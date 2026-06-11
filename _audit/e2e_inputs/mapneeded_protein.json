@@ -1,0 +1,66 @@
+{
+  "antibody_pipeline": {
+    "brain": "protein",
+    "contract_keys": ["fv_structure_path", "complex_structure_path", "passed_qc"],
+    "inputs": {
+      "simulate": false
+    },
+    "skip": false,
+    "_note": "real() 行43-49 直接 return ok=False，composite pipeline(IgFold/AbodyBuilder + RFdiffusion + ProteinMPNN + snugdock)，需上层编排器。contract_keys 取 simulate() 成功出口的顶层 key。预期 harness 判 N-A。"
+  },
+
+  "binder_failure_postmortem": {
+    "brain": "protein",
+    "contract_keys": ["n_designs", "failure_tags", "case_writeback_proposal"],
+    "inputs": {
+      "simulate": false
+    },
+    "skip": false,
+    "_note": "real() 行41-48 直接 return ok=False，composite retrospective analysis(chai/boltz + foldseek + esm + 实验数据)，需上层串联。contract_keys 取 simulate() 成功出口的顶层 key。预期 harness 判 N-A。"
+  },
+
+  "de_novo_binder_pipeline": {
+    "brain": "protein",
+    "contract_keys": ["ok", "top_mutations", "runtime_sec"],
+    "inputs": {
+      "target_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+      "contigs": "A225-498/0 60-60",
+      "hotspots": "A270,A290,A310",
+      "binder_length": 60,
+      "num_designs": 2,
+      "timeout_s": 3600,
+      "simulate": false
+    },
+    "skip": false,
+    "_note": "real() 真实 RFdiffusion binder 生成；1iep 链 A 残基范围 225-498(非从 1 起),故显式 contigs=A225-498/0 60-60(保留 target 全链 + 设计 60aa binder),hotspots 用链 A 内真实残基 A270/290/310(否则 RFdiffusion contig/hotspot 解析 assert 失败)。num_designs=2 最小跑量。预期 30-60 min GPU,需 rfdiffusion env。"
+  },
+
+  "proteinmpnn_redesign": {
+    "brain": "protein",
+    "contract_keys": ["ok", "top_mutations", "runtime_sec"],
+    "inputs": {
+      "input_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+      "fixed_positions": [30, 33, 56],
+      "chain_letter": "A",
+      "num_seq_per_target": 4,
+      "timeout_s": 300,
+      "simulate": false
+    },
+    "skip": false,
+    "_note": "real() 行53-91 真实 ProteinMPNN partial redesign；input_pdb 行63检查文件存在；1iep.pdb 在 staging；fixed_positions 固定活性位点(空 list 亦可全 redesign)；num_seq_per_target=4 最小设计数。contract_keys 来自 run.py:87-91 成功 return。与 proteinmpnn_sequence 同二进制，是最可能真跑通的 skill。"
+  },
+
+  "symmetric_design_pipeline": {
+    "brain": "protein",
+    "contract_keys": ["ok", "top_mutations", "runtime_sec"],
+    "inputs": {
+      "symmetry": "c3",
+      "contigs": "81-81",
+      "num_designs": 2,
+      "timeout_s": 3600,
+      "simulate": false
+    },
+    "skip": false,
+    "_note": "real() 行51-79 真实 RFdiffusion symmetric design；symmetry/contigs 有默认值(c3/100-100)；不需要 target_pdb(de novo 模式)；contigs=80-80 生成 80aa monomer；num_designs=2 最小跑量。contract_keys 来自 run.py:74-79 成功 return。需 rfdiffusion env + symmetry 支持。"
+  }
+}

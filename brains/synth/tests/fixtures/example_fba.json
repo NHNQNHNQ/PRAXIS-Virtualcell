@@ -1,0 +1,8 @@
+{
+  "task_id": "demo-iml1515-fba-aerobic",
+  "problem": {
+    "synth_task": "fba",
+    "host_organism": "E. coli K-12 MG1655",
+    "constraints": ["aerobic glucose minimal medium", "MEMOTE QC pass required"]
+  }
+}

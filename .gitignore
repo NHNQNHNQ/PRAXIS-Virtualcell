@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.env
+*.egg-info/
+._*
+.DS_Store
+deploy/hpc_submit_account.toml
+
+# M9:frontend(v2 方案 B v2-email-auth)
+frontend/node_modules/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+.gstack/

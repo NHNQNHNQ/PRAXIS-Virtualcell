@@ -1,0 +1,13 @@
+# 智能体手册文案(从 PRAXIS V1 catalog 迁移)。
+helps_with:
+  - "拿到一个分子结构, 想知道怎么合成 (尤其工业可行的短路线)"
+  - "想评估某条路线的步骤数 / 试剂可得性 / SA score"
+  - "需要做基因合成 / DNA 订单, 不熟下单格式 (IDT / Twist / GenScript)"
+delivers:
+  - "AiZynth / ASKCOS / Synthia 逆合成路线图"
+  - "每步反应试剂 + 条件 + 预估产率"
+  - "多路线 SA score 对比 + 可工业化打分"
+  - "DNA / gene 合成订单 (codon 优化 + 限制位点检查)"
+examples:
+  - "这个分子怎么合成？"
+  - "AiZynth 路线评分怎么解读?"

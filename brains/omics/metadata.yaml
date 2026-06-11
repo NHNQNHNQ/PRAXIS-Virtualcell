@@ -1,0 +1,13 @@
+# 智能体手册文案(从 PRAXIS V1 catalog 迁移)。
+helps_with:
+  - "RNA-seq 想做差异表达 + 通路富集, 不会跑 DESeq2 / edgeR"
+  - "scRNA-seq 数据要做质控 + 聚类 + 细胞类型注释"
+  - "多组学 (转录组 + 蛋白组) 想做整合 / WGCNA / GSEA"
+delivers:
+  - "DESeq2 / edgeR 完整 R 脚本 + 火山图 + Top DEG"
+  - "Seurat / Scanpy QC → 聚类 → 注释 notebook"
+  - "batch effect 校正方案 (ComBat-seq / Harmony / scVI)"
+  - "GO / KEGG / GSEA 富集结果 + 通路图"
+examples:
+  - "DESeq2 怎么处理 batch effect？"
+  - "scRNA-seq 聚类后怎么注释细胞类型?"

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "scoping_plan.schema.json",
+  "title": "Scoping Plan (Agent 1 output, PRAXIS-Synth)",
+  "type": "object",
+  "required": ["task_id", "problem", "candidate_strategies", "retrieved_evidence"],
+  "properties": {
+    "task_id": {"type": "string"},
+    "problem": {
+      "type": "object",
+      "required": ["synth_task", "constraints"],
+      "properties": {
+        "synth_task": {
+          "type": "string",
+          "enum": ["fba", "pathway_design", "plasmid_assembly", "codon_opt", "circuit",
+                   "cell_free", "biosensor", "strain_engineering", "bgc_mining"]
+        },
+        "host_organism": {"type": ["string", "null"]},
+        "target_compound": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string"},
+            {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "kegg_id": {"type": ["string", "null"]},
+                "smiles": {"type": ["string", "null"]}
+              }
+            }
+          ]
+        },
+        "target_protein": {"type": ["string", "null"]},
+        "target_analyte": {"type": ["string", "null"]},
+        "scale": {
+          "type": ["string", "null"],
+          "enum": ["test_tube", "shake_flask", "fermenter", "industrial", null]
+        },
+        "assembly_strategy": {
+          "type": ["string", "null"],
+          "enum": ["golden_gate", "gibson", "yeast_assembly", "moclo", "klenow", null]
+        },
+        "pathway_class": {
+          "type": ["string", "null"],
+          "enum": ["terpenoid", "polyketide", "amino_acid", "alkaloid", "ripp", "none", null]
+        },
+        "constraints": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "literature_summary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["doi", "key_finding"],
+        "properties": {
+          "doi": {"type": "string"},
+          "key_finding": {"type": "string"},
+          "relevance": {"type": "string", "enum": ["high", "medium", "low"]}
+        }
+      }
+    },
+    "retrieved_evidence": {
+      "type": "object",
+      "required": ["cases", "rules"],
+      "properties": {
+        "cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["case_id"],
+            "properties": {
+              "case_id": {"type": "string"},
+              "similarity": {"type": "number"},
+              "pool": {"type": "string"},
+              "key_takeaway": {"type": "string"}
+            }
+          }
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["rule_id"],
+            "properties": {
+              "rule_id": {"type": "string"},
+              "applicability_note": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "candidate_strategies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "rationale", "evidence_case_ids"],
+        "properties": {
+          "name": {"type": "string"},
+          "rationale": {"type": "string"},
+          "method": {"type": "string"},
+          "evidence_case_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "evidence_rule_ids": {"type": "array", "items": {"type": "string"}},
+          "expected_cost": {"type": "string"},
+          "risk": {"type": "string"}
+        }
+      }
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["cold_start", "low", "medium", "high", "domain_knowledge"]
+    },
+    "open_questions": {"type": "array", "items": {"type": "string"}}
+  }
+}

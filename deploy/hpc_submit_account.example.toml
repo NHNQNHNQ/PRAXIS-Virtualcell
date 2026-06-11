@@ -1,0 +1,34 @@
+# §11.7 HPC 4 节点账号模板(M8 Task 13 实测;复制为 hpc_submit_account.toml 后填真值)
+# ⚠ SCW6CHB(GPU 包月)与 scw6chb(CPUX CPU 按需)是不同账号,严区分大小写
+
+[SCW6CHB]
+# §11.7 N40 GPU 包月,8×RTX 4090
+host = "n40.hpc.example.edu"
+user = "SCW6CHB"
+key_path = "~/.ssh/id_ed25519_SCW6CHB"
+queue = "gpu"
+default_partition = "N40"
+
+[bio000070]
+# §11.7 BIO 提交端(Quick AF3 入口)
+host = "bio.hpc.example.edu"
+user = "bio000070"
+key_path = "~/.ssh/id_ed25519_bio000070"
+queue = "submit"
+default_partition = "BIO"
+
+[a0s001884]
+# §11.7 2TB 大内存
+host = "bigmem.hpc.example.edu"
+user = "a0s001884"
+key_path = "~/.ssh/id_ed25519_a0s001884"
+queue = "bigmem"
+default_partition = "BIGMEM"
+
+[scw6chb]
+# §11.7 CPUX 按需 CPU(48 核,小写账号)
+host = "cpux.hpc.example.edu"
+user = "scw6chb"
+key_path = "~/.ssh/id_ed25519_scw6chb"
+queue = "cpu"
+default_partition = "CPUX"

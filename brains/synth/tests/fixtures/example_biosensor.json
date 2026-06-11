@@ -1,0 +1,9 @@
+{
+  "task_id": "demo-arabinose-biosensor",
+  "problem": {
+    "synth_task": "biosensor",
+    "host_organism": "E. coli",
+    "target_analyte": "arabinose",
+    "constraints": ["TF-promoter sensor", "specificity panel >=5 compounds", "single-cell flow cytometry readout"]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "envelope_kind": "inbound",
+  "source_agent": "imaginary_sibling",
+  "experiment_id": "bad-source-agent-001",
+  "linked_run_id": "demo-test",
+  "experiment_type": "enzyme_handoff",
+  "samples": [{"sample_id": "x"}],
+  "payload": {},
+  "operator": "test",
+  "timestamp_utc": "2026-04-29T00:00:00Z"
+}

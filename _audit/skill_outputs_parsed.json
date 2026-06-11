@@ -1,0 +1,1760 @@
+[
+  {
+    "path": "brains/_common/skills/workflows/nature_plot/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "_common",
+    "skill": "nature_plot"
+  },
+  {
+    "path": "brains/cell/skills/workflows/3d-organoid-segment/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "estimated_volume_um3",
+      "mask_3d_tif",
+      "n_cells_3d",
+      "passed_sanity",
+      "per_cell_3d_features_csv",
+      "true_volume_um3",
+      "volume_error_frac",
+      "zone_assignment_csv"
+    ],
+    "schema": {
+      "mask_3d_tif": "out/mask_3d.tif",
+      "per_cell_3d_features_csv": "out/per_cell_3d_features.csv",
+      "zone_assignment_csv": "out/zone_assignment.csv",
+      "n_cells_3d": 312,
+      "estimated_volume_um3": 1450000.0,
+      "true_volume_um3": 1500000.0,
+      "volume_error_frac": 0.033,
+      "passed_sanity": true
+    },
+    "brain": "cell",
+    "skill": "3d-organoid-segment"
+  },
+  {
+    "path": "brains/cell/skills/workflows/cellpose-segment/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "border_cells_filtered",
+      "iou_vs_manual",
+      "mask_path",
+      "n_cells",
+      "overlay_png",
+      "passed_sanity",
+      "per_cell_features_csv"
+    ],
+    "schema": {
+      "mask_path": "out/mask.tif",
+      "n_cells": 78,
+      "per_cell_features_csv": "out/per_cell_features.csv",
+      "overlay_png": "out/overlay.png",
+      "iou_vs_manual": 0.78,
+      "border_cells_filtered": 12,
+      "passed_sanity": true
+    },
+    "brain": "cell",
+    "skill": "cellpose-segment"
+  },
+  {
+    "path": "brains/cell/skills/workflows/coloc-quantify/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "costes_p",
+      "costes_threshold_ch1",
+      "costes_threshold_ch2",
+      "manders_m1",
+      "manders_m2",
+      "n_cells_analyzed",
+      "passed_sanity",
+      "pearson"
+    ],
+    "schema": {
+      "pearson": 0.72,
+      "manders_m1": 0.65,
+      "manders_m2": 0.83,
+      "costes_p": 0.001,
+      "costes_threshold_ch1": 12.4,
+      "costes_threshold_ch2": 8.1,
+      "n_cells_analyzed": 24,
+      "passed_sanity": true
+    },
+    "brain": "cell",
+    "skill": "coloc-quantify"
+  },
+  {
+    "path": "brains/cell/skills/workflows/deep-profiling/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "compound_profile_csv",
+      "moa_match_csv",
+      "moa_recovery_rate",
+      "n_compounds",
+      "passed_sanity",
+      "umap_png"
+    ],
+    "schema": {
+      "compound_profile_csv": "out/compound_profile.csv",
+      "umap_png": "out/umap.png",
+      "moa_match_csv": "out/moa_match.csv",
+      "n_compounds": 24,
+      "moa_recovery_rate": 0.92,
+      "passed_sanity": true
+    },
+    "brain": "cell",
+    "skill": "deep-profiling"
+  },
+  {
+    "path": "brains/cell/skills/workflows/dose-response-fit/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "bell_shape_detected",
+      "bottom",
+      "ec50",
+      "ec50_ci_high",
+      "ec50_ci_low",
+      "hill",
+      "passed_sanity",
+      "plateau_reached",
+      "plot_png",
+      "r2",
+      "top"
+    ],
+    "schema": {
+      "ec50": 5.1e-09,
+      "ec50_ci_low": 3e-09,
+      "ec50_ci_high": 8.5e-09,
+      "hill": 1.05,
+      "top": 100.0,
+      "bottom": 2.1,
+      "r2": 0.992,
+      "plateau_reached": true,
+      "bell_shape_detected": false,
+      "plot_png": "out/dr_curve.png",
+      "passed_sanity": true
+    },
+    "brain": "cell",
+    "skill": "dose-response-fit"
+  },
+  {
+    "path": "brains/cell/skills/workflows/hcs-hit-call/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "b_score_distribution_png",
+      "dmso_z_median",
+      "edge_effect_detected",
+      "hits_csv",
+      "n_hits",
+      "passed_sanity",
+      "plate_heatmap_png",
+      "pos_ctrl_z_median"
+    ],
+    "schema": {
+      "hits_csv": "out/hits.csv",
+      "b_score_distribution_png": "out/b_score_dist.png",
+      "plate_heatmap_png": "out/plate_heatmap.png",
+      "n_hits": 12,
+      "dmso_z_median": 0.05,
+      "pos_ctrl_z_median": 5.2,
+      "edge_effect_detected": false,
+      "passed_sanity": true
+    },
+    "brain": "cell",
+    "skill": "hcs-hit-call"
+  },
+  {
+    "path": "brains/cell/skills/workflows/imc-pipeline/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "cell_typing_csv",
+      "denoised_tiff_dir",
+      "hot_pixel_ratio_after",
+      "n_hot_pixels_removed",
+      "neighborhood_csv",
+      "passed_sanity"
+    ],
+    "schema": {
+      "denoised_tiff_dir": "out/denoised/",
+      "cell_typing_csv": "out/cell_typing.csv",
+      "neighborhood_csv": "out/neighborhood.csv",
+      "n_hot_pixels_removed": 1024,
+      "hot_pixel_ratio_after": 0.0008,
+      "passed_sanity": true
+    },
+    "brain": "cell",
+    "skill": "imc-pipeline"
+  },
+  {
+    "path": "brains/cell/skills/workflows/live-cell-track/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "lineage_accuracy",
+      "lineage_tree_json",
+      "mitotic_events_csv",
+      "n_mitoses",
+      "n_tracks",
+      "passed_sanity",
+      "tracks_csv"
+    ],
+    "schema": {
+      "tracks_csv": "out/tracks.csv",
+      "lineage_tree_json": "out/lineage_tree.json",
+      "mitotic_events_csv": "out/mitotic_events.csv",
+      "n_tracks": 50,
+      "n_mitoses": 12,
+      "lineage_accuracy": 0.94,
+      "passed_sanity": true
+    },
+    "brain": "cell",
+    "skill": "live-cell-track"
+  },
+  {
+    "path": "brains/cell/skills/workflows/phenotype-landscape/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "cluster_labels_csv",
+      "moa_call_csv",
+      "n_clusters",
+      "n_novel",
+      "novel_clusters_csv",
+      "passed_sanity",
+      "reference_recovery_rate",
+      "umap_png"
+    ],
+    "schema": {
+      "umap_png": "out/umap.png",
+      "cluster_labels_csv": "out/cluster_labels.csv",
+      "moa_call_csv": "out/moa_call.csv",
+      "novel_clusters_csv": "out/novel_clusters.csv",
+      "n_clusters": 7,
+      "n_novel": 1,
+      "reference_recovery_rate": 0.91,
+      "passed_sanity": true
+    },
+    "brain": "cell",
+    "skill": "phenotype-landscape"
+  },
+  {
+    "path": "brains/cell/skills/workflows/spatial-proteomics-pipeline/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "cell_typing_csv",
+      "cluster_labels_csv",
+      "germinal_center_cluster_present",
+      "neighborhood_csv",
+      "passed_sanity",
+      "umap_png"
+    ],
+    "schema": {
+      "cell_typing_csv": "out/cell_typing.csv",
+      "neighborhood_csv": "out/neighborhood.csv",
+      "umap_png": "out/umap.png",
+      "cluster_labels_csv": "out/cluster_labels.csv",
+      "germinal_center_cluster_present": true,
+      "passed_sanity": true
+    },
+    "brain": "cell",
+    "skill": "spatial-proteomics-pipeline"
+  },
+  {
+    "path": "brains/cell/skills/workflows/vcell_simulate/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "cell",
+    "skill": "vcell_simulate"
+  },
+  {
+    "path": "brains/crispr/skills/workflows/base_editor_design/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "crispr",
+    "skill": "base_editor_design"
+  },
+  {
+    "path": "brains/crispr/skills/workflows/cas13_grna_design/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "crispr",
+    "skill": "cas13_grna_design"
+  },
+  {
+    "path": "brains/crispr/skills/workflows/crispr_crispor_design/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "crispr",
+    "skill": "crispr_crispor_design"
+  },
+  {
+    "path": "brains/crispr/skills/workflows/hdr_donor_design/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "crispr",
+    "skill": "hdr_donor_design"
+  },
+  {
+    "path": "brains/crispr/skills/workflows/in_vivo_delivery_planner/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "crispr",
+    "skill": "in_vivo_delivery_planner"
+  },
+  {
+    "path": "brains/crispr/skills/workflows/multiplex_array_design/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "crispr",
+    "skill": "multiplex_array_design"
+  },
+  {
+    "path": "brains/crispr/skills/workflows/off_target_predict/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "crispr",
+    "skill": "off_target_predict"
+  },
+  {
+    "path": "brains/crispr/skills/workflows/prime_editor_pegrna/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "crispr",
+    "skill": "prime_editor_pegrna"
+  },
+  {
+    "path": "brains/crispr/skills/workflows/screen_analysis_mageck/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "crispr",
+    "skill": "screen_analysis_mageck"
+  },
+  {
+    "path": "brains/crispr/skills/workflows/sge_library_design/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "crispr",
+    "skill": "sge_library_design"
+  },
+  {
+    "path": "brains/crispr/skills/workflows/sgrna_design_score/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "crispr",
+    "skill": "sgrna_design_score"
+  },
+  {
+    "path": "brains/cryo/skills/workflows/2d_3d_classify/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "cryo",
+    "skill": "2d_3d_classify"
+  },
+  {
+    "path": "brains/cryo/skills/workflows/af_cryoem_hybrid/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "cryo",
+    "skill": "af_cryoem_hybrid"
+  },
+  {
+    "path": "brains/cryo/skills/workflows/environment_setup/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "cryo",
+    "skill": "environment_setup"
+  },
+  {
+    "path": "brains/cryo/skills/workflows/focused_refine/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "cryo",
+    "skill": "focused_refine"
+  },
+  {
+    "path": "brains/cryo/skills/workflows/model_angelo_build/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "cryo",
+    "skill": "model_angelo_build"
+  },
+  {
+    "path": "brains/cryo/skills/workflows/motion_correct_ctf/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "cryo",
+    "skill": "motion_correct_ctf"
+  },
+  {
+    "path": "brains/cryo/skills/workflows/multibody_refine/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "cryo",
+    "skill": "multibody_refine"
+  },
+  {
+    "path": "brains/cryo/skills/workflows/particle_pick_consensus/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "cryo",
+    "skill": "particle_pick_consensus"
+  },
+  {
+    "path": "brains/cryo/skills/workflows/phenix_validation/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "cryo",
+    "skill": "phenix_validation"
+  },
+  {
+    "path": "brains/cryo/skills/workflows/preferred_orientation_diag/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "cryo",
+    "skill": "preferred_orientation_diag"
+  },
+  {
+    "path": "brains/cryo/skills/workflows/subtomogram_avg/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "cryo",
+    "skill": "subtomogram_avg"
+  },
+  {
+    "path": "brains/dock/skills/workflows/af3_complex_predict/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting property name enclosed in double quotes at line 20",
+    "brain": "dock",
+    "skill": "af3_complex_predict"
+  },
+  {
+    "path": "brains/dock/skills/workflows/cluspro_blind_pp/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "consensus_clusters",
+      "passed_sanity",
+      "ranking_by",
+      "skill_id",
+      "top_clusters_per_weight",
+      "weight_sets_run"
+    ],
+    "schema": {
+      "skill_id": "cluspro_blind_pp",
+      "weight_sets_run": [
+        "balanced",
+        "electrostatic",
+        "hydrophobic"
+      ],
+      "top_clusters_per_weight": [
+        {
+          "weight": "balanced",
+          "cluster_rank": 1,
+          "cluster_size": 87,
+          "piper_score": -1024,
+          "model_pdb": "..."
+        }
+      ],
+      "consensus_clusters": [
+        {
+          "appears_in_n_weights": 3,
+          "centroid_rmsd_A": 1.8
+        }
+      ],
+      "ranking_by": "cluster_size",
+      "passed_sanity": true
+    },
+    "brain": "dock",
+    "skill": "cluspro_blind_pp"
+  },
+  {
+    "path": "brains/dock/skills/workflows/covalent_docking/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "dock",
+    "skill": "covalent_docking"
+  },
+  {
+    "path": "brains/dock/skills/workflows/dlmasif_interface/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "dock",
+    "skill": "dlmasif_interface"
+  },
+  {
+    "path": "brains/dock/skills/workflows/ensemble_docking_pipeline/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "dock",
+    "skill": "ensemble_docking_pipeline"
+  },
+  {
+    "path": "brains/dock/skills/workflows/flexpepdock_peptide/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "dock",
+    "skill": "flexpepdock_peptide"
+  },
+  {
+    "path": "brains/dock/skills/workflows/haddock_pp_with_air/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "capri_quality_top_cluster",
+      "clusters",
+      "n_models_per_stage",
+      "passed_sanity",
+      "provenance",
+      "ranking_signal",
+      "skill_id",
+      "stages_run",
+      "version"
+    ],
+    "schema": {
+      "skill_id": "haddock_pp_with_air",
+      "version": "HADDOCK 2.4",
+      "stages_run": [
+        "it0",
+        "it1",
+        "itw"
+      ],
+      "n_models_per_stage": {
+        "it0": 1000,
+        "it1": 200,
+        "itw": 200
+      },
+      "clusters": [
+        {
+          "cluster_rank": 1,
+          "cluster_size": 23,
+          "haddock_score": -120.4,
+          "interface_rmsd_A": 1.8,
+          "ligand_rmsd_A": 2.1,
+          "representative_pdb": "/runs/{tid}/haddock_pp_with_air/cluster1_rep.pdb"
+        }
+      ],
+      "ranking_signal": "cluster_size",
+      "capri_quality_top_cluster": "medium",
+      "passed_sanity": true,
+      "provenance": {
+        "command": "...",
+        "runtime_sec": 4231.5
+      }
+    },
+    "brain": "dock",
+    "skill": "haddock_pp_with_air"
+  },
+  {
+    "path": "brains/dock/skills/workflows/induced_fit_docking/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "dock",
+    "skill": "induced_fit_docking"
+  },
+  {
+    "path": "brains/dock/skills/workflows/pose_buster_validate/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "command",
+      "failed_checks",
+      "n_checks",
+      "n_passed",
+      "overall_pass",
+      "per_check",
+      "runtime_sec",
+      "skill_id",
+      "version"
+    ],
+    "schema": {
+      "skill_id": "pose_buster_validate",
+      "version": "0.6.5",
+      "overall_pass": false,
+      "n_checks": 19,
+      "n_passed": 17,
+      "failed_checks": [
+        "intermolecular_steric_clash",
+        "bond_lengths"
+      ],
+      "per_check": {
+        "mol_pred_loaded": true,
+        "rdkit_sanitization": true,
+        "atoms": true,
+        "bond_lengths": false,
+        "bond_angles": true,
+        "internal_steric_clash": true,
+        "intermolecular_steric_clash": false,
+        "valence": true,
+        "kekulization": true,
+        "geometry": true,
+        "ring_flat": true,
+        "double_bond_flat": true,
+        "amide_planar": true,
+        "passes_valence_inchi": true,
+        "passes_kekulization": true,
+        "passes_geometry": true,
+        "all_atoms_connected": true,
+        "stereochemistry": true,
+        "energy_ratio": true
+      },
+      "command": "python -m posebusters.cli ...",
+      "runtime_sec": 3.2
+    },
+    "brain": "dock",
+    "skill": "pose_buster_validate"
+  },
+  {
+    "path": "brains/dock/skills/workflows/protein_na_docking/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "dock",
+    "skill": "protein_na_docking"
+  },
+  {
+    "path": "brains/dock/skills/workflows/redock_benchmark/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting value at line 9",
+    "brain": "dock",
+    "skill": "redock_benchmark"
+  },
+  {
+    "path": "brains/dock/skills/workflows/snugdock_antibody/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "antibody_prep",
+      "capri_quality",
+      "epitope_hint_used",
+      "n_trajectories_run",
+      "passed_sanity",
+      "provenance",
+      "skill_id",
+      "top_n_models",
+      "version"
+    ],
+    "schema": {
+      "skill_id": "snugdock_antibody",
+      "version": "PyRosetta 4.0+",
+      "antibody_prep": {
+        "cdr_h3_length": 14,
+        "cdr_h3_length_warning_low_confidence": false,
+        "fv_method": "IgFold",
+        "framework_check_passed": true
+      },
+      "epitope_hint_used": [
+        417,
+        484,
+        501
+      ],
+      "n_trajectories_run": 1000,
+      "top_n_models": [
+        {
+          "rank": 1,
+          "interface_energy": -34.5,
+          "packstat": 0.71,
+          "shape_complementarity": 0.78,
+          "interface_rmsd_to_crystal_A": 2.3,
+          "model_pdb": "/runs/{tid}/snugdock_antibody/model1.pdb"
+        }
+      ],
+      "capri_quality": "medium",
+      "passed_sanity": true,
+      "provenance": {
+        "command": "...",
+        "runtime_sec": 8743.2,
+        "remote_executed": true
+      }
+    },
+    "brain": "dock",
+    "skill": "snugdock_antibody"
+  },
+  {
+    "path": "brains/dock/skills/workflows/vina_gnina_dock/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting value at line 19",
+    "brain": "dock",
+    "skill": "vina_gnina_dock"
+  },
+  {
+    "path": "brains/drug/skills/workflows/admet_multi/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "drug",
+    "skill": "admet_multi"
+  },
+  {
+    "path": "brains/drug/skills/workflows/aizynth_retrosynthesis/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "drug",
+    "skill": "aizynth_retrosynthesis"
+  },
+  {
+    "path": "brains/drug/skills/workflows/chem_id_validate/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "drug",
+    "skill": "chem_id_validate"
+  },
+  {
+    "path": "brains/drug/skills/workflows/covalent_docking/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "drug",
+    "skill": "covalent_docking"
+  },
+  {
+    "path": "brains/drug/skills/workflows/de_novo_generative/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "drug",
+    "skill": "de_novo_generative"
+  },
+  {
+    "path": "brains/drug/skills/workflows/fep_relative_affinity/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "drug",
+    "skill": "fep_relative_affinity"
+  },
+  {
+    "path": "brains/drug/skills/workflows/ligand_prep/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "drug",
+    "skill": "ligand_prep"
+  },
+  {
+    "path": "brains/drug/skills/workflows/mutation_panel_screen/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "drug",
+    "skill": "mutation_panel_screen"
+  },
+  {
+    "path": "brains/drug/skills/workflows/pocket2mol_sbdd/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "drug",
+    "skill": "pocket2mol_sbdd"
+  },
+  {
+    "path": "brains/drug/skills/workflows/protac_ternary/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "drug",
+    "skill": "protac_ternary"
+  },
+  {
+    "path": "brains/drug/skills/workflows/pubchem_chembl_lookup/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "drug",
+    "skill": "pubchem_chembl_lookup"
+  },
+  {
+    "path": "brains/drug/skills/workflows/vina_gnina_dock/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "drug",
+    "skill": "vina_gnina_dock"
+  },
+  {
+    "path": "brains/enzyme/skills/workflows/alphafold-plddt-analyzer/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting property name enclosed in double quotes at line 18",
+    "brain": "enzyme",
+    "skill": "alphafold-plddt-analyzer"
+  },
+  {
+    "path": "brains/enzyme/skills/workflows/catalytic-site-annotator/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting value at line 35",
+    "brain": "enzyme",
+    "skill": "catalytic-site-annotator"
+  },
+  {
+    "path": "brains/enzyme/skills/workflows/cazy-crawler/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "enzyme",
+    "skill": "cazy-crawler"
+  },
+  {
+    "path": "brains/enzyme/skills/workflows/conservation-msa-analyzer/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting value at line 23",
+    "brain": "enzyme",
+    "skill": "conservation-msa-analyzer"
+  },
+  {
+    "path": "brains/enzyme/skills/workflows/environment-setup/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "enzyme",
+    "skill": "environment-setup"
+  },
+  {
+    "path": "brains/enzyme/skills/workflows/esm-mutation-scan/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting value at line 17",
+    "brain": "enzyme",
+    "skill": "esm-mutation-scan"
+  },
+  {
+    "path": "brains/enzyme/skills/workflows/pdb-fetcher/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "enzyme",
+    "skill": "pdb-fetcher"
+  },
+  {
+    "path": "brains/enzyme/skills/workflows/pocket-tunnel-analyzer/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting value at line 51",
+    "brain": "enzyme",
+    "skill": "pocket-tunnel-analyzer"
+  },
+  {
+    "path": "brains/enzyme/skills/workflows/pyrosetta-stability-scan/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "diagnostics",
+      "mutations",
+      "scan_summary"
+    ],
+    "schema": {
+      "scan_summary": {
+        "n_positions_scanned": 480,
+        "n_mutations_evaluated": 9120,
+        "wallclock_seconds": 14400,
+        "score_function": "ref15_cart"
+      },
+      "mutations": [
+        {
+          "position": 196,
+          "wt_aa": "S",
+          "mut_aa": "A",
+          "ddG_REU": -3.8,
+          "ddG_kcal_per_mol": -2.17,
+          "ddG_std": 0.42,
+          "rsa": 0.42,
+          "near_active_site": false,
+          "near_glycosylation": false,
+          "passes_default_filter": true
+        }
+      ],
+      "diagnostics": {
+        "convergence_check_passed": true,
+        "warnings": []
+      }
+    },
+    "brain": "enzyme",
+    "skill": "pyrosetta-stability-scan"
+  },
+  {
+    "path": "brains/enzyme/skills/workflows/structural-context-analyzer/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting value at line 52",
+    "brain": "enzyme",
+    "skill": "structural-context-analyzer"
+  },
+  {
+    "path": "brains/enzyme/skills/workflows/uniprot-fetcher/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "enzyme",
+    "skill": "uniprot-fetcher"
+  },
+  {
+    "path": "brains/immuno/skills/workflows/allergen_predict/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting ',' delimiter at line 12",
+    "brain": "immuno",
+    "skill": "allergen_predict"
+  },
+  {
+    "path": "brains/immuno/skills/workflows/arcas_hla_typing/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "immuno",
+    "skill": "arcas_hla_typing"
+  },
+  {
+    "path": "brains/immuno/skills/workflows/bcr_seq_lineage/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting value at line 2",
+    "brain": "immuno",
+    "skill": "bcr_seq_lineage"
+  },
+  {
+    "path": "brains/immuno/skills/workflows/car_target_screen/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "targets"
+    ],
+    "schema": {
+      "targets": [
+        {
+          "gene": "CD33",
+          "tumor_expression_pct": 0.92,
+          "normal_essential_max_TPM": 0.4,
+          "surface_localization_confidence": 0.91,
+          "differential_expression_ratio": 18.5,
+          "escape_risk_score": 0.32,
+          "on_target_off_tumor_risk": "low",
+          "recommended_affinity_kd_nm": 35
+        }
+      ]
+    },
+    "brain": "immuno",
+    "skill": "car_target_screen"
+  },
+  {
+    "path": "brains/immuno/skills/workflows/hla_typing_rnaseq/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting value at line 5",
+    "brain": "immuno",
+    "skill": "hla_typing_rnaseq"
+  },
+  {
+    "path": "brains/immuno/skills/workflows/mhc_class_i_predict/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting property name enclosed in double quotes at line 18",
+    "brain": "immuno",
+    "skill": "mhc_class_i_predict"
+  },
+  {
+    "path": "brains/immuno/skills/workflows/mhc_class_ii_predict/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "epitopes"
+    ],
+    "schema": {
+      "epitopes": [
+        {
+          "peptide": "AVDLSHFLKEKGGL",
+          "length": 14,
+          "hla_alleles_strong_binding": [
+            "HLA-DRB1*15:01"
+          ],
+          "core_9mer_consensus": "DLSHFLKEK",
+          "register_predicted": 4,
+          "flanking_aa": {
+            "N": "AV",
+            "C": "EKGGL"
+          },
+          "promiscuity_count": 1,
+          "rank": 1
+        }
+      ]
+    },
+    "brain": "immuno",
+    "skill": "mhc_class_ii_predict"
+  },
+  {
+    "path": "brains/immuno/skills/workflows/mrna_vaccine_design/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "cai_human",
+      "codon_optimized_orf",
+      "cpg_count",
+      "cryptic_splice_count",
+      "gc_pct",
+      "has_m1psi_flag",
+      "mfe_kcal_per_mol",
+      "mrna_sequence",
+      "polya",
+      "qc_pass",
+      "restriction_sites",
+      "utr_3p",
+      "utr_5p"
+    ],
+    "schema": {
+      "mrna_sequence": "AUGUUCGUC...",
+      "codon_optimized_orf": "AUGUUC...",
+      "utr_5p": "GAGAAUAA...",
+      "utr_3p": "AAGCUC...",
+      "polya": "AAAA...",
+      "cai_human": 0.88,
+      "gc_pct": 56.0,
+      "mfe_kcal_per_mol": -425.0,
+      "has_m1psi_flag": true,
+      "cpg_count": 12,
+      "restriction_sites": [],
+      "cryptic_splice_count": 1,
+      "qc_pass": true
+    },
+    "brain": "immuno",
+    "skill": "mrna_vaccine_design"
+  },
+  {
+    "path": "brains/immuno/skills/workflows/neoantigen_pipeline/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting property name enclosed in double quotes at line 20",
+    "brain": "immuno",
+    "skill": "neoantigen_pipeline"
+  },
+  {
+    "path": "brains/immuno/skills/workflows/tcr_pmhc_dock/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "cdr3_loop_clusters",
+      "complex_pdb_path",
+      "interface_rmsd_to_ref",
+      "iptm",
+      "mhc_restriction_class",
+      "pae_interface",
+      "plddt_mean",
+      "ptm",
+      "qc_pass",
+      "specificity_score"
+    ],
+    "schema": {
+      "complex_pdb_path": "runs/.../complex.pdb",
+      "interface_rmsd_to_ref": 1.85,
+      "cdr3_loop_clusters": [
+        {
+          "cluster": 1,
+          "rmsd_within": 0.8,
+          "members": 3
+        }
+      ],
+      "iptm": 0.74,
+      "ptm": 0.69,
+      "plddt_mean": 78.0,
+      "pae_interface": 6.8,
+      "mhc_restriction_class": "HLA_I",
+      "specificity_score": 0.82,
+      "qc_pass": true
+    },
+    "brain": "immuno",
+    "skill": "tcr_pmhc_dock"
+  },
+  {
+    "path": "brains/immuno/skills/workflows/tcr_seq_repertoire/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "clones",
+      "diversity_metrics",
+      "gliph_clusters",
+      "oof_rate",
+      "qc_pass"
+    ],
+    "schema": {
+      "clones": [
+        {
+          "clone_id": "C0001",
+          "V": "TRBV9",
+          "J": "TRBJ2-7",
+          "CDR3_aa": "CASSLDRDREAFF",
+          "frequency": 0.018,
+          "public_or_private": "private"
+        }
+      ],
+      "diversity_metrics": {
+        "Shannon": 5.2,
+        "D50": 87,
+        "Gini": 0.42,
+        "Chao1": 1240
+      },
+      "gliph_clusters": [
+        {
+          "cluster_id": "G001",
+          "members": [
+            "C0001",
+            "C0007"
+          ],
+          "shared_motif": "SLDR.RE",
+          "db_hits": [
+            "EBV-BMLF1"
+          ]
+        }
+      ],
+      "oof_rate": 0.18,
+      "qc_pass": true
+    },
+    "brain": "immuno",
+    "skill": "tcr_seq_repertoire"
+  },
+  {
+    "path": "brains/md/Naruto-main/skills/workflows/auto-docking/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "md",
+    "skill": "auto-docking"
+  },
+  {
+    "path": "brains/md/Naruto-main/skills/workflows/code-review/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "md",
+    "skill": "code-review"
+  },
+  {
+    "path": "brains/md/Naruto-main/skills/workflows/md-build-run/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "md",
+    "skill": "md-build-run"
+  },
+  {
+    "path": "brains/md/Naruto-main/skills/workflows/md-dependency-bootstrap/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "md",
+    "skill": "md-dependency-bootstrap"
+  },
+  {
+    "path": "brains/md/Naruto-main/skills/workflows/md-gromacs/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "md",
+    "skill": "md-gromacs"
+  },
+  {
+    "path": "brains/md/Naruto-main/skills/workflows/pdb-literature-report/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "md",
+    "skill": "pdb-literature-report"
+  },
+  {
+    "path": "brains/md/Naruto-main/skills/workflows/research/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "md",
+    "skill": "research"
+  },
+  {
+    "path": "brains/md/skills/workflows/auto_md_submit/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "md",
+    "skill": "auto_md_submit"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/amplicon_dada2_qiime/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "amplicon_dada2_qiime"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/amplicon_minimal_real/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "amplicon_minimal_real"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/cooccurrence_network/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "cooccurrence_network"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/cooccurrence_network_real/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "cooccurrence_network_real"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/cultured_isolate_wgs_real/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "cultured_isolate_wgs_real"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/da_compositional/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "da_compositional"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/da_compositional_real/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "da_compositional_real"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/humann_functional/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "humann_functional"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/humann_functional_real/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "humann_functional_real"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/its_fungal_pipeline/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "its_fungal_pipeline"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/its_fungal_real/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "its_fungal_real"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/mag_assembly_pipeline/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "mag_assembly_pipeline"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/mag_assembly_real/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "mag_assembly_real"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/meta_hi_c_binning/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "meta_hi_c_binning"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/meta_hi_c_real/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "meta_hi_c_real"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/multiomics_integration/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "multiomics_integration"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/multiomics_integration_real/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "multiomics_integration_real"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/scfa_butyrate_screen_real/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "scfa_butyrate_screen_real"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/shotgun_taxonomy/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "shotgun_taxonomy"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/shotgun_taxonomy_real/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "shotgun_taxonomy_real"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/strain_tracking/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "strain_tracking"
+  },
+  {
+    "path": "brains/microbiome/skills/workflows/strain_tracking_real/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "microbiome",
+    "skill": "strain_tracking_real"
+  },
+  {
+    "path": "brains/omics/skills/workflows/bulk_de_pipeline/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "omics",
+    "skill": "bulk_de_pipeline"
+  },
+  {
+    "path": "brains/omics/skills/workflows/cnv_inference_dual/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "omics",
+    "skill": "cnv_inference_dual"
+  },
+  {
+    "path": "brains/omics/skills/workflows/hic_3d_contact/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "omics",
+    "skill": "hic_3d_contact"
+  },
+  {
+    "path": "brains/omics/skills/workflows/mofa_factor_analysis/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "omics",
+    "skill": "mofa_factor_analysis"
+  },
+  {
+    "path": "brains/omics/skills/workflows/multimodal_wnn/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "omics",
+    "skill": "multimodal_wnn"
+  },
+  {
+    "path": "brains/omics/skills/workflows/multiqc_aggregate/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "omics",
+    "skill": "multiqc_aggregate"
+  },
+  {
+    "path": "brains/omics/skills/workflows/salmon_quant/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "omics",
+    "skill": "salmon_quant"
+  },
+  {
+    "path": "brains/omics/skills/workflows/scatac_archr_pipeline/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "omics",
+    "skill": "scatac_archr_pipeline"
+  },
+  {
+    "path": "brains/omics/skills/workflows/scrna_annotate/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "omics",
+    "skill": "scrna_annotate"
+  },
+  {
+    "path": "brains/omics/skills/workflows/scrna_doublet_detect/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "omics",
+    "skill": "scrna_doublet_detect"
+  },
+  {
+    "path": "brains/omics/skills/workflows/scrna_integrate/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "omics",
+    "skill": "scrna_integrate"
+  },
+  {
+    "path": "brains/omics/skills/workflows/scrna_qc_pipeline/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "omics",
+    "skill": "scrna_qc_pipeline"
+  },
+  {
+    "path": "brains/omics/skills/workflows/spatial_deconvolution/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "omics",
+    "skill": "spatial_deconvolution"
+  },
+  {
+    "path": "brains/pharma/skills/workflows/allometric_scale/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "pharma",
+    "skill": "allometric_scale"
+  },
+  {
+    "path": "brains/pharma/skills/workflows/ddi_predict/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "pharma",
+    "skill": "ddi_predict"
+  },
+  {
+    "path": "brains/pharma/skills/workflows/faers_signal/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "pharma",
+    "skill": "faers_signal"
+  },
+  {
+    "path": "brains/pharma/skills/workflows/fih_dose_design/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "pharma",
+    "skill": "fih_dose_design"
+  },
+  {
+    "path": "brains/pharma/skills/workflows/gpcr_agent_screen/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "pharma",
+    "skill": "gpcr_agent_screen"
+  },
+  {
+    "path": "brains/pharma/skills/workflows/nca_analyze/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "pharma",
+    "skill": "nca_analyze"
+  },
+  {
+    "path": "brains/pharma/skills/workflows/pbpk_simulate/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "pharma",
+    "skill": "pbpk_simulate"
+  },
+  {
+    "path": "brains/pharma/skills/workflows/pkpd_emax/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "pharma",
+    "skill": "pkpd_emax"
+  },
+  {
+    "path": "brains/pharma/skills/workflows/poppk_fit/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "pharma",
+    "skill": "poppk_fit"
+  },
+  {
+    "path": "brains/pharma/skills/workflows/ppb_assess/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "pharma",
+    "skill": "ppb_assess"
+  },
+  {
+    "path": "brains/pharma/skills/workflows/tdm_bayesian/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "pharma",
+    "skill": "tdm_bayesian"
+  },
+  {
+    "path": "brains/protein/skills/workflows/antibody_pipeline/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting property name enclosed in double quotes at line 14",
+    "brain": "protein",
+    "skill": "antibody_pipeline"
+  },
+  {
+    "path": "brains/protein/skills/workflows/binder_failure_postmortem/SKILL.md",
+    "verdict": "OK",
+    "keys": [
+      "case_writeback_proposal",
+      "failure_tags",
+      "metric_correlation_to_success",
+      "n_designs",
+      "n_in_vitro_tested",
+      "provenance"
+    ],
+    "schema": {
+      "n_designs": 47,
+      "n_in_vitro_tested": 24,
+      "failure_tags": {
+        "expression_failure": 9,
+        "misfold": 5,
+        "non_binder": 7,
+        "weak_affinity": 2,
+        "success_high_affinity": 1
+      },
+      "metric_correlation_to_success": {
+        "pLDDT_binder": 0.31,
+        "iPTM": 0.42,
+        "Rosetta_ddG": 0.28,
+        "SAP_score": -0.51,
+        "ESM2_PLL": 0.48
+      },
+      "case_writeback_proposal": {
+        "should_write": true,
+        "draft_case_id": "binder-<target>-<batch>-postmortem",
+        "lessons": [
+          "...",
+          "..."
+        ]
+      },
+      "provenance": {
+        "simulated": false
+      }
+    },
+    "brain": "protein",
+    "skill": "binder_failure_postmortem"
+  },
+  {
+    "path": "brains/protein/skills/workflows/boltz_structure_predict/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "protein",
+    "skill": "boltz_structure_predict"
+  },
+  {
+    "path": "brains/protein/skills/workflows/chai_complex_predict/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "protein",
+    "skill": "chai_complex_predict"
+  },
+  {
+    "path": "brains/protein/skills/workflows/conformation_ensemble/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "protein",
+    "skill": "conformation_ensemble"
+  },
+  {
+    "path": "brains/protein/skills/workflows/consurf_conservation/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "protein",
+    "skill": "consurf_conservation"
+  },
+  {
+    "path": "brains/protein/skills/workflows/de_novo_binder_pipeline/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting property name enclosed in double quotes at line 21",
+    "brain": "protein",
+    "skill": "de_novo_binder_pipeline"
+  },
+  {
+    "path": "brains/protein/skills/workflows/esmfold_high_throughput/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting value at line 6",
+    "brain": "protein",
+    "skill": "esmfold_high_throughput"
+  },
+  {
+    "path": "brains/protein/skills/workflows/foldseek_homology/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting ',' delimiter at line 14",
+    "brain": "protein",
+    "skill": "foldseek_homology"
+  },
+  {
+    "path": "brains/protein/skills/workflows/mutation_effect_scan/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting value at line 13",
+    "brain": "protein",
+    "skill": "mutation_effect_scan"
+  },
+  {
+    "path": "brains/protein/skills/workflows/predict_complex/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting property name enclosed in double quotes at line 10",
+    "brain": "protein",
+    "skill": "predict_complex"
+  },
+  {
+    "path": "brains/protein/skills/workflows/predict_structure_monomer/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting property name enclosed in double quotes at line 14",
+    "brain": "protein",
+    "skill": "predict_structure_monomer"
+  },
+  {
+    "path": "brains/protein/skills/workflows/proteinmpnn_redesign/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting property name enclosed in double quotes at line 7",
+    "brain": "protein",
+    "skill": "proteinmpnn_redesign"
+  },
+  {
+    "path": "brains/protein/skills/workflows/proteinmpnn_sequence/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "protein",
+    "skill": "proteinmpnn_sequence"
+  },
+  {
+    "path": "brains/protein/skills/workflows/rfdiffusion_design/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "protein",
+    "skill": "rfdiffusion_design"
+  },
+  {
+    "path": "brains/protein/skills/workflows/symmetric_design_pipeline/SKILL.md",
+    "verdict": "PARSE_ERR",
+    "keys": null,
+    "schema": null,
+    "err": "JSONDecodeError: Expecting property name enclosed in double quotes at line 17",
+    "brain": "protein",
+    "skill": "symmetric_design_pipeline"
+  },
+  {
+    "path": "brains/protein/skills/workflows/thermompnn_stability/SKILL.md",
+    "verdict": "MISSING_SECTION",
+    "keys": null,
+    "schema": null,
+    "brain": "protein",
+    "skill": "thermompnn_stability"
+  }
+]

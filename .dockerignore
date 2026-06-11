@@ -1,0 +1,44 @@
+# D.5 reviewer M0/M8 #6:防 docker build context 过大,避免拷无用文件
+# docker build context 默认 = repo root,故 .dockerignore 放 root
+
+# Python 临时
+.venv
+.pytest_cache
+.ruff_cache
+__pycache__
+**/__pycache__
+**/*.pyc
+*.egg-info
+**/*.egg-info
+
+# macOS / 编辑器
+**/._*
+.DS_Store
+**/.DS_Store
+
+# Git / CI
+.git
+.gitignore
+.github
+
+# 前端(只 build backend,不要前端 artifacts)
+frontend/node_modules
+frontend/dist
+frontend/.vite
+
+# brains(prod 用 push_backend.sh rsync 单独同步,不入 docker context)
+brains
+
+# 文档 / 测试(运行时不需要)
+tests
+docs
+*.md
+
+# config / 本地 / 日志
+*.example
+*.local
+*.log
+deploy/hpc_submit_account.toml
+
+# 进度文档(临时)
+进度与下一步.md

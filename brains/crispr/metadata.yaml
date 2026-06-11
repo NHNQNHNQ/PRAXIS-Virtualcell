@@ -1,0 +1,13 @@
+# 智能体手册文案(从 PRAXIS V1 catalog 迁移)。
+helps_with:
+  - "你要敲掉某个基因, 不知道挑哪个外显子 / 设计哪几条 sgRNA"
+  - "做完 CRISPR screen 拿到一堆 read count, 不会做 hit calling"
+  - "想做 base editing / prime editing, 不熟 PAM 和编辑窗口规则"
+delivers:
+  - "5-10 条候选 sgRNA + CRISPOR / Cas-OFFinder off-target 评分"
+  - "MAGeCK / BAGEL screen 分析脚本 + Top hits 表"
+  - "BE / PE 设计 (PAM 选择 + 编辑窗口 + bystander 风险)"
+  - "Cas13 RNA targeting guide 设计"
+examples:
+  - "TP53 外显子 4 设计 5 条 sgRNA"
+  - "CRISPOR 评分如何解释？"

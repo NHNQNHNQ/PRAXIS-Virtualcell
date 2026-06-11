@@ -1,0 +1,31 @@
+name: synth_biosensor_circuit_design
+description: |
+  Genetic biosensor circuit design (sensor → logic → reporter). Includes
+  in-silico simulation before any wet-lab cloning order.
+domain: synth
+expected_outputs:
+  - biosensor_design
+  - circuit_simulation_traces
+  - dna_construct
+
+steps:
+  - skill: biosensor-design
+    label: "1. Sensor module choice (TF / riboswitch / aptamer)"
+    on_fail: abort
+    produces: [biosensor_design]
+
+  - skill: circuit-simulate
+    label: "2. Circuit simulation (ODE / SSA; Hill / repressor dynamics)"
+    on_fail: abort
+    produces: [circuit_simulation_traces]
+
+  - skill: dna-constraint-solve
+    label: "3. DNA constraint solving (RBS strength + spacer + restriction-site purge)"
+    on_fail: abort
+    produces: [dna_construct]
+
+  - skill: cellfree-design
+    label: "4. (optional) Cell-free TX-TL test plan"
+    when: has:cellfree_validation
+    on_fail: continue
+    produces: [txtl_test_plan]

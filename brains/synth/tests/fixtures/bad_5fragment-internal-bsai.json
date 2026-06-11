@@ -1,0 +1,7 @@
+[
+  {"id": "P1", "sequence": "AAAGGTCTCAAAATGCATGCAAGCTAGGCATGCATCGATCGAACTAG", "overhang_5": "AATG", "overhang_3": "AGCC", "kind": "part"},
+  {"id": "P2", "sequence": "GACGTACTGACTGTACGTACTGACTGTACGTACTAGT", "overhang_5": "AGCC", "overhang_3": "TACT", "kind": "part"},
+  {"id": "P3", "sequence": "ATGGTGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGGTG", "overhang_5": "TACT", "overhang_3": "GCTT", "kind": "part"},
+  {"id": "P4", "sequence": "AACTCGAGTAAGGATCTCCAGGCATCAAATAAAACGAAA", "overhang_5": "GCTT", "overhang_3": "CCGA", "kind": "part"},
+  {"id": "P5", "sequence": "AGCATGCAATCGATCGTACGTACGCGCATGCATGCATCG", "overhang_5": "CCGA", "overhang_3": "AATG", "kind": "backbone"}
+]

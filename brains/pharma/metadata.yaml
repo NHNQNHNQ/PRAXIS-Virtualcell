@@ -1,0 +1,13 @@
+# 智能体手册文案(从 PRAXIS V1 catalog 迁移)。
+helps_with:
+  - "动物实验拿到血药浓度曲线想算 PK 参数 (AUC / Cmax / t1/2)"
+  - "新化合物 t1/2 太短, 想看是代谢 / 清除 / 分布哪一段坏"
+  - "想搭 popPK / PBPK 模型, 做临床起始剂量外推"
+delivers:
+  - "AUC / Cmax / t1/2 非房室分析 (NCA) 报告"
+  - "NONMEM / Monolix popPK 模型脚本 + 参数估计"
+  - "PBPK / IVIVE 临床剂量预测"
+  - "IND 申报数据包关键项 checklist"
+examples:
+  - "non-compartmental PK 怎么算？"
+  - "化合物 t1/2 太短怎么改?"

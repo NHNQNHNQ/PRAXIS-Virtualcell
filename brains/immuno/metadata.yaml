@@ -1,0 +1,13 @@
+# 智能体手册文案(从 PRAXIS V1 catalog 迁移)。
+helps_with:
+  - "拿到肿瘤外显子组想找 neoantigen 给患者做个性化排序"
+  - "做疫苗想知道哪些表位在大多数人 HLA 上呈递好"
+  - "TCR / BCR repertoire 测序拿到了, 不知道怎么分析多样性 / 克隆扩增"
+delivers:
+  - "NetMHCpan / MHCflurry 表位预测 + 评分"
+  - "Neoantigen 优先级排序表 (表达量 + 呈递 + 免疫原性)"
+  - "OptiType HLA 分型结果"
+  - "TRUST4 / MiXCR repertoire 多样性 + clonotype 分析"
+examples:
+  - "黑色素瘤 neoantigen 排序"
+  - "疫苗表位怎么挑跨 HLA 覆盖最广?"

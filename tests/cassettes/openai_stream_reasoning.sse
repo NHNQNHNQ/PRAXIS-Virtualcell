@@ -1,0 +1,9 @@
+data: {"choices":[{"index":0,"delta":{"reasoning_content":"Let me think about this..."},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"reasoning_content":" Step 1: parse."},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"Answer is 42"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":5,"completion_tokens":3}}
+
+data: [DONE]

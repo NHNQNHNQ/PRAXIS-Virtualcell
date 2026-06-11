@@ -1,0 +1,290 @@
+brain	skill	req_type	name	source	confidence	gap_kind	matched_in	suggestion
+_common	nature_plot	tool	matplotlib	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR-crispor,PRAXIS-Cell,af2,chai,conformation,conformation-baselines,conformation-retrain,hic,praxis-dock,praxis-immuno,praxis-omics,praxis-pharma,praxis-protein,vcell,ycy	
+_common	nature_plot	tool	numpy	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,base,boltz,chai,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-da-v2,praxis-microbiome-gtdbtk,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,proteinmpnn,rfdiffusion,thermompnn,vcell,world,ycy	
+_common	nature_plot	tool	anndata	body:whitelist	medium	green	PRAXIS-Cell,praxis-immuno,praxis-omics,vcell	
+_common	nature_plot	tool	scanpy	body:whitelist	medium	green	PRAXIS-Cell,praxis-immuno,praxis-omics,vcell	
+_common	nature_plot	tool	torch	body:whitelist	medium	green	PRAXIS-Cell,PRAXIS-Enzyme,antibody,base,boltz,chai,conformation,conformation-baselines,conformation-retrain,esmfold,praxis-dock,praxis-drug-admet,praxis-drug-reinvent,praxis-immuno,praxis-omics,praxis-protein,proteinmpnn,rfdiffusion,thermompnn,vcell,world,ycy	
+_common	nature_plot	tool	scvi	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cell	3d-organoid-segment	tool	cellpose	body:whitelist	medium	green	PRAXIS-Cell	
+cell	cellpose-segment	tool	cellpose	body:whitelist	medium	green	PRAXIS-Cell	
+cell	deep-profiling	tool	cellprofiler	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cell	live-cell-track	tool	cellpose	body:whitelist	medium	green	PRAXIS-Cell	
+cell	spatial-proteomics-pipeline	tool	cellpose	body:whitelist	medium	green	PRAXIS-Cell	
+crispr	crispr_crispor_design	tool	crispor	body:whitelist	medium	green	PRAXIS-CRISPR-crispor	由 env name fuzzy 命中: PRAXIS-CRISPR-crispor
+cryo	2d_3d_classify	env	praxis-cryo-base	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+cryo	af_cryoem_hybrid	env	praxis-cryo-base	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+cryo	environment_setup	env	praxis-cryo-base	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+cryo	environment_setup	tool	biopython	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-crispor,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,boltz,chai,conformation-baselines,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-openfe,praxis-immuno,praxis-microbiome,praxis-microbiome-kraken,praxis-protein,thermompnn,ycy	
+cryo	environment_setup	tool	numpy	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,base,boltz,chai,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-da-v2,praxis-microbiome-gtdbtk,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,proteinmpnn,rfdiffusion,thermompnn,vcell,world,ycy	
+cryo	environment_setup	tool	scipy	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,boltz,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,rfdiffusion,vcell,ycy	
+cryo	environment_setup	tool	relion	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	environment_setup	tool	cryosparc	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	environment_setup	tool	phenix	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	environment_setup	tool	motioncor2	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	environment_setup	tool	chimerax	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	environment_setup	tool	topaz	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	environment_setup	tool	cryolo	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	environment_setup	tool	coot	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	environment_setup	tool	model_angelo	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	environment_setup	gpu	cuda	body:keyword	medium	green	gpu_available	
+cryo	focused_refine	env	praxis-cryo-base	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+cryo	model_angelo_build	env	praxis-cryo-modelangelo	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+cryo	model_angelo_build	tool	phenix	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	motion_correct_ctf	env	praxis-cryo-base	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+cryo	motion_correct_ctf	tool	relion	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	motion_correct_ctf	tool	motioncor2	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	motion_correct_ctf	gpu	cuda	body:keyword	medium	green	gpu_available	
+cryo	multibody_refine	env	praxis-cryo-base	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+cryo	particle_pick_consensus	env	praxis-cryo-base	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+cryo	particle_pick_consensus	tool	topaz	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	particle_pick_consensus	tool	cryolo	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	particle_pick_consensus	tool	cryosparc	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+cryo	phenix_validation	env	praxis-cryo-phenix	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+cryo	preferred_orientation_diag	env	praxis-cryo-base	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+cryo	subtomogram_avg	env	praxis-cryo-aretomo	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+dock	af3_complex_predict	tool	boltz	body:whitelist	medium	green	boltz,conformation-baselines,praxis-dock,praxis-protein	
+dock	af3_complex_predict	tool	vina	body:whitelist	medium	green	praxis-dock,praxis-drug	
+dock	af3_complex_predict	gpu	cuda	body:keyword	medium	green	gpu_available	
+dock	covalent_docking	tool	docker	body:whitelist	medium	green	af2,af2.bak,global	
+dock	covalent_docking	tool	vina	body:whitelist	medium	green	praxis-dock,praxis-drug	
+dock	ensemble_docking_pipeline	tool	amber	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+dock	ensemble_docking_pipeline	tool	openmm	body:whitelist	medium	green	af2,af2.bak,antibody,praxis-dock,praxis-drug-openfe,praxis-immuno	
+dock	ensemble_docking_pipeline	tool	gromacs	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+dock	ensemble_docking_pipeline	tool	gnina	body:whitelist	medium	green	praxis-dock	
+dock	ensemble_docking_pipeline	tool	vina	body:whitelist	medium	green	praxis-dock,praxis-drug	
+dock	flexpepdock_peptide	tool	pyrosetta	body:whitelist	medium	green	DL-masif,PRAXIS-Enzyme,antibody,praxis-protein	
+dock	induced_fit_docking	tool	rosetta	body:whitelist	medium	green	antibody	由 env name fuzzy 命中: antibody
+dock	pose_buster_validate	tool	boltz	body:whitelist	medium	green	boltz,conformation-baselines,praxis-dock,praxis-protein	
+dock	pose_buster_validate	gpu	cuda	body:keyword	medium	green	gpu_available	
+dock	protein_na_docking	tool	docker	body:whitelist	medium	green	af2,af2.bak,global	
+dock	redock_benchmark	tool	docker	body:whitelist	medium	green	af2,af2.bak,global	
+dock	redock_benchmark	tool	gnina	body:whitelist	medium	green	praxis-dock	
+dock	redock_benchmark	tool	vina	body:whitelist	medium	green	praxis-dock,praxis-drug	
+dock	snugdock_antibody	tool	docker	body:whitelist	medium	green	af2,af2.bak,global	
+dock	snugdock_antibody	tool	pyrosetta	body:whitelist	medium	green	DL-masif,PRAXIS-Enzyme,antibody,praxis-protein	
+dock	snugdock_antibody	gpu	cuda	body:keyword	medium	green	gpu_available	
+dock	vina_gnina_dock	tool	docker	body:whitelist	medium	green	af2,af2.bak,global	
+dock	vina_gnina_dock	tool	gnina	body:whitelist	medium	green	praxis-dock	
+dock	vina_gnina_dock	tool	vina	body:whitelist	medium	green	praxis-dock,praxis-drug	
+dock	vina_gnina_dock	tool	rdkit	body:whitelist	medium	green	PRAXIS-Enzyme,boltz,chai,conformation-baselines,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-protein	
+dock	vina_gnina_dock	tool	biopython	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-crispor,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,boltz,chai,conformation-baselines,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-openfe,praxis-immuno,praxis-microbiome,praxis-microbiome-kraken,praxis-protein,thermompnn,ycy	
+dock	vina_gnina_dock	gpu	cuda	body:keyword	medium	green	gpu_available	
+drug	admet_multi	tool	admet-ai	body:whitelist	medium	green	praxis-drug-admet	
+drug	admet_multi	gpu	cuda	body:keyword	medium	green	gpu_available	
+drug	aizynth_retrosynthesis	tool	aizynth	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+drug	chem_id_validate	env	praxis-drug-base	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+drug	chem_id_validate	tool	rdkit	body:whitelist	medium	green	PRAXIS-Enzyme,boltz,chai,conformation-baselines,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-protein	
+drug	covalent_docking	env	praxis-drug-vina	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+drug	covalent_docking	tool	vina	body:whitelist	medium	green	praxis-dock,praxis-drug	
+drug	covalent_docking	tool	gnina	body:whitelist	medium	green	praxis-dock	
+drug	de_novo_generative	tool	reinvent	body:whitelist	medium	green	praxis-drug-reinvent	
+drug	de_novo_generative	tool	go	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+drug	de_novo_generative	gpu	cuda	body:keyword	medium	green	gpu_available	
+drug	fep_relative_affinity	tool	openfe	body:whitelist	medium	green	praxis-drug-openfe	
+drug	fep_relative_affinity	tool	openmm	body:whitelist	medium	green	af2,af2.bak,antibody,praxis-dock,praxis-drug-openfe,praxis-immuno	
+drug	fep_relative_affinity	gpu	cuda	body:keyword	medium	green	gpu_available	
+drug	ligand_prep	env	praxis-drug-base	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+drug	ligand_prep	tool	rdkit	body:whitelist	medium	green	PRAXIS-Enzyme,boltz,chai,conformation-baselines,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-protein	
+drug	mutation_panel_screen	env	praxis-drug-vina	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+drug	mutation_panel_screen	tool	pyrosetta	body:whitelist	medium	green	DL-masif,PRAXIS-Enzyme,antibody,praxis-protein	
+drug	pocket2mol_sbdd	tool	pocket2mol	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+drug	pocket2mol_sbdd	gpu	cuda	body:keyword	medium	green	gpu_available	
+drug	protac_ternary	tool	vina	body:whitelist	medium	green	praxis-dock,praxis-drug	
+drug	pubchem_chembl_lookup	env	praxis-drug-base	frontmatter:env	high	red:env_missing		建 env (或映射到 staging 现有 env)
+drug	vina_gnina_dock	tool	gnina	body:whitelist	medium	green	praxis-dock	
+drug	vina_gnina_dock	tool	vina	body:whitelist	medium	green	praxis-dock,praxis-drug	
+enzyme	alphafold-plddt-analyzer	cli	curl	body:which	high	green	PRAXIS-CRISPR-bins,arcas-hla,hic,praxis-microbiome-da,praxis-microbiome-da-v2,praxis-microbiome-dada2-r,praxis-microbiome-kraken,praxis-protein	存在为 python 包,需 `python -m / -c` 调用
+enzyme	alphafold-plddt-analyzer	tool	biotite	body:whitelist	medium	green	esmfold,praxis-protein	
+enzyme	alphafold-plddt-analyzer	tool	numpy	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,base,boltz,chai,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-da-v2,praxis-microbiome-gtdbtk,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,proteinmpnn,rfdiffusion,thermompnn,vcell,world,ycy	
+enzyme	alphafold-plddt-analyzer	tool	alphafold	body:whitelist	medium	green	af2,af2.bak	由 env name fuzzy 命中: af2,af2.bak
+enzyme	alphafold-plddt-analyzer	tool	dali	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+enzyme	alphafold-plddt-analyzer	tool	pyrosetta	body:whitelist	medium	green	DL-masif,PRAXIS-Enzyme,antibody,praxis-protein	
+enzyme	alphafold-plddt-analyzer	tool	proteinmpnn	body:whitelist	medium	green	proteinmpnn	由 env name fuzzy 命中: proteinmpnn
+enzyme	alphafold-plddt-analyzer	tool	esmfold	body:whitelist	medium	green	esmfold	由 env name fuzzy 命中: esmfold
+enzyme	alphafold-plddt-analyzer	tool	boltz	body:whitelist	medium	green	boltz,conformation-baselines,praxis-dock,praxis-protein	
+enzyme	alphafold-plddt-analyzer	tool	colabfold	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+enzyme	alphafold-plddt-analyzer	tool	alphafold2	body:whitelist	medium	green	af2,af2.bak	由 env name fuzzy 命中: af2,af2.bak
+enzyme	catalytic-site-annotator	cli	curl	body:which	high	green	PRAXIS-CRISPR-bins,arcas-hla,hic,praxis-microbiome-da,praxis-microbiome-da-v2,praxis-microbiome-dada2-r,praxis-microbiome-kraken,praxis-protein	存在为 python 包,需 `python -m / -c` 调用
+enzyme	catalytic-site-annotator	data	interpro	body:whitelist	medium	red:data_missing		拉 interpro 数据 → ~/data1/databases/interpro/
+enzyme	catalytic-site-annotator	data	pdb	body:whitelist	medium	red:data_missing		拉 pdb 数据 → ~/data1/databases/pdb/
+enzyme	catalytic-site-annotator	data	uniprot	body:whitelist	medium	red:data_missing		拉 uniprot 数据 → ~/data1/databases/uniprot/
+enzyme	catalytic-site-annotator	tool	esm	body:whitelist	medium	green	esmfold	由 env name fuzzy 命中: esmfold
+enzyme	catalytic-site-annotator	tool	pyrosetta	body:whitelist	medium	green	DL-masif,PRAXIS-Enzyme,antibody,praxis-protein	
+enzyme	cazy-crawler	py_pkg	requests	frontmatter:deps	high	green	DL-masif,PRAXIS-CRISPR,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,base,boltz,chai,conformation-baselines,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-kraken,praxis-omics,praxis-protein,praxis2,rfdiffusion,thermompnn,vcell,world,ycy	
+enzyme	cazy-crawler	py_pkg	requests	body:pip	high	green	DL-masif,PRAXIS-CRISPR,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,base,boltz,chai,conformation-baselines,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-kraken,praxis-omics,praxis-protein,praxis2,rfdiffusion,thermompnn,vcell,world,ycy	
+enzyme	cazy-crawler	tool	foldseek	body:whitelist	medium	green	praxis-protein	
+enzyme	cazy-crawler	tool	alphafold	body:whitelist	medium	green	af2,af2.bak	由 env name fuzzy 命中: af2,af2.bak
+enzyme	cazy-crawler	tool	pandas	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,antibody,arcas-hla,boltz,chai,conformation,conformation-baselines,conformation-retrain,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,rfdiffusion,thermompnn,vcell,world,ycy	
+enzyme	conservation-msa-analyzer	cli	mmseqs	body:which	high	red:cli_missing		装 mmseqs (apt/conda/源码)
+enzyme	conservation-msa-analyzer	cli	gremlin_cpp	body:which	high	red:cli_missing		装 gremlin_cpp (apt/conda/源码)
+enzyme	conservation-msa-analyzer	tool	jackhmmer	body:whitelist	medium	green	af2,af2.bak,antibody,praxis-microbiome-gtdbtk,praxis-protein	
+enzyme	conservation-msa-analyzer	tool	hhblits	body:whitelist	medium	green	af2,af2.bak	
+enzyme	conservation-msa-analyzer	tool	esm	body:whitelist	medium	green	esmfold	由 env name fuzzy 命中: esmfold
+enzyme	conservation-msa-analyzer	tool	pyrosetta	body:whitelist	medium	green	DL-masif,PRAXIS-Enzyme,antibody,praxis-protein	
+enzyme	environment-setup	env	antibody	body:conda_install	high	green	antibody	
+enzyme	environment-setup	py_pkg	https://username:password@conda.graylab.jhu.edu	body:conda_install	high	red:pkg_missing		pip install https://username:password@conda.graylab.jhu.edu 或 conda install -c bioconda https://username:password@conda.graylab.jhu.edu
+enzyme	environment-setup	py_pkg	pyrosetta	body:conda_install	high	green	DL-masif,PRAXIS-Enzyme,praxis-protein	
+enzyme	environment-setup	py_pkg	python	body:conda_install	high	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,base,boltz,chai,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-da-v2,praxis-microbiome-gtdbtk,praxis-microbiome-humann,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,praxis2,proteinmpnn,rfdiffusion,thermompnn,vcell,world,ycy	
+enzyme	environment-setup	py_pkg	rdkit	body:pip	high	green	PRAXIS-Enzyme,boltz,chai,conformation-baselines,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-protein	
+enzyme	environment-setup	py_pkg	biopython	body:pip	high	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-crispor,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,boltz,chai,conformation-baselines,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-openfe,praxis-immuno,praxis-microbiome,praxis-microbiome-kraken,praxis-protein,thermompnn,ycy	
+enzyme	environment-setup	py_pkg	biotite	body:pip	high	green	esmfold,praxis-protein	
+enzyme	environment-setup	cli	packmol-memgen	body:which	high	green	praxis-drug-openfe	存在为 python 包,需 `python -m / -c` 调用
+enzyme	environment-setup	py_pkg	mdanalysis	body:pip	high	green	praxis-dock,praxis-drug-openfe,praxis-immuno	
+enzyme	environment-setup	tool	pyrosetta	body:whitelist	medium	green	DL-masif,PRAXIS-Enzyme,antibody,praxis-protein	
+enzyme	environment-setup	tool	dssp	body:whitelist	medium	green	praxis-protein	
+enzyme	environment-setup	tool	foldseek	body:whitelist	medium	green	praxis-protein	
+enzyme	environment-setup	tool	biopython	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-crispor,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,boltz,chai,conformation-baselines,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-openfe,praxis-immuno,praxis-microbiome,praxis-microbiome-kraken,praxis-protein,thermompnn,ycy	
+enzyme	environment-setup	tool	numpy	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,base,boltz,chai,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-da-v2,praxis-microbiome-gtdbtk,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,proteinmpnn,rfdiffusion,thermompnn,vcell,world,ycy	
+enzyme	environment-setup	tool	scipy	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,boltz,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,rfdiffusion,vcell,ycy	
+enzyme	environment-setup	tool	pandas	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,antibody,arcas-hla,boltz,chai,conformation,conformation-baselines,conformation-retrain,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,rfdiffusion,thermompnn,vcell,world,ycy	
+enzyme	environment-setup	tool	rdkit	body:whitelist	medium	green	PRAXIS-Enzyme,boltz,chai,conformation-baselines,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-protein	
+enzyme	environment-setup	tool	biotite	body:whitelist	medium	green	esmfold,praxis-protein	
+enzyme	environment-setup	tool	mdanalysis	body:whitelist	medium	green	praxis-dock,praxis-drug-openfe,praxis-immuno	
+enzyme	environment-setup	tool	pymol	body:whitelist	medium	green	conformation,conformation-retrain	
+enzyme	environment-setup	tool	foldx	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+enzyme	environment-setup	tool	rosetta	body:whitelist	medium	green	antibody	由 env name fuzzy 命中: antibody
+enzyme	environment-setup	tool	gromacs	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+enzyme	environment-setup	tool	proteinmpnn	body:whitelist	medium	green	proteinmpnn	由 env name fuzzy 命中: proteinmpnn
+enzyme	environment-setup	tool	esm	body:whitelist	medium	green	esmfold	由 env name fuzzy 命中: esmfold
+enzyme	environment-setup	tool	esmfold	body:whitelist	medium	green	esmfold	由 env name fuzzy 命中: esmfold
+enzyme	environment-setup	tool	torch	body:whitelist	medium	green	PRAXIS-Cell,PRAXIS-Enzyme,antibody,base,boltz,chai,conformation,conformation-baselines,conformation-retrain,esmfold,praxis-dock,praxis-drug-admet,praxis-drug-reinvent,praxis-immuno,praxis-omics,praxis-protein,proteinmpnn,rfdiffusion,thermompnn,vcell,world,ycy	
+enzyme	environment-setup	tool	boltz	body:whitelist	medium	green	boltz,conformation-baselines,praxis-dock,praxis-protein	
+enzyme	environment-setup	tool	colabfold	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+enzyme	environment-setup	tool	alphafold2	body:whitelist	medium	green	af2,af2.bak	由 env name fuzzy 命中: af2,af2.bak
+enzyme	environment-setup	tool	alphafold	body:whitelist	medium	green	af2,af2.bak	由 env name fuzzy 命中: af2,af2.bak
+enzyme	environment-setup	data	pdb	body:whitelist	medium	red:data_missing		拉 pdb 数据 → ~/data1/databases/pdb/
+enzyme	environment-setup	data	uniprot	body:whitelist	medium	red:data_missing		拉 uniprot 数据 → ~/data1/databases/uniprot/
+enzyme	environment-setup	gpu	cuda	body:keyword	medium	green	gpu_available	
+enzyme	esm-mutation-scan	py_pkg	fair-esm	body:pip	high	green	PRAXIS-Enzyme,esmfold,praxis-protein,thermompnn	
+enzyme	esm-mutation-scan	tool	esm	body:whitelist	medium	green	esmfold	由 env name fuzzy 命中: esmfold
+enzyme	esm-mutation-scan	tool	torch	body:whitelist	medium	green	PRAXIS-Cell,PRAXIS-Enzyme,antibody,base,boltz,chai,conformation,conformation-baselines,conformation-retrain,esmfold,praxis-dock,praxis-drug-admet,praxis-drug-reinvent,praxis-immuno,praxis-omics,praxis-protein,proteinmpnn,rfdiffusion,thermompnn,vcell,world,ycy	
+enzyme	esm-mutation-scan	tool	dssp	body:whitelist	medium	green	praxis-protein	
+enzyme	esm-mutation-scan	gpu	cuda	body:keyword	medium	green	gpu_available	
+enzyme	pdb-fetcher	py_pkg	json	body:python_import	high	red:pkg_missing		pip install json 或 conda install -c bioconda json
+enzyme	pdb-fetcher	py_pkg	re	body:python_import	high	red:pkg_missing		pip install re 或 conda install -c bioconda re
+enzyme	pdb-fetcher	py_pkg	requests	body:pip	high	green	DL-masif,PRAXIS-CRISPR,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,base,boltz,chai,conformation-baselines,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-kraken,praxis-omics,praxis-protein,praxis2,rfdiffusion,thermompnn,vcell,world,ycy	
+enzyme	pdb-fetcher	tool	alphafold	body:whitelist	medium	green	af2,af2.bak	由 env name fuzzy 命中: af2,af2.bak
+enzyme	pocket-tunnel-analyzer	cli	caver_analyst	body:which	high	red:cli_missing		装 caver_analyst (apt/conda/源码)
+enzyme	pocket-tunnel-analyzer	cli	fpocket	body:which	high	red:cli_missing		装 fpocket (apt/conda/源码)
+enzyme	pocket-tunnel-analyzer	cli	schrodinger	body:which	high	red:cli_missing		装 schrodinger (apt/conda/源码)
+enzyme	pocket-tunnel-analyzer	py_pkg	pykvfinder	body:pip	high	red:pkg_missing		pip install pykvfinder 或 conda install -c bioconda pykvfinder
+enzyme	pocket-tunnel-analyzer	data	pdb	body:whitelist	medium	red:data_missing		拉 pdb 数据 → ~/data1/databases/pdb/
+enzyme	pocket-tunnel-analyzer	tool	rdkit	body:whitelist	medium	green	PRAXIS-Enzyme,boltz,chai,conformation-baselines,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-protein	
+enzyme	pocket-tunnel-analyzer	tool	esm	body:whitelist	medium	green	esmfold	由 env name fuzzy 命中: esmfold
+enzyme	pocket-tunnel-analyzer	tool	pyrosetta	body:whitelist	medium	green	DL-masif,PRAXIS-Enzyme,antibody,praxis-protein	
+enzyme	pocket-tunnel-analyzer	tool	proteinmpnn	body:whitelist	medium	green	proteinmpnn	由 env name fuzzy 命中: proteinmpnn
+enzyme	pyrosetta-stability-scan	py_pkg	pyrosetta	frontmatter:deps	high	green	DL-masif,PRAXIS-Enzyme,praxis-protein	
+enzyme	pyrosetta-stability-scan	py_pkg	biopython	frontmatter:deps	high	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-crispor,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,boltz,chai,conformation-baselines,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-openfe,praxis-immuno,praxis-microbiome,praxis-microbiome-kraken,praxis-protein,thermompnn,ycy	
+enzyme	pyrosetta-stability-scan	py_pkg	numpy	frontmatter:deps	high	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,base,boltz,chai,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-da-v2,praxis-microbiome-gtdbtk,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,proteinmpnn,rfdiffusion,thermompnn,vcell,world,ycy	
+enzyme	pyrosetta-stability-scan	py_pkg	pandas	frontmatter:deps	high	green	DL-masif,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,antibody,arcas-hla,boltz,chai,conformation,conformation-baselines,conformation-retrain,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,rfdiffusion,thermompnn,vcell,world,ycy	
+enzyme	pyrosetta-stability-scan	py_pkg	pyrosetta	body:python_import	high	green	DL-masif,PRAXIS-Enzyme,praxis-protein	
+enzyme	pyrosetta-stability-scan	cli	mkdssp	body:which	high	red:cli_missing		装 mkdssp (apt/conda/源码)
+enzyme	pyrosetta-stability-scan	cli	dssp	body:which	high	green	praxis-protein	
+enzyme	pyrosetta-stability-scan	tool	rosetta	body:whitelist	medium	green	antibody	由 env name fuzzy 命中: antibody
+enzyme	pyrosetta-stability-scan	tool	foldx	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+enzyme	pyrosetta-stability-scan	tool	pymol	body:whitelist	medium	green	conformation,conformation-retrain	
+enzyme	pyrosetta-stability-scan	tool	biopython	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-crispor,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,boltz,chai,conformation-baselines,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-openfe,praxis-immuno,praxis-microbiome,praxis-microbiome-kraken,praxis-protein,thermompnn,ycy	
+enzyme	pyrosetta-stability-scan	gpu	cuda	body:keyword	medium	green	gpu_available	
+enzyme	structural-context-analyzer	cli	mkdssp	body:which	high	red:cli_missing		装 mkdssp (apt/conda/源码)
+enzyme	structural-context-analyzer	cli	dssp	body:which	high	green	praxis-protein	
+enzyme	structural-context-analyzer	cli	freesasa	body:which	high	red:cli_missing		装 freesasa (apt/conda/源码)
+enzyme	structural-context-analyzer	tool	biopython	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-crispor,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,boltz,chai,conformation-baselines,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-openfe,praxis-immuno,praxis-microbiome,praxis-microbiome-kraken,praxis-protein,thermompnn,ycy	
+enzyme	structural-context-analyzer	data	pdb	body:whitelist	medium	red:data_missing		拉 pdb 数据 → ~/data1/databases/pdb/
+enzyme	structural-context-analyzer	tool	numpy	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,base,boltz,chai,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-da-v2,praxis-microbiome-gtdbtk,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,proteinmpnn,rfdiffusion,thermompnn,vcell,world,ycy	
+enzyme	structural-context-analyzer	tool	alphafold	body:whitelist	medium	green	af2,af2.bak	由 env name fuzzy 命中: af2,af2.bak
+enzyme	structural-context-analyzer	tool	esm	body:whitelist	medium	green	esmfold	由 env name fuzzy 命中: esmfold
+enzyme	structural-context-analyzer	tool	pyrosetta	body:whitelist	medium	green	DL-masif,PRAXIS-Enzyme,antibody,praxis-protein	
+enzyme	uniprot-fetcher	py_pkg	json	body:python_import	high	red:pkg_missing		pip install json 或 conda install -c bioconda json
+enzyme	uniprot-fetcher	py_pkg	requests	body:pip	high	green	DL-masif,PRAXIS-CRISPR,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,base,boltz,chai,conformation-baselines,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-kraken,praxis-omics,praxis-protein,praxis2,rfdiffusion,thermompnn,vcell,world,ycy	
+immuno	hla_typing_rnaseq	tool	samtools	body:whitelist	medium	green	PRAXIS-CRISPR-bins,arcas-hla,hic,praxis-microbiome-kraken	
+immuno	mhc_class_i_predict	gpu	cuda	body:keyword	medium	green	gpu_available	
+immuno	tcr_pmhc_dock	tool	docker	body:whitelist	medium	green	af2,af2.bak,global	
+immuno	tcr_pmhc_dock	tool	esm	body:whitelist	medium	green	esmfold	由 env name fuzzy 命中: esmfold
+immuno	tcr_pmhc_dock	tool	alphafold	body:whitelist	medium	green	af2,af2.bak	由 env name fuzzy 命中: af2,af2.bak
+immuno	tcr_pmhc_dock	tool	rosetta	body:whitelist	medium	green	antibody	由 env name fuzzy 命中: antibody
+immuno	tcr_seq_repertoire	tool	scirpy	body:whitelist	medium	green	praxis-immuno	
+md	auto_md_submit	tool	gromacs	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+md	auto_md_submit	gpu	cuda	body:keyword	medium	green	gpu_available	
+microbiome	amplicon_dada2_qiime	tool	dada2	body:whitelist	medium	green	praxis-microbiome-dada2-r	由 env name fuzzy 命中: praxis-microbiome-dada2-r
+microbiome	amplicon_dada2_qiime	tool	qiime	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+microbiome	amplicon_dada2_qiime	tool	cutadapt	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+microbiome	amplicon_dada2_qiime	tool	mafft	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+microbiome	amplicon_minimal_real	tool	docker	body:whitelist	medium	green	af2,af2.bak,global	
+microbiome	amplicon_minimal_real	tool	dada2	body:whitelist	medium	green	praxis-microbiome-dada2-r	由 env name fuzzy 命中: praxis-microbiome-dada2-r
+microbiome	amplicon_minimal_real	tool	bowtie2	body:whitelist	medium	green	praxis-microbiome-humann,praxis-microbiome-kraken	
+microbiome	cultured_isolate_wgs_real	tool	fastp	body:whitelist	medium	green	hic,praxis-microbiome-kraken	
+microbiome	cultured_isolate_wgs_real	tool	checkm2	body:whitelist	medium	green	praxis-microbiome-checkm2	
+microbiome	da_compositional_real	tool	scipy	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,boltz,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,rfdiffusion,vcell,ycy	
+microbiome	humann_functional	tool	metaphlan	body:whitelist	medium	green	praxis-microbiome-humann,praxis-microbiome-kraken	
+microbiome	humann_functional_real	tool	humann3	body:whitelist	medium	green	praxis-microbiome-humann	
+microbiome	its_fungal_real	tool	kraken	body:whitelist	medium	green	praxis-microbiome-kraken	由 env name fuzzy 命中: praxis-microbiome-kraken
+microbiome	mag_assembly_real	tool	checkm2	body:whitelist	medium	green	praxis-microbiome-checkm2	
+microbiome	scfa_butyrate_screen_real	tool	humann3	body:whitelist	medium	green	praxis-microbiome-humann	
+microbiome	scfa_butyrate_screen_real	tool	drep	body:whitelist	medium	green	praxis-microbiome-da,praxis-microbiome-da-v2	由 env name fuzzy 命中: praxis-microbiome-da,praxis-microbiome-da-v2
+microbiome	scfa_butyrate_screen_real	tool	prodigal	body:whitelist	medium	green	praxis-microbiome-checkm2,praxis-microbiome-gtdbtk	
+microbiome	scfa_butyrate_screen_real	tool	humann	body:whitelist	medium	green	praxis-microbiome-humann	
+microbiome	shotgun_taxonomy	tool	fastp	body:whitelist	medium	green	hic,praxis-microbiome-kraken	
+microbiome	shotgun_taxonomy	tool	kraken2	body:whitelist	medium	green	praxis-microbiome-kraken	
+microbiome	shotgun_taxonomy	tool	metaphlan	body:whitelist	medium	green	praxis-microbiome-humann,praxis-microbiome-kraken	
+microbiome	shotgun_taxonomy	tool	bowtie2	body:whitelist	medium	green	praxis-microbiome-humann,praxis-microbiome-kraken	
+microbiome	shotgun_taxonomy	tool	kraken	body:whitelist	medium	green	praxis-microbiome-kraken	由 env name fuzzy 命中: praxis-microbiome-kraken
+microbiome	shotgun_taxonomy	tool	samtools	body:whitelist	medium	green	PRAXIS-CRISPR-bins,arcas-hla,hic,praxis-microbiome-kraken	
+microbiome	shotgun_taxonomy_real	tool	kraken2	body:whitelist	medium	green	praxis-microbiome-kraken	
+microbiome	strain_tracking_real	tool	bowtie2	body:whitelist	medium	green	praxis-microbiome-humann,praxis-microbiome-kraken	
+omics	bulk_de_pipeline	tool	deseq2	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+omics	bulk_de_pipeline	tool	salmon	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+omics	multimodal_wnn	gpu	cuda	body:keyword	medium	green	gpu_available	
+omics	multiqc_aggregate	tool	salmon	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+omics	multiqc_aggregate	tool	fastp	body:whitelist	medium	green	hic,praxis-microbiome-kraken	
+omics	multiqc_aggregate	tool	star	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+omics	salmon_quant	tool	salmon	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+omics	scrna_annotate	tool	anndata	body:whitelist	medium	green	PRAXIS-Cell,praxis-immuno,praxis-omics,vcell	
+omics	scrna_integrate	tool	harmony	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+omics	scrna_integrate	tool	scvi	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+omics	scrna_qc_pipeline	tool	anndata	body:whitelist	medium	green	PRAXIS-Cell,praxis-immuno,praxis-omics,vcell	
+omics	scrna_qc_pipeline	tool	scanpy	body:whitelist	medium	green	PRAXIS-Cell,praxis-immuno,praxis-omics,vcell	
+pharma	allometric_scale	tool	scipy	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,boltz,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,rfdiffusion,vcell,ycy	
+pharma	pbpk_simulate	tool	muscle	body:whitelist	medium	green	praxis-microbiome-kraken	
+pharma	pkpd_emax	env	praxis-pharma	frontmatter:env	high	green	praxis-pharma	
+pharma	pkpd_emax	tool	scipy	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,boltz,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,rfdiffusion,vcell,ycy	
+pharma	ppb_assess	env	praxis-pharma	frontmatter:env	high	green	praxis-pharma	
+pharma	ppb_assess	tool	admet-ai	body:whitelist	medium	green	praxis-drug-admet	
+protein	antibody_pipeline	py_pkg	anarci	frontmatter:deps	high	green	antibody,praxis-protein	
+protein	antibody_pipeline	cli	anarci	body:which	high	green	antibody,praxis-protein	存在为 python 包,需 `python -m / -c` 调用
+protein	antibody_pipeline	gpu	cuda	body:keyword	medium	green	gpu_available	
+protein	binder_failure_postmortem	tool	pandas	body:whitelist	medium	green	DL-masif,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,antibody,arcas-hla,boltz,chai,conformation,conformation-baselines,conformation-retrain,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,rfdiffusion,thermompnn,vcell,world,ycy	
+protein	binder_failure_postmortem	gpu	cuda	body:keyword	medium	green	gpu_available	
+protein	boltz_structure_predict	tool	boltz	body:whitelist	medium	green	boltz,conformation-baselines,praxis-dock,praxis-protein	
+protein	de_novo_binder_pipeline	tool	rfdiffusion	body:whitelist	medium	green	rfdiffusion	
+protein	de_novo_binder_pipeline	tool	proteinmpnn	body:whitelist	medium	green	proteinmpnn	由 env name fuzzy 命中: proteinmpnn
+protein	de_novo_binder_pipeline	tool	alphafold	body:whitelist	medium	green	af2,af2.bak	由 env name fuzzy 命中: af2,af2.bak
+protein	de_novo_binder_pipeline	gpu	cuda	body:keyword	medium	green	gpu_available	
+protein	esmfold_high_throughput	tool	esmfold	body:whitelist	medium	green	esmfold	由 env name fuzzy 命中: esmfold
+protein	esmfold_high_throughput	gpu	cuda	body:keyword	medium	green	gpu_available	
+protein	foldseek_homology	cli	mmseqs	body:which	high	red:cli_missing		装 mmseqs (apt/conda/源码)
+protein	foldseek_homology	tool	foldseek	body:whitelist	medium	green	praxis-protein	
+protein	mutation_effect_scan	cli	mkdssp	body:which	high	red:cli_missing		装 mkdssp (apt/conda/源码)
+protein	mutation_effect_scan	cli	dssp	body:which	high	green	praxis-protein	
+protein	mutation_effect_scan	tool	pyrosetta	body:whitelist	medium	green	DL-masif,PRAXIS-Enzyme,antibody,praxis-protein	
+protein	mutation_effect_scan	tool	rosetta	body:whitelist	medium	green	antibody	由 env name fuzzy 命中: antibody
+protein	mutation_effect_scan	gpu	cuda	body:keyword	medium	green	gpu_available	
+protein	predict_complex	cli	colabfold_search	body:which	high	red:cli_missing		装 colabfold_search (apt/conda/源码)
+protein	predict_complex	tool	esmfold	body:whitelist	medium	green	esmfold	由 env name fuzzy 命中: esmfold
+protein	predict_complex	tool	alphafold	body:whitelist	medium	green	af2,af2.bak	由 env name fuzzy 命中: af2,af2.bak
+protein	predict_complex	tool	alphafold3	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+protein	predict_complex	tool	boltz	body:whitelist	medium	green	boltz,conformation-baselines,praxis-dock,praxis-protein	
+protein	predict_complex	gpu	cuda	body:keyword	medium	green	gpu_available	
+protein	predict_structure_monomer	cli	esmfold	body:which	high	red:cli_missing		装 esmfold (apt/conda/源码)
+protein	predict_structure_monomer	tool	esm	body:whitelist	medium	green	esmfold	由 env name fuzzy 命中: esmfold
+protein	predict_structure_monomer	tool	alphafold3	body:whitelist	medium	red:cli_missing		未发现 (低置信度提取, 可能误判)
+protein	predict_structure_monomer	gpu	cuda	body:keyword	medium	green	gpu_available	
+protein	proteinmpnn_redesign	py_pkg	python	frontmatter:deps	high	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,base,boltz,chai,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-da-v2,praxis-microbiome-gtdbtk,praxis-microbiome-humann,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,praxis2,proteinmpnn,rfdiffusion,thermompnn,vcell,world,ycy	
+protein	proteinmpnn_redesign	cli	python	body:which	high	green	DL-masif,PRAXIS-CRISPR,PRAXIS-CRISPR-bins,PRAXIS-CRISPR-crispor,PRAXIS-Cell,PRAXIS-Enzyme,af2,af2.bak,antibody,arcas-hla,base,boltz,chai,conformation,conformation-baselines,conformation-retrain,esmfold,gpcr-agents,hic,praxis-dock,praxis-drug,praxis-drug-admet,praxis-drug-openfe,praxis-drug-reinvent,praxis-immuno,praxis-microbiome,praxis-microbiome-checkm2,praxis-microbiome-da-v2,praxis-microbiome-gtdbtk,praxis-microbiome-humann,praxis-microbiome-kraken,praxis-omics,praxis-pharma,praxis-protein,praxis2,proteinmpnn,rfdiffusion,thermompnn,vcell,world,ycy	存在为 python 包,需 `python -m / -c` 调用
+protein	proteinmpnn_redesign	tool	proteinmpnn	body:whitelist	medium	green	proteinmpnn	由 env name fuzzy 命中: proteinmpnn
+protein	proteinmpnn_redesign	gpu	cuda	body:keyword	medium	green	gpu_available	
+protein	proteinmpnn_sequence	tool	proteinmpnn	body:whitelist	medium	green	proteinmpnn	由 env name fuzzy 命中: proteinmpnn
+protein	rfdiffusion_design	tool	proteinmpnn	body:whitelist	medium	green	proteinmpnn	由 env name fuzzy 命中: proteinmpnn
+protein	rfdiffusion_design	tool	rfdiffusion	body:whitelist	medium	green	rfdiffusion	
+protein	symmetric_design_pipeline	tool	rfdiffusion	body:whitelist	medium	green	rfdiffusion	
+protein	symmetric_design_pipeline	gpu	cuda	body:keyword	medium	green	gpu_available	
+protein	thermompnn_stability	tool	pyrosetta	body:whitelist	medium	green	DL-masif,PRAXIS-Enzyme,antibody,praxis-protein	

@@ -1,0 +1,8 @@
+{
+  "task_id": "demo-streptomyces-bgc-mining",
+  "problem": {
+    "synth_task": "bgc_mining",
+    "host_organism": "Streptomyces",
+    "constraints": ["antiSMASH + DeepBGC consensus", "MIBiG cross-check mandatory"]
+  }
+}

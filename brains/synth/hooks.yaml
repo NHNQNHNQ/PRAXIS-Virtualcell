@@ -1,0 +1,18 @@
+# PRAXIS-Synth — hook registrations.
+hooks:
+  - kind: pre_seal_case
+    builtin: doi_required
+
+  - kind: pre_seal_case
+    builtin: excluded_required
+    config:
+      field_name: excluded_genes
+
+  - kind: anti_retrieval_fail
+    builtin: anti_retrieval_threshold
+    config:
+      min_pass_ratio: 1.0
+    # synth's NEG cases (antismash-mibig-cross-check / cross-host-codon / ...)
+
+  - kind: pre_seal_case
+    builtin: causal_tag_check

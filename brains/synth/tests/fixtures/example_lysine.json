@@ -1,0 +1,10 @@
+{
+  "task_id": "demo-lysine-cglutamicum-industrial",
+  "problem": {
+    "synth_task": "strain_engineering",
+    "host_organism": "Corynebacterium glutamicum",
+    "target_compound": {"name": "lysine", "kegg_id": "C00047"},
+    "scale": "industrial",
+    "constraints": ["100 g/L target titer", "fed-batch fermentation", "stable over 100h"]
+  }
+}

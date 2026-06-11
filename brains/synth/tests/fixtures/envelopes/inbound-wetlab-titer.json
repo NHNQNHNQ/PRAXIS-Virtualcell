@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "envelope_kind": "wetlab",
+  "source_agent": "direct",
+  "experiment_id": "wetlab-lysine-titer-batch-A001",
+  "linked_run_id": "demo-lysine-cglutamicum-industrial",
+  "linked_design_id": "D1_optknock_ko_set",
+  "experiment_type": "wetlab_titer",
+  "samples": [
+    {"sample_id": "ko_b2290_b3697_replicate_1", "design_id": "D1_optknock_ko_set", "replicate": 1},
+    {"sample_id": "ko_b2290_b3697_replicate_2", "design_id": "D1_optknock_ko_set", "replicate": 2},
+    {"sample_id": "ko_b2290_b3697_replicate_3", "design_id": "D1_optknock_ko_set", "replicate": 3}
+  ],
+  "payload": {
+    "compound": "L-lysine",
+    "method": "HPLC (post-derivatization with OPA)",
+    "values_g_per_L": [42.1, 38.7, 45.3],
+    "mean_g_per_L": 42.0,
+    "stdev_g_per_L": 3.3,
+    "fermentation": {
+      "vessel": "5 L bioreactor (BioFlo 320)",
+      "duration_h": 72,
+      "feeding": "fed-batch glucose (10 g/L feed)",
+      "DO_pct_min": 30,
+      "T_celsius": 30,
+      "pH": 7.0,
+      "biomass_OD600_final": 28.4
+    },
+    "predicted_vs_actual": {
+      "predicted_g_per_L": 60,
+      "actual_mean_g_per_L": 42,
+      "in_silico_to_in_vivo_gap_pct": 30,
+      "synth_009_lesson_4_compatible": true,
+      "comment": "30% gap consistent with synth-009 lesson 4 (predicted vs actual 30-50% gap)"
+    }
+  },
+  "qc": {
+    "passed": true,
+    "operator_notes": "All three replicates within 10% CV; HPLC standard curve r² > 0.99; predicted-vs-actual gap consistent with literature"
+  },
+  "operator": "wetlab-tech-002",
+  "timestamp_utc": "2026-05-02T09:15:00Z"
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "report.schema.json",
+  "title": "Final Report (Agent 4 output, PRAXIS-Synth)",
+  "type": "object",
+  "required": ["task_id", "summary", "interpretation", "reproducibility", "references", "confidence"],
+  "properties": {
+    "task_id": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["title", "headline_metric"],
+      "properties": {
+        "title": {"type": "string"},
+        "headline_metric": {
+          "type": "object",
+          "required": ["name", "value"],
+          "properties": {
+            "name": {"type": "string"},
+            "value": {"type": ["number", "string"]},
+            "unit": {"type": "string"}
+          }
+        },
+        "tldr": {"type": "string"}
+      }
+    },
+    "interpretation": {
+      "type": "object",
+      "required": ["why_succeeded", "why_failed", "literature_alignment"],
+      "properties": {
+        "why_succeeded": {"type": "array", "items": {"type": "string"}},
+        "why_failed": {"type": "array", "items": {"type": "string"}},
+        "literature_alignment": {"type": "array", "items": {"type": "string"}},
+        "rules_invoked": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "reproducibility": {
+      "type": "object",
+      "required": ["shell_script"],
+      "properties": {
+        "shell_script": {"type": "string", "minLength": 10},
+        "tool_versions": {"type": "object"},
+        "seed": {"type": ["integer", "null"]}
+      }
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["doi", "citation"],
+        "properties": {
+          "doi": {"type": "string"},
+          "citation": {"type": "string"},
+          "case_id": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "case_writeback_proposal": {
+      "type": "object",
+      "properties": {
+        "should_write": {"type": "boolean"},
+        "case_id_suggestion": {"type": "string"},
+        "rationale": {"type": "string"}
+      }
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["cold_start", "low", "medium", "high", "domain_knowledge"]
+    }
+  }
+}

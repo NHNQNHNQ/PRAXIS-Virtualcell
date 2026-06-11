@@ -1,0 +1,9 @@
+{
+  "task_id": "demo-moclo-5fragment-assembly",
+  "problem": {
+    "synth_task": "plasmid_assembly",
+    "host_organism": "E. coli",
+    "assembly_strategy": "golden_gate",
+    "constraints": ["5-fragment level-1 assembly", "BsaI", "MoClo standard library overhangs"]
+  }
+}

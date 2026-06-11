@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "execution_results.schema.json",
+  "title": "Execution Results (Agent 3 output, PRAXIS-Synth)",
+  "type": "object",
+  "required": ["task_id", "steps", "summary"],
+  "properties": {
+    "task_id": {"type": "string"},
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["step", "skill", "passed_qc", "tool_provenance"],
+        "properties": {
+          "step": {"type": "integer"},
+          "skill": {"type": "string"},
+          "args": {"type": "object"},
+          "result": {"type": "object"},
+          "passed_qc": {"type": "boolean"},
+          "tool_provenance": {
+            "type": "object",
+            "required": ["simulated", "partial", "full"],
+            "properties": {
+              "simulated": {"type": "boolean"},
+              "partial": {"type": "boolean"},
+              "full": {"type": "boolean"},
+              "backend": {"type": "string"},
+              "version": {"type": "object"},
+              "wallclock_seconds": {"type": "number"},
+              "stderr_tail": {"type": "string"}
+            }
+          },
+          "notes": {"type": "string"}
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["all_steps_passed", "any_simulated"],
+      "properties": {
+        "all_steps_passed": {"type": "boolean"},
+        "any_simulated": {"type": "boolean"},
+        "headline_metric": {
+          "type": "object",
+          "properties": {
+            "name": {"type": "string"},
+            "value": {"type": ["number", "string"]},
+            "unit": {"type": "string"}
+          }
+        }
+      }
+    },
+    "wetlab_results": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
+    "pending_wetlab": {
+      "type": "object",
+      "properties": {
+        "expected_experiments": {"type": "array", "items": {"type": "string"}},
+        "checkpoint_id": {"type": "string"}
+      }
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["cold_start", "low", "medium", "high", "domain_knowledge"]
+    }
+  }
+}

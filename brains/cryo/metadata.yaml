@@ -1,0 +1,13 @@
+# 智能体手册文案(从 PRAXIS V1 catalog 迁移)。
+helps_with:
+  - "RELION / cryoSPARC 跑到 2D class, 不知道哪些 class 该留"
+  - "3D refinement 一直发散, 分辨率上不去, 想知道哪步出错"
+  - "想从 EMDB 找参考 map 做 rigid-body 对接 / 验证"
+delivers:
+  - "RELION / cryoSPARC 参数建议 + 关键步 checkpoint"
+  - "可疑 2D / 3D class 标注 + 处理建议"
+  - "Topaz 颗粒挑选模型选型 + 训练数据准备"
+  - "cryoSPARC ↔ RELION 数据迁移脚本"
+examples:
+  - "RELION-5 怎么挑 2D class？"
+  - "cryoSPARC 3D refinement 发散怎么办?"

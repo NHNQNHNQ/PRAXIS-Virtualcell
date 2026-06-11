@@ -1,0 +1,13 @@
+# 智能体手册文案(从 PRAXIS V1 catalog 迁移)。
+helps_with:
+  - "想跑一段 MD 但不会写 mdp / topology / 力场参数"
+  - "想观察蛋白构象变化 / 别构 pocket 开闭 / 配体留存"
+  - "需要算结合自由能 (FEP / MM-PBSA / umbrella sampling)"
+delivers:
+  - "完整 GROMACS / OpenMM 输入文件 (mdp + topol + tpr)"
+  - "REMD 温度梯度 + replica 配置 + replica-exchange 频率"
+  - "PLUMED metadynamics CV 设计 + 收敛诊断"
+  - "RMSD / RMSF / hbond / 自由能轨迹分析脚本"
+examples:
+  - "GROMACS REMD 怎么设温度梯度？"
+  - "c-ABL DFG-out vs DFG-in 构象比对"

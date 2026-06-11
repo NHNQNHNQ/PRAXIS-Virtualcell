@@ -1,0 +1,12 @@
+{
+  "schema_version": 2,
+  "envelope_kind": "inbound",
+  "source_agent": "drug",
+  "experiment_id": "bad-schema-version-001",
+  "linked_run_id": "demo-test",
+  "experiment_type": "enzyme_handoff",
+  "samples": [{"sample_id": "x"}],
+  "payload": {},
+  "operator": "test",
+  "timestamp_utc": "2026-04-29T00:00:00Z"
+}

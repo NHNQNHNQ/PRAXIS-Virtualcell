@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "envelope_kind": "inbound",
+  "source_agent": "drug",
+  "experiment_id": "missing-most-fields",
+  "samples": []
+}
