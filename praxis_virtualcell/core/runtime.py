@@ -43,4 +43,45 @@ class AgentRuntime:
             raise RuntimeError(f"{message.receiver} 未产出 {expected_type}")
         return out
 
-    # run_workflow / export_outputs 在 Task 10 补。
+    def run_workflow(self, request) -> dict:
+        """request: VirtualCellRequest。返回最终 report dict。全程经 bus。"""
+        m = self.mk_message("client", "InputInterpreter", "parse_request",
+                            {"request_dict": asdict(request)})
+        out = self._dispatch_collect(m, "request_parsed")
+        m = self.mk_message(out.sender, "BioObjectNormalizer", "normalize",
+                            out.payload, out.message_id)
+        out = self._dispatch_collect(m, "object_normalized")
+        m = self.mk_message(out.sender, "SpeciesBrain", "retrieve", out.payload, out.message_id)
+        out = self._dispatch_collect(m, "brain_retrieved")
+        m = self.mk_message(out.sender, "ModelApplicability", "decide", out.payload, out.message_id)
+        app = self._dispatch_collect(m, "applicability_decided")
+        results = []
+        for pname in list(app.payload["applicable"]) + list(app.payload["rejected_candidates"]):
+            pm = self.mk_message("ModelApplicability", pname, "predict",
+                                {"request": app.payload["request"],
+                                 "brain_context": app.payload["brain_context"]}, app.message_id)
+            r = self._dispatch_collect(pm, "predictor_result")
+            results.append(r.payload)
+        m = self.mk_message("ModelApplicability", "EnsembleCoordinator", "ensemble",
+                            {"request": app.payload["request"],
+                             "brain_context": app.payload["brain_context"], "results": results},
+                            app.message_id)
+        ens = self._dispatch_collect(m, "ensemble_done")
+        m = self.mk_message(ens.sender, "Reliability", "assess", ens.payload, ens.message_id)
+        rel = self._dispatch_collect(m, "reliability_decided")
+        m = self.mk_message(rel.sender, "Critic", "review", rel.payload, rel.message_id)
+        crit = self._dispatch_collect(m, "critic_done")
+        m = self.mk_message(crit.sender, "ProvenanceAgent", "assemble", crit.payload, crit.message_id)
+        prov = self._dispatch_collect(m, "provenance_done")
+        m = self.mk_message(prov.sender, "Report", "render", prov.payload, prov.message_id)
+        rep = self._dispatch_collect(m, "report_done")
+        return rep.payload["report"]
+
+    def export_outputs(self, out_dir: str, report: dict) -> None:
+        d = Path(out_dir)
+        d.mkdir(parents=True, exist_ok=True)
+        self.bus.export_trace(str(d / "trace.json"))
+        (d / "prediction_report.json").write_text(
+            json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        (d / "provenance.json").write_text(
+            json.dumps(report.get("provenance", {}), ensure_ascii=False, indent=2), encoding="utf-8")
