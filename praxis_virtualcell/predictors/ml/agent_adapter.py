@@ -41,8 +41,9 @@ class MLBackedPredictorAgent(PredictorAgent):
         kind = "gene_combo" if len(targets) > 1 else "gene_ko"
         mean = MLPredictorAgent(self.model).predict_tensor(
             model_input["control"], model_input["pert_emb"], kind=kind, targets=targets)
-        # 摘要入 message(避免 2000 维 tensor 塞进 payload)
-        return {"prediction": {"delta_mean": float(mean.mean()), "n_genes": int(mean.numel())},
+        # delta 向量(预测 - control);EnsembleCoordinator 按 element-wise 聚合 prediction["delta"]
+        delta = (mean.squeeze(0) - model_input["control"]).detach().cpu().tolist()
+        return {"prediction": {"delta": delta, "n_genes": len(delta)},
                 "uncertainty": {"std": float(mean.std())}}
 
 
