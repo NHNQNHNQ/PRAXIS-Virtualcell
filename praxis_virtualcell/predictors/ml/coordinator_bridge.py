@@ -12,16 +12,21 @@ if _DONOR not in sys.path:
     sys.path.insert(0, _DONOR)
 
 
-def build_coordinator(ckpt_dir: str, predictor_names: list[str], *, bench_id: str = "norman_2019"):
-    """对每个 predictor_name 经 donor_bridge 加载 ckpt → 包 donor SubAgent → 组 donor Coordinator。"""
-    from agents.subagent import SubAgent, SubAgentSpec
+def build_coordinator(ckpt_dir: str, predictor_names: list[str], *, bench_id: str = "norman_2019",
+                      perturbation_kinds: frozenset[str] = frozenset({"gene_ko", "gene_combo"})):
+    """加载 predictor_names 的 ckpt → 装进一个 bench Subagent(内部多 predictor)→ 组 donor Coordinator。
+
+    注(donor 真实 API):一个 `Subagent` 持有该 bench 的**多个** Predictor(内部 ensemble);
+    `Coordinator` 持有 Subagent 列表。`SubagentSpec(id, perturbation_kinds, bench_id)`。
+    """
+    from agents.subagent import Subagent, SubagentSpec
     from coordinator.coordinator import Coordinator
 
     from praxis_virtualcell.predictors.ml.donor_bridge import build_predictor_from_ckpt
 
-    subs = []
-    for pn in predictor_names:
-        model, _ = build_predictor_from_ckpt(str(Path(ckpt_dir) / pn))
-        spec = SubAgentSpec(name=f"{pn}-{bench_id}", bench_id=bench_id, predictor_name=pn)
-        subs.append(SubAgent(spec=spec, predictor=model))
-    return Coordinator(subs, default_bench_id=bench_id)
+    predictors = [build_predictor_from_ckpt(str(Path(ckpt_dir) / pn))[0] for pn in predictor_names]
+    spec = SubagentSpec(id=f"subagent@{bench_id}", perturbation_kinds=set(perturbation_kinds),
+                        bench_id=bench_id)
+    coord = Coordinator([Subagent(spec, predictors)])
+    coord.default_bench_id = bench_id
+    return coord
