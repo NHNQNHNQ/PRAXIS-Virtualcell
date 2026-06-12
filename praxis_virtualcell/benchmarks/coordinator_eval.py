@@ -28,9 +28,9 @@ def score_coordinator(ckpt_dir: str, predictor_names: list[str], *,
     from praxis_virtualcell.predictors.ml.coordinator_bridge import build_coordinator
     from praxis_virtualcell.predictors.ml.donor_bridge import load_norman
 
-    coord = build_coordinator(ckpt_dir, predictor_names)
-    ds = load_norman(split=split, seed=seed)  # max_cells=200, seed=1
     dev = "cuda" if torch.cuda.is_available() else "cpu"
+    coord = build_coordinator(ckpt_dir, predictor_names, device=dev)
+    ds = load_norman(split=split, seed=seed)  # max_cells=200, seed=1
     rep = EvalAgent(batch_size=64, device=dev).evaluate(coord, ds)
     return {"delta_pearson": rep.metrics.delta_pearson, "cosine": rep.metrics.cosine,
             "n": rep.n_samples, "predictors": list(predictor_names)}

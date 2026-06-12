@@ -13,18 +13,21 @@ if _DONOR not in sys.path:
 
 
 def build_coordinator(ckpt_dir: str, predictor_names: list[str], *, bench_id: str = "norman_2019",
-                      perturbation_kinds: frozenset[str] = frozenset({"gene_ko", "gene_combo"})):
+                      perturbation_kinds: frozenset[str] = frozenset({"gene_ko", "gene_combo"}),
+                      device: str = "cpu"):
     """加载 predictor_names 的 ckpt → 装进一个 bench Subagent(内部多 predictor)→ 组 donor Coordinator。
 
     注(donor 真实 API):一个 `Subagent` 持有该 bench 的**多个** Predictor(内部 ensemble);
     `Coordinator` 持有 Subagent 列表。`SubagentSpec(id, perturbation_kinds, bench_id)`。
+    Coordinator 非 nn.Module → 不被 EvalAgent.to(device) 递归,故须显式把 predictors 移到 device。
     """
     from agents.subagent import Subagent, SubagentSpec
     from coordinator.coordinator import Coordinator
 
     from praxis_virtualcell.predictors.ml.donor_bridge import build_predictor_from_ckpt
 
-    predictors = [build_predictor_from_ckpt(str(Path(ckpt_dir) / pn))[0] for pn in predictor_names]
+    predictors = [build_predictor_from_ckpt(str(Path(ckpt_dir) / pn))[0].to(device)
+                  for pn in predictor_names]
     spec = SubagentSpec(id=f"subagent@{bench_id}", perturbation_kinds=set(perturbation_kinds),
                         bench_id=bench_id)
     coord = Coordinator([Subagent(spec, predictors)])
