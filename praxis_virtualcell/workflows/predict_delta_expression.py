@@ -27,6 +27,16 @@ def build_runtime(config: RuntimeConfig | None = None) -> AgentRuntime:
               EnsembleCoordinatorAgent(), ReliabilityAgent(), CriticAgent(),
               ProvenanceAgent(), ReportAgent()):
         rt.register_agent(a)
+    from praxis_virtualcell.agents_llm.llm_client import make_llm_client
+    client = make_llm_client(cfg)
+    if client.enabled:
+        from praxis_virtualcell.agents_llm.llm_critic import LLMCriticAgent
+        from praxis_virtualcell.agents_llm.llm_input_interpreter import LLMInputInterpreterAgent
+        from praxis_virtualcell.agents_llm.llm_report import LLMReportAgent
+        from praxis_virtualcell.agents_llm.llm_router import LLMRouterAgent
+        for a in (LLMInputInterpreterAgent(client), LLMRouterAgent(client),
+                  LLMCriticAgent(client), LLMReportAgent(client)):
+            rt.register_agent(a)
     rt.run_workflow_from_dict = lambda d: rt.run_workflow(VirtualCellRequest.from_dict(d))  # type: ignore[attr-defined]
     return rt
 

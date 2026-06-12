@@ -55,6 +55,13 @@ class AgentRuntime:
         out = self._dispatch_collect(m, "brain_retrieved")
         m = self.mk_message(out.sender, "ModelApplicability", "decide", out.payload, out.message_id)
         app = self._dispatch_collect(m, "applicability_decided")
+        llm_route = None
+        if "LLMRouter" in self._agents:
+            rmsg = self.mk_message("ModelApplicability", "LLMRouter", "route_suggest",
+                {"request": app.payload["request"], "brain_context": app.payload["brain_context"],
+                 "applicable": app.payload["applicable"],
+                 "rejected_candidates": app.payload["rejected_candidates"]}, app.message_id)
+            llm_route = self._dispatch_collect(rmsg, "llm_route_suggestion").payload
         results = []
         for pname in list(app.payload["applicable"]) + list(app.payload["rejected_candidates"]):
             pm = self.mk_message("ModelApplicability", pname, "predict",
@@ -75,7 +82,19 @@ class AgentRuntime:
         prov = self._dispatch_collect(m, "provenance_done")
         m = self.mk_message(prov.sender, "Report", "render", prov.payload, prov.message_id)
         rep = self._dispatch_collect(m, "report_done")
-        return rep.payload["report"]
+        report = rep.payload["report"]
+        if llm_route is not None:
+            report.setdefault("provenance", {})["llm_route_suggestion"] = llm_route
+        if "LLMCritic" in self._agents:
+            cm = self.mk_message("Report", "LLMCritic", "llm_review", {"report": report},
+                                 rep.message_id)
+            report.setdefault("provenance", {})["llm_critic_notes"] = \
+                self._dispatch_collect(cm, "llm_critic_notes").payload
+        if "LLMReport" in self._agents:
+            nm = self.mk_message("Report", "LLMReport", "llm_render", {"report": report},
+                                 rep.message_id)
+            report["narrative"] = self._dispatch_collect(nm, "llm_narrative").payload["narrative"]
+        return report
 
     def export_outputs(self, out_dir: str, report: dict) -> None:
         d = Path(out_dir)
@@ -85,3 +104,20 @@ class AgentRuntime:
             json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
         (d / "provenance.json").write_text(
             json.dumps(report.get("provenance", {}), ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def run_workflow_from_text(self, text: str) -> dict:
+        """free-text(仅 llm_assisted+key):LLMInputInterpreter 解析 → run_workflow。"""
+        from praxis_virtualcell.core.exceptions import InputValidationError
+        from praxis_virtualcell.core.request import VirtualCellRequest
+        if "LLMInputInterpreter" not in self._agents:
+            raise InputValidationError("free-text 需 llm_assisted + DEEPSEEK_API_KEY")
+        m = self.mk_message("client", "LLMInputInterpreter", "parse_text", {"text": text})
+        self.dispatch_message(m)
+        parsed = self.bus.latest("request_parsed")
+        if parsed is None:
+            fail = self.bus.latest("llm_input_failed")
+            return {"request_id": None, "abstain": True, "reliability": "low",
+                    "prediction": None, "models_used": [], "models_rejected": [],
+                    "abstain_reasons": ["input_missing"], "critic_violations": [],
+                    "narrative": "", "provenance": {"llm_input_failed": fail.payload if fail else None}}
+        return self.run_workflow(VirtualCellRequest.from_dict(parsed.payload["request"]))
