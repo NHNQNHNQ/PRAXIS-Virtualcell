@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import itertools
+import os
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -41,3 +42,34 @@ class RuntimeConfig:
     mode: Mode = Mode.OFFLINE
     brains_root: str = str(_BRAINS_DEFAULT)
     llm_enabled: bool = False  # 仅当 mode=llm_assisted 且有可用 key 时才 True
+    deepseek_api_key: str = ""
+    deepseek_base_url: str = "https://api.deepseek.com"
+    deepseek_model: str = "deepseek-chat"
+
+    @classmethod
+    def from_env(cls, *, env_path: str = ".env") -> "RuntimeConfig":
+        load_env(env_path)
+        mode = (Mode.LLM_ASSISTED
+                if os.environ.get("PRAXIS_VIRTUALCELL_MODE") == "llm_assisted"
+                else Mode.OFFLINE)
+        key = os.environ.get("DEEPSEEK_API_KEY", "")
+        return cls(
+            mode=mode,
+            deepseek_api_key=key,
+            deepseek_base_url=os.environ.get("PRAXIS_VC_LLM_BASE_URL", "https://api.deepseek.com"),
+            deepseek_model=os.environ.get("PRAXIS_VC_LLM_MODEL", "deepseek-chat"),
+            llm_enabled=(mode is Mode.LLM_ASSISTED and bool(key)),
+        )
+
+
+def load_env(path: str = ".env") -> None:
+    """读 .env 的 K=V 注入 os.environ(已存在的不覆盖;无文件 noop)。无新依赖。"""
+    p = Path(path)
+    if not p.is_file():
+        return
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        os.environ.setdefault(k.strip(), v.strip())
