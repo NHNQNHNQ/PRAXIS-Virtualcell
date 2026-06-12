@@ -10,8 +10,8 @@
 ## 1. 现状(recon 实测)
 - donor norman ckpt(8):latent_additive / gnn_pert / decoder_only / cpa_style / linear_additive / pretrained_backbone / tabular_transformer / mechanistic。
 - 4 base(latent/gnn/decoder/cpa)+ pretrained_backbone 的 `predict(ctx, pert)` 接口与 linear **完全相同**(`ctx.control` + `pert.meta['pert_emb']` → `forward` → `Prediction.mean`)→ Week 4a `donor_bridge` 可直接泛化。
-- 各 base anchor ΔPearson(Norman test, max_cells=200 / seed=1):**latent 0.6922 / gnn 0.6918 / pretrained_backbone(scGPT) 0.6750 / linear 0.6639 / decoder 0.6636 / cpa 0.5673 / tabular 0.6922 / mechanistic 0.0**。
-- Coordinator ~0.70 来自 **latent+gnn 组合**(run_full_bench 注释「避免 linear/diffusion 拉低」)。
+- 各 base anchor ΔPearson(Norman test, max_cells=200 / seed=1,**Task1 实测权威值**):**cpa 0.6716 / decoder 0.6709 / gnn 0.6675 / linear 0.6639 / latent 0.6365 / pretrained_backbone(mock backbone,非真 scGPT) 0.6183 / mechanistic 0.0**。(⚠ 早期 recon 的 latent 0.6922 / cpa 0.5673 等串行有误,见 finding_w4b_multi_anchor)
+- Coordinator 组合:run_full_bench 用 latent+gnn,但实测 latent 偏弱 → **Task 3 实测 donor Coordinator 真值为准**,不预设 0.70。
 - Coordinator API:`from agents.subagent import SubAgent, SubAgentSpec`;`SubAgentSpec(name, bench_id, predictor_name)` + `SubAgent(spec, predictor)`;`Coordinator(subagents, *, router, ensembler, in_features, calibrators, experience_query, default_bench_id)`,是 `Predictor` 子类(`predict` 接口),`EvalAgent.evaluate(coord, ds)`。
 - **scGPT** 已集成在 donor `pretrained_backbone`(`BackboneAdapter`→`SCGPTAdapter`,ckpt `data/raw/pretrained/scgpt/`,norman anchor 0.6750)→ 走 donor_bridge,低风险。
 - **GEARS**:donor norman **无 GEARS ckpt**;`vcell` 环境有 `cell-gears 0.0.2` + `scgpt 0.2.4` 包 + `gears_aux.yaml` manifest → 包可用但需 ckpt/训练 → audit-first(见 [[p2b_external_models_blocked]])。

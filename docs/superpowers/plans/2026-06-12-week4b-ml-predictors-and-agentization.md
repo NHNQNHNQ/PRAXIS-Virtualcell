@@ -6,7 +6,7 @@
 
 **Spec:** [docs/superpowers/specs/2026-06-12-week4b-ml-predictors-and-agentization-design.md](../specs/2026-06-12-week4b-ml-predictors-and-agentization-design.md)
 
-**Context(recon 实测):** 5 predictor 接口与 linear 完全相同 → donor_bridge 直接泛化。各 base anchor:latent 0.6922 / gnn 0.6918 / scGPT 0.6750 / decoder 0.6636 / cpa 0.5673。Coordinator ~0.70 = latent+gnn 组合。Coordinator API:`SubAgent(SubAgentSpec(name,bench_id,predictor_name), predictor)` + `Coordinator(subs)`。scGPT=donor `pretrained_backbone`(已有 ckpt)。GEARS 无 norman ckpt(vcell 有 `cell-gears` 包)。
+**Context(Task1 实测权威值):** 5 predictor 接口与 linear 完全相同 → donor_bridge 直接泛化。各 base anchor:cpa 0.6716 / decoder 0.6709 / gnn 0.6675 / linear 0.6639 / latent 0.6365 / pretrained_backbone(mock) 0.6183(早期 recon 数字串行有误,见 finding_w4b_multi_anchor)。Coordinator 真值 Task 3 实测(不预设 0.70)。Coordinator API:`SubAgent(SubAgentSpec(name,bench_id,predictor_name), predictor)` + `Coordinator(subs)`。pretrained_backbone=mock backbone 非真 scGPT;真 scGPT/GEARS 均无 norman ckpt → Task 4 外部 audit。
 
 **远端约定(同 Week 4a):** donor 根 `/home/zkyd/data1/mzy/Virtual cell`(含空格引号);远端仓 `/home/zkyd/data1/mzy/PRAXIS-virtualcell`;`source /home/zkyd/software/miniconda3/etc/profile.d/conda.sh && conda activate virtualcell`;Mac commit+push → 远端 git pull;ml 测试标 `remote`(Mac skip);commit 前清 `._*`;ckpt stem 用 `runs/full_bench_20260521_060815/checkpoints/norman_2019/<name>`;W4A_ANCHOR 锚定值见 finding。
 
