@@ -1,24 +1,46 @@
-"""统一 LLM 接口。Week 2 只实现 disabled / mock;真 OpenAI/Anthropic 留 W3。
-无 key 时 enabled=False,complete() 返回 {disabled: True} 不抛 — 保证 offline 永不依赖 API。"""
+"""纯 DeepSeek LLM client(httpx,OpenAI 兼容 /chat/completions)。
+无 openai/anthropic SDK;无 key → disabled;complete() 不抛,失败返回 {error}。"""
 from __future__ import annotations
 
 from typing import Any
+
+import httpx
 
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 
 
 class LLMClient:
-    def __init__(self, *, enabled: bool, backend: str = "disabled") -> None:
+    def __init__(self, *, enabled: bool, api_key: str = "",
+                 base_url: str = "https://api.deepseek.com",
+                 model: str = "deepseek-chat", timeout: float = 60.0) -> None:
         self.enabled = enabled
-        self.backend = backend
+        self.api_key = api_key
+        self.base_url = base_url.rstrip("/")
+        self.model = model
+        self.timeout = timeout
 
-    def complete(self, messages: list[dict], schema: dict | None = None) -> dict[str, Any]:
+    def complete(self, messages: list[dict], *, json_mode: bool = False,
+                 max_tokens: int = 1024) -> dict[str, Any]:
         if not self.enabled:
-            return {"disabled": True, "content": None}
-        # W3 接真 backend;Week 2 mock:回显
-        return {"disabled": False, "content": {"echo": messages[-1].get("content")}}
+            return {"disabled": True, "content": None, "error": None}
+        body: dict[str, Any] = {"model": self.model, "messages": messages,
+                                "temperature": 0, "max_tokens": max_tokens}
+        if json_mode:
+            body["response_format"] = {"type": "json_object"}
+        try:
+            r = httpx.post(
+                f"{self.base_url}/chat/completions",
+                headers={"Authorization": f"Bearer {self.api_key}",
+                         "Content-Type": "application/json"},
+                json=body, timeout=self.timeout)
+            r.raise_for_status()
+            content = r.json()["choices"][0]["message"]["content"]
+            return {"disabled": False, "content": content, "error": None}
+        except Exception as e:  # noqa: BLE001 — 不抛,调用方 fallback
+            return {"disabled": False, "content": None, "error": str(e)}
 
 
 def make_llm_client(config: RuntimeConfig) -> LLMClient:
-    enabled = config.mode is Mode.LLM_ASSISTED and config.llm_enabled
-    return LLMClient(enabled=enabled, backend="mock" if enabled else "disabled")
+    enabled = config.mode is Mode.LLM_ASSISTED and bool(config.deepseek_api_key)
+    return LLMClient(enabled=enabled, api_key=config.deepseek_api_key,
+                     base_url=config.deepseek_base_url, model=config.deepseek_model)
