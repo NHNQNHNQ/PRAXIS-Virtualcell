@@ -1,0 +1,16 @@
+MockCPA:
+  supported_species: [human]
+  supported_modalities: [scRNA]
+  supported_tasks: [predict_delta_expression]
+  supported_perturbations: [gene, drug]
+MockGEARS:
+  supported_species: [human]
+  supported_modalities: [scRNA]
+  supported_tasks: [predict_delta_expression]
+  supported_perturbations: [gene, gene_combination]
+  reject_if: [gene_not_in_graph_vocabulary]
+MockLinear:
+  supported_species: [human]
+  supported_modalities: [scRNA]
+  supported_tasks: [predict_delta_expression]
+  supported_perturbations: [gene, drug]

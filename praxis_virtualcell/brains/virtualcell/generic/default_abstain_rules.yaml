@@ -1,0 +1,5 @@
+abstain_if:
+  - all_predictors_rejected
+  - species_not_supported
+  - core_predictor_failed
+  - model_disagreement_too_high

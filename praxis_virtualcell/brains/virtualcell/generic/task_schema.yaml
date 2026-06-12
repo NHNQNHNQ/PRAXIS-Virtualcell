@@ -1,0 +1,4 @@
+supported_tasks:
+  - predict_delta_expression
+supported_modalities:
+  - scRNA
