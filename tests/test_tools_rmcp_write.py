@@ -20,7 +20,7 @@ from praxis2.tools.rmcp_write import RMCPWriteCaseTool
 
 def test_rmcp_write_case_registered_in_chat_registry():
     """所有模式都应注册 RMCPWriteCase(SEAL 相位的核心 op)。"""
-    sel_disc = resolve_agent("enzyme", user_query="hi")
+    sel_disc = resolve_agent("virtualcell", user_query="hi")
     reg_disc = build_chat_registry(selection=sel_disc)
     names = [t["name"] for t in reg_disc.anthropic_tools()]
     assert "RMCPWriteCase" in names
@@ -35,7 +35,7 @@ def test_rmcp_write_case_persists_to_proposed_inbox(tmp_path: Path):
     """happy path:调 run() → 写入 brains/<slug>/memory/cases/_proposed/<stem>.md。"""
     t = RMCPWriteCaseTool(brains_root=tmp_path)
     r = asyncio.run(t.run({
-        "brain": "enzyme",
+        "brain": "virtualcell",
         "title": "TEM-1 β-lactamase 进化性 deep mutational scanning",
         "summary": "Stiffler 2015 在 TEM-1 β-lactamase 上做 DMS,发现纯化选择下的进化性...",
         "evidence": [
@@ -50,7 +50,7 @@ def test_rmcp_write_case_persists_to_proposed_inbox(tmp_path: Path):
     assert written.parent.name == "_proposed"
     assert written.parent.parent.name == "cases"
     assert written.parent.parent.parent.name == "memory"
-    assert written.parent.parent.parent.parent.name == "enzyme"
+    assert written.parent.parent.parent.parent.name == "virtualcell"
     # 文件内容含 frontmatter + body
     text = written.read_text(encoding="utf-8")
     assert text.startswith("---")
@@ -62,7 +62,7 @@ def test_rmcp_write_case_requires_doi(tmp_path: Path):
     """§安全规则:不杜撰 DOI/引用。evidence 必须含至少 1 个 doi(否则拒)。"""
     t = RMCPWriteCaseTool(brains_root=tmp_path)
     r = asyncio.run(t.run({
-        "brain": "enzyme",
+        "brain": "virtualcell",
         "title": "无来源",
         "summary": "凭空",
         "evidence": [],
@@ -87,7 +87,7 @@ def test_rmcp_write_case_idempotent_same_title_overwrites(tmp_path: Path):
     """同 brain + 同 title → 同 stem → 后写覆盖前写(便于模型迭代)。"""
     t = RMCPWriteCaseTool(brains_root=tmp_path)
     payload = {
-        "brain": "enzyme",
+        "brain": "virtualcell",
         "title": "TEM-1 DMS evolvability",
         "summary": "v1 summary",
         "evidence": [{"doi": "10.0/a"}],
@@ -113,11 +113,11 @@ def test_rmcp_write_case_missing_required_returns_error(tmp_path: Path):
                           "evidence": [{"doi": "10.0/a"}]}))
     assert not r.ok
     # 缺 title
-    r = asyncio.run(t.run({"brain": "enzyme", "summary": "y",
+    r = asyncio.run(t.run({"brain": "virtualcell", "summary": "y",
                           "evidence": [{"doi": "10.0/a"}]}))
     assert not r.ok
     # 缺 summary
-    r = asyncio.run(t.run({"brain": "enzyme", "title": "x",
+    r = asyncio.run(t.run({"brain": "virtualcell", "title": "x",
                           "evidence": [{"doi": "10.0/a"}]}))
     assert not r.ok
 
@@ -141,7 +141,7 @@ def test_rmcp_write_case_stem_safe_for_filesystem(tmp_path: Path):
     """title 含空格 / 中文 / 路径分隔符 / 不安全字符 → stem 安全化。"""
     t = RMCPWriteCaseTool(brains_root=tmp_path)
     r = asyncio.run(t.run({
-        "brain": "enzyme",
+        "brain": "virtualcell",
         "title": "TEM-1 / β-lactamase: deep mutational scanning ★ 2015",
         "summary": "x",
         "evidence": [{"doi": "10.0/a"}],

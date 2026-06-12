@@ -22,26 +22,9 @@ _TOKEN_RE = re.compile(r"[\w一-鿿]+")
 # B.3 校准:key lowercase 对齐 DISCIPLINE_SLUGS(真盘 namespace brain:<lower>);
 # v2.0.2:Synth carry → 13(真盘 _brains/synth/ 已落地 + rsync 到 brains/synth/)。
 _SLUG_KEYWORDS: dict[str, set[str]] = {
-    "cell":       {"细胞", "cell", "培养", "凋亡"},
-    "crispr":     {"crispr", "sgrna", "基因编辑", "脱靶", "cas9"},
-    # cryo 临时下线 (SOFTWARE-GAP-REPORT v2 §4.1):staging .53 上 cryo 全套
-    # (relion/cryosparc/motioncor2/topaz/ctffind/phenix/model_angelo) 均未装,
-    # 4 个 praxis-cryo-* env 也不存在,cryo 11 个 skill 全红。
-    # 关掉自动路由(空 keyword set),但保留 key 以维持 _SLUG_KEYWORDS 12 项不变式
-    # (test_correctness_slug_canonical.py)。显式 spec="cryo" 仍走 DISCIPLINE 分支。
-    # 重启自动路由的判据:host_inventory.json 出现 relion / motioncor2 binary。
-    "cryo":       set(),
-    "dock":       {"对接", "dock", "docking", "结合位点"},
-    "drug":       {"药物", "drug", "成药", "先导"},
-    "enzyme":     {"酶", "enzyme", "催化", "米氏", "动力学"},
-    "immuno":     {"免疫", "immuno", "抗体", "抗原"},
-    "md":         {"分子动力学", "md", "模拟", "force", "forcefield"},
-    "microbiome": {"微生物", "microbiome", "菌群", "16s"},
-    "omics":      {"组学", "omics", "转录组", "测序"},
-    "pharma":     {"药代", "pharma", "pk", "代谢"},
-    "protein":    {"蛋白", "protein", "折叠", "结构预测"},
-    "synth":      {"合成", "synth", "异源表达", "bgc", "antismash", "biosensor",
-                   "生物传感器", "cell-free", "codon", "golden-gate", "fba", "pathway"},
+    "virtualcell": {"虚拟细胞", "virtualcell", "扰动", "perturbation", "敲除",
+                    "转录组", "scrna", "生长", "必需基因", "essentiality",
+                    "跨物种", "abstain", "norman", "replogle"},
 }
 
 

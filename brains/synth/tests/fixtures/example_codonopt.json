@@ -1,9 +1,0 @@
-{
-  "task_id": "demo-il2-codon-opt-yeast",
-  "problem": {
-    "synth_task": "codon_opt",
-    "host_organism": "Saccharomyces cerevisiae",
-    "target_protein": "GFP (stand-in for human IL-2)",
-    "constraints": ["yeast codon table", "no BsaI/BsmBI/SapI", "GC 0.35-0.55", "preserve rare codons ~5%"]
-  }
-}

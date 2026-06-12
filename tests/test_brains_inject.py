@@ -11,14 +11,14 @@ from praxis2.core.prompt import (
 
 
 def test_assemble_returns_sections_with_common_and_hits_before_boundary():
-    # 注:build_fixture_brain("Cryo") 的 text 含 "Cryo"/"领域"(英文+汉字 fixture);
+    # 注:build_fixture_brain("Virtualcell") 的 text 含 "Virtualcell"/"领域"(英文+汉字 fixture);
     # 查询词须与 fixture 实际内容匹配(BM25-lite 不做中文分词,
     # "冷冻电镜 三维重构" 在 fixture 中无命中 → degraded)。
     # 以 M5 retrieve_brain 真实行为为准,使用可命中 fixture 的查询词。
-    sel = resolve_agent("Cryo", user_query="Cryo 领域")
+    sel = resolve_agent("Virtualcell", user_query="Virtualcell 领域")
     common = build_fixture_brain("_common")
-    cryo = build_fixture_brain("Cryo")
-    r = retrieve_brain(cryo, "Cryo 领域", top_k=2)
+    cryo = build_fixture_brain("Virtualcell")
+    r = retrieve_brain(cryo, "Virtualcell 领域", top_k=2)
     secs = assemble_agent_sections(
         sel, retrieval=r, common_docs=common,
         skill_summary="## skill: wf1\n- description: d",
@@ -32,7 +32,7 @@ def test_assemble_returns_sections_with_common_and_hits_before_boundary():
     assert "memory_index" in names
     assert names[-1] == SYSTEM_PROMPT_DYNAMIC_BOUNDARY
     blob = "\n".join(s.text for s in secs)
-    assert "Cryo" in blob or "领域" in blob
+    assert "Virtualcell" in blob or "领域" in blob
 
 
 def test_injects_into_agent_layer_of_build_effective_system_prompt():

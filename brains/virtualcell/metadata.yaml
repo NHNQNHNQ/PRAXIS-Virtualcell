@@ -1,0 +1,13 @@
+# virtualcell brain — 虚拟细胞多物种多任务预测。
+# helps_with=场景痛点 · delivers=交付物 · examples=试试这样问。
+helps_with:
+  - "想预测基因扰动/敲除后单细胞转录组怎么变(Norman / Replogle 类)"
+  - "想比较多个 perturbation predictor 并要可靠性(abstain)判断"
+  - "想把哺乳动物的方法迁到细菌/酵母,但担心跨物种误迁移"
+delivers:
+  - "Coordinator 编排的 perturbation 预测 + 不确定性 + abstain 决策"
+  - "跨物种适用性 / 负迁移告警(species-aware,Week 5 起)"
+  - "公开 benchmark 同表对比(Norman / Replogle / Sciplex / E.coli / yeast)"
+examples:
+  - "Norman 双基因扰动,Coordinator+abstain 给可靠预测"
+  - "这个 predictor 能用在 E. coli 上吗?"

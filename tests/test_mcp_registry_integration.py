@@ -14,7 +14,7 @@ def _mk_mcp_tool(server, remote):
 
 
 def test_registry_includes_mcp_tools():
-    sel = resolve_agent("enzyme", user_query="hi")
+    sel = resolve_agent("virtualcell", user_query="hi")
     mcp_tools = [_mk_mcp_tool("echo", "echo"), _mk_mcp_tool("echo", "add")]
     reg = build_chat_registry(selection=sel, mcp_tools=mcp_tools)
     names = [t["name"] for t in reg.anthropic_tools()]
@@ -25,7 +25,7 @@ def test_registry_includes_mcp_tools():
 
 def test_registry_no_mcp_tools_when_none():
     """不传 mcp_tools → 行为与 v0.16 完全一致(零回归)。"""
-    sel = resolve_agent("enzyme", user_query="hi")
+    sel = resolve_agent("virtualcell", user_query="hi")
     reg = build_chat_registry(selection=sel)
     names = [t["name"] for t in reg.anthropic_tools()]
     assert not any(n.startswith("mcp__") for n in names)
@@ -34,7 +34,7 @@ def test_registry_no_mcp_tools_when_none():
 
 def test_mcp_tool_registered_alongside_builtins():
     """MCP tool 与内建工具共存,命名前缀 mcp__ 天然不冲突。"""
-    sel = resolve_agent("enzyme", user_query="hi")
+    sel = resolve_agent("virtualcell", user_query="hi")
     mt = _mk_mcp_tool("x", "y")
     reg = build_chat_registry(selection=sel, mcp_tools=[mt])
     names = [t["name"] for t in reg.anthropic_tools()]

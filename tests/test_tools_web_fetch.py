@@ -26,7 +26,7 @@ from praxis2.tools.web_fetch import WebFetchTool
 
 
 def test_web_fetch_registered_in_chat_registry():
-    sel = resolve_agent("enzyme", user_query="hi")
+    sel = resolve_agent("virtualcell", user_query="hi")
     reg = build_chat_registry(selection=sel)
     assert "WebFetch" in [t["name"] for t in reg.anthropic_tools()]
 

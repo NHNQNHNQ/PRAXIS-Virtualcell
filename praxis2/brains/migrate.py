@@ -16,8 +16,7 @@ from praxis2.brains.store import BrainDoc
 # Synth 大脑真盘路径:/home/zkyd/data1/mzy/PRAXIS-Brains/_brains/synth/,
 # 已 rsync 到 brains/synth/(22 cases / 44 rules / 13 workflows / prompts 完整)。
 DISCIPLINE_SLUGS: list[str] = [
-    "cell", "crispr", "cryo", "dock", "drug", "enzyme",
-    "immuno", "md", "microbiome", "omics", "pharma", "protein", "synth",
+    "virtualcell",
 ]
 
 # v1 §2.1 固定结构对应的四合并接口 kind
@@ -27,19 +26,7 @@ THREE_LAYER_DIRS = ("cases", "neg_cases", "rules", "skills")
 # 与 T8 _SLUG_KEYWORDS 同口径,系 T5↔T11 跨任务一致性校准,见 plan T11 carry)。
 # B.3 校准:key lowercase 对齐 DISCIPLINE_SLUGS;模块顶层定义便于不变式 import。
 _SLUG_CASE_HINTS: dict[str, str] = {
-    "cell":       "细胞 培养 凋亡 标准流程",
-    "crispr":     "CRISPR cas9 基因编辑 脱靶 标准流程",
-    "cryo":       "冷冻电镜 cryo 三维重构 颗粒 标准流程",
-    "dock":       "对接 docking 结合位点 标准流程",
-    "drug":       "药物 成药 先导 标准流程",
-    "enzyme":     "酶 enzyme 催化 米氏 动力学 标准流程",
-    "immuno":     "免疫 抗体 抗原 标准流程",
-    "md":         "分子动力学 MD 模拟 force forcefield 标准流程",
-    "microbiome": "微生物 菌群 16S 标准流程",
-    "omics":      "组学 转录组 测序 标准流程",
-    "pharma":     "药代 PK 代谢 标准流程",
-    "protein":    "蛋白 折叠 结构预测 标准流程",
-    "synth":      "合成 异源表达 BGC 生物传感器 cell-free FBA 标准流程",
+    "virtualcell": "虚拟细胞 扰动 敲除 转录组 生长 必需基因 跨物种 abstain 预测 标准流程",
 }
 
 

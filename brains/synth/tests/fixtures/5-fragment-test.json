@@ -1,7 +1,0 @@
-[
-  {"id": "P1_promoter",  "sequence": "AAACATGCAAGCTAGGCATGCATCGATCGAACTAG",      "overhang_5": "AATG", "overhang_3": "AGCC", "kind": "part"},
-  {"id": "P2_RBS",       "sequence": "GACGTACTGACTGTACGTACTGACTGTACGTACTAGT",      "overhang_5": "AGCC", "overhang_3": "TACT", "kind": "part"},
-  {"id": "P3_CDS_GFP",   "sequence": "ATGGTGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGGTGCCCATCCTGGTCGAGCTGGACGGCGACGTAAACGGCCACAAGTTCAGCGTGT", "overhang_5": "TACT", "overhang_3": "GCTT", "kind": "part"},
-  {"id": "P4_terminator","sequence": "AACTCGAGTAAGGATCTCCAGGCATCAAATAAAACGAAAGGCTCAGTCGAAAGACTGGGCC", "overhang_5": "GCTT", "overhang_3": "CCGA", "kind": "part"},
-  {"id": "P5_backbone",  "sequence": "AGCATGCAATCGATCGTACGTACGCGCATGCATGCATCGTACGTACGTACGTACGT",     "overhang_5": "CCGA", "overhang_3": "AATG", "kind": "backbone"}
-]

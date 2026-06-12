@@ -253,7 +253,7 @@ async def test_agents_profile_returns_13(files_deps):
     )
     assert status == 200
     assert "profiles" in body
-    assert len(body["profiles"]) == 13
+    assert len(body["profiles"]) == 1
 
 
 async def test_agents_profile_has_full_shape(files_deps):

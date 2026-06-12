@@ -1,8 +1,0 @@
-{
-  "task_id": "demo-toggle-switch-ecoli",
-  "problem": {
-    "synth_task": "circuit",
-    "host_organism": "E. coli",
-    "constraints": ["bistable", "switchable by IPTG and aTc", "single-cell readout (rule 07)"]
-  }
-}

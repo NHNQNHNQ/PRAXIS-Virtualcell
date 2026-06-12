@@ -15,13 +15,10 @@ from scripts.migrate_brains import (
 )
 
 
-def test_legacy_slugs_constant_lists_13():
-    # v2.0.2:Synth 真盘已落地(brains/synth/ + _brains/synth/)→ 13 学科
-    assert len(_LEGACY_SLUGS) == 13
-    assert _LEGACY_SLUGS == [
-        "cell", "crispr", "cryo", "dock", "drug", "enzyme",
-        "immuno", "md", "microbiome", "omics", "pharma", "protein", "synth",
-    ]
+def test_legacy_slugs_constant_lists_virtualcell():
+    # PRAXIS-virtualcell:_LEGACY_SLUGS 是 DISCIPLINE_SLUGS 的 alias → 单一 virtualcell
+    assert len(_LEGACY_SLUGS) == 1
+    assert _LEGACY_SLUGS == ["virtualcell"]
 
 
 async def test_migrate_all_smoke_with_synthetic_root(tmp_path):

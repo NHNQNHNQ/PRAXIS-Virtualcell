@@ -4,12 +4,12 @@ from __future__ import annotations
 from praxis2.brains.migrate import DISCIPLINE_SLUGS
 
 
-def test_load_all_profiles_returns_13_slugs():
+def test_load_all_profiles_returns_expected_slugs():
     from praxis2.brains.profile import load_all_profiles, reset_cache_for_tests
     reset_cache_for_tests()
     profiles = load_all_profiles()
     assert set(profiles.keys()) == set(DISCIPLINE_SLUGS)
-    assert len(profiles) == 13
+    assert len(profiles) == 1
 
 
 def test_profile_has_required_fields():

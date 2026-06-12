@@ -15,15 +15,11 @@ from praxis2.brains.store import (
 from praxis2.store.memory import InMemoryStore
 
 
-def test_thirteen_discipline_slugs_lowercase_match_real_disk():
-    # v2.0.2:Synth carry 落地(brains/synth/ + _brains/synth/)→ 13 lowercase 目录。
-    # 与 /Volumes/T7/PRAXIS-Brains/_brains/ 目录精确对齐
+def test_discipline_slugs_lowercase_single_virtualcell():
+    # PRAXIS-virtualcell:13 通用学科脑已移除,改为单一 virtualcell 大脑。
     # (单源不变式由 tests/test_correctness_slug_canonical.py 锁 4 处)
-    assert DISCIPLINE_SLUGS == [
-        "cell", "crispr", "cryo", "dock", "drug", "enzyme",
-        "immuno", "md", "microbiome", "omics", "pharma", "protein", "synth",
-    ]
-    assert len(DISCIPLINE_SLUGS) == 13
+    assert DISCIPLINE_SLUGS == ["virtualcell"]
+    assert len(DISCIPLINE_SLUGS) == 1
 
 
 def test_three_layer_structure_contract_matches_v1():

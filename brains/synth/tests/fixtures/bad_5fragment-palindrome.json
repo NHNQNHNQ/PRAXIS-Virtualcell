@@ -1,6 +1,0 @@
-[
-  {"id": "P1", "sequence": "AAAAAAAAACGTACGTACGT", "overhang_5": "AATG", "overhang_3": "TGCA", "kind": "part"},
-  {"id": "P2", "sequence": "GGGGCCCCAAAATTTTGCGC", "overhang_5": "TGCA", "overhang_3": "GATC", "kind": "part"},
-  {"id": "P3", "sequence": "ATATATATGCGCGCGCGCGC", "overhang_5": "GATC", "overhang_3": "CATG", "kind": "part"},
-  {"id": "P4", "sequence": "TTTTAAAAGGCCGGCCAATT", "overhang_5": "CATG", "overhang_3": "AATG", "kind": "backbone"}
-]

@@ -19,7 +19,7 @@ def _run(coro):
 
 def test_skill_exec_registered_in_chat_registry():
     """所有模式都应有 SkillExec(包括 discipline)。"""
-    sel_disc = resolve_agent("dock", user_query="hi")
+    sel_disc = resolve_agent("virtualcell", user_query="hi")
     reg_disc = build_chat_registry(selection=sel_disc)
     names = [t["name"] for t in reg_disc.anthropic_tools()]
     assert "SkillExec" in names
@@ -38,17 +38,17 @@ def test_skill_exec_returns_to_execute_for_real_skill():
     """对真存在的 skill 返回 execution_plan + ssh 命令模板 + SOP 摘要。"""
     t = SkillExecTool()
     r = asyncio.run(t.run({
-        "name": "vina_gnina_dock",
-        "brain": "dock",
-        "inputs": {"receptor_pdb": "rec.pdb", "ligand_smiles": "CCO"},
+        "name": "perturbation_predict",
+        "brain": "virtualcell",
+        "inputs": {"perturbation": "GENE_KO", "cell_type": "K562"},
     }))
     assert r.ok
     plan = r.value["execution_plan"]
-    assert plan["brain"] == "dock"
-    assert plan["skill"] == "vina_gnina_dock"
-    assert plan["host_env"] == "praxis-dock"
+    assert plan["brain"] == "virtualcell"
+    assert plan["skill"] == "perturbation_predict"
+    assert plan["host_env"] == "praxis-virtualcell"
     assert r.value["sop_excerpt"]  # SOP 抓到了
-    assert "conda activate praxis-dock" in r.value["ssh_command_template"]
+    assert "conda activate praxis-virtualcell" in r.value["ssh_command_template"]
 
 
 def test_skill_exec_unknown_skill_returns_error():
@@ -61,9 +61,9 @@ def test_skill_exec_unknown_skill_returns_error():
 def test_skill_exec_finds_skill_without_brain_hint():
     """传 name 不传 brain 也能找到(全 brain 搜)。"""
     t = SkillExecTool()
-    r = asyncio.run(t.run({"name": "cellpose-segment"}))
+    r = asyncio.run(t.run({"name": "perturbation_predict"}))
     assert r.ok
-    assert r.value["execution_plan"]["brain"] == "cell"
+    assert r.value["execution_plan"]["brain"] == "virtualcell"
 
 
 def test_skill_exec_rmcp_op_declared():
@@ -78,13 +78,13 @@ def test_skill_exec_degrades_when_no_ssh_env(monkeypatch):
         monkeypatch.delenv(k, raising=False)
     t = SkillExecTool()
     r = asyncio.run(t.run({
-        "name": "pyrosetta-stability-scan", "brain": "enzyme",
-        "inputs": {"positions": [12], "simulate": True},
+        "name": "perturbation_predict", "brain": "virtualcell",
+        "inputs": {"perturbation": "GENE_KO", "simulate": True},
     }))
     assert r.ok
     assert r.value["exec_via"] == "manual (no auto-exec)"
     assert "PRAXIS_SKILL_SSH_HOST" in r.value["why_not_executed"]
-    assert "conda activate antibody" in r.value["ssh_command_template"]
+    assert "conda activate praxis-virtualcell" in r.value["ssh_command_template"]
 
 
 def test_skill_exec_input_schema_complete():
@@ -144,8 +144,8 @@ def test_skill_exec_real_ssh_when_env_set(monkeypatch):
 
     t = mod.SkillExecTool()
     r = _aio.run(t.run({
-        "name": "boltz_structure_predict",
-        "brain": "protein",
+        "name": "perturbation_predict",
+        "brain": "virtualcell",
         "inputs": {"seed": 42, "simulate": True},
     }))
     assert r.ok, f"应真 exec 成功,得到 error={r.error}"
@@ -174,8 +174,8 @@ def test_skill_exec_ssh_exec_nonzero_rc_returns_error(monkeypatch):
 
     t = mod.SkillExecTool()
     r = _aio.run(t.run({
-        "name": "boltz_structure_predict",
-        "brain": "protein",
+        "name": "perturbation_predict",
+        "brain": "virtualcell",
         "inputs": {"simulate": True},
     }))
     assert not r.ok
@@ -208,8 +208,8 @@ def test_skill_exec_ssh_command_quotes_run_py_path_with_spaces(monkeypatch):
 
     t = mod.SkillExecTool()
     _ = _aio.run(t.run({
-        "name": "boltz_structure_predict",
-        "brain": "protein",
+        "name": "perturbation_predict",
+        "brain": "virtualcell",
         "inputs": {},
     }))
     cmd = captured_remote_cmd[0]
@@ -242,8 +242,8 @@ def test_skill_exec_ssh_exec_stdout_non_json_returns_error(monkeypatch):
 
     t = mod.SkillExecTool()
     r = _aio.run(t.run({
-        "name": "boltz_structure_predict",
-        "brain": "protein",
+        "name": "perturbation_predict",
+        "brain": "virtualcell",
         "inputs": {},
     }))
     assert not r.ok

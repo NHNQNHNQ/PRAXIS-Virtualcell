@@ -1,9 +1,0 @@
-{
-  "task_id": "demo-txtl-gfp-prototyping",
-  "problem": {
-    "synth_task": "cell_free",
-    "host_organism": "cell_free",
-    "target_protein": "GFP",
-    "constraints": ["TX-TL E. coli extract", "Mg in 8-15 mM optimal range", "real-time GFP monitor"]
-  }
-}

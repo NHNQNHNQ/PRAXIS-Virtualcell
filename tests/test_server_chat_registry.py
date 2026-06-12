@@ -47,7 +47,7 @@ def test_default_tools_non_empty_for_anthropic_api() -> None:
 
 def test_discipline_mode_excludes_agent_tool() -> None:
     """§7.5.4:学科 agent 禁用 AgentTool 防递归深度爆炸。"""
-    sel = resolve_agent("cell", user_query="细胞实验")
+    sel = resolve_agent("virtualcell", user_query="基因扰动预测")
     assert sel.is_discipline is True
     reg = build_chat_registry(selection=sel)
     assert "AgentTool" not in _names(reg)
@@ -74,7 +74,7 @@ def test_yourself_mode_includes_agent_tool() -> None:
 
 def test_one_above_all_route_to_discipline_excludes_agent_tool() -> None:
     """OAA 命中学科(is_discipline=True)按学科 agent 处理,禁用 AgentTool。"""
-    sel = resolve_agent("one-above-all", user_query="CRISPR sgRNA 设计脱靶")
+    sel = resolve_agent("one-above-all", user_query="Norman perturbation 预测")
     assert sel.is_discipline is True
     reg = build_chat_registry(selection=sel)
     assert "AgentTool" not in _names(reg)

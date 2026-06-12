@@ -11,8 +11,8 @@ from praxis2.brains.system_prompt import build_chat_system_prompt
 
 def test_build_chat_system_prompt_returns_non_empty_for_discipline_agent():
     """enzyme agent + 酶相关 query → system 应非空,且首块带 cache_control(静态前缀)。"""
-    sel = resolve_agent("enzyme", user_query="我要做酶热稳定性 ddG 扫描")
-    assert sel.brain_slugs == ["_common", "enzyme"]
+    sel = resolve_agent("virtualcell", user_query="我要预测基因扰动后的转录组")
+    assert sel.brain_slugs == ["_common", "virtualcell"]
     out = build_chat_system_prompt(sel, "我要做酶热稳定性 ddG 扫描")
     assert out, "system prompt 不能为空 — 否则模型不知何时调工具(PLAN §11 退回)"
     # 静态前缀块带 ephemeral cache
@@ -25,7 +25,7 @@ def test_build_chat_system_prompt_returns_non_empty_for_discipline_agent():
 def test_build_chat_system_prompt_filters_skills_by_host_env():
     """主路径过滤:只入 host_env 存在于 staging conda_envs 的 skill;
     断言生成的 skill_summary 不包含 cryo skill(已 status:not-deployed 且无 cryo env)。"""
-    sel = resolve_agent("protein", user_query="预测蛋白结构")
+    sel = resolve_agent("virtualcell", user_query="预测基因扰动")
     out = build_chat_system_prompt(sel, "预测蛋白结构")
     flat = "\n".join(b.get("text", "") for b in out)
     # cryo skill 都标了 status:not-deployed,且 host_env 是 praxis-cryo-* (不在 staging)

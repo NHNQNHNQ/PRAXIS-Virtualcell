@@ -54,14 +54,14 @@ def _settings():
 @respx.mock
 async def test_same_query_path_retrieve_inject_then_execute_allowed():
     # §7.5.0 末句:所有模式共用同一 query()/prompt 路径,不产生第二条代码路径
-    sel = resolve_agent("Cryo", user_query="冷冻电镜 三维重构")
+    sel = resolve_agent("Virtualcell", user_query="冷冻电镜 三维重构")
     st = State()
     rf = retrieve_first(
         st,
         sel,
-        domain_docs=build_fixture_brain("Cryo"),
+        domain_docs=build_fixture_brain("Virtualcell"),
         common_docs=build_fixture_brain("_common"),
-        user_query="冷冻电镜 三维重构怎么做",
+        user_query="Virtualcell 领域",
         skill_summary="## skill: wf1\n- description: 重构流程",
         memory_text="- [Rule](rmcp.md) — RMCP",
     )
@@ -70,7 +70,7 @@ async def test_same_query_path_retrieve_inject_then_execute_allowed():
     eff = build_effective_system_prompt(agent=rf.sections)
     api_system = to_api_system(eff)
     blob = " ".join(b["text"] for b in api_system)
-    assert "冷冻电镜" in blob or "三维重构" in blob
+    assert "Virtualcell" in blob or "领域" in blob
     assert "RMCP" in blob
 
     # 跳过 AF/PLAN 工具调用直接推进 EXECUTE 以测 skill 放行

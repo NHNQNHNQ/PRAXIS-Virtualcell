@@ -156,35 +156,8 @@ async def _append_turn_entries(
 # 与 resolve_agent(spec) 接受的 spec 完全一致(否则 FE 点击 sidebar 会 ValueError)。
 # E501 noqa:视觉对齐 emoji/name/desc 单行,可读性优先于 100 字限制(13 项扫一眼即可)。
 _AGENT_META: dict[str, dict[str, object]] = {
-    "cell":       {"name": "Cell 细胞",      "emoji": "🧫", "desc": "细胞培养 / 凋亡 / 形态学 / scRNA",  # noqa: E501
-                   "examples": ["细胞培养 SOP 怎么写?", "用 cellpose 分割我的 IF 图"]},
-    "crispr":     {"name": "CRISPR 基因编辑", "emoji": "🧬", "desc": "sgRNA 设计 / 脱靶预测 / Cas9 编辑",  # noqa: E501
-                   "examples": ["TP53 的 sgRNA 三条候选", "评估某条 sgRNA 的脱靶风险"]},
-    "cryo":       {"name": "Cryo-EM 冷冻电镜", "emoji": "❄️", "desc": "RELION / cryoSPARC / 颗粒挑选(staging 缺工具,显式调可走)",  # noqa: E501
-                   "examples": ["3D 重构典型参数", "颗粒挑选用什么阈值?"]},
-    "dock":       {"name": "Dock 对接",       "emoji": "🔗", "desc": "AutoDock Vina / Boltz / 结合位点",  # noqa: E501
-                   "examples": ["把这条配体对到 6LU7", "比较两个口袋的 docking score"]},
-    "drug":       {"name": "Drug 药物设计",   "emoji": "💊", "desc": "ADMET / REINVENT / 先导化合物",  # noqa: E501
-                   "examples": ["这个 SMILES 的 ADMET", "用 REINVENT 生成 kinase 候选"]},
-    "enzyme":     {"name": "Enzyme 酶催化",   "emoji": "🧪", "desc": "酶动力学 / 米氏方程 / 结构-功能",  # noqa: E501
-                   "examples": ["实测 KM/Vmax 拟合", "ESM 预测此酶变体活性"]},
-    "immuno":     {"name": "Immuno 免疫",     "emoji": "🛡", "desc": "MHC 预测 / 抗体配对 / TCR",
-                   "examples": ["MHC-I 9-mer 预测", "用 ANARCI 给抗体编号"]},
-    "md":         {"name": "MD 分子动力学",   "emoji": "⚛️", "desc": "GROMACS / OpenMM / 自由能",
-                   "examples": ["10 ns 平衡需要多久?", "AMBER ff14SB 跑 100 ns 蛋白"]},
-    "microbiome": {"name": "Microbiome 微生物组", "emoji": "🦠", "desc": "16S / kraken2 / 菌群 alpha/beta",  # noqa: E501
-                   "examples": ["DADA2 vs QIIME2 怎么选?", "用 humann 走功能注释"]},
-    "omics":      {"name": "Omics 组学",      "emoji": "📊", "desc": "scRNA / 转录组 / 多组学整合",  # noqa: E501
-                   "examples": ["scanpy 标准 QC 流程", "MOFA 整合 RNA+ATAC"]},
-    "pharma":     {"name": "Pharma 药代",     "emoji": "💉", "desc": "PK/PD / 代谢通路 / FDA 检索",
-                   "examples": ["一房室 IV 推注模型", "查 atorvastatin 的 FDA AE 报告"]},
-    "protein":    {"name": "Protein 蛋白",    "emoji": "🧷", "desc": "ESMFold / AlphaFold / Boltz / 结构搜索",  # noqa: E501
-                   "examples": ["给我这个序列的 ESMFold", "用 foldseek 找类似结构"]},
-    # v2.0.2:Synth 真盘已落地(_brains/synth/ + brains/synth/),22 cases / 44 rules / 13 workflows
-    # → DISCIPLINE_SLUGS 自身升 12→13,resolve_agent('synth') 真路由到 synth brain。
-    "synth":      {"name": "Synth 合成",      "emoji": "⚗️", "desc": "合成生物学 / 异源表达 / BGC 挖掘 / Cell-free / FBA",  # noqa: E501
-                   "examples": ["把这条 pathway 转到 E.coli 怎么走?", "用 antiSMASH 挖 BGC",
-                                "Golden-Gate 引物对设计", "FBA 多目标稳态分析"]},
+    "virtualcell": {"name": "VirtualCell 虚拟细胞", "emoji": "🧫", "desc": "扰动响应预测 / 跨物种 / abstain 可靠性 / Coordinator 编排",  # noqa: E501
+                   "examples": ["Norman 双基因扰动预测", "这个 predictor 能用在 E. coli 上吗?", "Coordinator+abstain 给可靠预测"]},
 }
 # v2.0.2:Synth 已落地(brains/synth/),DISCIPLINE_SLUGS 自身已含 synth → 13 项。
 # 不再需要 + ["synth"] 的拼接。

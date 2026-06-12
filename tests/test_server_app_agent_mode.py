@@ -33,7 +33,7 @@ async def test_chat_stream_with_discipline_agent_returns_sse(monkeypatch) -> Non
     async with httpx.AsyncClient(transport=transport, base_url="http://t") as c:
         r = await c.post(
             "/api/chat-stream",
-            json={"message": "细胞实验帮我看", "agent": "cell", "session_id": "s1"},
+            json={"message": "基因扰动帮我看", "agent": "virtualcell", "session_id": "s1"},
             headers={"Cookie": cookie},
         )
         assert r.status_code == 200

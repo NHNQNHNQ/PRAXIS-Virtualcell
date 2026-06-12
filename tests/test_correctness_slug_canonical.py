@@ -7,13 +7,14 @@ reviewer M5 C1+C2:DISCIPLINE_SLUGS / _LEGACY_SLUGS / _SLUG_KEYWORDS / _SLUG_CASE
 """
 
 
-def test_disciplines_are_lowercase_and_13():
+def test_disciplines_are_lowercase_and_single_virtualcell():
+    # PRAXIS-virtualcell:13 个通用学科脑已移除,改为单一 virtualcell 大脑。
     from praxis2.brains.migrate import DISCIPLINE_SLUGS
-    assert len(DISCIPLINE_SLUGS) == 13
+    assert len(DISCIPLINE_SLUGS) == 1
     assert all(s == s.lower() for s in DISCIPLINE_SLUGS), \
-        f"slug 必须 lowercase(真盘对齐),实际:{DISCIPLINE_SLUGS}"
-    assert "synth" in DISCIPLINE_SLUGS, \
-        "Synth v2.0.2 已落地(brains/synth/ + _brains/synth/),必须在 13 学科内"
+        f"slug 必须 lowercase,实际:{DISCIPLINE_SLUGS}"
+    assert "virtualcell" in DISCIPLINE_SLUGS, \
+        "PRAXIS-virtualcell 单一大脑必须是 virtualcell"
 
 
 def test_slug_constants_aligned_across_modules():
@@ -33,9 +34,9 @@ def test_resolve_agent_normalizes_input_case():
     """resolve_agent('Cryo')、'CRYO'、'cryo' 全部命中同一 slug,
     且 brain_slugs 内统一 lowercase(对齐真盘 namespace brain:cryo)。"""
     from praxis2.agents.loader import resolve_agent
-    sel_lower = resolve_agent("cryo", user_query="冷冻电镜")
-    sel_title = resolve_agent("Cryo", user_query="冷冻电镜")
-    sel_upper = resolve_agent("CRYO", user_query="冷冻电镜")
+    sel_lower = resolve_agent("virtualcell", user_query="扰动")
+    sel_title = resolve_agent("Virtualcell", user_query="扰动")
+    sel_upper = resolve_agent("VIRTUALCELL", user_query="扰动")
     # 三种大小写输入应导出同一 brain_slugs(全 lowercase)
     assert sel_lower.brain_slugs == sel_title.brain_slugs == sel_upper.brain_slugs
-    assert sel_lower.brain_slugs == ["_common", "cryo"]
+    assert sel_lower.brain_slugs == ["_common", "virtualcell"]

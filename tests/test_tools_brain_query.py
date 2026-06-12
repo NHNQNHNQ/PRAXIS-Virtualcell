@@ -20,7 +20,7 @@ from praxis2.tools.brain_query import BrainQueryTool
 
 def test_brain_query_registered_in_chat_registry():
     """所有模式都应注册 BrainQuery(包括 discipline:学科 agent 必备的检索工具)。"""
-    sel_disc = resolve_agent("enzyme", user_query="hi")
+    sel_disc = resolve_agent("virtualcell", user_query="hi")
     reg_disc = build_chat_registry(selection=sel_disc)
     names = [t["name"] for t in reg_disc.anthropic_tools()]
     assert "BrainQuery" in names
@@ -31,23 +31,22 @@ def test_brain_query_registered_in_chat_registry():
     assert "BrainQuery" in names_gen
 
 
-def test_brain_query_returns_hits_for_stiffler_2015():
-    """e2e 真盘:enzyme brain 查 Stiffler 2015 应命中 BETA-LACTAMASE-stiffler-2015-cell.md。"""
+def test_brain_query_returns_hits_for_virtualcell_seed():
+    """virtualcell brain 查扰动种子内容 → 命中 vcell-001 bootstrap case。"""
     t = BrainQueryTool()
     r = asyncio.run(t.run({
-        "brain": "enzyme",
-        "query": "Stiffler 2015 β-lactamase deep mutational scanning",
+        "brain": "virtualcell",
+        "query": "扰动 perturbation 转录组 预测 Norman",
         "top_k": 3,
     }))
     assert r.ok
     v = r.value
-    assert v["brain"] == "enzyme"
+    assert v["brain"] == "virtualcell"
     assert v["degraded_to_bare"] is False
     assert len(v["hits"]) >= 1
     stems = [h["stem"] for h in v["hits"]]
-    # 真盘文件 stem(去 .md):BETA-LACTAMASE-stiffler-2015-cell
-    assert any("stiffler" in s.lower() for s in stems), f"应命中 Stiffler case,得到 {stems}"
-    # 命中 case 的 excerpt 应含证据(doi 或 pmid 或关键词)
+    # virtualcell 种子 case stem:vcell-001-bootstrap
+    assert any("vcell" in s.lower() for s in stems), f"应命中 vcell 种子 case,得到 {stems}"
     top_hit = v["hits"][0]
     assert top_hit["kind"] in ("cases", "rules", "skills", "neg_cases")
     assert top_hit["excerpt"]
@@ -56,7 +55,7 @@ def test_brain_query_returns_hits_for_stiffler_2015():
 def test_brain_query_top_k_caps_hits():
     t = BrainQueryTool()
     r = asyncio.run(t.run({
-        "brain": "enzyme",
+        "brain": "virtualcell",
         "query": "酶 催化 动力学 文献",
         "top_k": 2,
     }))
@@ -78,7 +77,7 @@ def test_brain_query_missing_required_returns_error():
     t = BrainQueryTool()
     r1 = asyncio.run(t.run({"query": "x"}))  # 无 brain
     assert not r1.ok
-    r2 = asyncio.run(t.run({"brain": "enzyme"}))  # 无 query
+    r2 = asyncio.run(t.run({"brain": "virtualcell"}))  # 无 query
     assert not r2.ok
 
 
@@ -86,7 +85,7 @@ def test_brain_query_no_overlap_degrades_to_bare_explicit():
     """检索 0 命中 → degraded_to_bare=True + reason 显式记录,不静默返空(§3 step 2.5)。"""
     t = BrainQueryTool()
     r = asyncio.run(t.run({
-        "brain": "enzyme",
+        "brain": "virtualcell",
         "query": "完全无关的烹饪食谱内容 zzzzzzz_no_overlap",
         "top_k": 3,
     }))
@@ -100,8 +99,8 @@ def test_brain_query_kinds_filter():
     """kinds 过滤:仅检索指定类(cases / rules / skills / neg_cases)。"""
     t = BrainQueryTool()
     r = asyncio.run(t.run({
-        "brain": "enzyme",
-        "query": "酶 催化 动力学",
+        "brain": "virtualcell",
+        "query": "扰动 跨物种 benchmark",
         "top_k": 5,
         "kinds": ["rules"],
     }))

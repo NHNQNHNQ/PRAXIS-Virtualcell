@@ -4,12 +4,12 @@ from praxis2.agents.loader import AgentMode, AgentSelection, resolve_agent
 
 
 def test_discipline_mode_selects_that_slug_plus_common():
-    # B.3:历史 TitleCase 入口 "Cryo" 经 resolve_agent 内部 .lower() 标准化为
-    # "cryo",与真盘 namespace brain:cryo 对齐(reviewer M5 C1+C2)
-    sel = resolve_agent("Cryo", user_query="冷冻电镜重构")
+    # 历史 TitleCase 入口经 resolve_agent 内部 .lower() 标准化为 lowercase slug,
+    # 与 namespace brain:virtualcell 对齐(PRAXIS-virtualcell 单一学科)。
+    sel = resolve_agent("Virtualcell", user_query="基因扰动预测")
     assert isinstance(sel, AgentSelection)
     assert sel.mode is AgentMode.DISCIPLINE
-    assert sel.brain_slugs == ["_common", "cryo"]
+    assert sel.brain_slugs == ["_common", "virtualcell"]
     assert sel.is_discipline is True   # §7.5.4 → disallowed AgentTool
     assert sel.readonly is False
 
@@ -31,15 +31,15 @@ def test_one_above_all_routes_by_intent_and_records_reason():
     rec: list[dict] = []
     sel = resolve_agent(
         "one-above-all",
-        user_query="CRISPR 基因编辑 sgRNA 设计脱靶",
+        user_query="Norman perturbation 基因扰动 转录组",
         transcript_sink=rec.append,
     )
     assert sel.mode is AgentMode.ONE_ABOVE_ALL
-    assert "crispr" in sel.brain_slugs  # B.3:lowercase 单源
+    assert "virtualcell" in sel.brain_slugs  # lowercase 单源
     assert sel.max_turns is not None and sel.max_turns <= 5  # §7.5.4
     # §12:路由依据写 transcript(可复盘为何这么选)
     assert rec and rec[0]["type"] == "agent_route"
-    assert rec[0]["chosen"] == "crispr" and "score" in rec[0]
+    assert rec[0]["chosen"] == "virtualcell" and "score" in rec[0]
 
 
 def test_one_above_all_falls_back_to_general_when_unsure():
@@ -56,12 +56,12 @@ def test_one_above_all_falls_back_to_general_when_unsure():
 def test_yourself_synthesizes_readonly_slice_from_disciplines():
     sel = resolve_agent(
         "yourself",
-        user_query="我做酶催化与对接,关注 Enzyme 与 Dock",
+        user_query="我关注基因扰动预测 norman perturbation",
     )
     assert sel.mode is AgentMode.YOURSELF
     assert "_common" in sel.brain_slugs
-    # B.3:slug lowercase 单源(真盘 brain:enzyme / brain:dock)
-    assert "enzyme" in sel.brain_slugs and "dock" in sel.brain_slugs
+    # slug lowercase 单源(namespace brain:virtualcell)
+    assert "virtualcell" in sel.brain_slugs
     assert sel.readonly is True  # 只读视图,不写回 brains(§7.5.0)
 
 
@@ -70,9 +70,8 @@ def test_unknown_spec_is_hard_error_fail_fast():
         resolve_agent("not-a-mode", user_query="x")
 
 
-def test_one_above_all_routes_md_by_force_keyword_not_dead():
-    # C1 回归:多词短语拆为单 token 后 "force"/"forcefield" 真能命中 MD
-    # (旧 "force field" 经 _tokens 分词永不命中,属死关键词)
-    sel = resolve_agent("one-above-all", user_query="force field 分子动力学模拟")
-    assert "md" in sel.brain_slugs  # B.3:lowercase 单源
-    assert sel.scores.get("md", 0) >= 1
+def test_one_above_all_routes_virtualcell_by_keyword():
+    # PRAXIS-virtualcell:OAA 按 virtualcell 关键词(norman/perturbation/扰动)命中单一学科。
+    sel = resolve_agent("one-above-all", user_query="norman perturbation 扰动预测")
+    assert "virtualcell" in sel.brain_slugs  # lowercase 单源
+    assert sel.scores.get("virtualcell", 0) >= 1

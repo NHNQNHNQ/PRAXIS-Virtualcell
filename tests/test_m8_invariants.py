@@ -21,7 +21,7 @@ def test_inv1_config_settings_required_fields_no_default():
 
 def test_inv2_brains_legacy_slugs_constant_13():
     # v2.0.2:Synth carry 落地(brains/synth/)→ 13 学科
-    assert len(_LEGACY_SLUGS) == 13
+    assert len(_LEGACY_SLUGS) == 1
 
 
 def test_inv3_sse_event_set_13_unchanged_from_m6():

@@ -19,7 +19,7 @@ from praxis2.tools.file_read import FileReadTool
 
 
 def test_file_read_registered_in_chat_registry():
-    sel_disc = resolve_agent("enzyme", user_query="hi")
+    sel_disc = resolve_agent("virtualcell", user_query="hi")
     reg_disc = build_chat_registry(selection=sel_disc)
     names = [t["name"] for t in reg_disc.anthropic_tools()]
     assert "FileRead" in names
