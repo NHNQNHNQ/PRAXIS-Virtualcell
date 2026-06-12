@@ -7,10 +7,16 @@
 - GPU:**8× NVIDIA A100-SXM4-40GB**(driver `570.148.08`,支持 CUDA 13.x)
 - conda init:`source /home/zkyd/software/miniconda3/etc/profile.d/conda.sh`
 
-## conda 环境 `virtualcell`(Task 1 新建,最高风险步已过)
-- `python 3.11` + `torch 2.12.0+cu130`、`lightning 2.6.5`、numpy/scipy/pint/pyyaml/jsonschema
-- **GATE 通过**:`torch.cuda.is_available() == True`,`device_count() == 8`
-- 建法:`conda create -n virtualcell python=3.11 -y && pip install "torch>=2.2" lightning numpy scipy pint pyyaml jsonschema`(PyPI 默认 wheel 即 cu130,driver 570 兼容;过程中 lightning 有 1 次 ReadTimeout,retry 成功)
+## conda 环境 `virtualcell`(Task 1 新建)
+- `python 3.11`、lightning 2.6.5、anndata 0.12.16、numpy/scipy/pint/pyyaml/jsonschema
+- torch 见下「GPU/torch 修复」(PyPI 默认 cu130 与 driver 不兼容,改 cu124)。
+
+## GPU/torch 修复(P2-B env 坑实录)
+driver 570.148.08 支持 **CUDA 12.8**(`nvidia-smi` runtime 12080),**不支持 cu130**(需 driver≥580):
+- ❌ PyPI 默认 `torch 2.12.0+cu130`:`is_available()` 首次误报 True,实际 GPU op `RuntimeError: driver too old (12080)` → CPU fallback。
+- ❌ `download.pytorch.org/whl/cu124|cu128`:curl HEAD 返回 200,但 pip 拉大 wheel 反复 `SSLError(SSL: UNEXPECTED_EOF)`(该服务器对 pytorch.org 大文件不稳)。
+- ✅ 改**清华 PyPI 镜像**:`pip install torch==2.6.0 -i https://pypi.tuna.tsinghua.edu.cn/simple`(默认 linux wheel = cu124,国内传输稳)→ virtualcell 最终 **`torch 2.6.0+cu124`、`cuda True`、ndev 8**;virtualcell 自跑 ml 4 passed + GPU 锚定逐位复现 S0(DoD 1 满足)。
+- **`vcell` 环境**(donor "Virtual cell" 原环境,`torch 2.6.0+cu124 cuda True` + anndata/scipy/pint/yaml/jsonschema 全套)是 Week 4a GPU 验证(锚定 + ml 4 passed)的实际运行环境,亦为 virtualcell 的现成 fallback。
 
 ## 远端 praxis 仓
 - `/home/zkyd/data1/mzy/PRAXIS-virtualcell`(Task 1 `git clone`,HEAD = `a0aaea2`,与 Mac 同步)

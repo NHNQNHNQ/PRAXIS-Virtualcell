@@ -18,5 +18,13 @@
 ## M2 对照真值
 **`S_anchor = 0.6638587246223396`**(Task 5 的 praxis 复现须 `abs(s_praxis - S_anchor) < 1e-4` 命中;因同 ckpt+loader+EvalAgent,预期差异 ~0)。
 
-## 备注:GPU 现状
-首跑时 `torch 2.12.0+cu130` 与 driver 570(CUDA 12.8)不匹配 → `cuda.is_available()=False`,eval **CPU fallback**(linear deterministic,结果不受影响)。env 修复(重装 `torch cu128`)见 [finding_w4a_env.md](finding_w4a_env.md)。
+## M2 结果(Task 3–5,远端 vcell GPU)
+- `predictors/ml/donor_bridge`、`predictors/ml/linear_additive_agent`、`benchmarks/norman_eval` 远端跑通。
+- ml 测试 **4 passed**(`test_ml_donor_bridge` 2 + `test_ml_linear_agent` 1 + `test_ml_norman_score` 1):
+  - 包装预测与 donor `predict()` **逐元素一致**(atol 1e-6);
+  - praxis 复用 EvalAgent 复现分数 == S_anchor(<1e-4)。
+
+## 备注:GPU 路径与 CPU 一致
+- **GPU 锚定**(vcell,`torch 2.6.0+cu124`):`S_eval = 0.6638587363779742` = `S0` **逐位相同**(15 位);训练即 GPU,故精确复现。
+- **CPU 锚定**(首跑,torch cu130 不兼容 driver → fallback):`0.6638587246223396`,与 S0 差 1.2e-8(CPU/GPU 浮点微差,deterministic 性质不变)。
+- env 修复(cu130→cu124)详见 [finding_w4a_env.md](finding_w4a_env.md)。
