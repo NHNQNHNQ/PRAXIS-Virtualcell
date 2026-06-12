@@ -19,10 +19,18 @@ _CLASSES: dict[str, Any] = {}
 
 
 def _cls(name: str):
+    """按 ckpt json 的 class_name 查 donor predictor 类(全 CamelCase)。"""
     if not _CLASSES:
+        from predictors.cpa_style import CPAStylePredictor
+        from predictors.decoder_only import DecoderOnlyPredictor
+        from predictors.gnn_pert import GNNPertPredictor
+        from predictors.latent_additive import LatentAdditivePredictor
         from predictors.linear_additive import LinearAdditivePredictor
+        from predictors.pretrained_backbone import PretrainedBackbonePredictor
 
-        _CLASSES["LinearAdditivePredictor"] = LinearAdditivePredictor
+        for c in (LinearAdditivePredictor, LatentAdditivePredictor, CPAStylePredictor,
+                  GNNPertPredictor, DecoderOnlyPredictor, PretrainedBackbonePredictor):
+            _CLASSES[c.__name__] = c
     return _CLASSES[name]
 
 
