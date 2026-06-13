@@ -53,6 +53,7 @@ class SpeciesBrainAgent(BaseAgent):
                 "task_schema": _load_yaml(self.root / "generic" / "task_schema.yaml"),
                 "default_abstain_rules": _load_yaml(self.root / "generic" / "default_abstain_rules.yaml"),
                 "negative_transfer": _load_yaml(self.root / "generic" / "general_negative_transfer.yaml"),
+                "core_predictors": _load_yaml(self.root / "generic" / "core_predictors.yaml"),
             },
             "model_applicability": _load_yaml(sp_dir / "model_applicability.yaml"),
             "object_vocabulary": _load_yaml(sp_dir / "object_vocabulary.yaml"),
