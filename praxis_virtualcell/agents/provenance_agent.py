@@ -11,10 +11,14 @@ class ProvenanceAgent(BaseAgent):
 
     def handle(self, message: AgentMessage, bus: MessageBus) -> None:
         p = message.payload
+        bc = p.get("brain_context", {})
+        routing = bc.get("routing", {})
         provenance = {
             "n_messages": len(bus.trace),
-            "rules_referenced": p.get("brain_context", {}).get("rules_referenced", [])
-                                or p.get("brain_context", {}).get("generic", {}).get("negative_transfer", []),
+            "rules_referenced": bc.get("rules_referenced", []),
+            "rules_hit": routing.get("rules_hit", []),                  # §7.5 本次命中的具体规则名
+            "ortholog_cautions": routing.get("cautions", {}),          # §7.3 {predictor: [caution flags]}
+            "rejection_reasons": routing.get("rejection_reasons", {}),  # §7.5 {predictor: {reason}}
             "models_used": p.get("models_used", []),
             "models_rejected": p.get("models_rejected", []),
             "critic_violations": p.get("critic_violations", []),

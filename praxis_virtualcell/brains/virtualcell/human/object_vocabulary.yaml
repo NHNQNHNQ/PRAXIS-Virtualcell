@@ -1,6 +1,36 @@
+# human (K562 / Norman et al. perturb-seq) 常见扰动基因词表。
+# 用途:MockGEARS reject_if=gene_not_in_graph_vocabulary 时,要求 perturbation_targets
+#       全部命中本表,否则该 perturbation 被判为图词表外 → MockGEARS 在该请求下 reject。
+# 注:保留原 5 个(AHR/TP53/MYC/STAT1/GATA1)以兼容现有 human 测试(test_species_brain
+#     断言 'AHR' in genes;test_offline_workflow 用 AHR 走 MockCPA 不 abstain)。
+# 来源:Norman 2019 (Science) GI map / Replogle 2022 K562 genome-wide perturb-seq 高频 TF 与调控因子。
 genes:
+  # --- 原始 5 个(冻结,勿删:human 测试依赖)---
   - AHR
   - TP53
   - MYC
   - STAT1
   - GATA1
+  # --- Norman GI / 红系与髓系命运决定 TF ---
+  - KLF1
+  - CEBPA
+  - CEBPB
+  - CEBPE
+  - SPI1
+  - GATA2
+  - FOXA1
+  - FOXA3
+  # --- Norman 双扰动常见 partner / 凋亡 / 信号 ---
+  - SET
+  - BAK1
+  - FOSB
+  - JUN
+  - EGR1
+  - ELK1
+  - ETS2
+  - MAPK1
+  - CDKN1A
+  # --- 染色质 / 表观调控 ---
+  - ARID1A
+  - DUSP9
+  - PRDM1

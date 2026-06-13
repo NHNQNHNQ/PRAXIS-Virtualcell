@@ -38,7 +38,8 @@ class SpeciesBrainAgent(BaseAgent):
             },
             "model_applicability": _load_yaml(sp_dir / "model_applicability.yaml"),
             "object_vocabulary": _load_yaml(sp_dir / "object_vocabulary.yaml"),
-            "rules_referenced": [f"brains/virtualcell/{species or 'generic'}/model_applicability.yaml"],
+            "rules_referenced": ([f"brains/virtualcell/{species}/model_applicability.yaml"] if supported else [])
+                                + ["brains/virtualcell/generic/general_negative_transfer.yaml"],
         }
         bus.send(AgentMessage(
             message_id=message.message_id + ":brain",

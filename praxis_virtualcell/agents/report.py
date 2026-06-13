@@ -21,6 +21,7 @@ class ReportAgent(BaseAgent):
             "models_rejected": p.get("models_rejected", []),
             "abstain_reasons": rd.get("reasons", []),
             "critic_violations": p.get("critic_violations", []),
+            "caution_flags": p.get("provenance", {}).get("ortholog_cautions", {}),  # §7.3 cross-species caution 可见
             "provenance": p.get("provenance", {}),
         }
         bus.send(AgentMessage(message.message_id + ":rep", self.name, "client",
