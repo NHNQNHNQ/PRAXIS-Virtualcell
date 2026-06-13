@@ -14,19 +14,28 @@ class ReliabilityAgent(BaseAgent):
     def handle(self, message: AgentMessage, bus: MessageBus) -> None:
         p = message.payload
         used = p.get("models_used", [])
+        bc = p.get("brain_context", {})
+        req = p.get("request", {})
+        abstain_rules = (bc.get("generic", {}).get("default_abstain_rules", {}).get("abstain_if", []))
         reasons: list[str] = []
         failed: list[str] = []
-        abstain_rules = (p.get("brain_context", {}).get("generic", {})
-                         .get("default_abstain_rules", {}).get("abstain_if", []))
         abstain = False
+        # 退化输入:无有效扰动目标 → abstain(不该静默出预测)
+        targets = [t for t in (req.get("perturbation_targets") or []) if str(t).strip()]
+        if not targets:
+            abstain = True
+            reasons.append("no_perturbation_specified")
         if not used:
             abstain = True
-            if "all_predictors_rejected" in abstain_rules:
-                reasons.append("all_predictors_rejected")
-            else:
-                reasons.append("no_successful_predictor")
+            # 物种未知 vs 物种已知但模型不适配:前者额外标 species_not_supported(若 abstain rule 允许)
+            if not bc.get("species_supported", True) and "species_not_supported" in abstain_rules:
+                reasons.append("species_not_supported")
+            reasons.append("all_predictors_rejected" if "all_predictors_rejected" in abstain_rules
+                           else "no_successful_predictor")
         disagreement = None
-        if len(used) >= 2 and p.get("ensemble"):
+        if abstain:
+            reliability = "low"
+        elif len(used) >= 2 and p.get("ensemble"):
             reliability = "high"
         elif used:
             reliability = "medium"

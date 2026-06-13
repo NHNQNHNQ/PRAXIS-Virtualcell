@@ -22,5 +22,14 @@
 - **运行时**(ModelApplicabilityAgent/SpeciesBrainAgent 读取,影响路由/trace):`supported_species` / `supported_modalities` / `supported_tasks` / `reject_if` / `object_vocabulary.genes` / `caution.<species>`(LIST) / `cross_species.rule` / `generic.negative_transfer`。
 - **声明式 brain 知识**(本期**不参与**运行时路由,人读/未来接入):`supported_perturbations` / `supported_cell_types` / `native_host` / `mouse/ortholog_rules.yaml` / `yeast/genetic_interaction_rules.yaml` / species 级 `negative_transfer.yaml` / `bacteria/abstain_rules.yaml` / `reject_reason_for_X`。诚实记:这些是 brain 知识库,SpeciesBrainAgent 暂不读取,不与运行时绑定(对抗验证特别指出不可 over-claim 它们参与判定)。
 
+## 第二层对抗验证(实现级 review workflow,2 reviewer 实跑 dry-run + pytest)
+overall_pass=true,但抓出 2 must-fix + nice/minor(reviewer **实跑确认**,非纸面),已全部修复 + 加回归测试(`test_cross_species_routing` 6→11 PASS):
+1. **drug 拒因语义错误(must-fix)**:mouse drug[aspirin] 原把药名当基因做 vocab 比对(拒因误为 gene_not_in_graph_vocabulary)。→ `base.assess` + ModelApplicability + mock_gears 加 `supported_perturbations` 检查 + gene-vocab 守卫(仅 gene/gene_combination);drug 下 MockGEARS 以 `unsupported_perturbation` 拒。
+2. **ortholog 投影零执行(must-fix,§7.3 言过其实)**:mouse OOV[ZZZZ9] 与可映射[TRP53] 原拿**相同** caution,`ortholog_rules.yaml` 是死文件。→ SpeciesBrainAgent 加载 ortholog_rules + ModelApplicability 用 `map_upper` **真投影**,未映射 target 加 `unmapped_ortholog` flag(OOV ≠ mappable);ortholog_rules.yaml 进 rules_referenced。
+3. **per-species yaml 不进 trace(nice)**:→ SpeciesBrainAgent 加载 species 级 negative_transfer/abstain/ortholog/interaction → `species_rules` + rules_referenced(§7.5 审计链完整)。
+4. **空 targets 静默出预测(nice)**:→ ReliabilityAgent 空 perturbation_targets → abstain(`no_perturbation_specified`)。
+5. **martian abstain_reasons(minor)**:→ ReliabilityAgent species_supported=False 加 `species_not_supported`,区分"物种未知"vs"模型不适配"。
++ caution `isinstance list` 守卫、`native_host` per-predictor(取代全局硬编码 origin)。confirmed-ok:§7.1/7.2/7.4 真满足、向后兼容真不破、鲁棒性(畸形输入不抛异常)。
+
 ## 留 backlog
-species 级 negative_transfer/ortholog_rules 接入运行时(让声明式字段生效);更多 species(rat/zebrafish);真 cross-species predictor(在 W4c GEARS/scGPT 之上做 ortholog 投影);cross-species 端到端 abstain 强化(W6)。
+species 级 negative_transfer/abstain/genetic_interaction 接入**判定**(目前进 rules_referenced 可审,但路由真相源仍是 generic.negative_transfer);更多 species(rat/zebrafish);真 cross-species ML predictor(在 W4c GEARS/scGPT 之上做 ortholog 投影 + 真预测,取代 mock);cross-species 端到端 abstain 强化(W6)。

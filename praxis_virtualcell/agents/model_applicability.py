@@ -1,7 +1,10 @@
 """据 brain_context 把候选 predictor 分成 applicable / rejected_candidates；
 并计算 cross-species ortholog caution(§7.3)/ negative-transfer 命中(§7.5)/ 各 predictor 拒因,
 写入 brain_context.routing(随 payload 透传到 Provenance/Report,使路由依据在 trace 可审计)。
-最终路由权威在此(LLMRouter 只能建议,W3)。"""
+
+§7.3 真投影:对 applicable+caution 的 predictor,用 species_rules.ortholog_rules.ortholog.map_upper
+把 target 映回母种;未映射 target 追加 unmapped_ortholog flag —— 使 OOV/不可映射基因与可映射基因
+拿到不同 caution(投影非纯声明)。最终路由权威在此(LLMRouter 只能建议,W3)。"""
 from __future__ import annotations
 
 from praxis_virtualcell.core.agent import BaseAgent
@@ -9,8 +12,8 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
 
 _CANDIDATES = ("MockLinear", "MockCPA", "MockGEARS")
-# Mock* 三个 predictor 均训练于 human(母种);cross-species 迁移/负迁移据此判定。
-_PREDICTOR_ORIGIN = "human"
+_DEFAULT_ORIGIN = "human"            # predictor 母种缺省(可被 model_applicability[name].native_host 覆盖)
+_GENE_PERTS = ("gene", "gene_combination")
 
 
 class ModelApplicabilityAgent(BaseAgent):
@@ -22,38 +25,48 @@ class ModelApplicabilityAgent(BaseAgent):
         appmap = bc.get("model_applicability") or {}
         vocab = set((bc.get("object_vocabulary") or {}).get("genes", []))
         species = req.get("species")
+        ptype = req.get("perturbation_type")
+        targets = req.get("perturbation_targets", [])
         neg_transfer = ((bc.get("generic") or {}).get("negative_transfer") or {}).get("negative_transfer", [])
-        # 母种(human)→ 本物种 是否命中负迁移 → 具体 rule 名(供 §7.5 trace 审计)
-        nt_rule = next((nt.get("rule") for nt in neg_transfer
-                        if nt.get("from_species") == _PREDICTOR_ORIGIN
-                        and species in (nt.get("to_species") or [])), None)
+        ortholog_map = (((bc.get("species_rules") or {}).get("ortholog_rules") or {})
+                        .get("ortholog", {}).get("map_upper", {}))
 
         applicable, rejected = [], []
-        cautions: dict[str, list] = {}            # {name: [caution flags]}  §7.3
-        rejection_reasons: dict[str, dict] = {}   # {name: {reason}}          §7.5
+        cautions: dict[str, list] = {}            # §7.3 {predictor: [caution flags]}
+        rejection_reasons: dict[str, dict] = {}   # §7.5 {predictor: {reason}}
         rules_hit: list[str] = []                 # 本次命中的具体规则名
 
         for name in _CANDIDATES:
-            rules = appmap.get(name)
+            rules = appmap.get(name) or {}
+            origin = rules.get("native_host", _DEFAULT_ORIGIN)
+            nt_rule = next((nt.get("rule") for nt in neg_transfer
+                            if nt.get("from_species") == origin and species in (nt.get("to_species") or [])), None)
             species_ok = bool(rules) and species in rules.get("supported_species", [])
             ok = species_ok \
                 and req.get("input_modality") in rules.get("supported_modalities", []) \
                 and req.get("task_type") in rules.get("supported_tasks", [])
             reason = None
-            if ok and "gene_not_in_graph_vocabulary" in rules.get("reject_if", []):
-                if any(g not in vocab for g in req.get("perturbation_targets", [])):
-                    ok = False
-                    reason = "gene_not_in_graph_vocabulary"
+            sp_list = rules.get("supported_perturbations")
+            if ok and sp_list is not None and ptype not in sp_list:
+                ok, reason = False, "unsupported_perturbation"
+            if ok and "gene_not_in_graph_vocabulary" in rules.get("reject_if", []) and ptype in _GENE_PERTS:
+                if any(g not in vocab for g in targets):
+                    ok, reason = False, "gene_not_in_graph_vocabulary"
                     rules_hit.append("gene_not_in_graph_vocabulary")
             if ok:
-                # cross-species ortholog caution:applicable 但带 caution(LIST)§7.3
                 caution = (rules.get("caution") or {}).get(species) or []
+                caution = list(caution) if isinstance(caution, list) else [caution]
                 if caution:
-                    cautions[name] = list(caution)
+                    # ortholog 真投影:未映射 target → unmapped flag(区分 OOV vs 可映射)§7.3
+                    if ortholog_map and ptype in _GENE_PERTS:
+                        unmapped = [g for g in targets if g not in ortholog_map]
+                        if unmapped:
+                            caution = caution + [f"unmapped_ortholog:{unmapped}"]
+                    cautions[name] = caution
                     rules_hit.append((rules.get("cross_species") or {}).get("rule", "ortholog_caution"))
                 applicable.append(name)
             else:
-                if reason is None:  # 物种级拒绝:负迁移命中则记具体 rule,否则 unsupported_species
+                if reason is None:
                     if nt_rule:
                         reason = nt_rule
                         rules_hit.append(nt_rule)

@@ -25,6 +25,9 @@ class PredictorAgent(BaseAgent):
             return 0.0, "unsupported_modality"
         if request.get("task_type") not in rules.get("supported_tasks", []):
             return 0.0, "unsupported_task"
+        sp = rules.get("supported_perturbations")
+        if sp is not None and request.get("perturbation_type") not in sp:
+            return 0.0, "unsupported_perturbation"
         return 1.0, None
 
     def prepare_input(self, request: dict, brain_context: dict) -> dict:

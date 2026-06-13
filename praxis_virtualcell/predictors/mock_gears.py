@@ -13,7 +13,8 @@ class MockGEARSAgent(PredictorAgent):
             return score, reject
         vocab = set((brain_context.get("object_vocabulary") or {}).get("genes", []))
         rules = (brain_context.get("model_applicability") or {}).get(self.name, {})
-        if "gene_not_in_graph_vocabulary" in rules.get("reject_if", []):
+        if "gene_not_in_graph_vocabulary" in rules.get("reject_if", []) \
+                and request.get("perturbation_type") in ("gene", "gene_combination"):
             missing = [g for g in request.get("perturbation_targets", []) if g not in vocab]
             if missing:
                 return 0.0, f"gene_not_in_graph_vocabulary:{missing}"
