@@ -21,6 +21,7 @@ class ProvenanceAgent(BaseAgent):
             "rejection_reasons": routing.get("rejection_reasons", {}),  # §7.5 {predictor: {reason}}
             "models_used": p.get("models_used", []),
             "models_rejected": p.get("models_rejected", []),
+            "models_failed": p.get("models_failed", []),
             "critic_violations": p.get("critic_violations", []),
         }
         bus.send(AgentMessage(message.message_id + ":prov", self.name, "Report",

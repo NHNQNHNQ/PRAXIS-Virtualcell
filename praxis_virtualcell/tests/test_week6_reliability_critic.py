@@ -50,6 +50,7 @@ def test_disagreement_high_downgrades_when_no_abstain_rule():
                "ensemble": {"delta": [0.05]}, "disagreement": {"score": 0.9},
                "brain_context": {"generic": {"default_abstain_rules": {"abstain_if": []}}}})
     assert rd["abstain"] is False and rd["reliability"] == "medium"   # high→medium(分歧高但 rule 未声明 abstain)
+    assert "downgrade:model_disagreement_too_high" in rd["reasons"]   # 降级理由可追溯(§8.4)
 
 
 # --- core_predictor_failed (§8.2) ---
@@ -123,3 +124,18 @@ def test_critic_happy_no_violations():
                "models_used": ["MockCPA"], "ensemble": {"delta": [0.1]},
                "results": [_result("MockCPA", "success", [0.1])]})
     assert v == []
+
+
+# --- report 拆分 abstain vs downgrade (§8.4 报告诚实性, e2e 激活 cell_type 路径) ---
+
+def test_report_cell_type_downgrade_e2e():
+    from praxis_virtualcell.workflows.predict_delta_expression import run_request
+    # human + 不支持的 cell_type(Jurkat 不在任何 supported_cell_types) → 降级(非 abstain)
+    r = run_request({"request_id": "r", "species": "human", "perturbation_type": "gene",
+                     "perturbation_targets": ["AHR"], "input_modality": "scRNA",
+                     "output_modality": "delta_expression", "task_type": "predict_delta_expression",
+                     "cell_type": "Jurkat"})
+    assert r["abstain"] is False
+    assert r["abstain_reasons"] == []                                    # 非 abstain → 不携带 abstain_reasons
+    assert "downgrade:cell_type_not_supported" in r["downgrade_reasons"]  # 降级单列
+    assert "models_failed" in r and "model_disagreement" in r            # 契约字段齐

@@ -16,7 +16,8 @@ def _disagreement(vecs: list) -> dict:
     (避免如 MockLinear 恒零产生的伪分歧被误读为真方向冲突)。注:1 维 delta 下只能检符号翻转,幅度分歧不可见。"""
     k = len(vecs)
     if k < 2:
-        return {"score": None, "metric": "pairwise_cosine_distance", "n_models": k, "reason": "single_model"}
+        return {"score": None, "metric": "pairwise_cosine_distance", "n_models": k,
+                "reason": "no_models" if k == 0 else "single_model"}
     length = min(len(v) for v in vecs)
     pairs, n_zero = [], 0
     for a, b in itertools.combinations(vecs, 2):

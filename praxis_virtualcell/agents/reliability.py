@@ -65,6 +65,7 @@ class ReliabilityAgent(BaseAgent):
         # 降级类(非 abstain):分歧高 → 降一档;cell_type 全不覆盖 → 降一档(§8 medium-low)
         if disagreement_high and not abstain:
             reliability = "medium" if reliability == "high" else "low"
+            reasons.append("downgrade:model_disagreement_too_high")  # 非 abstain 降级理由(report 可追溯,§8.4)
             if "model_disagreement" not in failed:
                 failed.append("model_disagreement")
         req_ct = req.get("cell_type")

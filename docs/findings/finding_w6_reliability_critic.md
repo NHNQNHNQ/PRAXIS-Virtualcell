@@ -23,5 +23,13 @@
 - **1 维 delta**:mock delta 单 target 1 维,cosine 只能检符号翻转,幅度分歧([0.01] vs [100])测不出。真分歧检测待多维 delta(真 predictor 输出 n_genes 维)。
 - `unsupported_species_in_ensemble` 是防御性不变量检查(正常路由不命中,抓汇总 bug 注入),非 §8.4 主力;§8.4 主力是 `missing_provenance`(实测可触发)。
 
+## 第二层对抗验证(implement review,2 reviewer 实跑 dry-run + pytest)
+overall_pass=true(70 passed 无回归,§8.3/8.4 实测真可激活**非纸面**:7 critic violation 全可触发 + disagreement abstain/降级 + 阈值严格 > 余量充足)。2 reviewer 共识抓出 2 medium + low(虽归 nice,但关系 §8.4 可追溯 + 报告诚实性 → 已全修):
+1. **disagreement 非 abstain 降级 report 不留痕(medium)**:score>0.5 但 rule 未声明 abstain 时 reliability 降级却无理由可见。→ reliability 加 `downgrade:model_disagreement_too_high` reason + report 透出 `model_disagreement`/`failed_checks`。
+2. **abstain_reasons 语义错位(medium)**:`downgrade:cell_type_not_supported`(非 abstain)进 report.abstain_reasons → 下游误读"已弃权"。→ ReportAgent **拆分**:abstain_reasons 只装真 abstain 原因,downgrade 类单列 `report.downgrade_reasons`。
+3. **models_failed 契约缺口(low)**:ensemble 算出但 Report/Provenance 丢弃。→ report.py/provenance_agent.py 加 models_failed。
+4. **_disagreement 空 list 标签(low)**:k==0 → `no_models`(区别 single_model)。
++ e2e 测试 `test_report_cell_type_downgrade_e2e`(human+Jurkat 激活 cell_type 路径,证明 report 拆分 e2e 生效)。test_week6 11→12 PASS,Mac 71+23skip 零回归。
+
 ## 留 backlog
 真分歧 predictor 接入(让 disagreement e2e 生效);真可失败 core predictor 声明;LLMReport 端到端 critic;OOD/calibration(GPT §8 提及,本期未做)。
