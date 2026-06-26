@@ -30,11 +30,14 @@ contrast, not a graded improvement. Second, on the Norman 2019 benchmark[^3], th
 the donor Coordinator's delta-expression Pearson of 0.7039 (n = 18,874). The agent wrapper reproduces each
 underlying predictor's output element-wise (atol 1e-6); the communicative layer never runs a forward pass, so
 wrapping changes none of the numbers a predictor produces. A frozen scGPT backbone with a light head reaches
-only 0.4407, below every task-specific base, consistent with reports that scale alone is not the fix[^12]. The
-end-to-end reliability path runs on mock predictors; several declarative mechanisms (model-disagreement,
-core-failure, and cell-type downgrades) are covered by activation unit tests and await real predictors. This
-release is validated on human single-cell perturbation prediction, with cross-species behavior demonstrated
-at the routing level and no language model in the prediction core.
+only 0.4407, below every task-specific base — and below even a same-protocol mean-perturbation baseline (0.4615)
+— consistent with reports that scale alone is not the fix[^12]. The end-to-end reliability path runs on mock
+predictors, where a few declarative mechanisms (core-failure and cell-type downgrades) are covered by
+activation unit tests and await real predictors. On the real donor predictors, however, a disagreement-based
+abstention policy already delivers a positive risk–coverage curve: retained delta-expression Pearson rises from
+0.67 to 0.75 as the system declines its most-disagreed perturbations. This release is validated on human
+single-cell perturbation prediction, with cross-species behavior demonstrated at the routing level and no
+language model in the prediction core.
 
 **Keywords:** virtual cell; perturbation prediction; multi-agent systems; model applicability; abstention; provenance; reproducibility
 
@@ -52,8 +55,10 @@ at the routing level and no language model in the prediction core.
 由于 A 臂在结构上缺少相应组件,这是能力"有/无"的对比,而非程度上的改进。其二,在 Norman 2019 基准[^3]上,
 预测层复现了 donor Coordinator 的 delta-expression Pearson 0.7039(n = 18,874);智能体包装逐元素复现底层
 预测器输出(atol 1e-6),通讯层从不执行前向计算,因此不改变任何预测数值。一个冻结的 scGPT backbone 加轻量
-head 仅达 0.4407,低于所有任务专用基线,印证了"单靠规模并非解药"[^12]。端到端可靠性路径运行在 mock
-predictor 上;若干声明式机制(模型分歧、核心失败、细胞类型降级)由激活单元测试覆盖,真实激活待接入真预测器。
+head 仅达 0.4407,低于所有任务专用基线、也低于同协议的 mean-perturbation 基线(0.4615),印证了"单靠规模并非
+解药"[^12]。端到端可靠性路径运行在 mock predictor 上,其中若干声明式机制(核心失败、细胞类型降级)由激活
+单元测试覆盖、真实激活待接入真预测器;但在真实 donor predictor 上,基于模型分歧的弃权策略已给出正向的
+risk–coverage 曲线:当系统弃权分歧最大的扰动时,保留集的 delta-expression Pearson 从 0.67 升到 0.75。
 本版在人类单细胞扰动预测上验证,跨物种行为在路由层面给出,预测核心不含任何语言模型。
 
 **关键词:** 虚拟细胞;扰动预测;多智能体系统;模型适用性;弃权;溯源;可复现
@@ -164,14 +169,20 @@ metadata and tensors but performs no tensor arithmetic — wrapping a predictor 
 produces. We therefore claim only that the communicative layer is performance-neutral, not that
 message-passing achieves a higher Pearson.
 
-As an external-model integration sanity check, kept off the delta-Pearson axis, we also ran two foundation
-models natively. A frozen scGPT backbone (53.8 M parameters) with a light trainable head (~2.47 M) reaches
-delta-Pearson 0.4407 (cosine 0.9808, n = 7,290 under reduced sampling), below every task-specific base; the
-training loss barely moves, indicating the frozen encoder plus light head saturates on this task. GEARS run in
-its native pipeline reports pearson_de 0.8392, but this is *not comparable* to the delta-Pearson numbers above
-— it is an absolute-expression Pearson over differentially expressed genes on a different split — and we do not
-place it on the same axis. Both observations are consistent with the view that a large pretrained model is not
-automatically the strongest perturbation predictor[^12].
+As a same-protocol naive baseline — same Norman test split, same per-cell delta-Pearson, same EvalAgent — a
+perturbation-agnostic mean-perturbation predictor that returns the average training delta for every input
+reaches delta-Pearson 0.4615 (n = 18,874). It sits well below every trained base (0.6183–0.6716), confirming
+that the trained predictors capture perturbation-specific structure rather than a shared mean response, and it
+provides a floor for the accuracy comparison.
+
+We also ran two foundation models. A frozen scGPT backbone (53.8 M parameters) with a light trainable head
+(~2.47 M) reaches delta-Pearson 0.4407 (cosine 0.9808, n = 7,290 under reduced sampling) — below every
+task-specific base and, notably, below even the trivial mean-perturbation baseline; the training loss barely
+moves, indicating the frozen encoder plus light head saturates on this task. GEARS, run in its native pipeline,
+reports pearson_de 0.8392, but this is *not comparable* to the delta-Pearson numbers above — it is an
+absolute-expression Pearson over differentially expressed genes on a different split — so we keep it off this
+axis. Both observations are consistent with the view that a large pretrained model is not automatically the
+strongest perturbation predictor[^12].
 
 ### 3.4 The runtime, not the predictor, is what improves reliability
 
@@ -206,6 +217,17 @@ uncertainty, unsupported species, and abstain/prediction consistency); and the r
 abstention reasons from confidence-downgrade reasons so a downstream reader is not misled into treating a
 downgrade as an abstention.
 
+We quantify the value of abstention with a risk–coverage analysis on the Norman test split, using the real
+donor predictors (manifest `data/manifests/norman_2019.yaml`, which records the data fingerprint and declares a
+held-out out-of-distribution split — 82 of the 151 test perturbations are unseen in training). Using the
+ensemble-disagreement signal to abstain on the most-disagreed perturbations, retained accuracy rises
+monotonically as coverage falls: from delta-Pearson 0.672 at full coverage to 0.683 at 96% coverage, 0.707 at
+88%, 0.732 at 82%, and 0.754 at 74% — up to +0.08 on the perturbations the system chooses to answer. Because
+per-perturbation disagreement values near the abstention threshold are sensitive to GPU floating-point
+non-determinism, we report the gain against a fixed full-coverage reference and emphasize the monotone trend
+rather than any single point. This is the abstention policy delivering a measurable reliability benefit on real
+predictors, not merely a declared capability.
+
 The suite at tag v0.1.0 runs 75 passed and 23 skipped on a machine without a GPU (ML tests are tagged
 `remote` and skipped when torch is absent; all ML tests pass remotely).
 
@@ -219,7 +241,12 @@ the runtime never touches the tensors, and the reliability arms share the same m
 
 Three positions follow. First, applicability and abstention belong in the pipeline, not only in the loss; the
 reject option and applicability-domain ideas[^13][^14][^15][^16][^17] are implementable as enforced control
-flow over heterogeneous predictors. Second, a foundation model is not automatically the answer: our frozen
+flow over heterogeneous predictors. A capability audit of five representative perturbation systems — GEARS[^8],
+CPA[^7], scGPT[^9], scGen[^6], and STATE[^11] — against their public papers and code found that none
+implements out-of-distribution rejection, an applicability check, an abstention mechanism, prediction
+provenance, or auditable multi-model messaging; uncertainty outputs, where present, are scalars a user must
+threshold, not a decision to decline. These are governance functions PRAXIS supplies around predictors rather
+than properties of any one predictor. Second, a foundation model is not automatically the answer: our frozen
 scGPT result and independent zero-shot evaluations[^12] both argue for keeping task-specific predictors under
 a routing layer rather than betting on scale alone — even as strong perturbation foundation models such as
 STATE[^11] continue to improve. Third, the adversarial, honesty-first methodology we used during development
@@ -259,8 +286,10 @@ deterministic path, both over the same mock predictor set. We report five axes: 
 wrong-model-use rate, provenance completeness, abstention correctness, and trace completeness. Two further
 arms were considered and dropped: arm B (brain-guided without the bus) had no implementation and would yield
 inferred-only numbers, and arm C (communicative without reliability) was effectively equal to D on the primary
-axes; we therefore report the A↔D poles only. We do not report a numeric abstain-gain on a held-out
-out-of-distribution split because no formal `data/manifests/norman_2019.yaml` defines that split yet.
+axes; we therefore report the A↔D poles only. A numeric risk–coverage analysis of the abstention policy is
+reported separately in §3.4, using the `data/manifests/norman_2019.yaml` manifest that records the data
+fingerprint (sha256) and declares a held-out OOD-perturbation split; that analysis runs on the real donor
+predictors, not the mock set.
 
 **Reliability and critic.** The ensemble computes pairwise-cosine disagreement (with a configurable
 `disagreement_threshold`, default 0.5, and an audit field counting zero-vector pairs). The reliability agent
@@ -296,11 +325,15 @@ on the remote GPU host.
 - **Ortholog projection is exercised in routing/caution but not yet in a real cross-species prediction.** The
   projection runs and flags unmapped targets; using it to drive an actual mouse/bacteria/yeast prediction
   awaits a real cross-species predictor.
-- **No numeric abstain-gain and no formal split manifest.** The Norman split is defined by the loader recipe;
-  a DOI+sha256 manifest and a held-out OOD-perturbation split (needed for a risk–coverage / abstain-gain
-  number) are not yet provided.
-- **No same-protocol external baseline.** The six predictors are donor-stack variants; an external baseline
-  (e.g., mean-perturbation, GEARS, or CPA) on the identical split and metric is not yet available.
+- **Abstain-gain is measured over the full test split, not yet OOD-restricted.** A DOI+sha256 manifest and a
+  held-out OOD-perturbation split are now provided (`data/manifests/norman_2019.yaml`), and §3.4 reports a
+  positive risk–coverage curve from disagreement-based abstention on the real predictors. That abstention
+  operates over the whole test split; an OOD-restricted abstain-gain — and a test of whether the abstained
+  perturbations are enriched for the unseen split — is a clean refinement we have not yet run.
+- **External baselines are partial.** The six predictors are donor-stack variants. We add a same-protocol
+  mean-perturbation naive baseline (0.4615) and a frozen-scGPT foundation baseline (0.4407), but a strong
+  external task-specific baseline on the identical split and metric (e.g., GEARS or scGen adapted to the donor
+  split) is still future work.
 - **External-model caveats.** The scGPT result uses a frozen backbone with a light head under reduced sampling;
   GEARS's metric and split are not comparable to the delta-Pearson axis.
 - **Scope.** This release validates human single-cell perturbation prediction; mouse, bacteria, and yeast are
