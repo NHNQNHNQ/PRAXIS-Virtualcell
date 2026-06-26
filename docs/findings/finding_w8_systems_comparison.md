@@ -5,10 +5,11 @@
 
 ## 进度
 - [x] **S1 治理能力矩阵(表 B)** — Mac+联网,据实核查 5 系统 repo+论文,每格附依据。
-- [ ] S2 mean-perturbation baseline + 统一准确性表骨架(表 A) — 远端
+- [x] **诚信复核** — 远端重跑见证全部准确性数字真实([[finding_w8_provenance_reverify]])。
+- [x] **S2 mean-perturbation baseline = 0.4615** + 统一准确性表(表 A)骨架建立 — 远端实跑。
 - [ ] S4 manifest + OOD split + abstain_gain(表 C) — 远端
-- [ ] S3 GEARS 适配 donor split+ΔPearson / scGen 接入 — 远端
-- [ ] S5 STATE 接入 — 远端
+- [ ] S3 GEARS 适配 donor split+ΔPearson / scGen 接入 → 入表 A — 远端
+- [ ] S5 STATE 接入 → 入表 A — 远端
 - [ ] S6 汇总三表 → manuscript Results §3.3–3.4 + Related Work
 
 ---
@@ -71,6 +72,30 @@
 - 治理矩阵是**能力有/无**对比,不是性能对比;准确性对比见表 A(待 S2 起)。**PRAXIS 准确性不声称赢 SOTA**。
 - 矩阵每格均有代码路径/论文出处依据,非印象;子代理核查 repo 实际内容,STATE 为 2025 新 preprint,信息以当前公开为准。
 
-## 留待(表 A / 表 C)
-S2 mean-perturbation baseline(满足 ≥3 baseline 不变量)→ 统一准确性表;S3 GEARS 同 split 适配解"不可比";
-S4 `data/manifests/norman_2019.yaml` + OOD split → abstain_gain / risk-coverage 数值;S5 STATE 接入同协议;S6 汇总进 manuscript。
+## 表 A — 准确性(same-protocol:donor norman test split · per-cell ΔPearson · 同 EvalAgent · n=18874)
+
+> 全部数字本会话远端当场见证([[finding_w8_provenance_reverify]])。代码 `benchmarks/mean_baseline.py`(本轮新增,S2)。
+
+| 系统 / 方法 | 类型 | ΔPearson | n | 见证 |
+|---|---|---|---|---|
+| **PRAXIS Coordinator (all-5)** | ensemble + 治理层 | **0.7039** | 18874 | 0.703874 ✓ |
+| PRAXIS Coordinator (cpa+decoder+gnn) | ensemble | 0.7020 | 18874 | 0.701951 ✓ |
+| cpa_style | 单 base | 0.6716 | 18874 | ✓ |
+| decoder_only | 单 base | 0.6709 | 18874 | ✓ |
+| gnn_pert | 单 base | 0.6675 | 18874 | ✓ |
+| PRAXIS Coordinator (latent+gnn) | ensemble | 0.6847 | 18874 | 0.684678 ✓ |
+| linear_additive | 单 base | 0.6639 | 18874 | 逐位 ✓ |
+| latent_additive | 单 base | 0.6365 | 18874 | ✓ |
+| pretrained-mock | 单 base | 0.6183 | 18874 | ✓ |
+| **mean-perturbation** | **naive baseline** | **0.4615** | 18874 | 远端实跑 ✓(S2,新)|
+| scGPT (frozen backbone + head) | foundation | 0.4407 | 7290¹ | 逐位 ✓ |
+
+¹ scGPT 用 max_cells=50 减采样(n=7290),其余 n=18874。
+- **不可比项不入表**:GEARS 原生 pearson_de 0.8392/0.8461(absolute-expression DE-gene pearson,不同 split,off-axis)。
+- **诚实**:PRAXIS Coordinator 0.7039 是 ensemble 复现,**不声称赢 SOTA**;mean baseline 0.4615 为 same-protocol 下界,满足 ≥3 baseline 不变量。
+- **观察(诚实卖点对照)**:scGPT frozen(0.4407)**反低于** mean-perturbation naive baseline(0.4615)——冻结基础模型 + 轻 head 不如平凡平均扰动 baseline,印证论文"规模非解药"([[finding_w4c_scgpt]] + Kedzierska 2023)。
+
+## 留待(表 A 续 / 表 C)
+- 表 A 续:GEARS 适配 donor split+ΔPearson(解"不可比",S3)、scGen 接入(S3)、STATE 同协议(S5)——各需适配/训练。
+- 表 C:`data/manifests/norman_2019.yaml` + held-out OOD-pert split → abstain_gain / risk-coverage(S4)。
+- S6 汇总三表 → manuscript Results §3.3–3.4 + Related Work + Fig 6(治理矩阵 / 准确性 bar)。
