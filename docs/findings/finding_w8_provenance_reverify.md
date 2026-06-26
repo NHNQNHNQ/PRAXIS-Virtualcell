@@ -60,7 +60,25 @@ n = 7290
 - [[finding_w7_ablation]] 的 A↔D 0→1 表 + cross-species 已在 Mac 本地当场复跑见证(75 passed)。
 - **未发现任何编造或对不上的准确性数字。**
 
-## 待见证 / 下一步
-- [进行中] GEARS 原生 pearson_de(论文标注**与 base 不可比**,off-axis):远端后台重训中
-  (`gears_norman 5`,~38min;重训为 ~0.84 量级、非逐位,因训练随机)。下轮查 `/tmp/gears_witnessed.log`。
-- 之后接 S2 mean-perturbation baseline(同 harness,顺带做)。
+## 5. GEARS 原生 pearson_de —— 重训落在同一量级(确认真实)
+命令:`python -m praxis_virtualcell.benchmarks.gears_norman 5`(virtualcell env,后台重训 t=2356s≈39min)
+```
+GEARS_METRICS: {'mse': 0.0066, 'mse_de': 0.1693, 'pearson': 0.9841, 'pearson_de': 0.8461}
+```
+→ 重训 pearson_de **0.8461**(原 finding 记 0.8392)、pearson 0.9841(原 0.9834):**训练噪声内的同量级差异**
+(GEARS 重训无固定 seed,本就不逐位)。**确认 GEARS 0.8392 是真实实验结果**(重跑落同一邻域)。
+论文如标:GEARS 指标(absolute-expression DE-gene pearson)与 donor delta_pearson **不可比,off-axis,不入准确性表**。
+
+## 全部准确性数字诚信结论
+| 数字族 | 见证方式 | 结果 |
+|---|---|---|
+| 6 base(0.6716…0.6183) | 远端重 eval(确定性) | linear 逐位、其余 diff 与 finding 一致 ✓ |
+| Coordinator 0.7039/0.7020/0.6847 | 远端重 eval(确定性) | all-5=0.703874 等,n=18874 ✓ |
+| scGPT 0.4407 | 存档 ckpt 重 eval(确定性) | 逐位 0.4406901964584723 ✓ |
+| GEARS pearson_de 0.8392 | 重训(随机) | 0.8461 同量级,确认真实(不可比 off-axis)|
+| ablation A↔D 0→1 + cross-species | Mac 本地重跑(确定性) | 一致(75 passed)✓ |
+
+**论文全部量化结果本会话当场见证为真,未发现任何编造或对不上的数字。**
+
+## 下一步
+S2 mean-perturbation baseline(同 harness,补 ≥3 baseline + 统一准确性表)。
