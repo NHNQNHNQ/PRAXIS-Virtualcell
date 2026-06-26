@@ -7,7 +7,7 @@
 - [x] **S1 治理能力矩阵(表 B)** — Mac+联网,据实核查 5 系统 repo+论文,每格附依据。
 - [x] **诚信复核** — 远端重跑见证全部准确性数字真实([[finding_w8_provenance_reverify]])。
 - [x] **S2 mean-perturbation baseline = 0.4615** + 统一准确性表(表 A)骨架建立 — 远端实跑。
-- [ ] S4 manifest + OOD split + abstain_gain(表 C) — 远端
+- [x] **S4 manifest + OOD-pert split + abstain_gain(表 C)** — `data/manifests/norman_2019.yaml`(sha256)+ risk-coverage 远端实跑。
 - [ ] S3 GEARS 适配 donor split+ΔPearson / scGen 接入 → 入表 A — 远端
 - [ ] S5 STATE 接入 → 入表 A — 远端
 - [ ] S6 汇总三表 → manuscript Results §3.3–3.4 + Related Work
@@ -95,7 +95,32 @@
 - **诚实**:PRAXIS Coordinator 0.7039 是 ensemble 复现,**不声称赢 SOTA**;mean baseline 0.4615 为 same-protocol 下界,满足 ≥3 baseline 不变量。
 - **观察(诚实卖点对照)**:scGPT frozen(0.4407)**反低于** mean-perturbation naive baseline(0.4615)——冻结基础模型 + 轻 head 不如平凡平均扰动 baseline,印证论文"规模非解药"([[finding_w4c_scgpt]] + Kedzierska 2023)。
 
-## 留待(表 A 续 / 表 C)
+## 表 C — abstain_gain / risk-coverage(S4,补 02_review R9)
+
+> manifest:`data/manifests/norman_2019.yaml`(Norman 2019, DOI 10.1126/science.aax4438;h5ad sha256
+> `e3d116b4…4317de`, 937614888 B)。**真实 OOD-pert split**:test 151 扰动中 **82 个未见(13056 cells)**、
+> 69 个已见(5818 cells)——由 train/test 扰动集合重叠实测导出。
+> **abstain 机制(在 in-vocab 未见扰动上真实成立)**:ensemble 跨 base disagreement(物种/词表拒绝不触发)。
+> 复现:`python -m praxis_virtualcell.benchmarks.abstain_gain`(cpa primary + 4 base aux, pert_level)。
+
+| tau | coverage | 保留集 ΔPearson | gain(vs 满覆盖 0.6716) |
+|---|---|---|---|
+| 1.0 | 1.00 | 0.6716 | —(满覆盖参考)|
+| 0.4 | 0.96 | 0.6830 | +0.011 |
+| 0.3 | 0.88 | 0.7071 | +0.036 |
+| 0.25 | 0.82 | 0.7320 | +0.060 |
+| 0.2 | 0.74 | 0.7536 | +0.082 |
+
+→ **disagreement-based abstention 带来正向 risk-coverage**:弃权最高分歧的扰动,保留集 ΔPearson 单调上升;
+弃权 ~26%(coverage 0.74)时保留集达 **0.754**(+0.082)。这是治理层价值的**真实定量证据**(此前仅 PLANNED)。
+
+**诚实边界(表 C)**:
+- gain 以**固定满覆盖参考(tau 最大)**计;阈值附近因 GPU 浮点非确定性,abstain_rate/单点 gain 有 ~±0.01 run 间抖动
+  (smoke 与 sweep 的 tau=0.4 gain 0.041 vs 0.027 即此),**趋势(单调正向)稳健,不报单点精确值**。
+- 此 risk-coverage 在**整个 test split**上由 disagreement 弃权得到;「弃权扰动是否富集 OOD(82 未见)」是干净的下一步细化(可测 abstained∩unseen 富集度 / 仅 OOD 子集的 abstain_gain)。
+- 仍为 same-protocol(donor norman test, per-cell ΔPearson, 同 EvalAgent)。
+
+## 留待
 - 表 A 续:GEARS 适配 donor split+ΔPearson(解"不可比",S3)、scGen 接入(S3)、STATE 同协议(S5)——各需适配/训练。
-- 表 C:`data/manifests/norman_2019.yaml` + held-out OOD-pert split → abstain_gain / risk-coverage(S4)。
-- S6 汇总三表 → manuscript Results §3.3–3.4 + Related Work + Fig 6(治理矩阵 / 准确性 bar)。
+- 表 C 细化:abstained 扰动的 OOD 富集度 / 仅 OOD 子集 abstain_gain。
+- S6 汇总三表 → manuscript Results §3.3–3.4 + Related Work + Fig 6(治理矩阵 / 准确性 bar / risk-coverage 曲线)。

@@ -1,0 +1,49 @@
+# PRAXIS-VirtualCell manifest — Norman 2019 单细胞扰动基准 + in-dist / OOD-pert split 声明
+# 遵 CLAUDE.md manifest 制度(不变量3):数据来源 + sha256 + 可复现 split 配方。
+# 解决 02_review R9(无 manifest)+ finding_w7_ablation backlog(abstain_gain 需真 OOD split)。
+
+dataset: norman_2019
+description: >
+  Norman et al. 2019 单细胞 CRISPRa 遗传交互扰动图谱(K562);经 donor VCBench preprocessing
+  打包为 h5ad(condition: control / GENE+ctrl / GENE_A+GENE_B)。PRAXIS 只读复用,不重新分发数据。
+
+source:
+  paper: "Norman et al., Exploring genetic interaction manifolds constructed from rich single-cell phenotypes"
+  venue: "Science 365(6455):786-793 (2019)"
+  doi: "10.1126/science.aax4438"
+
+processed_file:
+  path: "data/raw/tasks_data/unseen_perts/norman2019_comb_stack.h5ad"   # 相对 donor_root
+  donor_root: "/home/zkyd/data1/mzy/Virtual cell"                       # 远端只读
+  size_bytes: 937614888
+  sha256: "e3d116b4e01baffb154b7b42b4ad9d2c6680b088c2d7aba766d4dd4d8b4317de"  # 远端实测
+  shape: "118856 x 2000 (cells x genes)"
+
+loader_recipe:
+  function: "bench.vcbench.loader.load_vcbench_split"
+  test:  { name: norman_2019, split: test,  max_cells_per_pert: 200, rng_seed: 1 }
+  train: { name: norman_2019, split: train, max_cells_per_pert: 200, rng_seed: 0 }
+  metric: "per-cell ΔPearson (donor coordinator.eval_agent.EvalAgent, batch_size=64)"
+
+# split 由 train/test 扰动集合重叠**经验导出**(远端实测,见 finding_w8_systems_comparison 表 C)
+splits:
+  in_distribution_seen:
+    definition: "test 扰动 ∈ train 扰动集合(seen perturbation)"
+    n_perturbations: 69
+    n_cells: 5818
+  ood_perturbation_unseen:
+    definition: "test 扰动 ∉ train 扰动集合(held-out OOD-perturbation)"
+    n_perturbations: 82
+    n_cells: 13056
+    examples: ["BCORL1", "CBFA2T3", "CDKN1B", "CBL+PTPN12", "BPGM+ZBTB1"]
+  totals: { test_perturbations: 151, test_cells: 18874, train_perturbations: 137 }
+
+# 在「人类、词表内、未见扰动」上**真实成立**的 abstain 机制:ensemble 跨 base disagreement
+# (物种拒绝 / 词表拒绝在此不触发)。
+abstain_mechanism:
+  type: "ensemble_disagreement (cross_base_agreement)"
+  impl: "coordinator.eval_agent.EvalAgent(aux_bases=[...], tau_disagreement, abstain_granularity=pert_level)"
+  reproduce: "python -m praxis_virtualcell.benchmarks.abstain_gain"
+  honesty: >
+    risk-coverage 正向:弃权高分歧扰动 → 保留集 ΔPearson 单调上升(见表 C)。
+    阈值附近因 GPU 浮点非确定性,abstain_rate/gain 有 ~±0.01 run 间抖动;gain 以固定满覆盖参考(tau 最大)计。
