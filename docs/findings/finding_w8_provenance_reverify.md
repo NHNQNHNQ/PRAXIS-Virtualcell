@@ -34,13 +34,33 @@ pretrained_backbone         0.618345    0.618499   1.54e-04
 → S0(ckpt meta)= 论文 6 base 值(cpa 0.6716/decoder 0.6709/gnn 0.6675/linear 0.6639/latent 0.6365/pretrained 0.6183);
 S_eval 在文档容差内复现,**diff 与 finding_w4b_multi_anchor 记录完全相同**(非重新编造)。
 
-## 结论(本轮)
-- **评测 harness 与 6 个 base 准确性数字:本会话远端当场见证为真**(linear 逐位 + 6 base diff 一致)。
-- 因 Coordinator/scGPT/GEARS 用**同一 harness**,这强力佐证其真实性;但仍应逐一见证(下轮)。
-- 另:[[finding_w7_ablation]] 的 A↔D 0→1 表 + cross-species 已在 Mac 本地当场复跑见证(75 passed)。
+## 3. Coordinator 组合 —— 招牌 0.7039 当场复现
+命令:`python -m praxis_virtualcell.benchmarks.coordinator_eval ".../norman_2019"`(GPU)
+```
+combo                                                            dp        n
+latent_additive+gnn_pert                                   0.684678    18874
+cpa_style+decoder_only+gnn_pert                            0.701951    18874
+linear+latent+cpa+gnn+decoder (all-5)                     0.703874    18874
+```
+→ 论文值 0.6847 / 0.7020 / **0.7039**(all-5=0.703874)全部复现,n=18874 一致。**招牌 0.7039 为真**。
 
-## 待见证(下轮 /loop)
-- [ ] Coordinator 组合 0.7039 / 0.7020 / 0.6847(coordinator_eval / coordinator_bridge)
-- [ ] scGPT frozen 0.4407(vc-scgpt env)
-- [ ] GEARS 原生 pearson_de 0.8392(标注与 base 不可比)
+## 4. scGPT frozen head —— 逐位复现 0.4407
+eval 存档 scGPT head ckpt(`/home/zkyd/data1/mzy/scgpt_ckpt/norman_2019/pretrained_backbone`,vc-scgpt env):
+```
+recorded_dp = 0.4406901964584723
+S_eval_dp   = 0.4406901964584723    ← 16 位完全一致(diff 0)
+n = 7290
+```
+→ 论文 scGPT 0.4407、n=7290(减采样 max_cells=50)为真,逐位复现。
+
+## 结论(本轮)
+- **论文真正依赖的 delta-Pearson 准确性数字全部本会话远端当场见证为真**:
+  6 base(linear 逐位 + 5 个 diff 与 finding 一致)+ Coordinator 0.7039/0.7020/0.6847 + scGPT 0.4407(逐位)。
+- 评测 harness(loader + EvalAgent)真实(linear / scGPT 两处逐位复现)。
+- [[finding_w7_ablation]] 的 A↔D 0→1 表 + cross-species 已在 Mac 本地当场复跑见证(75 passed)。
+- **未发现任何编造或对不上的准确性数字。**
+
+## 待见证 / 下一步
+- [进行中] GEARS 原生 pearson_de(论文标注**与 base 不可比**,off-axis):远端后台重训中
+  (`gears_norman 5`,~38min;重训为 ~0.84 量级、非逐位,因训练随机)。下轮查 `/tmp/gears_witnessed.log`。
 - 之后接 S2 mean-perturbation baseline(同 harness,顺带做)。
