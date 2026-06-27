@@ -40,7 +40,8 @@ class LedgerEntry:
     critic_violations: list = field(default_factory=list)
     caution_flags: dict = field(default_factory=dict)
     # 可选外部评测信号(有 ground-truth 时填;否则 None = 未评测)
-    delta_pearson: float | None = None
+    delta_pearson: float | None = None                          # ensemble/整体该扰动准度
+    per_predictor_delta_pearson: dict | None = None             # {predictor_name: 该扰动 ΔPearson}(阶段2 router 训练标签)
     seen_in_train: bool | None = None
 
     def as_dict(self) -> dict:
@@ -49,6 +50,7 @@ class LedgerEntry:
 
 def _entry_from_report(report: dict, *, request: dict | None = None,
                        delta_pearson: float | None = None,
+                       per_predictor_delta_pearson: dict | None = None,
                        seen_in_train: bool | None = None) -> LedgerEntry:
     req = request or {}
     md = report.get("model_disagreement") or {}
@@ -71,6 +73,7 @@ def _entry_from_report(report: dict, *, request: dict | None = None,
         critic_violations=list(report.get("critic_violations") or []),
         caution_flags=dict(report.get("caution_flags") or {}),
         delta_pearson=delta_pearson,
+        per_predictor_delta_pearson=per_predictor_delta_pearson,
         seen_in_train=seen_in_train,
     )
 
@@ -83,8 +86,10 @@ class EvalLedger:
 
     def record(self, report: dict, *, request: dict | None = None,
                delta_pearson: float | None = None,
+               per_predictor_delta_pearson: dict | None = None,
                seen_in_train: bool | None = None) -> LedgerEntry:
         e = _entry_from_report(report, request=request, delta_pearson=delta_pearson,
+                               per_predictor_delta_pearson=per_predictor_delta_pearson,
                                seen_in_train=seen_in_train)
         self.entries.append(e)
         return e
