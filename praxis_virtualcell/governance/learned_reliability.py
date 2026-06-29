@@ -37,6 +37,13 @@ def score(features: dict, *, art_dir=ARTIFACT_DIR) -> dict:
     if rel.get("feature_schema_version") != FEATURE_SCHEMA_VERSION:
         return {"fallback": True, "reason": "schema_mismatch",
                 "expected": FEATURE_SCHEMA_VERSION, "got": rel.get("feature_schema_version")}
+    # 完整性:必需字段齐 + content hash 匹配(篡改 weights / 字段不全 → fallback,主动防护)
+    if not all(rel.get(k) for k in ("features", "mean", "std", "weights")):
+        return {"fallback": True, "reason": "incomplete_artifact"}
+    _content = {k: rel.get(k) for k in ("features", "mean", "std", "weights", "lam")}
+    _calc = hashlib.sha256(json.dumps(_content, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+    if rel.get("content_sha256") != _calc:
+        return {"fallback": True, "reason": "integrity_mismatch"}
 
     from praxis_virtualcell.governance.reliability_model import predict_dp
 

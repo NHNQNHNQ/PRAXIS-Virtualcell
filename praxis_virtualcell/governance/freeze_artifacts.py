@@ -44,6 +44,10 @@ def main():
         "finding": "docs/findings/finding_w9_m2_reliability_model.md",
         "metrics_oof": {"reg_corr": 0.701, "bad_auroc": 0.907},
     }
+    # 自校验:content hash 覆盖模型内容(features/mean/std/weights/lam);runtime 验证不符 → 篡改 → fallback
+    content = {k: rel[k] for k in ("features", "mean", "std", "weights", "lam")}
+    rel["content_sha256"] = hashlib.sha256(
+        json.dumps(content, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
     ab = {
         "model_version": "abstain_v0.3.0", "feature_schema_version": SCHEMA,
         "uses_reliability": "reliability_v0.3.0",

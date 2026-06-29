@@ -30,5 +30,6 @@
   "metrics_oof": {
     "reg_corr": 0.701,
     "bad_auroc": 0.907
-  }
+  },
+  "content_sha256": "99842864d260bff16ab119b555152361615f792a81e7331689fc577b848d6ed9"
 }

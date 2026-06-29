@@ -87,3 +87,21 @@ def test_e2e_report_carries_learned_decision():
     assert lr["fallback"] is False and "reliability_score" in lr and lr["model_version"] == "reliability_v0.3.0"
     # 冻结治理证据:决策可追溯到 artifact 内容哈希(64 hex)
     assert len(lr["artifact_sha256"]) == 64 and len(lr["abstain_artifact_sha256"]) == 64
+
+
+# artifact 篡改/不全 → 主动 fallback(冻结治理可审计)
+def test_artifact_tamper_falls_back(tmp_path):
+    import json, os, shutil
+    from praxis_virtualcell.governance import learned_reliability as L
+    art = "praxis_virtualcell/governance/artifacts"
+    for f in os.listdir(art):
+        if f.endswith(".json"):
+            shutil.copy(f"{art}/{f}", tmp_path / f)
+    rel = json.loads((tmp_path / "reliability_model_v0_3.json").read_text())
+    rel["weights"][1] += 99.0                                   # 篡改 weights
+    (tmp_path / "reliability_model_v0_3.json").write_text(json.dumps(rel))
+    r = L.score({"disagreement_score": 0.4}, art_dir=str(tmp_path))
+    assert r["fallback"] is True and r["reason"] == "integrity_mismatch"
+    (tmp_path / "reliability_model_v0_3.json").write_text(json.dumps({"feature_schema_version": "v0.3.0"}))
+    r2 = L.score({"disagreement_score": 0.4}, art_dir=str(tmp_path))
+    assert r2["fallback"] is True and r2["reason"] == "incomplete_artifact"
