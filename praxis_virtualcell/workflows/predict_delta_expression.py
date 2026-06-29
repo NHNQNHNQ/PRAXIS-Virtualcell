@@ -24,7 +24,7 @@ def build_runtime(config: RuntimeConfig | None = None) -> AgentRuntime:
     rt = AgentRuntime(cfg, bus=MessageBus(), clock=Clock(), idgen=IdGen())
     for a in (InputInterpreterAgent(), BioObjectNormalizerAgent(), SpeciesBrainAgent(cfg),
               ModelApplicabilityAgent(), MockLinearAgent(), MockCPAAgent(), MockGEARSAgent(),
-              EnsembleCoordinatorAgent(), ReliabilityAgent(), CriticAgent(),
+              EnsembleCoordinatorAgent(), ReliabilityAgent(mode=cfg.reliability_mode), CriticAgent(),
               ProvenanceAgent(), ReportAgent()):
         rt.register_agent(a)
     from praxis_virtualcell.agents_llm.llm_client import make_llm_client

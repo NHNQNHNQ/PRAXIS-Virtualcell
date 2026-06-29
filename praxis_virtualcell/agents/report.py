@@ -29,6 +29,7 @@ class ReportAgent(BaseAgent):
             "model_disagreement": rd.get("model_disagreement"),
             "critic_violations": p.get("critic_violations", []),
             "caution_flags": p.get("provenance", {}).get("ortholog_cautions", {}),
+            "learned_reliability": p.get("learned_reliability"),  # M2.1 Step6:learned 决策+provenance(rule 模式为 None)
             "provenance": p.get("provenance", {}),
         }
         bus.send(AgentMessage(message.message_id + ":rep", self.name, "client",

@@ -41,6 +41,9 @@ class IdGen:
 class RuntimeConfig:
     mode: Mode = Mode.OFFLINE
     brains_root: str = str(_BRAINS_DEFAULT)
+    # M2.1 Step6:可靠性判定模式 rule / learned / learned_with_rule_fallback。
+    # 默认 learned_with_rule_fallback(artifact 缺失/schema 不匹配自动退回 rule,fail-closed)。
+    reliability_mode: str = "learned_with_rule_fallback"
     llm_enabled: bool = False  # 仅当 mode=llm_assisted 且有可用 key 时才 True
     deepseek_api_key: str = ""
     deepseek_base_url: str = "https://api.deepseek.com"

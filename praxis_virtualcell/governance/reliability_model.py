@@ -90,6 +90,28 @@ def cv_reliability(entries, *, k=5, lam=1.0):
     return oof, y
 
 
+def fit_full(entries, *, lam=1.0):
+    """全量训练(非 CV),返回冻结参数 dict:features/mean/std/weights。供 artifact 导出 + runtime 加载。"""
+    X, y = _matrix(entries)
+    mean, std = _col_stats(X)
+    Xs = _imp_std(X, mean, std)
+    # 仅用有 label 的样本拟合
+    idx = [i for i in range(len(y)) if not _isnan(y[i])]
+    w = _ridge_fit([Xs[i] for i in idx], [y[i] for i in idx], lam)
+    return {"features": list(FEATURES), "mean": mean, "std": std, "weights": w, "lam": lam}
+
+
+def predict_dp(params, feat: dict) -> float:
+    """用冻结参数对单条推理特征算预测 dp。缺失特征用训练均值填(provenance 另记)。"""
+    feats, mean, std, w = params["features"], params["mean"], params["std"], params["weights"]
+    xs = []
+    for j, f in enumerate(feats):
+        v = feat.get(f)
+        v = mean[j] if (v is None or _isnan(float(v))) else float(v)
+        xs.append((v - mean[j]) / std[j])
+    return w[0] + sum(w[j + 1] * xs[j] for j in range(len(xs)))
+
+
 def _pearson(a, b):
     pairs = [(x, y) for x, y in zip(a, b) if not (_isnan(x) or _isnan(y))]
     if len(pairs) < 2:

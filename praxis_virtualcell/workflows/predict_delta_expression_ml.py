@@ -36,7 +36,7 @@ def build_runtime_ml(ckpt_dir: str, *, config=None, norman_ds=None):
         rt.register_agent(make_ml_agent(model, norman_ds=ds, name=name))
 
     for a in (InputInterpreterAgent(), BioObjectNormalizerAgent(), SpeciesBrainAgent(cfg),
-              ModelApplicabilityAgent(), EnsembleCoordinatorAgent(), ReliabilityAgent(),
+              ModelApplicabilityAgent(), EnsembleCoordinatorAgent(), ReliabilityAgent(mode=cfg.reliability_mode),
               CriticAgent(), ProvenanceAgent(), ReportAgent()):
         rt.register_agent(a)
     return rt
