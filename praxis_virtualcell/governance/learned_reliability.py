@@ -6,8 +6,13 @@ artifact 冻结在 governance/artifacts/(由 freeze_artifacts.py 导出,带 ledg
 """
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
+
+
+def _sha(path) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 ARTIFACT_DIR = Path(__file__).parent / "artifacts"
 FEATURE_SCHEMA_VERSION = "v0.3.0"
@@ -52,4 +57,7 @@ def score(features: dict, *, art_dir=ARTIFACT_DIR) -> dict:
         "features_used": used,                    # 各特征是否真到位(否则 predict_dp 用训练均值填)
         "model_version": rel.get("model_version"),
         "feature_schema_version": rel.get("feature_schema_version"),
+        # 冻结治理证据:每个 learned 决策可追溯到具体不可变 artifact 内容哈希
+        "artifact_sha256": _sha(Path(art_dir) / "reliability_model_v0_3.json"),
+        "abstain_artifact_sha256": _sha(Path(art_dir) / "abstain_head_v0_3.json"),
     }

@@ -85,3 +85,5 @@ def test_e2e_report_carries_learned_decision():
     lr = r["learned_reliability"]
     assert lr is not None and lr["reliability_mode"] == "learned_with_rule_fallback"
     assert lr["fallback"] is False and "reliability_score" in lr and lr["model_version"] == "reliability_v0.3.0"
+    # 冻结治理证据:决策可追溯到 artifact 内容哈希(64 hex)
+    assert len(lr["artifact_sha256"]) == 64 and len(lr["abstain_artifact_sha256"]) == 64
