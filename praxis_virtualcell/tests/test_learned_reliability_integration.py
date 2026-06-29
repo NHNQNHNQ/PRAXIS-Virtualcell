@@ -105,3 +105,15 @@ def test_artifact_tamper_falls_back(tmp_path):
     (tmp_path / "reliability_model_v0_3.json").write_text(json.dumps({"feature_schema_version": "v0.3.0"}))
     r2 = L.score({"disagreement_score": 0.4}, art_dir=str(tmp_path))
     assert r2["fallback"] is True and r2["reason"] == "incomplete_artifact"
+
+
+# rule_only vs learned 对照:learned 改善软风险且不破坏硬规则、provenance 完整
+def test_mode_compare_learned_improves_soft_risk():
+    from praxis_virtualcell.benchmarks.eval_ledger import EvalLedger
+    from praxis_virtualcell.governance import mode_compare as mc
+    r = mc.compare(EvalLedger.from_jsonl("docs/findings/m1_ledger_151.jsonl").entries)
+    assert r["hard_rule_override"] == 0 and r["provenance_complete"] is True
+    learned = r["modes"]["learned_with_rule_fallback"]
+    rule = r["modes"]["rule_only"]
+    assert learned["wrong_accept"] < rule["wrong_accept"] - 0.3      # 大幅少接受 bad
+    assert learned["risk_coverage"] > rule["risk_coverage"] + 0.3    # 大幅多覆盖 bad
