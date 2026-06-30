@@ -54,9 +54,24 @@ learned-governance.md / 中文版 / data-inventory 的 Limitations 从「151 无
 
 > *Under perturbation-level bootstrap resampling (B=2000), the learned governance advantage was statistically stable: the paired learned − disagreement-only gaps did not cross zero (bad-perturbation AUROC +0.13, 95% CI [0.056, 0.191]; abstention risk–coverage AUC +0.026, 95% CI [0.014, 0.041]). Single-point AUCs carried wide intervals at this ledger size (e.g. AUROC 0.907, 95% CI [0.846, 0.952]), so we emphasize the paired advantage rather than absolute point values.*
 
+## 补充 — 多 seed 重复 5-fold CV(B3,回应「单一确定性 5-fold」)
+
+打乱扰动顺序(仍 leave-perturbation-out,无泄漏)跑 5 个 seed。`governance/repeated_cv.py` + `tests/test_repeated_cv.py`(4 passed)+ `docs/findings/m2_repeated_cv.json`。
+
+| 指标 | mean ± sd | [min, max] |
+|---|---|---|
+| learned bad-pert AUROC | 0.9003 ± 0.0081 | [0.8852, 0.9068] |
+| disagreement-only AUROC | 0.7743 ± 0.0000 | 恒定(固定特征,不经 CV) |
+| learned risk-coverage AUC | 0.7438 ± 0.0014 | [0.7414, 0.7450] |
+| disagreement-only risk-cov AUC | 0.7196 ± 0.0000 | 恒定 |
+
+- **learned 优势对 fold 划分稳健**:5 个随机 seed 下 learned AUROC 全 > disagreement(0.885–0.907 vs 0.774)、learned risk-cov AUC 全 > disagreement(0.741–0.745 vs 0.720),方向 100% 稳定、sd 极小。
+- disagreement 跨 seed 恒定(固定特征排序,不依赖 fold);只有 learned(经 CV 训练)随 fold 微动 → learned 的优势不是侥幸 fold。
+
 ## 进度
 
 - [x] **L1 bootstrap CI**(本 finding)— 四个关键差值 CI 不跨 0,缺口「151 无 CI」已补。
+- [x] **B3 多 seed 重复 CV**(本 finding 补充)— 5 seed learned 优势方向 100% 稳定。
 - [ ] L2 OOD enrichment / OOD-only risk-coverage(纯 Mac,下一步)
 - [ ] L3 整合进 learned-governance.md(把 CI 句写进 Results/Limitations)
 - [ ] B1 GEARS same split(主刊增强)· B2 per-cell 解 W4.5 · B3 多 seed 重复 CV

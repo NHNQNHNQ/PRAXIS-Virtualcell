@@ -46,7 +46,8 @@
 - **TDD**:合成小例验证 enrichment/odds-ratio 计算正确 + 151 实跑断言方向(odds_ratio 有定义、OOD-only 与 seen-only AUC 都返回)。
 - **诚实边界**:`seen_in_train` 在 ledger 的覆盖率须如实报(若多 None,enrichment 仅在有 flag 的子集成立);pert-level;单 control(W4.5)。
 
-### - [ ] B3 — 多 seed 重复 5-fold CV(A 类补充,纯 Mac,轻)
+### - [x] B3 — 多 seed 重复 5-fold CV(A 类补充,纯 Mac,轻)【已完成 → `finding_w9_m2_bootstrap_ci.md` 补充节 + `m2_repeated_cv.json`】
+- 结果:5 seed learned AUROC 0.900±0.008、risk-cov AUC 0.744±0.001,每 seed 均 > disagreement(方向 100% 稳定)。`governance/repeated_cv.py` + `tests/test_repeated_cv.py`(4 passed)。
 - **目标**:给 OOF 指标(AUROC 0.907 / risk-cov AUC 0.746)加跨 seed 稳健性,补 bootstrap CI(回应"单一确定性 5-fold")。
 - **复用**:`reliability_model.cv_reliability` 现按固定 fold;加 `seed` 参数打乱 fold 分配(仍 leave-perturbation-out,无泄漏),跑 5 seeds × 5 folds。
 - **产出**:在 `bootstrap_ci.py` 或新 `governance/repeated_cv.py` 加函数 + test + 在 `finding_w9_m2_bootstrap_ci.md` 追加"repeated CV"小节(或新 finding)。
