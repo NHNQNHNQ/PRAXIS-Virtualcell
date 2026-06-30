@@ -31,7 +31,8 @@
 ### - [x] A2 — 证据分层 + runtime-replay 限制句(A 类,无需新跑)【已完成】
 - 已落在 `docs/paper/v0.3/learned-governance.md`(§A 证据分层表 + R7 限制句)、`-zh.md`、`data-inventory.md`(§0/§7)。loop 仅在 L3 整合时确认措辞,无需独立工作。
 
-### - [ ] L2 — OOD enrichment / OOD-only risk-coverage(A 类,纯 Mac)
+### - [x] L2 — OOD enrichment / OOD-only risk-coverage(A 类,纯 Mac)【已完成 → `docs/findings/finding_w9_m2_ood_enrichment.md`】
+- 结果:learned-flagged 98% 是 OOD(odds ratio 74.7);但超越 OOD 标签 — OOD-only 子集 risk-cov AUC 0.577>0.5、learned AUROC 0.907>ood-only 0.788。`governance/ood_enrichment.py` + `tests/test_ood_enrichment.py`(4 passed)+ `m2_ood_enrichment.json`。
 - **目标**:回答"learned abstain 是否偏好弃权 OOD(未见)扰动",并区分 learned 是否只是 OOD 标签的代理。
 - **数据**:`docs/findings/m1_ledger_151.jsonl` 的 `seen_in_train` 字段(OOD flag,推理期可得 → 可分析,**非 label**);v0.2 记 82/151 未见。
 - **复用**:`reliability_model.cv_reliability`(OOF)、`bootstrap_ci._prepare`(拿 learned/rule flag)、`abstain_head.risk_coverage/rc_auc`。
