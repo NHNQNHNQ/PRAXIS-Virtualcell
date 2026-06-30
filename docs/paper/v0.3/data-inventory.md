@@ -205,6 +205,29 @@
 
 → 加幅度/不确定性特征不升反降（原始）或持平（派生）→ **保持 base 3 特征**，防过拟合。disagreement 主导。
 
+**(d) 稳健性:bootstrap CI + 多 seed**（L1/B3,来源：`finding_w9_m2_bootstrap_ci.md`）
+
+| 指标 | point | 95% CI / 跨 seed |
+|---|---|---|
+| AUROC 配对差(learned − disagreement) | +0.1325 | **[0.056, 0.191]**（不跨 0） |
+| risk-cov AUC 配对差(learned − disagreement) | +0.0264 | **[0.014, 0.041]**（不跨 0） |
+| learned AUROC 单点 | 0.907 | [0.846, 0.952]（宽,小样本） |
+| learned AUROC 跨 5 seed | — | 0.900 ± 0.008 [0.885, 0.907] |
+| learned risk-cov AUC 跨 5 seed | — | 0.744 ± 0.001 |
+
+→ 配对优势统计显著（CI 不跨 0）、对 fold 划分稳健；单点区间宽是 151 的真实代价 → 论文强调**配对优势**而非单点绝对值。
+
+**(e) OOD enrichment**（L2,来源：`finding_w9_m2_ood_enrichment.md`）
+
+| 指标 | 值 |
+|---|---|
+| learned-flagged 中 OOD 占比 / base rate | 0.981(51/52) / 0.543 |
+| OOD enrichment odds ratio | **74.7** |
+| OOD-only / seen-only 子集 risk-cov AUC | 0.577 / 0.861 |
+| learned AUROC vs ood-only(支撑"非 OOD 代理") | 0.907 vs 0.788 |
+
+→ learned 强烈富集 OOD,但**超越 OOD 标签**(OOD-only 子集内仍有选择性 0.577>0.5)。
+
 ### 7B. 运行时集成证据（in-sample 回放）——`[in-sample回放]`
 
 口径：151 ledger · 冻结**全量拟合**模型在**同一批 151** 回放 → **非独立泛化**，仅证"接回系统后真改决策 + 保硬规则 + 全溯源"。来源：`finding_w9_m2_mode_compare` / `finding_w9_m2_runtime_integration`。
@@ -249,12 +272,12 @@
 
 | 缺口 | 影响面 | 严重度 | 现状 / 补法 |
 |---|---|---|---|
-| **151 小样本无 bootstrap CI** | 0.907 / 0.746 / 对照表 都无区间 | **高** | 纯 Mac/TDD 可补 perturbation-level bootstrap CI（不碰远端） |
+| ~~151 小样本无 bootstrap CI~~ → **已补(L1)** | 0.907 / 0.746 / 对照表 加了 95% CI | ~~高~~ → 已解 | ✅ 配对差值 CI 不跨 0(AUROC +0.13[0.056,0.191]、risk-cov +0.026[0.014,0.041];wrong-accept 降/risk-cov 增 [0.59,0.92])。`finding_w9_m2_bootstrap_ci.md` |
 | **外部专用 baseline 未入表 A** | 完整 VirtualCell 论文竞争力 | **高** | GEARS 同 split / scGen / STATE 同协议（较重，需远端适配/训练） |
 | **per-cell 解 W4.5 单 control** | M1/M2 全 pert-level，disagreement 单基线 | 中高 | 解 W4.5 后 disagreement 更准、可能整体升；较重 |
 | **mode_compare 为 in-sample** | R7 非独立泛化 | 中 | 已用 OOF（7A）作泛化兜底 + 写法上明确定性，**不算硬伤但须写清** |
 | **阈值非端到端调优** | unnecessary_abstain 随阈值动 | 中 | 训练分位设定；可后续按运营反馈调 |
-| **单一确定性 5-fold（无多 seed）** | OOF 稳健性 | 中 | 可加多 seed / 重复 CV |
+| ~~单一确定性 5-fold（无多 seed）~~ → **已补(B3)** | OOF 稳健性 | ~~中~~ → 已解 | ✅ 5 seed learned AUROC 0.900±0.008、risk-cov 0.744±0.001,每 seed 均 > disagreement。`finding_w9_m2_bootstrap_ci.md` 补充节 |
 | **Router / Delta-Adapter 未做** | — | 低 | Router deferred（ensemble 近 oracle）；Delta-Adapter 暂缓（易泄漏） |
 | **跨物种仅路由层原型** | mouse/bacteria/yeast | 低（已声明 scope） | 无真跨物种 predictor，已诚实标 scope |
 
@@ -274,4 +297,4 @@
 - **硬缺口**：① 表 A 无同协议外部强 baseline（GEARS同split/scGen/STATE）；② per-cell 解 W4.5；③ CI。这三项不补，审稿人易质疑"准确性侧无强对照 + 小样本无区间"。
 - **结论倾向**：作为**治理/可信方向**的主刊投稿，**核心贡献够新**，但**竞争力补强需 ①②③**；若定位纯方法/系统贡献、明确不比 SOTA，则门槛低很多。
 
-**最省力的下一步（性价比排序）**：① bootstrap CI（纯 Mac，几小时，直接强化 A 与 B 的③）→ ② GEARS 同 split 入表 A（解 B①，较重，远端）→ ③ per-cell 解 W4.5（最重，解 B②）。
+**最省力的下一步（性价比排序）**：~~① bootstrap CI~~ ✅**已完成**（L1 CI + B3 多 seed + L2 OOD enrichment,均纯 Mac）→ ② GEARS 同 split 入表 A（解 B①，较重，**远端**）→ ③ per-cell 解 W4.5（最重，解 B②，**远端**）。剩余两项均需远端,见 `docs/PLAN-v0.3-limitations-completion.md` 的 🛑 步骤。

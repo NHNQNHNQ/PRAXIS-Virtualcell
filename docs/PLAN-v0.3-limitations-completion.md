@@ -54,7 +54,8 @@
 - **验收**:报 5 seeds 的 learned AUROC / risk-cov AUC 的 mean ± sd(或 min–max);断言方向稳定(每个 seed learned > disagreement)。
 - **诚实**:多 seed 只动 fold 划分,不动数据;仍 pert-level、151。
 
-### - [ ] L3 — 把 CI + OOD + 多seed 整合进 v0.3 文档(A 类,纯 Mac,改 v0.3 文档)
+### - [x] L3 — 把 CI + OOD + 多seed 整合进 v0.3 文档(A 类,纯 Mac,改 v0.3 文档)【已完成】
+- learned-governance.md / -zh.md:R2/R3 加 CI、新增 OOD enrichment 段、Limitations 改写、Evidence sources 加 2 行;data-inventory:§7A 加 (d)/(e)、§9 缺口 CI/多seed 标已补、§10 next-step 更新。中文 docx 已同步重生成。
 - **改**(均为 v0.3 新文档,**不碰 v0.2 正文**):
   - `docs/paper/v0.3/learned-governance.md`:Limitations 的"无 CI"改成 finding_w9_m2_bootstrap_ci 里备好的英文句;R3/R2 加 CI 区间;新增 OOD-enrichment 一小段(R3 后或新 R)。
   - `docs/paper/v0.3/learned-governance-zh.md`:同步中文。

@@ -47,6 +47,8 @@ We train a deliberately light reliability model — a pure-Python ridge regresso
 
 The learned model also regresses the reliability target with OOF corr(predicted, true) = **0.701**. Learning a three-feature combination improves bad-perturbation detection by **+0.13 AUROC** over the strong disagreement-only heuristic that already drove v0.2. Because these are out-of-fold predictions, this is a generalization result, not memorization.
 
+Under perturbation-level bootstrap resampling (B = 2000), the paired learned − disagreement-only AUROC gap did not cross zero: **+0.13, 95% CI [0.056, 0.191]**. The single-point AUROC carried a wide interval at this ledger size (0.907, 95% CI [0.846, 0.952]), so we emphasize the paired advantage over absolute point values. Across five random leave-perturbation-out splits the learned AUROC was stable at 0.900 ± 0.008 (range 0.885–0.907), exceeding disagreement-only (0.774) in every split.
+
 ### R3. Learned abstention dominates the rule-based abstain (OOF; upgrades v0.2 Table C)
 
 We convert the OOF reliability predictions into a selective-prediction (abstention) policy and measure risk–coverage — for each ranking signal, abstain on the least-reliable perturbations first and track retained accuracy as coverage falls. v0.2 Table C used disagreement to rank; here learned reliability ranks.
@@ -59,7 +61,9 @@ We convert the OOF reliability predictions into a selective-prediction (abstenti
 | Disagreement-only (v0.2) | 0.7196 |
 | Random | 0.6595 |
 
-Retained Δ-Pearson at coverage 1.0 / 0.8 / 0.6 is 0.657 / 0.733 / 0.796 for learned versus 0.657 / 0.713 / 0.749 for disagreement-only: at 60% coverage the learned policy retains **+0.047** Δ-Pearson over the v0.2 rule, capturing roughly half of the rule→oracle gap. The selective-reliability decision is now learned and strictly better than the v0.2 hand-set rule, while remaining well below the oracle ceiling (which we report to avoid over-claiming).
+Retained Δ-Pearson at coverage 1.0 / 0.8 / 0.6 is 0.657 / 0.733 / 0.796 for learned versus 0.657 / 0.713 / 0.749 for disagreement-only: at 60% coverage the learned policy retains **+0.047** Δ-Pearson over the v0.2 rule, capturing roughly half of the rule→oracle gap. The selective-reliability decision is now learned and strictly better than the v0.2 hand-set rule, while remaining well below the oracle ceiling (which we report to avoid over-claiming). The paired learned − disagreement-only risk–coverage AUC gap was bootstrap-stable: **+0.026, 95% CI [0.014, 0.041]** (B = 2000), and held in all five random splits (learned 0.744 ± 0.001 vs disagreement-only 0.720).
+
+**What the learned policy abstains on.** Learned abstention preferentially flags unseen/out-of-distribution perturbations: 98% of flagged perturbations are OOD (enrichment odds ratio 74.7 over a base rate of 0.54), consistent with OOD perturbations being lower-accuracy (mean Δ-Pearson 0.51 vs 0.83 for seen). Crucially it is not a mere OOD-label proxy — within the OOD-only subset, where the OOD label is constant, learned reliability still ranks perturbations for selective abstention (risk–coverage AUC 0.577 > 0.5), and the learned detector exceeds the OOD-only heuristic on bad-perturbation detection (AUROC 0.907 vs 0.788). The learned head therefore captures low-accuracy perturbations *beyond* OOD status alone.
 
 ### R4. Adding prediction-magnitude/uncertainty features does not help — a negative result
 
@@ -119,7 +123,7 @@ The takeaway, stated narrowly: with the learned default the runtime recovers sof
 - **Perturbation-level, not per-cell.** All numbers (≈0.5–0.9 Δ-Pearson, AUROC, risk-coverage) are perturbation-level selective-reliability statistics over the evaluation ledger; they are not, and are not comparable to, the v0.2 per-cell headline (0.7039).
 - **R7 is in-sample by construction.** The rule-vs-learned table replays the same 151 entries the frozen model was fit on. It demonstrates decision-behaviour change and hard-rule/provenance preservation, not out-of-sample performance; the generalization claim rests on R2/R3.
 - **Single control (W4.5).** Disagreement is currently computed against a single baseline rather than the full per-cell control; the −0.716 and downstream signals are established under that single-control setting, and a per-cell control is expected to sharpen them.
-- **Small sample, no CI.** The ledger is 151 perturbations with a single deterministic 5-fold; we report no bootstrap confidence intervals. The cross-fold OOF gaps (0.907 vs 0.774; 0.746 vs 0.720) are clear but uninterval'd; a perturbation-level bootstrap CI on the headline numbers is a clean, planned refinement.
+- **Small sample.** The ledger is 151 perturbations. We quantify the resulting uncertainty rather than ignore it: under perturbation-level bootstrap (B = 2000) the paired learned-vs-baseline gaps did not cross zero (AUROC +0.13 [0.056, 0.191]; risk–coverage AUC +0.026 [0.014, 0.041]), and the advantage held across five random splits — but single-point AUCs carry wide intervals (e.g. AUROC 0.907 [0.846, 0.952]), so we emphasize the paired advantage rather than absolute point values. A larger ledger would tighten the single-point intervals.
 - **Three features.** The learned model uses three inference features; richer features did not help at this scale (R4) but the conclusion is scoped to the current ledger and predictor set.
 - **Runtime `seen_in_train` is mostly None.** The training-set lookup is not yet wired into the runtime, so `seen_in_train` is usually absent and `predict_dp` imputes the training mean (recorded honestly in `features_used`); disagreement is the dominant feature, so the effect is limited.
 - **Thresholds are not end-to-end tuned.** Abstain/downgrade thresholds are set from training-prediction quantiles (15% / 35%), not end-to-end optimized; `unnecessary-abstain` will move with the threshold.
@@ -144,6 +148,8 @@ Every number above is reproduced from a logged finding; nothing is hand-entered:
 | Rule-vs-learned table (n=151; 0.974→0.211; 0.026→0.789; override 0; provenance complete) | `docs/findings/finding_w9_m2_mode_compare.md` |
 | Leakage-controlled feature/label/diagnostic classification | `docs/findings/finding_w9_m2_ledger_audit.md` |
 | Oracle router 0.7043; ensemble near oracle → Router deferred | `docs/findings/finding_w9_m2_router_oracle.md` |
+| Bootstrap CI (AUROC/AUC paired gaps not crossing 0); repeated-CV stability | `docs/findings/finding_w9_m2_bootstrap_ci.md` |
+| OOD enrichment OR 74.7; OOD-only/seen-only risk-cov 0.577/0.861 | `docs/findings/finding_w9_m2_ood_enrichment.md` |
 
 ## References
 
