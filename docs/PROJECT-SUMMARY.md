@@ -1,6 +1,6 @@
 # PRAXIS-VirtualCell — 项目全景总结(供独立判断)
 
-> 更新:2026-06-29 · git HEAD `a52d940`(已 push)· tag 见下 · 测试 Mac **93 passed + 25 skipped**
+> 更新:2026-06-30 · 本地 HEAD `e432562`(L1/L2/B3/L3 共 7 commit **待 push**)· tag 见下 · 测试 Mac **105 passed + 25 skipped**
 > 分层呈现:**真实见证 / 复现 donor / 声明式 / learned自研 / 诚实边界 / 未做**。刻意不替读者下结论。
 
 ## 0. 一句话定位
@@ -38,25 +38,31 @@ ablation A↔D 五指标 0→1 / cross-species 路由。
   - **rule vs learned 对照**:wrong_accept **0.974→0.211**、risk_coverage **0.026→0.789**、hard_rule_override **0**、provenance complete → 默认 learned **真改善软风险**且不破硬规则。
   - 7 gates 全过 + 篡改审计 + 对照,Mac 93 passed 零回归。
 
+### M2.1 投稿前补强(L1/L2/B3/L3,纯 Mac,已 commit)——把 Limitations 转成主动证据
+- **bootstrap CI(L1)**:扰动级 bootstrap(B=2000),四个**配对差值 CI 不跨 0**(learned−disagreement AUROC +0.13[0.056,0.191]、risk-cov +0.026[0.014,0.041];learned−rule wrong-accept降/risk-cov增 [0.59,0.92])→ 小样本下优势统计显著。
+- **多 seed 重复 CV(B3)**:5 seed learned AUROC 0.900±0.008、risk-cov 0.744±0.001,每 seed 均 > disagreement → 对 fold 划分稳健。
+- **OOD enrichment(L2)**:learned-flagged 98% 是 OOD(**OR 74.7**),但**超越 OOD 标签**(OOD-only 子集 risk-cov 0.577>0.5、AUROC 0.907>ood-only 0.788)。
+- **整合(L3)**:CI/OOD/多seed 写进 `docs/paper/v0.3/learned-governance.md`(英/中)+ data-inventory;新增治理包 `bootstrap_ci / ood_enrichment / repeated_cv`。
+
 ---
 
 ## 4. 诚实边界(持续,务必带进论文)
 - **pert-level ≠ per-cell**:M2 全部数(~0.5–0.9 / AUROC / risk-cov)是**扰动级**,**不是**招牌 per-cell 0.67/0.70。
 - **单 control(W4.5)**:disagreement 基于单一基线,非 per-cell 全量;解 W4.5 后下游可能整体升。
-- **小样本**:ledger 151、单一确定性 5-fold、**无 bootstrap CI**(差距清晰但缺区间)。
+- **小样本**:ledger 151、pert-level。**bootstrap CI 已补**(L1:配对差值 CI 不跨 0)、**多 seed 已补**(B3);单点 AUC 区间仍宽(AUROC 0.907[0.846,0.952])→ 论文强调**配对优势**而非单点绝对值。
 - **learned 用 3 特征**;runtime `seen_in_train` 多为 None → 训练均值填(features_used 如实记),disagreement 主导。
 - **阈值非端到端调优**(按训练分位);unnecessary_abstain 可随阈值调。
 - **预测性能不赢 SOTA**(复现 donor + 套壳);强外部 baseline(GEARS 同 split/scGen/STATE)未做。
 - mouse/bacteria/yeast 仅路由层原型(无真跨物种 predictor)。
 
 ## 5. 工程 / 状态
-- Mac **93 passed + 25 skipped**;`origin/main = a52d940`,全部已 push。
+- Mac **105 passed + 25 skipped**;本地 HEAD `e432562`(L1/L2/B3/L3 共 7 commit,**待 push** — push 留用户决定)。
 - 远端 `zkyd@10.102.106.53`(8×A100;env virtualcell/vc-scgpt)复现准确性。
 - 自研治理包 `praxis_virtualcell/governance/`(ledger_features / reliability_model / abstain_head / learned_reliability / freeze_artifacts / mode_compare + artifacts/)。
 
 ## 6. Backlog / 未做
-- **v0.3 论文新 Result**(learned governance,PRAXIS 自己口径,**不碰 E9** code-gate 那条线)— **下一步**。
-- Router(deferred:ensemble 近 oracle)· M2.4 Delta-Adapter(最后,易泄漏)· per-cell 解 W4.5 · 外部 predictor 进表 A · bootstrap CI · 真 cross-species predictor。
+- **v0.3 论文 Result**(learned governance)— ✅ 已写 `docs/paper/v0.3/learned-governance.md`(英/中)+ `data-inventory.md` 全量盘点 + 补强 CI/OOD/多seed;**不碰 E9**。
+- **L4 GEARS 同 split 入表 A**(远端,执行清单已备于 `PLAN-v0.3-limitations-completion.md`)· **B2 per-cell 解 W4.5**(远端)· Router(deferred:ensemble 近 oracle)· M2.4 Delta-Adapter(最后,易泄漏)· 真 cross-species predictor。(bootstrap CI/多seed/OOD 已补)
 - 接更异构 predictor(STATE/GEARS/scGPT embedding)后重启 Router + 重测特征增强。
 
 ## 7. 供判断的问题
