@@ -72,6 +72,7 @@
   - **不可比两根源 → 要对齐**:① **split**:`simulation` split ≠ donor norman test 的 151 扰动 → 改用 donor test 扰动集(同 `load_vcbench_split("norman_2019","test",rng_seed=1)` 口径);② **指标**:GEARS `pearson_de`(DE-gene 绝对表达 pearson)≠ per-cell ΔPearson → 取 GEARS 预测转 delta(pred − control mean)过 **donor EvalAgent** 算 per-cell ΔPearson(n=18874 口径)。
   - **远端步骤**:(a) `ssh zkyd@10.102.106.53` + `conda activate virtualcell` + `git pull`;(b) 在 `gears_norman.py` 加 `--donor-eval` 路径(用 donor test split + donor EvalAgent 算 ΔPearson,而非 GEARS 自带指标);(c) 跑 `python -m praxis_virtualcell.benchmarks.gears_norman <epochs> --donor-eval`;(d) 见证 ΔPearson + n,写 finding,入表 A(PRAXIS Coordinator 0.7039 旁)解 R8。
   - **诚实**:GEARS 训练无固定 seed(重训有噪声:0.8392→0.8461);务必报 ΔPearson(非 pearson_de);适配代码须**在远端 env 写+验证**(Mac 无 GEARS/donor 数据,不臆造未验证适配)。
+  - **📋 可执行 runbook(确定接口 `load_norman`/`EvalAgent` + 远端探查命令 + `GearsDonorAdapter` 骨架 + 防泄漏)**:`docs/L4-gears-remote-runbook.md`。
 
 ### - [ ] 🛑 B2 — per-cell 解 W4.5 单 control(B 类,**远端+重,必停**)
 - **为何停**:把 disagreement 从单 control 升级为 per-cell 全量,需远端重跑;影响面大。主刊增强项,优先级在 L4 之后。
