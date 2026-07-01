@@ -106,9 +106,10 @@
 - **治理**:基因不在 GEM → abstain(全缺)/caution(部分缺),不虚构生长。`test_ecoli_gem_case.py`(7 passed,无 cobra skip)。
 - **finding**:`docs/findings/finding_v0_4_metabolism_cases.md`(§1-3)。pyproject 加 `[mechanistic]` extra。
 
-#### - [ ] ⏸ W2.2 — Yeast growth/flux case(C5,T:yeast GEM)【停在数据门:接口就绪,待 SBML】
-- **状态**:yeast-GEM(Yeast8 / iMM904)非 cobrapy 自带 → **停在 D 类数据门**。接口已就绪:`EcoliGEM(sbml_path=...)` 已支持任意 SBML;yeast 只需提供 SBML 路径即可复用同一 FBA/KO/case 管线。**待用户提供 Yeast8/iMM904 SBML 本地路径,或授权从 BiGG 下载 iMM904**。
-- **loop 动作**:yeast-GEM(Yeast8,SBML)非 cobrapy 自带 → 尝试轻量获取;若无数据本地 → **准备接口+验收清单后停**(D 类)。
+#### - [x] W2.2 — Yeast growth/flux case(C5,T:yeast GEM)【已完成 — 用户授权下载 iMM904】
+- **落地**:用户授权 → 下载 iMM904(BiGG,`data/gems/iMM904.xml.gz`,905 genes)。泛化出 `gem_model.GemModel` + `run_growth_case` 基座,`yeast_gem.py` 复用(与 E. coli 同管线,仅换 SBML)。
+- **真跑数字**:WT growth **0.28787**;YGR175C(ERG1)KO→growth 0 **ESSENTIAL**;YOR375C/YIL125W 非必需;缺失基因→**caution**(不虚构)。route `(yeast,gene,growth)→gem_fba`。
+- **架构复用点**:E. coli + yeast 共用 GemModel/run_growth_case → 框架对不同物种机制模型可扩展(换 SBML 即换物种)。`test_yeast_gem_case.py`(6 passed,无 cobra/SBML skip)。finding §4-6。
 - **产出(若数据可得)**:yeast GEM 接入 + carbon source change / gene deletion → growth/flux;并入 `finding_v0_4_metabolism_cases.md`。
 - **验收**:flux shift / growth prediction / medium sensitivity;7 部分 validator 过。
 - **停止条件**:yeast GEM SBML 本地无 → 停,标 D 类等用户提供 SBML 路径。
