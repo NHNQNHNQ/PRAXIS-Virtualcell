@@ -40,6 +40,11 @@ prod = [
     "alembic>=1.13,<2",
 ]
 
+# v0.4 W2:机制模型(GEM/FBA)——bacteria/yeast growth case;test 无 cobra 时 skip
+mechanistic = [
+    "cobra>=0.29,<1",
+]
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"

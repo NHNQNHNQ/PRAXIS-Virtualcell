@@ -100,12 +100,11 @@
 
 ### Week 2 — E. coli / yeast metabolism cases(T 类,先试装 cobrapy)
 
-#### - [ ] 🔧 W2.1 — E. coli KO growth case(C4,T:cobrapy)
-- **loop 动作**:先 `.venv/bin/pip install cobra` 试装;cobrapy **自带 E. coli textbook 模型**(`cobra.test.create_test_model("textbook")`,iJO1366 需下载)。用 textbook/e_coli_core 跑 WT FBA growth + 单基因 KO(`single_gene_deletion`)→ essentiality。
-- **产出**:`praxis_virtualcell/predictors/mechanistic/ecoli_gem.py`(接 cobrapy)+ case 走 route_table → GEM。
-- **验收(真跑数字)**:WT growth rate、若干 KO 的 growth(含至少 1 essential→growth≈0)、essentiality 判定;7 部分 validator 过;与 baseline(WT)比。
-- **产出 finding**:`docs/findings/finding_v0_4_metabolism_cases.md`(先写 E. coli 段)。
-- **停止条件**:若 cobrapy 装不上、或需大 GEM 数据(iML1515)本地无 → 停下汇报,标 D 类等用户提供。
+#### - [x] 🔧 W2.1 — E. coli KO growth case(C4,T:cobrapy)【已完成】
+- **落地**:`pip install cobra` 成功;用 cobrapy **自带 e_coli_core(textbook)**(无联网)。`praxis_virtualcell/predictors/mechanistic/ecoli_gem.py`(WT FBA + 大小写不敏感单基因 KO,避 macOS 多进程卡)。
+- **真跑数字**:WT growth **0.87392**;b0720(gltA)/b1136(icd)KO→growth 0 **ESSENTIAL**;b2276 0.212、b0114 0.912、b0356 1.0。route `(bacteria,gene,growth)→gem_fba` accept。
+- **治理**:基因不在 GEM → abstain(全缺)/caution(部分缺),不虚构生长。`test_ecoli_gem_case.py`(7 passed,无 cobra skip)。
+- **finding**:`docs/findings/finding_v0_4_metabolism_cases.md`(§1-3)。pyproject 加 `[mechanistic]` extra。
 
 #### - [ ] 🔧 W2.2 — Yeast growth/flux case(C5,T:yeast GEM)
 - **loop 动作**:yeast-GEM(Yeast8,SBML)非 cobrapy 自带 → 尝试轻量获取;若无数据本地 → **准备接口+验收清单后停**(D 类)。
