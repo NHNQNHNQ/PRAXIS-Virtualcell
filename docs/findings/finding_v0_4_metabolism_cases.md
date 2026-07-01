@@ -54,6 +54,20 @@
 - `gem_model.GemModel`(基座:SBML→WT→大小写不敏感 KO)+ `run_growth_case`(7 部分 case)被 **E. coli(textbook)与 yeast(iMM904)共用** → 证明框架对不同物种机制模型**可扩展**:换 SBML 即换物种,治理/case 管线不变。
 - 现有真跑代谢 case:**bacteria(E. coli)+ yeast(S. cerevisiae)** 两个真核/原核代表,均由 route_table 正确路由到 gem_fba。
 
+## 6b. Phase II — E. coli 培养基/碳源切换 → growth(环境扰动,W5.1,真跑)
+
+激活 schema 的 `medium` 扰动对象(gene 以外的**环境扰动**);route_table 扩 `(microbe, medium, growth)→gem_fba`。同一 e_coli_core,把 glucose 换成其它单一碳源(上限 -10、有氧),FBA 算 growth。`medium_shift.py`。
+
+| carbon | growth | ratio vs glucose |
+|---|---|---|
+| glucose / fructose | 0.87392 | 1.000 |
+| succinate | 0.39756 | 0.455 |
+| lactate | 0.35031 | 0.401 |
+| **acetate** | 0.17334 | **0.198** |
+| unobtainium(伪) | — | 不在模型 |
+
+→ acetate 远弱于 glucose(乙醛酸支路,教科书一致);碳源不在模型 exchange → **abstain**(全缺)/ **caution**(部分缺),不虚构。测试 `test_medium_shift_case.py`(6 passed)。**证明 agent 能处理环境/化学扰动(非 gene)并受治理**。
+
 ## 6. 诚实边界(通用)
 
 - FBA growth 是**约束型可行性/最优通量的相对量**(steady-state),**非**绝对生长速率;in-silico essentiality 随培养基/目标函数变,需湿实验证实。

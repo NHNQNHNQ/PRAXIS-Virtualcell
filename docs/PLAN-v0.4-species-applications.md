@@ -128,6 +128,23 @@
 - **落地状态**:C1/C2 已有、C3/C4 真跑完成、L4 GEARS baseline 入表;C5(yeast)⏸ 数据门、C6(drug)🛑 数据门,均如实标注不虚填。
 - **诚实**:主文只展开真跑 core case;未跑进 roadmap 标 ⏸/🛑;非 human case 价值定位为治理(识别/路由/降级/弃权),不夸大预测。
 
+### Week 5 — Phase II supplement(自主可做子集:公开数据/工具)
+
+#### - [x] W5.1 — 微生物 培养基/碳源切换 → growth(环境扰动,T:cobra 复用)【已完成】
+- **落地**:route_table 扩 `(microbe, medium, growth)→gem_fba`;`medium_shift.py`(碳源名→exchange + FBA 切换)。激活 schema 的 `medium` 扰动对象。
+- **真跑**:glucose 0.874 → succinate 0.398 → lactate 0.350 → **acetate 0.173**(教科书梯度);碳源不在模型→abstain/caution。`test_medium_shift_case.py`(6 passed)。finding §6b。**新增 State 之外的应用维度:环境/化学扰动**。
+
+#### - [ ] W5.2 — Human 免疫激活 cell-state(填补 State/fate 空白应用,D:公开 scRNA)
+- **自主动作**:自主取公开刺激-响应 scRNA(如 Kang 2018 IFN-β PBMC via pertpy/scanpy 或 GEO)→ 计算激活 marker state score(control vs stimulated)→ 过 route_table(state 输出)→ 7 部分 case + 治理(marker 覆盖不足→downgrade)。
+- **验收**:activation state score(control vs stim 可分)+ marker panel + reliability;7 部分 validator 过。data 记 provenance。
+- **只有当**公开数据需注册/无可定位子集 → 硬门#4 停。产出 `finding_v0_4_cellstate_case.md`。
+
+#### - [ ] W5.3 — Human metabolic flux(scFEA/Compass,4C,T/D:重)
+- **自主动作**:试装 scFEA/Compass;若模型/数据轻量可得 → 跑 human 表达→pathway flux tendency + 治理;否则备接口停(硬门#4)。
+
+#### - [ ] W5.4 — Cell-cell communication(NicheNet/CellChat,应用 5,重/多为 R)
+- 多为 R 工具 + 先验数据 → 大概率硬门;先自主评估 Python 侧(如 `liana-py`)可行性,不可行则备接口 + roadmap 停。
+
 ---
 
 ## 自主执行协议(autonomous;尽量不打断)
