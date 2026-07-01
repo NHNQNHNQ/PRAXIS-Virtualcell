@@ -21,11 +21,9 @@
 - **落地**:paul15(scanpy 自带)子集 750 cells;`predictors/state/fate.py`(复用 scoring.py)+ route state_scoring。
 - **真跑**:fate 评分红系 +1.27 vs 髓系 −2.76,**Cohen's d 4.32 → accept**;两 panel 覆盖取 min,缺一→downgrade;原生小鼠 marker 分析(ortholog N/A)。`test_fate_case.py`(4 passed)。finding `finding_v0_5_fate_case.md`。
 
-### - [ ] R2 — Drug dose-response(应用 2 深化;dose/time)
-- **数据**:已下载的 `data/drug_signatures/LINCS_L1000_Chem_Pert_up/down.txt`(gitignore;term 编码 dose,如 `-vorinostat-10.0`/`-vorinostat-1.11`)。
-- **分析**:对某药(如 vorinostat/geldanamycin)按 term 解析 dose → 每 dose 的签名与**最高 dose 共识签名**的重叠(Jaccard)→ dose-response 单调性。复用 `DrugSignatureDB` 思路。route:`(human, drug, expression) → embedding`(已接入)。
-- **验收**:报 dose 梯度的相似度;**单调上升→accept**,非单调/噪声→downgrade(不硬说剂量依赖)。7 部分。
-- **产出**:扩 `drug_signature.py` 或新 `drug_dose.py` + test + finding(可并入 `finding_v0_4_drug_case`)。
+### - [x] R2 — Drug dose-response(应用 2 深化;dose)【已完成】
+- **落地**:LINCS 剂量子集(3 药 × 各剂量 top-150,22.6KB committed);`predictors/embedding/drug_dose.py`;recall vs 最多信号剂量参考 的 dose-Spearman。
+- **治理对照(实跑)**:geldanamycin Spearman 0.90→**accept**;sirolimus recall 近零→**downgrade**(幅度守卫);vorinostat→caution。`test_drug_dose_case.py`(4 passed)。finding `finding_v0_4_drug_case` §6。不训练模型。
 
 ### - [ ] R3 — Bacteria antibiotic → growth(应用 2 例 2C;机制)
 - **数据**:BiGG **iML1515**(全基因组 E. coli,`http://bigg.ucsd.edu/static/models/iML1515.xml.gz`,~数 MB)—— e_coli_core 无抗生素靶反应,iML1515 有叶酸合成(trimethoprim→DHFR、sulfamethoxazole→DHPS)。

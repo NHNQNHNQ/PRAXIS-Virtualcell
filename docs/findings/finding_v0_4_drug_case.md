@@ -39,3 +39,20 @@ drug → 签名 → 与**同 MOA** 药物签名相似度[(up Jaccard + down Jacc
 
 - `praxis_virtualcell/predictors/embedding/drug_signature.py`:`DrugSignatureDB`(签名库)+ `run_drug_response_case`(7 部分 case)。route_table `(*, drug, *) → embedding`(W3.1 起非 data-gated,caution)。
 - 测试 `test_drug_signature_case.py`(7 passed)覆盖 accept/downgrade(弱)/downgrade(无参考)/abstain 四种裁决 + 同 MOA>跨 MOA 可检验断言。**不训练任何模型**。
+
+---
+
+## 6. R2(v0.5)补充 — Drug dose-response(剂量-响应单调性)
+
+- 数据:LINCS 剂量子集(`dose_response_subset.json`,geldanamycin/sirolimus/vorinostat 每剂量 top-150 共识)。
+- 指标:参考态 = 信号最多剂量共识;recall(dose)=|dose_top ∩ ref|/|ref|;dose-recall 的 Spearman。
+- **治理对照(实跑)**:
+
+| drug | Spearman | max recall | 裁决 |
+|---|---|---|---|
+| geldanamycin | **0.90** | 0.06 | **accept**(单调剂量依赖) |
+| sirolimus | 0.50 | 0.02(近零) | **downgrade**(签名重叠不足,不硬说剂量依赖) |
+| vorinostat | 0.50 | 0.75 | **caution**(中等) |
+
+- **幅度守卫**:max recall <0.05(sirolimus)→ 无足够信号评估剂量-响应 → downgrade(Spearman 不可靠时不硬判)。`predictors/embedding/drug_dose.py` + `test_drug_dose_case.py`(4 passed)。
+- 诚实:downgrade 表"签名层无足够证据支持剂量依赖",非"药物无剂量效应"。不训练模型。

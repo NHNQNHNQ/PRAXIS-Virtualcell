@@ -29,5 +29,17 @@
     ],
     "consensus": "per-drug top-100 most-frequent up/down genes across all its LINCS conditions",
     "moa_labels": "curated textbook pharmacology (HSP90/HDAC/PI3K/mTOR inhibitors)"
+  },
+  "committed_subset_dose": {
+    "file": "dose_response_subset.json",
+    "sha256": "663ee14477d3765ccf52e2f06eb5e54a38b8d59c3e3d79c46e1f98fee40ac44a",
+    "bytes": 22650,
+    "drugs": [
+      "geldanamycin",
+      "sirolimus",
+      "vorinostat"
+    ],
+    "content": "每药每剂量 top-150 共识基因(from LINCS terms)",
+    "purpose": "R2 dose-response"
   }
 }
