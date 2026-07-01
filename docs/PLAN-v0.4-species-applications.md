@@ -87,10 +87,10 @@
 - **验收**:`tests/test_species_schema.py`(11 passed)——human gene / mouse gene / ecoli KO growth / yeast deletion growth / human drug 五输入归一(gene→大写、drug→小写);未知 species/object/output、缺字段、空 targets 全报错。
 - **诚实**:仅 schema/归一层,不含预测;非法输入不静默补默认。finding 汇总到 W1.3。
 
-#### - [ ] W1.2 — human/mouse/yeast/bacteria route table + applicability rules(M)
-- **产出**:`praxis_virtualcell/agents/route_table.py`——按 (species × perturbation_object × target_output) 映射到 {donor predictor | GEM/FBA | embedding | reject/downgrade};含 applicability 规则(如 mammalian scRNA predictor **不得**用于 bacteria growth → 必须路由 GEM 或 abstain)。
-- **验收**:TDD `tests/test_route_table.py`——bacteria growth 不路由到 mammalian predictor;mouse gene 触发 ortholog caution;unknown species → reject。
-- **诚实**:route table 是**声明式能力图**,标 `[能力矩阵]`,非性能。
+#### - [x] W1.2 — human/mouse/yeast/bacteria route table + applicability rules(M)【已完成】
+- **产出**:`praxis_virtualcell/agents/route_table.py`(`route(req)→RouteDecision{engine,disposition,reason,caution_flags,data_gated}`,引擎 donor_predictor/gem_fba/embedding/reject)。
+- **验收**:`tests/test_route_table.py`(9 passed)——bacteria/yeast growth→gem_fba(**不**路由哺乳类 predictor);bacteria expression→abstain(mammalian_not_applicable);mouse gene→ortholog caution;drug→embedding+data_gated downgrade;human flux→data_gated downgrade;决策可 to_dict 进 provenance。
+- **诚实**:route table 是**声明式能力图** `[能力矩阵]`,非性能;data-gated 引擎真跑前恒 downgrade/abstain,不假装 accept。
 
 #### - [ ] W1.3 — 3 个 mock-to-real routing 单测 + case validator(M)
 - **产出**:`tests/test_v04_case_schema.py`(7 部分 validator)+ 3 个 routing case 骨架(C3/C4/C5 的输入→路由→预期决策,先 mock 预测输出占位,标 TODO 待真跑替换)。
