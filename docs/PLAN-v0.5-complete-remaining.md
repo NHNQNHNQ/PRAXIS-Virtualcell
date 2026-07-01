@@ -38,11 +38,10 @@
 - **落地**:squidpy 装成;`imc`(乳腺癌 IMC)子集 3909 肿瘤细胞;空间 k-NN(k=15)预计算 niche;`predictors/spatial/niche.py`;route 加 `spatial_niche` 引擎(medium+state)。
 - **真跑**:间质邻接肿瘤 EMT 评分 −1.90 vs 贫瘠 −4.70,**Cohen's d 0.74 → caution**(间质诱导部分 EMT:Vim↑ ECad↓);niche 细胞不足→abstain。`test_spatial_niche_case.py`(4 passed)。finding `finding_v0_5_spatial_case.md`。不训练模型。
 
-### - [ ] R6 — Co-culture / two-cell receiver(应用 5 例 5C)
-- **数据**:复用 Kang L-R 子集(`kang_lr_subset.json`)换 sender/receiver 组合(如 DC→NK 的不同 L-R 对),或自主找 co-culture 公开数据。
-- **分析**:sender 扰动 → receiver state shift(L-R 通讯 + receiver marker 响应两步链)。复用 `lr_comm.py` + `cell_state` 评分。
-- **验收**:通讯链 + receiver 响应一致→accept;任一环节弱→downgrade。7 部分。
-- **产出**:扩 `lr_comm.py` 或 `predictors/communication/coculture.py` + test + finding。
+### - [x] R6 — Co-culture / two-cell receiver(应用 5 例 5C)【已完成】
+- **落地**:`predictors/communication/coculture.py` 复用 `LRCommDB`(通讯)+ `CellStateDB`(receiver 状态)做两步链。
+- **真跑**:Mono→CD8T/NK(通讯诱导 + ISG 激活 d≈2.8)→**accept**;Mono→巨核(通讯未诱导 + ISG d=0.20)→**downgrade**(链不完整);未知 ligand→abstain。`test_coculture_case.py`(3 passed)。finding `finding_v0_5_coculture_case.md`。
+- **意义**:多步治理(每步受检,链完整才 accept)。不训练模型。
 
 ### - [ ] R7 — 补矩阵到 15/15 + 更新 outline(纯 Mac)
 - **产出**:`application-cases.md` 矩阵填满已完成格、R5/R6 表补 R1-R6 case、strict 15/15 计数;`RESULTS-CONSOLIDATED.md` 测试数 + 广度更新。
