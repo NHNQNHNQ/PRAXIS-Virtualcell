@@ -114,12 +114,13 @@
 - **验收**:flux shift / growth prediction / medium sensitivity;7 部分 validator 过。
 - **停止条件**:yeast GEM SBML 本地无 → 停,标 D 类等用户提供 SBML 路径。
 
-### Week 3 — human drug response case(D 类,多半需数据,准备后停)
+### Week 3 — human drug response case(D 类,先自主找公开数据)
 
-#### - [ ] 🛑 W3.1 — Human drug response case(C6,D:CPA/LINCS)
-- **为何停**:需 CPA/LINCS drug signature 数据或 ChemBERTa/embedding 模型 + 数据,本地/远端数据未就位。
-- **loop 动作**:写 drug perturbation schema(drug identity/target/dose)+ adapter 接口骨架(CPA / LINCS signature / embedding)+ 验收清单(drug signature similarity、model support、dose/time caveat、abstain/downgrade),**停下等用户指定数据/模型路径**。
-- **产出**:`docs/findings/finding_v0_4_drug_case.md`(先写 schema + 接口 + 验收,标 TODO 待数据)。
+#### - [ ] W3.1 — Human drug response case(C6,drug perturbation)
+- **自主动作(先做,别问)**:① 写 drug perturbation schema(drug identity/target/dose)+ adapter 接口骨架(signature / embedding);② **自主尝试公开数据源**——sciPlex(GEO GSE139944 子集)、LINCS L1000 公开 level-5 签名、或 cmapPy 可取的小样本 → 下载可得子集,记 URL+sha;③ 用公开子集跑 drug→signature/response,过 route_table(→ embedding),出 7 部分 case。
+- **验收(真跑)**:drug signature similarity / model support / dose·time caveat / accept·downgrade·abstain;7 部分 validator 过。
+- **只有当**公开药物扰动数据需注册/许可、或无可定位公开子集时 → 按硬门#4 停,记清试过哪些源。
+- **产出**:`docs/findings/finding_v0_4_drug_case.md`。
 
 ### Week 4 — 整理 application matrix + 论文 outline(M 类,纯 Mac)
 
@@ -130,28 +131,33 @@
 
 ---
 
-## loop 执行协议(自动边界与停止条件)
+## 自主执行协议(autonomous;尽量不打断)
 
-**每次 loop fire**:读本文件 → 找**第一个未勾选 `- [ ]` 步骤** → 按其"产出/验收/铁律"完成 → 跑 `.venv/bin/python -m pytest praxis_virtualcell/tests` 确认无回归 → 写/更新 finding → 本地单独 commit → 勾上并回填 finding 路径 → 简短汇报 → 继续下一个未勾选步骤。
+**每次 fire**:读本文件 → 找**第一个未勾选 `- [ ]` 步骤** → 按其"产出/验收/铁律"**做到底** → 跑 `.venv/bin/python -m pytest praxis_virtualcell/tests` 无回归 → 写/更新 finding → 本地单独 commit → 勾上回填 → **直接继续下一个未勾选步骤**,循环到所有步骤完成或撞硬门。
 
-**遇到以下任一,立即停下汇报、不要继续**:
-1. 步骤标 🛑(D 类需外部数据)或 🔧 试装失败/需大数据——准备好 schema/接口/验收后停,等用户提供数据/路径;
-2. 步骤标 R 类(需远端 `zkyd@10.102.106.53`)——准备 runbook 后停;
-3. 需要 `git push`(只本地 commit);
-4. 需要修改**已核验的 v0.2/v0.3 正文**——只新增 v0.4 文档,不碰;
-5. 测试失败、或真跑数字与预期方向矛盾且无法自解;
-6. 需要新增**外部文献引用**(须先核验);
-7. 某 case 无法拿到真实分析输出(只能 mock)——**不假装完成**,标 data/tool-gated 停下;
-8. 所有 M 类步骤(W1.1/W1.2/W1.3/W4.1)完成、T/D/R 类均停在数据门 → 停,交回用户决定提供数据或启动远端。
+**自主授权(不必问,直接做 + 在 finding 记 provenance)**:
+- **标准 pip 工具直接装**(cobra 等);
+- **有明确权威公开来源的数据/模型直接下载**(BiGG GEM 如 iMM904/iML1515、cobrapy 自带 textbook、小型公开扰动数据集如 sciPlex/LINCS 公开子集),在 finding 记 **URL + sha256/大小**;
+- **需要的科学默认选择自己定合理值**(培养基、目标函数、阈值分位、gene 归一约定等),在 finding 写明依据,**不来回问**;
+- 🔧/⏸/🛑 标记只是"曾经的数据门",遇到时**先自主尝试获取公开数据/工具**;能拿到就继续做,拿不到才按硬门#4 停。
 
-**过度承诺红线**:任何 case 若真跑不可靠,输出必须是 downgrade/abstain + boundary,**不得**包装成成功预测。
+**只在下列硬门停下汇报(其余一律继续,不问"下一步")**:
+1. `git push`(只本地 commit,push 永远等我);
+2. 要改**已核验的 v0.2/v0.3 正文**;
+3. 测试失败 / 真跑数字与 finding 对不上,且诚实 debug 后仍无法定位;
+4. 数据需**凭证/许可/注册**,或**无可定位的公开源**(记清缺什么、试过哪些源);
+5. 动作需远端 `zkyd@10.102.106.53` GPU + donor 私有数据(备好 runbook 后停)。
+
+**质量铁律不变(自主 ≠ 降标准)**:TDD 先写失败测试、真跑工具不 mock、每 case 强制 7 部分、不可靠则 downgrade/abstain **不过度承诺**、无泄漏、per-cell≠pert-level、OOF/泛化与 in-sample 分清、硬规则不被 learned 覆盖、**不训练新模型**、commit 前 `find docs praxis_virtualcell -name '._*' -delete`。
+
+**结束**:所有可做步骤完成 → 简短汇报干了什么 + 剩哪些硬门(硬门#4/#5),**不问"下一步做什么"**。
 
 ---
 
-## /loop 提示词(直接粘贴到 Claude Code)
+## /goal 提示词(自主推进,直接粘贴)
+
+> 注:`/goal` 若在你的环境不是注册命令,会被当作普通消息执行——效果一样(自主推进)。
 
 ```
-/loop 读 docs/PLAN-v0.4-species-applications.md，找到第一个未勾选(- [ ])的步骤，严格按它的"产出/验收/铁律"完成：TDD(先写失败测试)、真跑工具/模型不臆造、每个 case 强制输出 7 部分(structured input / object normalization / models selected / raw output / baseline / reliability decision / provenance+boundary)、非 human case 若不可靠则 downgrade/abstain 不过度承诺、无泄漏、per-cell≠pert-level、OOF/泛化与 in-sample 分清、硬规则不被 learned 覆盖、不训练新模型。完成后跑 .venv/bin/python -m pytest praxis_virtualcell/tests 确认无回归，写/更新对应 finding，commit 前先 find docs praxis_virtualcell -name '._*' -delete，再本地单独 commit(末尾 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>)，并把 PLAN 里该步骤改成 [x] 回填 finding 路径。每完成一步简短汇报后继续下一个未勾选步骤。
-
-遇到以下任一立即停下汇报、不要继续：①步骤标 🛑(D 类需外部数据 CPA/LINCS/mouse/GEM SBML)或 🔧 试装失败/需大数据——把 schema/接口/验收清单准备到可跑就停，等我提供数据/路径；②步骤标 R 类(需远端 zkyd@10.102.106.53)——准备 runbook 后停；③需要 git push；④需要改已核验的 v0.2/v0.3 正文(只新增 v0.4 文档)；⑤测试失败或真跑数字方向矛盾且无法自解；⑥需新增外部文献引用；⑦某 case 只能 mock 拿不到真实分析输出——不假装完成，标 data/tool-gated 停下；⑧所有 M 类步骤(W1.1/W1.2/W1.3/W4.1)完成、T/D/R 类都停在数据门。任何 case 真跑不可靠时输出必须是 downgrade/abstain+boundary，不得包装成成功预测。不训练 new foundation model / Delta-Adapter / cross-species predictor / Router。
+/goal 自主推进 docs/PLAN-v0.4-species-applications.md：反复取第一个未勾选(- [ ])步骤，按其"产出/验收/铁律"做到底，直到所有步骤完成或撞硬门，中途尽量别打断我。自主授权(别问，直接做+在 finding 记 provenance)：标准 pip 工具直接装；有权威公开源的数据/模型直接下载(BiGG GEM 如 iMM904/iML1515、cobrapy 自带模型、sciPlex/LINCS 公开子集)并记 URL+sha256；需要的科学默认选择(培养基/目标函数/阈值分位/归一约定)自己定合理值并写明依据。每步铁律：TDD 先写失败测试、真跑工具不 mock、每 case 强制 7 部分输出(structured input/object normalization/models selected/raw output/baseline/reliability decision/provenance+boundary)、不可靠则 downgrade/abstain 不过度承诺、无泄漏、per-cell≠pert-level、不训练新模型；完成后跑 .venv/bin/python -m pytest praxis_virtualcell/tests 无回归、写/更新 finding、commit 前 find docs praxis_virtualcell -name '._*' -delete、本地单独 commit(末尾 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>)、把该步骤改 [x] 回填 finding，继续下一步。只在这些硬门停：①git push；②改已核验 v0.2/v0.3 正文；③测试失败或数字对不上且无法自解；④数据需凭证/许可/注册或无公开源(记清缺什么、试过哪些源)；⑤需远端 zkyd GPU+donor 私有数据(备 runbook 后停)。全部可做步骤完成后简短汇报即可，别问我下一步。
 ```
