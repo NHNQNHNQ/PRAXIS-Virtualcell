@@ -134,10 +134,9 @@
 - **落地**:route_table 扩 `(microbe, medium, growth)→gem_fba`;`medium_shift.py`(碳源名→exchange + FBA 切换)。激活 schema 的 `medium` 扰动对象。
 - **真跑**:glucose 0.874 → succinate 0.398 → lactate 0.350 → **acetate 0.173**(教科书梯度);碳源不在模型→abstain/caution。`test_medium_shift_case.py`(6 passed)。finding §6b。**新增 State 之外的应用维度:环境/化学扰动**。
 
-#### - [ ] W5.2 — Human 免疫激活 cell-state(填补 State/fate 空白应用,D:公开 scRNA)
-- **自主动作**:自主取公开刺激-响应 scRNA(如 Kang 2018 IFN-β PBMC via pertpy/scanpy 或 GEO)→ 计算激活 marker state score(control vs stimulated)→ 过 route_table(state 输出)→ 7 部分 case + 治理(marker 覆盖不足→downgrade)。
-- **验收**:activation state score(control vs stim 可分)+ marker panel + reliability;7 部分 validator 过。data 记 provenance。
-- **只有当**公开数据需注册/无可定位子集 → 硬门#4 停。产出 `finding_v0_4_cellstate_case.md`。
+#### - [x] W5.2 — Human 免疫激活 cell-state(填补 State/fate 空白应用)【已完成 — 自主取 Kang 2018】
+- **落地**:自主取 Kang 2018 IFN-β PBMC(pertpy,committed 子集 2232 cells,provenance 记);route 加 `state_scoring` 引擎;`predictors/state/cell_state.py`(ISG 激活评分)。
+- **真跑**:IFN-β→ISG 激活整体 **Cohen's d 2.49→accept**;per-cell-type 髓系(DC 6.2/单核 6.1)最强、巨核 0.20 几乎不响应(教科书一致)。治理:marker 覆盖<50%→downgrade;巨核弱效应暴露。`test_cellstate_case.py`(6 passed,运行时不需 scanpy)。finding `finding_v0_4_cellstate_case.md`。**State/fate 空白应用已落地。不训练模型。**
 
 #### - [ ] W5.3 — Human metabolic flux(scFEA/Compass,4C,T/D:重)
 - **自主动作**:试装 scFEA/Compass;若模型/数据轻量可得 → 跑 human 表达→pathway flux tendency + 治理;否则备接口停(硬门#4)。

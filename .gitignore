@@ -17,3 +17,6 @@ frontend/tsconfig.tsbuildinfo
 
 # v0.4 W3:LINCS L1000 原始签名库(大,~30MB)—— 只提交 curated_subset.json + provenance
 data/drug_signatures/*.txt
+
+# v0.4 W5.2:cell-state 大数据(pertpy 缓存在 home,不入库);只提交 subset+provenance
+data/cellstate/*.h5ad

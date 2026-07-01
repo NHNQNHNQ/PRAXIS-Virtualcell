@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, asdict
 
-ENGINES = ("donor_predictor", "gem_fba", "embedding", "reject")
+ENGINES = ("donor_predictor", "gem_fba", "embedding", "state_scoring", "reject")
 
 _MAMMAL = {"human", "mouse"}
 _MICROBE = {"bacteria", "yeast"}
@@ -59,6 +59,16 @@ def route(req: dict) -> RouteDecision:
         return RouteDecision("reject", "abstain",
                              reason="no_metabolic_engine_for_request")
 
+    # --- 细胞状态/命运(state):marker-based state scoring(真 scRNA 分析)---
+    if out == "state":
+        if sp == "human":
+            return RouteDecision("state_scoring", "accept", reason="human_cell_state_scoring")
+        if sp == "mouse":
+            return RouteDecision("state_scoring", "caution",
+                                 reason="mouse_cell_state_scoring_ortholog",
+                                 caution_flags=["ortholog_required"])
+        return RouteDecision("reject", "abstain", reason="no_state_engine_for_species")
+
     # --- 药物扰动:LINCS L1000 签名 DB 已接入(W3.1)→ 非 data-gated,但签名噪声大故 caution ---
     if obj == "drug":
         return RouteDecision("embedding", "caution",
@@ -68,8 +78,8 @@ def route(req: dict) -> RouteDecision:
         return RouteDecision("embedding", "downgrade",
                              reason="ligand_signature_model_data_gated", data_gated=True)
 
-    # --- 基因扰动 → 表达/状态:哺乳类 scRNA predictor 领地 ---
-    if obj in _GENE_LIKE and out in ("expression", "state"):
+    # --- 基因扰动 → 表达:哺乳类 scRNA predictor 领地(state 已在上面按 state_scoring 路由)---
+    if obj in _GENE_LIKE and out == "expression":
         if sp == "human":
             return RouteDecision("donor_predictor", "accept",
                                  reason="human_native_scrna_predictor")

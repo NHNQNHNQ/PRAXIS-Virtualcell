@@ -1,0 +1,20 @@
+{
+  "dataset": "Kang et al. 2018 — IFN-β stimulated vs control PBMC",
+  "accession": "GSE96583",
+  "loader": "pertpy.data.kang_2018()",
+  "date": "2026-07-01",
+  "full_data": {
+    "note": "完整 h5ad 由 pertpy 缓存(figshare),未入库(大)",
+    "shape": "24673 cells x 15706 genes"
+  },
+  "committed_subset": {
+    "file": "kang_isg_subset.json",
+    "sha256": "79258815892c287391272a8e7fe068a911476d835c29baf31c026c04a70977c8",
+    "bytes": 564154,
+    "n_cells": 2232,
+    "genes": "25 ISG + 8 housekeeping",
+    "raw_counts": true,
+    "sampling": "每 (label × cell_type) 最多 150 cell,seed=1 确定性"
+  },
+  "rebuild": "scanpy + pertpy(pip install scanpy pertpy);见 scratchpad/build_kang_subset.py"
+}
