@@ -34,12 +34,9 @@
 - **真跑**:EMT 评分肉瘤(间质)+0.03 vs 上皮癌 −1.16,**Cohen's d 1.72 → accept**;marker 覆盖取 min 缺一→downgrade。`test_emt_case.py`(4 passed)。finding `finding_v0_5_emt_case.md`。
 - **诚实**:mcfarland 无 TGF-β 诱导扰动 → 本 case 是 EMT **状态刻画**(哪类癌偏间质),非扰动诱导 EMT 转变(已标注)。不训练模型。
 
-### - [ ] R5 — Spatial niche 响应(应用 5 例 5B)
-- **数据**:`squidpy.datasets`(如 `visium_hne_adata` / `imc`,自带 demo)—— 试装 `squidpy`。
-- **分析**:同一 marker/程序在不同空间 niche(邻域聚类)下的活性差异 → niche-dependent 响应。复用 `scoring.py` + squidpy 邻域。
-- **验收**:niche 间响应差异可测 + reliability(niche 支持不足→downgrade)。7 部分。
-- **只有当** squidpy 装不上/demo 数据需大下载 → 备接口 + 停(记清)。
-- **产出**:`predictors/spatial/niche.py` + test + `finding_v0_5_spatial_case.md`。
+### - [x] R5 — Spatial niche 响应(应用 5 例 5B)【已完成】
+- **落地**:squidpy 装成;`imc`(乳腺癌 IMC)子集 3909 肿瘤细胞;空间 k-NN(k=15)预计算 niche;`predictors/spatial/niche.py`;route 加 `spatial_niche` 引擎(medium+state)。
+- **真跑**:间质邻接肿瘤 EMT 评分 −1.90 vs 贫瘠 −4.70,**Cohen's d 0.74 → caution**(间质诱导部分 EMT:Vim↑ ECad↓);niche 细胞不足→abstain。`test_spatial_niche_case.py`(4 passed)。finding `finding_v0_5_spatial_case.md`。不训练模型。
 
 ### - [ ] R6 — Co-culture / two-cell receiver(应用 5 例 5C)
 - **数据**:复用 Kang L-R 子集(`kang_lr_subset.json`)换 sender/receiver 组合(如 DC→NK 的不同 L-R 对),或自主找 co-culture 公开数据。

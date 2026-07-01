@@ -20,7 +20,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field, asdict
 
 ENGINES = ("donor_predictor", "gem_fba", "embedding", "state_scoring", "pathway_scoring",
-           "communication", "reject")
+           "communication", "spatial_niche", "reject")
 
 _MAMMAL = {"human", "mouse"}
 _MICROBE = {"bacteria", "yeast"}
@@ -68,6 +68,9 @@ def route(req: dict) -> RouteDecision:
     # --- 细胞状态/命运(state):marker-based state scoring(真 scRNA 分析)---
     if out == "state":
         if sp == "human":
+            if obj == "medium":
+                # medium=微环境/niche + state → 空间 niche 依赖状态分析
+                return RouteDecision("spatial_niche", "accept", reason="human_spatial_niche_state")
             return RouteDecision("state_scoring", "accept", reason="human_cell_state_scoring")
         if sp == "mouse":
             return RouteDecision("state_scoring", "caution",

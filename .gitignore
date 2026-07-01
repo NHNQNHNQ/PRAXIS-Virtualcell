@@ -22,3 +22,6 @@ data/drug_signatures/*.txt
 data/cellstate/*.h5ad
 
 data/*.h5ad
+
+# squidpy/scanpy 缓存数据(大),只提交 subset
+data/anndata/
