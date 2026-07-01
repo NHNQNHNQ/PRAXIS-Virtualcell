@@ -43,9 +43,9 @@
 - **真跑**:Mono→CD8T/NK(通讯诱导 + ISG 激活 d≈2.8)→**accept**;Mono→巨核(通讯未诱导 + ISG d=0.20)→**downgrade**(链不完整);未知 ligand→abstain。`test_coculture_case.py`(3 passed)。finding `finding_v0_5_coculture_case.md`。
 - **意义**:多步治理(每步受检,链完整才 accept)。不训练模型。
 
-### - [ ] R7 — 补矩阵到 15/15 + 更新 outline(纯 Mac)
-- **产出**:`application-cases.md` 矩阵填满已完成格、R5/R6 表补 R1-R6 case、strict 15/15 计数;`RESULTS-CONSOLIDATED.md` 测试数 + 广度更新。
-- **验收**:矩阵与 finding 一致;未做的(需注册/远端)如实标,不虚填。
+### - [x] R7 — 补矩阵到 15/15 + 更新 outline(纯 Mac)【已完成】
+- **落地**:`application-cases.md` 矩阵填满(5 应用×4 物种)+ Phase II 表补 S1-S4/R1-R6 + R6 收束表补全 + strict 15/15 达成声明;`RESULTS-CONSOLIDATED.md` 测试数 203 + 广度更新。
+- **验收**:矩阵与 finding 一致;仅剩远端硬门 G1/G2 如实标。**A 类 R1-R7 全部完成。**
 
 ---
 

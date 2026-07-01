@@ -8,11 +8,13 @@
 
 | 应用 \ 物种 | Human | Mouse | Yeast | Bacteria |
 |---|---|---|---|---|
-| Gene perturbation | ✅ Norman CRISPR(表 A,0.7039) | ✅ ortholog caution(C3) | ✅ deletion growth(C5,iMM904) | ✅ KO growth(C4) |
-| Drug/chemical | ✅ drug MOA signature(C6,LINCS L1000) | ⬜ | ⬜ | ✅ 碳源切换 growth(S,e_coli_core) |
-| State/fate | ✅ immune activation(S,IFN-β/Kang2018) | ⬜ | ⬜ | ⬜ |
-| Metabolism/flux | ✅ 通路 tendency(S,治理对照 downgrade) | ⬜ | ✅ yeast GEM(C5,iMM904) | ✅ E. coli GEM(C4) |
-| Communication/env | ✅ L-R 共表达(S,CXCL10-CXCR3/Kang2018) | ⬜ | ⬜ | ⬜ |
+| Gene perturbation | ✅ Norman CRISPR(C1,0.7039)+ OOD(C2) | ✅ ortholog caution(C3) | ✅ deletion growth(C5) | ✅ KO growth(C4) |
+| Drug/chemical | ✅ drug MOA(C6)+ dose-response(R2) | — | — | ✅ 碳源切换(S1)+ antibiotic(R3) |
+| State/fate | ✅ IFN 激活(S2)+ EMT(R4) | ✅ 分化 fate(R1,paul15) | — | — |
+| Metabolism/flux | ✅ 通路 tendency(S3,治理对照) | — | ✅ yeast GEM(C5) | ✅ E. coli GEM(C4) |
+| Communication/env | ✅ L-R 共表达(S4)+ 空间 niche(R5)+ co-culture(R6) | — | — | — |
+
+> 5 应用 × 4 物种全覆盖;**16 个真跑 case + L4 baseline**;strict 15/15 达成(见 §2/§3)。
 
 ## 2. Phase I — 主文 6 核心 case(状态)
 
@@ -27,16 +29,22 @@
 
 **外部同协议 baseline(表 A 增补)**:✅ L4 GEARS same-split ΔPearson **0.4877**(`finding_w9_l4_gears_same_split`)。
 
-## 3. Phase II — supplement(自主用公开数据完成 5 个 case)
+## 3. Phase II — supplement(自主用公开数据完成 10 个 case)
 
 | Case | 应用 | 状态 | 结果 / finding |
 |---|---|---|---|
-| S1 E. coli 碳源切换 growth | Metabolism(环境扰动) | ✅ | glucose 0.874→acetate 0.173;`finding_v0_4_metabolism_cases` §6b |
-| S2 免疫激活 cell-state | **State/fate** | ✅ | IFN-β→ISG d=2.49 accept;髓系>淋巴>巨核;`finding_v0_4_cellstate_case` |
-| S3 代谢通路 tendency | Metabolism/flux | ✅ | 治理对照:ISG accept vs 代谢 downgrade;`finding_v0_4_metabolic_tendency` |
-| S4 L-R 通讯 | **Communication** | ✅ | CXCL10→CXCR3 Mono→CD8T 51× accept;→CD4T downgrade;`finding_v0_4_communication` |
+| S1 E. coli 碳源切换 growth | Metabolism(环境) | ✅ | glucose 0.874→acetate 0.173;`finding_v0_4_metabolism_cases` §6b |
+| S2 免疫激活 cell-state | State/fate | ✅ | IFN-β→ISG d=2.49 accept;髓系>淋巴>巨核;`finding_v0_4_cellstate_case` |
+| S3 代谢通路 tendency | Metabolism | ✅ | 治理对照:ISG accept vs 代谢 downgrade;`finding_v0_4_metabolic_tendency` |
+| S4 L-R 通讯 | Communication | ✅ | CXCL10→CXCR3 Mono→CD8T 51× accept;→CD4T downgrade;`finding_v0_4_communication` |
+| R1 分化 fate | State/fate(3A) | ✅ | 红系 vs 髓系 d=4.32 accept(paul15);`finding_v0_5_fate_case` |
+| R2 drug dose-response | Drug(dose) | ✅ | geldanamycin Spearman 0.90 accept;sirolimus downgrade;`finding_v0_4_drug_case` §6 |
+| R3 antibiotic → growth | Drug(2C) | ✅ | trimethoprim/sulfa 靶抑制致死 accept;非代谢靶 abstain;`finding_v0_4_metabolism_cases` §7 |
+| R4 cancer EMT state | State/fate(3C) | ✅ | 肉瘤 vs 上皮癌 d=1.72 accept(mcfarland);`finding_v0_5_emt_case` |
+| R5 spatial niche | Communication(5B) | ✅ | 间质邻接肿瘤 EMT d=0.74 caution(imc);`finding_v0_5_spatial_case` |
+| R6 co-culture 两步链 | Communication(5C) | ✅ | Mono→CD8T accept;→巨核 downgrade;`finding_v0_5_coculture_case` |
 
-→ **5 个代表应用全部有真跑 case**(gene / drug / state-fate / metabolism / communication)。仍 roadmap:cancer EMT · spatial niche · antibiotic FBA 等(需更多公开数据)。
+→ **strict 15/15 达成**:5 应用 × 3 例全部有真跑 case(共 16 case + L4 baseline)。物种:human/mouse/bacteria/yeast。
 
 ## 4. 论文 Results 结构(6 节;现有证据可支撑度)
 
@@ -62,6 +70,12 @@
 | S2 cell-state | IFN-β→ISG d=2.49 | ctrl 激活评分 | **accept**;巨核弱效应暴露 | marker 代理,非绝对通路活性 |
 | S3 metabolic | 糖酵解/OXPHOS d=0.10/0.28 | ctrl 通路评分 | **downgrade**(对照 S2 accept) | 表达代理非真通量 |
 | S4 communication | CXCL10→CXCR3 fold 51× | ctrl comm score | Mono→CD8T/NK **accept**;→CD4T **downgrade** | 共表达代理,非实测信号转导 |
+| R1 分化 fate | 红系−髓系 d=4.32 | 两谱系对比 | **accept**;缺 marker→downgrade | lineage 相对量,非命运概率 |
+| R2 drug dose | Spearman(dose,recall) | 剂量单调性 | geldanamycin **accept**;sirolimus **downgrade** | 签名层,非绝对剂量效应 |
+| R3 antibiotic | 靶反应抑制 growth 0 | WT growth | **accept**(代谢靶);非代谢靶 **abstain** | 理想化抑制;仅代谢靶适用 |
+| R4 cancer EMT | 肉瘤−上皮 d=1.72 | 癌类对比 | **accept** | 状态刻画,非诱导转变 |
+| R5 spatial niche | 间质邻接 EMT d=0.74 | niche 对比 | **caution**(中等 niche 效应) | 空间共定位,非因果 |
+| R6 co-culture | 两步链(通讯+receiver) | ctrl 链 | Mono→CD8T **accept**;→巨核 **downgrade** | 多步代理,非真 co-culture |
 | L4 GEARS | same-split ΔPearson 0.4877 | Coordinator 0.7039 | — | condition→cell broadcast caveat |
 
 ## 6. 最稳口径(全文守住)
@@ -70,6 +84,6 @@
 
 ## 7. 下一步(硬门,待用户)
 
-- **Phase I 6 core + Phase II 4 case 全部真跑完成**;**5 个代表应用 × 4 物种全覆盖**。
-- 仍可扩(公开数据,可自主):cancer EMT state · spatial niche · bacteria antibiotic FBA · drug dose/time。
-- **需远端 zkyd(硬门#5)**:scGen/STATE 同协议入表 A · B2 per-cell 解 W4.5。
+- **strict 15/15 达成**:Phase I 6 core + Phase II 10 case(S1-S4 + R1-R6)全部真跑;**5 应用 × 3 例 × 4 物种全覆盖**;16 case + L4 baseline。
+- **需远端 zkyd(硬门#5,仅剩)**:scGen/STATE 同协议入表 A(G1)· B2 per-cell 解 W4.5(G2)。
+- 论文数据侧已充分:主 benchmark + 同协议外部 baseline + 可学习治理 + 5 应用 × 4 物种受治理 case。

@@ -1,7 +1,7 @@
 # PRAXIS-VirtualCell 现有结果深度总结(v0.1→v0.3,投稿前证据盘点)
 
 > 目的:把**当前已落地、已见证的全部结果**一次性深度汇总,并**明确指出"用来写完整 VirtualCell 主刊论文还缺什么"**——为 v0.4「代表物种 × 代表应用」补强计划提供依据(见 `docs/PLAN-v0.4-species-applications.md`)。
-> 数字一律抄自已记录 finding,无手工臆造。口径红线严格分层。最后更新:2026-07-01(含 L4 + v0.4 W1-W5 代表物种/应用 case,5 应用 × 4 物种全落地),测试 Mac **179 passed + 25 skipped**,本地 HEAD 见 `git log -1`。
+> 数字一律抄自已记录 finding,无手工臆造。口径红线严格分层。最后更新:2026-07-01(含 L4 + v0.4 + v0.5,strict 15/15,5 应用 × 4 物种全落地),测试 Mac **203 passed + 25 skipped**,本地 HEAD 见 `git log -1`。
 > 详版逐条盘点见 `docs/paper/v0.3/data-inventory.md`;本文件是**面向论文叙事的深度综合 + 缺口判断**。
 
 ---
