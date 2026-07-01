@@ -1,7 +1,7 @@
 # PRAXIS-VirtualCell 现有结果深度总结(v0.1→v0.3,投稿前证据盘点)
 
 > 目的:把**当前已落地、已见证的全部结果**一次性深度汇总,并**明确指出"用来写完整 VirtualCell 主刊论文还缺什么"**——为 v0.4「代表物种 × 代表应用」补强计划提供依据(见 `docs/PLAN-v0.4-species-applications.md`)。
-> 数字一律抄自已记录 finding,无手工臆造。口径红线严格分层。最后更新:2026-07-01(含 L4 + v0.4 W1-W3 代表物种/应用 case),测试 Mac **158 passed + 25 skipped**,本地 HEAD 见 `git log -1`。
+> 数字一律抄自已记录 finding,无手工臆造。口径红线严格分层。最后更新:2026-07-01(含 L4 + v0.4 W1-W5 代表物种/应用 case,5 应用 × 4 物种全落地),测试 Mac **179 passed + 25 skipped**,本地 HEAD 见 `git log -1`。
 > 详版逐条盘点见 `docs/paper/v0.3/data-inventory.md`;本文件是**面向论文叙事的深度综合 + 缺口判断**。
 
 ---
@@ -122,7 +122,7 @@ runtime / message bus / species brain / predictor-agent / abstain / critic / pro
 **原三大短板 → v0.4 进度**:
 1. 准确性侧无同协议强外部对照 → **✅ L4 补 GEARS 0.4877 同协议**(scGen/STATE 仍待);
 2. ~~主结果单物种(human)、单应用(gene perturbation)~~ → **✅ v0.4 补**:human/mouse/bacteria/yeast 四物种 + gene/metabolism/drug 三应用,Phase I 6 core case 全真跑(C1-C6);
-3. ~~"虚拟细胞"广度未体现~~ → **✅ 部分补**:metabolism(GEM/FBA)+ drug(LINCS MOA)已落地;state-fate/communication 列 Phase II roadmap。
+3. ~~"虚拟细胞"广度未体现~~ → **✅ 5 应用全落地**:gene / drug(LINCS MOA)/ **state-fate(IFN 激活)** / metabolism(GEM+表达 tendency)/ **communication(L-R 共表达)** 均有真跑 case + 治理裁决。
 
 **v0.4 已落地**(详见 `docs/PLAN-v0.4-species-applications.md` + `application-cases.md`):论文结构从
 `Norman prediction → governance → learned abstain`
