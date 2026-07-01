@@ -61,11 +61,16 @@ def test_drug_routes_to_embedding_wired():
     assert d.data_gated is False
 
 
-def test_ligand_routes_to_embedding_still_data_gated():
-    # 配体扰动 signature/communication 模型未接入 → 仍 data-gated
-    d = _route("human", "ligand", "communication", targets=("TNF",))
+def test_ligand_expression_still_data_gated():
+    # 配体→表达 signature 模型未接入 → 仍 data-gated(通讯输出另走 communication 引擎)
+    d = _route("human", "ligand", "expression", targets=("TNF",))
     assert d.engine == "embedding"
     assert d.data_gated is True
+
+
+def test_human_communication_routes_to_comm_engine():
+    d = _route("human", "ligand", "communication", targets=("CXCL10",))
+    assert d.engine == "communication" and d.disposition == "accept"
 
 
 def test_human_gene_growth_no_mammalian_gem_downgrade():

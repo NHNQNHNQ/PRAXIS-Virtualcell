@@ -142,8 +142,9 @@
 - **落地**:Recon3D 机制 GEM 探查后弃用(开放培养基 WT 755、Entrez 基因 id、KO 无效应 → 需大量整备易出可疑数字);改走 4C 本义(表达→通路 tendency,scFEA/Compass 思想)。`predictors/state/metabolic_tendency.py` + 共享 `scoring.py`;route 加 `pathway_scoring`(human flux)。
 - **真跑 + 治理对照(R6 硬证据)**:同一 IFN-β 扰动,ISG 激活 d=2.49→accept,但糖酵解/OXPHOS 表达层 d=0.10/0.28→**downgrade**。agent 按证据分别裁决、不硬报代谢重编程。`test_metabolic_tendency_case.py`(4 passed)。finding `finding_v0_4_metabolic_tendency.md`。**不训练模型。**
 
-#### - [ ] W5.4 — Cell-cell communication(NicheNet/CellChat,应用 5,重/多为 R)
-- 多为 R 工具 + 先验数据 → 大概率硬门;先自主评估 Python 侧(如 `liana-py`)可行性,不可行则备接口 + roadmap 停。
+#### - [x] W5.4 — Cell-cell communication(填补 Communication 空白应用)【已完成 — L-R 共表达】
+- **落地**:自主用 Kang 2018 L-R 子集(8 对)+ ligand×receptor 共表达(NicheNet/CellPhoneDB 思路);route 加 `communication` 引擎;`predictors/communication/lr_comm.py`。
+- **真跑 + 治理**:IFN-β 诱导 CXCL10(单核)→CXCR3;Mono→CD8T fold 51×/→NK 32× **accept**;→CD4 T(CXCR3^low)**downgrade**(受体证据不足,生物学正确);未知 ligand→abstain。`test_communication_case.py`(5 passed)。finding `finding_v0_4_communication.md`。**5 个代表应用全部落地。不训练模型。**
 
 ---
 

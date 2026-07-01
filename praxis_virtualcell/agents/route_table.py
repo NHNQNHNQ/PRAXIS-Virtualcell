@@ -19,7 +19,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, asdict
 
-ENGINES = ("donor_predictor", "gem_fba", "embedding", "state_scoring", "pathway_scoring", "reject")
+ENGINES = ("donor_predictor", "gem_fba", "embedding", "state_scoring", "pathway_scoring",
+           "communication", "reject")
 
 _MAMMAL = {"human", "mouse"}
 _MICROBE = {"bacteria", "yeast"}
@@ -73,6 +74,13 @@ def route(req: dict) -> RouteDecision:
                                  caution_flags=["ortholog_required"])
         return RouteDecision("reject", "abstain", reason="no_state_engine_for_species")
 
+    # --- 细胞通讯(communication):ligand-receptor 共表达分析(W5.4 已接入)---
+    if out == "communication":
+        if sp == "human":
+            return RouteDecision("communication", "accept",
+                                 reason="human_ligand_receptor_coexpression")
+        return RouteDecision("reject", "abstain", reason="no_communication_engine_for_species")
+
     # --- 药物扰动:LINCS L1000 签名 DB 已接入(W3.1)→ 非 data-gated,但签名噪声大故 caution ---
     if obj == "drug":
         return RouteDecision("embedding", "caution",
@@ -96,11 +104,5 @@ def route(req: dict) -> RouteDecision:
             # 铁律:哺乳类 scRNA predictor 不适用于微生物 → abstain
             return RouteDecision("reject", "abstain",
                                  reason="mammalian_scrna_predictor_not_applicable")
-
-    # --- communication 等其余:暂无接入引擎 ---
-    if out == "communication":
-        return RouteDecision("embedding", "downgrade",
-                             reason="communication_model_data_gated",
-                             data_gated=True)
 
     return RouteDecision("reject", "abstain", reason="no_applicable_engine")
