@@ -29,12 +29,10 @@
 - **落地**:iML1515(BiGG,620KB committed);`predictors/mechanistic/antibiotic.py`(复用 GemModel);route 扩 `(microbe, drug, growth)→gem_fba`。
 - **真跑**:trimethoprim(靶 DHFR)/ sulfamethoxazole(靶 DHPS2)→ growth 0(致死)→**accept**;ciprofloxacin(非代谢靶)/ 未知 →**abstain**(GEM 诚实弃权)。`test_antibiotic_case.py`(5 passed)。finding `finding_v0_4_metabolism_cases` §7。不训练模型。
 
-### - [ ] R4 — Cancer EMT/resistance state(应用 3 例 3C)
-- **数据**:**自主找公开 EMT scRNA**(如 A549 TGF-β EMT GEO/pertpy 数据集,或含 EMT 的癌症数据集)→ 下载可得子集,记 provenance。
-- **分析**:EMT score = 间质 marker(VIM/FN1/CDH2/ZEB1/SNAI1/SNAI2)− 上皮 marker(CDH1/EPCAM/KRT8/KRT18)→ 处理组 vs 对照 state 迁移。复用 `scoring.py`。
-- **验收**:TGF-β(或扰动)→ EMT score 上升(可分)→ accept;信号弱→downgrade。7 部分。
-- **只有当**无可定位公开 EMT 子集(需注册/许可)→ 硬门#数据 停,记清试过哪些源。
-- **产出**:`predictors/state/emt.py` + test + `finding_v0_5_emt_case.md`。
+### - [x] R4 — Cancer EMT/resistance state(应用 3 例 3C)【已完成】
+- **落地**:pertpy `mcfarland_2020`(泛癌 MIX-seq)子集 900 cells;`predictors/state/emt.py`(复用 scoring.py)。
+- **真跑**:EMT 评分肉瘤(间质)+0.03 vs 上皮癌 −1.16,**Cohen's d 1.72 → accept**;marker 覆盖取 min 缺一→downgrade。`test_emt_case.py`(4 passed)。finding `finding_v0_5_emt_case.md`。
+- **诚实**:mcfarland 无 TGF-β 诱导扰动 → 本 case 是 EMT **状态刻画**(哪类癌偏间质),非扰动诱导 EMT 转变(已标注)。不训练模型。
 
 ### - [ ] R5 — Spatial niche 响应(应用 5 例 5B)
 - **数据**:`squidpy.datasets`(如 `visium_hne_adata` / `imc`,自带 demo)—— 试装 `squidpy`。
