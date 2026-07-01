@@ -1,0 +1,33 @@
+{
+  "source": "Enrichr (Ma'ayan Lab) gene set libraries",
+  "date": "2026-07-01",
+  "files": {
+    "LINCS_L1000_Chem_Pert_up.txt": {
+      "url": "https://maayanlab.cloud/Enrichr/geneSetLibrary?mode=text&libraryName=LINCS_L1000_Chem_Pert_up",
+      "sha256": "324647818b38a23385b4cd9ef8265499007f66db94e9f9de73cb3d837771a4a2",
+      "bytes": 16214812,
+      "n_signatures": 33133,
+      "gitignored": true
+    },
+    "LINCS_L1000_Chem_Pert_down.txt": {
+      "url": "https://maayanlab.cloud/Enrichr/geneSetLibrary?mode=text&libraryName=LINCS_L1000_Chem_Pert_down",
+      "sha256": "25c0dbcb78c929dd0b3e98327ad04f8f5138e35427d357e8fd02454ae80c83a2",
+      "bytes": 14045684,
+      "n_signatures": 33133,
+      "gitignored": true
+    }
+  },
+  "curated_subset": {
+    "file": "curated_subset.json",
+    "drugs": [
+      "geldanamycin",
+      "tanespimycin",
+      "vorinostat",
+      "entinostat",
+      "wortmannin",
+      "sirolimus"
+    ],
+    "consensus": "per-drug top-100 most-frequent up/down genes across all its LINCS conditions",
+    "moa_labels": "curated textbook pharmacology (HSP90/HDAC/PI3K/mTOR inhibitors)"
+  }
+}

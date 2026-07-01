@@ -116,11 +116,10 @@
 
 ### Week 3 — human drug response case(D 类,先自主找公开数据)
 
-#### - [ ] W3.1 — Human drug response case(C6,drug perturbation)
-- **自主动作(先做,别问)**:① 写 drug perturbation schema(drug identity/target/dose)+ adapter 接口骨架(signature / embedding);② **自主尝试公开数据源**——sciPlex(GEO GSE139944 子集)、LINCS L1000 公开 level-5 签名、或 cmapPy 可取的小样本 → 下载可得子集,记 URL+sha;③ 用公开子集跑 drug→signature/response,过 route_table(→ embedding),出 7 部分 case。
-- **验收(真跑)**:drug signature similarity / model support / dose·time caveat / accept·downgrade·abstain;7 部分 validator 过。
-- **只有当**公开药物扰动数据需注册/许可、或无可定位公开子集时 → 按硬门#4 停,记清试过哪些源。
-- **产出**:`docs/findings/finding_v0_4_drug_case.md`。
+#### - [x] W3.1 — Human drug response case(C6,drug perturbation)【已完成 — 自主取公开数据】
+- **落地**:自主下载 Enrichr LINCS L1000 Chem Pert 签名(公开无凭证;原始 ~30MB gitignore,provenance `data/drug_signatures/PROVENANCE.json`,curated 子集 `curated_subset.json` committed)。`predictors/embedding/drug_signature.py`(`DrugSignatureDB` + `run_drug_response_case`)。
+- **真跑 + 治理**:drug→签名→同 MOA vs 跨 MOA 富集。HSP90(geldanamycin/tanespimycin)富集 **2.6-3.5×→accept**;HDAC(vorinostat)弱 0.10**→downgrade**;单例(sirolimus)无参考**→downgrade**;未知药**→abstain**。**R6 防过度承诺硬证据**(信号弱主动降级不硬说)。
+- route_table `drug→embedding` 改为**非 data-gated**(caution);`test_drug_signature_case.py`(7 passed)+ route test 更新。**不训练模型**。finding `finding_v0_4_drug_case.md`。
 
 ### Week 4 — 整理 application matrix + 论文 outline(M 类,纯 Mac)
 

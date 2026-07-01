@@ -54,11 +54,17 @@ def test_bacteria_expression_abstains_no_mammalian_transfer():
     assert "mammalian" in d.reason or "not_applicable" in d.reason
 
 
-def test_drug_routes_to_embedding_data_gated_downgrade():
-    # 药物扰动 → embedding 引擎;下游数据未就位 → downgrade(data-gated,不假装 accept)
+def test_drug_routes_to_embedding_wired():
+    # 药物扰动 → embedding;LINCS L1000 签名 DB 已接入(W3.1)→ 非 data-gated(caution,签名噪声大)
     d = _route("human", "drug", "expression", targets=("aspirin",))
     assert d.engine == "embedding"
-    assert d.disposition in ("downgrade", "abstain")
+    assert d.data_gated is False
+
+
+def test_ligand_routes_to_embedding_still_data_gated():
+    # 配体扰动 signature/communication 模型未接入 → 仍 data-gated
+    d = _route("human", "ligand", "communication", targets=("TNF",))
+    assert d.engine == "embedding"
     assert d.data_gated is True
 
 

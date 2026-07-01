@@ -9,7 +9,7 @@
 | 应用 \ 物种 | Human | Mouse | Yeast | Bacteria |
 |---|---|---|---|---|
 | Gene perturbation | ✅ Norman CRISPR(表 A,0.7039) | ✅ ortholog caution(C3) | ✅ deletion growth(C5,iMM904) | ✅ KO growth(C4) |
-| Drug/chemical | 🛑 drug response(C6,CPA/LINCS) | ⬜ | ⬜ | ⬜ antibiotic |
+| Drug/chemical | ✅ drug MOA signature(C6,LINCS L1000) | ⬜ | ⬜ | ⬜ antibiotic |
 | State/fate | 🛑 stem/immune/cancer | ⬜ | ⬜ | ⬜ |
 | Metabolism/flux | 🛑 scFEA/Compass | ⬜ | ✅ yeast GEM(C5,iMM904) | ✅ E. coli GEM(C4) |
 | Communication/env | 🛑 tumor-immune/spatial | ⬜ | ⬜ | ⬜ |
@@ -23,7 +23,7 @@
 | C3 | Mouse ortholog routing | Mouse | ✅ 完成 | donor_predictor + ortholog caution(降级);`finding_v0_4_species_routing` |
 | C4 | E. coli KO growth | Bacteria | ✅ 完成 | WT 0.874;gltA/icd essential;`finding_v0_4_metabolism_cases` §1 |
 | C5 | Yeast growth/flux | Yeast | ✅ 完成 | WT 0.288;ERG1(YGR175C)essential;`finding_v0_4_metabolism_cases` §4 |
-| C6 | Drug response | Human | 🛑 数据门 | schema/接口待建,待 CPA/LINCS 数据(W3.1) |
+| C6 | Drug response | Human | ✅ 完成 | HSP90 富集 2.6-3.5×→accept;HDAC 弱→downgrade;`finding_v0_4_drug_case` |
 
 **外部同协议 baseline(表 A 增补)**:✅ L4 GEARS same-split ΔPearson **0.4877**(`finding_w9_l4_gears_same_split`)。
 
@@ -39,7 +39,7 @@ stem/fate · immune activation · cancer EMT · human flux(scFEA/Compass)· tumo
 | R2 human perturbation benchmark | 表 A 0.7039 / mean 0.4615 / scGPT 0.4407 / **GEARS same-split 0.4877** | ✅ 见证 |
 | R3 learned reliability governance | −0.716 / AUROC 0.907 / risk-cov 0.746 / CI / OOD / runtime | ✅ v0.3 |
 | R4 representative species routing | human/mouse/yeast/bacteria 路由 + applicability + reject/downgrade | ✅ C3/C4/C5 真跑(human/mouse/bacteria/yeast 全覆盖) |
-| R5 representative application cases | 5 应用 × 3 例;主文展开 core case | 🟡 C3/C4/C5 真跑,C6 待数据 |
+| R5 representative application cases | 5 应用 × 3 例;主文展开 core case | ✅ Phase I 6 core 全真跑(C1-C6);gene+metabolism+drug 三应用落地 |
 | R6 reliability-governed reporting prevents overclaiming | 各应用 accept/downgrade/abstain 总表 | ✅ 逻辑就绪(下表) |
 
 ## 5. R6 收束总表(治理防过度承诺;已完成 case)
@@ -51,8 +51,8 @@ stem/fate · immune activation · cancer EMT · human flux(scFEA/Compass)· tumo
 | C3 mouse gene | donor_predictor(ortholog 投影) | ungoverned=直接用 human predictor | **caution/downgrade**(ortholog_required) | 跨物种迁移不可当母种精度 |
 | C4 E. coli KO | WT 0.874;gltA/icd essential | WT growth | accept(全基因在 GEM);缺失→abstain | FBA 相对量非绝对速率;核心代谢子集 |
 | C5 yeast del | WT 0.288;ERG1 essential | WT growth | accept;缺失→caution | FBA 相对量;iMM904 有限覆盖 |
+| C6 drug MOA | HSP90 富集 2.6-3.5×;HDAC 0.10 | 跨 MOA 均值 | HSP90 **accept**;HDAC/单例 **downgrade**;未知 **abstain** | LINCS bulk 方向级,非 per-cell;阈值默认 |
 | L4 GEARS | same-split ΔPearson 0.4877 | Coordinator 0.7039 | — | condition→cell broadcast caveat |
-| C6 drug | 🛑 待 CPA/LINCS | — | data-gated | schema 待建 |
 
 ## 6. 最稳口径(全文守住)
 
@@ -60,5 +60,6 @@ stem/fate · immune activation · cancer EMT · human flux(scFEA/Compass)· tumo
 
 ## 7. 下一步(待用户)
 
-- **C6 drug**:提供 CPA/LINCS drug signature 数据或 embedding 模型路径 → 建 drug adapter(仅剩这一个 Phase I core case 待数据)。
-- **scGen/STATE 同协议**(表 A 进一步补强)· **B2 per-cell 解 W4.5**(远端)。
+- **Phase I 6 core case 全部真跑完成**(C1-C6:gene / metabolism / drug 三应用 + human/mouse/bacteria/yeast 四物种)。
+- Phase II 9 supplement(state/fate、communication、spatial 等)——需更多公开数据/工具,列 roadmap。
+- **scGen/STATE 同协议**(表 A 进一步补强)· **B2 per-cell 解 W4.5**(远端 zkyd,硬门#5)。

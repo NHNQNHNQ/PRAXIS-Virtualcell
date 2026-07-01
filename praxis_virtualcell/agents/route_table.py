@@ -59,11 +59,14 @@ def route(req: dict) -> RouteDecision:
         return RouteDecision("reject", "abstain",
                              reason="no_metabolic_engine_for_request")
 
-    # --- 药物/配体扰动:embedding/signature 领地(下游数据多未就位)---
-    if obj in ("drug", "ligand"):
+    # --- 药物扰动:LINCS L1000 签名 DB 已接入(W3.1)→ 非 data-gated,但签名噪声大故 caution ---
+    if obj == "drug":
+        return RouteDecision("embedding", "caution",
+                             reason="drug_signature_db_wired", data_gated=False)
+    # --- 配体扰动:signature/communication 模型未接入 → data-gated ---
+    if obj == "ligand":
         return RouteDecision("embedding", "downgrade",
-                             reason=f"{obj}_signature_model_data_gated",
-                             data_gated=True)
+                             reason="ligand_signature_model_data_gated", data_gated=True)
 
     # --- 基因扰动 → 表达/状态:哺乳类 scRNA predictor 领地 ---
     if obj in _GENE_LIKE and out in ("expression", "state"):
