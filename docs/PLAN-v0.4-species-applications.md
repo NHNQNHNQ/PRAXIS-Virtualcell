@@ -106,7 +106,8 @@
 - **治理**:基因不在 GEM → abstain(全缺)/caution(部分缺),不虚构生长。`test_ecoli_gem_case.py`(7 passed,无 cobra skip)。
 - **finding**:`docs/findings/finding_v0_4_metabolism_cases.md`(§1-3)。pyproject 加 `[mechanistic]` extra。
 
-#### - [ ] 🔧 W2.2 — Yeast growth/flux case(C5,T:yeast GEM)
+#### - [ ] ⏸ W2.2 — Yeast growth/flux case(C5,T:yeast GEM)【停在数据门:接口就绪,待 SBML】
+- **状态**:yeast-GEM(Yeast8 / iMM904)非 cobrapy 自带 → **停在 D 类数据门**。接口已就绪:`EcoliGEM(sbml_path=...)` 已支持任意 SBML;yeast 只需提供 SBML 路径即可复用同一 FBA/KO/case 管线。**待用户提供 Yeast8/iMM904 SBML 本地路径,或授权从 BiGG 下载 iMM904**。
 - **loop 动作**:yeast-GEM(Yeast8,SBML)非 cobrapy 自带 → 尝试轻量获取;若无数据本地 → **准备接口+验收清单后停**(D 类)。
 - **产出(若数据可得)**:yeast GEM 接入 + carbon source change / gene deletion → growth/flux;并入 `finding_v0_4_metabolism_cases.md`。
 - **验收**:flux shift / growth prediction / medium sensitivity;7 部分 validator 过。
@@ -121,10 +122,10 @@
 
 ### Week 4 — 整理 application matrix + 论文 outline(M 类,纯 Mac)
 
-#### - [ ] W4.1 — application matrix + v0.4 paper outline(M)
-- **产出**:`docs/paper/v0.4/application-cases.md`——5 applications × 3 examples 总表 + 6 core / 9 supplement 分类 + 每个已完成 case 的 7 部分 report 摘要 + 更新的 Results 结构(6 节:architecture / human benchmark / learned governance / species routing / application cases / reliability-governed reporting prevents overclaiming)。
-- **验收**:矩阵与已完成 finding 一致;未完成 case 明确标 TODO/data-gated,不虚填。
-- **诚实**:主文只展开已真跑的 core case;未跑的进 roadmap 表(标 `[能力矩阵]`/`[待数据]`)。
+#### - [x] W4.1 — application matrix + v0.4 paper outline(M)【已完成】
+- **产出**:`docs/paper/v0.4/application-cases.md`——能力矩阵(状态标注)+ 6 core / 9 supplement 分类 + Results 6 节结构 + R6 收束总表(治理防过度承诺)+ 最稳口径。
+- **落地状态**:C1/C2 已有、C3/C4 真跑完成、L4 GEARS baseline 入表;C5(yeast)⏸ 数据门、C6(drug)🛑 数据门,均如实标注不虚填。
+- **诚实**:主文只展开真跑 core case;未跑进 roadmap 标 ⏸/🛑;非 human case 价值定位为治理(识别/路由/降级/弃权),不夸大预测。
 
 ---
 
