@@ -20,3 +20,5 @@ data/drug_signatures/*.txt
 
 # v0.4 W5.2:cell-state 大数据(pertpy 缓存在 home,不入库);只提交 subset+provenance
 data/cellstate/*.h5ad
+
+data/*.h5ad
