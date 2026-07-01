@@ -48,7 +48,8 @@ def route(req: dict) -> RouteDecision:
 
     # --- 代谢型输出(growth/flux):机制模型领地 ---
     if out in _METABOLIC:
-        if sp in _MICROBE and (obj in _GENE_LIKE or obj == "medium"):
+        if sp in _MICROBE and (obj in _GENE_LIKE or obj in ("medium", "drug")):
+            # gene 敲除 / 培养基切换 / 抗生素(靶代谢反应)→ 机制 GEM
             return RouteDecision("gem_fba", "accept",
                                  reason=f"{sp}_metabolic_gem_fba")
         if sp in _MAMMAL and out == "flux":

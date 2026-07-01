@@ -25,11 +25,9 @@
 - **落地**:LINCS 剂量子集(3 药 × 各剂量 top-150,22.6KB committed);`predictors/embedding/drug_dose.py`;recall vs 最多信号剂量参考 的 dose-Spearman。
 - **治理对照(实跑)**:geldanamycin Spearman 0.90→**accept**;sirolimus recall 近零→**downgrade**(幅度守卫);vorinostat→caution。`test_drug_dose_case.py`(4 passed)。finding `finding_v0_4_drug_case` §6。不训练模型。
 
-### - [ ] R3 — Bacteria antibiotic → growth(应用 2 例 2C;机制)
-- **数据**:BiGG **iML1515**(全基因组 E. coli,`http://bigg.ucsd.edu/static/models/iML1515.xml.gz`,~数 MB)—— e_coli_core 无抗生素靶反应,iML1515 有叶酸合成(trimethoprim→DHFR、sulfamethoxazole→DHPS)。
-- **分析**:抗生素建模为**靶反应抑制**(如 trimethoprim → 抑制 DHFR 反应)→ FBA growth。复用 `GemModel`(传 iML1515 SBML)。route:`(bacteria, drug, growth) → gem_fba`(需扩 route:drug 对象 + growth 输出 → gem_fba)。
-- **验收**:靶反应抑制 → growth 显著下降(vs WT);靶反应不在模型 → abstain。7 部分。
-- **产出**:`predictors/mechanistic/antibiotic.py` + test + finding(并入 `finding_v0_4_metabolism_cases`)。
+### - [x] R3 — Bacteria antibiotic → growth(应用 2 例 2C)【已完成】
+- **落地**:iML1515(BiGG,620KB committed);`predictors/mechanistic/antibiotic.py`(复用 GemModel);route 扩 `(microbe, drug, growth)→gem_fba`。
+- **真跑**:trimethoprim(靶 DHFR)/ sulfamethoxazole(靶 DHPS2)→ growth 0(致死)→**accept**;ciprofloxacin(非代谢靶)/ 未知 →**abstain**(GEM 诚实弃权)。`test_antibiotic_case.py`(5 passed)。finding `finding_v0_4_metabolism_cases` §7。不训练模型。
 
 ### - [ ] R4 — Cancer EMT/resistance state(应用 3 例 3C)
 - **数据**:**自主找公开 EMT scRNA**(如 A549 TGF-β EMT GEO/pertpy 数据集,或含 EMT 的癌症数据集)→ 下载可得子集,记 provenance。

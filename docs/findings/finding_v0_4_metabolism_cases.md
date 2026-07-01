@@ -73,3 +73,19 @@
 - FBA growth 是**约束型可行性/最优通量的相对量**(steady-state),**非**绝对生长速率;in-silico essentiality 随培养基/目标函数变,需湿实验证实。
 - e_coli_core(137 genes)/ iMM904(905 genes)均为**有限覆盖**重建,非完备代谢刻画。
 - 本组 case 证明的是**"agent 能路由到机制模型并产出受治理的真实预测"**(能力 + 治理 + 可扩展),非 E. coli/yeast 代谢的完备刻画。
+
+---
+
+## 7. R3(v0.5)补充 — Bacteria antibiotic → growth(iML1515 靶反应抑制)
+
+- 数据:iML1515(全基因组 E. coli GEM,BiGG,`data/gems/iML1515.xml.gz`,620KB;1516 genes)—— 含叶酸合成等抗生素靶(e_coli_core 无)。抗生素建模为靶代谢反应抑制 FBA。`predictors/mechanistic/antibiotic.py`(复用 GemModel)。route `(bacteria, drug, growth) → gem_fba`。
+- **真跑 + 治理**(WT 0.877):
+
+| antibiotic | 靶反应 | growth | 裁决 |
+|---|---|---|---|
+| trimethoprim | DHFR(二氢叶酸还原酶) | 0.000 | **accept**(growth arrest) |
+| sulfamethoxazole | DHPS2(二氢蝶酸合酶) | 0.000 | **accept** |
+| ciprofloxacin | DNA 旋转酶(非代谢) | — | **abstain**(GEM 不适用) |
+| notanab(未知) | — | — | **abstain** |
+
+→ trimethoprim/sulfa 靶叶酸代谢 → FBA 预测致死(与已知抗菌机制一致);**喹诺酮/β-内酰胺等非代谢靶 → abstain**(机制模型诚实弃权,不虚构)。`test_antibiotic_case.py`(5 passed)。不训练模型。
