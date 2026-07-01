@@ -17,11 +17,9 @@
 
 ## A 类 — 自主可做(公开数据,纯 Mac,loop 主战场)
 
-### - [ ] R1 — Stem/progenitor 分化 fate(应用 3 例 3A;State/fate 深化)
-- **数据**:`scanpy.datasets.paul15()`(自带,髓系祖细胞分化,~2730 cells,无需外网大下载)。
-- **分析**:lineage fate score —— 红系(GATA1/KLF1/HBB/HBA1)vs 髓系(ELANE/MPO/GATA2/CEBPE)marker 评分;沿分化给出 fate tendency(哪支占优)。复用 `scoring.py`。route:新增或复用 `state_scoring`(target_output=state,object=gene/lineage)。
-- **验收(真跑)**:红系 vs 髓系 fate score 在对应祖细胞群可分(Cohen's d 或分类);marker 覆盖不足→downgrade。7 部分 validator 过。
-- **产出**:`predictors/state/fate.py` + `test_fate_case.py` + `finding_v0_5_fate_case.md`。
+### - [x] R1 — Stem/progenitor 分化 fate(应用 3 例 3A)【已完成】
+- **落地**:paul15(scanpy 自带)子集 750 cells;`predictors/state/fate.py`(复用 scoring.py)+ route state_scoring。
+- **真跑**:fate 评分红系 +1.27 vs 髓系 −2.76,**Cohen's d 4.32 → accept**;两 panel 覆盖取 min,缺一→downgrade;原生小鼠 marker 分析(ortholog N/A)。`test_fate_case.py`(4 passed)。finding `finding_v0_5_fate_case.md`。
 
 ### - [ ] R2 — Drug dose-response(应用 2 深化;dose/time)
 - **数据**:已下载的 `data/drug_signatures/LINCS_L1000_Chem_Pert_up/down.txt`(gitignore;term 编码 dose,如 `-vorinostat-10.0`/`-vorinostat-1.11`)。
