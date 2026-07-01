@@ -40,12 +40,12 @@
 | linear_additive | 单 base | 0.6639 | 18874 | **逐位** 0.6638587363779742 ✓ |
 | latent_additive | 单 base | 0.6365 | 18874 | ✓ |
 | pretrained-mock | 单 base | 0.6183 | 18874 | ✓ |
+| **GEARS (same-split donor-eval, 5ep)** | 外部专用 GNN | **0.4877** | 18874 | 远端实跑 ✓（L4） |
 | **mean-perturbation** | naive 下界 | **0.4615** | 18874 | 远端实跑 ✓ |
 | scGPT (frozen backbone + 轻 head) | foundation | **0.4407** | 7290 | **逐位** 0.4406901964584723 ✓ |
 
-- **off-axis 不入表**：GEARS 原生 pearson_de 0.8392（重训复现 0.8461，同量级）——absolute-expression DE-gene pearson、不同 split，与 ΔPearson 不可比。
+- **同协议外部 baseline 已补（L4，`finding_w9_l4_gears_same_split`）**：GEARS 原生 pearson_de 0.8392（重训 0.8461）是 off-axis（absolute-expression DE-gene pearson、自带 split，不可比）；拉到**同协议 per-cell ΔPearson**（donor test split，n=18874），GEARS = **0.4877** → 低于所有 donor base、远低于 Coordinator 0.7039。防泄漏 train62/test150（IER5L 被 GEARS GO 图过滤）。**caveat**：GEARS 为 condition 级，broadcast 到 per-cell，尺子对其不利，**非"PRAXIS 赢 SOTA"**。
 - **诚实卖点**：scGPT frozen 0.4407 **反低于** mean-baseline 0.4615 → "规模非解药"；PRAXIS **不声称赢 SOTA**。
-- **缺口**：表 A 无**同协议外部专用 baseline**（GEARS 同 split / scGen / STATE 均未入表）。
 
 ## 2. v0.2 — 治理能力矩阵（表 B）
 
@@ -273,7 +273,7 @@
 | 缺口 | 影响面 | 严重度 | 现状 / 补法 |
 |---|---|---|---|
 | ~~151 小样本无 bootstrap CI~~ → **已补(L1)** | 0.907 / 0.746 / 对照表 加了 95% CI | ~~高~~ → 已解 | ✅ 配对差值 CI 不跨 0(AUROC +0.13[0.056,0.191]、risk-cov +0.026[0.014,0.041];wrong-accept 降/risk-cov 增 [0.59,0.92])。`finding_w9_m2_bootstrap_ci.md` |
-| **外部专用 baseline 未入表 A** | 完整 VirtualCell 论文竞争力 | **高** | GEARS 同 split / scGen / STATE 同协议（较重，需远端适配/训练） |
+| ~~外部专用 baseline 未入表 A~~ → **GEARS 已补（L4）** | 完整 VirtualCell 论文竞争力 | ~~高~~ → 部分解 | ✅ GEARS same-split 0.4877 入表 A（`finding_w9_l4_gears_same_split`）；scGen / STATE 仍未做 |
 | **per-cell 解 W4.5 单 control** | M1/M2 全 pert-level，disagreement 单基线 | 中高 | 解 W4.5 后 disagreement 更准、可能整体升；较重 |
 | **mode_compare 为 in-sample** | R7 非独立泛化 | 中 | 已用 OOF（7A）作泛化兜底 + 写法上明确定性，**不算硬伤但须写清** |
 | **阈值非端到端调优** | unnecessary_abstain 随阈值动 | 中 | 训练分位设定；可后续按运营反馈调 |

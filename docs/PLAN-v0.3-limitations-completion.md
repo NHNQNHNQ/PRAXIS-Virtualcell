@@ -63,7 +63,11 @@
 - **验收**:三文档数字与 finding 一致;无新引用需核验;`learned-governance.md` 与 `-zh.md` 逐节对应。
 - **可选**:重生成中文 docx(pandoc),仅当用户要。
 
-### - [ ] 🛑 L4 — GEARS same split / same metric 入表 A(B 类,**远端,必停**)
+### - [x] L4 — GEARS same split / same metric 入表 A(B 类,远端)【已完成 2026-07-01 → `finding_w9_l4_gears_same_split.md`】
+- **结果**:GEARS same-split donor-eval,5ep → **ΔPearson 0.4877**(cosine 0.986,n=18874,同表 A 口径)。同协议下低于所有 donor base、远低于 Coordinator 0.7039;**R8 解除**,入表 A。
+- **防泄漏**:custom split train62/test150(donor train∩test=∅,IER5L 被 GEARS GO 图过滤);eval=`load_norman("test",seed=1)` 18874 cells。**caveat**:condition→cell broadcast(GEARS 粒度限制,per-cell 尺子对其不利),5ep 对齐参考基线,单次(GEARS 无固定 seed)。脚本 `praxis_virtualcell/benchmarks/gears_donor_eval.py`(已本地+远端 commit)。
+
+<details><summary>原远端执行清单(已完成,存档)</summary>
 - **为何停**:需远端 `zkyd@10.102.106.53` 适配/(重)训 GEARS 到 donor norman split + per-cell ΔPearson(铁律:先远端见证再入表)。loop **不可**自动跑远端。
 - **loop 动作**:把可跑配方/脚本准备好(检查 `benchmarks/gears_norman.py` 现状、写 donor-split 适配 TODO),写一份"远端执行清单",然后**停下汇报**,等用户在远端跑完贴回数字再入表 A + 解 R8。
 - **诚实**:GEARS 原生 pearson_de 0.8392(off-axis)≠ ΔPearson;同 split 适配是关键。
@@ -73,6 +77,7 @@
   - **远端步骤**:(a) `ssh zkyd@10.102.106.53` + `conda activate virtualcell` + `git pull`;(b) 在 `gears_norman.py` 加 `--donor-eval` 路径(用 donor test split + donor EvalAgent 算 ΔPearson,而非 GEARS 自带指标);(c) 跑 `python -m praxis_virtualcell.benchmarks.gears_norman <epochs> --donor-eval`;(d) 见证 ΔPearson + n,写 finding,入表 A(PRAXIS Coordinator 0.7039 旁)解 R8。
   - **诚实**:GEARS 训练无固定 seed(重训有噪声:0.8392→0.8461);务必报 ΔPearson(非 pearson_de);适配代码须**在远端 env 写+验证**(Mac 无 GEARS/donor 数据,不臆造未验证适配)。
   - **📋 可执行 runbook(确定接口 `load_norman`/`EvalAgent` + 远端探查命令 + `GearsDonorAdapter` 骨架 + 防泄漏)**:`docs/L4-gears-remote-runbook.md`。
+</details>
 
 ### - [ ] 🛑 B2 — per-cell 解 W4.5 单 control(B 类,**远端+重,必停**)
 - **为何停**:把 disagreement 从单 control 升级为 per-cell 全量,需远端重跑;影响面大。主刊增强项,优先级在 L4 之后。

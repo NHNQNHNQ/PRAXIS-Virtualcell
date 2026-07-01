@@ -50,12 +50,12 @@ runtime / message bus / species brain / predictor-agent / abstain / critic / pro
 |---|---|---|---|
 | **PRAXIS Coordinator (all-5)** | ensemble + 治理 | **0.7039** | 18874 |
 | 6 base predictor | 单 base | 0.6716–0.6183 | 18874 |
+| **GEARS (same-split donor-eval, 5ep)** | 外部专用 GNN | **0.4877** | 18874 |
 | **mean-perturbation** | naive 下界 | **0.4615** | 18874 |
 | scGPT (frozen + 轻 head) | foundation | **0.4407** | 7290 |
 
 - **诚实卖点**:scGPT frozen 0.4407 **反低于** mean-baseline 0.4615 →"规模非解药";PRAXIS **不声称赢 SOTA**。
-- **off-axis 不入表**:GEARS 原生 `pearson_de` 0.8392(重训 0.8461 同量级)——不同指标/split,与 ΔPearson 不可比。
-- **缺口**:表 A **无同协议外部专用 baseline**。→ **L4(GEARS 同 split donor-eval)正在补**(见 §5)。
+- **同协议外部 baseline 已补(L4,`finding_w9_l4_gears_same_split`)**:GEARS 原生 `pearson_de` 0.8392 是 off-axis(DE-gene 绝对表达 + 自带 split);拉到**同协议 per-cell ΔPearson**(donor test split,n=18874),GEARS = **0.4877**——低于所有 donor base,远低于 Coordinator 0.7039。**核心读法:指标/协议决定结论,off-axis 会高估;GEARS 为 condition 级,per-cell 尺子对其不利(见 finding §4 caveat),非"PRAXIS 赢 SOTA"标题**。防泄漏:GEARS train 扰动与 test 互斥(train62/test150,IER5L 被 GEARS GO 图过滤)。
 
 ### R3 — Learned reliability governance(v0.3 M1/M2.1,**最强新贡献**)
 证据链完整闭环,每步有数、口径分层干净:
@@ -100,15 +100,15 @@ runtime / message bus / species brain / predictor-agent / abstain / critic / pro
 
 ## 5. 进行中 / 待补(直接决定论文竞争力)
 
-### 🔄 L4 — GEARS 同 split donor-eval 入表 A(远端,进行中)
-- **状态**:2026-07-01 远端 `zkyd@10.102.106.53` 已跑通 pipeline。防泄漏 custom split(train 137 / test 151 互斥),用 donor `EvalAgent` 算 **per-cell ΔPearson**(同表 A 口径,n=18874)。smoke(1 epoch)ΔPearson=0.424 验证端到端通;正式 **5 epoch**(对齐参考基线 hidden=64/5ep→pearson_de 0.8392)后台运行中。
-- **待回填**:`GEARS 同协议 ΔPearson + n` → 入表 A(PRAXIS Coordinator 0.7039 旁)、写 finding、解"无同协议外部 baseline"。
-- 脚本:`praxis_virtualcell/benchmarks/gears_donor_eval.py`(远端);runbook `docs/L4-gears-remote-runbook.md`。
+### ✅ L4 — GEARS 同 split donor-eval 入表 A(远端,**已完成 2026-07-01**)
+- **结果**:GEARS same-split donor-eval,5ep → **ΔPearson 0.4877**(cosine 0.986,n=18874,同表 A 口径)。已入表 A(见 R2)。finding:`finding_w9_l4_gears_same_split`。
+- **防泄漏坐实**:custom split train62/test150(donor train∩test=∅,IER5L 被 GEARS GO 图过滤);eval=`load_norman("test",seed=1)` 18874 cells。
+- **caveat**:condition→cell broadcast(GEARS 粒度限制,per-cell 尺子对其不利);5ep 对齐参考基线;单次(GEARS 无固定 seed)。**R8 解除**。
 
 ### 缺口清单(v0.4 要解决的核心)
 | 缺口 | 影响面 | 现状 |
 |---|---|---|
-| 外部专用 baseline 未入表 A | 高 | L4 进行中(GEARS);scGen/STATE 未做 |
+| 外部专用 baseline 未入表 A | 高 | **✅ L4 已补(GEARS 0.4877 同协议)**;scGen/STATE 未做 |
 | per-cell 解 W4.5 单 control | 中高 | 远端重跑,B2 待启 |
 | **跨物种仅路由原型** | 中(scope 已声明) | **v0.4 补代表物种 case** |
 | **应用维度单一(只 gene pert)** | **高(VirtualCell 广度)** | **v0.4 补代表应用 case** |
