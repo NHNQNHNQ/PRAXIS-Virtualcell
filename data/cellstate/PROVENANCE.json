@@ -16,5 +16,12 @@
     "raw_counts": true,
     "sampling": "每 (label × cell_type) 最多 150 cell,seed=1 确定性"
   },
-  "rebuild": "scanpy + pertpy(pip install scanpy pertpy);见 scratchpad/build_kang_subset.py"
+  "rebuild": "scanpy + pertpy(pip install scanpy pertpy);见 scratchpad/build_kang_subset.py",
+  "committed_subset_metabolic": {
+    "file": "kang_metabolic_subset.json",
+    "sha256": "19cb566f2024f5e820216e45ee39ac5eb20e2c52c3c2749e04a25b9b276e8eb2",
+    "bytes": 561016,
+    "panels": "glycolysis(16)+oxphos(11)+housekeeping(7)",
+    "purpose": "W5.3 代谢通路 tendency"
+  }
 }

@@ -11,7 +11,7 @@
 | Gene perturbation | ✅ Norman CRISPR(表 A,0.7039) | ✅ ortholog caution(C3) | ✅ deletion growth(C5,iMM904) | ✅ KO growth(C4) |
 | Drug/chemical | ✅ drug MOA signature(C6,LINCS L1000) | ⬜ | ⬜ | ✅ 碳源切换 growth(S,e_coli_core) |
 | State/fate | ✅ immune activation(S,IFN-β/Kang2018) | ⬜ | ⬜ | ⬜ |
-| Metabolism/flux | 🛑 scFEA/Compass | ⬜ | ✅ yeast GEM(C5,iMM904) | ✅ E. coli GEM(C4) |
+| Metabolism/flux | ✅ 通路 tendency(S,治理对照 downgrade) | ⬜ | ✅ yeast GEM(C5,iMM904) | ✅ E. coli GEM(C4) |
 | Communication/env | 🛑 tumor-immune/spatial | ⬜ | ⬜ | ⬜ |
 
 ## 2. Phase I — 主文 6 核心 case(状态)

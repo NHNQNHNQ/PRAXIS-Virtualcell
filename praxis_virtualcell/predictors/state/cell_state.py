@@ -14,12 +14,12 @@ provenance `data/cellstate/PROVENANCE.json`)。
 from __future__ import annotations
 
 import json
-import math
 from pathlib import Path
 
 from praxis_virtualcell.agents.case_report import CaseReport
 from praxis_virtualcell.agents.species_schema import normalize_request
 from praxis_virtualcell.agents.route_table import route
+from praxis_virtualcell.predictors.state.scoring import lognorm, panel_score, cohens_d as _cohens_d
 
 _DEFAULT_SUBSET = Path(__file__).resolve().parents[3] / "data" / "cellstate" / "kang_isg_subset.json"
 
@@ -34,17 +34,6 @@ _BOUNDARY = ("ISG 激活评分是 marker-based 相对量(CP10k+log1p,ISG−house
              "确证 state 迁移',非'无迁移'。")
 
 
-def _cohens_d(a: list[float], b: list[float]) -> float:
-    na, nb = len(a), len(b)
-    if na < 2 or nb < 2:
-        return 0.0
-    ma, mb = sum(a) / na, sum(b) / nb
-    va = sum((x - ma) ** 2 for x in a) / (na - 1)
-    vb = sum((x - mb) ** 2 for x in b) / (nb - 1)
-    psd = math.sqrt((va + vb) / 2) or 1e-9
-    return (ma - mb) / psd
-
-
 class CellStateDB:
     """Kang 2018 ISG 子集(committed)。提供归一 + ISG 激活评分。"""
 
@@ -54,18 +43,12 @@ class CellStateDB:
         self._hk = self._d["genes_hk"]
         self._idx = {g: i for i, g in enumerate(self._isg + self._hk)}
 
-    def _lognorm(self, cell) -> list[float]:
-        tot = cell["total_counts"] or 1.0
-        return [math.log1p(c / tot * 1e4) for c in cell["counts"]]
-
     def score_cell(self, cell, isg_panel=None) -> float | None:
         """ISG 激活评分 = mean(ISG present) − mean(housekeeping)。panel 覆盖为空 → None。"""
-        ln = self._lognorm(cell)
+        ln = lognorm(cell["counts"], cell["total_counts"])
         isg = [self._idx[g] for g in (isg_panel or self._isg) if g in self._idx]
         hk = [self._idx[g] for g in self._hk if g in self._idx]
-        if not isg or not hk:
-            return None
-        return sum(ln[i] for i in isg) / len(isg) - sum(ln[i] for i in hk) / len(hk)
+        return panel_score(ln, isg, hk)
 
     def marker_coverage(self, isg_panel=None) -> float:
         panel = isg_panel or self._isg

@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, asdict
 
-ENGINES = ("donor_predictor", "gem_fba", "embedding", "state_scoring", "reject")
+ENGINES = ("donor_predictor", "gem_fba", "embedding", "state_scoring", "pathway_scoring", "reject")
 
 _MAMMAL = {"human", "mouse"}
 _MICROBE = {"bacteria", "yeast"}
@@ -50,10 +50,14 @@ def route(req: dict) -> RouteDecision:
         if sp in _MICROBE and (obj in _GENE_LIKE or obj == "medium"):
             return RouteDecision("gem_fba", "accept",
                                  reason=f"{sp}_metabolic_gem_fba")
+        if sp in _MAMMAL and out == "flux":
+            # 哺乳类无机制 GEM 接入 → 用**表达层代谢通路 tendency**(scFEA/Compass 思想)评分
+            return RouteDecision("pathway_scoring", "caution",
+                                 reason="mammalian_metabolic_pathway_scoring")
         if sp in _MAMMAL:
-            # 哺乳类 flux 需 scFEA/Compass,尚未接入 → 不假装
+            # 哺乳类 growth 无机制 GEM 接入 → 不假装
             return RouteDecision("gem_fba", "downgrade",
-                                 reason="mammalian_flux_model_not_wired",
+                                 reason="mammalian_growth_model_not_wired",
                                  data_gated=True)
         # 其余(如 medium 改变的 growth)暂无接入
         return RouteDecision("reject", "abstain",

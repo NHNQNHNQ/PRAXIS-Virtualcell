@@ -138,8 +138,9 @@
 - **落地**:自主取 Kang 2018 IFN-β PBMC(pertpy,committed 子集 2232 cells,provenance 记);route 加 `state_scoring` 引擎;`predictors/state/cell_state.py`(ISG 激活评分)。
 - **真跑**:IFN-β→ISG 激活整体 **Cohen's d 2.49→accept**;per-cell-type 髓系(DC 6.2/单核 6.1)最强、巨核 0.20 几乎不响应(教科书一致)。治理:marker 覆盖<50%→downgrade;巨核弱效应暴露。`test_cellstate_case.py`(6 passed,运行时不需 scanpy)。finding `finding_v0_4_cellstate_case.md`。**State/fate 空白应用已落地。不训练模型。**
 
-#### - [ ] W5.3 — Human metabolic flux(scFEA/Compass,4C,T/D:重)
-- **自主动作**:试装 scFEA/Compass;若模型/数据轻量可得 → 跑 human 表达→pathway flux tendency + 治理;否则备接口停(硬门#4)。
+#### - [x] W5.3 — Human metabolic flux tendency(4C)【已完成 — 表达层通路评分 + 治理对照】
+- **落地**:Recon3D 机制 GEM 探查后弃用(开放培养基 WT 755、Entrez 基因 id、KO 无效应 → 需大量整备易出可疑数字);改走 4C 本义(表达→通路 tendency,scFEA/Compass 思想)。`predictors/state/metabolic_tendency.py` + 共享 `scoring.py`;route 加 `pathway_scoring`(human flux)。
+- **真跑 + 治理对照(R6 硬证据)**:同一 IFN-β 扰动,ISG 激活 d=2.49→accept,但糖酵解/OXPHOS 表达层 d=0.10/0.28→**downgrade**。agent 按证据分别裁决、不硬报代谢重编程。`test_metabolic_tendency_case.py`(4 passed)。finding `finding_v0_4_metabolic_tendency.md`。**不训练模型。**
 
 #### - [ ] W5.4 — Cell-cell communication(NicheNet/CellChat,应用 5,重/多为 R)
 - 多为 R 工具 + 先验数据 → 大概率硬门;先自主评估 Python 侧(如 `liana-py`)可行性,不可行则备接口 + roadmap 停。

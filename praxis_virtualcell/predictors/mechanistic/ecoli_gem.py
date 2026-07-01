@@ -27,7 +27,7 @@ class EcoliGEM(GemModel):
         super().__init__(sbml_path or _bundled_textbook_path())
 
 
-def run_ecoli_growth_case(raw_req: dict, gem: "EcoliGEM | None" = None):
+def run_ecoli_growth_case(raw_req: dict, gem: EcoliGEM | None = None):
     """E. coli KO growth case → 7 部分 CaseReport(真实数值)。返回 (CaseReport, RouteDecision)。"""
     gem = gem or EcoliGEM()
     return run_growth_case(raw_req, gem, tool="cobrapy e_coli_core (textbook)",

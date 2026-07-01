@@ -91,7 +91,8 @@ def run_drug_response_case(raw_req: dict, db: DrugSignatureDB | None = None,
     for drug in norm["perturbation_targets"]:
         if not db.has(drug):
             per_drug.append({"drug": drug, "in_db": False, "moa": None, "moa_enrichment": None})
-            dispositions.append("abstain"); flags.append(f"drug_not_in_db:{drug}")
+            dispositions.append("abstain")
+            flags.append(f"drug_not_in_db:{drug}")
             continue
         enr = db.moa_enrichment(drug)
         rec = {"drug": drug, "in_db": True, "moa": db.moa(drug),
@@ -102,11 +103,13 @@ def run_drug_response_case(raw_req: dict, db: DrugSignatureDB | None = None,
                "top_up_genes": db.up(drug)[:10]}
         per_drug.append(rec)
         if enr["partner"] is None:
-            dispositions.append("downgrade"); flags.append(f"no_same_moa_reference:{drug}")
+            dispositions.append("downgrade")
+            flags.append(f"no_same_moa_reference:{drug}")
         elif enr["enrichment"] >= threshold:
             dispositions.append("accept")
         else:
-            dispositions.append("downgrade"); flags.append(f"weak_moa_consistency:{drug}")
+            dispositions.append("downgrade")
+            flags.append(f"weak_moa_consistency:{drug}")
 
     disposition = max(dispositions, key=lambda x: _ORDER[x]) if dispositions else "abstain"
 
