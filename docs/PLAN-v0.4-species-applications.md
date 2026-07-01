@@ -92,11 +92,11 @@
 - **验收**:`tests/test_route_table.py`(9 passed)——bacteria/yeast growth→gem_fba(**不**路由哺乳类 predictor);bacteria expression→abstain(mammalian_not_applicable);mouse gene→ortholog caution;drug→embedding+data_gated downgrade;human flux→data_gated downgrade;决策可 to_dict 进 provenance。
 - **诚实**:route table 是**声明式能力图** `[能力矩阵]`,非性能;data-gated 引擎真跑前恒 downgrade/abstain,不假装 accept。
 
-#### - [ ] W1.3 — 3 个 mock-to-real routing 单测 + case validator(M)
-- **产出**:`tests/test_v04_case_schema.py`(7 部分 validator)+ 3 个 routing case 骨架(C3/C4/C5 的输入→路由→预期决策,先 mock 预测输出占位,标 TODO 待真跑替换)。
-- **验收**:validator 对齐 7 部分;3 routing 决策方向正确(mouse→caution、ecoli→GEM、yeast→GEM)。
-- **产出 finding**:`docs/findings/finding_v0_4_species_routing.md`(记 schema + route table + 3 routing 决策 + 覆盖矩阵)。
-- **勾选后**:Week 1 完成 → 继续 Week 2(进入 T 类,可能停)。
+#### - [x] W1.3 — 3 个 mock-to-real routing 单测 + case validator(M)【已完成】
+- **产出**:`praxis_virtualcell/agents/case_report.py`(`CaseReport` 7 字段 + `validate_case_report` + `routing_case`)+ `tests/test_v04_case_schema.py`(12 passed)。
+- **验收**:validator 拒绝 7 部分任一缺失;3 routing case 方向正确(C3 mouse→donor+ortholog caution、C4 ecoli→gem_fba、C5 yeast→gem_fba)且 7 部分齐全;C4/C5 生长数值 boundary 标 pending W2。
+- **产出 finding**:`docs/findings/finding_v0_4_species_routing.md`(schema + route table 覆盖矩阵 + 3 routing 决策 + 诚实标注)。
+- **Week 1(M 类)全部完成** → 继续 Week 2(T 类 cobrapy,可能停)。
 
 ### Week 2 — E. coli / yeast metabolism cases(T 类,先试装 cobrapy)
 
