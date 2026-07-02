@@ -1,5 +1,5 @@
 """Week 5:cross-species brain 路由/拒绝/ortholog caution。断言"可见差异"(非仅 abstain)以防 §7.3 退化。
-含 review workflow 抓出的 must-fix 回归:drug 拒因语义 / ortholog 真投影 / 空 targets / martian species_not_supported。"""
+含 review workflow 抓出的 must-fix 回归:drug 拒因语义 / ortholog 真投影 / 空 targets / martian species_not_supported。"""  # noqa: E501
 from praxis_virtualcell.workflows.predict_delta_expression import run_request
 
 

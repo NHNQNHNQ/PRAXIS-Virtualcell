@@ -405,7 +405,7 @@ def _job_to_trajectory(job: dict, ssh_user: str) -> dict:
         "ensemble": params.get("ensemble") or "",
         "time_ns": params.get("time_ns"),
         "created_at": created_at.isoformat() if hasattr(created_at, "isoformat") else str(created_at or ""),
-        "finished_at": finished_at.isoformat() if hasattr(finished_at, "isoformat") else (str(finished_at) if finished_at else None),
+        "finished_at": finished_at.isoformat() if hasattr(finished_at, "isoformat") else (str(finished_at) if finished_at else None),  # noqa: E501
         "status": job.get("status", "unknown"),
         "download_url": f"/api/md/jobs/{job_id}",
         "sim_type": job.get("sim_type", ""),

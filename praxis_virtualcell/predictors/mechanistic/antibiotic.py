@@ -81,7 +81,7 @@ def run_antibiotic_case(raw_req: dict, gem: GemModel | None = None):
         case_id=raw_req.get("case_id", "S_ecoli_antibiotic"),
         structured_input=dict(raw_req),
         object_normalization={"species": norm["species"], "perturbation_object": norm["perturbation_object"],
-                              "normalized_targets": norm["perturbation_targets"], "target_output": norm["target_output"]},
+                              "normalized_targets": norm["perturbation_targets"], "target_output": norm["target_output"]},  # noqa: E501
         models_tools_selected={"engine": dec.engine, "tool": "cobrapy iML1515 (全基因组 E. coli)",
                                "method": "抗生素靶代谢反应抑制 FBA", "reason": dec.reason},
         raw_output={"wt_growth": round(gem.wt_growth, 5), "antibiotics": results},

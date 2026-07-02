@@ -68,7 +68,7 @@ def run_spatial_niche_case(raw_req: dict, db: SpatialNicheDB | None = None):
         case_id=raw_req.get("case_id", "S_spatial_niche"),
         structured_input=dict(raw_req),
         object_normalization={"species": norm["species"], "perturbation_object": norm["perturbation_object"],
-                              "niche_contrast": "stroma_adjacent vs stroma_poor", "target_output": norm["target_output"],
+                              "niche_contrast": "stroma_adjacent vs stroma_poor", "target_output": norm["target_output"],  # noqa: E501
                               "readout": "EMT score (Vimentin − ECadherin)"},
         models_tools_selected={"engine": dec.engine, "tool": "squidpy imc (IMC 乳腺癌) + 空间 k-NN niche",
                                "method": "niche 分层 EMT 评分对比(间质邻接 vs 贫瘠)", "reason": dec.reason},

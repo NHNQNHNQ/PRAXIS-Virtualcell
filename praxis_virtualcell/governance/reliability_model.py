@@ -85,7 +85,7 @@ def cv_reliability(entries, *, k=5, lam=1.0):
         Xtr = _imp_std([X[i] for i in tr], mean, std)
         Xte = _imp_std([X[i] for i in te], mean, std)
         w = _ridge_fit(Xtr, [y[i] for i in tr], lam)
-        for idx, pv in zip(te, _pred(w, Xte)):
+        for idx, pv in zip(te, _pred(w, Xte)):  # noqa: B905
             oof[idx] = pv
     return oof, y
 
@@ -113,11 +113,11 @@ def predict_dp(params, feat: dict) -> float:
 
 
 def _pearson(a, b):
-    pairs = [(x, y) for x, y in zip(a, b) if not (_isnan(x) or _isnan(y))]
+    pairs = [(x, y) for x, y in zip(a, b) if not (_isnan(x) or _isnan(y))]  # noqa: B905
     if len(pairs) < 2:
         return _NAN
-    xs = [p[0] for p in pairs]; ys = [p[1] for p in pairs]
-    mx = sum(xs) / len(xs); my = sum(ys) / len(ys)
+    xs = [p[0] for p in pairs]; ys = [p[1] for p in pairs]  # noqa: E702
+    mx = sum(xs) / len(xs); my = sum(ys) / len(ys)  # noqa: E702
     sx = (sum((x - mx) ** 2 for x in xs)) ** 0.5
     sy = (sum((y - my) ** 2 for y in ys)) ** 0.5
     if sx == 0 or sy == 0:
@@ -127,8 +127,8 @@ def _pearson(a, b):
 
 def _auroc(scores, labels):
     """labels:1=bad;scores 越大越像 bad。手算 AUROC。"""
-    pos = [s for s, y in zip(scores, labels) if y == 1]
-    neg = [s for s, y in zip(scores, labels) if y == 0]
+    pos = [s for s, y in zip(scores, labels) if y == 1]  # noqa: B905
+    neg = [s for s, y in zip(scores, labels) if y == 0]  # noqa: B905
     if not pos or not neg:
         return _NAN
     wins = sum(sum(1.0 if p > n else 0.5 if p == n else 0.0 for n in neg) for p in pos)

@@ -20,7 +20,7 @@ def _isnan(x):
 
 def risk_coverage(reliability_score, true_dp, coverages=COVERAGES):
     """reliability_score 越大=越该保留;返回 [(coverage, 保留集平均真 dp)]。"""
-    pairs = [(s, d) for s, d in zip(reliability_score, true_dp) if not (_isnan(s) or _isnan(d))]
+    pairs = [(s, d) for s, d in zip(reliability_score, true_dp) if not (_isnan(s) or _isnan(d))]  # noqa: B905
     pairs.sort(key=lambda x: -x[0])             # 最可靠的排前
     n = len(pairs)
     out = []

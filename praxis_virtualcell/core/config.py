@@ -10,7 +10,7 @@ from pathlib import Path
 _BRAINS_DEFAULT = Path(__file__).resolve().parent.parent / "brains" / "virtualcell"
 
 
-class Mode(str, Enum):
+class Mode(str, Enum):  # noqa: UP042
     OFFLINE = "offline"
     LLM_ASSISTED = "llm_assisted"
 

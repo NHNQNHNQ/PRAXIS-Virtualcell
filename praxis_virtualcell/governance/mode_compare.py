@@ -8,7 +8,7 @@
 
 诚实:ledger 全为 human/in-vocab 软判定样本(无硬规则触发),故 hard_rule_override=0 by construction;硬规则不被
 learned 覆盖另有单测(test_hard_abstain_not_overridden_by_learned)。pert-level(≠per-cell);disagreement 单 control。
-"""
+"""  # noqa: E501
 from __future__ import annotations
 
 from praxis_virtualcell.governance import learned_reliability as L
@@ -49,10 +49,10 @@ def compare(entries, *, bad_quantile=0.25, rule_threshold=0.5):
                     if not all(k in lr for k in _PROV_FIELDS):
                         prov_ok = False
             flagged.append(flag)
-        wa = sum(1 for b, f in zip(bad, flagged) if b and not f) / n_bad
-        ua = sum(1 for b, f in zip(bad, flagged) if (not b) and f) / n_good
-        rc = sum(1 for b, f in zip(bad, flagged) if b and f) / n_bad
-        ru = sum(1 for b, f in zip(bad, flagged) if (not b) and not f) / n_good
+        wa = sum(1 for b, f in zip(bad, flagged) if b and not f) / n_bad  # noqa: B905
+        ua = sum(1 for b, f in zip(bad, flagged) if (not b) and f) / n_good  # noqa: B905
+        rc = sum(1 for b, f in zip(bad, flagged) if b and f) / n_bad  # noqa: B905
+        ru = sum(1 for b, f in zip(bad, flagged) if (not b) and not f) / n_good  # noqa: B905
         out[mode] = {"wrong_accept": wa, "unnecessary_abstain": ua,
                      "risk_coverage": rc, "retained_utility": ru,
                      "n_flagged": sum(flagged)}

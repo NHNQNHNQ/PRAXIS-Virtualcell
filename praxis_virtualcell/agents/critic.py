@@ -55,7 +55,7 @@ class CriticAgent(BaseAgent):
         if abstain and ensemble is not None:
             violations.append("abstain_inconsistent_with_prediction")
         notes.append(f"checked retrieve-first, ensemble integrity, abstain honesty, provenance, "
-                     f"uncertainty reporting, species consistency, abstain/prediction consistency; violations={violations}")
+                     f"uncertainty reporting, species consistency, abstain/prediction consistency; violations={violations}")  # noqa: E501
         bus.send(AgentMessage(message.message_id + ":crit", self.name, "ProvenanceAgent",
             "critic_done", {**p, "critic_notes": notes, "critic_violations": violations},
             message.timestamp, message.message_id))

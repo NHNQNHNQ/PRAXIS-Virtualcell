@@ -3,7 +3,7 @@
 继承 core `PredictorAgent`:retrieve-before-predict 门 + `assess_applicability`(brain) + `prepare_input` + `run_prediction`。
 `prepare_input` 做 **schema→tensor 适配**(request.targets → esm2 pert_emb + norman control)。
 `run_prediction` 调真 donor `model.predict`。仅远端 virtualcell 环境(import torch + donor)。
-"""
+"""  # noqa: E501
 from __future__ import annotations
 
 import sys
@@ -12,7 +12,7 @@ _DONOR = "/home/zkyd/data1/mzy/Virtual cell"
 if _DONOR not in sys.path:
     sys.path.insert(0, _DONOR)
 
-from praxis_virtualcell.predictors.base import PredictorAgent
+from praxis_virtualcell.predictors.base import PredictorAgent  # noqa: E402
 
 
 class MLBackedPredictorAgent(PredictorAgent):

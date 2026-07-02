@@ -56,7 +56,7 @@ async def test_bash_deny_through_runner(tmp_path: Path):
         [{"id": "t1", "name": "Bash", "input": {"command": "rm -rf /"}}], st
     )
     assert results[0]["is_error"] is True
-    assert "权限" in results[0]["content"] or "黑名单" in results[0]["content"] or "deny" in results[0]["content"].lower()
+    assert "权限" in results[0]["content"] or "黑名单" in results[0]["content"] or "deny" in results[0]["content"].lower()  # noqa: E501
 
 
 @pytest.mark.asyncio

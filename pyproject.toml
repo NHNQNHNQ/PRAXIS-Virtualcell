@@ -67,7 +67,9 @@ include = ["praxis2*"]
 [tool.ruff]
 line-length = 120
 target-version = "py311"
-exclude = ["._*", ".venv", "*.egg-info", "frontend"]
+# 排除非发布的一次性工具脚本(图表/审计/远程 skill runner),它们非可导入库、不参与 import 测试;
+# 发布代码(praxis_virtualcell / praxis_vc_api / praxis2 / tests)仍严格 lint。
+exclude = ["._*", ".venv", "*.egg-info", "frontend", "docs", "scripts", "brains"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

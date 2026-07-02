@@ -68,7 +68,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def log_message(self, fmt: str, *args) -> None:
         sys.stderr.write(
-            "[%s] %s - %s\n"
+            "[%s] %s - %s\n"  # noqa: UP031
             % (self.log_date_time_string(), self.address_string(), fmt % args)
         )
 

@@ -41,7 +41,7 @@ class LedgerEntry:
     caution_flags: dict = field(default_factory=dict)
     # 可选外部评测信号(有 ground-truth 时填;否则 None = 未评测)
     delta_pearson: float | None = None                          # ensemble/整体该扰动准度
-    per_predictor_delta_pearson: dict | None = None             # {predictor_name: 该扰动 ΔPearson}(阶段2 router 训练标签)
+    per_predictor_delta_pearson: dict | None = None             # {predictor_name: 该扰动 ΔPearson}(阶段2 router 训练标签)  # noqa: E501
     seen_in_train: bool | None = None
 
     def as_dict(self) -> dict:

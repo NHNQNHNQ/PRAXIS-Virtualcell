@@ -22,7 +22,7 @@ def test_ensemble_only_aggregates_success():
 
 def test_reliability_abstains_when_all_rejected():
     bus = MessageBus()
-    payload = {"request": {}, "brain_context": {"generic": {"default_abstain_rules": {"abstain_if": ["all_predictors_rejected"]}}},
+    payload = {"request": {}, "brain_context": {"generic": {"default_abstain_rules": {"abstain_if": ["all_predictors_rejected"]}}},  # noqa: E501
                "results": [_result("MockCPA", "rejected"), _result("MockGEARS", "rejected")],
                "models_used": [], "models_rejected": ["MockCPA", "MockGEARS"], "ensemble": None}
     ReliabilityAgent().handle(AgentMessage("m", "X", "Reliability", "assess", payload, "t1"), bus)

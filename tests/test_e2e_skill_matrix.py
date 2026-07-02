@@ -44,7 +44,7 @@ def test_error_when_timeout():
     assert esm.classify_verdict(tr, ["poses"]) == "ERROR"
 
 
-import csv
+import csv  # noqa: E402
 
 
 def test_load_inputs_filters_by_green(tmp_path, monkeypatch):
@@ -65,7 +65,7 @@ def test_load_inputs_filters_by_green(tmp_path, monkeypatch):
 
 def test_update_inventory_csv_promotes_done_real(tmp_path, monkeypatch):
     csvp = tmp_path / "inv.csv"
-    csvp.write_text("brain,skill,archetype,status\ndock,vina_gnina_dock,docking,TODO\ndock,redock_benchmark,docking,TODO\n", encoding="utf-8")
+    csvp.write_text("brain,skill,archetype,status\ndock,vina_gnina_dock,docking,TODO\ndock,redock_benchmark,docking,TODO\n", encoding="utf-8")  # noqa: E501
     monkeypatch.setattr(esm, "INVENTORY_CSV", csvp)
     esm.update_inventory_csv({("dock", "vina_gnina_dock"): "DONE_real", ("dock", "redock_benchmark"): "RED"})
     rows = list(csv.DictReader(csvp.open(encoding="utf-8")))
@@ -82,7 +82,7 @@ def test_update_inventory_csv_idempotent(tmp_path, monkeypatch):
     assert csvp.read_text(encoding="utf-8").count("DONE_real") == 1
 
 
-import asyncio
+import asyncio  # noqa: E402
 
 
 def test_run_archetype_with_fake_executor(tmp_path, monkeypatch):
@@ -95,14 +95,14 @@ def test_run_archetype_with_fake_executor(tmp_path, monkeypatch):
 
     aud = tmp_path / "_audit"
     (aud / "e2e_inputs").mkdir(parents=True)
-    (aud / "green_skills.json").write_text('{"dock":["vina_gnina_dock","induced_fit_docking","covalent_docking"]}', encoding="utf-8")
+    (aud / "green_skills.json").write_text('{"dock":["vina_gnina_dock","induced_fit_docking","covalent_docking"]}', encoding="utf-8")  # noqa: E501
     (aud / "e2e_inputs" / "docking.json").write_text(json.dumps({
         "vina_gnina_dock": {"brain": "dock", "inputs": {"simulate": False}, "contract_keys": ["poses", "best_pose"]},
-        "induced_fit_docking": {"brain": "dock", "inputs": {"simulate": False}, "contract_keys": ["poses"], "skip": False},
+        "induced_fit_docking": {"brain": "dock", "inputs": {"simulate": False}, "contract_keys": ["poses"], "skip": False},  # noqa: E501
         "covalent_docking": {"brain": "dock", "inputs": {"simulate": False}, "contract_keys": ["poses"]},
     }), encoding="utf-8")
     (aud / "skill_real_impl_inventory.csv").write_text(
-        "brain,skill,archetype,status\ndock,vina_gnina_dock,docking,TODO\ndock,induced_fit_docking,docking,TODO\ndock,covalent_docking,docking,TODO\n", encoding="utf-8")
+        "brain,skill,archetype,status\ndock,vina_gnina_dock,docking,TODO\ndock,induced_fit_docking,docking,TODO\ndock,covalent_docking,docking,TODO\n", encoding="utf-8")  # noqa: E501
     monkeypatch.setattr(esm, "AUDIT", aud)
     monkeypatch.setattr(esm, "GREEN_SKILLS", aud / "green_skills.json")
     monkeypatch.setattr(esm, "INVENTORY_CSV", aud / "skill_real_impl_inventory.csv")
@@ -177,7 +177,7 @@ def test_incomplete_when_input_not_provided():
 def test_error_when_genuine_crash():
     """真跑崩(non-zero exit,stderr 无 env 坏库线索)→ ERROR。"""
     tr = {"ok": True, "value": {"ok": True, "exec_via": "ssh",
-          "result": {"ok": False, "error": "non-zero exit 1", "stderr": "Traceback ... ValueError: bad pose"}}, "error": None}
+          "result": {"ok": False, "error": "non-zero exit 1", "stderr": "Traceback ... ValueError: bad pose"}}, "error": None}  # noqa: E501
     assert esm.classify_verdict(tr, ["poses"]) == "ERROR"
 
 

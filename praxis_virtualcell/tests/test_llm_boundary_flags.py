@@ -33,5 +33,5 @@ def test_assert_boundaries_passes_when_false():
 def test_assert_boundaries_raises_if_any_true(flag):
     c = RuntimeConfig()
     object.__setattr__(c, flag, True)               # 强行改也要被守卫拦下
-    with pytest.raises(Exception):
+    with pytest.raises(Exception):  # noqa: B017
         assert_llm_boundaries(c)

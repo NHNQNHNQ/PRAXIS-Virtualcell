@@ -28,7 +28,7 @@ def _disagreement(vecs: list) -> dict:
             pairs.append(0.5)
             n_zero += 1
         else:
-            cos = max(-1.0, min(1.0, sum(x * y for x, y in zip(va, vb)) / (na * nb)))
+            cos = max(-1.0, min(1.0, sum(x * y for x, y in zip(va, vb)) / (na * nb)))  # noqa: B905
             pairs.append((1.0 - cos) / 2.0)
     return {"score": sum(pairs) / len(pairs), "metric": "pairwise_cosine_distance",
             "n_models": k, "n_pairs": len(pairs), "dims": length, "n_zero_vector_pairs": n_zero}

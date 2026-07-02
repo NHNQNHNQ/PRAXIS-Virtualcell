@@ -5,7 +5,7 @@
 adapter:Prediction.mean = ctx.control + (GEARS预测绝对表达 − GEARS_ctrl_mean) → EvalAgent 取 mean−control = GEARS delta。
 
 仅远端 virtualcell env。用法:python gears_donor_eval.py [epochs]   (epochs=1 验证 pipeline,>=20 出真数字)
-"""
+"""  # noqa: E501
 import pickle
 import sys
 import time
@@ -69,7 +69,7 @@ def main(epochs: int = 20):
     random.Random(1).shuffle(train_pool)
     n_val = max(1, len(train_pool) // 10)
     split_dict = {"train": train_pool[n_val:], "val": train_pool[:n_val], "test": test_keep}
-    print(f"[split] train={len(split_dict['train'])} val={len(split_dict['val'])} test={len(split_dict['test'])}", flush=True)
+    print(f"[split] train={len(split_dict['train'])} val={len(split_dict['val'])} test={len(split_dict['test'])}", flush=True)  # noqa: E501
     sp = "/home/zkyd/data1/mzy/gears_data/l4_split.pkl"
     with open(sp, "wb") as f:
         pickle.dump(split_dict, f)

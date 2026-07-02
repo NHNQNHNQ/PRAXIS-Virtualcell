@@ -54,7 +54,7 @@ def test_web_fetch_non_whitelist_rejected():
     t = WebFetchTool()
     r = asyncio.run(t.run({"url": "https://evil.example.com/secret"}))
     assert not r.ok
-    assert "白名单" in (r.error or "") or "whitelist" in (r.error or "").lower() or "not allowed" in (r.error or "").lower()
+    assert "白名单" in (r.error or "") or "whitelist" in (r.error or "").lower() or "not allowed" in (r.error or "").lower()  # noqa: E501
 
 
 def test_web_fetch_http_scheme_rejected():

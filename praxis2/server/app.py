@@ -157,7 +157,7 @@ async def _append_turn_entries(
 # E501 noqa:视觉对齐 emoji/name/desc 单行,可读性优先于 100 字限制(13 项扫一眼即可)。
 _AGENT_META: dict[str, dict[str, object]] = {
     "virtualcell": {"name": "VirtualCell 虚拟细胞", "emoji": "🧫", "desc": "扰动响应预测 / 跨物种 / abstain 可靠性 / Coordinator 编排",  # noqa: E501
-                   "examples": ["Norman 双基因扰动预测", "这个 predictor 能用在 E. coli 上吗?", "Coordinator+abstain 给可靠预测"]},
+                   "examples": ["Norman 双基因扰动预测", "这个 predictor 能用在 E. coli 上吗?", "Coordinator+abstain 给可靠预测"]},  # noqa: E501
 }
 # v2.0.2:Synth 已落地(brains/synth/),DISCIPLINE_SLUGS 自身已含 synth → 13 项。
 # 不再需要 + ["synth"] 的拼接。

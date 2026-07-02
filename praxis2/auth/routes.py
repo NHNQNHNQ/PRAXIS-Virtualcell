@@ -567,7 +567,7 @@ async def handle_info(scope, receive, send, deps) -> None:
         200,
         {
             "service": "PRAXIS-2",
-            "version": "v0.21.0",  # 0.21.0:MD 本地 A100 真执行链(LocalJobRunner+MCP gmx server)+四种增强采样全真跑(standard/SMD/伞形/REMD/metadynamics)
+            "version": "v0.21.0",  # 0.21.0:MD 本地 A100 真执行链(LocalJobRunner+MCP gmx server)+四种增强采样全真跑(standard/SMD/伞形/REMD/metadynamics)  # noqa: E501
             "env": settings.env_label,
             "allow_self_signup": settings.allow_self_signup,
             "default_model": getattr(settings, "model", ""),

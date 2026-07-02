@@ -4,7 +4,7 @@
 记 training ledger sha256 + version + finding 引用。写 governance/artifacts/{reliability_model,abstain_head,feature_schema}_v0_3.json。
 
 用法:python -m praxis_virtualcell.governance.freeze_artifacts
-"""
+"""  # noqa: E501
 from __future__ import annotations
 
 import hashlib

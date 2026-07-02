@@ -8,8 +8,8 @@ import pytest
 
 cobra = pytest.importorskip("cobra")   # 无 cobra → skip
 
-from praxis_virtualcell.agents.case_report import validate_case_report
-from praxis_virtualcell.predictors.mechanistic.ecoli_gem import EcoliGEM, run_ecoli_growth_case
+from praxis_virtualcell.agents.case_report import validate_case_report  # noqa: E402
+from praxis_virtualcell.predictors.mechanistic.ecoli_gem import EcoliGEM, run_ecoli_growth_case  # noqa: E402
 
 
 @pytest.fixture(scope="module")

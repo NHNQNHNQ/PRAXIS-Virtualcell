@@ -14,7 +14,7 @@ from praxis2.tools.skill_exec import SkillExecTool
 
 
 def _run(coro):
-    return asyncio.get_event_loop().run_until_complete(coro) if not asyncio.get_event_loop().is_running() else asyncio.run(coro)
+    return asyncio.get_event_loop().run_until_complete(coro) if not asyncio.get_event_loop().is_running() else asyncio.run(coro)  # noqa: E501
 
 
 def test_skill_exec_registered_in_chat_registry():

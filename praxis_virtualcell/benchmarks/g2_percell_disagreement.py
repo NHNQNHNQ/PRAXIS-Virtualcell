@@ -20,7 +20,7 @@ slots={"linear":"linear_additive","latent":"latent_additive","gnn":"gnn_pert"}
 def percell_disagreement(D):
     pairs=[]
     for a,b in itertools.combinations(D,2):
-        na=a.norm(dim=1); nb=b.norm(dim=1)
+        na=a.norm(dim=1); nb=b.norm(dim=1)  # noqa: E702
         denom=(na*nb).clamp_min(1e-12)
         cos=((a*b).sum(1)/denom).clamp(-1,1)
         pd=(1-cos)/2
@@ -49,17 +49,17 @@ def main(max_perts=None, out=None):
     groups=defaultdict(list)
     for i in range(len(ds)):
         p=ds[i].perturbation
-        if p!="control": groups[p].append(i)
+        if p!="control": groups[p].append(i)  # noqa: E701
     train_perts=set()
     dstr=load_norman("train",seed=0,max_cells=2)
-    for i in range(len(dstr)): train_perts.add(dstr[i].perturbation)
+    for i in range(len(dstr)): train_perts.add(dstr[i].perturbation)  # noqa: E701
     print(f"[{time.time()-t0:.0f}s] loaded; n_perts={len(groups)}", flush=True)
     perts=sorted(groups)
-    if max_perts: perts=perts[:max_perts]
+    if max_perts: perts=perts[:max_perts]  # noqa: E701
     dev="cpu"
     res={}
     for j,pname in enumerate(perts):
-        idxs=groups[pname]; targets=tuple(pname.split("+"))
+        idxs=groups[pname]; targets=tuple(pname.split("+"))  # noqa: E702
         kind="gene_combo" if len(targets)>1 else "gene_ko"
         pe=_pert_emb_for(pname, ds.pert_table, ds.pert_dim)
         ctrl=torch.stack([ds[i].control for i in idxs]).to(dev)
@@ -68,12 +68,12 @@ def main(max_perts=None, out=None):
         res[pname]={"disagreement_percell_mean":float(pcd.mean()),
                     "disagreement_percell_sd":float(pcd.std()),
                     "n_cells":len(idxs),"seen_in_train":pname in train_perts}
-        if j<3 or j%40==0: print(f"  [{time.time()-t0:.0f}s] {j+1}/{len(perts)} {pname} dis={res[pname]['disagreement_percell_mean']:.4f} n={len(idxs)}", flush=True)
+        if j<3 or j%40==0: print(f"  [{time.time()-t0:.0f}s] {j+1}/{len(perts)} {pname} dis={res[pname]['disagreement_percell_mean']:.4f} n={len(idxs)}", flush=True)  # noqa: E501, E701
     if out:
         json.dump(res, open(out,"w"))
         print("WROTE", out, flush=True)
     print(f"DONE {len(res)} perts t={time.time()-t0:.0f}s", flush=True)
 
 if __name__=="__main__":
-    ap=argparse.ArgumentParser(); ap.add_argument("--max-perts",type=int,default=None); ap.add_argument("--out",default=None)
-    a=ap.parse_args(); main(a.max_perts, a.out)
+    ap=argparse.ArgumentParser(); ap.add_argument("--max-perts",type=int,default=None); ap.add_argument("--out",default=None)  # noqa: E501, E702
+    a=ap.parse_args(); main(a.max_perts, a.out)  # noqa: E702

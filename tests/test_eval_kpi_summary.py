@@ -34,9 +34,9 @@ def test_empty_counts_no_zerodiv():
     assert s["n_conversations"] == 1 and s["ab_ratio"] == 0.0
 
 
-import subprocess
-import sys
-from pathlib import Path
+import subprocess  # noqa: E402
+import sys  # noqa: E402
+from pathlib import Path  # noqa: E402
 
 _REPO = Path(__file__).resolve().parent.parent
 

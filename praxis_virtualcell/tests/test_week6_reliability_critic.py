@@ -40,7 +40,7 @@ def _rel(payload):
 def test_disagreement_high_abstains_when_rule_present():
     rd = _rel({"request": {"perturbation_targets": ["A"]}, "models_used": ["MockCPA", "MockGEARS"],
                "ensemble": {"delta": [0.05]}, "disagreement": {"score": 0.9},
-               "brain_context": {"generic": {"default_abstain_rules": {"abstain_if": ["model_disagreement_too_high"]}}}})
+               "brain_context": {"generic": {"default_abstain_rules": {"abstain_if": ["model_disagreement_too_high"]}}}})  # noqa: E501
     assert rd["abstain"] is True and "model_disagreement_too_high" in rd["reasons"]
     assert rd["model_disagreement"]["triggered"] is True
 
