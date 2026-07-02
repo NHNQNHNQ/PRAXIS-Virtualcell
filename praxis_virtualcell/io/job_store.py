@@ -37,6 +37,16 @@ class JobStore:
             self._w(d, "provenance", result.get("provenance", {}))
             if result.get("narrative"):
                 self._w(d, "narrative_report.md", result["narrative"])
+            # 确定性 Markdown 报告:每次都写(含 offline),与 LLM narrative 正交
+            from praxis_virtualcell.io.report_markdown import render_report_md
+            job_like = {
+                "report": result.get("structured_report", {}),
+                "request": request, "candidate_request": candidate,
+                "trace": result.get("trace", []),
+                "provenance": result.get("provenance", {}),
+                "mode": result.get("mode"), "llm_enabled": result.get("llm_enabled"),
+            }
+            self._w(d, "report.md", render_report_md(job_like))
             # LLM 元数据只存 hash(不存 key/原文)
             llm = (result.get("parsed") or {}).get("llm_metadata") or {}
             self._w(d, "llm_meta", {k: v for k, v in llm.items() if k != "api_key"})
@@ -56,6 +66,9 @@ class JobStore:
         nf = d / "narrative_report.md"
         if nf.is_file():
             out["narrative"] = nf.read_text(encoding="utf-8")
+        rf = d / "report.md"
+        if rf.is_file():
+            out["report_md"] = rf.read_text(encoding="utf-8")
         return out
 
     def list_jobs(self) -> list[str]:

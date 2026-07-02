@@ -112,3 +112,19 @@ def test_no_llm_import_in_module():
 def test_reproducible_byte_identical():
     assert render_report_md(_ACCEPT) == render_report_md(_ACCEPT)
     assert render_report_md(_ABSTAIN) == render_report_md(_ABSTAIN)
+
+
+def test_jobstore_writes_and_loads_report_md(tmp_path):
+    from praxis_virtualcell.io.job_store import JobStore
+    store = JobStore(str(tmp_path / "runs"))
+    result = {
+        "structured_report": _ACCEPT["report"],
+        "trace": [], "provenance": _ACCEPT["report"]["provenance"],
+        "mode": "offline", "llm_enabled": False,
+    }
+    store.save("job1", request=_ACCEPT["request"], result=result)
+    assert (tmp_path / "runs" / "job1" / "report.md").is_file()
+    loaded = store.load("job1")
+    assert "report_md" in loaded
+    assert loaded["report_md"].startswith("# PRAXIS-VirtualCell Report")
+    assert "verdict: **accept**" in loaded["report_md"]
