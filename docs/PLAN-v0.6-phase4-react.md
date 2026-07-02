@@ -12,7 +12,7 @@
 - 前端 py 测试无关;后端若动 FastAPI 要跑 `.venv/bin/python -m pytest praxis_virtualcell/tests` 无回归(带 `PYTHONPATH=<repo>`)。
 
 ## 环境前置(loop 第一步必查)
-- [ ] R4.0 — 查 `node -v` / `npm -v`。**无 node/npm → 硬门停下**,让用户装(Node ≥18)。有则继续。
+- [x] R4.0 — 查 `node -v` / `npm -v`。**无 node/npm → 硬门停下**,让用户装(Node ≥18)。有则继续。(node v25.8.2 / npm 11.11.1,均 ≥18,通过)
 
 ## 步骤
 
