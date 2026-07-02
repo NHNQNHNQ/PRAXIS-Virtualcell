@@ -274,7 +274,7 @@
 |---|---|---|---|
 | ~~151 小样本无 bootstrap CI~~ → **已补(L1)** | 0.907 / 0.746 / 对照表 加了 95% CI | ~~高~~ → 已解 | ✅ 配对差值 CI 不跨 0(AUROC +0.13[0.056,0.191]、risk-cov +0.026[0.014,0.041];wrong-accept 降/risk-cov 增 [0.59,0.92])。`finding_w9_m2_bootstrap_ci.md` |
 | ~~外部专用 baseline 未入表 A~~ → **GEARS 已补（L4）** | 完整 VirtualCell 论文竞争力 | ~~高~~ → 部分解 | ✅ GEARS same-split 0.4877 入表 A（`finding_w9_l4_gears_same_split`）；scGen / STATE 仍未做 |
-| **per-cell 解 W4.5 单 control** | M1/M2 全 pert-level，disagreement 单基线 | 中高 | 解 W4.5 后 disagreement 更准、可能整体升；较重 |
+| ~~per-cell 解 W4.5 单 control~~ → **已解(G2)** | disagreement 单基线 | ~~中高~~ → 已解 | ✅ per-cell disagreement 重算:learned AUROC 0.907→**0.869**、risk-cov 0.746→**0.736**(单 control 略乐观,结论稳健);`finding_g2_percell_w45` |
 | **mode_compare 为 in-sample** | R7 非独立泛化 | 中 | 已用 OOF（7A）作泛化兜底 + 写法上明确定性，**不算硬伤但须写清** |
 | **阈值非端到端调优** | unnecessary_abstain 随阈值动 | 中 | 训练分位设定；可后续按运营反馈调 |
 | ~~单一确定性 5-fold（无多 seed）~~ → **已补(B3)** | OOF 稳健性 | ~~中~~ → 已解 | ✅ 5 seed learned AUROC 0.900±0.008、risk-cov 0.744±0.001,每 seed 均 > disagreement。`finding_w9_m2_bootstrap_ci.md` 补充节 |

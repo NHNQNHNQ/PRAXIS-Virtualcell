@@ -55,7 +55,7 @@
 - **为何停**:需远端装 scGen(scvi-tools)/STATE(arc-state)+ donor train 训练 + donor EvalAgent per-cell ΔPearson。远端已核实:scgen/scvi/state 均未装(需 pip)、torch 2.6+cu124 可用、eval 接口同 L4/scGPT。
 - **runbook**:确定接口(load_vcbench_split/EvalAgent/Predictor)+ 安装命令 + scGen/STATE adapter 骨架 + 防泄漏(train∩test=∅)+ 探查点。**等远端跑完贴回 delta_pearson+n → 入表 A**。
 
-### - [ ] 🛑 G2 — per-cell 解 W4.5 单 control【runbook 已备:`docs/G2-percell-w45-remote-runbook.md`】
+### - [x] G2 — per-cell 解 W4.5 单 control【已跑完 → `finding_g2_percell_w45`;runbook 已备:`docs/G2-percell-w45-remote-runbook.md`】
 - **为何停**:disagreement 从单 control(`ds[0].control`)升级 per-cell(`ds[i].control`)需远端重建 ledger。远端已核实:18874 样本各带自身 control(数据本就在,只需改 adapter/ledger)。
 - **runbook**:定位根源(`agent_adapter.py:55`)+ per-cell 填充方案 A(逐 cell 用 `s.control`)+ Mac 复算下游(reliability/abstain/CI/OOD)+ 防泄漏。**等远端产新 ledger → Mac 复算对比**。
 
