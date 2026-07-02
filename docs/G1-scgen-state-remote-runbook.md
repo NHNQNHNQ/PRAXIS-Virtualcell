@@ -1,5 +1,9 @@
 # G1 远端 runbook — scGen / STATE same-split / same-metric 入表 A
 
+> ⚠️ **2026-07-02 实测更新(见 `finding_g1_scgen_state`)**:scGen 撞两重障碍——① scgen 2.1.0 ✗ scvi-tools 1.4.2(`scvi._compat` 已移除),pin 旧 scvi 会降级 torch 破坏 donor;② scGen 是条件迁移模型,对 Norman **未见扰动** test 无法 leak-free 预测 → **不是合适对照**。**GEARS 0.4877(L4)已填同协议 baseline 缺口**。STATE 更合适但重/新,建议独立 env 交互式设置。下方为原始 runbook(STATE 路径仍有效)。
+
+---
+
 > 目标:把 **scGen** 与 **STATE** 两个外部专用 perturbation predictor,放到 **donor norman test split** 上、用 **per-cell ΔPearson(同表 A 口径,n=18874)** 评估 → 入表 A(GEARS 0.4877 / scGPT 0.4407 旁),把"同协议外部 baseline"从 1 个(GEARS)扩到 3 个。
 > 远端 `zkyd@10.102.106.53`,`conda activate virtualcell`,先 `git pull`。**结构照搬已成功的 L4**(`docs/L4-gears-remote-runbook.md`);确定接口直接给,未知标【远端探查】。
 

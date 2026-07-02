@@ -51,7 +51,7 @@
 
 ## 🛑 B 类 — 远端硬门(需 zkyd@10.102.106.53,备 runbook 后停)
 
-### - [ ] 🛑 G1 — scGen / STATE 同协议入表 A【runbook 已备:`docs/G1-scgen-state-remote-runbook.md`】
+### - [~] 🛑 G1 — scGen / STATE 同协议入表 A【实测阻塞 → `finding_g1_scgen_state`;scGen 依赖+方法学双障碍不强跑,STATE 待独立 env;GEARS 0.4877 已填缺口;runbook:`docs/G1-scgen-state-remote-runbook.md`】
 - **为何停**:需远端装 scGen(scvi-tools)/STATE(arc-state)+ donor train 训练 + donor EvalAgent per-cell ΔPearson。远端已核实:scgen/scvi/state 均未装(需 pip)、torch 2.6+cu124 可用、eval 接口同 L4/scGPT。
 - **runbook**:确定接口(load_vcbench_split/EvalAgent/Predictor)+ 安装命令 + scGen/STATE adapter 骨架 + 防泄漏(train∩test=∅)+ 探查点。**等远端跑完贴回 delta_pearson+n → 入表 A**。
 
