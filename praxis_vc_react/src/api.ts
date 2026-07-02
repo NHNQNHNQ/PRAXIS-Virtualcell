@@ -51,6 +51,7 @@ export interface ReportResult {
   narrative_report: string | null;
   trace_url: string;
   provenance_url: string;
+  markdown_url: string;
   llm_used_for_prediction: boolean;
 }
 
@@ -121,4 +122,11 @@ export function getTrace(jobId: string): Promise<TraceResult> {
 
 export function getProvenance(jobId: string): Promise<ProvenanceResult> {
   return req<ProvenanceResult>(`/api/reports/${encodeURIComponent(jobId)}/provenance`);
+}
+
+// report.md 为纯文本(text/markdown),不走 JSON 解析,单独 fetch。
+export async function getReportMarkdown(jobId: string): Promise<string> {
+  const res = await fetch(`${API_BASE}/api/reports/${encodeURIComponent(jobId)}/markdown`);
+  if (!res.ok) throw new Error(`API ${res.status}: report.md 获取失败`);
+  return res.text();
 }

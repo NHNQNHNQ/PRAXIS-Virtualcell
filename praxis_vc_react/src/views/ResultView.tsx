@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   getProvenance,
   getReport,
+  getReportMarkdown,
   getTrace,
   type ProvenanceResult,
   type ReportResult,
@@ -89,6 +90,17 @@ export default function ResultView({
             }
           >
             导出 narrative.md
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={() =>
+              getReportMarkdown(jobId)
+                .then((md) => download(`${jobId}_report.md`, md, "text/markdown"))
+                .catch((e: unknown) => setErr(String(e)))
+            }
+          >
+            导出 report.md
           </button>
           <button type="button" className="btn btn-sm" onClick={onReset}>
             {resetLabel}
