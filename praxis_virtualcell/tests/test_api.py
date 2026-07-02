@@ -1,0 +1,61 @@
+"""v0.6 P2:FastAPI 本地服务 —— offline 全链(health/parse/jobs/reports/trace/provenance)。
+
+无 fastapi 或无法 import praxis_vc_api(不在 path)时 skip。offline 不调 LLM。
+"""
+import os
+
+import pytest
+
+pytest.importorskip("fastapi")
+try:
+    from fastapi.testclient import TestClient
+    from praxis_vc_api.main import app
+except Exception:  # noqa: BLE001
+    pytest.skip("praxis_vc_api 不可导入(需 repo root 在 PYTHONPATH)", allow_module_level=True)
+
+
+@pytest.fixture()
+def client(tmp_path, monkeypatch):
+    monkeypatch.setenv("PRAXIS_VC_RUNS", str(tmp_path / "runs"))
+    # 强制 offline
+    monkeypatch.delenv("PRAXIS_VIRTUALCELL_MODE", raising=False)
+    import importlib
+
+    import praxis_vc_api.services.runtime_service as rs
+    importlib.reload(rs)
+    return TestClient(app)
+
+
+def test_health(client):
+    r = client.get("/api/health")
+    assert r.status_code == 200
+    assert r.json()["status"] == "ok" and "mode" in r.json()
+
+
+def test_parse_offline(client):
+    r = client.post("/api/parse", json={"text": "在 human 细胞敲 AHR", "mode": "offline"})
+    assert r.status_code == 200
+    d = r.json()
+    assert d["llm_used"] is False and d["candidate_request"]["species"] == "human"
+
+
+def test_job_flow_offline(client):
+    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+           "input_modality": "scRNA", "output_modality": "delta_expression",
+           "task_type": "predict_delta_expression"}
+    j = client.post("/api/jobs", json={"request": req, "mode": "offline"})
+    assert j.status_code == 200
+    jid = j.json()["job_id"]
+    assert j.json()["status"] == "done"
+    rep = client.get(f"/api/reports/{jid}")
+    assert rep.status_code == 200
+    assert rep.json()["llm_used_for_prediction"] is False
+    assert "structured_report" in rep.json()
+    tr = client.get(f"/api/reports/{jid}/trace")
+    assert tr.status_code == 200 and tr.json()["trace"]
+    pv = client.get(f"/api/reports/{jid}/provenance")
+    assert pv.status_code == 200 and "provenance" in pv.json()
+
+
+def test_missing_job_404(client):
+    assert client.get("/api/reports/nope").status_code == 404
