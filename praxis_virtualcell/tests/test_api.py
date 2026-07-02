@@ -57,5 +57,17 @@ def test_job_flow_offline(client):
     assert pv.status_code == 200 and "provenance" in pv.json()
 
 
+def test_list_jobs(client):
+    # 空 → []
+    assert client.get("/api/jobs").json()["jobs"] == []
+    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+           "input_modality": "scRNA", "output_modality": "delta_expression",
+           "task_type": "predict_delta_expression"}
+    client.post("/api/jobs", json={"request": req, "mode": "offline"})
+    jobs = client.get("/api/jobs").json()["jobs"]
+    assert len(jobs) == 1
+    assert jobs[0]["species"] == "human" and jobs[0]["status"] == "done"
+
+
 def test_missing_job_404(client):
     assert client.get("/api/reports/nope").status_code == 404

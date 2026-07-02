@@ -45,6 +45,12 @@ def create_job(body: JobIn):
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
+@app.get("/api/jobs")
+def list_jobs():
+    """列出历史 job(只读)。供前端 Jobs 列表复用 JobStore.list_jobs。"""
+    return {"jobs": svc.list_jobs()}
+
+
 @app.get("/api/jobs/{job_id}")
 def job_status(job_id: str):
     try:

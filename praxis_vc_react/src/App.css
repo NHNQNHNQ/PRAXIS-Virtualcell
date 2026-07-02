@@ -137,3 +137,8 @@ code.sha { font-size: 0.72rem; }
 .timeline .ts { color: #6b7280; min-width: 3.2rem; }
 .timeline .hop { font-weight: 600; }
 .timeline .mtype { color: #2563eb; }
+
+.jobs { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.5rem; }
+.jobs th, .jobs td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid #eee; }
+.jobs th { color: #6b7280; font-weight: 600; }
+.jobs button { padding: 0.25rem 0.6rem; font-size: 0.8rem; }

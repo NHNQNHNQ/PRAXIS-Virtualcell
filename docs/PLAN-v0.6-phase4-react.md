@@ -33,7 +33,7 @@
 - 顶部横幅:`mode` + "LLM 未参与预测/治理决策"。
 - 验收:后端开着时,输入自然语言 → 确认 → 得到报告/trace/provenance,全链走通(offline)。
 
-### - [ ] R4.4 — Jobs 列表 + 报告导出 + trace 可视化
+### - [x] R4.4 — Jobs 列表 + 报告导出 + trace 可视化
 - Jobs 页:列 `runs/` 下 job(需后端加 `GET /api/jobs`(list)—— 若无则本步先给后端加该 endpoint,复用 `JobStore.list_jobs`)。点击载入历史 job。
 - 报告导出:前端下载 structured_report.json / narrative.md。
 - Trace 可视化:按 sender→receiver 顺序渲染 agent 流程(简单时间线/列表即可,不必上重库)。

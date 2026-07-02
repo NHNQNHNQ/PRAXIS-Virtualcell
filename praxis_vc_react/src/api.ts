@@ -33,6 +33,15 @@ export interface JobRef {
   status: string;
 }
 
+export interface JobSummary {
+  job_id: string;
+  status: string;
+  species: string | null;
+  perturbation_targets: string[];
+  abstain: boolean | null;
+  reliability: string | null;
+}
+
 export interface ReportResult {
   structured_report: Record<string, unknown>;
   narrative_report: string | null;
@@ -92,6 +101,10 @@ export function createJob(
     method: "POST",
     body: JSON.stringify({ request, mode, enable_llm_report }),
   });
+}
+
+export function listJobs(): Promise<{ jobs: JobSummary[] }> {
+  return req<{ jobs: JobSummary[] }>("/api/jobs");
 }
 
 export function getReport(jobId: string): Promise<ReportResult> {

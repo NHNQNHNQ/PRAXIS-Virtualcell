@@ -47,3 +47,25 @@ def run_job(request: dict, mode: str, enable_llm_report: bool) -> dict:
 
 def get_job(job_id: str) -> dict:
     return JobStore(RUNS_DIR).load(job_id)
+
+
+def list_jobs() -> list[dict]:
+    """列出 runs/ 下所有 job(带简要信息,供前端 Jobs 列表)。只读,不做任何科学判断。"""
+    store = JobStore(RUNS_DIR)
+    out: list[dict] = []
+    for jid in store.list_jobs():
+        try:
+            j = store.load(jid)
+        except FileNotFoundError:
+            continue
+        req = j.get("request", {}) or {}
+        rep = j.get("report", {}) or {}
+        out.append({
+            "job_id": jid,
+            "status": j.get("status", "unknown"),
+            "species": req.get("species"),
+            "perturbation_targets": req.get("perturbation_targets", []),
+            "abstain": rep.get("abstain"),
+            "reliability": rep.get("reliability"),
+        })
+    return out

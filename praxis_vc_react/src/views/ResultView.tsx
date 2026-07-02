@@ -22,12 +22,25 @@ function pretty(v: unknown): string {
   return JSON.stringify(v, null, 2);
 }
 
+// 前端下载:把内容存为本地文件(纯前端,不上传任何数据)。
+function download(filename: string, content: string, mime: string) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function ResultView({
   jobId,
   onReset,
+  resetLabel = "新建查询",
 }: {
   jobId: string;
   onReset: () => void;
+  resetLabel?: string;
 }) {
   const [tab, setTab] = useState<Tab>("report");
   const [report, setReport] = useState<ReportResult | null>(null);
@@ -53,9 +66,34 @@ export default function ResultView({
     <section className="card">
       <div className="row between">
         <h2>3 · 结果(job {jobId})</h2>
-        <button type="button" className="ghost" onClick={onReset}>
-          新建查询
-        </button>
+        <div className="row">
+          <button
+            type="button"
+            className="ghost"
+            onClick={() =>
+              download(
+                `${jobId}_structured_report.json`,
+                pretty(report.structured_report),
+                "application/json",
+              )
+            }
+          >
+            导出 report.json
+          </button>
+          <button
+            type="button"
+            className="ghost"
+            disabled={!report.narrative_report}
+            onClick={() =>
+              download(`${jobId}_narrative.md`, report.narrative_report ?? "", "text/markdown")
+            }
+          >
+            导出 narrative.md
+          </button>
+          <button type="button" onClick={onReset}>
+            {resetLabel}
+          </button>
+        </div>
       </div>
 
       <div className="tabs">
