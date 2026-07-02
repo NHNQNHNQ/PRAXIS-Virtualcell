@@ -26,3 +26,8 @@ data/*.h5ad
 # squidpy/scanpy 缓存数据(大),只提交 subset
 data/anndata/
 data/paul15/
+
+# v0.6 job 输出
+runs/
+*.key
+secrets/
