@@ -2,8 +2,12 @@
 // 铁律:前端只展示,绝不在此做预测/治理判断;默认 offline;不存/不显示 API key。
 // 所有科学决策均由后端确定性 runtime 完成,本文件仅做 HTTP 调用与类型定义。
 
+// 默认同源(相对路径 ""):FastAPI serve 同源托管 dist 时,前端请求当前 origin 的 /api/*,
+// 无需 CORS、不硬编码 IP —— 部署到任意主机(如 10.102.106.53)开箱即用。
+// dev(Vite 5173)经 vite.config.ts 的 proxy 把 /api 转发到后端;
+// 需指向异地后端时设 VITE_API_BASE 覆盖。
 export const API_BASE: string =
-  (import.meta.env.VITE_API_BASE as string | undefined) ?? "http://127.0.0.1:8000";
+  (import.meta.env.VITE_API_BASE as string | undefined) ?? "";
 
 export type Mode = "offline" | "llm_assisted";
 

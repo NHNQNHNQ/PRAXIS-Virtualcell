@@ -40,7 +40,7 @@ export default function App() {
       </header>
 
       <p className="muted subline">
-        本地只读展示前端 · API base:{API_BASE} · 前端不存/不显示 API key ·{" "}
+        本地只读展示前端 · API:{API_BASE || "同源(same-origin)"} · 前端不存/不显示 API key ·{" "}
         {h ? `后端 ${h.status}(runtime ${h.runtime_version})` : healthErr ? "后端未连通" : "连接后端…"}
       </p>
 
