@@ -50,3 +50,27 @@ def test_no_unsafe_accept():
               if c["expect"]["disposition"] != "accept"
               and route(normalize_request(c["input"])).disposition == "accept"]
     assert unsafe == [], f"unsafe accept(应非 accept 却 accept):{unsafe}"
+
+
+_WF_CASES = [c for c in _CASES if c.get("workflow") == "offline"]
+
+
+def test_has_workflow_offline_case():
+    assert len(_WF_CASES) >= 1, "至少 1 个 workflow: offline case 覆盖离线报告链"
+
+
+@pytest.mark.parametrize("case", _WF_CASES, ids=[c["case_id"] for c in _WF_CASES] or ["_none"])
+def test_workflow_offline_report(case):
+    """workflow: offline 的 case 跑离线 run_query,验证 report.md/provenance 生成(§4.3)。"""
+    from praxis_virtualcell.core.config import Mode, RuntimeConfig
+    from praxis_virtualcell.io.report_markdown import render_report_md
+    from praxis_virtualcell.workflows.run_virtualcell_query import run_query
+    cfg = RuntimeConfig(mode=Mode.OFFLINE, llm_enabled=False)
+    out = run_query(case["request"], config=cfg)
+    assert out["structured_report"].get("provenance"), "provenance 应非空"
+    assert isinstance(out["structured_report"].get("abstain"), bool)
+    job = {"report": out["structured_report"], "request": case["request"],
+           "provenance": out["provenance"], "mode": out["mode"]}
+    md = render_report_md(job)
+    for sec in ("## 1. Question", "## 5. Governance Verdict", "## 9. Reproducibility"):
+        assert sec in md, f"report.md 缺段:{sec}"
