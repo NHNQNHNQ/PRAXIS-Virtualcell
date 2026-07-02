@@ -38,6 +38,7 @@ praxis-vc serve --host 127.0.0.1 --port 8000
 | `POST /api/jobs` | 已确认 request → 离线执行 → 落盘 job |
 | `GET /api/jobs` | 列出 `runs/` 下历史 job(只读,供前端 Jobs 列表) |
 | `GET /api/reports/{id}` `/trace` `/provenance` | 结果 / trace / 溯源 |
+| `GET /api/reports/{id}/markdown` | 确定性 report.md(text/markdown,可下载) |
 
 > CORS 仅放行本地 Vite dev(`http://localhost:5173`、`http://127.0.0.1:5173`)。
 
@@ -65,7 +66,9 @@ praxis-vc serve --host 127.0.0.1 --port 8000         # dist 存在时自动挂�
 - 决策边界铁律:`allow_llm_to_modify_core_decision/_prediction/_override_hard_rules` **永为 False**(`assert_llm_boundaries` 守卫);冲突时 deterministic wins,记 provenance。
 
 ## 输出(runs/<job_id>/)
-`request.json` · `report.json` · `trace.json` · `provenance.json` · `narrative_report.md`(可选)· `llm_meta.json`(仅 hash,不存 key/原文)。
+`request.json` · `report.json` · `report.md`(**确定性 Markdown 报告,9 段,offline 也有**)· `trace.json` · `provenance.json` · `narrative_report.md`(可选 LLM 散文,与 report.md 正交)· `llm_meta.json`(仅 hash,不存 key/原文)。
+
+`report.md` 由确定性渲染器从 structured artifact 生成:纯确定性、不调 LLM、可复现(同 job 两次逐字节相同),含 Question / Cell Context / Routing / Result / Governance Verdict / Evidence & Provenance / Biological Interpretation / Limitations / Reproducibility 九段。前端结果页可一键「导出 report.md」。
 
 ## 说明
 - 本地(Mac)runtime 用 mock/可用 predictor 走完整治理流(route/reliability/abstain/critic/provenance);真 donor 数值预测在远端 A100(见 benchmarks/ + L4/G2 runbook)。
