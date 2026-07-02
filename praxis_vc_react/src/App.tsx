@@ -1,40 +1,69 @@
 import { useEffect, useState } from "react";
-import { API_BASE, health, type Health } from "./api";
+import { API_BASE, health, type Health, type Mode, type ParseResult } from "./api";
+import AskView from "./views/AskView";
+import ConfirmView from "./views/ConfirmView";
+import ResultView from "./views/ResultView";
 import "./App.css";
 
-// R4.2:最小首页 —— 拉 /api/health 验证前后端连通。完整页面在 R4.3 构建。
+type Step = "ask" | "confirm" | "result";
+
 export default function App() {
+  const [mode, setMode] = useState<Mode>("offline");
+  const [step, setStep] = useState<Step>("ask");
+  const [parseResult, setParseResult] = useState<ParseResult | null>(null);
+  const [jobId, setJobId] = useState<string | null>(null);
   const [h, setH] = useState<Health | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const [healthErr, setHealthErr] = useState<string | null>(null);
 
   useEffect(() => {
     health()
       .then(setH)
-      .catch((e: unknown) => setErr(String(e)));
+      .catch((e: unknown) => setHealthErr(String(e)));
   }, []);
+
+  function reset() {
+    setParseResult(null);
+    setJobId(null);
+    setStep("ask");
+  }
 
   return (
     <div className="app">
       <header className="banner">
-        <strong>PRAXIS-VirtualCell</strong> —— 本地只读展示前端
+        <strong>PRAXIS-VirtualCell</strong>
+        <span className="mode">mode:{mode}</span>
         <span className="notice">LLM 未参与预测/治理决策</span>
       </header>
 
-      <main>
-        <h1>后端连通性(/api/health)</h1>
-        <p className="muted">API base:{API_BASE}(默认 offline;前端不存/不显示 API key)</p>
-        {err && <pre className="err">{err}</pre>}
-        {h ? (
-          <ul>
-            <li>status:{h.status}</li>
-            <li>mode:{h.mode}</li>
-            <li>llm_enabled:{String(h.llm_enabled)}</li>
-            <li>runtime_version:{h.runtime_version}</li>
-          </ul>
-        ) : (
-          !err && <p>加载中……(请确认后端已启动:praxis-vc serve)</p>
-        )}
-      </main>
+      <p className="muted subline">
+        本地只读展示前端 · API base:{API_BASE} · 前端不存/不显示 API key ·{" "}
+        {h ? `后端 ${h.status}(runtime ${h.runtime_version})` : healthErr ? "后端未连通" : "连接后端…"}
+      </p>
+
+      {step === "ask" && (
+        <AskView
+          mode={mode}
+          onMode={setMode}
+          onParsed={(r) => {
+            setParseResult(r);
+            setStep("confirm");
+          }}
+        />
+      )}
+
+      {step === "confirm" && parseResult && (
+        <ConfirmView
+          parseResult={parseResult}
+          mode={mode}
+          onBack={() => setStep("ask")}
+          onRan={(id) => {
+            setJobId(id);
+            setStep("result");
+          }}
+        />
+      )}
+
+      {step === "result" && jobId && <ResultView jobId={jobId} onReset={reset} />}
     </div>
   );
 }

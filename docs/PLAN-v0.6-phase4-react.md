@@ -26,7 +26,7 @@
 - `src/api.ts`:`health()/parse(text,mode)/createJob(request,mode,enable_llm_report)/getReport(id)/getTrace(id)/getProvenance(id)`。
 - 验收:`npm run build` 通过;`npm run dev` 起;首页能拉到 `/api/health`(后端开着时)。
 
-### - [ ] R4.3 — 页面:Ask → Confirm → Report/Trace/Provenance
+### - [x] R4.3 — 页面:Ask → Confirm → Report/Trace/Provenance
 - **Ask**:textarea + 模式选择(offline/llm_assisted)+ Parse 按钮 → 调 `/api/parse`。
 - **Confirm**:显示 candidate(species/cell_type/perturbation_type/targets 可编辑)+ parser/llm_used/schema_valid/assumptions;missing/errors 高亮;**Confirm and Run** → `/api/jobs`。
 - **Result**:tab Report(4 块:Summary / Prediction(是否 abstain)/ Reliability decision / Boundary)+ narrative(标注 LLM 未改预测)· Trace(agent 表格/流程)· Provenance(version/artifact_sha/fallback/llm_meta hash)。

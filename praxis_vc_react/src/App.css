@@ -1,10 +1,11 @@
-/* PRAXIS-VirtualCell 前端样式(最小)。完整页面样式在 R4.3 扩展。 */
+/* PRAXIS-VirtualCell 前端样式。前端只读展示。 */
 .app {
-  max-width: 880px;
+  max-width: 920px;
   margin: 0 auto;
   padding: 1rem;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   text-align: left;
+  color: #111827;
 }
 
 .banner {
@@ -17,7 +18,12 @@
   gap: 0.75rem;
   flex-wrap: wrap;
 }
-
+.banner .mode {
+  background: #374151;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
 .banner .notice {
   margin-left: auto;
   background: #b45309;
@@ -27,13 +33,107 @@
   font-size: 0.8rem;
   font-weight: 600;
 }
+.subline { margin: 0.4rem 0 1rem; }
+
+.card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  background: #fff;
+}
 
 .muted { color: #6b7280; font-size: 0.9rem; }
 
-.err {
-  background: #fef2f2;
-  color: #991b1b;
-  padding: 0.6rem;
+textarea, input, select {
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #d1d5db;
   border-radius: 6px;
-  white-space: pre-wrap;
+  width: 100%;
+  box-sizing: border-box;
 }
+textarea { resize: vertical; }
+
+.row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+.row.between { justify-content: space-between; }
+.row label { display: flex; align-items: center; gap: 0.4rem; }
+.row select { width: auto; }
+
+button {
+  font: inherit;
+  padding: 0.45rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+button.ghost { background: #e5e7eb; color: #111827; }
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+.grid2 label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; color: #374151; }
+@media (max-width: 620px) { .grid2 { grid-template-columns: 1fr; } }
+
+.meta { list-style: none; padding: 0; margin: 0.6rem 0; }
+.meta li { margin: 0.2rem 0; font-size: 0.9rem; }
+code { background: #f3f4f6; padding: 0.05rem 0.35rem; border-radius: 4px; word-break: break-all; }
+code.ok { background: #dcfce7; color: #166534; }
+code.bad { background: #fee2e2; color: #991b1b; }
+code.sha { font-size: 0.72rem; }
+
+.note { background: #eff6ff; color: #1e40af; padding: 0.5rem 0.7rem; border-radius: 6px; margin: 0.5rem 0; font-size: 0.85rem; }
+.warn { background: #fffbeb; color: #92400e; padding: 0.5rem 0.7rem; border-radius: 6px; margin: 0.5rem 0; font-size: 0.85rem; }
+.bad-box { background: #fef2f2; color: #991b1b; padding: 0.5rem 0.7rem; border-radius: 6px; margin: 0.5rem 0; font-size: 0.85rem; }
+.err { background: #fef2f2; color: #991b1b; padding: 0.6rem; border-radius: 6px; white-space: pre-wrap; }
+
+.checkbox { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.9rem; }
+.checkbox input { width: auto; }
+
+.tabs { display: flex; gap: 0.4rem; border-bottom: 1px solid #e5e7eb; margin: 0.5rem 0 1rem; }
+.tab { background: transparent; color: #374151; border-radius: 6px 6px 0 0; }
+.tab.active { background: #2563eb; color: #fff; }
+
+.badge-strong {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.block { border-top: 1px dashed #e5e7eb; padding-top: 0.6rem; margin-top: 0.6rem; }
+.block h3 { margin: 0.3rem 0; font-size: 1rem; }
+
+.json, .narrative {
+  background: #0b1021;
+  color: #d1e0ff;
+  padding: 0.7rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.narrative { background: #f8fafc; color: #111827; border: 1px solid #e5e7eb; }
+
+.timeline { margin: 0; padding-left: 1.1rem; }
+.timeline li { margin: 0.25rem 0; font-size: 0.85rem; display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.timeline .ts { color: #6b7280; min-width: 3.2rem; }
+.timeline .hop { font-weight: 600; }
+.timeline .mtype { color: #2563eb; }
