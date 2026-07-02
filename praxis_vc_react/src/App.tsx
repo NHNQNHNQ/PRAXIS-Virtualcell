@@ -1,106 +1,104 @@
-import { useEffect, useState } from "react";
-import { API_BASE, health, type Health, type Mode, type ParseResult } from "./api";
+import { useCallback, useEffect, useState } from "react";
+import { health, listJobs, type Health, type JobSummary, type Mode, type ParseResult } from "./api";
 import AskView from "./views/AskView";
 import ConfirmView from "./views/ConfirmView";
-import JobsView from "./views/JobsView";
 import ResultView from "./views/ResultView";
+import Sidebar from "./views/Sidebar";
 import "./App.css";
 
-type Nav = "query" | "jobs";
 type Step = "ask" | "confirm" | "result";
 
 export default function App() {
-  const [nav, setNav] = useState<Nav>("query");
   const [mode, setMode] = useState<Mode>("offline");
   const [step, setStep] = useState<Step>("ask");
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
-  const [jobId, setJobId] = useState<string | null>(null); // 查询流产出的 job
-  const [openedJobId, setOpenedJobId] = useState<string | null>(null); // Jobs 列表载入的历史 job
+  const [jobId, setJobId] = useState<string | null>(null); // 查询流产出
+  const [openedJobId, setOpenedJobId] = useState<string | null>(null); // 侧栏载入的历史 job
+  const [jobs, setJobs] = useState<JobSummary[] | null>(null);
   const [h, setH] = useState<Health | null>(null);
   const [healthErr, setHealthErr] = useState<string | null>(null);
 
-  useEffect(() => {
-    health()
-      .then(setH)
-      .catch((e: unknown) => setHealthErr(String(e)));
+  const loadJobs = useCallback(() => {
+    listJobs()
+      .then((d) => setJobs(d.jobs))
+      .catch(() => setJobs([]));
   }, []);
 
-  function resetQuery() {
+  useEffect(() => {
+    health().then(setH).catch((e: unknown) => setHealthErr(String(e)));
+    loadJobs();
+  }, [loadJobs]);
+
+  function newQuery() {
     setParseResult(null);
     setJobId(null);
+    setOpenedJobId(null);
     setStep("ask");
   }
 
+  // 主区当前展示的 job(供侧栏高亮)
+  const activeJobId = openedJobId ?? (step === "result" ? jobId : null);
+
   return (
-    <div className="app">
-      <header className="banner">
-        <strong>PRAXIS-VirtualCell</strong>
-        <span className="mode">mode:{mode}</span>
-        <span className="notice">LLM 未参与预测/治理决策</span>
-      </header>
+    <div className="app-shell">
+      <Sidebar
+        jobs={jobs}
+        activeJobId={activeJobId}
+        onNewQuery={newQuery}
+        onOpenJob={(id) => {
+          setOpenedJobId(id);
+        }}
+        health={h}
+        healthErr={healthErr}
+        mode={mode}
+      />
 
-      <p className="muted subline">
-        本地只读展示前端 · API:{API_BASE || "同源(same-origin)"} · 前端不存/不显示 API key ·{" "}
-        {h ? `后端 ${h.status}(runtime ${h.runtime_version})` : healthErr ? "后端未连通" : "连接后端…"}
-      </p>
+      <div className="main">
+        <div className="topbar">
+          <span className="mode-pill">mode:{mode}</span>
+          <span className="notice-pill">⚠ LLM 未参与预测/治理决策</span>
+        </div>
 
-      <nav className="tabs">
-        <button
-          type="button"
-          className={nav === "query" ? "tab active" : "tab"}
-          onClick={() => setNav("query")}
-        >
-          查询
-        </button>
-        <button
-          type="button"
-          className={nav === "jobs" ? "tab active" : "tab"}
-          onClick={() => {
-            setOpenedJobId(null);
-            setNav("jobs");
-          }}
-        >
-          历史 Jobs
-        </button>
-      </nav>
-
-      {nav === "query" && (
-        <>
-          {step === "ask" && (
-            <AskView
-              mode={mode}
-              onMode={setMode}
-              onParsed={(r) => {
-                setParseResult(r);
-                setStep("confirm");
-              }}
-            />
-          )}
-          {step === "confirm" && parseResult && (
-            <ConfirmView
-              parseResult={parseResult}
-              mode={mode}
-              onBack={() => setStep("ask")}
-              onRan={(id) => {
-                setJobId(id);
-                setStep("result");
-              }}
-            />
-          )}
-          {step === "result" && jobId && <ResultView jobId={jobId} onReset={resetQuery} />}
-        </>
-      )}
-
-      {nav === "jobs" &&
-        (openedJobId ? (
-          <ResultView
-            jobId={openedJobId}
-            onReset={() => setOpenedJobId(null)}
-            resetLabel="← 返回列表"
-          />
-        ) : (
-          <JobsView onOpen={setOpenedJobId} />
-        ))}
+        <div className="main-scroll">
+          <div className="main-inner">
+            {openedJobId ? (
+              <ResultView
+                jobId={openedJobId}
+                onReset={newQuery}
+                resetLabel="＋ 新建查询"
+              />
+            ) : (
+              <>
+                {step === "ask" && (
+                  <AskView
+                    mode={mode}
+                    onMode={setMode}
+                    onParsed={(r) => {
+                      setParseResult(r);
+                      setStep("confirm");
+                    }}
+                  />
+                )}
+                {step === "confirm" && parseResult && (
+                  <ConfirmView
+                    parseResult={parseResult}
+                    mode={mode}
+                    onBack={() => setStep("ask")}
+                    onRan={(id) => {
+                      setJobId(id);
+                      setStep("result");
+                      loadJobs();
+                    }}
+                  />
+                )}
+                {step === "result" && jobId && (
+                  <ResultView jobId={jobId} onReset={newQuery} resetLabel="＋ 新建查询" />
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

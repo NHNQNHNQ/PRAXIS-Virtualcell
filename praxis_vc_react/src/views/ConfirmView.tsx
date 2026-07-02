@@ -115,12 +115,12 @@ export default function ConfirmView({
 
       {err && <pre className="err">{err}</pre>}
 
-      <div className="row">
-        <button type="button" className="ghost" onClick={onBack} disabled={busy}>
+      <div className="row end">
+        <button type="button" className="btn btn-ghost" onClick={onBack} disabled={busy}>
           ← 返回
         </button>
-        <button type="button" onClick={run} disabled={busy || !species.trim()}>
-          {busy ? "运行中…" : "Confirm and Run"}
+        <button type="button" className="btn" onClick={run} disabled={busy || !species.trim()}>
+          {busy ? "运行中…" : "Confirm and Run →"}
         </button>
       </div>
     </section>

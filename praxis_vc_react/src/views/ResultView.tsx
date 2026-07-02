@@ -69,7 +69,7 @@ export default function ResultView({
         <div className="row">
           <button
             type="button"
-            className="ghost"
+            className="btn btn-ghost btn-sm"
             onClick={() =>
               download(
                 `${jobId}_structured_report.json`,
@@ -82,7 +82,7 @@ export default function ResultView({
           </button>
           <button
             type="button"
-            className="ghost"
+            className="btn btn-ghost btn-sm"
             disabled={!report.narrative_report}
             onClick={() =>
               download(`${jobId}_narrative.md`, report.narrative_report ?? "", "text/markdown")
@@ -90,7 +90,7 @@ export default function ResultView({
           >
             导出 narrative.md
           </button>
-          <button type="button" onClick={onReset}>
+          <button type="button" className="btn btn-sm" onClick={onReset}>
             {resetLabel}
           </button>
         </div>
