@@ -39,7 +39,7 @@
 - Trace 可视化:按 sender→receiver 顺序渲染 agent 流程(简单时间线/列表即可,不必上重库)。
 - 验收:能列出并重看历史 job;能导出报告。
 
-### - [ ] R4.5 — 构建产物 + CLI 集成 + 文档
+### - [x] R4.5 — 构建产物 + CLI 集成 + 文档
 - `npm run build` → `praxis_vc_react/dist/`;可选:FastAPI 挂载静态(`app.mount("/", StaticFiles(dist))`)让 `praxis-vc serve` 直接托管前端。
 - CLI:`praxis-vc web` 保留 Streamlit;新增说明 React 用法(dev:两个进程;prod:serve 托管 dist)。
 - 更新 `docs/USAGE-llm-interface.md` 加 React 段;pyproject 无需加(前端独立)。

@@ -5,6 +5,11 @@
   praxis-vc serve --host 127.0.0.1 --port 8000        # FastAPI(需 [api] extra)
   praxis-vc web  --api http://127.0.0.1:8000          # Streamlit(需 [web] extra)
 
+React 正式网站(praxis_vc_react/,只读展示,不参与预测/治理决策):
+  开发:另起 `cd praxis_vc_react && npm run dev`(5173),serve 作后端。
+  生产:`cd praxis_vc_react && npm run build` 后,serve 会自动把 dist 挂到 "/"
+        (同源),浏览器开 http://127.0.0.1:8000 即前端+后端。
+
 默认 offline;llm-assisted 需 .env 有 DEEPSEEK_API_KEY,否则自动 fallback。
 """
 from __future__ import annotations

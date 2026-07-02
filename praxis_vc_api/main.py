@@ -5,8 +5,11 @@
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from praxis_vc_api.models.api_schema import HealthOut, JobIn, JobOut, ParseIn, ParseOut
 from praxis_vc_api.services import runtime_service as svc
@@ -87,3 +90,11 @@ def provenance(job_id: str):
                 "llm_meta": svc.get_job(job_id).get("llm_meta", {})}
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail="job not found") from e
+
+
+# 生产托管:若 React 已构建(praxis_vc_react/dist),把它挂到 "/",
+# 让 `praxis-vc serve` 同源托管前端(此时前端与 API 同源,无需 CORS)。
+# 必须在所有 /api 路由声明之后 mount,API 路由优先匹配。
+_REACT_DIST = Path(__file__).resolve().parent.parent / "praxis_vc_react" / "dist"
+if _REACT_DIST.is_dir():
+    app.mount("/", StaticFiles(directory=str(_REACT_DIST), html=True), name="react")

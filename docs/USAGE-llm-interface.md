@@ -27,7 +27,7 @@ praxis-vc web                       # 或 streamlit run praxis_vc_web/app.py
 ```
 流程:输入自然语言 → **解析**(可确认/编辑物种/细胞/扰动)→ **Confirm and Run** → Report(4 块)/ Trace / Provenance 三 tab。网页明确标注"LLM 未参与预测/治理决策"。
 
-### 3) FastAPI(程序化 / 远端 / 未来 React 前端)
+### 3) FastAPI(程序化 / 远端 / React 前端后端)
 ```bash
 praxis-vc serve --host 127.0.0.1 --port 8000
 ```
@@ -36,7 +36,28 @@ praxis-vc serve --host 127.0.0.1 --port 8000
 | `GET /api/health` | mode / llm_enabled / runtime_version |
 | `POST /api/parse` | 自然语言 → candidate_request + 校验(不执行) |
 | `POST /api/jobs` | 已确认 request → 离线执行 → 落盘 job |
+| `GET /api/jobs` | 列出 `runs/` 下历史 job(只读,供前端 Jobs 列表) |
 | `GET /api/reports/{id}` `/trace` `/provenance` | 结果 / trace / 溯源 |
+
+> CORS 仅放行本地 Vite dev(`http://localhost:5173`、`http://127.0.0.1:5173`)。
+
+### 4) React 正式网站(`praxis_vc_react/`)
+前端**只读展示**:所有预测/治理决策由后端确定性 runtime 完成,页面明确标注"LLM 未参与预测/治理决策";默认 offline,不存/不显示 API key(仅 `VITE_API_BASE` 指向后端,默认 `http://127.0.0.1:8000`)。
+
+**开发(两个进程)**
+```bash
+praxis-vc serve --host 127.0.0.1 --port 8000        # 终端 A:后端
+cd praxis_vc_react && npm install && npm run dev     # 终端 B:Vite dev(5173)
+# 浏览器开 http://127.0.0.1:5173
+```
+
+**生产(一条命令,同源托管)**
+```bash
+cd praxis_vc_react && npm run build                  # 产出 praxis_vc_react/dist/
+praxis-vc serve --host 127.0.0.1 --port 8000         # dist 存在时自动挂到 "/"
+# 浏览器开 http://127.0.0.1:8000 —— 前端与 API 同源,无需 CORS
+```
+流程与 Streamlit 一致:Ask → Confirm(可编辑 species/cell_type/perturbation_type/targets)→ Report(Summary/Prediction/Reliability/Boundary 四块)/ Trace(agent 流程时间线)/ Provenance 三 tab;支持历史 Jobs 列表载入与报告导出(structured_report.json / narrative.md)。
 
 ## 模式与 LLM
 - `offline`(默认):**不调用任何 LLM**;自然语言用确定性关键词解析。
