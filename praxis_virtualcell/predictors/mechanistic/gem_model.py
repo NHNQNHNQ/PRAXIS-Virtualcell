@@ -58,9 +58,9 @@ def run_growth_case(raw_req: dict, gem: GemModel, *, tool: str, model_label: str
 
     治理:全部 target 不在 GEM → abstain(不虚构);部分不在 → caution(降级);全在 → accept。
     """
-    from praxis_virtualcell.agents.species_schema import normalize_request
-    from praxis_virtualcell.agents.route_table import route
     from praxis_virtualcell.agents.case_report import CaseReport
+    from praxis_virtualcell.agents.route_table import route
+    from praxis_virtualcell.agents.species_schema import normalize_request
 
     norm = normalize_request(raw_req)
     dec = route(norm)

@@ -11,8 +11,8 @@ learned 覆盖另有单测(test_hard_abstain_not_overridden_by_learned)。pert-l
 """
 from __future__ import annotations
 
-from praxis_virtualcell.governance import ledger_features as lf
 from praxis_virtualcell.governance import learned_reliability as L
+from praxis_virtualcell.governance import ledger_features as lf
 
 # score() 实际输出字段(reliability_mode 由 agent 层加、report 层 e2e 另测)
 _PROV_FIELDS = ("reliability_score", "abstain_score", "abstain_decision", "features_used",

@@ -11,8 +11,8 @@ FBA 算生长 → 证明 agent 能处理 **gene 以外的环境扰动**(medium �
 from __future__ import annotations
 
 from praxis_virtualcell.agents.case_report import CaseReport
-from praxis_virtualcell.agents.species_schema import normalize_request
 from praxis_virtualcell.agents.route_table import route
+from praxis_virtualcell.agents.species_schema import normalize_request
 
 # 常见碳源名 → e_coli_core exchange 反应 id
 CARBON_EXCHANGES = {

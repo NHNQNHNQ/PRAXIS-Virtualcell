@@ -5,8 +5,8 @@ reliability disposition(accept / caution / downgrade / abstain)。
 这是**声明式能力图**(presence-absence),不是性能;核心 applicability 铁律:
 哺乳类 scRNA predictor **不得**用于 bacteria/yeast growth → 必须路由 GEM 或 abstain。
 """
+from praxis_virtualcell.agents.route_table import ENGINES, route
 from praxis_virtualcell.agents.species_schema import normalize_request
-from praxis_virtualcell.agents.route_table import route, ENGINES
 
 
 def _route(species, obj, out, targets=("AHR",), **extra):

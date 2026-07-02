@@ -6,10 +6,12 @@
 """
 import pytest
 
-from praxis_virtualcell.predictors.communication.coculture import run_coculture_case
-from praxis_virtualcell.predictors.communication.lr_comm import LRCommDB, _DEFAULT_SUBSET as _LR
-from praxis_virtualcell.predictors.state.cell_state import CellStateDB, _DEFAULT_SUBSET as _ISG
 from praxis_virtualcell.agents.case_report import validate_case_report
+from praxis_virtualcell.predictors.communication.coculture import run_coculture_case
+from praxis_virtualcell.predictors.communication.lr_comm import _DEFAULT_SUBSET as _LR
+from praxis_virtualcell.predictors.communication.lr_comm import LRCommDB
+from praxis_virtualcell.predictors.state.cell_state import _DEFAULT_SUBSET as _ISG
+from praxis_virtualcell.predictors.state.cell_state import CellStateDB
 
 if not (_LR.is_file() and _ISG.is_file()):
     pytest.skip("Kang L-R / ISG 子集缺失", allow_module_level=True)

@@ -4,8 +4,8 @@
 """
 import pytest
 
-from praxis_virtualcell.predictors.state.emt import EmtDB, run_emt_case, _DEFAULT_SUBSET
 from praxis_virtualcell.agents.case_report import validate_case_report
+from praxis_virtualcell.predictors.state.emt import _DEFAULT_SUBSET, EmtDB, run_emt_case
 
 if not _DEFAULT_SUBSET.is_file():
     pytest.skip(f"mcfarland EMT 子集缺失({_DEFAULT_SUBSET})", allow_module_level=True)

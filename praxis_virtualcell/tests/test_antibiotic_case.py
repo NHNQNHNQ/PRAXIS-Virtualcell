@@ -7,12 +7,14 @@ import pytest
 
 pytest.importorskip("cobra")
 
-from praxis_virtualcell.predictors.mechanistic.antibiotic import (
-    run_antibiotic_case, _IML1515, _gem,
-)
 from praxis_virtualcell.agents.case_report import validate_case_report
-from praxis_virtualcell.agents.species_schema import normalize_request
 from praxis_virtualcell.agents.route_table import route
+from praxis_virtualcell.agents.species_schema import normalize_request
+from praxis_virtualcell.predictors.mechanistic.antibiotic import (
+    _IML1515,
+    _gem,
+    run_antibiotic_case,
+)
 
 if not _IML1515.is_file():
     pytest.skip(f"iML1515 缺失({_IML1515})", allow_module_level=True)

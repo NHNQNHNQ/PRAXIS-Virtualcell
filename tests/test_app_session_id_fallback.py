@@ -17,7 +17,6 @@ import uuid
 
 from praxis2.server.app import _resolve_session_id
 
-
 _UUID_HEX_RE = re.compile(r"^[0-9a-f]{32}$")
 
 

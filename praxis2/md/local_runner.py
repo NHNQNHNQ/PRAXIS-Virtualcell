@@ -24,7 +24,7 @@ def _import_ssh():
     return ssh_run, ssh_write_file
 
 
-async def _ssh_run_rc(cfg: "SshConfig", cmd: str) -> int:
+async def _ssh_run_rc(cfg: SshConfig, cmd: str) -> int:
     """跑 cmd,返 exit code(不抛 RuntimeError)。"""
     ssh_run, _ = _import_ssh()
     try:
@@ -41,7 +41,7 @@ async def _ssh_run_rc(cfg: "SshConfig", cmd: str) -> int:
         return 1
 
 
-async def submit(cfg: "SshConfig", work_dir: str, script_bytes: bytes) -> str:
+async def submit(cfg: SshConfig, work_dir: str, script_bytes: bytes) -> str:
     """写 job.sh + nohup 跑,返回 PID 字符串。
 
     job.sh 由 sbatch.py 生成,其末尾已有 STATUS 哨兵(done/failed)写入。
@@ -67,7 +67,7 @@ async def submit(cfg: "SshConfig", work_dir: str, script_bytes: bytes) -> str:
 
 
 async def poll_status(
-    cfg: "SshConfig", work_dir: str, pid: str,
+    cfg: SshConfig, work_dir: str, pid: str,
 ) -> str:
     """查询本地任务状态,返 queued / running / done / failed。
 

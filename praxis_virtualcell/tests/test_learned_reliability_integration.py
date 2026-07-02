@@ -50,8 +50,9 @@ def test_schema_mismatch_falls_back(tmp_path):
 
 # gate5:禁止泄漏字段(label 进 runtime 特征 → 断言失败)
 def test_no_leakage_label_rejected():
-    from praxis_virtualcell.governance import learned_reliability as L
     import pytest
+
+    from praxis_virtualcell.governance import learned_reliability as L
     with pytest.raises(AssertionError):
         L.score({"disagreement_score": 0.4, "delta_pearson": 0.7})  # delta_pearson 是 label
 
@@ -91,7 +92,10 @@ def test_e2e_report_carries_learned_decision():
 
 # artifact 篡改/不全 → 主动 fallback(冻结治理可审计)
 def test_artifact_tamper_falls_back(tmp_path):
-    import json, os, shutil
+    import json
+    import os
+    import shutil
+
     from praxis_virtualcell.governance import learned_reliability as L
     art = "praxis_virtualcell/governance/artifacts"
     for f in os.listdir(art):

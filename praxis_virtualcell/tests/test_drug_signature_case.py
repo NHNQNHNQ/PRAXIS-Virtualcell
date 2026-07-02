@@ -10,12 +10,14 @@
 断言基于**实测数字**:HSP90 对(geldanamycin/tanespimycin)富集 >1.5 → accept;
 HDAC 对(vorinostat/entinostat)富集 <1.5 → downgrade。
 """
-from praxis_virtualcell.predictors.embedding.drug_signature import (
-    DrugSignatureDB, run_drug_response_case, _DEFAULT_SUBSET,
-)
-from praxis_virtualcell.agents.case_report import validate_case_report
-
 import pytest
+
+from praxis_virtualcell.agents.case_report import validate_case_report
+from praxis_virtualcell.predictors.embedding.drug_signature import (
+    _DEFAULT_SUBSET,
+    DrugSignatureDB,
+    run_drug_response_case,
+)
 
 if not _DEFAULT_SUBSET.is_file():
     pytest.skip(f"curated_subset.json 缺失({_DEFAULT_SUBSET})", allow_module_level=True)

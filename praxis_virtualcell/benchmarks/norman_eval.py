@@ -14,7 +14,6 @@ if _DONOR not in sys.path:
 
 def score_linear_ckpt(ckpt_stem: str, *, split: str = "test", seed: int = 1) -> dict[str, Any]:
     import torch
-
     from coordinator.eval_agent import EvalAgent
 
     from praxis_virtualcell.predictors.ml.donor_bridge import build_predictor_from_ckpt, load_norman

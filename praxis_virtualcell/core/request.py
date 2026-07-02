@@ -31,7 +31,7 @@ class VirtualCellRequest:
     constraints: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "VirtualCellRequest":
+    def from_dict(cls, d: dict[str, Any]) -> VirtualCellRequest:
         for k in _REQUIRED:
             if d.get(k) in (None, ""):
                 raise InputValidationError(f"VirtualCellRequest 缺必填字段: {k}")

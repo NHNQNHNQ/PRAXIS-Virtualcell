@@ -23,8 +23,8 @@ from __future__ import annotations
 
 import re
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 ROOT = Path(__file__).resolve().parent.parent.parent / "brains"
 # 已有手写实现,不覆盖

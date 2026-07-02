@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 PRAXIS-VirtualCell v0.1 — 出版级图 (Nature Methods 风格, Python/matplotlib)
 所有数字硬编码自 docs/findings/*,注释标注来源 finding。
@@ -7,13 +6,15 @@ PRAXIS-VirtualCell v0.1 — 出版级图 (Nature Methods 风格, Python/matplotl
 运行: python3 make_figures.py
 """
 from __future__ import annotations
+
 import os
+
 import matplotlib
+
 matplotlib.use("Agg")
-import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Rectangle, Patch
-from matplotlib.lines import Line2D
+import numpy as np
+from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, Patch, Rectangle
 
 # ── MANDATORY: editable SVG text (nature-figure 不变量) ───────────────────────
 plt.rcParams["font.family"] = "sans-serif"

@@ -96,7 +96,7 @@ def main() -> int:
 
     nf = r["issues"]["no_frontmatter"]
     nc = r["issues"]["no_case_id"]
-    print(f"\n=== case 格式问题 ===")
+    print("\n=== case 格式问题 ===")
     print(f"无 frontmatter 的 case: {len(nf)}")
     for p in nf[:15]:
         print(f"  - {p}")

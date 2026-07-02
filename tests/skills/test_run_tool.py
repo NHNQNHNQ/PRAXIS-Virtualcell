@@ -1,5 +1,4 @@
 """run_tool 的契约:超时/非 0/异常都不抛,结构化返回。"""
-import pytest
 
 from brains._common.lib.run_tool import run_tool
 

@@ -8,7 +8,6 @@ OOD-only / random / oracle(真 dp 上界)。纯 Python,Mac;无泄漏(learned 用
 """
 from __future__ import annotations
 
-from praxis_virtualcell.governance import ledger_features as lf
 from praxis_virtualcell.governance import reliability_model as rm
 
 _NAN = float("nan")

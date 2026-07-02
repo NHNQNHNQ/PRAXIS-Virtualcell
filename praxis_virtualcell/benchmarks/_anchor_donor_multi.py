@@ -19,7 +19,6 @@ PREDICTORS = ["linear_additive", "latent_additive", "cpa_style", "gnn_pert",
 
 def main(ckpt_dir: str) -> None:
     import torch
-
     from coordinator.eval_agent import EvalAgent
 
     from praxis_virtualcell.predictors.ml.donor_bridge import build_predictor_from_ckpt, load_norman

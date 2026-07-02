@@ -23,8 +23,8 @@ from __future__ import annotations
 import csv
 import re
 import sys
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 
 ROOT = Path(__file__).resolve().parent.parent.parent / "brains"
 

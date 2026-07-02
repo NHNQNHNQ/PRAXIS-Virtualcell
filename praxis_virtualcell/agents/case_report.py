@@ -7,10 +7,10 @@ routing_case 从原始请求构建 routing-prototype case:此类 case 的分析�
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 
+from praxis_virtualcell.agents.route_table import RouteDecision, route
 from praxis_virtualcell.agents.species_schema import normalize_request
-from praxis_virtualcell.agents.route_table import route, RouteDecision
 
 _REQUIRED = ("structured_input", "object_normalization", "models_tools_selected",
              "raw_output", "baseline_comparison", "reliability_decision", "provenance_boundary")

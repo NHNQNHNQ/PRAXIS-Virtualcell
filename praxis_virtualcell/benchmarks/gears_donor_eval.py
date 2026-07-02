@@ -6,7 +6,10 @@ adapter:Prediction.mean = ctx.control + (GEARS预测绝对表达 − GEARS_ctrl_
 
 仅远端 virtualcell env。用法:python gears_donor_eval.py [epochs]   (epochs=1 验证 pipeline,>=20 出真数字)
 """
-import sys, time, pickle
+import pickle
+import sys
+import time
+
 import numpy as np
 import torch
 
@@ -37,7 +40,8 @@ def donor_conditions():
 
 
 def main(epochs: int = 20):
-    import pandas as pd_pkg, scanpy as sc
+    import pandas as pd_pkg
+    import scanpy as sc
     pd_pkg.Series.nonzero = lambda self: self.to_numpy().nonzero()  # GEARS+新pandas 兼容
     from gears import GEARS, PertData
 
@@ -80,8 +84,9 @@ def main(epochs: int = 20):
     print(f"[train] {epochs}ep done t={time.time()-t0:.0f}s", flush=True)
 
     # 5) GearsDonorAdapter + donor EvalAgent
-    from predictors.base import Predictor, Prediction
     from coordinator.eval_agent import EvalAgent
+    from predictors.base import Prediction, Predictor
+
     from praxis_virtualcell.predictors.ml.donor_bridge import load_norman
 
     ctrl = pd.adata[pd.adata.obs["condition"] == "ctrl"]

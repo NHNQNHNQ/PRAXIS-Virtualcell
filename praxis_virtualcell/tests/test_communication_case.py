@@ -5,12 +5,14 @@
 """
 import pytest
 
-from praxis_virtualcell.predictors.communication.lr_comm import (
-    LRCommDB, run_communication_case, _DEFAULT_SUBSET,
-)
 from praxis_virtualcell.agents.case_report import validate_case_report
-from praxis_virtualcell.agents.species_schema import normalize_request
 from praxis_virtualcell.agents.route_table import route
+from praxis_virtualcell.agents.species_schema import normalize_request
+from praxis_virtualcell.predictors.communication.lr_comm import (
+    _DEFAULT_SUBSET,
+    LRCommDB,
+    run_communication_case,
+)
 
 if not _DEFAULT_SUBSET.is_file():
     pytest.skip(f"L-R 子集缺失({_DEFAULT_SUBSET})", allow_module_level=True)

@@ -7,10 +7,12 @@ import pytest
 
 pytest.importorskip("cobra")
 
-from praxis_virtualcell.predictors.mechanistic.yeast_gem import (
-    YeastGEM, run_yeast_growth_case, _DEFAULT_YEAST_SBML,
-)
 from praxis_virtualcell.agents.case_report import validate_case_report
+from praxis_virtualcell.predictors.mechanistic.yeast_gem import (
+    _DEFAULT_YEAST_SBML,
+    YeastGEM,
+    run_yeast_growth_case,
+)
 
 if not _DEFAULT_YEAST_SBML.is_file():
     pytest.skip(f"iMM904 SBML 缺失({_DEFAULT_YEAST_SBML})", allow_module_level=True)

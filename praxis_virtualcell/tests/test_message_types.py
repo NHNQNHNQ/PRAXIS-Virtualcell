@@ -1,7 +1,9 @@
 from dataclasses import asdict
 
 from praxis_virtualcell.core.message import (
-    AgentMessage, PredictorResultMessage, ReliabilityDecision,
+    AgentMessage,
+    PredictorResultMessage,
+    ReliabilityDecision,
 )
 
 

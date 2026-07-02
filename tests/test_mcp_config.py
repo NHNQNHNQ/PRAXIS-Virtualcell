@@ -1,5 +1,6 @@
 import pytest
-from praxis2.mcp.config import MCPServerSpec, parse_mcp_servers
+
+from praxis2.mcp.config import parse_mcp_servers
 
 
 def test_parse_empty_returns_empty_list():

@@ -1,4 +1,4 @@
-from praxis_virtualcell.core.config import Mode, Clock, IdGen, RuntimeConfig
+from praxis_virtualcell.core.config import Clock, IdGen, Mode, RuntimeConfig
 
 
 def test_default_mode_is_offline():

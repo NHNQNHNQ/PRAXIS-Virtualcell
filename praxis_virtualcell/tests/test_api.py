@@ -2,13 +2,13 @@
 
 无 fastapi 或无法 import praxis_vc_api(不在 path)时 skip。offline 不调 LLM。
 """
-import os
 
 import pytest
 
 pytest.importorskip("fastapi")
 try:
     from fastapi.testclient import TestClient
+
     from praxis_vc_api.main import app
 except Exception:  # noqa: BLE001
     pytest.skip("praxis_vc_api 不可导入(需 repo root 在 PYTHONPATH)", allow_module_level=True)

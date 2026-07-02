@@ -8,11 +8,11 @@ import pytest
 
 pytest.importorskip("cobra")
 
-from praxis_virtualcell.predictors.mechanistic.ecoli_gem import EcoliGEM
-from praxis_virtualcell.predictors.mechanistic.medium_shift import run_medium_shift_case, CARBON_EXCHANGES
 from praxis_virtualcell.agents.case_report import validate_case_report
-from praxis_virtualcell.agents.species_schema import normalize_request
 from praxis_virtualcell.agents.route_table import route
+from praxis_virtualcell.agents.species_schema import normalize_request
+from praxis_virtualcell.predictors.mechanistic.ecoli_gem import EcoliGEM
+from praxis_virtualcell.predictors.mechanistic.medium_shift import CARBON_EXCHANGES, run_medium_shift_case
 
 
 @pytest.fixture(scope="module")

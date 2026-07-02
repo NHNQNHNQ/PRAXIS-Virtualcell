@@ -6,8 +6,8 @@
 """
 import pytest
 
-from praxis_virtualcell.predictors.state.fate import FateDB, run_fate_case, _DEFAULT_SUBSET
 from praxis_virtualcell.agents.case_report import validate_case_report
+from praxis_virtualcell.predictors.state.fate import _DEFAULT_SUBSET, FateDB, run_fate_case
 
 if not _DEFAULT_SUBSET.is_file():
     pytest.skip(f"paul15 fate 子集缺失({_DEFAULT_SUBSET})", allow_module_level=True)

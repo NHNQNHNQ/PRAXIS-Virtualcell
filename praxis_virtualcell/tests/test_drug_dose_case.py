@@ -4,10 +4,12 @@
 """
 import pytest
 
-from praxis_virtualcell.predictors.embedding.drug_dose import (
-    DoseResponseDB, run_drug_dose_case, _DEFAULT_SUBSET,
-)
 from praxis_virtualcell.agents.case_report import validate_case_report
+from praxis_virtualcell.predictors.embedding.drug_dose import (
+    _DEFAULT_SUBSET,
+    DoseResponseDB,
+    run_drug_dose_case,
+)
 
 if not _DEFAULT_SUBSET.is_file():
     pytest.skip(f"dose 子集缺失({_DEFAULT_SUBSET})", allow_module_level=True)

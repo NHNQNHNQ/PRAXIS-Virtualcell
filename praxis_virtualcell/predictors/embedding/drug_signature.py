@@ -19,8 +19,8 @@ import json
 from pathlib import Path
 
 from praxis_virtualcell.agents.case_report import CaseReport
-from praxis_virtualcell.agents.species_schema import normalize_request
 from praxis_virtualcell.agents.route_table import route
+from praxis_virtualcell.agents.species_schema import normalize_request
 
 _DEFAULT_SUBSET = Path(__file__).resolve().parents[3] / "data" / "drug_signatures" / "curated_subset.json"
 _ENRICH_THRESHOLD = 1.5

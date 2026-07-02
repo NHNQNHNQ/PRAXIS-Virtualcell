@@ -32,7 +32,6 @@ TAUS = (1.0, 0.5, 0.4, 0.3, 0.25, 0.2)
 def risk_coverage(*, ckpt_dir: str = CKPT_DIR, primary: str = PRIMARY,
                   aux: list[str] | None = None, taus=TAUS, test_seed: int = 1) -> dict:
     import torch
-
     from coordinator.eval_agent import EvalAgent
 
     from praxis_virtualcell.predictors.ml.donor_bridge import build_predictor_from_ckpt, load_norman

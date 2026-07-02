@@ -11,7 +11,10 @@ schema 归一 + route_table 路由,7 部分由真实 schema/routing 填充。C4/
 import pytest
 
 from praxis_virtualcell.agents.case_report import (
-    CaseReport, validate_case_report, routing_case, CaseReportError,
+    CaseReport,
+    CaseReportError,
+    routing_case,
+    validate_case_report,
 )
 
 _FULL = dict(

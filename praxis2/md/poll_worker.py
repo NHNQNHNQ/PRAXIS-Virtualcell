@@ -122,7 +122,7 @@ async def _estimate_elapsed(cfg: SshConfig, work_dir: str) -> int:
 
 # ---- 保留 SLURM 解析函数(已不走主路径,维持旧测试兼容) ----
 
-def _parse_scontrol(out: str, slurm_id: str) -> "tuple[str, int, int, int] | None":
+def _parse_scontrol(out: str, slurm_id: str) -> tuple[str, int, int, int] | None:
     if not out or not out.strip():
         return None
     d: dict[str, str] = {}

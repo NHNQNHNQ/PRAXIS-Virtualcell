@@ -22,9 +22,8 @@ CKPT_DIR = _DONOR + "/runs/full_bench_20260521_060815/checkpoints/norman_2019"
 
 
 def _pert_set(ds):
-    from torch.utils.data import DataLoader
-
     from bench.vcbench.loader import collate_perturbation
+    from torch.utils.data import DataLoader
 
     s = set()
     for b in DataLoader(ds, batch_size=256, collate_fn=collate_perturbation):

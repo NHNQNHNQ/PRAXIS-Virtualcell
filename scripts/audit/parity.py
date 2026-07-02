@@ -130,7 +130,7 @@ def main() -> int:
                     if similar:
                         sugg = f"或用相近 env: {','.join(similar[:3])}"
                     else:
-                        sugg = f"建 env (或映射到 staging 现有 env)"
+                        sugg = "建 env (或映射到 staging 现有 env)"
 
             elif req_type == "py_pkg":
                 envs = find_pkg(name)

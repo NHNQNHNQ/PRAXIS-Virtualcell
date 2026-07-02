@@ -4,8 +4,6 @@
 """
 from __future__ import annotations
 
-import os
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -16,6 +14,7 @@ def gmod(tmp_path, monkeypatch):
     """重载 gmx_server 模块，将 _SAFE_ROOT 指向临时目录。"""
     monkeypatch.setenv("PRAXIS_GMX_WORK_ROOT", str(tmp_path))
     import importlib
+
     import praxis2.mcp.servers.gmx_server as m
     importlib.reload(m)
     return m, tmp_path

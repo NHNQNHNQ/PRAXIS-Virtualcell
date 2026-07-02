@@ -102,7 +102,7 @@ class EvalLedger:
                 f.write(json.dumps(e.as_dict(), ensure_ascii=False) + "\n")
 
     @classmethod
-    def from_jsonl(cls, path: str | Path) -> "EvalLedger":
+    def from_jsonl(cls, path: str | Path) -> EvalLedger:
         led = cls()
         for line in Path(path).read_text(encoding="utf-8").splitlines():
             if line.strip():

@@ -16,9 +16,9 @@ import json
 from pathlib import Path
 
 from praxis_virtualcell.agents.case_report import CaseReport
-from praxis_virtualcell.agents.species_schema import normalize_request
 from praxis_virtualcell.agents.route_table import route
-from praxis_virtualcell.predictors.state.scoring import lognorm, panel_score, cohens_d
+from praxis_virtualcell.agents.species_schema import normalize_request
+from praxis_virtualcell.predictors.state.scoring import cohens_d, lognorm, panel_score
 
 _DEFAULT_SUBSET = Path(__file__).resolve().parents[3] / "data" / "cellstate" / "kang_metabolic_subset.json"
 _D_ACCEPT, _D_CAUTION = 0.8, 0.3

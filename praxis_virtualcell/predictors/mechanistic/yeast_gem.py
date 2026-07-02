@@ -25,7 +25,7 @@ class YeastGEM(GemModel):
         super().__init__(str(sbml_path or _DEFAULT_YEAST_SBML))
 
 
-def run_yeast_growth_case(raw_req: dict, gem: "YeastGEM | None" = None, sbml_path: str | None = None):
+def run_yeast_growth_case(raw_req: dict, gem: YeastGEM | None = None, sbml_path: str | None = None):
     """Yeast KO growth case → 7 部分 CaseReport(真实数值)。返回 (CaseReport, RouteDecision)。"""
     gem = gem or YeastGEM(sbml_path)
     return run_growth_case(raw_req, gem, tool="cobrapy iMM904",

@@ -27,7 +27,7 @@ def _make_row(**overrides):
         "ip": None,
         "ua": "test-ua",
         "meta": None,
-        "created_at": dt.datetime(2026, 5, 29, 6, 51, 0, tzinfo=dt.timezone.utc),
+        "created_at": dt.datetime(2026, 5, 29, 6, 51, 0, tzinfo=dt.UTC),
     }
     base.update(overrides)
     return _FakeRecord(base)

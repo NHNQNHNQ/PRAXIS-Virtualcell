@@ -178,7 +178,9 @@ def test_no_match_still_allow_with_source_tiers():
 def test_retrieve_first_permission_matrix():
     from praxis2.core.rmcp import Phase, set_phase
     from praxis2.core.seams import (
-        PermissionDecision, PermissionPolicy, PermissionResult,
+        PermissionDecision,
+        PermissionPolicy,
+        PermissionResult,
     )
     from praxis2.core.state import State
     from praxis2.tools.permission import RetrieveFirstPermission

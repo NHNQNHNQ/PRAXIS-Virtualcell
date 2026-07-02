@@ -7,12 +7,14 @@
 """
 import pytest
 
-from praxis_virtualcell.predictors.state.cell_state import (
-    CellStateDB, run_cellstate_case, _DEFAULT_SUBSET,
-)
 from praxis_virtualcell.agents.case_report import validate_case_report
-from praxis_virtualcell.agents.species_schema import normalize_request
 from praxis_virtualcell.agents.route_table import route
+from praxis_virtualcell.agents.species_schema import normalize_request
+from praxis_virtualcell.predictors.state.cell_state import (
+    _DEFAULT_SUBSET,
+    CellStateDB,
+    run_cellstate_case,
+)
 
 if not _DEFAULT_SUBSET.is_file():
     pytest.skip(f"kang 子集缺失({_DEFAULT_SUBSET})", allow_module_level=True)

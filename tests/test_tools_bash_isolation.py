@@ -1,8 +1,5 @@
 """BashTool 文件系统真隔离(unshare userns)单测(v0.18 子项目1)。"""
 import asyncio
-from pathlib import Path
-
-import pytest
 
 from praxis2.tools import bash as bashmod
 

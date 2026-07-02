@@ -1,12 +1,11 @@
 """GET /api/storage/trajectories — 端点测试。"""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
-from praxis2.server.routes.files import handle_storage_trajectories, _job_to_trajectory
-
+from praxis2.server.routes.files import _job_to_trajectory, handle_storage_trajectories
 
 # ---- _job_to_trajectory 单元测试 ----
 
@@ -25,9 +24,9 @@ def _make_job(**kwargs) -> dict:
         "cost_li": 500,
         "cpu_hours": 0.5,
         "gpu_hours": 0.5,
-        "created_at": datetime(2026, 6, 10, 12, 0, 0, tzinfo=timezone.utc),
-        "started_at": datetime(2026, 6, 10, 12, 1, 0, tzinfo=timezone.utc),
-        "finished_at": datetime(2026, 6, 10, 14, 0, 0, tzinfo=timezone.utc),
+        "created_at": datetime(2026, 6, 10, 12, 0, 0, tzinfo=UTC),
+        "started_at": datetime(2026, 6, 10, 12, 1, 0, tzinfo=UTC),
+        "finished_at": datetime(2026, 6, 10, 14, 0, 0, tzinfo=UTC),
     }
     base.update(kwargs)
     return base

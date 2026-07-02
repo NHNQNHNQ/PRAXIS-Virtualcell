@@ -15,8 +15,8 @@ from __future__ import annotations
 import random as _random
 
 from praxis_virtualcell.governance import abstain_head as ah
-from praxis_virtualcell.governance import ledger_features as lf
 from praxis_virtualcell.governance import learned_reliability as L
+from praxis_virtualcell.governance import ledger_features as lf
 from praxis_virtualcell.governance import reliability_model as rm
 
 _NAN = float("nan")

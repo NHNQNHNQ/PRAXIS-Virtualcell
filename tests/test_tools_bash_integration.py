@@ -1,19 +1,18 @@
 """BashTool 端到端集成:BashCommandPolicy + BashTool 经 SerialToolRunner 串通
 (final review I-2:此前 policy/bash 只单独单测,核心契约 ALLOW→执行 / DENY→拒 无集成覆盖)。"""
-import asyncio
 from pathlib import Path
 
 import pytest
 
 from praxis2.core.state import State
-from praxis2.tools.bash import BashTool
-from praxis2.tools.bash_policy import BashCommandPolicy
-from praxis2.tools.registry import ToolRegistry
-from praxis2.tools.runtools import SerialToolRunner
 from praxis2.server.permission_bridge import (
     BridgePermissionAdapter,
     PendingPermissionRegistry,
 )
+from praxis2.tools.bash import BashTool
+from praxis2.tools.bash_policy import BashCommandPolicy
+from praxis2.tools.registry import ToolRegistry
+from praxis2.tools.runtools import SerialToolRunner
 
 
 def _runner(tmp_path):

@@ -25,8 +25,7 @@ if _DONOR not in sys.path:
 def _build_mean_predictor(mean_delta):
     """构造 MeanPerturbationPredictor(在函数内 import donor base,避免 Mac 无 torch 时 import 失败)。"""
     import torch  # noqa: F401
-
-    from predictors.base import Predictor, Prediction
+    from predictors.base import Prediction, Predictor
 
     class MeanPerturbationPredictor(Predictor):
         def __init__(self, md):
@@ -59,9 +58,8 @@ def _build_mean_predictor(mean_delta):
 def compute_mean_delta(ds):
     """训练集所有非 control 细胞 (target-control) 的平均 delta [n_genes]。返回 (mean_delta, n_used)。"""
     import torch
-    from torch.utils.data import DataLoader
-
     from bench.vcbench.loader import collate_perturbation
+    from torch.utils.data import DataLoader
 
     loader = DataLoader(ds, batch_size=64, shuffle=False, collate_fn=collate_perturbation)
     tot = None
@@ -81,7 +79,6 @@ def compute_mean_delta(ds):
 
 def score_mean_baseline(*, test_seed: int = 1, train_seed: int = 0) -> dict[str, Any]:
     import torch
-
     from coordinator.eval_agent import EvalAgent
 
     from praxis_virtualcell.predictors.ml.donor_bridge import load_norman

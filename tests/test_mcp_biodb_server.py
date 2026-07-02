@@ -7,10 +7,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-import pytest
-
 from praxis2.mcp.servers import biodb_server as bd
-
 
 # ---- search_pubmed(esearch + esummary 两步) ----
 

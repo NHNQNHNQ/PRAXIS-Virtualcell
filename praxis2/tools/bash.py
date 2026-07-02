@@ -18,7 +18,6 @@ from typing import Any
 
 from praxis2.tools.base import Tool, ToolResult
 
-
 # 机密 env 变量名特征:子进程 env 滤掉这些,防 BashTool 命令读出上游 API key /
 # DB 口令 / pepper(final review I-1)。PATH/HOME/LANG 等非机密保留。
 _SECRET_ENV_MARKERS = ("KEY", "TOKEN", "SECRET", "PASSWORD", "PEPPER", "PRAXIS_")

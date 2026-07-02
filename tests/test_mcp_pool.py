@@ -1,6 +1,8 @@
 import asyncio
 import sys
+
 import pytest
+
 from praxis2.mcp.config import MCPServerSpec
 from praxis2.mcp.pool import MCPConnectionPool
 

@@ -9,8 +9,6 @@
 """
 from __future__ import annotations
 
-import pytest
-
 from praxis2.spawn.spec_parser import parse_executable_spec
 
 

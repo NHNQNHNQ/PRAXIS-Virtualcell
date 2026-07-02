@@ -59,8 +59,8 @@ async def test_chat_stream_passes_system_to_query(monkeypatch):
 
     monkeypatch.setattr(app_module, "query", fake_query)
 
-    from tests.test_correctness_eventbus_replay import _drive_chat_stream, make_test_app_deps, preseed_session
     from praxis2.server.app import make_app
+    from tests.test_correctness_eventbus_replay import _drive_chat_stream, make_test_app_deps, preseed_session
 
     deps = make_test_app_deps()
     cookie = await preseed_session(deps, user_id="u_sys_wire")

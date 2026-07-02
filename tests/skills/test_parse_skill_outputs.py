@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 
 from scripts.uplift.parse_skill_outputs import parse_outputs_block, parse_skill_md

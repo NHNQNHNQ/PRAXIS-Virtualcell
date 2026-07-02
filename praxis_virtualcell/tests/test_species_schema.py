@@ -7,11 +7,11 @@ perturbation_object(drug/medium/ligand)与 delta_expression 以外的 target_out
 import pytest
 
 from praxis_virtualcell.agents.species_schema import (
-    SPECIES,
     PERTURBATION_OBJECTS,
+    SPECIES,
     TARGET_OUTPUTS,
-    normalize_request,
     SchemaError,
+    normalize_request,
 )
 
 

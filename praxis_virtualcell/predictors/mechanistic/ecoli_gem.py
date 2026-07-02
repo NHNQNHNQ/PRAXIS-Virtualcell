@@ -8,7 +8,9 @@ from __future__ import annotations
 import os
 
 from praxis_virtualcell.predictors.mechanistic.gem_model import (  # noqa: F401 (re-export)
-    GemModel, KOResult, run_growth_case,
+    GemModel,
+    KOResult,
+    run_growth_case,
 )
 
 _ECOLI_BOUNDARY = ("FBA growth 是约束型可行性/最优通量的相对量(steady-state 假设),**非**绝对生长"

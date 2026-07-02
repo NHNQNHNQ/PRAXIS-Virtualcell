@@ -5,12 +5,14 @@
 """
 import pytest
 
-from praxis_virtualcell.predictors.state.metabolic_tendency import (
-    MetabolicDB, run_metabolic_tendency_case, _DEFAULT_SUBSET,
-)
 from praxis_virtualcell.agents.case_report import validate_case_report
-from praxis_virtualcell.agents.species_schema import normalize_request
 from praxis_virtualcell.agents.route_table import route
+from praxis_virtualcell.agents.species_schema import normalize_request
+from praxis_virtualcell.predictors.state.metabolic_tendency import (
+    _DEFAULT_SUBSET,
+    MetabolicDB,
+    run_metabolic_tendency_case,
+)
 
 if not _DEFAULT_SUBSET.is_file():
     pytest.skip(f"代谢子集缺失({_DEFAULT_SUBSET})", allow_module_level=True)

@@ -20,7 +20,7 @@ _EMPTY: dict[str, Any] = {
 }
 
 
-async def fetch_gpu_pool(*, cfg: "SshConfig", script_path: str) -> dict[str, Any]:
+async def fetch_gpu_pool(*, cfg: SshConfig, script_path: str) -> dict[str, Any]:
     """跑 .53 上 check_gpus.sh,返 GpuPoolStatus dict。"""
     from praxis2.md.ssh import ssh_run  # noqa: PLC0415
     try:

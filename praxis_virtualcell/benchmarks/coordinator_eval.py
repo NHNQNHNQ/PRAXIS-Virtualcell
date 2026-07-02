@@ -22,7 +22,6 @@ COMBOS = [
 def score_coordinator(ckpt_dir: str, predictor_names: list[str], *,
                       split: str = "test", seed: int = 1) -> dict[str, Any]:
     import torch
-
     from coordinator.eval_agent import EvalAgent
 
     from praxis_virtualcell.predictors.ml.coordinator_bridge import build_coordinator

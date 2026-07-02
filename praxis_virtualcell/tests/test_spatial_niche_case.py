@@ -4,12 +4,14 @@
 """
 import pytest
 
-from praxis_virtualcell.predictors.spatial.niche import (
-    SpatialNicheDB, run_spatial_niche_case, _DEFAULT_SUBSET,
-)
 from praxis_virtualcell.agents.case_report import validate_case_report
-from praxis_virtualcell.agents.species_schema import normalize_request
 from praxis_virtualcell.agents.route_table import route
+from praxis_virtualcell.agents.species_schema import normalize_request
+from praxis_virtualcell.predictors.spatial.niche import (
+    _DEFAULT_SUBSET,
+    SpatialNicheDB,
+    run_spatial_niche_case,
+)
 
 if not _DEFAULT_SUBSET.is_file():
     pytest.skip(f"imc niche 子集缺失({_DEFAULT_SUBSET})", allow_module_level=True)

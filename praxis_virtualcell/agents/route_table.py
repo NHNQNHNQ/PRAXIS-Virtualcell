@@ -17,7 +17,7 @@ applicability 铁律:哺乳类 predictor **不得**用于 bacteria/yeast growth 
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 
 ENGINES = ("donor_predictor", "gem_fba", "embedding", "state_scoring", "pathway_scoring",
            "communication", "spatial_niche", "reject")

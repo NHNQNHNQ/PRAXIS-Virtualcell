@@ -14,6 +14,7 @@ import pytest
 def dmod(tmp_path, monkeypatch):
     monkeypatch.setenv("PRAXIS_DOCK_WORK_ROOT", str(tmp_path))
     import importlib
+
     import praxis2.mcp.servers.dock_server as m
     importlib.reload(m)
     return m, tmp_path

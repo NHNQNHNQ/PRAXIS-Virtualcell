@@ -4,7 +4,10 @@
 """
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.workflows.run_virtualcell_query import (
-    parse_query, run_query, run_full_query, validate_candidate,
+    parse_query,
+    run_full_query,
+    run_query,
+    validate_candidate,
 )
 
 _OFFLINE = RuntimeConfig(mode=Mode.OFFLINE, llm_enabled=False)

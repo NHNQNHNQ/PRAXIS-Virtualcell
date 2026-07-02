@@ -399,7 +399,7 @@ def _job_to_trajectory(job: dict, ssh_user: str) -> dict:
         "job_id": job_id,
         "name": name,
         "size_bytes": 0,
-        "remote_host": job.get("gpu_host") or f"10.102.106.53",
+        "remote_host": job.get("gpu_host") or "10.102.106.53",
         "remote_path": f"/home/{ssh_user}/praxis-md/{job_id}",
         "structure": params.get("structure_file_id") or "",
         "ensemble": params.get("ensemble") or "",

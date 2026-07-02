@@ -12,10 +12,9 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
-
-import re
 
 from praxis2.brains.inject import assemble_agent_sections
 from praxis2.brains.migrate import migrate_dir_tree

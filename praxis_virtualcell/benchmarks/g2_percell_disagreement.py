@@ -1,10 +1,18 @@
-import sys, os, time, json, itertools, argparse
+import argparse
+import itertools
+import json
+import os
+import sys
+import time
+
 sys.path.insert(0, "/home/zkyd/data1/mzy/Virtual cell")
-import torch
 from collections import defaultdict
-from praxis_virtualcell.predictors.ml.donor_bridge import load_norman, build_predictor_from_ckpt
-from praxis_virtualcell.predictors.ml.ml_predictor_agent import MLPredictorAgent
+
+import torch
 from bench.vcbench.loader import _pert_emb_for
+
+from praxis_virtualcell.predictors.ml.donor_bridge import build_predictor_from_ckpt, load_norman
+from praxis_virtualcell.predictors.ml.ml_predictor_agent import MLPredictorAgent
 
 CKPT="/home/zkyd/data1/mzy/Virtual cell/runs/full_bench_20260521_060815/checkpoints/norman_2019"
 slots={"linear":"linear_additive","latent":"latent_additive","gnn":"gnn_pert"}

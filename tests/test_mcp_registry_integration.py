@@ -1,6 +1,6 @@
 from praxis2.agents.loader import resolve_agent
-from praxis2.server.chat_registry import build_chat_registry
 from praxis2.mcp.tool_adapter import MCPTool
+from praxis2.server.chat_registry import build_chat_registry
 
 
 class _FakeSession:

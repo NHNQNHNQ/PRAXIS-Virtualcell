@@ -24,6 +24,7 @@ def test_deepseek_real_completion_roundtrip():
 @pytest.mark.llm
 def test_deepseek_json_mode_returns_parseable():
     import json
+
     from praxis_virtualcell.agents_llm.llm_client import make_llm_client
     client = make_llm_client(_cfg())
     res = client.complete(

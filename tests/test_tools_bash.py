@@ -115,6 +115,7 @@ def test_drain_exception_returns_ok_false_not_raise(tmp_path: Path, monkeypatch)
     """I-1 回归:drain 内 stream.read 抛非超时异常 → ok=False 兜底,不裸冒泡(防 500),
     且无 task 泄漏 / 进程僵尸。"""
     import asyncio as _aio
+
     from praxis2.tools import bash as bash_mod
 
     real_create = _aio.create_subprocess_shell
