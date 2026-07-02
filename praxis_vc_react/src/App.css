@@ -1,0 +1,39 @@
+/* PRAXIS-VirtualCell 前端样式(最小)。完整页面样式在 R4.3 扩展。 */
+.app {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  text-align: left;
+}
+
+.banner {
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.banner .notice {
+  margin-left: auto;
+  background: #b45309;
+  color: #fff;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.muted { color: #6b7280; font-size: 0.9rem; }
+
+.err {
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 0.6rem;
+  border-radius: 6px;
+  white-space: pre-wrap;
+}

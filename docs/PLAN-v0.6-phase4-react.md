@@ -21,7 +21,7 @@
 - 启动 `praxis-vc serve`(或 `uvicorn praxis_vc_api.main:app`),`curl /api/health` 返 200;`POST /api/parse` offline 通。
 - 验收:CORS 生效;`pytest praxis_virtualcell/tests` 无回归(test_api 仍绿)。
 
-### - [ ] R4.2 — Vite + React + TS scaffold + API client
+### - [x] R4.2 — Vite + React + TS scaffold + API client
 - `npm create vite@latest praxis_vc_react -- --template react-ts`;`npm i`。`.env`/config 里 API base 默认 `http://127.0.0.1:8000`(可 `VITE_API_BASE` 覆盖)。
 - `src/api.ts`:`health()/parse(text,mode)/createJob(request,mode,enable_llm_report)/getReport(id)/getTrace(id)/getProvenance(id)`。
 - 验收:`npm run build` 通过;`npm run dev` 起;首页能拉到 `/api/health`(后端开着时)。
