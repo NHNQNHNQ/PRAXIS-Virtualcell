@@ -16,7 +16,7 @@
 
 ## 步骤
 
-### - [ ] R4.1 — FastAPI 加 CORS + 冒烟
+### - [x] R4.1 — FastAPI 加 CORS + 冒烟
 - `praxis_vc_api/main.py` 加 `CORSMiddleware`(允许 `http://localhost:5173`、`127.0.0.1:5173` — Vite dev)。
 - 启动 `praxis-vc serve`(或 `uvicorn praxis_vc_api.main:app`),`curl /api/health` 返 200;`POST /api/parse` offline 通。
 - 验收:CORS 生效;`pytest praxis_virtualcell/tests` 无回归(test_api 仍绿)。

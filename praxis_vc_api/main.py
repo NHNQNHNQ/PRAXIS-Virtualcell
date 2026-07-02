@@ -6,11 +6,23 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from praxis_vc_api.models.api_schema import HealthOut, JobIn, JobOut, ParseIn, ParseOut
 from praxis_vc_api.services import runtime_service as svc
 
 app = FastAPI(title="PRAXIS-VirtualCell Local API", version="0.6")
+
+# CORS:仅放行本地 Vite dev(5173)。前端只读展示,不影响后端科学决策。
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/api/health", response_model=HealthOut)
