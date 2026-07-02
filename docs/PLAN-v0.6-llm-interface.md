@@ -19,7 +19,11 @@
 
 **结构决策(建议,待确认)**:**不做**方案里的大重构(现有 `predictors/ml`、`benchmarks/` 布局能跑、203 tests 绿)。按现结构**增量加** `io/` + `praxis_vc_api/` + `praxis_vc_web/` + CLI,降风险。`predictors/donor|gears|cpa` 重排 = 可选后续,非本次。
 
-## 决策待确认(开工前)
+## ✅ 决策已定(2026-07-02:增量不重构 · 直推 MVP · 真调 DeepSeek 已验证)+ 原决策记录
+
+> **MVP 已交付**:package(P1)+ FastAPI(P2)+ Streamlit(P3);221 passed;真调 DeepSeek 解析验证通过;见 `docs/USAGE-llm-interface.md`。
+
+### 原决策待确认(开工前)
 1. **包结构**:增量加(推荐,不重构)vs 按方案重排 `predictors/donor|gears|...`。
 2. **v0.1 网页**:Streamlit(方案已定)。
 3. **MVP 范围**:Phase 1+2+3(package→API→Streamlit)一次到 MVP,还是先 Phase 1(LLM 外层 + 统一 workflow + CLI `ask`)交付再往上。
@@ -27,7 +31,7 @@
 
 ---
 
-## Phase 1 — LLM 外层 + 统一 query workflow(纯 Python,TDD,无网络依赖)
+## Phase 1 ✅ — LLM 外层 + 统一 query workflow(纯 Python,TDD,无网络依赖)
 
 ### - [ ] P1.1 — config 安全 flag + 边界断言
 - `core/config.py` 加 `allow_llm_to_modify_core_decision/_prediction/_override_hard_rules: bool = False`(注释:永为 False)。加一处启动断言/常量守卫,任何路径不得置 True。
@@ -64,7 +68,7 @@
 
 ---
 
-## Phase 2 — FastAPI 本地服务(`praxis_vc_api/`)
+## Phase 2 ✅ — FastAPI 本地服务(`praxis_vc_api/`)
 
 ### - [ ] P2.1 — FastAPI 骨架 + endpoints
 - `main.py` + routes:`GET /api/health`、`POST /api/parse`、`POST /api/jobs`、`GET /api/jobs/{id}`、`GET /api/reports/{id}`、`/trace`、`/provenance`。
@@ -72,7 +76,7 @@
 - 依赖:fastapi/uvicorn/pydantic(+ sqlite/duckdb 可选)。加 `[project.optional-dependencies] api`。
 - 验收:`GET /health` 返 mode/llm_enabled/version;parse→jobs→reports 全链本地跑通;offline 无 LLM。
 
-## Phase 3 — Streamlit 本地网页(`praxis_vc_web/`)
+## Phase 3 ✅ — Streamlit 本地网页(`praxis_vc_web/`)
 
 ### - [ ] P3.1 — 5 页
 - Ask(文本+模式选择+Confirm)/ Parsed Request(可改)/ Running Trace(逐 agent status)/ Report(4 块 + 可选 narrative,标注"LLM 未改预测/治理")/ Provenance(version/artifact_sha/fallback/prompt-hash/trace 下载)。
