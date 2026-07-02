@@ -9,6 +9,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 from praxis_vc_api.models.api_schema import HealthOut, JobIn, JobOut, ParseIn, ParseOut
@@ -37,6 +38,12 @@ def health():
 def parse(body: ParseIn):
     """自然语言 → candidate_request + 校验(不执行)。offline 不调 LLM。"""
     return svc.parse(body.text, body.mode)
+
+
+@app.get("/api/options")
+def options():
+    """前端下拉选项(只读):物种/扰动类型/任务的权威枚举 + cell_type 常见示例。"""
+    return svc.options()
 
 
 @app.post("/api/jobs", response_model=JobOut)
@@ -72,6 +79,7 @@ def report(job_id: str):
     return {"structured_report": j.get("report", {}), "narrative_report": j.get("narrative"),
             "trace_url": f"/api/reports/{job_id}/trace",
             "provenance_url": f"/api/reports/{job_id}/provenance",
+            "markdown_url": f"/api/reports/{job_id}/markdown",
             "llm_used_for_prediction": False}
 
 
@@ -88,6 +96,15 @@ def provenance(job_id: str):
     try:
         return {"provenance": svc.get_job(job_id).get("provenance", {}),
                 "llm_meta": svc.get_job(job_id).get("llm_meta", {})}
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail="job not found") from e
+
+
+@app.get("/api/reports/{job_id}/markdown", response_class=PlainTextResponse)
+def report_markdown(job_id: str):
+    """确定性 report.md(text/markdown)。历史 job 缺 .md 时现场重渲染。"""
+    try:
+        return PlainTextResponse(svc.report_markdown(job_id), media_type="text/markdown")
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail="job not found") from e
 

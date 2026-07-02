@@ -7,10 +7,23 @@ import os
 
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.io.job_store import JobStore
-from praxis_virtualcell.workflows.run_virtualcell_query import parse_query, run_query
+from praxis_virtualcell.workflows.run_virtualcell_query import (
+    SUPPORTED_PERTURBATION,
+    SUPPORTED_SPECIES,
+    SUPPORTED_TASKS,
+    parse_query,
+    run_query,
+)
 
 RUNS_DIR = os.environ.get("PRAXIS_VC_RUNS", "runs")
 RUNTIME_VERSION = "v0.3"
+
+# UI 辅助:cell_type 后端不做枚举校验(自由字符串),这里仅给常见示例供前端下拉,
+# 允许自由填写。物种/扰动类型的合法值直接复用 runtime 白名单(单一真相源)。
+_CELL_TYPE_EXAMPLES = [
+    "K562", "HEK293T", "A549", "Jurkat", "HeLa", "THP-1",
+    "iPSC", "T cell", "B cell", "macrophage", "fibroblast", "hepatocyte",
+]
 
 
 def config_for(mode: str) -> RuntimeConfig:
@@ -29,6 +42,17 @@ def health() -> dict:
 
 def parse(text: str, mode: str) -> dict:
     return parse_query(text, config=config_for(mode))
+
+
+def options() -> dict:
+    """暴露后端权威枚举供前端下拉(只读)。cell_type 后端不限制,仅给示例可自由填。"""
+    return {
+        "species": sorted(SUPPORTED_SPECIES),
+        "perturbation_type": sorted(SUPPORTED_PERTURBATION),
+        "task_type": sorted(SUPPORTED_TASKS),
+        "cell_type_examples": list(_CELL_TYPE_EXAMPLES),
+        "cell_type_free_text": True,
+    }
 
 
 def _job_id(request: dict) -> str:
@@ -69,3 +93,13 @@ def list_jobs() -> list[dict]:
             "reliability": rep.get("reliability"),
         })
     return out
+
+
+def report_markdown(job_id: str) -> str:
+    """返回该 job 的确定性 report.md(优先读落盘,缺则现场重渲染)。只读。"""
+    job = JobStore(RUNS_DIR).load(job_id)   # 缺失抛 FileNotFoundError
+    md = job.get("report_md")
+    if md:
+        return md
+    from praxis_virtualcell.io.report_markdown import render_report_md
+    return render_report_md(job)

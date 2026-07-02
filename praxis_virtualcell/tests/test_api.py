@@ -69,5 +69,28 @@ def test_list_jobs(client):
     assert jobs[0]["species"] == "human" and jobs[0]["status"] == "done"
 
 
+def test_options(client):
+    d = client.get("/api/options").json()
+    assert "human" in d["species"] and "mouse" in d["species"]
+    assert "gene" in d["perturbation_type"]
+    assert d["cell_type_free_text"] is True and len(d["cell_type_examples"]) > 0
+
+
+def test_report_markdown(client):
+    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+           "input_modality": "scRNA", "output_modality": "delta_expression",
+           "task_type": "predict_delta_expression"}
+    jid = client.post("/api/jobs", json={"request": req, "mode": "offline"}).json()["job_id"]
+    r = client.get(f"/api/reports/{jid}/markdown")
+    assert r.status_code == 200
+    assert "text/markdown" in r.headers["content-type"]
+    assert "# PRAXIS-VirtualCell Report" in r.text
+    assert "## 5. Governance Verdict" in r.text
+
+
+def test_report_markdown_404(client):
+    assert client.get("/api/reports/nope/markdown").status_code == 404
+
+
 def test_missing_job_404(client):
     assert client.get("/api/reports/nope").status_code == 404
