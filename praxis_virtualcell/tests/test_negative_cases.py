@@ -50,3 +50,24 @@ def test_negative(case):
             f"{case['case_id']}: disposition {dec.disposition} != {exp['disposition']}"
     else:
         pytest.fail(f"{case['case_id']}: 未知 layer={layer}")
+
+
+def test_negative_never_silently_accepts():
+    """KPI:没有任何 negative case 得到静默 accept/成功。
+    normalize 层必抛、validate 层 schema_valid=False、route 层 disposition!=accept。"""
+    offenders = []
+    for c in _CASES:
+        layer, inp = c["layer"], c["input"]
+        if layer == "normalize":
+            try:
+                normalize_request(inp)
+                offenders.append(f"{c['case_id']}(normalize 未拒绝)")
+            except SchemaError:
+                pass
+        elif layer == "validate":
+            if validate_candidate(inp)["schema_valid"] is not False:
+                offenders.append(f"{c['case_id']}(validate 竟 valid)")
+        elif layer == "route":
+            if route(normalize_request(inp)).disposition == "accept":
+                offenders.append(f"{c['case_id']}(route 竟 accept)")
+    assert offenders == [], f"静默 accept 违规:{offenders}"
