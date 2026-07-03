@@ -74,6 +74,10 @@ def test_options(client):
     assert "human" in d["species"] and "mouse" in d["species"]
     assert "gene" in d["perturbation_type"]
     assert d["cell_type_free_text"] is True and len(d["cell_type_examples"]) > 0
+    presets = d["cell_presets"]
+    assert len(presets) >= 10
+    p0 = presets[0]
+    assert p0["species"] in d["species"] and p0["cell_type"] and p0["label"]
 
 
 def test_report_markdown(client):

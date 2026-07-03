@@ -45,13 +45,16 @@ def parse(text: str, mode: str) -> dict:
 
 
 def options() -> dict:
-    """暴露后端权威枚举供前端下拉(只读)。cell_type 后端不限制,仅给示例可自由填。"""
+    """暴露后端权威枚举供前端下拉(只读)。cell_type 后端不限制,仅给示例可自由填。
+    cell_presets 是只读展示层(catalog),不引入新词汇/治理权威。"""
+    from praxis_virtualcell.catalogs import load_cell_presets
     return {
         "species": sorted(SUPPORTED_SPECIES),
         "perturbation_type": sorted(SUPPORTED_PERTURBATION),
         "task_type": sorted(SUPPORTED_TASKS),
         "cell_type_examples": list(_CELL_TYPE_EXAMPLES),
         "cell_type_free_text": True,
+        "cell_presets": load_cell_presets(),
     }
 
 
