@@ -61,8 +61,11 @@ praxis-vc = "praxis_virtualcell.cli:main"
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.setuptools.packages.find]
-include = ["praxis2*"]
+include = ["praxis2*", "praxis_virtualcell*", "praxis_vc_api*"]
 
 [tool.ruff]
 line-length = 120
