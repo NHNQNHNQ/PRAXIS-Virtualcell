@@ -1,5 +1,12 @@
-import { useState } from "react";
-import { createJob, type Mode, type ParseResult } from "../api";
+import { useEffect, useState } from "react";
+import {
+  createJob,
+  getOptions,
+  type CellPreset,
+  type Mode,
+  type Options,
+  type ParseResult,
+} from "../api";
 
 // Confirm 页:展示并允许微调 candidate(species/cell_type/perturbation_type/targets),
 // 显示 parser/llm_used/schema_valid/assumptions,高亮 missing/errors。
@@ -29,6 +36,25 @@ export default function ConfirmView({
   const [enableLlmReport, setEnableLlmReport] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [opts, setOpts] = useState<Options | null>(null);
+
+  useEffect(() => {
+    getOptions().then(setOpts).catch(() => setOpts(null)); // 失败静默降级为纯文本
+  }, []);
+
+  // 选中预设 → 填充 species/cell_type/perturbation_type/targets(便捷,仍可手改)
+  function applyPreset(p: CellPreset) {
+    setSpecies(p.species);
+    setCellType(p.cell_type);
+    if (p.example_perturbation_type) setPertType(p.example_perturbation_type);
+    if (p.example_targets) setTargets(p.example_targets.join(", "));
+  }
+
+  // 下拉选项:枚举 + 保留当前值(避免锁死非枚举内的历史值)
+  function withCurrent(list: string[] | undefined, cur: string): string[] {
+    const xs = list ?? [];
+    return cur && !xs.includes(cur) ? [cur, ...xs] : xs;
+  }
 
   async function run() {
     setBusy(true);
@@ -58,10 +84,40 @@ export default function ConfirmView({
     <section className="card">
       <h2>2 · 确认(Confirm)</h2>
 
+      {opts && opts.cell_presets.length > 0 && (
+        <label>
+          载入 cell 预设(便捷,可再手改)
+          <select
+            defaultValue=""
+            onChange={(e) => {
+              const p = opts.cell_presets.find((x) => x.id === e.target.value);
+              if (p) applyPreset(p);
+            }}
+          >
+            <option value="">— 选择物种/细胞预设 —</option>
+            {opts.cell_presets.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+
       <div className="grid2">
         <label>
           species
-          <input value={species} onChange={(e) => setSpecies(e.target.value)} />
+          {opts ? (
+            <select value={species} onChange={(e) => setSpecies(e.target.value)}>
+              {withCurrent(opts.species, species).map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input value={species} onChange={(e) => setSpecies(e.target.value)} />
+          )}
         </label>
         <label>
           cell_type(可空)
@@ -69,7 +125,17 @@ export default function ConfirmView({
         </label>
         <label>
           perturbation_type
-          <input value={pertType} onChange={(e) => setPertType(e.target.value)} />
+          {opts ? (
+            <select value={pertType} onChange={(e) => setPertType(e.target.value)}>
+              {withCurrent(opts.perturbation_type, pertType).map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input value={pertType} onChange={(e) => setPertType(e.target.value)} />
+          )}
         </label>
         <label>
           perturbation_targets(逗号分隔)

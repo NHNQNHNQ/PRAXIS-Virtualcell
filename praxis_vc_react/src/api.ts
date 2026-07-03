@@ -66,6 +66,24 @@ export interface ProvenanceResult {
   llm_meta: Record<string, unknown>;
 }
 
+export interface CellPreset {
+  id: string;
+  species: string;
+  cell_type: string;
+  label: string;
+  example_perturbation_type?: string;
+  example_targets?: string[];
+}
+
+export interface Options {
+  species: string[];
+  perturbation_type: string[];
+  task_type: string[];
+  cell_type_examples: string[];
+  cell_type_free_text: boolean;
+  cell_presets: CellPreset[];
+}
+
 // ---- 内部 fetch 助手 ----
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -122,6 +140,11 @@ export function getTrace(jobId: string): Promise<TraceResult> {
 
 export function getProvenance(jobId: string): Promise<ProvenanceResult> {
   return req<ProvenanceResult>(`/api/reports/${encodeURIComponent(jobId)}/provenance`);
+}
+
+// 只读枚举 + cell 预设(供前端下拉)。权威仍在后端,前端只展示。
+export function getOptions(): Promise<Options> {
+  return req<Options>("/api/options");
 }
 
 // report.md 为纯文本(text/markdown),不走 JSON 解析,单独 fetch。
