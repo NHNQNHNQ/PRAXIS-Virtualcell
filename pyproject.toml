@@ -2,6 +2,8 @@
 name = "praxis-virtualcell"
 version = "0.0.0"
 description = "PRAXIS-2-derived multi-agent framework for virtual-cell prediction"
+readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.11"
 dependencies = [
     "httpx>=0.27",
