@@ -1,0 +1,42 @@
+# M1-M8 支持度矩阵(yeast)。代谢强(iMM904 GEM);scRNA/组织类不支持。
+species: yeast
+modules:
+  membrane_system:
+    support: medium
+    reason: ER-Golgi trafficking/脂质合成规则;无专用预测器
+    tools: [lipid_pathway_rules, trafficking_knowledge]
+  genetic_hub:
+    support: weak
+    reason: deletion library 知识存在但无 offline scRNA predictor;待自训 deletion-to-fitness
+    self_training: yeast_deletion_to_fitness
+  mitochondrial_energy_metabolism:
+    support: medium
+    reason: respiration-fermentation switch;GEM 覆盖呼吸代谢
+    models: [gem_fba]
+  cytoplasmic_metabolism:
+    support: strong
+    reason: iMM904 GEM 真跑(碳氮源切换/氨基酸合成)
+    models: [gem_fba]
+  biosynthetic_network:
+    support: weak
+    reason: 无蛋白质量控制预测器;ER quality control 规则
+    tools: [ribosome_folding_gene_set]
+  cytoskeletal_framework:
+    support: weak
+    reason: 无 bud morphology 预测器
+    self_training: yeast_bud_morphology
+  stress_processor:
+    support: weak
+    reason: 应激颗粒/P-body 知识存在但无预测器;待自训 stress-state classifier
+    self_training: yeast_stress_state
+  degradation_machinery:
+    support: weak
+    reason: 液泡/自噬规则;无预测器
+    tools: [vacuole_autophagy_gene_set]
+biological_mismatch:
+  - query: tissue_spatial_niche
+    verdict: reject
+    reason: 单细胞真菌,无组织/空间 niche 概念
+  - query: mammalian_cell_communication
+    verdict: reject
+    reason: 无哺乳类细胞间通讯语境
