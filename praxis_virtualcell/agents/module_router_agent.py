@@ -14,6 +14,7 @@ from __future__ import annotations
 from praxis_virtualcell.agents import module_rules
 from praxis_virtualcell.agents.route_table import route
 from praxis_virtualcell.agents.species_schema import normalize_request
+from praxis_virtualcell.llm_orchestration import safety_contract as SC
 from praxis_virtualcell.biological_modules import modules as M
 from praxis_virtualcell.biological_modules.module_plan import ModulePlan, ModulePlanEntry
 from praxis_virtualcell.core.agent import BaseAgent
@@ -31,9 +32,19 @@ class ModuleRouterAgent(BaseAgent):
         mismatch_queries = message.payload.get("mismatch_queries", {})
         species = req["species"]
 
-        primary = module_rules.pick_primary(req)
-        secondary = module_rules.pick_secondary(req, primary)
+        primary = module_rules.pick_primary(req)   # 决策 P1:primary 永由确定性规则定,LLM 不改
         notes: list[str] = []
+        # Phase 4:若带 LLM 候选(module_candidates.selected),secondary 从 LLM 选中集派生
+        # (决策 P2:LLM 只增删 secondary,且必 ⊆ candidate 全集)。无候选(OFFLINE)→ Phase 3 原路径。
+        mc = message.payload.get("module_candidates")
+        if mc and mc.get("selected") is not None:
+            candidates = SC.build_candidate_modules(req, module_support)
+            secondary = [m for m in mc["selected"]
+                         if m != primary and m in candidates]
+            for flag in (mc.get("risk_flags") or []):
+                notes.append(f"llm_{flag}" if not str(flag).startswith("llm_") else str(flag))
+        else:
+            secondary = module_rules.pick_secondary(req, primary)
 
         entries: list[ModulePlanEntry] = []
         for mid, role in [(primary, "primary")] + [(s, "secondary") for s in secondary]:
