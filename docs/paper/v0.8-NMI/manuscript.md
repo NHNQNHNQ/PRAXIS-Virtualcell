@@ -6,8 +6,9 @@
 > (English + Simplified Chinese). Systems/methods framing per author decision (2026-07-03). Every quantitative
 > claim traces to a recorded finding (`docs/ANALYSIS-SUMMARY.md`, `docs/paper/v0.4/RESULTS-CONSOLIDATED.md`,
 > `docs/paper/v0.3/data-inventory.md`, `docs/findings/`). References [1]–[22] are DOI/source-verified (v0.2
-> `phase1_literature.md`); references [23]+ are newly added for the dataset/tool corpus (Results 4–5) and are
-> pending final DOI verification in the citation-check phase. Figures Fig 1–5 are in `docs/paper/figures/`.
+> `phase1_literature.md`); references [23]–[30] (dataset/tool corpus, Results 4–5) were DOI/source-verified via
+> web search on 2026-07-04 (DOI, journal, volume and pages all confirmed). Figures Fig 1–5 are in
+> `docs/paper/figures/`.
 
 ---
 
@@ -396,6 +397,46 @@ interests. Funding — TBD.
 
 ---
 
+## Figure legends
+
+**Fig. 1 | System architecture and message flow (Result 1).** The runtime orchestrates ten deterministic
+agents (InputInterpreter → ObjectNormalizer → SpeciesBrain → ModelApplicability → predictor-agents → Ensemble →
+Reliability → Critic → Provenance → Report) that communicate only over a single auditable `MessageBus`. A hard
+retrieve-before-predict gate forces applicability retrieval before any predictor runs, and an abstain branch
+diverts unsupported requests. Optional language-model agents (input interpretation, routing review, critique,
+reporting) sit outside the prediction core.
+
+**Fig. 2 | Human perturbation benchmark (Result 2).** Per-cell delta-expression Pearson on the Norman 2019
+test split (n = 18,874): six donor base predictors span 0.6183–0.6716 and Coordinator ensembles reach 0.7039
+(+0.032 over the strongest single base). Same-protocol baselines anchor the axis: mean-perturbation 0.4615,
+same-protocol GEARS 0.4877, and frozen scGPT 0.4407 (n = 7,290, reduced sampling). The wrapper reproduces each
+predictor element-wise (atol 1e-6), so the ensemble gain is a property of the predictors, not the runtime.
+(Figure to be updated to include the GEARS same-protocol bar added after v0.2.)
+
+**Fig. 3 | Runtime ablation (Result 1).** Five governance capability axes move from absent (arm A, an ML-only
+stub) to present (arm D, full PRAXIS) over the *same* mock predictors: out-of-distribution rejection,
+wrong-model use, provenance, abstention correctness, and trace completeness. A presence/absence contrast, not a
+graded score.
+
+**Fig. 4 | Species-aware routing (Results 1, 4).** One fixed task routed across organisms: human applicable
+(no caution); mouse applicable with an ortholog caution and real target projection; bacteria and yeast rejected
+by the negative-transfer rule and abstained; unknown ("martian") species abstained with no fabricated rule
+references.
+
+**Fig. 5 | Governance mechanism (Results 1, 3).** The disagreement → abstain/downgrade → critic →
+report-split pipeline. Components that are declarative (unit-test-activated but not firing in the offline mock
+end-to-end path) are marked, keeping the mechanism's demonstrated-versus-declarative status explicit.
+
+**Fig. 6 | Learned reliability governance (Result 3)** *(to be generated).* (a) Bad-perturbation AUROC under
+leave-perturbation-out cross-validation: learned 0.907 versus disagreement-only 0.774, out-of-distribution-flag
+0.788, and random 0.479, with the per-cell recomputation (0.869) shown alongside. (b) Risk–coverage curves
+(learned AUC 0.746; per-cell 0.736) and, on the real donor predictors, retained delta-Pearson rising from 0.672
+at full coverage to 0.754 at 74% coverage. (c) Wired back into the runtime, the wrong-accept rate falls from
+0.974 to 0.211 and risk-coverage rises from 0.026 to 0.789 with zero hard-rule overrides. All values are
+recorded findings; the figure is a faithful renderer to be produced with `make_figures.py`.
+
+---
+
 ## References
 
 [^1]: Bunne, C. et al. How to build the virtual cell with artificial intelligence: priorities and opportunities. *Cell* **187**, 7045–7063 (2024). https://doi.org/10.1016/j.cell.2024.11.015
@@ -421,8 +462,8 @@ interests. Funding — TBD.
 [^21]: Wang, H. et al. Scientific discovery in the age of artificial intelligence. *Nature* **620**, 47–60 (2023). https://doi.org/10.1038/s41586-023-06221-2
 [^22]: Sandve, G. K., Nekrutenko, A., Taylor, J. & Hovig, E. Ten simple rules for reproducible computational research. *PLoS Comput. Biol.* **9**, e1003285 (2013). https://doi.org/10.1371/journal.pcbi.1003285
 
-> References [23]–[30] are newly added for the Results 4–5 dataset/tool corpus and are **pending final DOI
-> verification in the citation-check phase** before submission:
+> References [23]–[30] (Results 4–5 dataset/tool corpus) — DOI, journal, volume and pages verified via web
+> search on 2026-07-04:
 
 [^23]: Subramanian, A. et al. A next generation connectivity map: L1000 platform and the first 1,000,000 profiles. *Cell* **171**, 1437–1452.e17 (2017). https://doi.org/10.1016/j.cell.2017.10.049
 [^24]: Kang, H. M. et al. Multiplexed droplet single-cell RNA-sequencing using natural genetic variation. *Nat. Biotechnol.* **36**, 89–94 (2018). https://doi.org/10.1038/nbt.4042
