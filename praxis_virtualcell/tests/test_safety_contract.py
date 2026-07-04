@@ -85,6 +85,25 @@ def test_sanitize_bad_json_is_fail_closed():
     assert out["selected_modules"] == ["genetic_hub"]   # 回退保底
 
 
+def test_sanitize_non_object_json_is_fail_closed():
+    """漏洞 A:合法但非 object 的 JSON(list/int/null 等)→ d.get 会抛 AttributeError。
+    必须 fail-closed:不崩溃、risk_flags 含 llm_parse_failed、selected 回退保底含 primary。"""
+    cands = ["genetic_hub", "stress_processor"]
+    for raw in ("[1,2,3]", "42", "null", "true", '"str"'):
+        out = SC.sanitize_llm_plan(raw, cands, primary="genetic_hub")
+        assert "llm_parse_failed" in out["risk_flags"], raw
+        assert "genetic_hub" in out["selected_modules"], raw   # primary 保底
+
+
+def test_sanitize_non_iterable_selected_is_fail_closed():
+    """漏洞 B:selected_modules 为非可迭代标量(123)→ filter 内 set(123) 抛 TypeError。
+    必须 fail-closed:不崩溃、回退保底含 primary。"""
+    cands = ["genetic_hub", "stress_processor"]
+    out = SC.sanitize_llm_plan('{"selected_modules": 123}', cands, primary="genetic_hub")
+    assert "llm_parse_failed" in out["risk_flags"]
+    assert "genetic_hub" in out["selected_modules"]            # primary 保底
+
+
 def test_assert_plan_within_bounds_clean():
     plan = {"primary": "genetic_hub", "secondary": ["stress_processor"],
             "entries": [{"module": "genetic_hub"}, {"module": "stress_processor"}]}

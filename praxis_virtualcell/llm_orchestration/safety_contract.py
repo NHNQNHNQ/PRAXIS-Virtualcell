@@ -47,18 +47,22 @@ def sanitize_llm_plan(raw_content: str | None, candidates: list[str],
         out["risk_flags"] = ["llm_unavailable"]
         out["selected_modules"] = _fallback
         return out
+    # 整段后处理纳入同一 try:
+    # - json.loads 成功但非 object(list/int/str/bool/None)→ d.get 抛 AttributeError
+    # - selected_modules 为非可迭代标量(如 123)→ filter 内 set(123) 抛 TypeError
+    # 任一异常都走 fallback(含 primary),绝不崩溃、绝不丢主模块。
     try:
         d = json.loads(raw_content)
-    except (json.JSONDecodeError, TypeError):
+        sel = filter_to_supported_modules(d.get("selected_modules") or [], candidates)
+        if primary in candidates and primary not in sel:
+            sel = [primary] + sel              # primary 保底(LLM 不可删 primary)
+        rf = d.get("risk_flags")
+        out["selected_modules"] = sel
+        out["reasoning_summary"] = str(d.get("reasoning_summary", ""))[:500]
+        out["risk_flags"] = list(rf) if isinstance(rf, list) else []  # 只接受 list,否则丢弃(不把字符串逐字符拆)
+    except (json.JSONDecodeError, TypeError, AttributeError):
         out["risk_flags"] = ["llm_parse_failed"]
         out["selected_modules"] = _fallback
-        return out
-    sel = filter_to_supported_modules(d.get("selected_modules") or [], candidates)
-    if primary in candidates and primary not in sel:
-        sel = [primary] + sel                  # primary 保底(LLM 不可删 primary)
-    out["selected_modules"] = sel
-    out["reasoning_summary"] = str(d.get("reasoning_summary", ""))[:500]
-    out["risk_flags"] = list(d.get("risk_flags") or [])
     return out
 
 
