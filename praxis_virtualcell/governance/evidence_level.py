@@ -9,9 +9,11 @@ runtime OOD 真实情况(实读 reliability.py:136):seen_in_train 多为 None �
 """
 from __future__ import annotations
 
-# 硬拒 abstain 原因(→ E0)
-_HARD_REJECT = {"species_not_supported", "all_predictors_rejected",
-                "no_perturbation_specified", "no_successful_predictor"}
+from praxis_virtualcell.agents.reliability import _HARD_ABSTAIN
+
+# 硬拒 abstain 原因(→ E0):单一真相源 = reliability._HARD_ABSTAIN
+# (含 core_predictor_failed;复用消除两处常量漂移,新增硬拒原因只须改 reliability 一处)。
+_HARD_REJECT = _HARD_ABSTAIN
 # 提示跨物种/OOD 的 caution flag 关键词
 _OOD_CAUTION_KEYS = ("ortholog", "cross_species", "cross-species", "projected")
 

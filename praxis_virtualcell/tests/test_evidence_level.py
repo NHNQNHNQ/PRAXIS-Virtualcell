@@ -77,6 +77,14 @@ def test_e0_hard_reject():
     assert out["level"] == "E0"
 
 
+def test_e0_core_predictor_failed():
+    """E0:core 预测器硬失败(core_predictor_failed 不带 downgrade 前缀)的 abstain 须落 E0 硬拒,
+    而非 E1 普通弃权(与 reliability._HARD_ABSTAIN 单一真相源对齐)。"""
+    out = EL.map_evidence_level(_report(abstain=True, prediction=None, models_used=[],
+                                        abstain_reasons=["core_predictor_failed"]))
+    assert out["level"] == "E0"
+
+
 def test_e_level_does_not_lead_disposition():
     """红线/决策 B:downgrade 请求不得被映射成 E2/E3 accept 级。"""
     out = EL.map_evidence_level(_report(seen_in_train=True, reliability="high",
