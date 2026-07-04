@@ -65,8 +65,8 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 ### Phase 3(进行中,起点基线 352 passed / 25 skipped;计划 98d8c95,8 task,累计 +98 → 450 passed 达路线图地标)
 > ⚠️ 口径同上:计划标 "N passed" 为 collected 含 skipped;真实 passed = collected − 25。验收认 0 failed/0 errors + 新增条数。
 > 🔬 **v1.0 里程碑审查待确认(科学核心决策;规划 subagent 已落最小确定性集保证可测+fail-closed,不阻塞执行)**:M1 primary/secondary 模块选取规则(communication 暂归 M7;secondary 仅 growth/flux+human/mouse 加 M3,更细规则待定);M3 mismatch query 推导(bacteria+降解语境→自噬、yeast+niche/communication→组织 niche)。到 v1.0 pause 时连同跑通的 golden 结果一起交用户拍板。
-- [ ] Task 3.1 ModulePlan 数据结构(白名单校验 + verdict 保守合成 + to_dict;+7 → 359 passed)
-- [ ] Task 3.2 SpeciesContextAgent(插点 A,进 bus;读 module_support 给 8 模块 + mismatch 表;+6 → 365 passed)
+- [x] Task 3.1 ModulePlan 数据结构(1b72c39;白名单校验 + verdict 保守合成 + to_dict;+7 → 359 passed;spec 审 + 质量审双 APPROVED)
+- [x] Task 3.2 SpeciesContextAgent(7174bae;插点 A,进 bus;8 模块 support/verdict + mismatch;+6 → 365 passed;spec 审 + 质量审双 APPROVED)
 - [ ] Task 3.3 module_rules 确定性规则(primary/secondary 选取 + mismatch query,零 LLM;+10 → 375 passed)
 - [ ] Task 3.4 ModuleRouterAgent(插点 B,产 ModulePlan;复用 route()+物种 verdict+mismatch 降级;+7 → 382 passed)
 - [ ] Task 3.5 module routing golden representative(4 物种×代表应用)+ 独立 runner + unsafe-accept KPI(+34 → 416 passed)
@@ -74,7 +74,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [ ] Task 3.7 cross-module consistency 校验(G4 铺路,纯函数;+6 → 450 passed)
 - [ ] Task 3.8 Phase 3 完成闸门 — 红线核验 + 台账 + **v1.0 tag**(本地不 push;+0 → 450 passed)
 
-## 当前状态:Phase 3 进行中 — 计划已展开(98d8c95,8 task),开始 Task 3.1(ModulePlan 数据结构)
+## 当前状态:Phase 3 进行中 — Task 3.1/3.2 两审通过,连做 Task 3.3(module_rules 确定性规则)
 
 ## 事件日志(每次 loop 追加一行)
 
@@ -98,3 +98,5 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - 2026-07-04 **Task 2.7 两审通过 + Phase 2 完成闸门(控制器亲验)**(a414927,+4 → 352 passed):spec 合规审 + 代码质量审均 APPROVED(_validate 纯 +9 追加未破坏现有逻辑,Task 2.1 六测试仍绿,training_card 校验 fail-closed 正确无漏洞)。**控制器独立闸门核验全绿**:①全量回归 352 passed/25 skipped/**0 failed/0 errors**(collected 377);②红线四件套(LLM 边界三 flag 恒 False + golden unsafe-accept=0 + negative 无静默 accept + baseline OFFLINE 零 LLM 产 report.md)共 54 tests 0 failed;③提交范围 v0.9.0→HEAD **根 tests/ 零触碰、core/predictors 零触碰、现有 agents 未改**(agents/ 仅新增 model_broker_agent.py)。STATUS 文档已追加 Phase 2 完成台账段。**Phase 2 非里程碑 → 不打 tag**(v1.0 tag 等 Phase 3)。**下一工作单元 = 用 writing-plans 展开 Phase 3(module-aware router,把 model_zoo/broker 接进 runtime 管线)详细 TDD 计划**,严格对着 Phase 1 modules.py + Phase 2 ModelBrokerAgent/ModelZooRegistry 真实接口。
 - 2026-07-04 **可选建议观察项汇总(Phase 2 全 task,均非阻塞、未在本 Phase 改)**:①registry _validate 未防 entry 非 dict(边缘坏 yaml,重新评估决定不做);②estimate_uncertainty 默认实现忽略传入 prediction 参数二次推理(真实高成本模型覆写此方法规避);③cache/downloader 路径穿越守卫(source 来自受控 registry 非外部输入,Phase 6 接不可信源再加);④broker payload 缺 model_name 键当未知模型处理(仍 fail-closed 安全);⑤若干测试断言可收紧(uncertainty_contract/missing_asset 的 or 分支)。留待 Phase 3/6 需要时统一处理。
 - 2026-07-04 **Phase 3 计划展开完成**(规划 subagent DONE,98d8c95,1569 行,8 task):module-aware router = SpeciesContextAgent(插点 A)+ ModuleRouterAgent(插点 B,产 ModulePlan)+ golden 扩到 60 + cross-module consistency,起点 352 → 累计 +98 → 450 passed(达路线图地标)。**质检亮点**:规划 subagent 用真实 route()+ModuleRegistry 预演全部 60 条 golden expect,发现并修正自己写错的 5 条期望值(human/mouse growth/flux 先命中代谢分支,ligand 不改结果),60/60 与真实代码一致;校正 5 处路线图旧描述(RouteDecision 有第 5 字段 reason、route() 需先 normalize_request、module→engine 在 MODULES[mid].engines、ModuleRegistry 真实方法名、broker 已存在留 Phase 4)。**归置决策**:SpeciesContextAgent 归 Phase 3(与 router 强耦合);EvidenceLevelAgent(E0–E5)留 Phase 4/5(需管线运行时 reliability/OOD 信号,Phase 3 刻意不接管线降低 v1.0 回归风险)。**待确认**:M1/M3 科学决策已落最小确定性集,标 v1.0 里程碑审查项(见 Phase 3 task 清单上方 🔬)。控制器核实计划头部铁律 + 数据契约 + Task 3.1 完整可执行。台账填入 Phase 3 8-task 清单。连做 Task 3.1(ModulePlan 数据结构,纯 dataclass 不涉 M1/M3 争议,安全起步)。
+- 2026-07-04 **Task 3.1 两审通过**(1b72c39,+7 → 359 passed/0 failed):spec 合规审 APPROVED(2 文件逐行一致纯新增,7 断言点全覆盖,sys.modules 探测确认纯 dataclass 无 bus/LLM/torch/cobra 依赖);代码质量审 APPROVED(verdict 合成保守优先级无放宽漏洞、未知值兜底当最保守、白名单校验 __post_init__ fail-closed 无绕过、可变默认 field(default_factory)、to_dict 手写注入 overall_verdict 正确)。**2 条非阻塞建议(记观察)**:species_support/route_disposition/species_verdict 字段未做值域枚举校验(纯透传或 _SEVERITY.get(v,3) 兜底当最保守,fail-closed 安全非缺陷)——防御性增强留后统一。连做 Task 3.2(SpeciesContextAgent 插点 A);台账勾选累积待一起 chore commit。
+- 2026-07-04 **Task 3.2 两审通过**(7174bae,+6 → 365 passed/0 failed):spec 合规审 APPROVED(2 文件逐字符一致纯新增,6 断言点全覆盖,进 bus + fail-closed 三红线落实);代码质量审 APPROVED(进 bus 契约规范与 ModelBrokerAgent 风格一致,8 模块 support/verdict/mismatch/display_name 全来自 ModuleRegistry 不自造,独立补测未知/空物种全 reject 不崩不静默,6 测试真读 yaml 有效)。**1 条非阻塞建议(记观察)**:`_reg._load()` 私有访问取 mismatch 表(registry 无枚举全部 mismatch 的公开 API 属合理权衡)——将来给 ModuleRegistry 加公开 mismatch_table(species) 收敛(需改 Phase 1 现有文件,留 Phase 3 之后)。连做 Task 3.3(module_rules,涉 M1/M3 最小确定性集);做 chore commit 落盘 3.1/3.2 台账勾选。
