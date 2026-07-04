@@ -6,7 +6,7 @@ from typing import Any
 
 import httpx
 
-from praxis_virtualcell.core.config import Mode, RuntimeConfig
+from praxis_virtualcell.core.config import LLM_MODES, RuntimeConfig
 
 
 class LLMClient:
@@ -41,6 +41,7 @@ class LLMClient:
 
 
 def make_llm_client(config: RuntimeConfig) -> LLMClient:
-    enabled = config.mode is Mode.LLM_ASSISTED and bool(config.deepseek_api_key)
+    # Phase 4:enabled 认所有需要 LLM 的模式(assist + 编排 + 编排-strict),不再只认 LLM_ASSISTED。
+    enabled = config.mode in LLM_MODES and bool(config.deepseek_api_key)
     return LLMClient(enabled=enabled, api_key=config.deepseek_api_key,
                      base_url=config.deepseek_base_url, model=config.deepseek_model)

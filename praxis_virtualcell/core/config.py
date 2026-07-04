@@ -13,6 +13,14 @@ _BRAINS_DEFAULT = Path(__file__).resolve().parent.parent / "brains" / "virtualce
 class Mode(str, Enum):  # noqa: UP042
     OFFLINE = "offline"
     LLM_ASSISTED = "llm_assisted"
+    # Phase 4(v1.1):LLM 编排模式。LLM 只出 module 集建议(经 safety_contract 过滤成合法候选),
+    # 不碰 prediction/hard-rule/verdict 终决(assert_llm_boundaries 三 flag 仍恒 False)。
+    LLM_ORCHESTRATED = "llm_orchestrated"
+    LLM_ORCHESTRATED_STRICT = "llm_orchestrated_strict"
+
+
+# 需要 LLM 的运行模式集合(assist / 编排 / 编排-strict)。OFFLINE 不在内 → 恒零 LLM。
+LLM_MODES = (Mode.LLM_ASSISTED, Mode.LLM_ORCHESTRATED, Mode.LLM_ORCHESTRATED_STRICT)
 
 
 class Clock:
@@ -58,16 +66,16 @@ class RuntimeConfig:
     @classmethod
     def from_env(cls, *, env_path: str = ".env") -> RuntimeConfig:
         load_env(env_path)
-        mode = (Mode.LLM_ASSISTED
-                if os.environ.get("PRAXIS_VIRTUALCELL_MODE") == "llm_assisted"
-                else Mode.OFFLINE)
+        _mode_str = os.environ.get("PRAXIS_VIRTUALCELL_MODE", "offline")
+        _by_str = {m.value: m for m in Mode}
+        mode = _by_str.get(_mode_str, Mode.OFFLINE)
         key = os.environ.get("DEEPSEEK_API_KEY", "")
         return cls(
             mode=mode,
             deepseek_api_key=key,
             deepseek_base_url=os.environ.get("PRAXIS_VC_LLM_BASE_URL", "https://api.deepseek.com"),
             deepseek_model=os.environ.get("PRAXIS_VC_LLM_MODEL", "deepseek-chat"),
-            llm_enabled=(mode is Mode.LLM_ASSISTED and bool(key)),
+            llm_enabled=(mode in LLM_MODES and bool(key)),
         )
 
 
