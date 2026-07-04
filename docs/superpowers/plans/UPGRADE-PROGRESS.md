@@ -9,7 +9,7 @@
 branch: feat/v0.9-phase0-module-core     # 当前工作分支(每到版本里程碑可换新分支)
 push_authorized: false                   # 未经用户授权不 push
 pause_at_milestones: true                # 每到 v0.x 里程碑结束 loop 等人工审;设 false 则全自动直穿 v1.3
-paused_for_review: false                 # 2026-07-04 用户重启 loop=继续 → 清除 v1.1 暂停闸,进 Phase 5(主动学习 v1);v1.1 待确认项(P3/communication/predictor 驱动/_is_routable/M1-3-8)保留为观察
+paused_for_review: true                  # 2026-07-04 v1.2 里程碑(Phase 5 完成)硬闸暂停等人工审;要继续 Phase 6/7 回复"继续"(届时清 false 重启 loop)
 test_scope: praxis_virtualcell/tests     # 唯一测试口径(永不碰根 tests/ 的 ~1398 继承测试)
 test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -q"
 ```
@@ -21,7 +21,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 | v0.9 module core | Phase 0 + 1 完成并回归绿 | ✅ 完成(暂停等审) | v0.9.0 |
 | v1.0 model-controlled | Phase 2 + 3 | ✅ 完成(暂停等审) | v1.0.0 |
 | v1.1 LLM-orchestrated | Phase 4 | ✅ 完成(暂停等审) | v1.1.0 |
-| v1.2 active-learning | Phase 5 | ⬜ | — |
+| v1.2 active-learning | Phase 5 | ✅ 完成(暂停等审) | v1.2.0 |
 | v1.3 public release | Phase 6 + 7 + 8 | ⬜ | — |
 
 ## 相位进度
@@ -33,7 +33,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 | 2 ModelBroker + model_zoo | 2026-07-04-phase2-model-broker.md | ✅ 完成 | 7 task 全过两审;352 passed/25 skipped/0 failed;闸门红线四件套全绿;纯新增未碰内核;非里程碑不打 tag |
 | 3 module-aware router | 2026-07-04-phase3-module-router.md | ✅ 完成 | 8 task 全过两审;450 passed/25 skipped/0 failed;总 golden 60;闸门红线四件套全绿;纯新增未碰内核;v1.0.0 tag |
 | 4 LLM_ORCHESTRATED | 2026-07-04-phase4-llm-orchestrated.md | ✅ 完成 | 8 task 全过两审;509 passed/25 skipped/0 failed;LLMModulePlanner+safety_contract+接管线;OFFLINE 字节等价、LLM 不越权、三 flag False;v1.1.0 tag |
-| 5 主动学习 v1 | 2026-07-04-phase5-active-learning.md | 🔵 进行中 | 计划已展开(e2cabaa,8 task,509→555);EvidenceLevel E0–E5 + ActiveLearning learning_queue;advisory 不碰裁决;OFFLINE 字节等价;Phase 5 完成=v1.2 里程碑 |
+| 5 主动学习 v1 | 2026-07-04-phase5-active-learning.md | ✅ 完成 | 8 task 全过两审;556 passed/25 skipped/0 failed;EvidenceLevel E0–E5 + ActiveLearning learning_queue;advisory 不碰裁决、OFFLINE 字节等价、治理核心零改动;v1.2.0 tag |
 | 6 公开模型接入 | (待展开) | ⬜ | GEARS/scGPT 在 .53 真跑,收编进 ModelBroker(fail-closed) |
 | 7 自训模型第一批 | (待展开) | ⬜ | 依赖 Phase 2 broker 契约,可与 6 并行 |
 | 8 网站 + Linux release | (待展开) | ⬜ | 增量扩前后端 |
@@ -87,7 +87,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 4.7 接进 runtime 管线(518e47b;build_runtime 注册 + run_workflow 旁路挂 module_plan;+5 → 509 passed;实现 BLOCKED→控制器架构裁决旁路 gating→修复→spec 审 + 质量审双 APPROVED;OFFLINE 字节等价、predictor/治理零改动、4 回归恢复)
 - [x] Task 4.8 Phase 4 完成闸门(控制器执行;全量 509 passed/25 skipped/0 failed;红线核验 73 tests 全绿含 LLM 编排契约;根 tests/+predictors 零触碰;打 **v1.1.0** tag 本地不 push;pause 等审)
 
-### Phase 5(进行中,起点基线 509 passed / 25 skipped;计划 e2cabaa,8 task,累计 +46 → 555 passed;计划已用真实 passed 口径 + 脚本自查测试数一致)
+### Phase 5 ✅ 完成(起点 509 → 556 passed / 25 skipped / 0 failed;主动学习 v1;闸门红线全绿;v1.2.0 tag)
 > 🔬 **v1.2 里程碑待确认(科学决策;已落 v1 启发式不阻塞)**:①information gain 权重常量(v1 等权启发式非严格 EIG,调参/贝叶斯 EIG 留 v1.2.x)②learning_queue 候选粒度(每 module 一候选,module×扰动×细胞类型细网格留 v1.2.x)③evidence_level 是否反馈 ledger 触发再训练(本 Phase 只 advisory,闭环再训练归 Phase 7)。
 > 🔒 **改现有文件(计划授权最小接线)**:workflows/predict_delta_expression.py 增量注册 2 agent、core/runtime.py 加 2 可选 sidecar 插点、io/report_markdown.py 追加 2 段;均不动 reliability/critic/provenance/predictor/route_table/ModulePlan/Phase 3-4 逻辑;OFFLINE 只往 provenance 追加 evidence_level/learning_queue 两新键、字节等价。
 > ⚠️ 口径:Task 5.1 质量审补 1 test(core_predictor_failed→E0 漏洞修复)→ 5.1 变 +14 → 523;故 5.2–5.8 期望数 +1,Phase 5 最终 556。
@@ -98,9 +98,9 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 5.5 ActiveLearningAgent(482671d;进 bus 产 learning_queue,插点 D,不碰裁决;+7 → 547 passed;spec 审 + 质量审双 APPROVED,变异测试证实 mutate 守卫非空转、deepcopy 验证 report 未变)
 - [x] Task 5.6 接管线(c5d9b4c;runtime 2 gated sidecar 挂 evidence_level + learning_queue;+5 → 552 passed;spec 审 + 质量审双 APPROVED,OFFLINE 字节等价 deepcopy 验证核心字段全等、predictor/治理零改动、baseline 全绿)
 - [x] Task 5.7 report_markdown 扩两段(2e99d54;证据记录 + 验证计划,现有 9 段不变;+4 → 556 passed;spec 审 + 质量审双 APPROVED,byte-identical 不破/缺键 N/A/零 LLM/无不确定性)
-- [ ] Task 5.8 Phase 5 完成闸门 — 红线核验 + 台账 + **v1.2 tag**(+0 → 556 passed)
+- [x] Task 5.8 Phase 5 完成闸门(控制器执行;全量 556 passed/25 skipped/0 failed;红线核验 99 tests 全绿含 AL/evidence 不碰裁决;根 tests/+predictors+治理核心零触碰;打 **v1.2.0** tag 本地不 push;pause 等审)
 
-## 当前状态:Phase 5 进行中 — Task 5.1–5.7 完成(556 passed,7/8),控制器执行 Task 5.8 = v1.2 里程碑闸门
+## 当前状态:Phase 5 ✅ 完成 → **v1.2 里程碑(active-learning)**,打 v1.2.0 tag,pause 等人工审。下一步:用户回复"继续"→清 paused_for_review→展开 Phase 6/7(公开模型接入 / 自训模型,依赖 Phase 2 broker,可并行)
 
 ## 事件日志(每次 loop 追加一行)
 
@@ -157,3 +157,4 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - 2026-07-04 **Task 5.5 两审通过**(482671d,+7 → 547 passed/0 failed/skip 25):spec 合规审 + 代码质量审均 APPROVED(2 文件逐字节纯新增,7 test 与计划标注一致;ActiveLearningAgent 读 report+evidence_level+module_plan.entries→派生候选→information_gain→LearningQueue→emit learning_queue_ready;**不碰裁决红线**:代码体无 report/provenance/verdict/ledger 写操作,质量审 deepcopy 验证 report 未变 + 变异注入 mutate 被三断言全捕获证明守卫非空转;候选派生弱模块/OOD/高分歧优先 fail-safe 稳健;无候选空+note 不虚构;abstain 不改 accept;进 bus 无 LLM)。1 条非阻塞建议(记观察):entry 缺 module 键 mid=None(实战不触发,真实 entries 由 ModulePlanEntry 保证 module 必填;同 Task 4.7 边缘)。连做 Task 5.6(接 runtime 管线);做 chore commit 落盘 5.5 台账勾选(8ad0caa)。
 - 2026-07-04 **Task 5.6 两审通过**(c5d9b4c,+5 → 552 passed/0 failed/skip 25;baseline 全绿):spec 合规审 + 代码质量审均 APPROVED(改 3 文件 runtime+16/workflow+5/新测试+56,接管线最小接线;runtime 只在 report 组装后加 2 gated sidecar 插点 predictor/ensemble/reliability/critic/provenance 逻辑逐字未动、workflow 增量注册 2 确定性节点;**OFFLINE 字节等价**:质量审 deepcopy 深比较移除两键后与接前 report 完全相等、核心字段逐一相等;evidence_level/learning_queue 只进 provenance 两新键;两 agent gated 裸 runtime 不受影响;三 flag False;fixture 补 input_modality 是计划 §1029 漏必填字段的必要修正与全仓一致;5 测试真断言非空转)。无必须修项。连做 Task 5.7(report_markdown 扩两段);做 chore commit 落盘 5.6 台账勾选(6bcdca5)。
 - 2026-07-04 **Task 5.7 两审通过**(2e99d54,+4 → 556 passed/0 failed/skip 25):spec 合规审 + 代码质量审均 APPROVED(2 文件与计划逐字节一致纯追加删除行=0,4 test 与计划标注一致;证据记录/验证计划两段用不带编号 ### 子标题插 §6/§8 后不打乱 9 段编号、缺键 N/A 不崩(压测空 job/None/items=[{}] 均不崩)、**byte-identical 对既有 job 不变**(独立验证 _ACCEPT/_ABSTAIN 字节相同)、零 LLM、新段无不确定性(唯一遍历 lq_items[:5] list 保序)、现有 9 段/byte-identical/no-LLM 断言未删弱化全绿)。无必须修项。1 条非阻塞微观察(记观察):验证计划按输入序渲染、排序责任在上游(io 层纯展示)。**Task 5.7 完成 → Phase 5 全 7 实现 task 完成**。控制器执行 Task 5.8 = v1.2 里程碑闸门。
+- 2026-07-04 **Phase 5 完成 → v1.2 里程碑(控制器执行 Task 5.8 闸门)**:全量回归 **556 passed/25 skipped/0 failed/0 errors**(collected 581);红线核验(LLM 边界三 flag 恒 False + golden unsafe-accept=0 + negative 无静默 accept + baseline OFFLINE 零 LLM 产 report + LLM 编排契约 + **evidence_level 不领先治理 + ActiveLearning mutate 守卫 + runtime AL 字节等价**)共 99 tests 全绿;提交范围 v1.1.0→HEAD **根 tests/ 零触碰 + predictors 核心零触碰 + 治理现有核心(reliability/critic/provenance)零触碰**,Phase 5 全是新增 active_learning 子包(acquisition/learning_queue/active_learning_agent)+ governance/evidence_level + evidence_level_agent + 测试,加计划授权最小接线(runtime sidecar / workflow 注册 / report 追加两段)。打 **v1.2.0** tag(本地不 push)。STATUS 文档追加 Phase 5 完成台账段。**pause_at_milestones=true → 设 paused_for_review=true 硬闸,结束 loop 等人工审**。**留给用户里程碑审查的待确认项**:①information gain 权重(v1 启发式,调参/贝叶斯 EIG 留 v1.2.x)②learning_queue 候选粒度(每 module 一候选,细网格留 v1.2.x)③evidence_level 反馈 ledger 再训练(留 Phase 7)④learning_queue.py:29 注释笔误(用负号→实际 reverse=True)⑤entry 缺 module 边缘(active_learning_agent)⑥v1.0/v1.1 遗留(P3/communication/module_plan 驱动 predictor/_is_routable/M1-3-8)。下一里程碑:v1.3 = Phase 6+7+8(公开模型 / 自训模型 / 网站发行)。
