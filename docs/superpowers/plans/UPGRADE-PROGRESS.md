@@ -9,7 +9,7 @@
 branch: feat/v0.9-phase0-module-core     # 当前工作分支(每到版本里程碑可换新分支)
 push_authorized: false                   # 未经用户授权不 push
 pause_at_milestones: true                # 每到 v0.x 里程碑结束 loop 等人工审;设 false 则全自动直穿 v1.3
-paused_for_review: true                  # 硬闸:v0.9 已达,暂停中。用户说"继续"→ 改 false 并重启 loop 进 Phase 2
+paused_for_review: false                 # 用户 2026-07-04 重启 loop=继续,已清除暂停闸,进 Phase 2
 test_scope: praxis_virtualcell/tests     # 唯一测试口径(永不碰根 tests/ 的 ~1398 继承测试)
 test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -q"
 ```
@@ -30,7 +30,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 |---|---|---|---|
 | 0 冻结基线 | 2026-07-04-phase0-1-module-core.md | ✅ 完成 | 287 passed/0 failed;实现+复核两 subagent 均过;纯新增未动源码 |
 | 1 八模块 core + species profile | 2026-07-04-phase0-1-module-core.md | ✅ 完成 | 319 passed/0 failed;5 task 全过;红线闸门全绿;v0.9.0 tag |
-| 2 ModelBroker + model_zoo | (待展开) | 🟡 待展开(下一个,需重启 loop) | 需先 writing-plans 展开详细计划 |
+| 2 ModelBroker + model_zoo | 2026-07-04-phase2-model-broker.md | 🔵 计划展开中 | 规划 subagent 在写详细 TDD 计划(7 task 骨架已定) |
 | 3 module-aware router | (待展开) | ⬜ | 依赖 Phase 1 modules.py |
 | 4 LLM_ORCHESTRATED | (待展开) | ⬜ | 依赖 Phase 3 ModulePlan |
 | 5 主动学习 v1 | (待展开) | ⬜ | 依赖 Phase 1 证据/模块结构 |
@@ -52,9 +52,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 1.4 物种特异错配守卫测试(c7a5522;319 passed;闸门审查 APPROVED)
 - [x] Task 1.5 全量回归 319 passed + MANIFEST 已覆盖 yaml + v0.9.0 tag(控制器执行)
 
-## ⏸ 当前状态:v0.9 里程碑完成,已暂停等人工审查
-- pause_at_milestones=true 生效。重启 `/loop`(同一条启动串)即从 Phase 2 继续。
-- 重启后 autopilot 会先用 writing-plans 把 Phase 2(ModelBroker + model_zoo)对着真实代码展开成详细计划,再逐 task 执行。
+## 当前状态:v0.9 已完成,用户重启 loop → 进 Phase 2(计划展开中)
 
 ## 事件日志(每次 loop 追加一行)
 
@@ -65,3 +63,4 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - 2026-07-04 Phase 1 Task 1.3 完成(1fb4edc):实现 DONE(312 passed/0 failed;实现诚实指出计划 Step4 "7 passed" 是笔误、实为 6 测试,未编造凑数——已修计划为 6)。审查 subagent 异常返回(0 工具调用 flake)→ **控制器亲自独立核实**:junit 312 passed/0 failed、registry 契约逐条正确(verdict 映射/未知物种→unsupported→reject/未知模块→KeyError/matrix 4×8/mismatch/别名)、纯新增(仅 2 文件)。接受。下一个:Task 1.4。
 - 2026-07-04 Phase 1 Task 1.4 完成(c7a5522):实现 DONE(319 passed;4 条 mismatch 守卫全测)。闸门审查 subagent APPROVED:Task 1.4 纯新增 + Phase 1 红线全绿(内核源码零改动、根 tests/ 未碰、LLM 边界 6 passed、golden+negative 38 passed、baseline 10 passed)。非阻断观察:test_unsupported_modules_reject 当前空转(4×8 矩阵暂无 unsupported 条目)。
 - 2026-07-04 **Phase 1 完成 → v0.9 里程碑**:控制器执行 Task 1.5(最终回归 319 passed/0 failed/25 skipped;MANIFEST recursive-include *.yaml 已覆盖 module_support.yaml;打 v0.9.0 tag)。pause_at_milestones=true → **暂停等人工审查**。下一个:Phase 2(重启 loop 后先展开详细计划)。
+- 2026-07-04 用户重启 loop=继续 → 清除 paused_for_review。派规划 subagent 展开 Phase 2(ModelBroker + model_zoo)详细计划,骨架 7 task:registry.yaml+loader / ModelWrapper(扩 PredictorAgent + declare_scope + estimate_uncertainty)/ GemWrapper(真模型)/ cache+版本锁 / downloader(远端 gated fail-closed)/ ModelBrokerAgent(bus,缺模型不静默 accept)/ training_card + 闸门。
