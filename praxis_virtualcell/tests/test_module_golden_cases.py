@@ -42,7 +42,7 @@ def _plan_for(request):
 
 
 def test_case_count():
-    assert len(_CASES) >= 30, f"module golden 用例过少({len(_CASES)}),疑 glob 落空"
+    assert len(_CASES) >= 60, f"module golden 用例过少({len(_CASES)}),路线图 §8 目标 60"
 
 
 @pytest.mark.parametrize("case", _CASES, ids=[c["case_id"] for c in _CASES] or ["_empty"])
