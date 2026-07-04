@@ -13,50 +13,35 @@
 
 ## Abstract
 
-Computational models that predict how a cell responds to a genetic or chemical perturbation are central to the
-virtual-cell program[^1][^2], yet they share a structural weakness: a trained predictor returns a number for
-*any* input — an out-of-distribution species, an unsupported perturbation type, or a gene outside its
-vocabulary — with no applicability check, no record of which model ran, and no option to decline. We present
-PRAXIS-VirtualCell, a multi-agent runtime that reframes trustworthy prediction as a control-flow problem: a
-message-bus system of deterministic agents routes a typed request through a per-species "brain" of
-applicability rules to heterogeneous predictor-agents, and a hard retrieve-before-predict gate, a learnable
-abstention policy, a trace critic, and a provenance assembler make rejection, abstention, and auditability
-enforced behaviours rather than optional add-ons. We report five results. (1) The runtime, ablated against an
-ML-only stub over the *same* predictors, moves five capability axes from absent to present (out-of-distribution
-rejection, wrong-model use, provenance, abstention correctness, trace completeness), isolating governance as a
-property of the runtime rather than the predictor. (2) On the Norman 2019 benchmark[^3] the predictive layer
-reproduces the donor Coordinator's per-cell delta-expression Pearson of 0.7039 (n = 18,874); a same-protocol
-external GEARS[^8] baseline reaches 0.4877 and a frozen scGPT[^9] backbone only 0.4407 — below even a
-mean-perturbation baseline (0.4615) — and the communicative wrapper reproduces each predictor element-wise
-(atol 1e-6), so it is performance-neutral. (3) A learned reliability model, trained under leave-perturbation-out
-cross-validation, flags bad perturbations at AUROC 0.907 and yields a risk–coverage AUC of 0.746, both far
-above rule and random baselines and robust across seeds; wired back into the runtime it cuts the wrong-accept
-rate from 0.974 to 0.211 with zero hard-rule overrides. (4) Across five applications and four species (16
-governed workflows on public data and tools), the same runtime routes, cautions, downgrades, or abstains per
-case — refusing to over-report when evidence is weak. (5) Every run emits a deterministic nine-section
-Markdown report; declarative golden and negative test suites enforce a zero unsafe-accept rate; and the system
-installs and runs offline on Linux with no API key. Governance metrics are perturbation-level and the system
-does not claim state-of-the-art accuracy; its contribution is an auditable, reproducible control layer that
-knows when not to answer.
+Computational models predict how a cell responds to a genetic or chemical perturbation, but a trained predictor
+returns a number for *any* input — an out-of-distribution species, an unsupported perturbation, or a gene
+outside its vocabulary — with no applicability check, no record of which model ran, and no option to decline.
+We present PRAXIS-VirtualCell, a multi-agent runtime that reframes trustworthy prediction as a control-flow
+problem: deterministic agents route a typed request through a per-species "brain" of applicability rules to
+heterogeneous predictor-agents, and a retrieve-before-predict gate, a learned abstention policy, a trace critic
+and a provenance assembler make rejection, abstention and auditability enforced behaviours. Ablated against an
+ML-only stub over the *same* predictors, the runtime turns five governance capabilities from absent to present.
+On the Norman perturbation benchmark it reproduces a per-cell delta-expression Pearson of 0.7039 without
+altering any predictor output, while a learned reliability model flags error-prone perturbations at AUROC 0.907
+and cuts the wrong-accept rate from 0.974 to 0.211 with no hard-rule overrides. Across five applications and
+four species the runtime cautions, downgrades or abstains rather than over-report; every run emits a
+deterministic, auditable report and installs offline with no API key. These governance metrics are
+perturbation-level and we claim no accuracy record — the contribution is a control layer that knows when not to
+answer.
 
 **Keywords:** virtual cell; perturbation prediction; multi-agent systems; selective prediction; abstention; model applicability; provenance; reproducibility
 
 ## 摘要
 
-预测细胞对基因或化学扰动响应的计算模型是虚拟细胞研究的核心[^1][^2],却有一个结构性缺陷:训练好的预测器对
-任何输入(分布外物种、不支持的扰动类型、词表外基因)都会输出一个数值,既不检查适用性,也不记录用了哪个
-模型,更没有"拒绝回答"的选项。我们提出 PRAXIS-VirtualCell,一个把可信预测重述为控制流问题的多智能体运行时:
-一套确定性智能体的消息总线把结构化请求经逐物种"脑"(适用性规则)路由到异构 predictor-agent;一个硬性"先检索
-再预测"门、一套可学习弃权策略、一个轨迹批判者和一个溯源装配器,把拒绝、弃权、可审计变为强制行为。我们报告
-五项结果:(1)相对仅含预测器的对照桩,该运行时在同一组预测器上把五个能力轴从"无"变为"有",将治理定位为
-运行时而非预测器的属性;(2)在 Norman 2019 基准[^3]上预测层复现 donor Coordinator 的 per-cell
-delta-expression Pearson 0.7039(n=18,874),同协议外部 GEARS[^8] 为 0.4877、冻结 scGPT[^9] 仅 0.4407——低于
-mean-perturbation 基线(0.4615)——包装逐元素复现(atol 1e-6),性能中性;(3)留扰动交叉验证下,可学习可靠性
-模型以 AUROC 0.907 标记坏扰动、risk–coverage AUC 0.746,均远超规则与随机基线且跨种子稳健,接回运行时后把
-wrong-accept 从 0.974 降到 0.211、硬规则覆盖为零;(4)跨五应用四物种(16 个公开数据/工具上的受治理工作流),
-同一运行时按 case 路由/告警/降级/弃权,证据弱时拒绝过度上报;(5)每次运行产出确定性九段 Markdown 报告,声明式
-golden 与 negative 测试套件把 unsafe-accept 率压到零,系统可离线无 key 在 Linux 上安装运行。治理指标为扰动级,
-系统不宣称最先进准确率;其贡献是一个知道何时不作答的、可审计可复现的控制层。
+预测细胞对基因或化学扰动响应的计算模型,对任何输入(分布外物种、不支持的扰动、词表外基因)都会输出一个
+数值,既不检查适用性,也不记录用了哪个模型,更无"拒绝"选项。我们提出 PRAXIS-VirtualCell,一个把可信预测
+重述为控制流问题的多智能体运行时:确定性智能体把结构化请求经逐物种"脑"(适用性规则)路由到异构预测器,一个
+"先检索再预测"门、一套可学习弃权策略、一个轨迹批判者与一个溯源装配器,把拒绝、弃权、可审计变为强制行为。
+相对仅含预测器的对照桩,该运行时在同一组预测器上把五个治理能力从"无"变为"有";在 Norman 扰动基准上复现
+per-cell delta-expression Pearson 0.7039 而不改变任何预测输出;可学习可靠性模型以 AUROC 0.907 标记易错扰动,
+把 wrong-accept 从 0.974 降到 0.211 且不覆盖任何硬规则。跨五应用四物种,系统按证据强弱告警/降级/弃权而非
+过度上报;每次运行产出确定性可审计报告并可离线无 key 安装。治理指标为扰动级,系统不宣称准确率记录——其贡献
+是一个知道何时不作答的控制层。
 
 **关键词:** 虚拟细胞;扰动预测;多智能体系统;选择性预测;弃权;模型适用性;溯源;可复现
 
@@ -215,6 +200,29 @@ Cohen's d = 2.49, myeloid > lymphoid, accept) and Paul 2015 haematopoiesis[^25] 
 monocyte → CD8 T 51×, accept for CXCR3-high populations, downgrade for CXCR3-low CD4 T) and spatial niche
 analysis via squidpy[^27].
 
+**Table 1 | Sixteen governed workflows across five applications and four species.** Each workflow runs a public
+dataset or standard tool through the runtime and returns a governed verdict; effect sizes are Cohen's *d* or
+Spearman ρ as stated.
+
+| Case | Application | Species | Data / tool | Key readout | Verdict |
+|---|---|---|---|---|---|
+| C1 | Gene perturbation | Human | Donor Coordinator (Norman) | delta-Pearson 0.7039 | accept |
+| C2 | Gene perturbation (OOD) | Human | Learned reliability | AUROC 0.907; OOD odds-ratio 74.7 | abstain (OOD-enriched) |
+| C3 | Gene perturbation | Mouse | route_table + ortholog projection | ortholog-mapped targets | caution / downgrade |
+| C4 | Gene KO → growth | *E. coli* | COBRApy `e_coli_core` | WT 0.874; `gltA`/`icd` essential | accept; gene absent → abstain |
+| C5 | Gene KO → growth | Yeast | COBRApy `iMM904` | WT 0.288; `ERG1` essential | accept |
+| C6 | Drug MOA | Human | LINCS L1000 | HSP90 target enrichment 2.6–3.5× | accept; weak HDAC → downgrade |
+| S1 | Carbon-source shift | *E. coli* | COBRApy `e_coli_core` | glucose 0.874 → acetate 0.173 | accept; unknown source → caution |
+| S2 | Immune activation | Human | Kang 2018 (IFN-β) | ISG activation *d* = 2.49 | accept; megakaryocyte weak |
+| S3 | Metabolic tendency | Human | Kang 2018 (expression proxy) | glycolysis/OXPHOS *d* = 0.10/0.28 | **downgrade** |
+| S4 | Ligand–receptor | Human | Kang 2018 | CXCL10→CXCR3, Mono→CD8 T 51× | accept (CXCR3⁺); downgrade (CXCR3⁻) |
+| R1 | Differentiation fate | Mouse | scanpy `paul15` | erythroid vs myeloid *d* = 4.32 | accept |
+| R2 | Drug dose–response | Human | LINCS L1000 (dose) | geldanamycin Spearman ρ = 0.90 | accept; near-zero sirolimus → downgrade |
+| R3 | Antibiotic → growth | *E. coli* | COBRApy `iML1515` | trimethoprim/sulfa target arrest | accept; non-metabolic target → abstain |
+| R4 | Cancer EMT | Human | pertpy (McFarland) | sarcoma vs epithelial *d* = 1.72 | accept (state characterisation) |
+| R5 | Spatial niche | Human | squidpy (IMC) | stroma-adjacent tumour EMT *d* = 0.74 | caution (moderate niche) |
+| R6 | Co-culture chain | Human | Kang 2018 (two-step) | Mono→CD8 T chain complete | accept; →megakaryocyte broken → downgrade |
+
 The throughline is that governance prevents over-claiming, and we make it visible with within-experiment
 contrasts. The *same* interferon perturbation is accepted for interferon-stimulated-gene activation (d = 2.49)
 but downgraded for a metabolic readout (glycolysis/OXPHOS d = 0.10/0.28) — the runtime does not upgrade a weak
@@ -226,7 +234,23 @@ instead declines. A capability audit of five representative perturbation systems
 scGPT[^9], scGen[^6], and STATE[^11] — against their public papers and code found that none implements
 out-of-distribution rejection, an applicability check, an abstention mechanism, prediction provenance, or
 auditable multi-model messaging (Table 2); these are governance functions PRAXIS supplies around predictors,
-not properties of any one predictor. We are explicit that most non-human, non-gene workflows are *governed
+not properties of any one predictor.
+
+**Table 2 | Governance-capability audit of representative perturbation systems.** Presence/absence against each
+system's public paper and code; ✓ = implemented as an enforced behaviour, ✗ = absent (a scalar uncertainty a
+user must threshold is not counted as an abstention decision).
+
+| Governance capability | PRAXIS | GEARS[^8] | CPA[^7] | scGPT[^9] | scGen[^6] | STATE[^11] |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| Out-of-distribution rejection | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Applicability / routing check | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Abstention (decision to decline) | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Learned reliability scoring | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Prediction provenance | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Auditable multi-model messaging / replayable trace | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Deterministic reproducible report | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+
+We are explicit that most non-human, non-gene workflows are *governed
 demonstrations* on marker, co-expression, or flux-balance proxies rather than validated cross-species predictors,
 and that some (cancer epithelial-mesenchymal transition, spatial niche) are state characterisations rather than
 perturbation-induced transitions; the contribution here is that the runtime routes, flags, and declines
