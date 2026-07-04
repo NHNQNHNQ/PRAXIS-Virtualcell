@@ -32,7 +32,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 | 1 八模块 core + species profile | 2026-07-04-phase0-1-module-core.md | ✅ 完成 | 319 passed/0 failed;5 task 全过;红线闸门全绿;v0.9.0 tag |
 | 2 ModelBroker + model_zoo | 2026-07-04-phase2-model-broker.md | ✅ 完成 | 7 task 全过两审;352 passed/25 skipped/0 failed;闸门红线四件套全绿;纯新增未碰内核;非里程碑不打 tag |
 | 3 module-aware router | 2026-07-04-phase3-module-router.md | ✅ 完成 | 8 task 全过两审;450 passed/25 skipped/0 failed;总 golden 60;闸门红线四件套全绿;纯新增未碰内核;v1.0.0 tag |
-| 4 LLM_ORCHESTRATED | (计划展开中) | 🔵 计划展开中 | 依赖 Phase 3 ModulePlan;规划 subagent 展开详细 TDD 计划(LLMModulePlanner + safety_contract + 接管线,复用 LLMRouter 只能从候选选) |
+| 4 LLM_ORCHESTRATED | 2026-07-04-phase4-llm-orchestrated.md | 🔵 进行中 | 计划已展开(df1e6d1,8 task,450→509);LLMModulePlanner+safety_contract+接管线旁路挂 module_plan;守 LLM 边界;Phase 4 完成=v1.1 里程碑 |
 | 5 主动学习 v1 | (待展开) | ⬜ | 依赖 Phase 1 证据/模块结构 |
 | 6 公开模型接入 | (待展开) | ⬜ | GEARS/scGPT 在 .53 真跑,收编进 ModelBroker(fail-closed) |
 | 7 自训模型第一批 | (待展开) | ⬜ | 依赖 Phase 2 broker 契约,可与 6 并行 |
@@ -74,7 +74,19 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 3.7 cross-module consistency 校验(1e32a41;G4 铺路,纯函数,4 条一致性 fail-closed;+6 → 450 passed;spec 审 + 质量审双 APPROVED,有真正违规检测用例非半边覆盖)
 - [x] Task 3.8 Phase 3 完成闸门(控制器执行;全量 450 passed/25 skipped/0 failed;红线四件套 54 tests 全绿;根 tests/+内核零触碰;打 **v1.0.0** tag 本地不 push;pause 等审)
 
-## 当前状态:v1.0 里程碑已过,用户重启 loop=继续 → 清 paused_for_review,进 Phase 4(LLM_ORCHESTRATED)计划展开中
+### Phase 4(进行中,起点基线 450 passed / 25 skipped;计划 df1e6d1,8 task,累计 +59 → 509 passed;计划已用真实 passed 口径)
+> 🔬 **v1.1 里程碑待确认(科学/架构决策;已落最小集不阻塞执行)**:P3 LLM_ORCHESTRATED_STRICT 冲突降级语义(本 Phase 仅加枚举+测识别,冲突降级逻辑留 v1.1.x);communication 语义模块归属(沿用 Phase 3 M1 归 M7);module_plan 是否驱动 predictor 选择(本 Phase 仅旁路挂 provenance,深度重构留 v1.2+)。
+> 🔒 **本 Phase 改现有文件(计划允许的最小接线,非纯新增)**:config.py 加 2 枚举值、llm_client.py 扩 make_llm_client enabled、workflows/predict_delta_expression.py 增量注册 agent、runtime.py 加可选插点——均不动三 flag/assert_llm_boundaries/predictor/治理/route_table/ModulePlan/Phase 3 三 agent 逻辑;OFFLINE 分支须字节等价。
+- [ ] Task 4.1 config 加 LLM_ORCHESTRATED/_STRICT 枚举 + make_llm_client enabled 扩展(+7 → 457 passed)
+- [ ] Task 4.2 safety_contract 纯函数(build_candidate/filter/sanitize/assert_within_bounds;+11 → 468 passed)
+- [ ] Task 4.3 LLMModulePlanner(进 bus,复刻 LLMRouter,产 module_candidates_llm;+6 → 474 passed)
+- [ ] Task 4.4 ModuleRouterAgent 读 LLM 候选(P1 primary 不可改/P2 只增删 secondary,最小扩展;+6 → 480 passed)
+- [ ] Task 4.5 LLMCrossModuleReasoner(进 bus,复刻 LLMCritic,只出 notes/flags 不碰裁决;+4 → 484 passed)
+- [ ] Task 4.6 LLM 编排红线契约测试(扩 test_llm_boundary_flags;+20 → 504 passed)
+- [ ] Task 4.7 接进 runtime 管线(build_runtime 注册 + run_workflow 旁路挂 module_plan,OFFLINE 字节等价;+5 → 509 passed)
+- [ ] Task 4.8 Phase 4 完成闸门 — 红线核验 + 台账 + **v1.1 tag**(+0 → 509 passed)
+
+## 当前状态:Phase 4 进行中 — 计划已展开(df1e6d1,8 task),开始 Task 4.1(config 加 orchestrated 枚举)
 
 ## 事件日志(每次 loop 追加一行)
 
@@ -108,3 +120,4 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - 2026-07-04 **Task 3.7 两审通过**(1e32a41,+6 → 450 passed/0 failed,达路线图 450 地标):spec 合规审 + 代码质量审均 APPROVED(4 条一致性校验 verdict≤route/mismatch 不 accept/engine 白名单/overall 取最保守,严重度方向全 fail-closed;3 个 test_detects_* 手工构造违规 plan 断言非空违规列表非半边覆盖;纯函数不越界无 E0–E5/管线/LLM 依赖)。**2 条非阻塞建议(记观察)**:_SEVERITY 在 module_consistency/module_plan 各一份副本(值一致可复用)、规则4 可补直接负向单测。
 - 2026-07-04 **Phase 3 完成 → v1.0 里程碑(控制器执行 Task 3.8 闸门)**:全量回归 **450 passed/25 skipped/0 failed/0 errors**(collected 475);红线四件套(LLM 边界三 flag 恒 False + golden unsafe-accept=0 + negative 无静默 accept + baseline OFFLINE 零 LLM 产 report)54 tests 全绿;提交范围核验 **根 tests/ 零触碰 + core/predictors/ 零触碰**(内核现有逻辑未动),Phase 3 全 8 交付纯新增(3 agents module_router/rules/species_context + module_plan + module_consistency + 2 golden yaml + 7 测试)。打 **v1.0.0** tag(本地不 push)。STATUS 文档追加 Phase 3 完成台账段。**pause_at_milestones=true → 设 paused_for_review=true 硬闸,结束 loop 等人工审**。**留给用户里程碑审查的待确认项**:①M1 primary/secondary 选取规则(communication 归 M7、secondary 扩展)②M3 mismatch 按请求语义推导(当前只按 species+module,致 M8 bacteria_autophagy 端到端不可达)③M8 degradation_machinery 是否应参与路由 ④若干测试防御性加固(_SEVERITY 复用、规则4 负向测、值域校验)。下一里程碑:v1.1 = Phase 4(LLM_ORCHESTRATED,依赖本 Phase ModulePlan 契约)。
 - 2026-07-04 **用户重启 loop=继续 → 进 Phase 4**:清除 v1.0 paused_for_review 硬闸。M1/M3/M8 里程碑待确认项保留为观察(用户重启未特别指示,视为按最小确定性集继续;Phase 4 用已稳定 ModulePlan 契约,不依赖其最终形态,后续可回溯微调)。派规划 subagent 展开 Phase 4(LLM_ORCHESTRATED)详细 TDD 计划:LLMModulePlanner(插点 B 出 module plan 建议)+ safety_contract(过滤成合法 module 集,复用 LLMRouter"只能从候选选")+ cross_module_reasoner + 接 runtime 管线(Phase 3 未接);守 assert_llm_boundaries 三 flag 恒 False、LLM plan 必须转 AgentMessage、OFFLINE 默认零 LLM 不变。起点基线 450 passed。
+- 2026-07-04 **Phase 4 计划展开完成**(规划 subagent DONE,df1e6d1,1748 行,8 task):LLM_ORCHESTRATED = LLMModulePlanner(出 module 集建议)+ safety_contract(过滤成合法候选,复刻 LLMRouter 只能从候选选)+ LLMCrossModuleReasoner(只出 advisory notes)+ 接 runtime 管线(旁路挂 module_plan 进 provenance,predictor fan-out 不改)。起点 450 → +59 → 509 passed。**契约核心**:LLM 只挑合法 module(∈ Phase 3 确定性候选 ∪ 物种非 unsupported),primary 永由确定性规则定(LLM 不改),LLM 只增删 secondary,engine/verdict 仍由 route()+synthesize_verdict 定 → LLM 结构性无法把 downgrade 改 accept/给 unsupported 硬解释;LLM 空/失败 fail-closed 回退 Phase 3 候选。**skip 恒 25**(全 FakeLLMClient 离线,不新增 @pytest.mark.llm)。**4 处真实代码校正**:config 现有枚举仅 OFFLINE/LLM_ASSISTED、make_llm_client 只认 LLM_ASSISTED(不扩会静默退化 OFFLINE 必须改)、runtime LLM 节点用 if "X" in self._agents gating、model_applicability request 键是 perturbation_type/output_modality(无 perturbation_object/target_output,已落死确定性映射)。控制器核实计划头部铁律+数据契约+Task 4.1 完整可执行。台账填入 Phase 4 8-task 清单。连做 Task 4.1(config 加枚举,模式开关地基,不涉待确认决策)。
