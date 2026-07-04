@@ -5,6 +5,12 @@ __pycache__/
 .ruff_cache/
 .env
 *.egg-info/
+# v0.8 打包:wheel/sdist 构建产物(pip wheel / python -m build)不入库
+build/
+/dist/
+*.whl
+praxis_vc_react/dist/
+praxis_vc_react/node_modules/
 ._*
 .DS_Store
 deploy/hpc_submit_account.toml
