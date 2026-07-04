@@ -9,7 +9,7 @@
 branch: feat/v0.9-phase0-module-core     # 当前工作分支(每到版本里程碑可换新分支)
 push_authorized: false                   # 未经用户授权不 push
 pause_at_milestones: true                # 每到 v0.x 里程碑结束 loop 等人工审;设 false 则全自动直穿 v1.3
-paused_for_review: false                 # 用户 2026-07-04 重启 loop=继续,已清除暂停闸,进 Phase 2
+paused_for_review: true                  # 2026-07-04 v1.0 里程碑(Phase 3 完成)硬闸暂停等人工审;要继续 Phase 4 回复"继续"(届时清 false 重启 loop)
 test_scope: praxis_virtualcell/tests     # 唯一测试口径(永不碰根 tests/ 的 ~1398 继承测试)
 test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -q"
 ```
@@ -19,7 +19,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 | 里程碑 | 完成条件 | 状态 | tag |
 |---|---|---|---|
 | v0.9 module core | Phase 0 + 1 完成并回归绿 | ✅ 完成(暂停等审) | v0.9.0 |
-| v1.0 model-controlled | Phase 2 + 3 | 🔵 Phase 2 完成,待 Phase 3 | —(v1.0 tag 等 Phase 3) |
+| v1.0 model-controlled | Phase 2 + 3 | ✅ 完成(暂停等审) | v1.0.0 |
 | v1.1 LLM-orchestrated | Phase 4 | ⬜ | — |
 | v1.2 active-learning | Phase 5 | ⬜ | — |
 | v1.3 public release | Phase 6 + 7 + 8 | ⬜ | — |
@@ -31,7 +31,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 | 0 冻结基线 | 2026-07-04-phase0-1-module-core.md | ✅ 完成 | 287 passed/0 failed;实现+复核两 subagent 均过;纯新增未动源码 |
 | 1 八模块 core + species profile | 2026-07-04-phase0-1-module-core.md | ✅ 完成 | 319 passed/0 failed;5 task 全过;红线闸门全绿;v0.9.0 tag |
 | 2 ModelBroker + model_zoo | 2026-07-04-phase2-model-broker.md | ✅ 完成 | 7 task 全过两审;352 passed/25 skipped/0 failed;闸门红线四件套全绿;纯新增未碰内核;非里程碑不打 tag |
-| 3 module-aware router | 2026-07-04-phase3-module-router.md | 🔵 进行中 | 计划已展开(98d8c95,8 task,352→450);SpeciesContext+ModuleRouter+ModulePlan+golden 60;Phase 3 完成=v1.0 里程碑 |
+| 3 module-aware router | 2026-07-04-phase3-module-router.md | ✅ 完成 | 8 task 全过两审;450 passed/25 skipped/0 failed;总 golden 60;闸门红线四件套全绿;纯新增未碰内核;v1.0.0 tag |
 | 4 LLM_ORCHESTRATED | (待展开) | ⬜ | 依赖 Phase 3 ModulePlan |
 | 5 主动学习 v1 | (待展开) | ⬜ | 依赖 Phase 1 证据/模块结构 |
 | 6 公开模型接入 | (待展开) | ⬜ | GEARS/scGPT 在 .53 真跑,收编进 ModelBroker(fail-closed) |
@@ -62,7 +62,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 2.6 ModelBrokerAgent 进 message bus(f939457;available→wrapper;缺依赖→fail-closed;+5 → 348 passed;spec 审 + 质量审双 APPROVED)
 - [x] Task 2.7 self_trained training_card 校验 + Phase 2 完成闸门(a414927;+4 → 352 passed / collected 377;双 APPROVED;闸门全绿,不打 tag)
 
-### Phase 3(进行中,起点基线 352 passed / 25 skipped;计划 98d8c95,8 task,累计 +98 → 450 passed 达路线图地标)
+### Phase 3 ✅ 完成(起点 352 → 450 passed / 25 skipped / 0 failed;总 golden 60;闸门红线全绿;v1.0.0 tag)
 > ⚠️ 口径同上:计划标 "N passed" 为 collected 含 skipped;真实 passed = collected − 25。验收认 0 failed/0 errors + 新增条数。
 > 🔬 **v1.0 里程碑审查待确认(科学核心决策;规划 subagent 已落最小确定性集保证可测+fail-closed,不阻塞执行)**:M1 primary/secondary 模块选取规则(communication 暂归 M7;secondary 仅 growth/flux+human/mouse 加 M3,更细规则待定);M3 mismatch query 推导(bacteria+降解语境→自噬、yeast+niche/communication→组织 niche)。到 v1.0 pause 时连同跑通的 golden 结果一起交用户拍板。
 - [x] Task 3.1 ModulePlan 数据结构(1b72c39;白名单校验 + verdict 保守合成 + to_dict;+7 → 359 passed;spec 审 + 质量审双 APPROVED)
@@ -71,10 +71,10 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 3.4 ModuleRouterAgent(3d1da8a + 修复 78d6581;插点 B 产 ModulePlan;+7 → 382 passed;spec 审 APPROVED + 质量审 CHANGES_REQUESTED→修复→控制器亲验关闭 mismatch 降级盲区)
 - [x] Task 3.5 module routing golden representative(84df3e5;32 case 4 物种×8 + 独立 runner + unsafe-accept KPI=0;+34 → 416 passed;spec 审 + 质量审双 APPROVED,质量审独立跑 ModuleRouter 逐条比对 0 mismatch 无空转/假 KPI)
 - [x] Task 3.6 module routing golden safety(e915bf8;mismatch/negative-transfer/fail-closed;总 golden 60;+28 → 444 passed;spec 审 + 质量审双 APPROVED,28 条 0 mismatch/25 非 accept 真进 KPI,unsafe-accept=0)
-- [ ] Task 3.7 cross-module consistency 校验(G4 铺路,纯函数;+6 → 450 passed)
-- [ ] Task 3.8 Phase 3 完成闸门 — 红线核验 + 台账 + **v1.0 tag**(本地不 push;+0 → 450 passed)
+- [x] Task 3.7 cross-module consistency 校验(1e32a41;G4 铺路,纯函数,4 条一致性 fail-closed;+6 → 450 passed;spec 审 + 质量审双 APPROVED,有真正违规检测用例非半边覆盖)
+- [x] Task 3.8 Phase 3 完成闸门(控制器执行;全量 450 passed/25 skipped/0 failed;红线四件套 54 tests 全绿;根 tests/+内核零触碰;打 **v1.0.0** tag 本地不 push;pause 等审)
 
-## 当前状态:Phase 3 进行中 — Task 3.1–3.6 两审通过(总 golden 60),连做 Task 3.7(cross-module consistency +6)
+## 当前状态:Phase 3 ✅ 完成 → **v1.0 里程碑(model-controlled)**,打 v1.0.0 tag,pause 等人工审。下一步:用户回复"继续"→清 paused_for_review→展开 Phase 4(LLM_ORCHESTRATED)
 
 ## 事件日志(每次 loop 追加一行)
 
@@ -104,4 +104,6 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - 2026-07-04 **Task 3.4 实现 + spec 审 APPROVED,但代码质量审 CHANGES_REQUESTED(本会话首个非 APPROVED,控制器采纳)**(3d1da8a,382 passed):spec 合规审 APPROVED(2 文件逐字一致纯新增,7 断言点全在,组装链 + fail-closed 三链落实,零 LLM)。**代码质量审发现阻塞盲区**:`test_bacteria_autophagy_mismatch_downgrades` 空转——bacteria+growth 的 primary=cytoplasmic_metabolism,而 pick_primary/pick_secondary **从不产 M8(degradation_machinery)**,degradation entry 不在 plan、degs=[]、断言从不执行;更深:**bacteria autophagy mismatch 在当前 M1 规则下端到端不可达**,导致 **mismatch 降级(本 Phase 核心 fail-closed 红线)在 ModuleRouterAgent 端到端零有效覆盖**。两审分歧(spec 审认 vacuous 是计划明示 / 质量审认 fail-closed 盲区必修)→ **控制器裁决采纳质量审**(底层 synthesize/mismatch_query_for 各有单元测但集成路径无覆盖,计划注释接受了盲区不可接受)。**修复**:把空转的 bacteria autophagy 测试替换成可达的 **yeast niche state** 端到端 mismatch 降级测试(primary=M6→mismatch tissue_spatial_niche→verdict 非 accept;实现 subagent 端到端例子已证实可达),测试数保持 7、skip 保持 25;bacteria autophagy(M8)不可达归入 **M1/M3 v1.0 里程碑待确认项**(印证 Task 3.3 疑问②:mismatch 应按请求语义推导才能让 M8 可达)。质量审 2 条可选建议(记观察):route(req) 请求级不区分 mid 致 secondary 复用 primary 路由结果(当前不误 accept,建议 docstring 说明)、漂移检查排除 reject 无 note。派实现 subagent 修复后重审。
 - 2026-07-04 **Task 3.4 修复完成 + 控制器亲验(盲区关闭)**(78d6581):修复 subagent 核实 M8 确不产(pick_primary/secondary 只产 M2/M3/M4/M6/M7)→ bacteria autophagy mismatch 端到端不可达属实;把空转测试替换成可达的 `test_yeast_niche_mismatch_downgrades`(yeast+niche state→primary M6→mismatch tissue_spatial_niche reject→verdict=abstain 实跑真实值,前置守卫防空转),测试数保持 7、skip 保持 25、全量 382 passed。**控制器亲验**:git diff 确认 module_router_agent.py 仅加注释(route() 请求级说明)无逻辑改动、新测试真断言(mismatch/verdict/overall 强断言 + 前置守卫)、独立重跑单文件 7 passed + 全量 382/25/0——盲区关闭,接受。**Task 3.4 达两审通过等价(spec APPROVED + 质量审问题已修复+亲验)**。修复 subagent 诚实校正:降级值是 abstain(engine=reject→route abstain 叠 species caution)非我描述的 caution,按实跑写断言未改源码。连做 Task 3.5(golden representative +34);做 chore commit 落盘 3.3/3.4 台账勾选(129ade3)。
 - 2026-07-04 **Task 3.5 两审通过**(84df3e5,+34 → 416 passed/0 failed):spec 合规审 APPROVED(32 golden case 4 物种×8 均衡纯新增,独立 runner 未改 test_golden_cases.py,unsafe-accept KPI 覆盖 16 条非 accept case 实跑 0 违规);代码质量审 APPROVED(**针对 3.4 空转教训重点验证**:参数化真展开 32 独立 case、每条硬断言 primary/engine/overall_verdict 缺字段 KeyError 硬失败、16/32 非 accept 构成非空检验集非假 KPI、独立跑 ModuleRouter 对 32 条全字段逐条比对 0 mismatch 无放水)。**2 条非阻塞建议(记观察)**:①docstring 写"目标 ≥60"当前 32(Task 3.6 补齐)②仅 4 条声明 primary_verdict(覆盖足够)。**环境澄清**:隔离 worktree 跑父提交得 373/34 是缺未追踪 .env 的 DeepSeek key 致 9 条 test_llm_* 多跳过,与 commit 无关;主区精确 382→416。连做 Task 3.6(golden safety +28,总≥60);台账 3.5/3.6 勾选累积待一起 chore commit。
-- 2026-07-04 **Task 3.6 两审通过**(e915bf8,+28 → 444 passed/0 failed;总 golden 60 达路线图地标):spec 合规审 APPROVED(safety YAML 28 case 逐字节一致,test 文件仅门槛 30→60 一行微调,verdict 分布 abstain14/downgrade6/caution5/accept3);代码质量审 APPROVED(**延续空转警惕**:参数化真展开 60 独立 case case_id 无重复、28 条全实跑与 ModuleRouter 0 mismatch 无放水、25 非 accept 真进 KPI 检验集、抽查危险 case fail-closed reason 真实引擎级逻辑如 mammalian_scrna_predictor_not_applicable/no_state_engine_for_species、门槛仅数字改 runner 逻辑未动)。unsafe-accept=0 守住。连做 Task 3.7(cross-module consistency +6 纯函数 G4 铺路);做 chore commit 落盘 3.5/3.6 台账勾选。
+- 2026-07-04 **Task 3.6 两审通过**(e915bf8,+28 → 444 passed/0 failed;总 golden 60 达路线图地标):spec 合规审 APPROVED(safety YAML 28 case 逐字节一致,test 文件仅门槛 30→60 一行微调,verdict 分布 abstain14/downgrade6/caution5/accept3);代码质量审 APPROVED(**延续空转警惕**:参数化真展开 60 独立 case case_id 无重复、28 条全实跑与 ModuleRouter 0 mismatch 无放水、25 非 accept 真进 KPI 检验集、抽查危险 case fail-closed reason 真实引擎级逻辑如 mammalian_scrna_predictor_not_applicable/no_state_engine_for_species、门槛仅数字改 runner 逻辑未动)。unsafe-accept=0 守住。连做 Task 3.7(cross-module consistency +6 纯函数 G4 铺路);做 chore commit 落盘 3.5/3.6 台账勾选(60a577b)。
+- 2026-07-04 **Task 3.7 两审通过**(1e32a41,+6 → 450 passed/0 failed,达路线图 450 地标):spec 合规审 + 代码质量审均 APPROVED(4 条一致性校验 verdict≤route/mismatch 不 accept/engine 白名单/overall 取最保守,严重度方向全 fail-closed;3 个 test_detects_* 手工构造违规 plan 断言非空违规列表非半边覆盖;纯函数不越界无 E0–E5/管线/LLM 依赖)。**2 条非阻塞建议(记观察)**:_SEVERITY 在 module_consistency/module_plan 各一份副本(值一致可复用)、规则4 可补直接负向单测。
+- 2026-07-04 **Phase 3 完成 → v1.0 里程碑(控制器执行 Task 3.8 闸门)**:全量回归 **450 passed/25 skipped/0 failed/0 errors**(collected 475);红线四件套(LLM 边界三 flag 恒 False + golden unsafe-accept=0 + negative 无静默 accept + baseline OFFLINE 零 LLM 产 report)54 tests 全绿;提交范围核验 **根 tests/ 零触碰 + core/predictors/ 零触碰**(内核现有逻辑未动),Phase 3 全 8 交付纯新增(3 agents module_router/rules/species_context + module_plan + module_consistency + 2 golden yaml + 7 测试)。打 **v1.0.0** tag(本地不 push)。STATUS 文档追加 Phase 3 完成台账段。**pause_at_milestones=true → 设 paused_for_review=true 硬闸,结束 loop 等人工审**。**留给用户里程碑审查的待确认项**:①M1 primary/secondary 选取规则(communication 归 M7、secondary 扩展)②M3 mismatch 按请求语义推导(当前只按 species+module,致 M8 bacteria_autophagy 端到端不可达)③M8 degradation_machinery 是否应参与路由 ④若干测试防御性加固(_SEVERITY 复用、规则4 负向测、值域校验)。下一里程碑:v1.1 = Phase 4(LLM_ORCHESTRATED,依赖本 Phase ModulePlan 契约)。
