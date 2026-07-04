@@ -19,7 +19,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 | 里程碑 | 完成条件 | 状态 | tag |
 |---|---|---|---|
 | v0.9 module core | Phase 0 + 1 完成并回归绿 | ✅ 完成(暂停等审) | v0.9.0 |
-| v1.0 model-controlled | Phase 2 + 3 | ⬜ 未开始 | — |
+| v1.0 model-controlled | Phase 2 + 3 | 🔵 Phase 2 完成,待 Phase 3 | —(v1.0 tag 等 Phase 3) |
 | v1.1 LLM-orchestrated | Phase 4 | ⬜ | — |
 | v1.2 active-learning | Phase 5 | ⬜ | — |
 | v1.3 public release | Phase 6 + 7 + 8 | ⬜ | — |
@@ -30,8 +30,8 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 |---|---|---|---|
 | 0 冻结基线 | 2026-07-04-phase0-1-module-core.md | ✅ 完成 | 287 passed/0 failed;实现+复核两 subagent 均过;纯新增未动源码 |
 | 1 八模块 core + species profile | 2026-07-04-phase0-1-module-core.md | ✅ 完成 | 319 passed/0 failed;5 task 全过;红线闸门全绿;v0.9.0 tag |
-| 2 ModelBroker + model_zoo | 2026-07-04-phase2-model-broker.md | 🔵 进行中 | 计划已展开(7 task,起点基线 319 passed / 25 skipped 实跑核实);逐 task 实现+两审 |
-| 3 module-aware router | (待展开) | ⬜ | 依赖 Phase 1 modules.py |
+| 2 ModelBroker + model_zoo | 2026-07-04-phase2-model-broker.md | ✅ 完成 | 7 task 全过两审;352 passed/25 skipped/0 failed;闸门红线四件套全绿;纯新增未碰内核;非里程碑不打 tag |
+| 3 module-aware router | (待展开) | ⬜ | 依赖 Phase 1 modules.py + Phase 2 ModelBrokerAgent/ModelZooRegistry;下一工作单元=展开详细计划 |
 | 4 LLM_ORCHESTRATED | (待展开) | ⬜ | 依赖 Phase 3 ModulePlan |
 | 5 主动学习 v1 | (待展开) | ⬜ | 依赖 Phase 1 证据/模块结构 |
 | 6 公开模型接入 | (待展开) | ⬜ | GEARS/scGPT 在 .53 真跑,收编进 ModelBroker(fail-closed) |
@@ -60,9 +60,9 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 2.4 ModelCache 本地缓存 + sha256 版本锁(87c236c;fail-closed;+5 → 339 passed;spec 审 + 质量审双 APPROVED)
 - [x] Task 2.5 downloader 下载契约(31b3c09;远端 gated → requires_manual_fetch;零网络请求;+4 → 343 passed;spec 审 + 质量审双 APPROVED)
 - [x] Task 2.6 ModelBrokerAgent 进 message bus(f939457;available→wrapper;缺依赖→fail-closed;+5 → 348 passed;spec 审 + 质量审双 APPROVED)
-- [ ] Task 2.7 self_trained training_card 校验 + Phase 2 完成闸门(+4 → 352 passed / collected 377;不打 tag)
+- [x] Task 2.7 self_trained training_card 校验 + Phase 2 完成闸门(a414927;+4 → 352 passed / collected 377;双 APPROVED;闸门全绿,不打 tag)
 
-## 当前状态:Phase 2 进行中 — Task 2.1–2.6 两审通过,连做 Task 2.7(training_card 校验 + 完成闸门)
+## 当前状态:Phase 2 ✅ 完成(352 passed,闸门全绿,不打 tag)— 下一工作单元 = 展开 Phase 3(module-aware router)详细计划
 
 ## 事件日志(每次 loop 追加一行)
 
@@ -83,3 +83,5 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - 2026-07-04 **Task 2.5 两审通过**(31b3c09,+4 → 343 passed/0 failed):spec 合规审 APPROVED(2 文件逐字节一致纯新增,4 断言点全覆盖含 remote gated 核心,grep 确认零真实网络请求);代码质量审 APPROVED(四 scheme 互斥、split maxsplit=1 无坑、_REPO_ROOT parents[2] 实证指向 repo 根、fail-closed 无漏洞、local 资产 iMM904.xml.gz 真实存在故非空转)。**1 条非阻塞建议(记为观察)**:local: 分支对 rel 未防空/绝对路径——与 Task 2.4 路径穿越建议**同源**(cache.py + downloader.py 都从受控 registry 拼路径,过 schema 校验非外部输入),归并为一条:Phase 6 若引入不可信 source 再统一加路径守卫。连做 Task 2.6(ModelBrokerAgent 进 bus);台账 2.5/2.6 勾选留待一起 chore commit。
 - 2026-07-04 **Task 2.6 两审通过**(f939457,+5 → 348 passed/0 failed):spec 合规审 APPROVED(2 文件逐字一致纯新增,5 断言点全覆盖,_resolve fail-closed 五步顺序正确);代码质量审 APPROVED(默认 available=False + 四分支短路 return + source 双重保险无漏洞,_dep_available gpu 恒判缺失、模块级可 monkeypatch,进 bus 契约规范 receiver=EnsembleCoordinator,5 测试非空转)。**1 条非阻塞建议(记观察)**:payload 缺 model_name 键时 get(None)→KeyError→"unknown model: None" 仍 fail-closed 安全,可单列 reason。**Task 2.1 建议① 重新评估**:此前记"留到 2.7 顺带补 entry 非 dict 守卫",重新权衡后**改为不做**(边缘情况:手写坏 yaml 裸标量仍会 fail、仅异常类型不统一;加它偏离 2.7 spec 且属额外 error handling,与"不过度防御"冲突)。Task 2.7 严格照计划做 training_card 校验(+4)。连做 Task 2.7;chore commit 落盘 2.5/2.6 台账勾选。
 - 2026-07-04 **Phase 完成闸门分工说明**:Task 2.7 代码部分(training_card 校验 test + 扩 _validate + commit)由实现 subagent 做 + 两审;Phase 2 完成闸门核验(协议 §STEP 4:全量回归 + 红线核验 LLM 边界/golden/negative/baseline + MANIFEST + STATUS 文档 + 里程碑判断)由**控制器亲自**做。Phase 2 非里程碑 → 不打 tag,闸门后继续 Phase 3 展开。
+- 2026-07-04 **Task 2.7 两审通过 + Phase 2 完成闸门(控制器亲验)**(a414927,+4 → 352 passed):spec 合规审 + 代码质量审均 APPROVED(_validate 纯 +9 追加未破坏现有逻辑,Task 2.1 六测试仍绿,training_card 校验 fail-closed 正确无漏洞)。**控制器独立闸门核验全绿**:①全量回归 352 passed/25 skipped/**0 failed/0 errors**(collected 377);②红线四件套(LLM 边界三 flag 恒 False + golden unsafe-accept=0 + negative 无静默 accept + baseline OFFLINE 零 LLM 产 report.md)共 54 tests 0 failed;③提交范围 v0.9.0→HEAD **根 tests/ 零触碰、core/predictors 零触碰、现有 agents 未改**(agents/ 仅新增 model_broker_agent.py)。STATUS 文档已追加 Phase 2 完成台账段。**Phase 2 非里程碑 → 不打 tag**(v1.0 tag 等 Phase 3)。**下一工作单元 = 用 writing-plans 展开 Phase 3(module-aware router,把 model_zoo/broker 接进 runtime 管线)详细 TDD 计划**,严格对着 Phase 1 modules.py + Phase 2 ModelBrokerAgent/ModelZooRegistry 真实接口。
+- 2026-07-04 **可选建议观察项汇总(Phase 2 全 task,均非阻塞、未在本 Phase 改)**:①registry _validate 未防 entry 非 dict(边缘坏 yaml,重新评估决定不做);②estimate_uncertainty 默认实现忽略传入 prediction 参数二次推理(真实高成本模型覆写此方法规避);③cache/downloader 路径穿越守卫(source 来自受控 registry 非外部输入,Phase 6 接不可信源再加);④broker payload 缺 model_name 键当未知模型处理(仍 fail-closed 安全);⑤若干测试断言可收紧(uncertainty_contract/missing_asset 的 or 分支)。留待 Phase 3/6 需要时统一处理。
