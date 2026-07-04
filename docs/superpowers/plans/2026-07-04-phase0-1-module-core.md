@@ -827,7 +827,7 @@ class ModuleRegistry:
 - [ ] **Step 4: 跑确认通过**
 
 Run: `PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests/test_module_registry.py -q`
-Expected: 7 passed。
+Expected: 6 passed。
 
 - [ ] **Step 5: 提交**
 
