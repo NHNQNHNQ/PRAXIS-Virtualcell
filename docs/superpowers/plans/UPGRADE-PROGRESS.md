@@ -9,7 +9,7 @@
 branch: feat/v0.9-phase0-module-core     # 当前工作分支(每到版本里程碑可换新分支)
 push_authorized: false                   # 未经用户授权不 push
 pause_at_milestones: true                # 每到 v0.x 里程碑结束 loop 等人工审;设 false 则全自动直穿 v1.3
-paused_for_review: false                 # 2026-07-04 用户重启 loop=继续 → 清除 v1.0 暂停闸,进 Phase 4(LLM_ORCHESTRATED);M1/M3/M8 待确认项保留为观察(Phase 4 用已稳定 ModulePlan 契约,不依赖其最终形态)
+paused_for_review: true                  # 2026-07-04 v1.1 里程碑(Phase 4 完成)硬闸暂停等人工审;要继续 Phase 5 回复"继续"(届时清 false 重启 loop)
 test_scope: praxis_virtualcell/tests     # 唯一测试口径(永不碰根 tests/ 的 ~1398 继承测试)
 test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -q"
 ```
@@ -20,7 +20,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 |---|---|---|---|
 | v0.9 module core | Phase 0 + 1 完成并回归绿 | ✅ 完成(暂停等审) | v0.9.0 |
 | v1.0 model-controlled | Phase 2 + 3 | ✅ 完成(暂停等审) | v1.0.0 |
-| v1.1 LLM-orchestrated | Phase 4 | ⬜ | — |
+| v1.1 LLM-orchestrated | Phase 4 | ✅ 完成(暂停等审) | v1.1.0 |
 | v1.2 active-learning | Phase 5 | ⬜ | — |
 | v1.3 public release | Phase 6 + 7 + 8 | ⬜ | — |
 
@@ -32,7 +32,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 | 1 八模块 core + species profile | 2026-07-04-phase0-1-module-core.md | ✅ 完成 | 319 passed/0 failed;5 task 全过;红线闸门全绿;v0.9.0 tag |
 | 2 ModelBroker + model_zoo | 2026-07-04-phase2-model-broker.md | ✅ 完成 | 7 task 全过两审;352 passed/25 skipped/0 failed;闸门红线四件套全绿;纯新增未碰内核;非里程碑不打 tag |
 | 3 module-aware router | 2026-07-04-phase3-module-router.md | ✅ 完成 | 8 task 全过两审;450 passed/25 skipped/0 failed;总 golden 60;闸门红线四件套全绿;纯新增未碰内核;v1.0.0 tag |
-| 4 LLM_ORCHESTRATED | 2026-07-04-phase4-llm-orchestrated.md | 🔵 进行中 | 计划已展开(df1e6d1,8 task,450→509);LLMModulePlanner+safety_contract+接管线旁路挂 module_plan;守 LLM 边界;Phase 4 完成=v1.1 里程碑 |
+| 4 LLM_ORCHESTRATED | 2026-07-04-phase4-llm-orchestrated.md | ✅ 完成 | 8 task 全过两审;509 passed/25 skipped/0 failed;LLMModulePlanner+safety_contract+接管线;OFFLINE 字节等价、LLM 不越权、三 flag False;v1.1.0 tag |
 | 5 主动学习 v1 | (待展开) | ⬜ | 依赖 Phase 1 证据/模块结构 |
 | 6 公开模型接入 | (待展开) | ⬜ | GEARS/scGPT 在 .53 真跑,收编进 ModelBroker(fail-closed) |
 | 7 自训模型第一批 | (待展开) | ⬜ | 依赖 Phase 2 broker 契约,可与 6 并行 |
@@ -74,7 +74,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 3.7 cross-module consistency 校验(1e32a41;G4 铺路,纯函数,4 条一致性 fail-closed;+6 → 450 passed;spec 审 + 质量审双 APPROVED,有真正违规检测用例非半边覆盖)
 - [x] Task 3.8 Phase 3 完成闸门(控制器执行;全量 450 passed/25 skipped/0 failed;红线四件套 54 tests 全绿;根 tests/+内核零触碰;打 **v1.0.0** tag 本地不 push;pause 等审)
 
-### Phase 4(进行中,起点基线 450 passed / 25 skipped;计划 df1e6d1,8 task,累计 +59 → 509 passed;计划已用真实 passed 口径)
+### Phase 4 ✅ 完成(起点 450 → 509 passed / 25 skipped / 0 failed;LLM 编排;闸门红线全绿;v1.1.0 tag)
 > 🔬 **v1.1 里程碑待确认(科学/架构决策;已落最小集不阻塞执行)**:P3 LLM_ORCHESTRATED_STRICT 冲突降级语义(本 Phase 仅加枚举+测识别,冲突降级逻辑留 v1.1.x);communication 语义模块归属(沿用 Phase 3 M1 归 M7);module_plan 是否驱动 predictor 选择(本 Phase 仅旁路挂 provenance,深度重构留 v1.2+)。
 > 🔒 **本 Phase 改现有文件(计划允许的最小接线,非纯新增)**:config.py 加 2 枚举值、llm_client.py 扩 make_llm_client enabled、workflows/predict_delta_expression.py 增量注册 agent、runtime.py 加可选插点——均不动三 flag/assert_llm_boundaries/predictor/治理/route_table/ModulePlan/Phase 3 三 agent 逻辑;OFFLINE 分支须字节等价。
 - [x] Task 4.1 config 加 LLM_ORCHESTRATED/_STRICT 枚举 + make_llm_client enabled 扩展(402c4a5;+7 → 457 passed;spec 审 + 质量审双 APPROVED,三 flag/守卫零改动无回归,skip 仍 25)
@@ -85,9 +85,9 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 4.5 LLMCrossModuleReasoner(bce3a3b;进 bus 复刻 LLMCritic,只出 notes/flags 不碰裁决;+4 → 485 passed;spec 审 + 质量审双 APPROVED,P4 零写回路径 mutate 测试真守卫)
 - [x] Task 4.6 LLM 编排红线契约测试(2bf9918;19 契约测试 ast import 检测;+19 → 504 passed;实现 BLOCKED→控制器亲验红线未破→裁决修检测逻辑→亲验,LLM_ORCHESTRATED 三 flag/不产 plan/不改 verdict/unsupported 剔除/fail-closed 全守住)
 - [x] Task 4.7 接进 runtime 管线(518e47b;build_runtime 注册 + run_workflow 旁路挂 module_plan;+5 → 509 passed;实现 BLOCKED→控制器架构裁决旁路 gating→修复→spec 审 + 质量审双 APPROVED;OFFLINE 字节等价、predictor/治理零改动、4 回归恢复)
-- [ ] Task 4.8 Phase 4 完成闸门 — 红线核验 + 台账 + **v1.1 tag**(+0 → 509 passed)
+- [x] Task 4.8 Phase 4 完成闸门(控制器执行;全量 509 passed/25 skipped/0 failed;红线核验 73 tests 全绿含 LLM 编排契约;根 tests/+predictors 零触碰;打 **v1.1.0** tag 本地不 push;pause 等审)
 
-## 当前状态:Phase 4 进行中 — Task 4.1–4.7 完成(509 passed,7/8),控制器执行 Task 4.8 = v1.1 里程碑闸门
+## 当前状态:Phase 4 ✅ 完成 → **v1.1 里程碑(LLM-orchestrated)**,打 v1.1.0 tag,pause 等人工审。下一步:用户回复"继续"→清 paused_for_review→展开 Phase 5(主动学习 v1)
 
 ## 事件日志(每次 loop 追加一行)
 
@@ -133,3 +133,4 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - 2026-07-04 **Task 4.6 修复完成 + 控制器亲验**(2bf9918,504 passed):检测逻辑改 ast 遍历 Import/ImportFrom(不碰 docstring/注释/字符串),**变异自测**给 module_rules 加 agents_llm import→测试 FAIL(真守卫)、删除→PASS(subagent 诚实报了首次注入位置不当致 SyntaxError 后修正)。**控制器亲验**:`git show 2bf9918 --name-only` 只含 test_llm_orchestration_contract.py(无源码/docs)、全量重跑 504/25/0、单文件 19 passed。其他 18 条函数体不变(仅顶部 import subprocess/sys→ast)。**Task 4.6 达实现完成**(19 契约测试守住 LLM_ORCHESTRATED 全红线)。连做 Task 4.7(接 runtime 管线,改 runtime.py+workflow 最小插点,须 OFFLINE 字节等价);做 chore commit 落盘 4.5/4.6 台账勾选(84fd8a7)。
 - 2026-07-04 **Task 4.7 实现 BLOCKED→控制器架构裁决(旁路 gating)**:插点按计划落地,5 新测试先红后绿全过、baseline 10 全绿,但**破坏 4 条现有管线测试**(ablation + cross_species_routing 的 martian/空目标 abstain 路径),git stash 验证改动前全绿=**真实回归**。**根因**:旁路 `_build_module_plan` 在 ModelApplicability 后**无条件**调 `normalize_request(raw)`,对 martian(未知物种)/空 gene targets 抛 SchemaError → run_workflow 崩;而改动前管线对这些走 graceful abstain(从不对它们调 normalize_request)。subagent 正确守红线 BLOCKED(不改测试、不 try/except 吞异常)。**控制器裁决**:ModulePlan 只对"可路由"请求有意义,对 unsupported/非法请求(走 abstain/reject)本就无有意义 module_plan(如同现有管线不对它们跑 predictor)→ 授权**旁路 gating**:只在 ModelApplicability 判定可路由(applicable 非空)时产 module_plan,abstain/reject/unsupported 跳过旁路(module_plan 不挂)。**这非 try/except 吞异常,是架构正确的条件旁路**,保证 OFFLINE 字节等价(4 回归恢复)+ 5 新测试仍绿。计划 Step 3 LLM_MODES vs Mode 笔误(注册代码块用 Mode),照可运行块落。派修复 subagent(先核实 ModelApplicability 对这些请求的 payload 选可靠 gating 判据)后重审。
 - 2026-07-04 **Task 4.7 修复完成 + 两审通过**(518e47b,+5 → 509 passed/0 failed/skip 25):修复 subagent 核实 ModelApplicability payload(applicable/rejected_candidates),选判据 `_is_routable`=applicable 非空 AND targets 去空非空(覆盖 martian/unsupported + 空 targets 两种 SchemaError,与 reliability.py:43 同源),显式布尔非 try/except。**字节等价验证**:stash 对比改动前对 abstain 请求 report `diff -q` BYTE-EQUIVALENT。spec 合规审 + 代码质量审均 APPROVED:插点最小(predictor/ensemble/reliability/critic/provenance/route_table/Phase 3 逻辑零改动)、gating 覆盖 normalize_request 全 4 处 SchemaError 无遗漏、OFFLINE 字节等价(abstain 请求 provenance 无 module_plan、核心字段逐字节一致)、4 回归逐条恢复、三 flag False、LLM gated、5 测试真断言非空。**1 条非阻塞建议→记观察项**:`_is_routable` 情况②(未知 perturbation_object)安全性依赖 real brain 都声明 supported_perturbations(当前结构性不可达),将来 Phase 6/7 接真实模型若 predictor 漏声明会成缺口——与 M1/M3/M8 同类归 v1.1 里程碑审查 + Phase 6/7 观察项(可选加固:_is_routable 补 perturbation_type∈PERTURBATION_OBJECTS 判据自洽)。**Task 4.7 完成 → Phase 4 全 8 实现 task 完成**。控制器执行 Task 4.8 = v1.1 里程碑闸门。
+- 2026-07-04 **Phase 4 完成 → v1.1 里程碑(控制器执行 Task 4.8 闸门)**:全量回归 **509 passed/25 skipped/0 failed/0 errors**(collected 534);红线核验(LLM 边界三 flag 恒 False + golden unsafe-accept=0 + negative 无静默 accept + baseline OFFLINE 零 LLM 产 report + **LLM 编排契约 19 条**)共 73 tests 全绿;提交范围 v1.0.0→HEAD **根 tests/ 零触碰 + predictors 核心预测零触碰**,所有改动是计划授权最小接线(config 枚举/llm_client enabled/runtime 旁路插点/module_router 读候选/workflow 注册)+ 新增 llm_orchestration 子包,治理引擎/route_table/ModulePlan/Phase 3 核心逻辑未改。打 **v1.1.0** tag(本地不 push)。STATUS 文档追加 Phase 4 完成台账段。**pause_at_milestones=true → 设 paused_for_review=true 硬闸,结束 loop 等人工审**。**留给用户里程碑审查的待确认项**:①LLM_ORCHESTRATED_STRICT 冲突降级语义(P3,本 Phase 仅加枚举+测识别)②communication 归 M7 ③module_plan 驱动 predictor 选择(本 Phase 仅旁路挂 provenance,留 v1.2+)④_is_routable 情况② 自洽加固(依赖 brain 声明 supported_perturbations,Phase 6/7 接真模型时确认)⑤M1/M3/M8(v1.0 遗留)。下一里程碑:v1.2 = Phase 5(主动学习 v1)。
