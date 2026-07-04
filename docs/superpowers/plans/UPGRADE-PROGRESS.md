@@ -33,7 +33,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 | 2 ModelBroker + model_zoo | 2026-07-04-phase2-model-broker.md | ✅ 完成 | 7 task 全过两审;352 passed/25 skipped/0 failed;闸门红线四件套全绿;纯新增未碰内核;非里程碑不打 tag |
 | 3 module-aware router | 2026-07-04-phase3-module-router.md | ✅ 完成 | 8 task 全过两审;450 passed/25 skipped/0 failed;总 golden 60;闸门红线四件套全绿;纯新增未碰内核;v1.0.0 tag |
 | 4 LLM_ORCHESTRATED | 2026-07-04-phase4-llm-orchestrated.md | ✅ 完成 | 8 task 全过两审;509 passed/25 skipped/0 failed;LLMModulePlanner+safety_contract+接管线;OFFLINE 字节等价、LLM 不越权、三 flag False;v1.1.0 tag |
-| 5 主动学习 v1 | (计划展开中) | 🔵 计划展开中 | 规划 subagent 展开:ActiveLearningAgent 产 learning_queue + information gain;可含 EvidenceLevel(E0–E5,Phase 3/4 留后);依赖 reliability/OOD 信号(v0.8 已有) |
+| 5 主动学习 v1 | 2026-07-04-phase5-active-learning.md | 🔵 进行中 | 计划已展开(e2cabaa,8 task,509→555);EvidenceLevel E0–E5 + ActiveLearning learning_queue;advisory 不碰裁决;OFFLINE 字节等价;Phase 5 完成=v1.2 里程碑 |
 | 6 公开模型接入 | (待展开) | ⬜ | GEARS/scGPT 在 .53 真跑,收编进 ModelBroker(fail-closed) |
 | 7 自训模型第一批 | (待展开) | ⬜ | 依赖 Phase 2 broker 契约,可与 6 并行 |
 | 8 网站 + Linux release | (待展开) | ⬜ | 增量扩前后端 |
@@ -87,7 +87,19 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 4.7 接进 runtime 管线(518e47b;build_runtime 注册 + run_workflow 旁路挂 module_plan;+5 → 509 passed;实现 BLOCKED→控制器架构裁决旁路 gating→修复→spec 审 + 质量审双 APPROVED;OFFLINE 字节等价、predictor/治理零改动、4 回归恢复)
 - [x] Task 4.8 Phase 4 完成闸门(控制器执行;全量 509 passed/25 skipped/0 failed;红线核验 73 tests 全绿含 LLM 编排契约;根 tests/+predictors 零触碰;打 **v1.1.0** tag 本地不 push;pause 等审)
 
-## 当前状态:v1.1 里程碑已过,用户重启 loop=继续 → 清 paused_for_review,进 Phase 5(主动学习 v1)计划展开中
+### Phase 5(进行中,起点基线 509 passed / 25 skipped;计划 e2cabaa,8 task,累计 +46 → 555 passed;计划已用真实 passed 口径 + 脚本自查测试数一致)
+> 🔬 **v1.2 里程碑待确认(科学决策;已落 v1 启发式不阻塞)**:①information gain 权重常量(v1 等权启发式非严格 EIG,调参/贝叶斯 EIG 留 v1.2.x)②learning_queue 候选粒度(每 module 一候选,module×扰动×细胞类型细网格留 v1.2.x)③evidence_level 是否反馈 ledger 触发再训练(本 Phase 只 advisory,闭环再训练归 Phase 7)。
+> 🔒 **改现有文件(计划授权最小接线)**:workflows/predict_delta_expression.py 增量注册 2 agent、core/runtime.py 加 2 可选 sidecar 插点、io/report_markdown.py 追加 2 段;均不动 reliability/critic/provenance/predictor/route_table/ModulePlan/Phase 3-4 逻辑;OFFLINE 只往 provenance 追加 evidence_level/learning_queue 两新键、字节等价。
+- [ ] Task 5.1 evidence_level 纯函数(E0–E5 映射,决策 B 不领先治理;+13 → 522 passed)
+- [ ] Task 5.2 EvidenceLevelAgent(进 bus 薄包装,插点 C;+5 → 527 passed)
+- [ ] Task 5.3 acquisition 纯函数(information gain 启发式,诚实标注非严格 EIG;+7 → 534 passed)
+- [ ] Task 5.4 learning_queue 数据结构(+5 → 539 passed)
+- [ ] Task 5.5 ActiveLearningAgent(进 bus 产 learning_queue,插点 D,不碰裁决;+7 → 546 passed)
+- [ ] Task 5.6 接管线(runtime 旁路挂 evidence_level + learning_queue,OFFLINE 字节等价;+5 → 551 passed)
+- [ ] Task 5.7 report_markdown 扩两段(证据记录 + 验证计划,现有 9 段不变;+4 → 555 passed)
+- [ ] Task 5.8 Phase 5 完成闸门 — 红线核验 + 台账 + **v1.2 tag**(+0 → 555 passed)
+
+## 当前状态:Phase 5 进行中 — 计划已展开(e2cabaa,8 task),开始 Task 5.1(evidence_level 纯函数)
 
 ## 事件日志(每次 loop 追加一行)
 
@@ -135,3 +147,4 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - 2026-07-04 **Task 4.7 修复完成 + 两审通过**(518e47b,+5 → 509 passed/0 failed/skip 25):修复 subagent 核实 ModelApplicability payload(applicable/rejected_candidates),选判据 `_is_routable`=applicable 非空 AND targets 去空非空(覆盖 martian/unsupported + 空 targets 两种 SchemaError,与 reliability.py:43 同源),显式布尔非 try/except。**字节等价验证**:stash 对比改动前对 abstain 请求 report `diff -q` BYTE-EQUIVALENT。spec 合规审 + 代码质量审均 APPROVED:插点最小(predictor/ensemble/reliability/critic/provenance/route_table/Phase 3 逻辑零改动)、gating 覆盖 normalize_request 全 4 处 SchemaError 无遗漏、OFFLINE 字节等价(abstain 请求 provenance 无 module_plan、核心字段逐字节一致)、4 回归逐条恢复、三 flag False、LLM gated、5 测试真断言非空。**1 条非阻塞建议→记观察项**:`_is_routable` 情况②(未知 perturbation_object)安全性依赖 real brain 都声明 supported_perturbations(当前结构性不可达),将来 Phase 6/7 接真实模型若 predictor 漏声明会成缺口——与 M1/M3/M8 同类归 v1.1 里程碑审查 + Phase 6/7 观察项(可选加固:_is_routable 补 perturbation_type∈PERTURBATION_OBJECTS 判据自洽)。**Task 4.7 完成 → Phase 4 全 8 实现 task 完成**。控制器执行 Task 4.8 = v1.1 里程碑闸门。
 - 2026-07-04 **Phase 4 完成 → v1.1 里程碑(控制器执行 Task 4.8 闸门)**:全量回归 **509 passed/25 skipped/0 failed/0 errors**(collected 534);红线核验(LLM 边界三 flag 恒 False + golden unsafe-accept=0 + negative 无静默 accept + baseline OFFLINE 零 LLM 产 report + **LLM 编排契约 19 条**)共 73 tests 全绿;提交范围 v1.0.0→HEAD **根 tests/ 零触碰 + predictors 核心预测零触碰**,所有改动是计划授权最小接线(config 枚举/llm_client enabled/runtime 旁路插点/module_router 读候选/workflow 注册)+ 新增 llm_orchestration 子包,治理引擎/route_table/ModulePlan/Phase 3 核心逻辑未改。打 **v1.1.0** tag(本地不 push)。STATUS 文档追加 Phase 4 完成台账段。**pause_at_milestones=true → 设 paused_for_review=true 硬闸,结束 loop 等人工审**。**留给用户里程碑审查的待确认项**:①LLM_ORCHESTRATED_STRICT 冲突降级语义(P3,本 Phase 仅加枚举+测识别)②communication 归 M7 ③module_plan 驱动 predictor 选择(本 Phase 仅旁路挂 provenance,留 v1.2+)④_is_routable 情况② 自洽加固(依赖 brain 声明 supported_perturbations,Phase 6/7 接真模型时确认)⑤M1/M3/M8(v1.0 遗留)。下一里程碑:v1.2 = Phase 5(主动学习 v1)。
 - 2026-07-04 **用户重启 loop=继续 → 进 Phase 5**:清除 v1.1 paused_for_review 硬闸。v1.1/v1.0 待确认项(P3 STRICT/communication/module_plan 驱动 predictor/_is_routable 自洽/M1-M3-M8)保留为观察(不阻塞 Phase 5)。派规划 subagent 展开 Phase 5(主动学习 v1)详细 TDD 计划:ActiveLearningAgent(插点 D,产 learning_queue + information gain 排序"该测什么",用 disagreement/OOD 信号)+ 可含 EvidenceLevelAgent(插点 C,E0–E5,Phase 3/4 留后,读运行时 reliability/OOD 映射);守红线(OFFLINE 零 LLM、三 flag False、learning_queue/evidence 不碰 prediction/verdict 终决/provenance ledger)。起点基线 509 passed/25 skipped。
+- 2026-07-04 **Phase 5 计划展开完成**(规划 subagent DONE,e2cabaa,1491 行,8 task):主动学习 v1 = EvidenceLevelAgent(插点 C,E0–E5 映射决策 B 薄层不重写治理)+ ActiveLearningAgent(插点 D,产 learning_queue + information gain 启发式排序)+ 接管线 sidecar + report 扩两段。起点 509 → +46 → 555 passed。**契约核心**:两 agent 只读运行时确定性信号(reliability/disagreement/downgrade/learned_reliability/OOD proxy/module_plan)映射/排序,产物只挂 report.provenance.{evidence_level,learning_queue},**绝不碰 prediction/verdict 终决/provenance ledger/reliability 决策**;E-level 不领先治理(E2/E3 accept 级只在现有 disposition 已 accept 时给出);learning_queue advisory 不改裁决(契约测试 test_does_not_mutate_report 钉死)。skip 恒 25(全确定性离线)。**4 处真实代码校正**:①runtime OOD ≠ ood_enrichment.py(后者离线 ledger 分析),runtime 真实 OOD=payload seen_in_train 多为 None → derive_ood_signal fail-closed 记 unknown 不假装 in_domain ②EvidenceLevel 归 Phase 5(信号同源)③决策 B E-level 不回写 verdict/不领先 disposition ④report 扩段只加 evidence/learning 两段(Phase 8 全面扩容留后)。**测试数标注已脚本自查与代码块 def test_ 逐 task 一致**(避免前几 Phase 笔误)。**3 待确认决策**(information gain 权重/候选粒度/ledger 反馈再训练)给建议+标待确认。控制器核实计划头部铁律+数据契约+Task 5.1 完整可执行。台账填入 Phase 5 8-task 清单。连做 Task 5.1(evidence_level 纯函数,决策 B 纯映射,不涉待确认)。
