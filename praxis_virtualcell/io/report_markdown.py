@@ -145,6 +145,19 @@ def render_report_md(job: dict) -> str:
         w(f"- abstain_artifact_sha256: `{learned.get('abstain_artifact_sha256', _NA)}`")
     w("")
 
+    # 证据记录(Phase 5:evidence_level E0–E5,附 §6 之后。缺键标 N/A,不崩)
+    ev = prov.get("evidence_level") or {}
+    w("### 证据记录(Evidence Record)")
+    w("")
+    w(f"- evidence_level: `{ev.get('level', _NA)}`")
+    w(f"- ood_signal: `{ev.get('ood_signal', _NA)}`")
+    w(f"- rationale: `{_fmt_list(ev.get('rationale'))}`")
+    w(f"- aligned_with_disposition: `{ev.get('aligned_with_disposition', _NA)}`")
+    w("")
+    w("_证据等级是治理层之上的薄映射(读现有 reliability/OOD/disagreement 信号),"
+      "不重写裁决;E2=in-domain accept 与现有 disposition 对齐。_")
+    w("")
+
     # 7. Biological Interpretation
     w("## 7. Biological Interpretation")
     w("")
@@ -179,6 +192,27 @@ def render_report_md(job: dict) -> str:
         limits.append("未触发 abstain/降级/caution;仍以 §6 证据强度为准,不过度承诺。")
     for x in limits:
         w(f"- {x}")
+    w("")
+
+    # 验证计划(Phase 5:learning_queue,附 §8 之后。advisory 建议下一步实验,不改裁决。缺键标 N/A)
+    lq = prov.get("learning_queue") or {}
+    lq_items = lq.get("items") or []
+    w("### 验证计划(Validation Plan · 主动学习建议)")
+    w("")
+    if not lq_items:
+        w(f"- 优先实验候选:`{_NA}`(无可执行候选或缺 learning_queue)")
+    else:
+        w("- 优先实验候选(按 information gain 降序,advisory 不改裁决):")
+        for it in lq_items[:5]:            # top-5
+            w(f"  - `{it.get('candidate', _NA)}` · module=`{it.get('module', _NA)}` · "
+              f"information_gain=`{it.get('information_gain', _NA)}` · "
+              f"drivers={_fmt_list(it.get('drivers'))}")
+    lq_notes = lq.get("notes") or []
+    if lq_notes:
+        w(f"- notes: {_fmt_list(lq_notes)}")
+    w("")
+    w("_验证计划是主动学习的 advisory 产物:建议下一步该测什么(用 disagreement/OOD/证据等级排序),"
+      "不碰 prediction/verdict 终决/provenance ledger。_")
     w("")
 
     # 9. Reproducibility

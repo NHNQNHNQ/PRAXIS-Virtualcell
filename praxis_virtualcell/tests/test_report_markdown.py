@@ -128,3 +128,69 @@ def test_jobstore_writes_and_loads_report_md(tmp_path):
     assert "report_md" in loaded
     assert loaded["report_md"].startswith("# PRAXIS-VirtualCell Report")
     assert "verdict: **accept**" in loaded["report_md"]
+
+
+# ===== Phase 5:证据记录 + 验证计划两段 =====
+
+_WITH_AL = {
+    "mode": "offline",
+    "request": {"request_id": "al_ahr", "species": "human", "cell_type": "K562",
+                "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+                "task_type": "predict_delta_expression"},
+    "report": {
+        "request_id": "al_ahr", "abstain": False, "reliability": "medium",
+        "prediction": {"delta": [0.2]}, "models_used": ["MockLinear", "MockCPA"],
+        "models_rejected": [], "models_failed": [],
+        "abstain_reasons": [], "downgrade_reasons": ["downgrade:model_disagreement_too_high"],
+        "failed_checks": ["model_disagreement"],
+        "model_disagreement": {"score": 0.8, "triggered": True},
+        "critic_violations": [], "caution_flags": {}, "learned_reliability": None,
+        "provenance": {
+            "n_messages": 24, "rules_referenced": ["r1.yaml"], "rules_hit": [],
+            "ortholog_cautions": {}, "rejection_reasons": {},
+            "evidence_level": {"level": "E4", "rationale": ["downgrade"],
+                               "ood_signal": "unknown", "aligned_with_disposition": True},
+            "learning_queue": {"items": [
+                {"candidate": "stress_processor@human:AHR", "module": "stress_processor",
+                 "information_gain": 1.4, "drivers": ["disagreement_high", "module_weak"],
+                 "rationale": "x"},
+                {"candidate": "genetic_hub@human:AHR", "module": "genetic_hub",
+                 "information_gain": 0.8, "drivers": ["disagreement_high"], "rationale": "y"}],
+                "notes": []},
+        },
+    },
+}
+
+
+def test_evidence_record_section_present():
+    from praxis_virtualcell.io.report_markdown import render_report_md
+    md = render_report_md(_WITH_AL)
+    assert "证据记录" in md or "Evidence Record" in md
+    assert "E4" in md                      # evidence level 出现
+    assert "ood_signal" in md or "OOD" in md
+
+
+def test_validation_plan_section_present():
+    from praxis_virtualcell.io.report_markdown import render_report_md
+    md = render_report_md(_WITH_AL)
+    assert "验证计划" in md or "Validation Plan" in md
+    assert "stress_processor@human:AHR" in md    # top 候选出现
+    assert "1.4" in md                            # information_gain 出现
+
+
+def test_nine_sections_still_present_with_al():
+    from praxis_virtualcell.io.report_markdown import render_report_md
+    md = render_report_md(_WITH_AL)
+    for s in _SECTIONS:
+        assert s in md, f"缺段:{s}"       # 现有 9 段编号不被打乱
+
+
+def test_missing_evidence_and_queue_shows_na():
+    """缺 evidence_level/learning_queue(如旧 job)→ 标 N/A,不崩,9 段仍在。"""
+    from praxis_virtualcell.io.report_markdown import render_report_md
+    md = render_report_md(_ACCEPT)          # _ACCEPT 无 evidence_level/learning_queue 键
+    assert "证据记录" in md or "Evidence Record" in md
+    assert "验证计划" in md or "Validation Plan" in md
+    assert "N/A" in md
+    for s in _SECTIONS:
+        assert s in md
