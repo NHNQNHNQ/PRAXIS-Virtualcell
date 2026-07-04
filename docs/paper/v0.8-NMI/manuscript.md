@@ -8,7 +8,7 @@
 > `docs/paper/v0.3/data-inventory.md`, `docs/findings/`). References [1]–[22] are DOI/source-verified (v0.2
 > `phase1_literature.md`); references [23]–[30] (dataset/tool corpus, Results 4–5) were DOI/source-verified via
 > web search on 2026-07-04 (DOI, journal, volume and pages all confirmed). Figures Fig 1–5 are in
-> `docs/paper/figures/`.
+> `docs/paper/figures/`; Fig 6 (learned governance) is in `docs/paper/v0.8-NMI/figures/`.
 
 ---
 
@@ -427,13 +427,14 @@ references.
 report-split pipeline. Components that are declarative (unit-test-activated but not firing in the offline mock
 end-to-end path) are marked, keeping the mechanism's demonstrated-versus-declarative status explicit.
 
-**Fig. 6 | Learned reliability governance (Result 3)** *(to be generated).* (a) Bad-perturbation AUROC under
+**Fig. 6 | Learned reliability governance (Result 3).** (a) Bad-perturbation AUROC under
 leave-perturbation-out cross-validation: learned 0.907 versus disagreement-only 0.774, out-of-distribution-flag
-0.788, and random 0.479, with the per-cell recomputation (0.869) shown alongside. (b) Risk–coverage curves
-(learned AUC 0.746; per-cell 0.736) and, on the real donor predictors, retained delta-Pearson rising from 0.672
-at full coverage to 0.754 at 74% coverage. (c) Wired back into the runtime, the wrong-accept rate falls from
+0.788, and random 0.479, with the per-cell recomputation (0.869) shown alongside. (b) Risk–coverage on the real
+donor predictors: retained delta-Pearson rises from 0.672 at full coverage to 0.754 at 74% coverage
+(risk–coverage AUC 0.746; per-cell 0.736). (c) Wired back into the runtime, the wrong-accept rate falls from
 0.974 to 0.211 and risk-coverage rises from 0.026 to 0.789 with zero hard-rule overrides. All values are
-recorded findings; the figure is a faithful renderer to be produced with `make_figures.py`.
+recorded findings; rendered by `docs/paper/v0.8-NMI/figures/make_fig6.py`
+(`Fig6_learned_governance.svg/.pdf/.png`).
 
 ---
 
