@@ -27,8 +27,8 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 
 | Phase | 详细计划文件 | 状态 | 备注 |
 |---|---|---|---|
-| 0 冻结基线 | 2026-07-04-phase0-1-module-core.md | 🔵 执行中 | 实现 subagent 在跑(baseline 文档 + 特征化 + 路由快照) |
-| 1 八模块 core + species profile | 2026-07-04-phase0-1-module-core.md | ⬜ 待执行 | 计划已就绪,Phase 0 绿后开始 |
+| 0 冻结基线 | 2026-07-04-phase0-1-module-core.md | ✅ 完成 | 287 passed/0 failed;实现+复核两 subagent 均过;纯新增未动源码 |
+| 1 八模块 core + species profile | 2026-07-04-phase0-1-module-core.md | 🟡 待执行(下一个) | 计划已就绪,Phase 0 已绿,可开始 |
 | 2 ModelBroker + model_zoo | (待展开) | ⬜ | 需先 writing-plans 展开详细计划 |
 | 3 module-aware router | (待展开) | ⬜ | 依赖 Phase 1 modules.py |
 | 4 LLM_ORCHESTRATED | (待展开) | ⬜ | 依赖 Phase 3 ModulePlan |
@@ -39,11 +39,19 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 
 ## 任务级台账(仅当前 Phase 展开)
 
-### Phase 0
-- [ ] Task 0.1 基线架构文档
-- [ ] Task 0.2 离线报告特征化测试
-- [ ] Task 0.3 路由快照测试
+### Phase 0 ✅
+- [x] Task 0.1 基线架构文档(71a722f)
+- [x] Task 0.2 离线报告特征化测试(34ab03a)
+- [x] Task 0.3 路由快照测试(964dc1b)
+
+### Phase 1(下一个,计划已就绪)
+- [ ] Task 1.1 八模块规范定义 modules.py
+- [ ] Task 1.2 4 物种 module_support.yaml
+- [ ] Task 1.3 ModuleRegistry
+- [ ] Task 1.4 物种特异错配守卫测试
+- [ ] Task 1.5 全量回归 + 打包核对 + v0.9 tag
 
 ## 事件日志(每次 loop 追加一行)
 
 - 2026-07-04 台账初始化;Phase 0 实现 subagent 已派出;基线 = 277 passed / 25 skipped。
+- 2026-07-04 Phase 0 完成:实现 subagent DONE(3 commit,无断言迁就)+ 复核 subagent APPROVED(独立重跑 287 passed/0 failed,纯新增未动源码)。下一个:Phase 1 Task 1.1。
