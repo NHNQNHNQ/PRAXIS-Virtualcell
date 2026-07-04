@@ -11,7 +11,8 @@
 **铁律:**
 - 只**新增**文件,不改 `core/` `agents/`(现有)`predictors/`(现有)`route_table` 任何逻辑;若发现现有行为与预期不符 → 真实 bug,停下报告,不改代码迁就测试。
 - **缺模型 / 缺依赖(requires 不满足)/ sha 不匹配 → fail-closed,绝不 silent accept**(本 Phase 核心红线)。
-- 测试口径 = `praxis_virtualcell/tests`(当前 **344 passed / 25 skipped / 0 failed**,已含 Phase 0+1);**不碰根 `tests/`**。`-q` 不打印精确汇总,用 `--junit-xml` 取精确数。
+- 测试口径 = `praxis_virtualcell/tests`(当前 **319 passed / 25 skipped / 0 failed**,collected 总数 344,已含 Phase 0+1);**不碰根 `tests/`**。`-q` 不打印精确汇总,用 `--junit-xml` 取精确数。
+- ⚠️ **口径更正(2026-07-04 执行时发现)**:本计划正文各 task 标注的 "N passed / 25 skipped"(350/355/359/364/368/373/377)里的那个数其实是 pytest **collected 总数(含 25 skipped)**,不是 passed 数——起草时把 `--junit-xml` 的 `tests` 属性误当成 passed。**真实 passed = 该数 − 25**(325/330/334/339/343/348/352)。验收只认:**failures=0 errors=0** + 每 task 新增测试条数正确(+6/+5/+4/+5/+4/+5/+4)。Task 2.7 Step 6 的 junit 断言 `tests=377 ... skipped=25` 本身正确(tests=collected)。
 - cobra/torch/gpu gated 的测试用 `pytest.importorskip` skip(无依赖不 fail),延续现有 `test_ecoli_gem_case.py` 惯例。
 - 每 task 全量 `PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -q` 绿后再 commit;commit 前删 `._*`;commit message 末尾加 `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`;当前分支 `feat/v0.9-phase0-module-core`,**不 push、不 tag**。
 
