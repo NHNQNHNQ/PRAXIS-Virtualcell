@@ -17,7 +17,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 
 | 里程碑 | 完成条件 | 状态 | tag |
 |---|---|---|---|
-| v0.9 module core | Phase 0 + 1 完成并回归绿 | ⏳ 进行中 | — |
+| v0.9 module core | Phase 0 + 1 完成并回归绿 | ✅ 完成(暂停等审) | v0.9.0 |
 | v1.0 model-controlled | Phase 2 + 3 | ⬜ 未开始 | — |
 | v1.1 LLM-orchestrated | Phase 4 | ⬜ | — |
 | v1.2 active-learning | Phase 5 | ⬜ | — |
@@ -28,8 +28,8 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 | Phase | 详细计划文件 | 状态 | 备注 |
 |---|---|---|---|
 | 0 冻结基线 | 2026-07-04-phase0-1-module-core.md | ✅ 完成 | 287 passed/0 failed;实现+复核两 subagent 均过;纯新增未动源码 |
-| 1 八模块 core + species profile | 2026-07-04-phase0-1-module-core.md | 🟡 待执行(下一个) | 计划已就绪,Phase 0 已绿,可开始 |
-| 2 ModelBroker + model_zoo | (待展开) | ⬜ | 需先 writing-plans 展开详细计划 |
+| 1 八模块 core + species profile | 2026-07-04-phase0-1-module-core.md | ✅ 完成 | 319 passed/0 failed;5 task 全过;红线闸门全绿;v0.9.0 tag |
+| 2 ModelBroker + model_zoo | (待展开) | 🟡 待展开(下一个,需重启 loop) | 需先 writing-plans 展开详细计划 |
 | 3 module-aware router | (待展开) | ⬜ | 依赖 Phase 1 modules.py |
 | 4 LLM_ORCHESTRATED | (待展开) | ⬜ | 依赖 Phase 3 ModulePlan |
 | 5 主动学习 v1 | (待展开) | ⬜ | 依赖 Phase 1 证据/模块结构 |
@@ -48,8 +48,12 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 1.1 八模块规范定义 modules.py(94a8a60;292 passed;实现+审查双通过)
 - [x] Task 1.2 4 物种 module_support.yaml(27cd40d;306 passed;审查 APPROVED)
 - [x] Task 1.3 ModuleRegistry(1fb4edc;312 passed;审查 subagent flake→控制器亲验)
-- [ ] Task 1.4 物种特异错配守卫测试 ← 下一个
-- [ ] Task 1.5 全量回归 + 打包核对 + v0.9 tag
+- [x] Task 1.4 物种特异错配守卫测试(c7a5522;319 passed;闸门审查 APPROVED)
+- [x] Task 1.5 全量回归 319 passed + MANIFEST 已覆盖 yaml + v0.9.0 tag(控制器执行)
+
+## ⏸ 当前状态:v0.9 里程碑完成,已暂停等人工审查
+- pause_at_milestones=true 生效。重启 `/loop`(同一条启动串)即从 Phase 2 继续。
+- 重启后 autopilot 会先用 writing-plans 把 Phase 2(ModelBroker + model_zoo)对着真实代码展开成详细计划,再逐 task 执行。
 
 ## 事件日志(每次 loop 追加一行)
 
@@ -58,3 +62,5 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - 2026-07-04 Phase 1 Task 1.1 完成(94a8a60):实现 DONE + 审查 APPROVED(独立重跑 292 passed/0 failed,engines⊆ENGINES,bacteria M3 别名守住,变异测试证明有效)。下一个:Task 1.2。
 - 2026-07-04 Phase 1 Task 1.2 完成(27cd40d):实现 DONE + 审查 APPROVED(306 passed/0 failed,4 物种 8 模块齐,生物学守卫变异测试有效)。审查非阻塞观察:`mitochondria`/`mammalian_cell_communication` 两条 mismatch 数据在但 1.2 未单独断言——**由 Task 1.4 的 registry 守卫测试(_MISMATCH 4 条全测)关闭**。下一个:Task 1.3 registry。
 - 2026-07-04 Phase 1 Task 1.3 完成(1fb4edc):实现 DONE(312 passed/0 failed;实现诚实指出计划 Step4 "7 passed" 是笔误、实为 6 测试,未编造凑数——已修计划为 6)。审查 subagent 异常返回(0 工具调用 flake)→ **控制器亲自独立核实**:junit 312 passed/0 failed、registry 契约逐条正确(verdict 映射/未知物种→unsupported→reject/未知模块→KeyError/matrix 4×8/mismatch/别名)、纯新增(仅 2 文件)。接受。下一个:Task 1.4。
+- 2026-07-04 Phase 1 Task 1.4 完成(c7a5522):实现 DONE(319 passed;4 条 mismatch 守卫全测)。闸门审查 subagent APPROVED:Task 1.4 纯新增 + Phase 1 红线全绿(内核源码零改动、根 tests/ 未碰、LLM 边界 6 passed、golden+negative 38 passed、baseline 10 passed)。非阻断观察:test_unsupported_modules_reject 当前空转(4×8 矩阵暂无 unsupported 条目)。
+- 2026-07-04 **Phase 1 完成 → v0.9 里程碑**:控制器执行 Task 1.5(最终回归 319 passed/0 failed/25 skipped;MANIFEST recursive-include *.yaml 已覆盖 module_support.yaml;打 v0.9.0 tag)。pause_at_milestones=true → **暂停等人工审查**。下一个:Phase 2(重启 loop 后先展开详细计划)。
