@@ -44,9 +44,9 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 0.2 离线报告特征化测试(34ab03a)
 - [x] Task 0.3 路由快照测试(964dc1b)
 
-### Phase 1(下一个,计划已就绪)
-- [ ] Task 1.1 八模块规范定义 modules.py
-- [ ] Task 1.2 4 物种 module_support.yaml
+### Phase 1(进行中)
+- [x] Task 1.1 八模块规范定义 modules.py(94a8a60;292 passed;实现+审查双通过)
+- [ ] Task 1.2 4 物种 module_support.yaml ← 下一个
 - [ ] Task 1.3 ModuleRegistry
 - [ ] Task 1.4 物种特异错配守卫测试
 - [ ] Task 1.5 全量回归 + 打包核对 + v0.9 tag
@@ -55,3 +55,4 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 
 - 2026-07-04 台账初始化;Phase 0 实现 subagent 已派出;基线 = 277 passed / 25 skipped。
 - 2026-07-04 Phase 0 完成:实现 subagent DONE(3 commit,无断言迁就)+ 复核 subagent APPROVED(独立重跑 287 passed/0 failed,纯新增未动源码)。下一个:Phase 1 Task 1.1。
+- 2026-07-04 Phase 1 Task 1.1 完成(94a8a60):实现 DONE + 审查 APPROVED(独立重跑 292 passed/0 failed,engines⊆ENGINES,bacteria M3 别名守住,变异测试证明有效)。下一个:Task 1.2。
