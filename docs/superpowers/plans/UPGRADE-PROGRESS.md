@@ -9,6 +9,7 @@
 branch: feat/v0.9-phase0-module-core     # 当前工作分支(每到版本里程碑可换新分支)
 push_authorized: false                   # 未经用户授权不 push
 pause_at_milestones: true                # 每到 v0.x 里程碑结束 loop 等人工审;设 false 则全自动直穿 v1.3
+paused_for_review: true                  # 硬闸:v0.9 已达,暂停中。用户说"继续"→ 改 false 并重启 loop 进 Phase 2
 test_scope: praxis_virtualcell/tests     # 唯一测试口径(永不碰根 tests/ 的 ~1398 继承测试)
 test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -q"
 ```

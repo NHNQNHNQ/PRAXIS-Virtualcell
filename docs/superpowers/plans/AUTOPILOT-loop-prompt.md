@@ -6,9 +6,13 @@
 
 ---
 
-## STEP 1 — 定位(每次触发第一件事)
+## STEP 0 — 暂停闸(每次触发最先检查)
 
-1. 读 `docs/superpowers/plans/UPGRADE-PROGRESS.md`(台账)。读顶部 **Autopilot 配置**(branch / push_authorized / pause_at_milestones / test_cmd)。
+读台账 `docs/superpowers/plans/UPGRADE-PROGRESS.md` 的 Autopilot 配置:**若 `paused_for_review: true`,立即停止**(不 ScheduleWakeup、不派任何 subagent),给用户一行提示:"autopilot 已在 <当前里程碑> 暂停等审;要继续下一 Phase,回复'继续'"。这是硬闸——防止里程碑暂停后残留的兜底唤醒误触发把工作冲进下一 Phase。用户明确要继续时,才把 `paused_for_review` 改回 `false` 并重启 loop。
+
+## STEP 1 — 定位(通过 STEP 0 后)
+
+1. 读 `docs/superpowers/plans/UPGRADE-PROGRESS.md`(台账)。读顶部 **Autopilot 配置**(branch / push_authorized / pause_at_milestones / paused_for_review / test_cmd)。
 2. 读 `docs/superpowers/plans/2026-07-04-v0.9-v1.3-upgrade-roadmap.md`(权威:相位顺序 §5、已拍板决策 §6、红线 §7、事实校正 §3)。
 3. `git branch --show-current` 确认在台账指定的工作分支;不在则 `git checkout` 过去。**绝不在 main 上干活;push_authorized=false 时绝不 push。**
 4. 用台账 + `git log --oneline -15` 判定 **当前 Phase** 和 **下一个未完成工作单元**。
