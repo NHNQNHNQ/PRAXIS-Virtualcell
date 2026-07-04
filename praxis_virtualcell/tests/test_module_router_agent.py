@@ -66,16 +66,28 @@ def test_bacteria_expression_gene_is_abstain_reject():
     assert prim["verdict"] != "accept"
 
 
-def test_bacteria_autophagy_mismatch_downgrades():
-    """决策 E:bacteria + degradation → 自噬 mismatch → caution(不 accept)。"""
-    p = _plan_for(_req(species="bacteria", perturbation_object="gene",
-                       target_output="growth", perturbation_targets=["lon"]))
-    # M4 是 primary(growth);但若把 degradation 作为 secondary 出现则带 mismatch。
-    # 这里断言:整个 plan 里若出现 degradation_machinery entry,它带 mismatch=caution。
-    degs = [e for e in p["entries"] if e["module"] == "degradation_machinery"]
-    for e in degs:
-        assert e["mismatch"] == "caution"
-        assert e["verdict"] != "accept"
+def test_yeast_niche_mismatch_downgrades():
+    """决策 E(可达路径):yeast + niche state → primary M6 cytoskeletal_framework →
+    mismatch query tissue_spatial_niche → registry 判 reject → entry verdict 降级不 accept。
+
+    注:bacteria autophagy(M8 degradation_machinery)的 mismatch 在当前 module_rules 规则下
+    端到端不可达 —— pick_primary/pick_secondary 只产 M2/M3/M4/M6/M7,M8 从不作为
+    primary/secondary 出现,故 mismatch_query_for 的 bacteria_autophagy 分支永不被路由触达。
+    这属 M1/M3 v1.0 里程碑待确认项(是否让 M8 参与路由);在此之前 mismatch 降级红线改由
+    本 yeast niche 测试端到端覆盖(原 test_bacteria_autophagy_mismatch_downgrades 为空转)。"""
+    p = _plan_for(_req(species="yeast", perturbation_object="medium",
+                       target_output="state", medium="niche",
+                       perturbation_targets=["SNF1"]))
+    # 前置守卫:确保被测 entry 真存在,不再空转。
+    assert p["primary"] == "cytoskeletal_framework"
+    prim = next(e for e in p["entries"] if e["role"] == "primary")
+    assert prim["module"] == "cytoskeletal_framework"
+    # 强断言:mismatch 命中 + verdict 降级生效。
+    assert prim["mismatch"] == "reject"          # 单细胞真菌无组织 niche → registry 判 reject
+    assert prim["verdict"] != "accept"           # mismatch 降级红线:绝不 accept
+    assert prim["verdict"] == "abstain"          # 实跑核实的真实降级值
+    assert p["overall_verdict"] != "accept"
+    assert p["overall_verdict"] == "abstain"
 
 
 def test_bus_message_structure_and_no_llm():

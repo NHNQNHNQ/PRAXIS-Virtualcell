@@ -50,7 +50,9 @@ class ModuleRouterAgent(BaseAgent):
 
     def _build_entry(self, req, species, mid, role, module_support,
                      mismatch_queries, notes) -> ModulePlanEntry:
-        # 1) 落 engine:复用 route()(单一真相源)
+        # 1) 落 engine:复用 route()(单一真相源)。
+        # 注:route() 是请求级路由(非 module 级),secondary 复用同一路由结果;
+        # module 级路由(每个 module 独立落 engine)留 Phase 4,避免将来漂移检查误报。
         dec = route(req)
         # 2) engine 与 module 定义漂移检查(不崩,记 note 供 governance)
         legal_engines = M.MODULES[mid]["engines"]
