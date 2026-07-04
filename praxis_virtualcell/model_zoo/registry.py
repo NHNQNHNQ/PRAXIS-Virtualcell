@@ -49,6 +49,15 @@ class ModelZooRegistry:
             raise ValueError(f"{name} species 必须是非空 list")
         if not isinstance(entry.get("requires", []), list):
             raise ValueError(f"{name} requires 必须是 list")
+        # self_trained 必须带 training_card(无 provenance 的自训模型不入库,fail-closed)
+        if entry["type"] == "self_trained":
+            card = entry.get("training_card")
+            required_card = ("training_data", "split", "baseline", "metrics", "provenance")
+            if not isinstance(card, dict):
+                raise ValueError(f"{name} 是 self_trained 但缺 training_card(必填)")
+            missing = [k for k in required_card if k not in card]
+            if missing:
+                raise ValueError(f"{name} training_card 缺字段: {missing}")
 
     # ---- 查询 ----
     def names(self) -> list[str]:
