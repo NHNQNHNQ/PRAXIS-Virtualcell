@@ -15,13 +15,15 @@ def _ctx(request):
     return bus.latest("species_context_ready").payload
 
 
-def _plan_with_candidates(request, selected, risk_flags=None):
+def _plan_with_candidates(request, selected, risk_flags=None, module_support=None):
     ctx = _ctx(request)
+    # module_support 默认沿用 SpeciesContext;传入则覆写(用于构造"某模块 unsupported"场景)
+    ms = module_support if module_support is not None else ctx["module_support"]
     bus = MessageBus()
     ModuleRouterAgent().handle(AgentMessage(
         message_id="c2", sender="LLMModulePlanner", receiver="ModuleRouterAgent",
         message_type="module_route",
-        payload={"request": request, "module_support": ctx["module_support"],
+        payload={"request": request, "module_support": ms,
                  "mismatch_queries": ctx["mismatch_queries"],
                  "module_candidates": {"selected": selected, "candidates": [],
                                        "reasoning_summary": "", "risk_flags": risk_flags or []}},
@@ -83,9 +85,31 @@ def test_llm_risk_flags_surfaced_in_notes():
 
 
 def test_llm_out_of_candidate_secondary_dropped():
-    """LLM selected 里越候选的 module 不进 secondary(双保险:planner 已过滤,router 再核)。"""
-    p = _plan_with_candidates(_HUMAN_GENE, selected=["genetic_hub", "membrane_system"])
-    # membrane_system 是否成 secondary 取决于它是否 ∈ candidate 全集;若 human membrane weak(非 unsupported)
-    # 则它是合法候选、可成 secondary;此断言只保证:secondary 全 ∈ MODULE_ORDER 且不含发明名。
+    """决策 P2:LLM selected 里越候选的合法 module 被剔出 secondary(secondary 必 ⊆ candidates)。
+    构造真正越候选但合法的 module:membrane_system ∈ MODULE_ORDER(合法名,过 ModulePlanEntry 白名单),
+    但把 human 的 membrane_system 覆写成 support=unsupported 后,它既非确定性 primary(genetic_hub)
+    也非确定性 secondary([]),故 ∉ build_candidate_modules(req, module_support)。LLM 选它 → 必被 P2 剔除。
+    """
     from praxis_virtualcell.biological_modules import modules as M
-    assert all(s in M.MODULE_ORDER for s in p["secondary"])
+    from praxis_virtualcell.llm_orchestration import safety_contract as SC
+    from praxis_virtualcell.agents.species_schema import normalize_request
+
+    ctx = _ctx(_HUMAN_GENE)
+    # 覆写 membrane_system → unsupported(它就此掉出 candidate 全集,但仍是合法 module 名)
+    ms = {mid: dict(rec) for mid, rec in ctx["module_support"].items()}
+    ms["membrane_system"]["support"] = "unsupported"
+    ms["membrane_system"]["verdict"] = "reject"
+
+    # 前置核实:越候选 module ∈ MODULE_ORDER(合法),但 ∉ 该 module_support 下的候选全集
+    req = normalize_request(_HUMAN_GENE)
+    candidates = SC.build_candidate_modules(req, ms)
+    assert "membrane_system" in M.MODULE_ORDER          # 合法 module 名(不会被白名单拒)
+    assert "membrane_system" not in candidates          # 真正越候选(unsupported 且非确定性 primary/secondary)
+
+    # LLM 越候选选了 membrane_system → 必被 P2(and m in candidates)剔出 secondary
+    p = _plan_with_candidates(_HUMAN_GENE,
+                              selected=["genetic_hub", "membrane_system"],
+                              module_support=ms)
+    assert "membrane_system" not in p["secondary"]      # 越候选合法 module 被剔(真守卫 P2)
+    assert "membrane_system" not in [e["module"] for e in p["entries"]]
+    assert all(s in candidates for s in p["secondary"])  # secondary 必 ⊆ candidates
