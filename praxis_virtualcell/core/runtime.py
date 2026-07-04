@@ -55,6 +55,20 @@ class AgentRuntime:
         out = self._dispatch_collect(m, "brain_retrieved")
         m = self.mk_message(out.sender, "ModelApplicability", "decide", out.payload, out.message_id)
         app = self._dispatch_collect(m, "applicability_decided")
+        # Phase 4:module-aware 路由旁路挂载(SpeciesContext →[LLMModulePlanner?]→ ModuleRouter),
+        # 产 module_plan 挂进 report.provenance.module_plan;不改下游 predictor fan-out 契约。
+        # 旁路 gating:module_plan 只对"可路由"请求有意义(如同 predictor 只对 applicable 请求跑)。
+        # unsupported 物种(applicable 空)/ 空 perturbation_targets 走 abstain 路径,本无有意义的
+        # module_plan —— 不旁路(不调 normalize_request、不崩),与现有 abstain 语义一致。
+        module_plan = None
+        llm_cross_module = None
+        if "ModuleRouterAgent" in self._agents and self._is_routable(app):
+            module_plan = self._build_module_plan(app)
+            if "LLMCrossModuleReasoner" in self._agents and module_plan is not None:
+                xm = self.mk_message("ModuleRouterAgent", "LLMCrossModuleReasoner",
+                                     "cross_module_review", {"module_plan": module_plan},
+                                     app.message_id)
+                llm_cross_module = self._dispatch_collect(xm, "llm_cross_module_notes").payload
         llm_route = None
         if "LLMRouter" in self._agents:
             rmsg = self.mk_message("ModelApplicability", "LLMRouter", "route_suggest",
@@ -85,6 +99,10 @@ class AgentRuntime:
         report = rep.payload["report"]
         if llm_route is not None:
             report.setdefault("provenance", {})["llm_route_suggestion"] = llm_route
+        if module_plan is not None:
+            report.setdefault("provenance", {})["module_plan"] = module_plan
+        if llm_cross_module is not None:
+            report.setdefault("provenance", {})["llm_cross_module_notes"] = llm_cross_module
         if "LLMCritic" in self._agents:
             cm = self.mk_message("Report", "LLMCritic", "llm_review", {"report": report},
                                  rep.message_id)
@@ -95,6 +113,69 @@ class AgentRuntime:
                                  rep.message_id)
             report["narrative"] = self._dispatch_collect(nm, "llm_narrative").payload["narrative"]
         return report
+
+    @staticmethod
+    def _is_routable(app: AgentMessage) -> bool:
+        """module_plan 旁路的"可路由"判据(显式条件,非捕获异常)。
+
+        与现有管线 abstain 语义同源,排除两类本就无有意义 module_plan 的请求:
+          1) unsupported 物种(martian/bacteria/yeast)→ ModelApplicability 产 applicable==[]
+             (如同现有管线不对它们跑 predictor);
+          2) 空 perturbation_targets → reliability 判 no_perturbation_specified 硬 abstain
+             (与 reliability.py 第 43 行 `[t for t in targets if str(t).strip()]` 判据同源)。
+        两者恰是 module 路由 normalize_request 会抛 SchemaError 的情况;不满足则不旁路。
+        """
+        req = app.payload.get("request", {})
+        applicable = app.payload.get("applicable") or []
+        targets = [t for t in (req.get("perturbation_targets") or []) if str(t).strip()]
+        return bool(applicable) and bool(targets)
+
+    def _build_module_plan(self, app: AgentMessage) -> dict | None:
+        """Phase 4 旁路:SpeciesContext →[LLMModulePlanner?]→ ModuleRouter,产 module_plan(dict)。
+        OFFLINE(无 LLMModulePlanner)→ ModuleRouter 走确定性 secondary,零 LLM。"""
+        module_req = self._request_to_module_input(app.payload["request"])
+        sm = self.mk_message("ModelApplicability", "SpeciesContextAgent",
+                             "species_context", {"request": module_req}, app.message_id)
+        ctx = self._dispatch_collect(sm, "species_context_ready").payload
+        base_payload = {"request": module_req, "module_support": ctx["module_support"],
+                        "mismatch_queries": ctx["mismatch_queries"]}
+        if "LLMModulePlanner" in self._agents:
+            pm = self.mk_message("SpeciesContextAgent", "LLMModulePlanner",
+                                 "module_plan_request", base_payload, app.message_id)
+            mc = self._dispatch_collect(pm, "module_candidates_llm").payload
+            route_payload = mc                            # 已含 request/module_support/mismatch/module_candidates
+        else:
+            route_payload = base_payload                  # OFFLINE:无候选 → ModuleRouter 走确定性
+        rm = self.mk_message("SpeciesContextAgent", "ModuleRouterAgent",
+                             "module_route", route_payload, app.message_id)
+        return self._dispatch_collect(rm, "module_plan_ready").payload
+
+    @staticmethod
+    def _request_to_module_input(req: dict) -> dict:
+        """把管线 request(键 perturbation_type/output_modality/metadata.requested_outputs)确定性映射到
+        module 路由期望的 raw(键 perturbation_object/target_output/perturbation_targets)。零 LLM。
+
+        实读 model_applicability 产出的 req 键:species/perturbation_type/perturbation_targets/
+        input_modality/output_modality/task_type/cell_type/metadata。module 路由的 normalize_request
+        期望:species/perturbation_object/target_output/perturbation_targets(+可选 cell_type/medium/dose)。
+        """
+        # output_modality → target_output(TARGET_OUTPUTS = expression/growth/flux/state/communication)
+        _OUT_MAP = {"delta_expression": "expression", "pathway_response": "flux",
+                    "reliability_report": "expression", "growth": "growth", "flux": "flux",
+                    "state": "state", "communication": "communication", "expression": "expression"}
+        requested = ((req.get("metadata") or {}).get("requested_outputs") or [])
+        # 优先 requested_outputs 里第一个合法输出;否则由 output_modality 映射;再否则默认 expression
+        target_output = next((o for o in requested if o in _OUT_MAP.values()), None)
+        if target_output is None:
+            target_output = _OUT_MAP.get(str(req.get("output_modality", "")).lower(), "expression")
+        raw = {"species": req.get("species"),
+               "perturbation_object": req.get("perturbation_type"),
+               "target_output": target_output,
+               "perturbation_targets": list(req.get("perturbation_targets") or [])}
+        for k in ("cell_type", "medium", "dose"):
+            if req.get(k) is not None:
+                raw[k] = req[k]
+        return raw
 
     def export_outputs(self, out_dir: str, report: dict) -> None:
         d = Path(out_dir)
