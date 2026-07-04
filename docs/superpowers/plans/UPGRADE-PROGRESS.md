@@ -95,12 +95,12 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 5.2 EvidenceLevelAgent(3983277;进 bus 薄包装,插点 C;+5 → 528 passed;spec 审 + 质量审双 APPROVED,只读不改 report mutate 测试真守卫、零 LLM)
 - [x] Task 5.3 acquisition 纯函数(a049045;information gain 启发式,诚实标注非严格 EIG;+7 → 535 passed;spec 审 + 质量审双 APPROVED,权重方向全对确定性可复现纯函数无 LLM)
 - [x] Task 5.4 learning_queue 数据结构(10d65a0;items 降序 + notes + to_dict,空候选不虚构;+5 → 540 passed;spec 审 + 质量审双 APPROVED,降序稳定序/to_dict 无别名/纯 dataclass)
-- [ ] Task 5.5 ActiveLearningAgent(进 bus 产 learning_queue,插点 D,不碰裁决;+7 → 547 passed)
+- [x] Task 5.5 ActiveLearningAgent(482671d;进 bus 产 learning_queue,插点 D,不碰裁决;+7 → 547 passed;spec 审 + 质量审双 APPROVED,变异测试证实 mutate 守卫非空转、deepcopy 验证 report 未变)
 - [ ] Task 5.6 接管线(runtime 旁路挂 evidence_level + learning_queue,OFFLINE 字节等价;+5 → 552 passed)
 - [ ] Task 5.7 report_markdown 扩两段(证据记录 + 验证计划,现有 9 段不变;+4 → 556 passed)
 - [ ] Task 5.8 Phase 5 完成闸门 — 红线核验 + 台账 + **v1.2 tag**(+0 → 556 passed)
 
-## 当前状态:Phase 5 进行中 — Task 5.1–5.4 两审通过(540 passed),连做 Task 5.5(ActiveLearningAgent 插点 D)
+## 当前状态:Phase 5 进行中 — Task 5.1–5.5 两审通过(547 passed),连做 Task 5.6(接 runtime 管线,OFFLINE 字节等价)
 
 ## 事件日志(每次 loop 追加一行)
 
@@ -153,4 +153,5 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - 2026-07-04 **Task 5.1 修复完成 + 控制器亲验**(308b314,523 passed):修复 subagent 用方案一——`from praxis_virtualcell.agents.reliability import _HARD_ABSTAIN`,令 `_HARD_REJECT = _HARD_ABSTAIN`(单一真相源,消除两处常量漂移;无循环依赖已验证)。**变异验证**:修复前 core_predictor_failed→E1、修复后→E0。补 test_e0_core_predictor_failed(14 test)。**控制器亲验**:git diff 确认 evidence_level.py 仅换 _HARD_REJECT 来源(map_evidence_level 映射逻辑未改)、commit 只含 evidence_level.py + test(无 reliability.py)、全量重跑 523/25/0。**Task 5.1 达两审通过等价**(spec APPROVED + 质量审问题修复+亲验)。连做 Task 5.2(EvidenceLevelAgent 插点 C);台账 5.1/5.2 勾选累积待一起 chore commit。
 - 2026-07-04 **Task 5.2 两审通过**(3983277,+5 → 528 passed/0 failed/skip 25):spec 合规审 + 代码质量审均 APPROVED(2 文件逐字节一致纯新增,5 test 与计划标注一致;EvidenceLevelAgent 薄包装 map_evidence_level,进 bus emit evidence_level_ready→ActiveLearningAgent;**只读不改 report**:9 处 .get 只读 0 处写、返回全新 dict、deepcopy 验证 report 前后相等、mutate 测试真守卫;进 bus 契约与 species_context/provenance agent 同构;零 LLM)。1 条非阻塞建议(记观察):test_downgrade 断言 in(E4,E5) 略宽可收紧。连做 Task 5.3(acquisition information gain 启发式);台账 5.1/5.2 已勾,做 chore commit(1fc19c4)。
 - 2026-07-04 **Task 5.3 两审通过**(a049045,+7 → 535 passed/0 failed/skip 25):spec 合规审 + 代码质量审均 APPROVED(3 文件逐字节纯新增 active_learning 子包,7 test 与计划标注一致;information_gain 确定性加权 5 信号全计无漏、权重方向全对(质量审语义交叉核对 evidence_level:E2 最强 0/E4-E5 高不确定 → 权重 E2<E3<E4<E5)、docstring 诚实标注非严格 EIG、fail-safe 缺信号退 base、纯函数无 LLM/random)。3 条非阻塞建议(记观察):test_high_disagreement 可拆单变量、NaN 可 isnan 过滤、E1<E3 排序是设计选择。连做 Task 5.4(learning_queue 数据结构);台账 5.3/5.4 勾选累积待一起 chore commit。
-- 2026-07-04 **Task 5.4 两审通过**(10d65a0,+5 → 540 passed/0 failed/skip 25):spec 合规审 + 代码质量审均 APPROVED(2 文件逐字节纯新增,5 test 与计划标注一致;LearningQueue __post_init__ reverse=True 降序 + CPython 稳定排序保等 gain 插入序(运行时实测)、空候选不虚构、to_dict asdict 可 JSON 无别名、可变默认全 field(default_factory)、纯 dataclass 无 LLM/bus)。1 条非阻塞建议(记观察):learning_queue.py:29 注释"用负号"是陈旧笔误(实际 reverse=True),纯注释非功能非红线,将来动此文件顺带改。连做 Task 5.5(ActiveLearningAgent 插点 D);台账 5.3/5.4 已勾,做 chore commit。
+- 2026-07-04 **Task 5.4 两审通过**(10d65a0,+5 → 540 passed/0 failed/skip 25):spec 合规审 + 代码质量审均 APPROVED(2 文件逐字节纯新增,5 test 与计划标注一致;LearningQueue __post_init__ reverse=True 降序 + CPython 稳定排序保等 gain 插入序(运行时实测)、空候选不虚构、to_dict asdict 可 JSON 无别名、可变默认全 field(default_factory)、纯 dataclass 无 LLM/bus)。1 条非阻塞建议(记观察):learning_queue.py:29 注释"用负号"是陈旧笔误(实际 reverse=True),纯注释非功能非红线,将来动此文件顺带改。连做 Task 5.5(ActiveLearningAgent 插点 D);台账 5.3/5.4 已勾,做 chore commit(8f6482b)。
+- 2026-07-04 **Task 5.5 两审通过**(482671d,+7 → 547 passed/0 failed/skip 25):spec 合规审 + 代码质量审均 APPROVED(2 文件逐字节纯新增,7 test 与计划标注一致;ActiveLearningAgent 读 report+evidence_level+module_plan.entries→派生候选→information_gain→LearningQueue→emit learning_queue_ready;**不碰裁决红线**:代码体无 report/provenance/verdict/ledger 写操作,质量审 deepcopy 验证 report 未变 + 变异注入 mutate 被三断言全捕获证明守卫非空转;候选派生弱模块/OOD/高分歧优先 fail-safe 稳健;无候选空+note 不虚构;abstain 不改 accept;进 bus 无 LLM)。1 条非阻塞建议(记观察):entry 缺 module 键 mid=None(实战不触发,真实 entries 由 ModulePlanEntry 保证 module 必填;同 Task 4.7 边缘)。连做 Task 5.6(接 runtime 管线);做 chore commit 落盘 5.5 台账勾选。
