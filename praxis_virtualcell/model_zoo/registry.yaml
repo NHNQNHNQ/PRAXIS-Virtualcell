@@ -1,0 +1,54 @@
+# 声明式模型注册表(model zoo)。每条模型字段:
+#   name / type(public_model|self_trained) / species(list) / module(∈ MODULE_ORDER) /
+#   task / source / license / status(available|planned|missing) / wrapper(类路径) /
+#   version / requires(list,如 cobra/torch/gpu) / reliability_policy /
+#   training_card(仅 self_trained 必填,见 Task 2.7)
+# 铁律:module 必须 ∈ biological_modules.MODULE_ORDER;缺资产/缺依赖 → 由 broker fail-closed。
+models:
+  ecoli_gem:
+    name: ecoli_gem
+    type: public_model
+    species: [bacteria]
+    module: cytoplasmic_metabolism
+    task: growth
+    source: cobra_bundled_textbook          # cobra 自带 e_coli_core,无需下载
+    license: cobrapy-bundled
+    status: available
+    wrapper: praxis_virtualcell.model_zoo.wrappers.gem_wrapper.GemWrapper
+    version: e_coli_core-textbook
+    requires: [cobra]
+    reliability_policy: gem_growth_disposition
+
+  gears:
+    name: gears
+    type: public_model
+    species: [human]
+    module: genetic_hub
+    task: perturbation_response
+    source: "remote:gears_ckpt"             # 远端权重,Phase 2 不真下载(Phase 6 接入)
+    license: MIT
+    status: planned
+    wrapper: praxis_virtualcell.model_zoo.wrappers.gears_wrapper.GearsWrapper  # Phase 6 才实现
+    version: norman_2019
+    requires: [torch, gpu]
+    reliability_policy: ml_disagreement
+
+  yeast_deletion_fitness:
+    name: yeast_deletion_fitness
+    type: self_trained
+    species: [yeast]
+    module: genetic_hub
+    task: deletion_fitness
+    source: "self_trained:yeast_deletion_fitness"
+    license: internal
+    status: planned
+    wrapper: praxis_virtualcell.model_zoo.wrappers.self_trained_wrapper.SelfTrainedWrapper  # 未来
+    version: v0-planned
+    requires: [torch]
+    reliability_policy: ml_disagreement
+    training_card:                           # self_trained 必填(Task 2.7 校验)
+      training_data: SGD deletion library growth screens (planned)
+      split: by-gene holdout (planned)
+      baseline: mean-fitness predictor
+      metrics: {pearson: null, note: "planned, not yet trained"}
+      provenance: "planned; no weights yet — status=planned gates broker fail-closed"
