@@ -12,6 +12,8 @@ from praxis_virtualcell.agents.report import ReportAgent
 from praxis_virtualcell.agents.species_brain import SpeciesBrainAgent
 from praxis_virtualcell.agents.module_router_agent import ModuleRouterAgent
 from praxis_virtualcell.agents.species_context_agent import SpeciesContextAgent
+from praxis_virtualcell.agents.evidence_level_agent import EvidenceLevelAgent
+from praxis_virtualcell.active_learning.active_learning_agent import ActiveLearningAgent
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Clock, IdGen, Mode, RuntimeConfig
 from praxis_virtualcell.core.request import VirtualCellRequest
@@ -31,6 +33,9 @@ def build_runtime(config: RuntimeConfig | None = None) -> AgentRuntime:
         rt.register_agent(a)
     # Phase 4:module-aware 路由两节点(OFFLINE 也注册 → 产确定性 module_plan,零 LLM)
     for a in (SpeciesContextAgent(), ModuleRouterAgent()):
+        rt.register_agent(a)
+    # Phase 5:证据等级 + 主动学习两节点(OFFLINE 也注册 → 确定性 advisory 产物挂 provenance,零 LLM)
+    for a in (EvidenceLevelAgent(), ActiveLearningAgent()):
         rt.register_agent(a)
     from praxis_virtualcell.agents_llm.llm_client import make_llm_client
     client = make_llm_client(cfg)

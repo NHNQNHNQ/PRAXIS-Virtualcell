@@ -103,6 +103,22 @@ class AgentRuntime:
             report.setdefault("provenance", {})["module_plan"] = module_plan
         if llm_cross_module is not None:
             report.setdefault("provenance", {})["llm_cross_module_notes"] = llm_cross_module
+        # Phase 5:证据等级(插点 C)+ 主动学习(插点 D)旁路挂载。确定性零 LLM,advisory 不碰裁决。
+        # 读已组装完成的 report(reliability/abstain/disagreement/downgrade/caution/learned/module_plan
+        # 信号全齐的最早时机)→ 只往 report.provenance 追加 evidence_level/learning_queue 两新键,
+        # 不动任何现有键、不改 prediction/裁决。gated:agent 不在册则分支不进(OFFLINE 字节等价)。
+        evidence_level = None
+        if "EvidenceLevelAgent" in self._agents:
+            em = self.mk_message("Report", "EvidenceLevelAgent",
+                                 "evidence_level_request", {"report": report}, rep.message_id)
+            evidence_level = self._dispatch_collect(em, "evidence_level_ready").payload["evidence_level"]
+            report.setdefault("provenance", {})["evidence_level"] = evidence_level
+        if "ActiveLearningAgent" in self._agents:
+            am = self.mk_message("EvidenceLevelAgent", "ActiveLearningAgent",
+                                 "learning_queue_request",
+                                 {"report": report, "evidence_level": evidence_level}, rep.message_id)
+            report.setdefault("provenance", {})["learning_queue"] = \
+                self._dispatch_collect(am, "learning_queue_ready").payload["learning_queue"]
         if "LLMCritic" in self._agents:
             cm = self.mk_message("Report", "LLMCritic", "llm_review", {"report": report},
                                  rep.message_id)
