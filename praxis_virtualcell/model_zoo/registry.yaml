@@ -33,9 +33,12 @@ models:
     requires: [torch, gpu]
     reliability_policy: ml_disagreement
     assets:
-      - filename: gears_model.pt          # GEARS 原生 save/load 产物(.53)
-        sha256: null                       # 占位:真 sha 待 .53 上算过填(requires_manual_fetch)
-        source_note: "fetch from zkyd@10.102.106.53 conda env virtualcell; GEARS native save_model"
+      - filename: model.pt                # GEARS 原生 save_model 产物(.53 gears_ckpt/norman_2019/)
+        sha256: 5fd17e628d81cb7ec9e894ca2720c7fc599e604259b96dc96810ed45e1cf17ac  # 本次重训 5ep 落盘;GEARS 无固定 seed(provenance no_fixed_seed),此 sha 锁本 ckpt 版本
+        source_note: "fetch from zkyd@10.102.106.53 conda env virtualcell; GEARS native save_model (dir norman_2019/)"
+      - filename: config.pkl              # GEARS load_pretrained 配套(hidden=64/uncertainty=False)
+        sha256: 7da56a36e43e6fe9ff0846ec56e690df9aefb9e41a8e679873ef0d8086fa88e9
+        source_note: "same dir; required alongside model.pt for GEARS.load_pretrained"
     provenance:
       training_data: norman_2019
       architecture: GEARS GNN hidden=64 5epoch
@@ -78,11 +81,11 @@ models:
     requires: [torch, gpu]
     reliability_policy: ml_disagreement
     assets:
-      - filename: pretrained_backbone.pt   # ≈196MB scGPT backbone + head
-        sha256: null                        # 占位:真 sha 待 .53 上算过填
+      - filename: pretrained_backbone.pt   # ≈196MB scGPT backbone + head(215313336 B)
+        sha256: bc3e4c0e94c810bec7b06219adaf0a2db4f433e2811741d3e8c74fe878c3e27c
         source_note: "fetch from /home/zkyd/data1/mzy/scgpt_ckpt/norman_2019/ (host .53, env vc-scgpt)"
       - filename: pretrained_backbone.json # 重建 kwargs(backbone_name=scgpt)
-        sha256: null
+        sha256: bf02f71d9f904cca4ea112ce58a3edb51c44e94078eca12c00f21023eead35c4
         source_note: "same dir; class_name + kwargs for build_predictor_from_ckpt"
     provenance:
       training_data: donor norman_2019 (frozen scGPT + light head)

@@ -40,6 +40,21 @@ def test_query_by_module_genetic_hub_includes_public_models(reg):
     assert {"gears", "scgpt"} <= names
 
 
+def test_gears_and_scgpt_assets_sha256_backfilled(reg):
+    """Unit3:ckpt sha256 已从 .53 实测回填(非 null 占位),为合法 64 位 hex 版本锁。
+    诚实:status 仍 planned、broker 仍 fail-closed —— sha 是版本锚点,不代表可分发。
+    gears 文件名修正为真实 save_model 产物 model.pt + config.pkl(原 gears_model.pt 与实际不符)。"""
+    import re
+    hex64 = re.compile(r"^[0-9a-f]{64}$")
+    for name in ("gears", "scgpt"):
+        for a in reg.get(name)["assets"]:
+            assert a["sha256"] is not None, f"{name}/{a['filename']} sha256 未回填(仍 null)"
+            assert hex64.match(a["sha256"]), f"{name}/{a['filename']} sha256 非合法 64-hex"
+    gears_files = {a["filename"] for a in reg.get("gears")["assets"]}
+    assert gears_files == {"model.pt", "config.pkl"}, "gears assets 须为真实 GEARS save 产物"
+    assert reg.get("gears")["status"] == "planned"       # 填 sha 后仍 planned(不静默 available)
+
+
 def test_illegal_assets_shape_is_rejected(tmp_path):
     """assets 条目缺 filename/sha256 键 → ValueError(fail-closed)。"""
     bad = tmp_path / "bad.yaml"
