@@ -7,9 +7,9 @@
 
 ```yaml
 branch: feat/v0.9-phase0-module-core     # 当前工作分支(每到版本里程碑可换新分支)
-push_authorized: false                   # 未经用户授权不 push
+push_authorized: true                    # 2026-07-05 用户授权 git push feat→GitHub→.53 pull(Phase 6 需 .53 真跑 GEARS/scGPT);只 push 分支不 push tag(里程碑 tag 仍本地)
 pause_at_milestones: true                # 每到 v0.x 里程碑结束 loop 等人工审;设 false 则全自动直穿 v1.3
-paused_for_review: true                  # 2026-07-04 v1.2 里程碑(Phase 5 完成)硬闸暂停等人工审;要继续 Phase 6/7 回复"继续"(届时清 false 重启 loop)
+paused_for_review: false                 # 2026-07-05 用户回复"继续"→清 v1.2 硬闸,重启 loop 进 Phase 6(公开模型接入)
 test_scope: praxis_virtualcell/tests     # 唯一测试口径(永不碰根 tests/ 的 ~1398 继承测试)
 test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -q"
 ```
@@ -34,7 +34,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 | 3 module-aware router | 2026-07-04-phase3-module-router.md | ✅ 完成 | 8 task 全过两审;450 passed/25 skipped/0 failed;总 golden 60;闸门红线四件套全绿;纯新增未碰内核;v1.0.0 tag |
 | 4 LLM_ORCHESTRATED | 2026-07-04-phase4-llm-orchestrated.md | ✅ 完成 | 8 task 全过两审;509 passed/25 skipped/0 failed;LLMModulePlanner+safety_contract+接管线;OFFLINE 字节等价、LLM 不越权、三 flag False;v1.1.0 tag |
 | 5 主动学习 v1 | 2026-07-04-phase5-active-learning.md | ✅ 完成 | 8 task 全过两审;556 passed/25 skipped/0 failed;EvidenceLevel E0–E5 + ActiveLearning learning_queue;advisory 不碰裁决、OFFLINE 字节等价、治理核心零改动;v1.2.0 tag |
-| 6 公开模型接入 | (待展开) | ⬜ | GEARS/scGPT 在 .53 真跑,收编进 ModelBroker(fail-closed) |
+| 6 公开模型接入 | 2026-07-05-phase6-public-models.md | 🔄 计划已展开(5aa1e89,6 task) | GEARS/scGPT 收编进 ModelBroker(fail-closed);真推理 .53 gated;起点 556 → 592 passed / 27 skipped;非里程碑不打 tag |
 | 7 自训模型第一批 | (待展开) | ⬜ | 依赖 Phase 2 broker 契约,可与 6 并行 |
 | 8 网站 + Linux release | (待展开) | ⬜ | 增量扩前后端 |
 
@@ -100,7 +100,18 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 5.7 report_markdown 扩两段(2e99d54;证据记录 + 验证计划,现有 9 段不变;+4 → 556 passed;spec 审 + 质量审双 APPROVED,byte-identical 不破/缺键 N/A/零 LLM/无不确定性)
 - [x] Task 5.8 Phase 5 完成闸门(控制器执行;全量 556 passed/25 skipped/0 failed;红线核验 99 tests 全绿含 AL/evidence 不碰裁决;根 tests/+predictors+治理核心零触碰;打 **v1.2.0** tag 本地不 push;pause 等审)
 
-## 当前状态:Phase 5 ✅ 完成 → **v1.2 里程碑(active-learning)**,打 v1.2.0 tag,pause 等人工审。下一步:用户回复"继续"→清 paused_for_review→展开 Phase 6/7(公开模型接入 / 自训模型,依赖 Phase 2 broker,可并行)
+### Phase 6(进行中;计划 5aa1e89;起点 556 → 目标 592 passed / 27 skipped;真推理 .53 gated,非里程碑不打 tag)
+> ⚡ **用户 2026-07-05 拍板**:范围=**真推理验证接入**(不改权重,证明 wrapper 调起真 GEARS/scGPT 产真锚点,与计划吻合无返工;训练/自训留 Phase 7);同步=**git push feat→GitHub→.53 pull**(push_authorized=true);执行=**autopilot 自动 ssh 到 .53** 跑 Task 6.5 remote 真推理。
+> 🔬 **v1.3 里程碑待确认(科学决策;已落最小确定性集不阻塞)**:①GEARS/scGPT scope 边界(保守只声明 human/norman,mouse ortholog 投射待定)②estimate_uncertainty 口径(点估计 available=False 不假造 CI;ensemble/MC-dropout 留 backlog)③GEARS 同表可比 ΔPearson 何时补(需 .53 GearsDonorAdapter,comparable=null 标 backlog)④requires_manual_fetch 是否建 HTTP/OSS 分发源(当前零网络,sha256=null 占位)。
+> 🔒 **改现有文件(计划授权最小扩,不改现有逻辑)**:base.py 加 declare_provenance 默认方法、registry.yaml 追加 scgpt 条目 + gears/scgpt 扩 assets/provenance、registry.py _validate 追加 assets schema 分支、model_broker_agent.py _resolve 追加 assets sha256 关;fail-closed 不静默 accept 为头号红线(禁本地伪造 mock 0.4 冒充可用)。
+- [ ] Task 6.1 ModelWrapper.declare_provenance + GearsWrapper(缺 torch fail-closed 不静默 mock)(base 改 + gears_wrapper 纯新增;+8 → 564 passed)
+- [ ] Task 6.2 ScgptWrapper(复用 donor_bridge/MLPredictorAgent,缺 torch fail-closed)(纯新增;+9 → 573 passed)
+- [ ] Task 6.3 registry 补 scgpt 条目 + gears/scgpt assets/provenance + _validate assets schema(registry.yaml/py 受控扩;+5 → 578 passed)
+- [ ] Task 6.4 broker assets sha256 版本锁第二道关(缺 ckpt/sha 不匹配→fail-closed 不静默)(broker 受控扩;+6 → 584 passed)
+- [ ] Task 6.5 真 GEARS/scGPT 推理 gated 契约测试(.53 跑通,本地 remote skip)(纯新增;+0 passed / +2 skip → 27;**autopilot ssh .53 真跑 + 回填 sha256/锚点**)
+- [ ] Task 6.6 provenance/可分发性跨源一致闸门 + Phase 6 完成(纯新增;+8 → 592 passed)
+
+## 当前状态:**Phase 6 计划已展开(5aa1e89,6 task),进入执行阶段**。用户拍板范围=真推理验证接入、同步=push+.53 pull、执行=autopilot 自动 ssh。已核实:ssh 免密通、.53 有 4×A100、但远端 repo 停在 v0.8.0(main/7fc4aa5)需同步。下一步:push feat 到 origin 建同步链路 → 执行 Task 6.1(本地契约层,派实现 subagent 两审)。Task 6.5 前 ssh .53 增量同步 + 跑 remote 真推理回填。
 
 ## 事件日志(每次 loop 追加一行)
 
@@ -158,3 +169,5 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - 2026-07-04 **Task 5.6 两审通过**(c5d9b4c,+5 → 552 passed/0 failed/skip 25;baseline 全绿):spec 合规审 + 代码质量审均 APPROVED(改 3 文件 runtime+16/workflow+5/新测试+56,接管线最小接线;runtime 只在 report 组装后加 2 gated sidecar 插点 predictor/ensemble/reliability/critic/provenance 逻辑逐字未动、workflow 增量注册 2 确定性节点;**OFFLINE 字节等价**:质量审 deepcopy 深比较移除两键后与接前 report 完全相等、核心字段逐一相等;evidence_level/learning_queue 只进 provenance 两新键;两 agent gated 裸 runtime 不受影响;三 flag False;fixture 补 input_modality 是计划 §1029 漏必填字段的必要修正与全仓一致;5 测试真断言非空转)。无必须修项。连做 Task 5.7(report_markdown 扩两段);做 chore commit 落盘 5.6 台账勾选(6bcdca5)。
 - 2026-07-04 **Task 5.7 两审通过**(2e99d54,+4 → 556 passed/0 failed/skip 25):spec 合规审 + 代码质量审均 APPROVED(2 文件与计划逐字节一致纯追加删除行=0,4 test 与计划标注一致;证据记录/验证计划两段用不带编号 ### 子标题插 §6/§8 后不打乱 9 段编号、缺键 N/A 不崩(压测空 job/None/items=[{}] 均不崩)、**byte-identical 对既有 job 不变**(独立验证 _ACCEPT/_ABSTAIN 字节相同)、零 LLM、新段无不确定性(唯一遍历 lq_items[:5] list 保序)、现有 9 段/byte-identical/no-LLM 断言未删弱化全绿)。无必须修项。1 条非阻塞微观察(记观察):验证计划按输入序渲染、排序责任在上游(io 层纯展示)。**Task 5.7 完成 → Phase 5 全 7 实现 task 完成**。控制器执行 Task 5.8 = v1.2 里程碑闸门。
 - 2026-07-04 **Phase 5 完成 → v1.2 里程碑(控制器执行 Task 5.8 闸门)**:全量回归 **556 passed/25 skipped/0 failed/0 errors**(collected 581);红线核验(LLM 边界三 flag 恒 False + golden unsafe-accept=0 + negative 无静默 accept + baseline OFFLINE 零 LLM 产 report + LLM 编排契约 + **evidence_level 不领先治理 + ActiveLearning mutate 守卫 + runtime AL 字节等价**)共 99 tests 全绿;提交范围 v1.1.0→HEAD **根 tests/ 零触碰 + predictors 核心零触碰 + 治理现有核心(reliability/critic/provenance)零触碰**,Phase 5 全是新增 active_learning 子包(acquisition/learning_queue/active_learning_agent)+ governance/evidence_level + evidence_level_agent + 测试,加计划授权最小接线(runtime sidecar / workflow 注册 / report 追加两段)。打 **v1.2.0** tag(本地不 push)。STATUS 文档追加 Phase 5 完成台账段。**pause_at_milestones=true → 设 paused_for_review=true 硬闸,结束 loop 等人工审**。**留给用户里程碑审查的待确认项**:①information gain 权重(v1 启发式,调参/贝叶斯 EIG 留 v1.2.x)②learning_queue 候选粒度(每 module 一候选,细网格留 v1.2.x)③evidence_level 反馈 ledger 再训练(留 Phase 7)④learning_queue.py:29 注释笔误(用负号→实际 reverse=True)⑤entry 缺 module 边缘(active_learning_agent)⑥v1.0/v1.1 遗留(P3/communication/module_plan 驱动 predictor/_is_routable/M1-3-8)。下一里程碑:v1.3 = Phase 6+7+8(公开模型 / 自训模型 / 网站发行)。
+- 2026-07-05 **用户重启 loop=继续 → 进 Phase 6** + 派规划 subagent(全新上下文)展开 Phase 6 计划(初始约束:真推理留 .53 gated skip)。清 v1.2 paused_for_review 硬闸,v1.0/v1.1/v1.2 待确认项保留为观察。
+- 2026-07-05 **Phase 6 计划展开完成 + 用户三决策拍板 + 授权 push**:规划 subagent DONE(`2026-07-05-phase6-public-models.md`,5aa1e89,6 task,起点实跑核实 556 passed/25 skipped/collected 581)——把 .53 真跑的 GEARS/scGPT 收编进 ModelBroker(GearsWrapper/ScgptWrapper 扩 ModelWrapper + declare_provenance,registry 补 scgpt 条目 + assets/provenance,broker 加 assets sha256 关,真推理 .53 gated)。计划头部实读核实 **7 条真实代码校正**(gears 条目已存在只扩 assets/gears_wrapper.py 不存在需建/base 无 declare_provenance/GEARS predict 与 donor 不同构走原生 API/scGPT 已同构复用 MLPredictorAgent/本地无 torch 天然 fail-closed 不需 monkeypatch/模型级 provenance≠运行时 provenance),fail-closed 诚实(**禁本地伪造 mock 0.4 冒充可用**)。**控制器核验计划质量**:铁律/校正清单/数据契约全实读核实、Task 6.1 完整可执行、gated 复刻现有 remote 惯例——**接受**。**用户拍板**:①范围=真推理验证接入(不改权重,与计划吻合无返工)②同步=git push feat→GitHub→.53 pull(push_authorized 改 true)③执行=autopilot 自动 ssh 到 .53 跑 Task 6.5。**实况核实**:ssh 免密通、.53 有 4×A100、远端 repo 停在 v0.8.0(main/7fc4aa5,落后 Phase 0–5)需先同步。下一步:push feat 到 origin(不带 tag)建同步链路 → 执行 Task 6.1。
