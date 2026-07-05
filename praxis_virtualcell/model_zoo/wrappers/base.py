@@ -32,3 +32,9 @@ class ModelWrapper(PredictorAgent):
         if unc is None:
             return {"available": False, "reason": "model_reports_no_uncertainty"}
         return {"available": True, "uncertainty": unc}
+
+    def declare_provenance(self) -> dict:
+        """返回模型级 provenance(静态模型卡:训练数据/指标锚点/远端坐标/可分发性)。
+        默认空(机制模型如 GEM 无训练锚点);ML wrapper(GEARS/scGPT)覆写返回真锚点。
+        与运行时 PredictorResultMessage.provenance 正交(那是逐次预测的证据链)。"""
+        return {}
