@@ -32,6 +32,17 @@ models:
     version: norman_2019
     requires: [torch, gpu]
     reliability_policy: ml_disagreement
+    assets:
+      - filename: gears_model.pt          # GEARS 原生 save/load 产物(.53)
+        sha256: null                       # 占位:真 sha 待 .53 上算过填(requires_manual_fetch)
+        source_note: "fetch from zkyd@10.102.106.53 conda env virtualcell; GEARS native save_model"
+    provenance:
+      training_data: norman_2019
+      architecture: GEARS GNN hidden=64 5epoch
+      metrics: {pearson: 0.9834, pearson_de: 0.8392, mse: 0.0068, comparable_delta_pearson: null}
+      not_comparable_to_donor_base: true   # ADR-W4c-1:与 donor base 指标/split 不同,不可同表
+      remote_env: {host: "zkyd@10.102.106.53", conda_env: "virtualcell (torch 2.6)"}
+      distributable: false
 
   yeast_deletion_fitness:
     name: yeast_deletion_fitness
@@ -52,3 +63,32 @@ models:
       baseline: mean-fitness predictor
       metrics: {pearson: null, note: "planned, not yet trained"}
       provenance: "planned; no weights yet — status=planned gates broker fail-closed"
+
+  scgpt:
+    name: scgpt
+    type: public_model
+    species: [human]
+    module: genetic_hub
+    task: predict_delta_expression
+    source: "remote:scgpt_ckpt"           # 远端 196MB ckpt,requires_manual_fetch
+    license: MIT
+    status: planned                        # 缺 torch/ckpt → 仍 planned,broker fail-closed
+    wrapper: praxis_virtualcell.model_zoo.wrappers.scgpt_wrapper.ScgptWrapper
+    version: norman_2019-pretrained_backbone
+    requires: [torch, gpu]
+    reliability_policy: ml_disagreement
+    assets:
+      - filename: pretrained_backbone.pt   # ≈196MB scGPT backbone + head
+        sha256: null                        # 占位:真 sha 待 .53 上算过填
+        source_note: "fetch from /home/zkyd/data1/mzy/scgpt_ckpt/norman_2019/ (host .53, env vc-scgpt)"
+      - filename: pretrained_backbone.json # 重建 kwargs(backbone_name=scgpt)
+        sha256: null
+        source_note: "same dir; class_name + kwargs for build_predictor_from_ckpt"
+    provenance:
+      training_data: donor norman_2019 (frozen scGPT + light head)
+      architecture: frozen backbone 53.8M + head 2.47M (saturated)
+      metrics: {delta_pearson: 0.4407, cosine: 0.9808, n: 7290}
+      not_comparable_to_donor_base: false  # per-cell ΔPearson 同表 A 口径可比
+      frozen_backbone_underperforms: true  # 诚实:低于 base,SOTA 需 fine-tune(backlog)
+      remote_env: {host: "zkyd@10.102.106.53", conda_env: "vc-scgpt (torch 2.3)", ckpt: "scgpt_ckpt/norman_2019/pretrained_backbone.{pt,json}"}
+      distributable: false

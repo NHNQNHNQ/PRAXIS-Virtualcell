@@ -58,6 +58,15 @@ class ModelZooRegistry:
             missing = [k for k in required_card if k not in card]
             if missing:
                 raise ValueError(f"{name} training_card 缺字段: {missing}")
+        # assets 声明(可选;有则每条须含 filename + sha256 键 —— sha256 可 null 占位,但键必须在,
+        # 保证 ckpt 挪出硬编码后可被版本锁/取数流程指认。结构坏 → ValueError,fail-closed)
+        assets = entry.get("assets")
+        if assets is not None:
+            if not isinstance(assets, list):
+                raise ValueError(f"{name} assets 必须是 list")
+            for a in assets:
+                if not isinstance(a, dict) or "filename" not in a or "sha256" not in a:
+                    raise ValueError(f"{name} assets 条目须含 filename + sha256 键: {a}")
 
     # ---- 查询 ----
     def names(self) -> list[str]:
