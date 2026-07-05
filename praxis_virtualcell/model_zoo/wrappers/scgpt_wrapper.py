@@ -68,11 +68,15 @@ class ScgptWrapper(ModelWrapper):
         if not self._ckpt_stem:
             raise RuntimeError("scgpt ckpt 未声明(registry assets requires_manual_fetch);fail-closed")
         # donor_bridge 顶层 import torch;本地无 torch → ModuleNotFoundError(fail-closed 触发点)
+        from praxis_virtualcell.predictors.ml.agent_adapter import make_ml_agent
         from praxis_virtualcell.predictors.ml.donor_bridge import build_predictor_from_ckpt
 
         model, _cfg = build_predictor_from_ckpt(self._ckpt_stem)  # 重建 scgpt backbone + load head
-        # 真推理复用 MLPredictorAgent(scGPT 接口已同构 donor,finding_w4c_scgpt)。
-        # control/pert_emb 的 schema→tensor 适配由 .53 上的 norman ds 提供(Task 6.5 远端填实并 gated 验证)。
-        raise NotImplementedError(
-            "scGPT real inference (load 196MB ckpt + MLPredictorAgent on norman) runs on .53 (gated); "
-            "local has no torch/ckpt -> fail-closed")
+        # 真推理复用 MLBackedPredictorAgent(scGPT 接口已同构 donor,finding_w4c_scgpt);
+        # control baseline + pert_table 由 norman test ds 提供(make_ml_agent 默认加载)。
+        agent = make_ml_agent(model, name="scgpt")
+        targets = list(model_input.get("targets", []))
+        # prepare_input 读 request.perturbation_targets → esm2 pert_emb + norman control。
+        mi = agent.prepare_input({"perturbation_targets": targets}, {})
+        # run_prediction 走 MLPredictorAgent.predict_tensor(== donor predict);返回 delta/n_genes/uncertainty。
+        return agent.run_prediction(mi)
