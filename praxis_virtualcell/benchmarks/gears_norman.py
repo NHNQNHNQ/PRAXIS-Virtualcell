@@ -23,7 +23,8 @@ if _DONOR not in sys.path:
     sys.path.insert(0, _DONOR)
 
 
-def main(epochs: int = 5, gears_data: str = "/home/zkyd/data1/mzy/gears_data") -> dict:
+def main(epochs: int = 5, gears_data: str = "/home/zkyd/data1/mzy/gears_data",
+         save_dir: str | None = None) -> dict:
     import pandas as pd_pkg
     import scanpy as sc
 
@@ -50,8 +51,14 @@ def main(epochs: int = 5, gears_data: str = "/home/zkyd/data1/mzy/gears_data") -
     m, _ = compute_metrics(res)
     out = {k: round(float(m[k]), 4) for k in m if "pearson" in k.lower() or "mse" in k.lower()}
     print(f"GEARS_METRICS: {out} (t={time.time() - t0:.0f}s)")
+    if save_dir:  # 非空则落盘(GEARS.save_model 存 config.pkl + model.pt);默认仍只训练打印
+        g.save_model(save_dir)
+        print(f"GEARS_SAVED: {save_dir}")
     return out
 
 
 if __name__ == "__main__":
-    main(int(sys.argv[1]) if len(sys.argv) > 1 else 5)
+    # argv[1]=epochs;argv[2]=save_dir(可选,非空则训练后落盘)
+    _epochs = int(sys.argv[1]) if len(sys.argv) > 1 else 5
+    _save = sys.argv[2] if len(sys.argv) > 2 else None
+    main(_epochs, save_dir=_save)
