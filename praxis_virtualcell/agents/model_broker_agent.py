@@ -14,6 +14,7 @@ import importlib.util
 from praxis_virtualcell.core.agent import BaseAgent
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.model_zoo.cache import ModelCache
 from praxis_virtualcell.model_zoo.downloader import resolve_source
 from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
 
@@ -31,8 +32,10 @@ def _dep_available(dep: str) -> bool:
 class ModelBrokerAgent(BaseAgent):
     name = "ModelBrokerAgent"
 
-    def __init__(self, registry: ModelZooRegistry | None = None) -> None:
+    def __init__(self, registry: ModelZooRegistry | None = None,
+                 cache: ModelCache | None = None) -> None:
         self._reg = registry or ModelZooRegistry()
+        self._cache = cache or ModelCache()
 
     def handle(self, message: AgentMessage, bus: MessageBus) -> None:
         model_name = message.payload.get("model_name")
@@ -73,6 +76,19 @@ class ModelBrokerAgent(BaseAgent):
         if not src["available"]:
             base["reason"] = f"source not resolvable: {src['reason']}"
             return base
+
+        # 5) assets 版本锁关(有 assets 时每条须落地 + sha 对;sha=null 占位 → requires_manual_fetch)。
+        #    这是 fail-closed 第二道锁:即便依赖/source 齐,ckpt 未取到/sha 不匹配 → 不静默 accept(红线 6)。
+        for a in entry.get("assets", []) or []:
+            declared_sha = a.get("sha256")
+            if declared_sha is None:
+                base["reason"] = (f"asset requires_manual_fetch: {a.get('filename')} sha256 未登记"
+                                  f"(占位)—— 需按 source_note 手动获取并登记 sha 后方可用")
+                return base
+            st = self._cache.check(model_name, a["filename"], sha256=declared_sha)
+            if not st.available:
+                base["reason"] = f"asset unavailable: {st.reason}"
+                return base
 
         # 全部通过 → available
         base["available"] = True
