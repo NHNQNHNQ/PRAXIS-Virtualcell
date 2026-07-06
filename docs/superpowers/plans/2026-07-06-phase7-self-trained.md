@@ -845,24 +845,24 @@ def test_self_trained_sha_placeholder_fail_closed(tmp_path, monkeypatch):
 - [ ] **Step 2: 跑确认失败**
 
 Run: `PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests/test_broker_self_trained.py -q`
-Expected: 部分 FAIL —— `test_yeast_deletion_fitness_planned_fail_closed` 断 wrapper 路径 `self_trained_wrapper.SelfTrainedWrapper`(registry.yaml 现值即如此,应过);`test_norman_mean_baseline_source_self_trained_fail_closed` 依赖 registry.yaml 有 `norman_mean_baseline` 条目 → **FAIL(KeyError/unknown model,因 Task 7.5 才加该条目)**。→ 本 task 与 Task 7.5 有序:**7.4 先只写不依赖 norman_mean_baseline 条目的测试;`test_norman_mean_baseline_*` 移到 Task 7.5**。**修正:把 `test_norman_mean_baseline_source_self_trained_fail_closed` 从本 task 删除,移入 Task 7.5**(Task 7.5 加 registry 条目后它才有意义)。本 task 保留其余 5 条。
+Expected: 部分 FAIL —— `test_yeast_deletion_fitness_planned_fail_closed` 断 wrapper 路径 `self_trained_wrapper.SelfTrainedWrapper`(registry.yaml 现值即如此,应过);`test_norman_mean_baseline_source_self_trained_fail_closed` 依赖 registry.yaml 有 `norman_mean_baseline` 条目 → **FAIL(KeyError/unknown model,因 Task 7.5 才加该条目)**。→ 本 task 与 Task 7.5 有序:**7.4 先只写不依赖 norman_mean_baseline 条目的测试;`test_norman_mean_baseline_*` 移到 Task 7.5**。**修正:把 `test_norman_mean_baseline_source_self_trained_fail_closed` 从本 task 删除,移入 Task 7.5**(Task 7.5 加 registry 条目后它才有意义)。本 task 保留其余 4 条。
 
-> **依赖修正(执行者必读):** 本 task 5 条测试(删去 norman_mean_baseline 那条)**不依赖** registry.yaml 新条目,只依赖现有 `yeast_deletion_fitness`(Phase 2 种子已在)+ 临时 registry。故本 task 顺序在 Task 7.5 之前可跑。`test_yeast_deletion_fitness_planned_fail_closed` 断 wrapper 路径 = registry.yaml 现值 `...self_trained_wrapper.SelfTrainedWrapper`(实读确认),Task 7.1 建了该 wrapper 文件,故路径有效。
+> **依赖修正(执行者必读):** 本 task 4 条测试(删去 norman_mean_baseline 那条)**不依赖** registry.yaml 新条目,只依赖现有 `yeast_deletion_fitness`(Phase 2 种子已在)+ 临时 registry。故本 task 顺序在 Task 7.5 之前可跑。`test_yeast_deletion_fitness_planned_fail_closed` 断 wrapper 路径 = registry.yaml 现值 `...self_trained_wrapper.SelfTrainedWrapper`(实读确认),Task 7.1 建了该 wrapper 文件,故路径有效。
 
 - [ ] **Step 3: 无源码改动(broker 五关复用)**
 
-本 task **不改 broker**。若 Step 2 某断言失败是因 broker 现有行为与预期不符 → **真 bug,停下报告,不改代码/测试迁就**(红线 5)。预期:5 条全绿(yeast planned 在②关、self_trained source 在④关、sha 占位在⑤关、sha 对放行——全是现有五关行为)。
+本 task **不改 broker**。若 Step 2 某断言失败是因 broker 现有行为与预期不符 → **真 bug,停下报告,不改代码/测试迁就**(红线 5)。预期:4 条全绿(yeast planned 在②关、self_trained source 在④关、sha 占位在⑤关、sha 对放行——全是现有五关行为)。
 
 - [ ] **Step 4: 跑绿**
 
 Run: `PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests/test_broker_self_trained.py -q`
-Expected: 5 passed(删去 norman_mean_baseline 条移 7.5 后)。
+Expected: 4 passed(删去 norman_mean_baseline 条移 7.5 后)。
 
 - [ ] **Step 5: 全量回归**
 
 Run: `PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -q --junit-xml=/tmp/junit_p7_t4.xml`
 Run: `python3 -c "import xml.etree.ElementTree as ET; r=ET.parse('/tmp/junit_p7_t4.xml').getroot(); s=r if r.tag=='testsuite' else r[0]; print('tests=%s failures=%s errors=%s skipped=%s'%(s.get('tests'),s.get('failures'),s.get('errors'),s.get('skipped')))"`
-Expected: `tests=644 failures=0 errors=0 skipped=27`(639 + 5 新 = 644;passed = 644 − 27 = **617**)。
+Expected: `tests=643 failures=0 errors=0 skipped=27`(639 + 4 新 = 643;passed = 643 − 27 = **616**)。
 
 - [ ] **Step 6: 提交**
 

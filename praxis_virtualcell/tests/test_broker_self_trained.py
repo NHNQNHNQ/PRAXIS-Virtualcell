@@ -4,7 +4,7 @@ sha 占位 → assets 关 fail-closed。变异逮捕:self_trained + 依赖齐 + 
 broker 五关不改,本 task 只加测试。
 
 依赖修正(计划 Task 7.4 Step 2):norman_mean_baseline 条目 Task 7.5 才加,故
-test_norman_mean_baseline_source_self_trained_fail_closed 移入 Task 7.5,本 task 保留其余 5 条
+test_norman_mean_baseline_source_self_trained_fail_closed 移入 Task 7.5,本 task 保留其余 4 条
 (只依赖现有 yeast_deletion_fitness 种子 + 临时 registry)。"""
 import hashlib
 
