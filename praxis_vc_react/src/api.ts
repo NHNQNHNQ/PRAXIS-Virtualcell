@@ -104,6 +104,9 @@ export interface ModulePlanEntry {
   verdict: string;
   mismatch: string | null;
   caution_flags: string[];
+  data_gated: boolean;
+  pillars: string[];
+  reason: string;
   available_models: string[];
 }
 
