@@ -9,4 +9,5 @@ class MockLinearAgent(PredictorAgent):
 
     def run_prediction(self, model_input: dict) -> dict:
         return {"prediction": {"delta": [0.0 for _ in model_input["targets"]] or [0.0]},
-                "uncertainty": {"sigma": 0.1}}
+                "uncertainty": {"sigma": 0.1},
+                "evidence": ["mock"], "provenance": {"mock": True}}  # 自声明 mock,非真跑数值

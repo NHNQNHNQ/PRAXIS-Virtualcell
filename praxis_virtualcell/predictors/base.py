@@ -60,8 +60,9 @@ class PredictorAgent(BaseAgent):
             return
         self._emit(bus, message, PredictorResultMessage(
             agent_name=self.name, status="success", prediction=out["prediction"],
-            uncertainty=out.get("uncertainty"), applicability_score=score, evidence=["mock"],
-            rejection_reason=None, provenance={"mock": True}))
+            uncertainty=out.get("uncertainty"), applicability_score=score,
+            evidence=out.get("evidence", []),
+            rejection_reason=None, provenance=out.get("provenance", {})))
 
     def _emit(self, bus: MessageBus, src: AgentMessage, result: PredictorResultMessage) -> None:
         bus.send(AgentMessage(
