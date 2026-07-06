@@ -280,7 +280,7 @@ code.sha { font-size: 0.68em; }
 .block:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
 .block h3 { font-size: 14px; margin-bottom: 8px; }
 
-.json, .narrative {
+.json, .narrative, .pretty {
   background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--text);
@@ -295,6 +295,59 @@ code.sha { font-size: 0.68em; }
   margin: 6px 0;
 }
 .narrative { font-family: var(--font-sans); font-size: 13px; }
+
+/* ---------- Parse Review: candidate_request 只读键值表 ---------- */
+.kv-table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 13px; }
+.kv-table th, .kv-table td {
+  text-align: left;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.kv-table th {
+  width: 38%;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.kv-table td { color: var(--text); word-break: break-word; }
+.kv-table tr:last-child th, .kv-table tr:last-child td { border-bottom: none; }
+
+/* ---------- Module Context: 模块目录卡片网格 ---------- */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.module-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  background: var(--surface-2);
+  transition: border-color 0.12s, background 0.12s;
+}
+.module-card.expected {
+  border-color: var(--focus);
+  background: var(--ok-bg);
+  box-shadow: 0 0 0 1px var(--focus) inset;
+}
+.module-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.module-code { font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
+.module-flag {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ok);
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--ok) 30%, transparent);
+  border-radius: var(--radius-pill);
+  padding: 1px 8px;
+}
+.module-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.module-engines { font-size: 11px; color: var(--text-faint); margin-top: 4px; font-family: var(--font-mono); word-break: break-word; }
+@media (max-width: 560px) { .module-grid { grid-template-columns: 1fr 1fr; } }
 
 /* ---------- Trace 时间线 ---------- */
 .timeline { list-style: none; margin: 6px 0; padding: 0; }
