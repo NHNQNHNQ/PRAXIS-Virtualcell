@@ -66,6 +66,12 @@ models:
       baseline: mean-fitness predictor
       metrics: {pearson: null, note: "planned, not yet trained"}
       provenance: "planned; no weights yet — status=planned gates broker fail-closed"
+    provenance:                                    # 顶层块,诚实标注无数据(与其他条目结构对齐)
+      training_data: SGD deletion library growth screens (planned — NOT YET AVAILABLE)
+      architecture: TBD (deletion-fitness predictor; needs SGD data)
+      metrics: {pearson: null, note: "planned, not yet trained — no SGD deletion data on repo/.53"}
+      status_note: "blocked on external SGD data — see plan 待确认 §1; broker fail-closed until trained"
+      distributable: false
 
   scgpt:
     name: scgpt
@@ -94,4 +100,36 @@ models:
       not_comparable_to_donor_base: false  # per-cell ΔPearson 同表 A 口径可比
       frozen_backbone_underperforms: true  # 诚实:低于 base,SOTA 需 fine-tune(backlog)
       remote_env: {host: "zkyd@10.102.106.53", conda_env: "vc-scgpt (torch 2.3)", ckpt: "scgpt_ckpt/norman_2019/pretrained_backbone.{pt,json}"}
+      distributable: false
+
+  norman_mean_baseline:
+    name: norman_mean_baseline
+    type: self_trained
+    species: [human]
+    module: genetic_hub
+    task: predict_delta_expression
+    source: "self_trained:norman_mean_baseline"   # 自训权重远端手动获取,broker source 关 fail-closed
+    license: internal
+    status: planned                                # ckpt 未落地/sha 占位 → broker fail-closed(红线 6)
+    wrapper: praxis_virtualcell.model_zoo.wrappers.self_trained_wrapper.SelfTrainedWrapper
+    version: v0-mean-baseline
+    requires: [torch]
+    reliability_policy: ml_disagreement
+    training_card:                                 # 真值(mean_baseline.py 实测,非占位)
+      training_data: donor norman_2019 (Perturb-seq K562); mean_delta over non-control cells
+      split: by-cell seed split (train seed 0 / test seed 1)
+      baseline: "N/A — this model IS the naive lower-bound baseline (>=3 baseline invariant)"
+      metrics: {delta_pearson: 0.4615, cosine: 0.9850, n: 18874, n_train: 25463}
+      provenance: "mean_baseline.py scored on .53 virtualcell env; ckpt fetch gated (assets sha placeholder)"
+    assets:
+      - filename: mean_delta.pt                    # ≈8KB float tensor(2000 维);.53 落盘产物
+        sha256: null                               # 占位:真训落盘后 .53 上算 sha256 填入(broker requires_manual_fetch)
+        source_note: "fetch from zkyd@10.102.106.53 virtualcell env; torch.save(compute_mean_delta(train_ds)[0])"
+    provenance:                                    # 顶层块,与 gears/scgpt 对齐
+      training_data: donor norman_2019 (mean_delta over non-control cells)
+      architecture: mean-perturbation naive baseline (perturbation-agnostic)
+      metrics: {delta_pearson: 0.4615, cosine: 0.9850, n: 18874}
+      is_naive_lower_bound_baseline: true          # 诚实:低于 trained predictors(base 0.6183~0.6716)by design
+      not_comparable_to_donor_base: false          # per-cell ΔPearson 同表 A 口径可比
+      remote_env: {host: "zkyd@10.102.106.53", conda_env: "virtualcell (torch 2.6)", training_script: "praxis_virtualcell.benchmarks.mean_baseline"}
       distributable: false
