@@ -9,7 +9,7 @@
 branch: feat/v0.9-phase0-module-core     # 当前工作分支(每到版本里程碑可换新分支)
 push_authorized: true                    # 2026-07-05 用户授权 git push feat→GitHub→.53 pull(Phase 6 需 .53 真跑 GEARS/scGPT);只 push 分支不 push tag(里程碑 tag 仍本地)
 pause_at_milestones: true                # 每到 v0.x 里程碑结束 loop 等人工审;设 false 则全自动直穿 v1.3
-paused_for_review: true                  # 2026-07-06 Phase 7 全部完成(Task 7.1–7.6,627/29/0)→ 收官处停 loop 汇报;Phase 8(网站+Linux release,v1.3 最后一相)是新大相位,等用户"继续"再展开
+paused_for_review: false                 # 2026-07-06 用户回复"继续"→ 进 Phase 8;本次工作单元=展开 Phase 8 详细 TDD 计划
 test_scope: praxis_virtualcell/tests     # 唯一测试口径(永不碰根 tests/ 的 ~1398 继承测试)
 test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -q"
 ```
@@ -36,7 +36,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 | 5 主动学习 v1 | 2026-07-04-phase5-active-learning.md | ✅ 完成 | 8 task 全过两审;556 passed/25 skipped/0 failed;EvidenceLevel E0–E5 + ActiveLearning learning_queue;advisory 不碰裁决、OFFLINE 字节等价、治理核心零改动;v1.2.0 tag |
 | 6 公开模型接入 | 2026-07-05-phase6-public-models.md | ✅ 完成 | 6 task 全过两审/复审;GEARS/scGPT 收编进 ModelBroker(fail-closed);**两 remote 真推理 .53 独立证真**(scGPT vc-scgpt / GEARS virtualcell 重训 pearson_de 0.8482,AHR vs FEV 反 mock);593 passed/27 skipped/0 failed;根 tests/+管线/治理/LLM 核心零触碰(仅 Unit4 意图 mock 清理 OFFLINE 字节等价);非里程碑不打 tag |
 | 7 自训模型第一批 | 2026-07-06-phase7-self-trained.md | ✅ 完成 | 6 task 全过两审/复审+独立 .53 复现;SelfTrainedWrapper+model_zoo/training+broker fail-closed 纵深+norman_mean_baseline 真训真评(.53 ΔPearson 0.46154≈0.4615)+跨源一致闸门;627 passed/29 skipped/0 failed;**纯 model_zoo 扩展,根 tests/+管线/治理/LLM/predictors/agents 核心零触碰**;yeast 保 planned(SGD 数据待用户);非里程碑不打 tag |
-| 8 网站 + Linux release | (待展开) | ⬜ | 增量扩前后端 |
+| 8 网站 + Linux release | 2026-07-06-phase8-web-release.md | 🔨 计划已展开 | 11 task:后端 module 端点×3(TDD)+ report 扩 12→30 + 前端 3→7 步(build-verified 无前端测试栈)+ Linux/Docker smoke 10(.53 真跑)+ v1.3 闸门 |
 
 ## 任务级台账(仅当前 Phase 展开)
 
@@ -121,7 +121,22 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - [x] Task 7.5 norman_mean_baseline 真训真评(stage A 09aac46 离线+gated 骨架 / stage B 9262769 .53 真训 ΔPearson 0.46154≈0.4615+落盘+抓修 wrapper Context bug+回填 sha256;三视角 APPROVED+独立 .53 复现 2 gated 真绿;621 passed/29 skipped)
 - [x] Task 7.6 provenance/training_card 跨源一致闸门 + Phase 7 完成闸门(0aa15c6,+6→627 passed;registry↔wrapper↔spec 三源锚点/scope 对齐防双真相源;质量审全套变异证真守卫;spec+质量双 APPROVED)
 
-## 当前状态:**🎉 Phase 7 全部完成(Task 7.1–7.6 全过两审/复审+独立 .53 复现;627 passed/29 skipped/0 failed;非里程碑不打 tag)。下一步:Phase 8(网站 + Linux release,v1.3 最后一相,待展开)—— autopilot 在 Phase 7 收官处停 loop 汇报,等继续指令。**
+### Phase 8(计划 2026-07-06-phase8-web-release.md;起点 627 passed/29 skipped;用户三决策:完整7步/前端不引入测试栈/smoke .53 真跑;v1.3 里程碑打 tag)
+> ⚠️ 前端 4 task 用 **build-verified 模板**(tsc build + oxlint + 后端契约 TDD + 手验清单),非标准 TDD——用户明确前端不引入测试栈。后端/smoke task 标准 TDD。
+> 🔑 关键实况(展开时亲验):module_plan 在 `structured_report["provenance"]["module_plan"]`(runtime.py:103);ModulePlanEntry 真实字段以 module_plan.py 为准;三份早期计划(linux-dist/cell-catalog/report-md)v0.6/v0.8 已 100% 落地,本 Phase 只做剩余增量。
+- [ ] Task 8.1 cell_catalog 加 module 元数据 + loader 白名单校验(TDD)
+- [ ] Task 8.2 GET /api/modules 八模块目录端点(TDD)
+- [ ] Task 8.3 GET /api/reports/{id}/module-plan 端点(fail-closed,TDD)
+- [ ] Task 8.4 report.md 加模块路由段(读 module_plan 缺则 N/A)+ 首批段测试(TDD)
+- [ ] Task 8.5 report tests 扩到 30(module/evidence/多物种/provenance 一致,TDD)
+- [ ] Task 8.6 前端 api.ts module 端点封装 + 类型(build-verified)
+- [ ] Task 8.7 前端 App 3→7 步状态机 + 新步骤占位组件(build-verified)
+- [ ] Task 8.8 ParseReviewView + ModuleContextView 实装(build-verified)
+- [ ] Task 8.9 RunConfirmView + ConfirmView 出口 + ResultView 模块路由块 + dist(build-verified)
+- [ ] Task 8.10 Linux/Docker smoke 10 条(integration,mac skip)+ .53 真跑绿(TDD+远端)
+- [ ] Task 8.11 Phase 8 完成闸门 + v1.3.0 tag(控制器执行;逐阶段暂停)
+
+## 当前状态:**🔨 Phase 8 计划已展开(2026-07-06-phase8-web-release.md,11 task)。下一步:执行 Task 8.1(cell_catalog module 元数据,TDD)。用户三决策已锁(完整7步/前端不引入测试栈/smoke .53 真跑)。v1.3 = 全升级收官里程碑,Phase 8 完成后打 v1.3.0 tag + 逐阶段暂停汇报。**
 **Phase 7 交付**:SelfTrainedWrapper(缺 torch/未训 fail-closed 不伪造)+ model_zoo/training SelfTrainingSpec(声明式训练契约 fail-closed)+ registry._validate training_card 内部字段校验加固 + broker self_trained 五关 fail-closed 纵深 + **norman_mean_baseline 第一个真自训样板(.53 真训真评 ΔPearson 0.46154≈0.4615,mean_delta 落盘 sha256 306f0b60,两 gated remote .53 真绿)** + 跨源一致闸门(registry↔wrapper↔spec 防双真相源)。stage B 靠真跑 .53 抓修一个潜伏 wrapper bug(donor API PredictionContext→Context)。红线全绿:根 tests/+管线/治理/LLM/predictors/agents 核心零触碰(纯 model_zoo 扩展,比 Phase 6 更干净)、LLM 三 flag False、golden unsafe-accept=0、negative 无静默、OFFLINE 零 LLM。yeast_deletion_fitness 保 planned(SGD 数据待用户提供才真训 yeast 模型)。
 **Phase 6 交付总结**:GEARS/scGPT 收编进 ModelBroker(缺 torch/ckpt fail-closed 不伪造)+ registry 声明 assets(sha256 已 .53 实测回填)/provenance(真锚点)+ broker assets 版本锁 + **两 remote 真推理 .53 独立证真**(scGPT vc-scgpt `1 passed`;GEARS virtualcell 重训 pearson_de 0.8482 落盘 `1 passed`,AHR vs FEV 1449 基因不同反 mock)+ mock 遗留标记清理(真预测器不再误标,OFFLINE 字节等价)+ 跨源一致闸门。红线全绿:根 tests/ 零触碰、管线/治理/LLM 编排/主动学习核心零触碰(仅 Unit4 意图 predictors/base.py mock 清理,OFFLINE 字节等价已证)、LLM 三 flag False、golden unsafe-accept=0、negative 无静默 accept、OFFLINE 零 LLM 产 report。**⚠ 环境 3 次注入(fresh Agent 间歇 tool_uses=0)均识别作废重派/控制器执行,零副作用;trailer 2026-07-06 起改 Opus 4.8。**
 **trailer 惯例(2026-07-06 用户拍板)**:往后新提交署名 `Co-Authored-By: Claude Opus 4.8`(实际运行模型);AUTOPILOT 协议 + Phase6 计划的旧 Fable 5 指令已更新;已推送历史 Phase 0-6+Unit1-3 保留 Fable 5 不重写;台账里记录历史事实的 Fable 5 是事实不改。
@@ -223,3 +238,4 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - 2026-07-06 **Task 7.5 stage B 复审通过(9262769)→ Task 7.5 全部完成**:Workflow(wf_217682ff)三视角**全 APPROVED**——spec(2 文件、wrapper 最小改 PredictionContext→Context+tuple/三道 fail-closed+declare_* 未动、registry 单点 sha256 回填、621/29/0)、质量(.53 读 donor base 证 Context 存在无 PredictionContext 修复对症、fail-closed 不受影响、sha 诚实)、**remote 独立 .53 复现(scp 修复版→ast walk 证 donor API→2 gated 测试真绿 10.41s→sha256 精确匹配 306f0b60→对抗直调 n_genes 2000/1674 唯一值非常数→还原 .53 干净)**。17 observation 0 blocking。**Task 7.5 接受**(控制器复核 stage B 本地 621/29/0 + .53 gated 2 passed)。下一步:push 9262769→origin+.53 同步 → **Task 7.6 完成闸门**(跨源一致 registry↔wrapper↔spec,须关 Task 7.1 记的 yeast 跨源[yeast 条目 species=yeast vs wrapper declare_scope=human] + Task 7.2 记的 spec↔registry 双真相源[to_training_card 键 vs required_card 硬编码])+ Phase 7 完成核验,非里程碑不打 tag。
 - 2026-07-06 **Task 7.6 完成闸门测试 + Phase 7 完成闸门核验(控制器执行,0aa15c6)**:控制器写 test_phase7_provenance_consistency.py(6 测试:registry↔wrapper delta_pearson/n 锚点对齐+module/species/task scope 对齐+spec_to_card 五键一致+wrapper 诚实 flag[is_naive_lower_bound_baseline/distributable False]+2 无 LLM import)——先核实 SelfTrainingSpec 构造/wrapper declare_provenance metrics/registry norman 条目 API 一致再落地。**闸门核验全过**:①gate 6 passed ②红线 KPI 批(LLM 边界/golden/negative/offline)47 passed ③**全量 656 tests/0 failed/0 errors/29 skipped→627 passed**(621+6;计划标 629 因基线漂移实为 627)④MANIFEST 有 *.yaml + training/__init__.py(find_packages 纳入)⑤**Phase 7 范围核验(7d8e52c..HEAD)**:仅 model_zoo/tests/benchmarks/docs,**根 tests/ 零触碰**、**管线/治理/LLM/predictors/agents 核心零触碰**(纯 model_zoo 扩展,比 Phase 6 更干净——Phase 6 曾动 predictors/base.py,Phase 7 零动核心)。commit 0aa15c6(纯新增 1 测试文件+Opus4.8 trailer,未 push/tag)。走 Workflow(wclghsljy)复审 gate 非 vacuous。**Phase 7 非里程碑不打 tag(v1.3 等 Phase 8)。yeast 跨源留 deferred(planned 占位无实际模型,真训 yeast 时才定 scope);spec↔registry 双真相源由 test_spec_to_card_matches_registry 关一致性。**
 - 2026-07-06 **🎉 Phase 7 收官(Task 7.6 gate 复审通过 + 全相位完成)**:Workflow(wf_483d88b4)两视角**全 APPROVED**——spec(单测试文件 59 行纯新增、与计划 byte-identical、6 测试锚点真值、627/29/0、trailer/未 push/tag)、**质量(全套变异证真守卫:wrapper delta_pearson 0.4615→0.5 KILLED / scope module·species·task 变异 KILLED / registry 侧漂移 KILLED / spec-metric KILLED / honest-flag KILLED / no-llm KILLED,全在 /tmp 副本+RAM monkeypatch repo 零改→无注入)**。11 findings(10 obs+1 minor)0 blocking。**Task 7.6 接受 → Phase 7 全部完成(7.1–7.6)**。**控制器决策:Phase 7 非版本里程碑(v1.3=Phase 8 后),但作为自训模型第一批全证真的重大收官点 + Phase 8 是新大相位,设 paused_for_review=true 停 loop 汇报,等'继续'再展开 Phase 8。** push 0aa15c6+台账→origin,.53 同步。
+- 2026-07-06 **用户回复"继续"→ 进 Phase 8**:清 paused_for_review 闸。派 3 个并行 Explore subagent(带防注入)调研前端 React / 后端 API+catalog / Linux 打包三子系统真实代码,全 tool_uses>0 无注入采信。**关键发现**:三份早期计划(linux-distribution/cell-catalog-presets/report-md-renderer)v0.6/v0.8 已 100% 落地,Phase 8 剩余增量仅三块(网站 module 展示+7步 / report tests 9段→30 / Linux smoke 10)。**首触产品可见 UI + 前端测试栈引入 + release 卖相 → AskUserQuestion 三决策**:①完整 7 步流程重构 ②前端不引入测试栈(后端 TDD 为主)③Linux smoke .53 真跑绿。控制器亲读 12 个真实接口文件(硬确认 module_plan 落 `report.provenance.module_plan`、ModulePlanEntry 真字段、三 fixture 模式)→ 用 writing-plans 展开 **2026-07-06-phase8-web-release.md(11 task)**:前端 build-verified、后端/smoke 标准 TDD。台账填 Phase 8 任务级。下一步执行 Task 8.1。
