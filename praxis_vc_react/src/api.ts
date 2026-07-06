@@ -73,6 +73,7 @@ export interface CellPreset {
   label: string;
   example_perturbation_type?: string;
   example_targets?: string[];
+  modules?: string[];
 }
 
 export interface Options {
@@ -82,6 +83,37 @@ export interface Options {
   cell_type_examples: string[];
   cell_type_free_text: boolean;
   cell_presets: CellPreset[];
+}
+
+export interface ModuleInfo {
+  id: string;
+  code: string;
+  display_name: string;
+  engines: string[];
+  pillars: string[];
+}
+
+export interface ModulePlanEntry {
+  module: string;
+  display_name: string;
+  role: string;
+  engine: string;
+  route_disposition: string;
+  species_support: string;
+  species_verdict: string;
+  verdict: string;
+  mismatch: string | null;
+  caution_flags: string[];
+  available_models: string[];
+}
+
+export interface ModulePlan {
+  species: string;
+  primary: string;
+  secondary: string[];
+  overall_verdict: string;
+  entries: ModulePlanEntry[];
+  notes: string[];
 }
 
 // ---- 内部 fetch 助手 ----
@@ -145,6 +177,16 @@ export function getProvenance(jobId: string): Promise<ProvenanceResult> {
 // 只读枚举 + cell 预设(供前端下拉)。权威仍在后端,前端只展示。
 export function getOptions(): Promise<Options> {
   return req<Options>("/api/options");
+}
+
+export function getModules(): Promise<{ modules: ModuleInfo[] }> {
+  return req<{ modules: ModuleInfo[] }>("/api/modules");
+}
+
+// 该 job 的实际模块路由结果(只读)。不可路由 job 返回空 module_plan。
+export function getModulePlan(jobId: string): Promise<{ module_plan: ModulePlan | Record<string, never> }> {
+  return req<{ module_plan: ModulePlan | Record<string, never> }>(
+    `/api/reports/${encodeURIComponent(jobId)}/module-plan`);
 }
 
 // report.md 为纯文本(text/markdown),不走 JSON 解析,单独 fetch。
