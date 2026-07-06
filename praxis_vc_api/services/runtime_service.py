@@ -118,3 +118,12 @@ def report_markdown(job_id: str) -> str:
         return md
     from praxis_virtualcell.io.report_markdown import render_report_md
     return render_report_md(job)
+
+
+def module_plan(job_id: str) -> dict:
+    """从落盘 job 的 structured_report.provenance 提取 module_plan(只读)。
+    缺失(abstain/不可路由 job)→ 空 dict,fail-closed 不重算。job 不存在 → FileNotFoundError。"""
+    job = JobStore(RUNS_DIR).load(job_id)   # 缺 → FileNotFoundError
+    report = job.get("report") or {}
+    prov = report.get("provenance") or job.get("provenance") or {}
+    return {"module_plan": prov.get("module_plan") or {}}

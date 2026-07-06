@@ -106,6 +106,16 @@ def provenance(job_id: str):
         raise HTTPException(status_code=404, detail="job not found") from e
 
 
+@app.get("/api/reports/{job_id}/module-plan")
+def module_plan(job_id: str):
+    """该 job 的实际模块路由结果(只读):primary/secondary/entries/overall_verdict。
+    不可路由 job 返回空 module_plan,不重算。"""
+    try:
+        return svc.module_plan(job_id)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail="job not found") from e
+
+
 @app.get("/api/reports/{job_id}/markdown", response_class=PlainTextResponse)
 def report_markdown(job_id: str):
     """确定性 report.md(text/markdown)。历史 job 缺 .md 时现场重渲染。"""

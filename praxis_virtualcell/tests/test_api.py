@@ -110,3 +110,30 @@ def test_modules_catalog(client):
     assert m2["id"] == "genetic_hub" and m2["display_name"] == "Genetic Hub"
     assert "donor_predictor" in m2["engines"]
     assert "pillars" in m2 and isinstance(m2["pillars"], list)
+
+
+def test_module_plan_endpoint(client):
+    # 可路由请求(human + 有 targets)→ 应产 module_plan
+    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+           "input_modality": "scRNA", "output_modality": "delta_expression",
+           "task_type": "predict_delta_expression"}
+    jid = client.post("/api/jobs", json={"request": req, "mode": "offline"}).json()["job_id"]
+    r = client.get(f"/api/reports/{jid}/module-plan")
+    assert r.status_code == 200
+    mp = r.json()["module_plan"]
+    assert mp.get("primary") and "entries" in mp and "overall_verdict" in mp
+
+
+def test_module_plan_missing_is_empty_not_500(client):
+    # 不可路由请求(空 targets → abstain,无 module_plan)→ 空 dict,不崩
+    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": [],
+           "input_modality": "scRNA", "output_modality": "delta_expression",
+           "task_type": "predict_delta_expression"}
+    jid = client.post("/api/jobs", json={"request": req, "mode": "offline"}).json()["job_id"]
+    r = client.get(f"/api/reports/{jid}/module-plan")
+    assert r.status_code == 200
+    assert r.json()["module_plan"] == {}
+
+
+def test_module_plan_404(client):
+    assert client.get("/api/reports/nope/module-plan").status_code == 404
