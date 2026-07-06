@@ -93,6 +93,28 @@ def render_report_md(job: dict) -> str:
           f"metric=`{dis.get('metric', _NA)}` · triggered=`{dis.get('triggered')}`")
     w("")
 
+    # 模块路由(Phase 8:module_plan 展示层。读现有 provenance.module_plan,缺则 N/A,不重算/不打乱 9 段编号)
+    mp = prov.get("module_plan") or {}
+    w("### 模块路由(Module Routing)")
+    w("")
+    if not mp:
+        w(f"- primary module: `{_NA}`(无 module_plan:abstain/不可路由 job 或旧记录)")
+    else:
+        w(f"- primary module: `{mp.get('primary', _NA)}` · "
+          f"secondary: `{_fmt_list(mp.get('secondary'))}` · "
+          f"overall_verdict: **{mp.get('overall_verdict', _NA)}**")
+        entries = mp.get("entries") or []
+        if entries:
+            w("- 模块裁决(module · role · verdict · mismatch):")
+            for e in entries:
+                w(f"  - `{e.get('module', _NA)}` · {e.get('role', _NA)} · "
+                  f"**{e.get('verdict', _NA)}**"
+                  + (f" · mismatch=`{e.get('mismatch')}`" if e.get('mismatch') else ""))
+    w("")
+    w("_模块路由是治理层之上的逻辑视图(读 module_plan artifact);M1–M8 映射现有 engine,"
+      "verdict 取 route/species/mismatch 最保守,不重写裁决。_")
+    w("")
+
     # 4. Result Summary
     w("## 4. Result Summary")
     w("")

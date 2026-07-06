@@ -194,3 +194,60 @@ def test_missing_evidence_and_queue_shows_na():
     assert "N/A" in md
     for s in _SECTIONS:
         assert s in md
+
+
+# ===== Phase 8:模块路由段(module_plan 展示层) =====
+
+_WITH_MODULE_PLAN = {
+    "mode": "offline",
+    "request": {"request_id": "mp_ahr", "species": "human", "cell_type": "K562",
+                "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+                "task_type": "predict_delta_expression"},
+    "report": {
+        "request_id": "mp_ahr", "abstain": False, "reliability": "high",
+        "prediction": {"delta": [0.3]}, "models_used": ["MockLinear"],
+        "models_rejected": [], "models_failed": [], "abstain_reasons": [],
+        "downgrade_reasons": [], "failed_checks": [], "model_disagreement": None,
+        "critic_violations": [], "caution_flags": {}, "learned_reliability": None,
+        "provenance": {"n_messages": 20, "rules_referenced": [], "rules_hit": [],
+                       "ortholog_cautions": {}, "rejection_reasons": {},
+                       "module_plan": {
+                           "species": "human", "primary": "genetic_hub",
+                           "secondary": ["stress_processor"], "overall_verdict": "accept",
+                           "entries": [
+                               {"module": "genetic_hub", "display_name": "Genetic Hub",
+                                "role": "primary", "engine": "donor_predictor",
+                                "route_disposition": "accept", "species_support": "supported",
+                                "species_verdict": "accept", "verdict": "accept",
+                                "mismatch": None, "caution_flags": [], "available_models": []},
+                               {"module": "stress_processor", "display_name": "Stress Processor",
+                                "role": "secondary", "engine": "state_scoring",
+                                "route_disposition": "caution", "species_support": "supported",
+                                "species_verdict": "accept", "verdict": "caution",
+                                "mismatch": None, "caution_flags": [], "available_models": []}],
+                           "notes": []}},
+    },
+}
+
+
+def test_module_routing_section_present():
+    md = render_report_md(_WITH_MODULE_PLAN)
+    assert "模块路由" in md or "Module Routing" in md
+    assert "genetic_hub" in md or "Genetic Hub" in md   # primary 出现
+    assert "stress_processor" in md or "Stress Processor" in md  # secondary 出现
+    assert "primary" in md and "secondary" in md
+
+
+def test_module_routing_missing_shows_na():
+    """无 module_plan(abstain/旧 job)→ 标 N/A,不崩,9 段仍在。"""
+    md = render_report_md(_ACCEPT)   # _ACCEPT 无 module_plan
+    assert "模块路由" in md or "Module Routing" in md
+    assert "N/A" in md
+    for s in _SECTIONS:
+        assert s in md
+
+
+def test_module_routing_does_not_break_nine_sections():
+    md = render_report_md(_WITH_MODULE_PLAN)
+    for s in _SECTIONS:
+        assert s in md, f"缺段:{s}"
