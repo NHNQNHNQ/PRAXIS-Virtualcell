@@ -541,3 +541,191 @@ select:focus {
     max-width: 46vw;
   }
 }
+
+/* ==========================================================================
+   Workspace + StepperRail(Task 9.7):主工作区 = 内部左侧阶段轨 + 右侧阶段内容。
+   阶段轨在「工作区内部」(spec §1),不是全局侧栏(全局侧栏是 .js-sidebar)。
+   宽屏:竖向 rail 在左;窄屏(≤900px):降级为顶部水平 stepper。
+   ========================================================================== */
+
+/* ---------- Workspace 容器:rail(左)+ stage(右) ---------- */
+.ws {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-5);
+}
+.ws-stage {
+  flex: 1;
+  min-width: 0; /* 允许内部横向滚动容器收缩,防整体横溢 */
+}
+
+/* ---------- StepperRail:竖向阶段轨(工作区内左侧) ---------- */
+.sr-rail {
+  flex-shrink: 0;
+  width: 168px;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+}
+.sr-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.sr-item {
+  position: relative;
+}
+/* 阶段节点:标号 + 文本(阶段名 + 提示) */
+.sr-node {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2) var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-sans);
+  transition: background 0.12s, border-color 0.12s;
+}
+.sr-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+.sr-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.sr-label {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.sr-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+/* 连接线:节点之间的竖线;已完成段落用深靛蓝提示进度 */
+.sr-connector {
+  position: absolute;
+  left: calc(var(--space-2) + 12px); /* 对齐 marker 中心 */
+  top: 34px;
+  width: 1.5px;
+  height: calc(100% - 34px + var(--space-1));
+  background: var(--border);
+}
+.sr-connector-done {
+  background: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+
+/* —— 当前阶段:高亮(深靛蓝) —— */
+.sr-current {
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+  cursor: default;
+}
+.sr-current .sr-marker {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+.sr-current .sr-label {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* —— 已完成:可点回退(翠绿勾,状态色) —— */
+.sr-done {
+  cursor: pointer;
+}
+.sr-done .sr-marker {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  color: var(--accent);
+}
+.sr-done:hover {
+  background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 24%, transparent);
+}
+
+/* —— 紧邻可前进阶段:可点(常态) —— */
+.sr-enabled {
+  cursor: pointer;
+}
+.sr-enabled:hover {
+  background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+/* —— 未达标 / 不可跳过:禁用置灰,点不动 —— */
+.sr-disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+.sr-disabled .sr-label,
+.sr-disabled .sr-hint {
+  color: var(--text-muted);
+}
+
+/* ---------- 窄屏降级(≤900px):竖轨 → 顶部水平 stepper ---------- */
+@media (max-width: 900px) {
+  .ws {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .sr-rail {
+    width: 100%;
+    position: static;
+  }
+  .sr-list {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-1);
+    overflow-x: auto; /* 极窄时水平滚动,不横溢页面 */
+    padding-bottom: var(--space-1);
+  }
+  .sr-item {
+    flex: 1 1 0;
+    min-width: 88px;
+  }
+  .sr-node {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    text-align: center;
+    padding: var(--space-2) var(--space-1);
+  }
+  .sr-text {
+    align-items: center;
+    text-align: center;
+  }
+  /* 水平模式隐藏长提示,只留阶段名(节省横向空间;提示仍在 title 属性) */
+  .sr-hint {
+    display: none;
+  }
+  /* 连接线改水平,横穿相邻节点之间 */
+  .sr-connector {
+    left: auto;
+    right: calc(-1 * var(--space-1) / 2);
+    top: calc(var(--space-2) + 12px);
+    width: var(--space-1);
+    height: 1.5px;
+    transform: translateX(50%);
+  }
+}

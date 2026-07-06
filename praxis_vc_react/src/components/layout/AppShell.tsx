@@ -6,23 +6,19 @@ import {
   type JobState,
   type JobSummary,
   type Mode,
-  type ModulePlan,
   type Stage,
 } from "../../api";
-import AskView from "../../views/AskView";
-import ParseReviewView from "../../views/ParseReviewView";
-import ConfirmView from "../../views/ConfirmView";
-import ModuleContextView from "../../views/ModuleContextView";
-import RunConfirmView from "../../views/RunConfirmView";
 import ResultView from "../../views/ResultView";
 import JobSidebar from "./JobSidebar";
 import TopBar, { type Theme } from "./TopBar";
+import Workspace from "./Workspace";
 
-// Phase 9 Task 9.5 · 状态机宿主(spec §6)。
+// Phase 9 Task 9.5/9.7 · 状态机宿主(spec §6)。
 // 集中管理 5 阶段(Ask→Review→Route→Run→Results)+ 集中式 JobState,
 // 迁移旧 App.tsx 的 loadJobs/health/newQuery/activeJobId。
-// 本 task 为「渐进过渡」骨架:布局层(JobSidebar/TopBar/StepperRail/Workspace)先内联,
-// Stage 内容先桥接现有 views/*(用 JobState 字段喂旧 props),P3 再逐个替换成新 Stage 页。
+// 布局层:JobSidebar(全局历史侧栏,9.6)/ TopBar(9.6)/ Workspace(工作区,9.7,内含左侧 StepperRail)。
+// 9.7 起 Workspace/StepperRail 从本文件抽出为独立组件,本文件不再内联阶段渲染;
+// Stage 内容仍由 Workspace 桥接现有 views/*(用 JobState 字段喂旧 props),P3 再逐个替换成新 Stage 页。
 // 铁律:api.ts 只加类型不改请求;后端零改动。
 
 // review 阶段内部子步:旧 parse_review + confirm 合并进 review,
@@ -87,7 +83,7 @@ export default function AppShell() {
   // ask→review 需 parsedIntent;review→route 需 confirmedRequest?.species;
   // route→run 需 modulePlan(静态预期已算出);run→results 需 runStatus∈{succeeded,failed,abstained}。
   // 回退不受此限(已完成阶段可点回退,回退只改 stage 不清字段)。
-  // 本函数即 9.7 StepperRail 的 jump 守卫;本 task 用于前进跳转守卫与阶段可达性判定。
+  // 本函数即 StepperRail 的 jump 守卫;也用于前进跳转守卫与阶段可达性判定。
   function canEnter(target: Stage): boolean {
     switch (target) {
       case "ask":
@@ -110,12 +106,22 @@ export default function AppShell() {
   }
 
   // 当前阶段的进入前提是否满足:渲染前守卫,避免异常路径下渲染半成品阶段
-  // (读的是已 commit 的 job 状态,非 stale 闭包)。9.7 StepperRail 复用 canEnter 做 jump 守卫。
+  // (读的是已 commit 的 job 状态,非 stale 闭包)。StepperRail 复用 canEnter 做 jump 守卫。
   const stageReady = stage === "ask" || canEnter(stage);
+  // 实际渲染的阶段:守卫兜底时回落到 ask(异常路径不渲半成品阶段)。
+  const effectiveStage: Stage = stageReady ? stage : "ask";
+
+  // StepperRail 的 jump:已完成阶段回退 / 紧邻可达阶段前进(rail 内部已做逐步不跳过约束,
+  // 此处再以 canEnter 兜底,非法 target 忽略)。回退只改 stage,不清 JobState 字段(不丢数据)。
+  function jumpTo(target: Stage) {
+    if (target !== "ask" && !canEnter(target)) return;
+    // 回退到 review 时,恢复到只读核对子步(与线性流程一致)。
+    if (target === "review") setReviewSub("summary");
+    setStage(target);
+  }
 
   // 主区当前展示的 job（供侧栏高亮）：历史 job 优先;否则 results 阶段展示当前 job。
-  const activeJobId =
-    openedJobId ?? (stage === "results" ? job.jobId : null);
+  const activeJobId = openedJobId ?? (stage === "results" ? job.jobId : null);
 
   return (
     <div className="app-shell">
@@ -143,7 +149,7 @@ export default function AppShell() {
 
         <div className="main-scroll">
           <div className="main-inner">
-            {/* 右：Workspace(本 task 先内联,9.7 拆成 Workspace + StepperRail)。
+            {/* 右:Workspace(工作区,内含左侧 StepperRail)。
                 历史 job 模式:直接进 results,以该 job_id 渲 ResultView(等价旧 openedJobId 分支)。 */}
             {openedJobId ? (
               <ResultView
@@ -151,116 +157,58 @@ export default function AppShell() {
                 onReset={newQuery}
                 resetLabel="＋ 新建查询"
               />
-            ) : stageReady ? (
-              renderStage()
             ) : (
-              renderStage("ask")
+              <Workspace
+                stage={effectiveStage}
+                job={job}
+                mode={mode}
+                reviewSub={reviewSub}
+                canEnter={canEnter}
+                onJump={jumpTo}
+                onMode={setMode}
+                onParsed={(r) => {
+                  // 旧 AskView 的 onParsed 只回传 ParseResult(不含 query 文本);
+                  // query 文本在 P3 的 AskStage 才回传,此处桥接暂留空。
+                  patchJob({ parsedIntent: r });
+                  setReviewSub("summary");
+                  setStage("review");
+                }}
+                onReviewNext={() => setReviewSub("form")}
+                onReviewBack={() => {
+                  // summary 子步返回 ask;form 子步返回 summary 子步。
+                  if (reviewSub === "form") setReviewSub("summary");
+                  else setStage("ask");
+                }}
+                onConfirmed={(req) => {
+                  patchJob({ confirmedRequest: req });
+                  setStage("route");
+                }}
+                onRouteBack={() => {
+                  setReviewSub("form");
+                  setStage("review");
+                }}
+                onRouteNext={(plan) => {
+                  // 旧 ModuleContextView 不产出 modulePlan;为满足 route→run 的 canEnter,
+                  // 用 Workspace 派生的轻量静态预期占位(P3 的 RouteStage 才产完整静态预期)。
+                  patchJob({ modulePlan: plan });
+                  setStage("run");
+                }}
+                onRunBack={() => setStage("route")}
+                onRan={(id) => {
+                  // 实际 abstain/failed 由结果页回填;此处先置 succeeded 满足 run→results。
+                  patchJob({ jobId: id, runStatus: "succeeded" });
+                  setStage("results");
+                  loadJobs();
+                }}
+                onReset={newQuery}
+              />
             )}
           </div>
         </div>
       </div>
     </div>
   );
-
-  // 按 stage 渲染 Stage 内容,桥接旧 views/*,用 JobState 字段喂旧 props。
-  // override:守卫兜底时强制渲染某阶段(正常线性流程不传,用当前 stage)。
-  function renderStage(override?: Stage) {
-    switch (override ?? stage) {
-      case "ask":
-        return (
-          <AskView
-            mode={mode}
-            onMode={setMode}
-            onParsed={(r) => {
-              // 旧 AskView 的 onParsed 只回传 ParseResult(不含 query 文本);
-              // query 文本在 P3 的 AskStage 才回传,此处桥接暂留空。
-              patchJob({ parsedIntent: r });
-              setReviewSub("summary");
-              setStage("review");
-            }}
-          />
-        );
-
-      case "review":
-        // 合并旧 parse_review + confirm:子步 summary(只读核对)→ form(可编辑确认)。
-        if (job.parsedIntent == null) return null;
-        return reviewSub === "summary" ? (
-          <ParseReviewView
-            parseResult={job.parsedIntent}
-            onBack={() => setStage("ask")}
-            onNext={() => setReviewSub("form")}
-          />
-        ) : (
-          <ConfirmView
-            parseResult={job.parsedIntent}
-            onBack={() => setReviewSub("summary")}
-            onConfirmed={(req) => {
-              patchJob({ confirmedRequest: req });
-              setStage("route");
-            }}
-          />
-        );
-
-      case "route":
-        if (job.confirmedRequest == null) return null;
-        return (
-          <ModuleContextView
-            request={job.confirmedRequest}
-            onBack={() => {
-              setReviewSub("form");
-              setStage("review");
-            }}
-            onNext={() => {
-              // 旧 ModuleContextView 不产出 modulePlan;为满足 route→run 的 canEnter,
-              // 派生一个轻量静态预期占位(P3 的 RouteStage 才产完整静态预期)。
-              patchJob({ modulePlan: staticModulePlanStub(job.confirmedRequest) });
-              setStage("run");
-            }}
-          />
-        );
-
-      case "run":
-        if (job.confirmedRequest == null) return null;
-        return (
-          <RunConfirmView
-            request={job.confirmedRequest}
-            mode={mode}
-            onBack={() => setStage("route")}
-            onRan={(id) => {
-              // 实际 abstain/failed 由结果页回填;此处先置 succeeded 满足 run→results。
-              patchJob({ jobId: id, runStatus: "succeeded" });
-              setStage("results");
-              loadJobs();
-            }}
-          />
-        );
-
-      case "results":
-        if (job.jobId == null) return null;
-        return (
-          <ResultView
-            jobId={job.jobId}
-            onReset={newQuery}
-            resetLabel="＋ 新建查询"
-          />
-        );
-    }
-  }
 }
 
-// 轻量静态预期占位:仅承载 species 以满足 route→run 的 canEnter(modulePlan!=null)。
-// 非实际路由(红线 3),真实静态预期分组在 P3 的 RouteStage 派生,实际路由在结果页 tab。
-function staticModulePlanStub(
-  request: Record<string, unknown> | null,
-): ModulePlan {
-  const species =
-    request?.species == null ? "" : String(request.species);
-  return {
-    species,
-    primary: "",
-    secondary: [],
-    overall_verdict: "expected",
-    entries: [],
-    notes: ["静态预期占位(非实际路由)"],
-  };
-}
+// 说明:阶段渲染与静态预期占位(staticModulePlanStub)已迁入 Workspace,
+// AppShell 只保留状态机(stage/job/reviewSub/canEnter)与跳转编排。
