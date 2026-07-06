@@ -58,6 +58,14 @@ class ModelZooRegistry:
             missing = [k for k in required_card if k not in card]
             if missing:
                 raise ValueError(f"{name} training_card 缺字段: {missing}")
+            # Phase 7 加固:内部字段类型/非空校验(现只校键存在,坏值 metrics='oops'/split=''
+            # 也会漏过 → fail-closed 加固,不静默接受坏契约)。
+            if not isinstance(card["metrics"], dict):
+                raise ValueError(f"{name} training_card.metrics 须是 dict(得 {type(card['metrics']).__name__})")
+            for k in ("training_data", "split", "baseline", "provenance"):
+                v = card[k]
+                if not isinstance(v, str) or not v.strip():
+                    raise ValueError(f"{name} training_card.{k} 须非空 str(得 {v!r});fail-closed")
         # assets 声明(可选;有则每条须含 filename + sha256 键 —— sha256 可 null 占位,但键必须在,
         # 保证 ckpt 挪出硬编码后可被版本锁/取数流程指认。结构坏 → ValueError,fail-closed)
         assets = entry.get("assets")
