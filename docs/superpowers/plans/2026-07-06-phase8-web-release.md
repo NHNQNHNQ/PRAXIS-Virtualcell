@@ -649,7 +649,10 @@ export interface ModulePlanEntry {
   verdict: string;
   mismatch: string | null;
   caution_flags: string[];
+  data_gated: boolean;
+  pillars: string[];
   available_models: string[];
+  reason: string;
 }
 
 export interface ModulePlan {
