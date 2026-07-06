@@ -22,3 +22,19 @@ def test_all_four_species_covered():
 def test_preset_ids_unique():
     ids = [p["id"] for p in load_cell_presets()]
     assert len(ids) == len(set(ids)), f"预设 id 重复:{ids}"
+
+
+def test_preset_modules_within_whitelist():
+    """预设若声明 modules,每个必须 ∈ MODULE_ORDER(防展示层与单一真相源漂移)。"""
+    from praxis_virtualcell.biological_modules.modules import MODULE_ORDER
+    for p in load_cell_presets():
+        mods = p.get("modules") or []
+        assert isinstance(mods, list), f"{p['id']} modules 非 list"
+        for m in mods:
+            assert m in MODULE_ORDER, f"{p['id']} module 越白名单: {m}"
+
+
+def test_every_preset_has_modules():
+    """本 Phase 起每个预设都标注 supported_modules(前端 module_context 步消费)。"""
+    for p in load_cell_presets():
+        assert p.get("modules"), f"{p['id']} 缺 modules 标注"
