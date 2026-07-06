@@ -1,17 +1,31 @@
 import { useCallback, useEffect, useState } from "react";
 import { health, listJobs, type Health, type JobSummary, type Mode, type ParseResult } from "./api";
 import AskView from "./views/AskView";
+import ParseReviewView from "./views/ParseReviewView";
 import ConfirmView from "./views/ConfirmView";
+import ModuleContextView from "./views/ModuleContextView";
+import RunConfirmView from "./views/RunConfirmView";
 import ResultView from "./views/ResultView";
 import Sidebar from "./views/Sidebar";
 import "./App.css";
 
-type Step = "ask" | "confirm" | "result";
+// 7 步流程:ask → parse_review → confirm → module_context → run_confirm → result → advanced。
+type Step =
+  | "ask"
+  | "parse_review"
+  | "confirm"
+  | "module_context"
+  | "run_confirm"
+  | "result"
+  | "advanced";
 
 export default function App() {
   const [mode, setMode] = useState<Mode>("offline");
   const [step, setStep] = useState<Step>("ask");
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
+  const [confirmedRequest, setConfirmedRequest] = useState<
+    Record<string, unknown> | null
+  >(null); // confirm 步交出的组装 request(run 在 run_confirm 步)
   const [jobId, setJobId] = useState<string | null>(null); // 查询流产出
   const [openedJobId, setOpenedJobId] = useState<string | null>(null); // 侧栏载入的历史 job
   const [jobs, setJobs] = useState<JobSummary[] | null>(null);
@@ -31,13 +45,15 @@ export default function App() {
 
   function newQuery() {
     setParseResult(null);
+    setConfirmedRequest(null);
     setJobId(null);
     setOpenedJobId(null);
     setStep("ask");
   }
 
-  // 主区当前展示的 job(供侧栏高亮)
-  const activeJobId = openedJobId ?? (step === "result" ? jobId : null);
+  // 主区当前展示的 job(供侧栏高亮):result / advanced 步均展示当前 job
+  const activeJobId =
+    openedJobId ?? (step === "result" || step === "advanced" ? jobId : null);
 
   return (
     <div className="app-shell">
@@ -75,15 +91,40 @@ export default function App() {
                     onMode={setMode}
                     onParsed={(r) => {
                       setParseResult(r);
-                      setStep("confirm");
+                      setStep("parse_review");
                     }}
+                  />
+                )}
+                {step === "parse_review" && parseResult && (
+                  <ParseReviewView
+                    parseResult={parseResult}
+                    onBack={() => setStep("ask")}
+                    onNext={() => setStep("confirm")}
                   />
                 )}
                 {step === "confirm" && parseResult && (
                   <ConfirmView
                     parseResult={parseResult}
                     mode={mode}
-                    onBack={() => setStep("ask")}
+                    onBack={() => setStep("parse_review")}
+                    onConfirmed={(req) => {
+                      setConfirmedRequest(req);
+                      setStep("module_context");
+                    }}
+                  />
+                )}
+                {step === "module_context" && confirmedRequest && (
+                  <ModuleContextView
+                    request={confirmedRequest}
+                    onBack={() => setStep("confirm")}
+                    onNext={() => setStep("run_confirm")}
+                  />
+                )}
+                {step === "run_confirm" && confirmedRequest && (
+                  <RunConfirmView
+                    request={confirmedRequest}
+                    mode={mode}
+                    onBack={() => setStep("module_context")}
                     onRan={(id) => {
                       setJobId(id);
                       setStep("result");
@@ -92,6 +133,9 @@ export default function App() {
                   />
                 )}
                 {step === "result" && jobId && (
+                  <ResultView jobId={jobId} onReset={newQuery} resetLabel="＋ 新建查询" />
+                )}
+                {step === "advanced" && jobId && (
                   <ResultView jobId={jobId} onReset={newQuery} resetLabel="＋ 新建查询" />
                 )}
               </>

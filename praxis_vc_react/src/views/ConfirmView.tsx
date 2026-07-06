@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  createJob,
   getOptions,
   type CellPreset,
   type Mode,
@@ -11,16 +10,16 @@ import {
 // Confirm 页:展示并允许微调 candidate(species/cell_type/perturbation_type/targets),
 // 显示 parser/llm_used/schema_valid/assumptions,高亮 missing/errors。
 // 铁律:前端不做任何治理/预测判断,仅把用户确认后的 request 原样交给后端执行。
+// 出口 onConfirmed 只交出组装好的 request,不再直接 createJob —— run 移到 RunConfirmView。
 export default function ConfirmView({
   parseResult,
-  mode,
   onBack,
-  onRan,
+  onConfirmed,
 }: {
   parseResult: ParseResult;
   mode: Mode;
   onBack: () => void;
-  onRan: (jobId: string) => void;
+  onConfirmed: (request: Record<string, unknown>) => void;
 }) {
   const cand = parseResult.candidate_request as Record<string, unknown>;
   const [species, setSpecies] = useState(String(cand.species ?? ""));
@@ -33,9 +32,6 @@ export default function ConfirmView({
       ? (cand.perturbation_targets as unknown[]).join(", ")
       : "",
   );
-  const [enableLlmReport, setEnableLlmReport] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
   const [opts, setOpts] = useState<Options | null>(null);
 
   useEffect(() => {
@@ -56,10 +52,9 @@ export default function ConfirmView({
     return cur && !xs.includes(cur) ? [cur, ...xs] : xs;
   }
 
-  async function run() {
-    setBusy(true);
-    setErr(null);
+  function confirm() {
     // 以原 candidate 为基底,仅覆盖可编辑字段(保留 request_id/metadata 等)。
+    // 只交出组装好的 request,不在此发起 createJob(run 在 RunConfirmView)。
     const request: Record<string, unknown> = {
       ...cand,
       species,
@@ -70,14 +65,7 @@ export default function ConfirmView({
         .map((s) => s.trim())
         .filter(Boolean),
     };
-    try {
-      const ref = await createJob(request, mode, enableLlmReport);
-      onRan(ref.job_id);
-    } catch (e: unknown) {
-      setErr(String(e));
-    } finally {
-      setBusy(false);
-    }
+    onConfirmed(request);
   }
 
   return (
@@ -170,23 +158,17 @@ export default function ConfirmView({
         <div className="warn">需要澄清(clarification_required)。</div>
       )}
 
-      <label className="checkbox">
-        <input
-          type="checkbox"
-          checked={enableLlmReport}
-          onChange={(e) => setEnableLlmReport(e.target.checked)}
-        />
-        生成 LLM 叙述报告(仅改写措辞,不参与预测/治理决策)
-      </label>
-
-      {err && <pre className="err">{err}</pre>}
-
       <div className="row end">
-        <button type="button" className="btn btn-ghost" onClick={onBack} disabled={busy}>
+        <button type="button" className="btn btn-ghost" onClick={onBack}>
           ← 返回
         </button>
-        <button type="button" className="btn" onClick={run} disabled={busy || !species.trim()}>
-          {busy ? "运行中…" : "Confirm and Run →"}
+        <button
+          type="button"
+          className="btn"
+          onClick={confirm}
+          disabled={!species.trim()}
+        >
+          确认(Confirm) →
         </button>
       </div>
     </section>
