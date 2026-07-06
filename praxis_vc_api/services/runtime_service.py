@@ -58,6 +58,18 @@ def options() -> dict:
     }
 
 
+def modules() -> dict:
+    """八模块目录(只读展示)。单一真相源 = biological_modules.modules,前端 module_context 步消费。"""
+    from praxis_virtualcell.biological_modules import modules as M
+    return {"modules": [
+        {"id": mid, "code": M.MODULES[mid]["code"],
+         "display_name": M.MODULES[mid]["display_name"],
+         "engines": list(M.MODULES[mid]["engines"]),
+         "pillars": list(M.MODULES[mid]["pillars"])}
+        for mid in M.MODULE_ORDER
+    ]}
+
+
 def _job_id(request: dict) -> str:
     h = hashlib.sha256(json.dumps(request, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:8]
     store = JobStore(RUNS_DIR)

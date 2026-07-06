@@ -98,3 +98,15 @@ def test_report_markdown_404(client):
 
 def test_missing_job_404(client):
     assert client.get("/api/reports/nope").status_code == 404
+
+
+def test_modules_catalog(client):
+    d = client.get("/api/modules").json()
+    mods = d["modules"]
+    assert len(mods) == 8
+    codes = [m["code"] for m in mods]
+    assert codes == ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8"]  # MODULE_ORDER 顺序
+    m2 = next(m for m in mods if m["code"] == "M2")
+    assert m2["id"] == "genetic_hub" and m2["display_name"] == "Genetic Hub"
+    assert "donor_predictor" in m2["engines"]
+    assert "pillars" in m2 and isinstance(m2["pillars"], list)

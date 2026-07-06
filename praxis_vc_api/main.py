@@ -46,6 +46,12 @@ def options():
     return svc.options()
 
 
+@app.get("/api/modules")
+def modules():
+    """八模块目录(只读):M1–M8 的 id/code/display_name/engines/pillars。单一真相源 modules.py。"""
+    return svc.modules()
+
+
 @app.post("/api/jobs", response_model=JobOut)
 def create_job(body: JobIn):
     """已确认的 request → 离线 runtime 执行 → 落盘 job。"""
