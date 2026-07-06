@@ -87,7 +87,7 @@ class SelfTrainedWrapper(ModelWrapper):
 
         # 2) 构造 control 上下文 + perturbation(donor 数据侧;真推理在 .53 由 Task 7.5 补全 ctx/pert 对照)
         #    这里走 donor predictor.predict(ctx, pert);缺 donor 数据 → 抛 → fail-closed。
-        from predictors.base import Perturbation, PredictionContext  # donor(sys.path 由 mean_baseline 注入)
+        from predictors.base import Context, Perturbation  # donor(sys.path 由 mean_baseline 注入)
 
         targets = list(model_input.get("targets") or [])
         if not targets:
@@ -96,8 +96,8 @@ class SelfTrainedWrapper(ModelWrapper):
         if ctx is None:
             raise RuntimeError("缺 control 上下文(需 donor norman control tensor);fail-closed —— "
                                ".53 gated 真推理在 Task 7.5 注入")
-        pert = Perturbation(kind="gene_ko", targets=targets)
-        out = predictor.predict(PredictionContext(control=ctx), pert)
+        pert = Perturbation(kind="gene_ko", targets=tuple(targets))
+        out = predictor.predict(Context(control=ctx), pert)
 
         # 3) 诚实包装:mean baseline delta(点估计,标 naive_lower_bound)
         delta = (out.mean - ctx).squeeze(0)

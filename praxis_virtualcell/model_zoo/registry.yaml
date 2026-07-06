@@ -122,8 +122,8 @@ models:
       metrics: {delta_pearson: 0.4615, cosine: 0.9850, n: 18874, n_train: 25463}
       provenance: "mean_baseline.py scored on .53 virtualcell env; ckpt fetch gated (assets sha placeholder)"
     assets:
-      - filename: mean_delta.pt                    # ≈8KB float tensor(2000 维);.53 落盘产物
-        sha256: null                               # 占位:真训落盘后 .53 上算 sha256 填入(broker requires_manual_fetch)
+      - filename: mean_delta.pt                    # 9195 B float tensor(2000 维);.53 落盘产物(mean_baseline_ckpt/norman_2019/)
+        sha256: 306f0b60be6d51888cd3fbdb2323ad9bac6be9239cc4b308785f03f514ba41d5  # .53 实测(train_seed=0 mean_delta;stage B 真训落盘 sha256sum);status 仍 planned/broker fail-closed(ckpt 不在 cache)
         source_note: "fetch from zkyd@10.102.106.53 virtualcell env; torch.save(compute_mean_delta(train_ds)[0])"
     provenance:                                    # 顶层块,与 gears/scgpt 对齐
       training_data: donor norman_2019 (mean_delta over non-control cells)
