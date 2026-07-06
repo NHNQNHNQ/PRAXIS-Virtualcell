@@ -194,7 +194,7 @@ textarea:focus, input:focus, select:focus {
   padding: 9px 16px;
   border: 1px solid transparent;
   border-radius: var(--radius);
-  background: var(--accent);
+  background: var(--accent-solid);
   color: var(--accent-text);
   transition: background 0.12s, opacity 0.12s;
   display: inline-flex;
