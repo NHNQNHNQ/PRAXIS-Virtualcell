@@ -27,7 +27,7 @@
 ## STEP 3 — 执行下一个未开始的 task(subagent-driven-development)
 
 1. 从当前 Phase 详细计划取**下一个未勾选 task**。
-2. 派**全新实现 subagent**(`general-purpose`),给它:场景说明 + 该 task 完整文本(或让它读该计划文件的这一节)+ 房规(venv `.venv`、`test_cmd`、commit 前删 `._*`、commit 末尾 `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`、在工作分支提交、**不 push**)+ §RED-LINES。**别让它继承你的上下文。**
+2. 派**全新实现 subagent**(`general-purpose`),给它:场景说明 + 该 task 完整文本(或让它读该计划文件的这一节)+ 房规(venv `.venv`、`test_cmd`、commit 前删 `._*`、commit 末尾 `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`、在工作分支提交、**不 push**)+ §RED-LINES。**别让它继承你的上下文。**
 3. 收到 **DONE** → 派 **spec 合规审查 subagent**(比对 task spec:有没有少做/多做),通过后派 **代码质量审查 subagent**。任一发现问题 → 同一实现 subagent 修 → 重审,直到两审都过。
 4. 收到 **BLOCKED / NEEDS_CONTEXT** → 按 subagent-driven-development 处理(补上下文重派 / 换更强模型 / 拆小 / 真 bug 则升级给人)。**绝不自己下场改源码迁就测试。**
 5. task 两审通过 → 在台账勾掉该 task + 追加事件日志一行。一次触发做 1 个 task(小 task 可连做 2–3 个),然后 §5。

@@ -20,7 +20,7 @@
 - **增量复用不推倒**:GearsWrapper/ScgptWrapper 包现有 `predictors/ml/`(`MLPredictorAgent`/`build_predictor_from_ckpt`/`donor_bridge`)+ GEARS 原生 `predict`,不重写 ML 内核(路线图红线 5)。
 - **测试口径** = `praxis_virtualcell/tests`(**绝不碰根 `tests/`**)。Phase 6 起点基线(当前分支 `feat/v0.9-phase0-module-core`,HEAD `f07e0dc`,含 Phase 0–5)**实跑核实 = 556 passed / 25 skipped / collected 581**(2026-07-05 `pytest --junit-xml` 实测:`tests=581 failures=0 errors=0 skipped=25`;注:台账/commit message 里的 "556 passed" = collected 581 − skipped 25,一致)。`-q` 不打印精确 passed;精确数用 `--junit-xml` 属性换算:**passed = tests(collected) − skipped − failures − errors**。验收只认:**failures=0 errors=0** + 每 task 新增测试条数正确(离线可跑的计入 passed,`@pytest.mark.remote` 的计入 skipped)。
 - **⚠ skip 基线诚实声明(重要,与前几 Phase 不同)**:Phase 6 的**真推理 gated 契约测试**(Task 6.5)用 `@pytest.mark.remote`,本地无 torch 自动 skip → **skip 基线从 25 升到 27**(新增 2 个 remote-marked skip:一个 GEARS 真推理、一个 scGPT 真推理)。这是**诚实的、设计使然的** skip(与 Phase 2 的 cobra/torch gated 同款惯例,conftest `pytest.mark.remote` 无 torch 自动 skip),**不是** flaky/隐藏失败。验收口径相应改为:**failures=0 errors=0 skipped=27**(25 旧 + 2 新 remote)。其余所有 task(6.1–6.4/6.6)的缺依赖 fail-closed / registry 声明 / broker assets 关 / provenance 校验测试**全部离线确定性可跑、计入 passed、不新增 skip**。
-- **每 task 全量回归绿**后再 commit:`PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -q`;commit 前 `find . -name '._*' -delete`(外置盘 AppleDouble);**只 `git add` 本 task 明列的文件**(工作树里 `docs/superpowers/plans/UPGRADE-PROGRESS.md` 有控制器的未提交改动,**绝不带进 commit**);commit message 末尾加 `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`;当前分支 `feat/v0.9-phase0-module-core`,**不 push**。
+- **每 task 全量回归绿**后再 commit:`PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -q`;commit 前 `find . -name '._*' -delete`(外置盘 AppleDouble);**只 `git add` 本 task 明列的文件**(工作树里 `docs/superpowers/plans/UPGRADE-PROGRESS.md` 有控制器的未提交改动,**绝不带进 commit**);commit message 末尾加 `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`;当前分支 `feat/v0.9-phase0-module-core`,**不 push**。
 - **不打 tag**:Phase 6 **不是里程碑**(v1.3 要等 Phase 6+7+8 全完成,Phase 8 才打 v1.3.0)。Phase 6 全 task 绿 = 完成闸门,**不打 tag**。
 
 ---
@@ -287,7 +287,7 @@ find . -name '._*' -delete
 git add praxis_virtualcell/model_zoo/wrappers/base.py praxis_virtualcell/model_zoo/wrappers/gears_wrapper.py praxis_virtualcell/tests/test_gears_wrapper.py
 git commit -m "feat(phase6): ModelWrapper.declare_provenance + GearsWrapper(scope/锚点 provenance/点估计 uncertainty/缺 torch fail-closed 不静默 mock)
 
-Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 ---
@@ -500,7 +500,7 @@ find . -name '._*' -delete
 git add praxis_virtualcell/model_zoo/wrappers/scgpt_wrapper.py praxis_virtualcell/tests/test_scgpt_wrapper.py
 git commit -m "feat(phase6): ScgptWrapper(scope/锚点 provenance ΔPearson 0.4407 可比+诚实低/点估计/缺 torch 复用 donor_bridge fail-closed 不伪造 delta)
 
-Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 ---
@@ -676,7 +676,7 @@ find . -name '._*' -delete
 git add praxis_virtualcell/model_zoo/registry.yaml praxis_virtualcell/model_zoo/registry.py praxis_virtualcell/tests/test_registry_public_models.py
 git commit -m "feat(phase6): registry 补 scgpt 条目 + gears/scgpt 声明 assets(ckpt 挪出硬编码,sha256 占位)/provenance(真锚点)+ _validate assets schema fail-closed
 
-Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 ---
@@ -923,7 +923,7 @@ find . -name '._*' -delete
 git add praxis_virtualcell/agents/model_broker_agent.py praxis_virtualcell/tests/test_broker_public_models.py
 git commit -m "feat(phase6): broker assets sha256 版本锁第二道关(缺 ckpt/sha 占位/sha 不匹配→fail-closed 不静默,依赖齐+sha 对才放行;wrapper 类路径 unavailable 时仍可见)
 
-Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 ---
@@ -1000,7 +1000,7 @@ find . -name '._*' -delete
 git add praxis_virtualcell/tests/test_public_models_remote.py
 git commit -m "test(phase6): GEARS/scGPT 真推理 gated 契约测试(@pytest.mark.remote,.53 跑通本地 skip;skip 基线诚实 25→27,不 mock 真语义凑绿)
 
-Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 ---
@@ -1129,7 +1129,7 @@ Phase 6 收编 GEARS/scGPT 进 ModelBroker:wrapper(缺 torch/ckpt fail-closed �
 0.4407 可比诚实低)+ broker assets 版本锁第二道关 + 真推理 .53 gated 本地 skip。红线 6 fail-closed
 纵深守住,管线/治理/LLM 边界零改动。Phase 6 非里程碑,不打 tag,v1.3 等 Phase 7+8。
 
-Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 **Phase 6 验收:**
