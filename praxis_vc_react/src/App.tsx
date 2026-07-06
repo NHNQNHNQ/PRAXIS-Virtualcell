@@ -105,7 +105,6 @@ export default function App() {
                 {step === "confirm" && parseResult && (
                   <ConfirmView
                     parseResult={parseResult}
-                    mode={mode}
                     onBack={() => setStep("parse_review")}
                     onConfirmed={(req) => {
                       setConfirmedRequest(req);
@@ -133,10 +132,21 @@ export default function App() {
                   />
                 )}
                 {step === "result" && jobId && (
-                  <ResultView jobId={jobId} onReset={newQuery} resetLabel="＋ 新建查询" />
+                  <ResultView
+                    jobId={jobId}
+                    onReset={newQuery}
+                    resetLabel="＋ 新建查询"
+                    onAdvanced={() => setStep("advanced")}
+                  />
                 )}
                 {step === "advanced" && jobId && (
-                  <ResultView jobId={jobId} onReset={newQuery} resetLabel="＋ 新建查询" />
+                  <ResultView
+                    jobId={jobId}
+                    onReset={newQuery}
+                    resetLabel="＋ 新建查询"
+                    advanced
+                    onBack={() => setStep("result")}
+                  />
                 )}
               </>
             )}

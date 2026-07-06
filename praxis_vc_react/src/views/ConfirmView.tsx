@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import {
   getOptions,
   type CellPreset,
-  type Mode,
   type Options,
   type ParseResult,
 } from "../api";
@@ -17,7 +16,6 @@ export default function ConfirmView({
   onConfirmed,
 }: {
   parseResult: ParseResult;
-  mode: Mode;
   onBack: () => void;
   onConfirmed: (request: Record<string, unknown>) => void;
 }) {

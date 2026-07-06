@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import {
+  getModulePlan,
   getProvenance,
   getReport,
   getReportMarkdown,
   getTrace,
+  type ModulePlan,
+  type ModulePlanEntry,
   type ProvenanceResult,
   type ReportResult,
   type TraceResult,
@@ -34,19 +37,34 @@ function download(filename: string, content: string, mime: string) {
   URL.revokeObjectURL(url);
 }
 
+// module_plan 可能为空对象 {}(不可路由 job)。判定是否有可展示的路由。
+function isModulePlan(v: ModulePlan | Record<string, never>): v is ModulePlan {
+  return Boolean(v) && Array.isArray((v as ModulePlan).entries);
+}
+
 export default function ResultView({
   jobId,
   onReset,
   resetLabel = "新建查询",
+  advanced = false,
+  onAdvanced,
+  onBack,
 }: {
   jobId: string;
   onReset: () => void;
   resetLabel?: string;
+  advanced?: boolean; // 为真时只显 trace + provenance 两 tab(默认 Trace)
+  onAdvanced?: () => void; // result 步显"高级"按钮 → 跳 advanced 步
+  onBack?: () => void; // advanced 步返回 result 步
 }) {
-  const [tab, setTab] = useState<Tab>("report");
+  const [tab, setTab] = useState<Tab>(advanced ? "trace" : "report");
   const [report, setReport] = useState<ReportResult | null>(null);
   const [trace, setTrace] = useState<TraceResult | null>(null);
   const [prov, setProv] = useState<ProvenanceResult | null>(null);
+  // module_plan:并发拉取;null=加载中/失败,ModulePlan|{} = 已到。
+  const [modulePlan, setModulePlan] = useState<
+    ModulePlan | Record<string, never> | null
+  >(null);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
@@ -58,7 +76,15 @@ export default function ResultView({
         setProv(p);
       })
       .catch((e: unknown) => setErr(String(e)));
+    // module_plan 独立并发:失败不阻塞主报告,静默降级为空。
+    getModulePlan(jobId)
+      .then((d) => setModulePlan(d.module_plan))
+      .catch(() => setModulePlan({}));
   }, [jobId]);
+
+  // advanced 步只有 trace/provenance 两 tab;若当前 tab 落在 report,回退到 trace。
+  const tabs: Tab[] = advanced ? ["trace", "provenance"] : ["report", "trace", "provenance"];
+  const effTab: Tab = advanced && tab === "report" ? "trace" : tab;
 
   if (err) return <pre className="err">{err}</pre>;
   if (!report) return <p>加载报告中…(job {jobId})</p>;
@@ -66,8 +92,20 @@ export default function ResultView({
   return (
     <section className="card">
       <div className="row between">
-        <h2>3 · 结果(job {jobId})</h2>
+        <h2>
+          {advanced ? "高级 · trace / provenance" : "3 · 结果"}(job {jobId})
+        </h2>
         <div className="row">
+          {advanced && onBack && (
+            <button type="button" className="btn btn-ghost btn-sm" onClick={onBack}>
+              ← 返回结果
+            </button>
+          )}
+          {!advanced && onAdvanced && (
+            <button type="button" className="btn btn-ghost btn-sm" onClick={onAdvanced}>
+              高级 →
+            </button>
+          )}
           <button
             type="button"
             className="btn btn-ghost btn-sm"
@@ -109,11 +147,11 @@ export default function ResultView({
       </div>
 
       <div className="tabs">
-        {(["report", "trace", "provenance"] as Tab[]).map((t) => (
+        {tabs.map((t) => (
           <button
             key={t}
             type="button"
-            className={tab === t ? "tab active" : "tab"}
+            className={effTab === t ? "tab active" : "tab"}
             onClick={() => setTab(t)}
           >
             {t === "report" ? "Report" : t === "trace" ? "Trace" : "Provenance"}
@@ -121,14 +159,20 @@ export default function ResultView({
         ))}
       </div>
 
-      {tab === "report" && <ReportTab report={report} />}
-      {tab === "trace" && <TraceTab trace={trace} />}
-      {tab === "provenance" && <ProvenanceTab prov={prov} />}
+      {effTab === "report" && <ReportTab report={report} modulePlan={modulePlan} />}
+      {effTab === "trace" && <TraceTab trace={trace} />}
+      {effTab === "provenance" && <ProvenanceTab prov={prov} />}
     </section>
   );
 }
 
-function ReportTab({ report }: { report: ReportResult }) {
+function ReportTab({
+  report,
+  modulePlan,
+}: {
+  report: ReportResult;
+  modulePlan: ModulePlan | Record<string, never> | null;
+}) {
   const sr = report.structured_report ?? {};
   const abstain = Boolean(g(sr, "abstain"));
   const prediction = g(sr, "prediction");
@@ -199,6 +243,9 @@ function ReportTab({ report }: { report: ReportResult }) {
         </ul>
       </div>
 
+      {/* 块 5:Module Routing(该 job 的实际模块路由) */}
+      <ModuleRoutingBlock plan={modulePlan} />
+
       {/* narrative */}
       <div className="block">
         <h3>Narrative</h3>
@@ -212,6 +259,68 @@ function ReportTab({ report }: { report: ReportResult }) {
         )}
       </div>
     </>
+  );
+}
+
+// 块 5:Module Routing。展示该 job 的实际模块路由(primary/secondary/overall_verdict + entries 表)。
+// 空 module_plan({})或加载中降级为文案,绝不崩。
+function ModuleRoutingBlock({
+  plan,
+}: {
+  plan: ModulePlan | Record<string, never> | null;
+}) {
+  if (plan === null) {
+    return (
+      <div className="block">
+        <h3>Module Routing</h3>
+        <p className="muted">加载模块路由中…</p>
+      </div>
+    );
+  }
+  if (!isModulePlan(plan)) {
+    return (
+      <div className="block">
+        <h3>Module Routing</h3>
+        <p className="muted">该请求未产生模块路由(abstain/不可路由)。</p>
+      </div>
+    );
+  }
+  const entries: ModulePlanEntry[] = plan.entries ?? [];
+  return (
+    <div className="block">
+      <h3>Module Routing</h3>
+      <ul className="meta">
+        <li>primary:<code>{plan.primary || "—"}</code></li>
+        <li>secondary:<code>{plan.secondary?.length ? plan.secondary.join(", ") : "—"}</code></li>
+        <li>overall_verdict:<code>{plan.overall_verdict || "—"}</code></li>
+      </ul>
+      {entries.length > 0 ? (
+        <div className="table-scroll">
+          <table className="kv-table module-table">
+            <thead>
+              <tr>
+                <th>module</th>
+                <th>role</th>
+                <th>verdict</th>
+                <th>mismatch</th>
+              </tr>
+            </thead>
+            <tbody>
+              {entries.map((e, i) => (
+                <tr key={e.module ?? i}>
+                  <td><code>{e.module || "—"}</code></td>
+                  <td>{e.role || "—"}</td>
+                  <td>{e.verdict || "—"}</td>
+                  <td>{e.mismatch ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="muted">无模块条目。</p>
+      )}
+    </div>
   );
 }
 

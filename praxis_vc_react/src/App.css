@@ -314,6 +314,22 @@ code.sha { font-size: 0.68em; }
 .kv-table td { color: var(--text); word-break: break-word; }
 .kv-table tr:last-child th, .kv-table tr:last-child td { border-bottom: none; }
 
+/* ---------- Module Routing: 结果里的实际路由表 ---------- */
+.table-scroll { overflow-x: auto; margin: 6px 0; }
+.module-table { min-width: 460px; }
+.module-table thead th {
+  width: auto;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--border-strong);
+}
+.module-table td {
+  font-size: 13px;
+  white-space: nowrap;
+}
+.module-table td code { font-size: 12px; }
+
 /* ---------- Module Context: 模块目录卡片网格 ---------- */
 .module-grid {
   display: grid;
