@@ -15,7 +15,8 @@ import ConfirmView from "../../views/ConfirmView";
 import ModuleContextView from "../../views/ModuleContextView";
 import RunConfirmView from "../../views/RunConfirmView";
 import ResultView from "../../views/ResultView";
-import Sidebar from "../../views/Sidebar";
+import JobSidebar from "./JobSidebar";
+import TopBar, { type Theme } from "./TopBar";
 
 // Phase 9 Task 9.5 · 状态机宿主(spec §6)。
 // 集中管理 5 阶段(Ask→Review→Route→Run→Results)+ 集中式 JobState,
@@ -47,6 +48,9 @@ export default function AppShell() {
   const [jobs, setJobs] = useState<JobSummary[] | null>(null);
   const [h, setH] = useState<Health | null>(null);
   const [healthErr, setHealthErr] = useState<string | null>(null);
+  // 主题(light/dark):TopBar 切换,副作用写到 <html data-theme>,themes.css 据此覆盖 token。
+  // 默认 light;不写 data-theme 时 themes.css 会跟随 prefers-color-scheme(系统偏好)。
+  const [theme, setTheme] = useState<Theme>("light");
 
   const loadJobs = useCallback(() => {
     listJobs()
@@ -60,6 +64,11 @@ export default function AppShell() {
       .catch((e: unknown) => setHealthErr(String(e)));
     loadJobs();
   }, [loadJobs]);
+
+  // 主题副作用:显式写 document.documentElement.dataset.theme,全站明暗切换。
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   // 新建查询:重置整个 JobState 回 ask,退出历史 job 模式。
   function newQuery() {
@@ -110,8 +119,8 @@ export default function AppShell() {
 
   return (
     <div className="app-shell">
-      {/* 左：Job Sidebar(本 task 先内联现 Sidebar,9.6 拆成 JobSidebar) */}
-      <Sidebar
+      {/* 左:独立 Job Sidebar(历史 job / 收藏;不与阶段轨混,spec §1) */}
+      <JobSidebar
         jobs={jobs}
         activeJobId={activeJobId}
         onNewQuery={newQuery}
@@ -122,11 +131,15 @@ export default function AppShell() {
       />
 
       <div className="main">
-        {/* TopBar(本 task 先内联,9.6 拆成 TopBar 组件) */}
-        <div className="topbar">
-          <span className="mode-pill">mode:{mode}</span>
-          <span className="notice-pill">⚠ LLM 未参与预测/治理决策</span>
-        </div>
+        {/* 顶栏:mode pill + LLM 提示 + light/dark 主题开关 */}
+        <TopBar
+          mode={mode}
+          onMode={setMode}
+          theme={theme}
+          onToggleTheme={() =>
+            setTheme((t) => (t === "light" ? "dark" : "light"))
+          }
+        />
 
         <div className="main-scroll">
           <div className="main-inner">
