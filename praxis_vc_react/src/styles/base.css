@@ -1,0 +1,143 @@
+/* 基础排版 —— reset + 全局字体/标题/代码,全部走 tokens.css 变量。
+   spec §3:正文用 Inter,大标题(h1/h2)用 Newsreader 衬线,code/pre 用 JetBrains Mono。
+   前端只读展示,不参与预测/治理决策。 */
+
+/* —— reset —— */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* —— 标题:大标题用衬线(Newsreader),小标题回落无衬线 —— */
+h1,
+h2,
+h3 {
+  margin: 0;
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h1,
+h2 {
+  font-family: var(--font-serif); /* hero / 页面大标题 用衬线 */
+  letter-spacing: -0.02em;
+}
+
+h3 {
+  font-family: var(--font-sans); /* 小节标题保持无衬线 */
+}
+
+p {
+  margin: 0;
+}
+
+/* —— 代码 —— */
+code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1px 6px;
+  color: var(--text);
+  word-break: break-word;
+}
+
+pre {
+  font-family: var(--font-mono);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  overflow-x: auto;
+  margin: 0;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* —— 细滚动条 —— */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* —— 过渡期兼容变量(白屏防护)——
+   App.tsx 本 task 不改,仍 import "./App.css"(旧布局/组件),而旧 index.css 切走后不再加载。
+   旧 App.css 引用的一批 legacy 变量在此按新 token 重新定义,使旧 views 的
+   .app-shell/.sidebar/.card/.btn/.tabs/.timeline/.module-grid 等在过渡期仍有正确样式,
+   避免切入口后旧页面样式丢失/白屏。这些变量在 P3/P5 迁完旧 views 后随 App.css 一并删除。 */
+:root {
+  --sidebar-bg: color-mix(in srgb, var(--bg) 60%, var(--surface));
+  --sidebar-border: var(--border);
+  --surface-2: var(--code-bg);
+  --surface-hover: color-mix(in srgb, var(--primary) 6%, var(--surface));
+  --text-faint: color-mix(in srgb, var(--text-muted) 70%, transparent);
+  --border-strong: color-mix(in srgb, var(--border) 70%, var(--text-muted));
+
+  --accent-solid: var(--primary); /* 旧 --accent 主按钮位改指深靛蓝(不用黑) */
+  --accent-hover: color-mix(in srgb, var(--primary) 85%, #000);
+  --accent-text: #ffffff;
+
+  --focus: var(--accent);
+  --focus-soft: color-mix(in srgb, var(--accent) 14%, transparent);
+
+  --danger-bg: color-mix(in srgb, var(--danger) 10%, var(--surface));
+  --warn-bg: color-mix(in srgb, var(--warn) 12%, var(--surface));
+  --ok: var(--accent);
+  --ok-bg: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  --info: var(--primary);
+  --info-bg: color-mix(in srgb, var(--primary) 10%, var(--surface));
+
+  --shadow-sm: var(--card-shadow);
+  --shadow: 0 2px 8px rgba(20, 20, 20, 0.06);
+}
+
+/* 旧 App.css 用 var(--accent) 作主按钮底色(旧值是黑);过渡期把它重定向到深靛蓝。
+   放在旧 index.css 之外的独立声明,确保 main 切到 styles/index.css 后旧按钮不再是黑。 */
+:root {
+  --accent: var(--primary);
+}

@@ -1,0 +1,276 @@
+/* 组件基样式 —— spec §3 卡片/按钮/表单/表格/tab/badge/pill。
+   复用现有类名(.btn/.card/.tabs/.badge/.pill 等)以降低后续组件改造成本,配色改到新 token。
+   前端只读展示,不参与预测/治理决策。
+
+   注:本文件经 styles/index.css 在 App.css 之前载入。过渡期旧 views 仍 import App.css,
+   同名类以 App.css(后载入、同特异度)为准,保证旧页面不掉样式(白屏防护);
+   新组件(P4/P5)引用这里的规则。P3/P5 迁完旧 views、删 App.css 后,这里成为唯一来源。 */
+
+/* ---------- 卡片(spec §3) ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--card-shadow);
+  padding: 22px 24px;
+  margin-bottom: var(--space-4);
+}
+.card > h2 {
+  font-size: 17px;
+  margin-bottom: var(--space-1);
+}
+
+/* ---------- 按钮 ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 9px 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: var(--primary); /* 深靛蓝实心,不用黑 */
+  color: #fff;
+  transition: background 0.12s, opacity 0.12s;
+}
+.btn:hover {
+  background: color-mix(in srgb, var(--primary) 85%, #000);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+.btn-ghost:hover {
+  background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+}
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn-danger:hover {
+  background: color-mix(in srgb, var(--danger) 85%, #000);
+}
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* ---------- 表单控件 ---------- */
+textarea,
+input[type="text"],
+input:not([type]),
+select {
+  font: inherit;
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+textarea:focus,
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+/* ---------- 键值表 / 通用表 ---------- */
+.kv-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-2) 0;
+  font-size: 13px;
+}
+.kv-table th,
+.kv-table td {
+  text-align: left;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.kv-table th {
+  width: 38%;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.kv-table td {
+  color: var(--text);
+  word-break: break-word;
+}
+.kv-table tr:last-child th,
+.kv-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---------- Tabs(segmented) ---------- */
+.tabs {
+  display: inline-flex;
+  gap: 2px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px;
+  margin: var(--space-1) 0 var(--space-4);
+}
+.tab {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  transition: background 0.12s, color 0.12s;
+}
+.tab:hover {
+  color: var(--text);
+}
+.tab.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--card-shadow);
+}
+
+/* ---------- Badge / Pill(状态语义,spec §2) ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: var(--surface);
+}
+.badge-confirmed {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+}
+.badge-inferred {
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--warn) 30%, transparent);
+}
+.badge-missing {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+  border-color: color-mix(in srgb, var(--danger) 30%, transparent);
+}
+.badge-ok {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: var(--surface);
+}
+
+/* ---------- 状态点(status dot) ---------- */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.status-dot.confirmed {
+  background: var(--primary);
+}
+.status-dot.inferred {
+  background: var(--warn);
+}
+.status-dot.missing {
+  background: var(--danger);
+}
+.status-dot.ok {
+  background: var(--accent);
+}
+
+/* ---------- 提示条 ---------- */
+.note,
+.warn,
+.err {
+  font-size: 13px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  margin: var(--space-2) 0;
+  border: 1px solid transparent;
+}
+.note {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 20%, transparent);
+}
+.warn {
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--warn) 20%, transparent);
+}
+.err {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+  border-color: color-mix(in srgb, var(--danger) 20%, transparent);
+  white-space: pre-wrap;
+  font-family: var(--font-mono);
+}
+
+/* ---------- json / narrative / pretty 代码块 ---------- */
+.json,
+.narrative,
+.pretty {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: var(--space-2) 0;
+}
+.narrative {
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+/* ---------- 表格横向滚动容器(防横溢) ---------- */
+.table-scroll {
+  overflow-x: auto;
+  margin: var(--space-2) 0;
+}
