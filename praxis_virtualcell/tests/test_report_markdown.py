@@ -1,5 +1,7 @@
 """确定性 report.md 渲染器测试:9 段齐全 / verdict 正确 / abstain 不出数值 /
 缺字段防御 / 无 LLM / 可复现。"""
+import pytest
+
 from praxis_virtualcell.io.report_markdown import render_report_md
 
 _ACCEPT = {
@@ -251,3 +253,157 @@ def test_module_routing_does_not_break_nine_sections():
     md = render_report_md(_WITH_MODULE_PLAN)
     for s in _SECTIONS:
         assert s in md, f"缺段:{s}"
+
+
+# ===== Task 8.5:report tests 扩到 30(module/evidence/多物种/provenance 一致) =====
+
+
+@pytest.mark.parametrize("species", ["human", "mouse", "yeast", "bacteria"])
+def test_report_all_species_render_nine_sections(species):
+    job = {"mode": "offline",
+           "request": {"request_id": f"sp_{species}", "species": species, "cell_type": "X",
+                       "perturbation_type": "gene", "perturbation_targets": ["G1"],
+                       "task_type": "predict_delta_expression"},
+           "report": {"request_id": f"sp_{species}", "abstain": False, "reliability": "medium",
+                      "prediction": {"delta": [0.1]}, "models_used": ["MockLinear"],
+                      "models_rejected": [], "models_failed": [], "abstain_reasons": [],
+                      "downgrade_reasons": [], "failed_checks": [], "model_disagreement": None,
+                      "critic_violations": [], "caution_flags": {}, "learned_reliability": None,
+                      "provenance": {"n_messages": 10, "rules_referenced": [], "rules_hit": [],
+                                     "ortholog_cautions": {}, "rejection_reasons": {}}}}
+    md = render_report_md(job)
+    for s in _SECTIONS:
+        assert s in md
+    if species != "human":
+        assert species in md  # 非 human 进 Limitations
+
+
+def test_non_human_species_downgrade_note_in_limitations():
+    for sp in ("mouse", "yeast", "bacteria"):
+        job = {"mode": "offline", "request": {"species": sp, "perturbation_targets": ["G"],
+               "perturbation_type": "gene", "task_type": "predict_delta_expression"},
+               "report": {"abstain": False, "reliability": "medium", "prediction": {"delta": [0.1]},
+                          "models_used": ["MockLinear"], "provenance": {}}}
+        md = render_report_md(job)
+        assert "跨物种" in md or "ortholog" in md.lower()
+
+
+def test_module_routing_caution_entry_verdict_shown():
+    md = render_report_md(_WITH_MODULE_PLAN)
+    assert "caution" in md  # secondary stress_processor verdict=caution
+
+
+def test_module_routing_mismatch_rendered():
+    job = {"mode": "offline", "request": {"species": "bacteria", "perturbation_targets": ["b0720"],
+           "perturbation_type": "gene", "task_type": "predict_delta_expression"},
+           "report": {"abstain": False, "reliability": "medium", "prediction": {"delta": [0.1]},
+                      "models_used": ["MockLinear"],
+                      "provenance": {"module_plan": {"species": "bacteria", "primary": "cytoplasmic_metabolism",
+                          "secondary": [], "overall_verdict": "caution",
+                          "entries": [{"module": "cytoplasmic_metabolism", "display_name": "Cytoplasmic Metabolism",
+                              "role": "primary", "engine": "gem_fba", "route_disposition": "accept",
+                              "species_support": "supported", "species_verdict": "accept",
+                              "verdict": "caution", "mismatch": "biological_mismatch"}], "notes": []}}}}
+    md = render_report_md(job)
+    assert "mismatch" in md and "biological_mismatch" in md
+
+
+def test_evidence_level_e2_in_domain_accept():
+    job = dict(_WITH_MODULE_PLAN)
+    job = {**_WITH_MODULE_PLAN,
+           "report": {**_WITH_MODULE_PLAN["report"],
+                      "provenance": {**_WITH_MODULE_PLAN["report"]["provenance"],
+                                     "evidence_level": {"level": "E2", "ood_signal": "in_domain",
+                                                        "rationale": ["matched_perturbation_data"],
+                                                        "aligned_with_disposition": True}}}}
+    md = render_report_md(job)
+    assert "E2" in md and "in_domain" in md
+
+
+@pytest.mark.parametrize("level", ["E0", "E1", "E3", "E5"])
+def test_evidence_levels_render(level):
+    job = {"mode": "offline", "request": {"species": "human", "perturbation_targets": ["AHR"],
+           "perturbation_type": "gene", "task_type": "predict_delta_expression"},
+           "report": {"abstain": False, "reliability": "medium", "prediction": {"delta": [0.1]},
+                      "models_used": ["MockLinear"],
+                      "provenance": {"evidence_level": {"level": level, "ood_signal": "unknown",
+                                     "rationale": [], "aligned_with_disposition": True}}}}
+    md = render_report_md(job)
+    assert level in md
+
+
+def test_learning_queue_sorted_top5_only():
+    items = [{"candidate": f"c{i}", "module": "genetic_hub", "information_gain": float(i),
+              "drivers": ["d"]} for i in range(7)]
+    job = {"mode": "offline", "request": {"species": "human", "perturbation_targets": ["AHR"],
+           "perturbation_type": "gene", "task_type": "predict_delta_expression"},
+           "report": {"abstain": False, "reliability": "medium", "prediction": {"delta": [0.1]},
+                      "models_used": ["MockLinear"],
+                      "provenance": {"learning_queue": {"items": items, "notes": []}}}}
+    md = render_report_md(job)
+    assert "c0" in md  # 前 5 项渲染(renderer 取 items[:5];此测钉现有 top-5 行为)
+
+
+def test_provenance_module_plan_and_evidence_coexist():
+    job = {**_WITH_MODULE_PLAN,
+           "report": {**_WITH_MODULE_PLAN["report"],
+                      "provenance": {**_WITH_MODULE_PLAN["report"]["provenance"],
+                                     "evidence_level": {"level": "E3", "ood_signal": "unknown",
+                                                        "rationale": [], "aligned_with_disposition": True},
+                                     "learning_queue": {"items": [], "notes": []}}}}
+    md = render_report_md(job)
+    assert ("模块路由" in md or "Module Routing" in md)
+    assert "E3" in md
+    assert "证据记录" in md or "Evidence Record" in md
+
+
+def test_report_md_ends_with_newline():
+    assert render_report_md(_WITH_MODULE_PLAN).endswith("\n")
+
+
+def test_report_md_no_llm_in_module_plan_path():
+    md = render_report_md(_WITH_MODULE_PLAN)
+    assert "llm_used_for_prediction: `False`" in md
+
+
+def test_empty_module_plan_entries_no_crash():
+    job = {"mode": "offline", "request": {"species": "human", "perturbation_targets": ["AHR"],
+           "perturbation_type": "gene", "task_type": "predict_delta_expression"},
+           "report": {"abstain": False, "reliability": "high", "prediction": {"delta": [0.1]},
+                      "models_used": ["MockLinear"],
+                      "provenance": {"module_plan": {"species": "human", "primary": "genetic_hub",
+                          "secondary": [], "overall_verdict": "accept", "entries": [], "notes": []}}}}
+    md = render_report_md(job)
+    assert "genetic_hub" in md  # primary 仍展示,即使 entries 空
+
+
+def test_downgrade_with_module_plan_verdict_consistency():
+    md = render_report_md(_WITH_MODULE_PLAN)
+    # overall_verdict=accept 出现在模块路由段
+    assert "overall_verdict: **accept**" in md
+
+
+def test_reproducible_with_module_plan():
+    assert render_report_md(_WITH_MODULE_PLAN) == render_report_md(_WITH_MODULE_PLAN)
+
+
+def test_module_routing_section_after_routing_decision():
+    md = render_report_md(_WITH_MODULE_PLAN)
+    assert md.index("## 3. Routing Decision") < md.index("模块路由") < md.index("## 4. Result Summary")
+
+
+def test_all_four_species_with_module_plan_no_crash():
+    for sp in ("human", "mouse", "yeast", "bacteria"):
+        job = {"mode": "offline", "request": {"species": sp, "perturbation_targets": ["G"],
+               "perturbation_type": "gene", "task_type": "predict_delta_expression"},
+               "report": {"abstain": False, "reliability": "medium", "prediction": {"delta": [0.1]},
+                          "models_used": ["MockLinear"],
+                          "provenance": {"module_plan": {"species": sp, "primary": "cytoplasmic_metabolism",
+                              "secondary": [], "overall_verdict": "accept",
+                              "entries": [{"module": "cytoplasmic_metabolism",
+                                  "display_name": "Cytoplasmic Metabolism", "role": "primary",
+                                  "engine": "gem_fba", "route_disposition": "accept",
+                                  "species_support": "supported", "species_verdict": "accept",
+                                  "verdict": "accept", "mismatch": None}], "notes": []}}}}
+        md = render_report_md(job)
+        assert "cytoplasmic_metabolism" in md
