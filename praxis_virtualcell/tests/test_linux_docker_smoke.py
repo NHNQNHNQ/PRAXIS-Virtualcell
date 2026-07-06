@@ -100,6 +100,48 @@ def docker_image():
     _docker_cleanup()
 
 
+def _resolve_host_port(container_name, *, container_port=8000):
+    """`docker run -p 0:8000` 后,用 `docker port` 解析 docker 实际分配的空闲 host 端口。
+
+    docker port 输出形如 `0.0.0.0:49153`(可能多行 IPv4/IPv6),取首行冒号后的端口。
+    因 host 8000 可能被长期服务占用,固定绑 8000 会 address already in use;
+    绑 `0:8000` 让 docker 自选空闲 host 端口,规避冲突。
+    """
+    r = _run(
+        ["docker", "port", container_name, f"{container_port}/tcp"],
+        timeout=_RUN_TIMEOUT,
+    )
+    assert r.returncode == 0, f"docker port 解析失败:{r.stderr}"
+    line = r.stdout.strip().splitlines()[0].strip()
+    host_port = int(line.rsplit(":", 1)[1])
+    assert host_port > 0, f"解析到非法 host 端口:{line}"
+    return host_port
+
+
+@pytest.fixture(scope="module")
+def running_container(docker_image):
+    """module 级:用**动态空闲 host 端口**(`-p 0:8000`)起一次容器,供三条容器用例复用。
+
+    host 8000 可能被长期运行的服务占用,固定绑 8000 会 `address already in use`;
+    这里让 docker 自选空闲 host 端口,再用 `docker port` 解析实际端口。
+    yield 容器可访问的 base_url(如 `http://127.0.0.1:49xxx`);teardown `docker rm -f`。
+    绝不 kill host 上任何占用 8000 的进程。
+    """
+    _run(["docker", "rm", "-f", _CONTAINER_NAME], timeout=_RUN_TIMEOUT)
+    up = _run(
+        ["docker", "run", "-d", "--name", _CONTAINER_NAME,
+         "-p", "0:8000", docker_image],
+        timeout=_RUN_TIMEOUT,
+    )
+    assert up.returncode == 0, f"docker run 失败:{up.stderr}"
+    assert up.stdout.strip(), "无容器 id"
+    try:
+        host_port = _resolve_host_port(_CONTAINER_NAME)
+        yield f"http://127.0.0.1:{host_port}"
+    finally:
+        _run(["docker", "rm", "-f", _CONTAINER_NAME], timeout=_RUN_TIMEOUT)
+
+
 # ============================================================
 # 1. python >= 3.11(发行最低版本线)
 # ============================================================
@@ -190,100 +232,68 @@ def test_docker_build(docker_image):
 
 
 # ============================================================
-# 6. docker run 容器起(offline 网页服务)
+# 6. docker run 容器起(offline 网页服务,动态空闲 host 端口)
 # ============================================================
 @pytest.mark.integration
 @requires_linux_docker
-def test_docker_run_container_up(docker_image):
-    _run(["docker", "rm", "-f", _CONTAINER_NAME], timeout=_RUN_TIMEOUT)
-    try:
-        up = _run(
-            ["docker", "run", "-d", "--name", _CONTAINER_NAME,
-             "-p", "8000:8000", docker_image],
-            timeout=_RUN_TIMEOUT,
-        )
-        assert up.returncode == 0, f"docker run 失败:{up.stderr}"
-        cid = up.stdout.strip()
-        assert cid, "无容器 id"
-        # 探活:容器仍在 running
-        time.sleep(3)
-        insp = _run(
-            ["docker", "inspect", "-f", "{{.State.Running}}", _CONTAINER_NAME],
-            timeout=_RUN_TIMEOUT,
-        )
-        assert insp.stdout.strip() == "true", (
-            f"容器未处于 running:{insp.stdout} / logs: "
-            f"{_run(['docker', 'logs', _CONTAINER_NAME], timeout=_RUN_TIMEOUT).stderr[-1000:]}"
-        )
-    finally:
-        _run(["docker", "rm", "-f", _CONTAINER_NAME], timeout=_RUN_TIMEOUT)
+def test_docker_run_container_up(running_container):
+    # running_container fixture 已用 `-p 0:8000` 起好容器;这里核验其处于 running。
+    time.sleep(3)
+    insp = _run(
+        ["docker", "inspect", "-f", "{{.State.Running}}", _CONTAINER_NAME],
+        timeout=_RUN_TIMEOUT,
+    )
+    assert insp.stdout.strip() == "true", (
+        f"容器未处于 running:{insp.stdout} / logs: "
+        f"{_run(['docker', 'logs', _CONTAINER_NAME], timeout=_RUN_TIMEOUT).stderr[-1000:]}"
+    )
 
 
 # ============================================================
-# 7. port 8000 /api/health 返回 200
+# 7. /api/health 返回 200(动态 host 端口)
 # ============================================================
 @pytest.mark.integration
 @requires_linux_docker
-def test_container_health_200(docker_image):
-    _run(["docker", "rm", "-f", _CONTAINER_NAME], timeout=_RUN_TIMEOUT)
-    try:
-        up = _run(
-            ["docker", "run", "-d", "--name", _CONTAINER_NAME,
-             "-p", "8000:8000", docker_image],
-            timeout=_RUN_TIMEOUT,
-        )
-        assert up.returncode == 0, f"docker run 失败:{up.stderr}"
-        code = _poll_http("http://127.0.0.1:8000/api/health")
-        assert code == 200, f"/api/health 状态 {code}(期望 200)"
-    finally:
-        _run(["docker", "rm", "-f", _CONTAINER_NAME], timeout=_RUN_TIMEOUT)
+def test_container_health_200(running_container):
+    code = _poll_http(f"{running_container}/api/health")
+    assert code == 200, f"/api/health 状态 {code}(期望 200)"
 
 
 # ============================================================
-# 8. /api/reports/{id}/markdown 可下载(容器内建 job → 取 markdown)
+# 8. /api/reports/{id}/markdown 可下载(容器内建 job → 取 markdown,动态 host 端口)
 # ============================================================
 @pytest.mark.integration
 @requires_linux_docker
-def test_container_report_markdown_download(docker_image):
-    _run(["docker", "rm", "-f", _CONTAINER_NAME], timeout=_RUN_TIMEOUT)
-    try:
-        up = _run(
-            ["docker", "run", "-d", "--name", _CONTAINER_NAME,
-             "-p", "8000:8000", docker_image],
-            timeout=_RUN_TIMEOUT,
-        )
-        assert up.returncode == 0, f"docker run 失败:{up.stderr}"
-        assert _poll_http("http://127.0.0.1:8000/api/health") == 200, "服务未就绪"
+def test_container_report_markdown_download(running_container):
+    assert _poll_http(f"{running_container}/api/health") == 200, "服务未就绪"
 
-        import urllib.request
+    import urllib.request
 
-        # 建一个 offline job
-        req = {
-            "species": "human", "perturbation_type": "gene",
-            "perturbation_targets": ["AHR"], "input_modality": "scRNA",
-            "output_modality": "delta_expression",
-            "task_type": "predict_delta_expression",
-        }
-        payload = json.dumps({"request": req, "mode": "offline"}).encode()
-        post = urllib.request.Request(
-            "http://127.0.0.1:8000/api/jobs", data=payload,
-            headers={"Content-Type": "application/json"}, method="POST",
-        )
-        with urllib.request.urlopen(post, timeout=_HTTP_TIMEOUT) as resp:
-            assert resp.status == 200
-            jid = json.loads(resp.read().decode())["job_id"]
+    # 建一个 offline job
+    req = {
+        "species": "human", "perturbation_type": "gene",
+        "perturbation_targets": ["AHR"], "input_modality": "scRNA",
+        "output_modality": "delta_expression",
+        "task_type": "predict_delta_expression",
+    }
+    payload = json.dumps({"request": req, "mode": "offline"}).encode()
+    post = urllib.request.Request(
+        f"{running_container}/api/jobs", data=payload,
+        headers={"Content-Type": "application/json"}, method="POST",
+    )
+    with urllib.request.urlopen(post, timeout=_HTTP_TIMEOUT) as resp:
+        assert resp.status == 200
+        jid = json.loads(resp.read().decode())["job_id"]
 
-        # 下载 markdown
-        with urllib.request.urlopen(
-            f"http://127.0.0.1:8000/api/reports/{jid}/markdown",
-            timeout=_HTTP_TIMEOUT,
-        ) as resp:
-            assert resp.status == 200
-            body = resp.read().decode("utf-8")
-            assert "text/markdown" in resp.headers.get("content-type", "")
-            assert "# PRAXIS-VirtualCell Report" in body
-    finally:
-        _run(["docker", "rm", "-f", _CONTAINER_NAME], timeout=_RUN_TIMEOUT)
+    # 下载 markdown
+    with urllib.request.urlopen(
+        f"{running_container}/api/reports/{jid}/markdown",
+        timeout=_HTTP_TIMEOUT,
+    ) as resp:
+        assert resp.status == 200
+        body = resp.read().decode("utf-8")
+        assert "text/markdown" in resp.headers.get("content-type", "")
+        assert "# PRAXIS-VirtualCell Report" in body
 
 
 # ============================================================
