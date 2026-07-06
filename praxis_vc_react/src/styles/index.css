@@ -1,2 +1,4 @@
-/* 样式聚合入口(tokens/base/components/themes 由 Task 9.2–9.3 追加) */
+/* 样式聚合入口(base/components 由 Task 9.3 追加) */
 @import "./fonts.css";
+@import "./tokens.css";
+@import "./themes.css";
