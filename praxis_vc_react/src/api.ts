@@ -198,3 +198,29 @@ export async function getReportMarkdown(jobId: string): Promise<string> {
   if (!res.ok) throw new Error(`API ${res.status}: report.md 获取失败`);
   return res.text();
 }
+
+// ---- UI 派生类型(spec §6 状态机;仅前端使用,不对应任何新端点/请求) ----
+// Phase 9 P2:7 步扁平流程 → 5 阶段状态机。以下三类型只服务前端状态管理,
+// 不改上面任何请求方法,不新增后端调用。
+
+// 5 阶段:Ask→Review→Route→Run→Results(旧 7 步映射见计划状态机映射表)。
+export type Stage = "ask" | "review" | "route" | "run" | "results";
+
+// 运行状态机:idle=未运行;running=同步执行中(确定性步骤指示,非流式);
+// succeeded/failed/abstained=终态(实际 abstain/failed 由结果页回填)。
+export type RunStatus =
+  | "idle"
+  | "running"
+  | "succeeded"
+  | "failed"
+  | "abstained";
+
+// 集中式作业状态:回退只改 stage 不清以下字段,故回退不丢数据。
+export interface JobState {
+  query: string; // Ask 阶段自然语言输入
+  parsedIntent: ParseResult | null; // /api/parse 结果(复用现有 ParseResult)
+  confirmedRequest: Record<string, unknown> | null; // Review 阶段编辑组装的 request
+  modulePlan: ModulePlan | null; // Route 静态预期(前端派生)/ Results 实际(/module-plan)
+  runStatus: RunStatus;
+  jobId: string | null; // createJob 产出
+}
