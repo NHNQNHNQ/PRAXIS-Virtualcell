@@ -93,7 +93,7 @@ export default function ResultView({
     <section className="card">
       <div className="row between">
         <h2>
-          {advanced ? "高级 · trace / provenance" : "3 · 结果"}(job {jobId})
+          {advanced ? "高级 · trace / provenance" : "结果"}(job {jobId})
         </h2>
         <div className="row">
           {advanced && onBack && (

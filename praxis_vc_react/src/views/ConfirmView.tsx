@@ -68,7 +68,7 @@ export default function ConfirmView({
 
   return (
     <section className="card">
-      <h2>2 · 确认(Confirm)</h2>
+      <h2>3 · 确认(Confirm)</h2>
 
       {opts && opts.cell_presets.length > 0 && (
         <label>

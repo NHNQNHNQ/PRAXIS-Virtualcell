@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createJob, type Mode } from "../api";
 
-// 步骤 6 · 运行确认(RunConfirm)。
+// 步骤 5 · 运行确认(RunConfirm)。
 // 展示最终 request 汇总(只读)+ LLM 报告复选框 + "确认运行"。
 // 铁律:前端不做任何治理/预测判断,仅把用户确认后的 request 原样交给后端执行。
 // createJob 由此处发起(从 ConfirmView 迁出),保证 confirm→module_context→run_confirm→createJob→result 链不断。
@@ -52,7 +52,7 @@ export default function RunConfirmView({
 
   return (
     <section className="card">
-      <h2>6 · 运行确认(Run Confirm)</h2>
+      <h2>5 · 运行确认(Run Confirm)</h2>
       <p className="hero-sub">确认下方请求后运行;解析与预测全在后端确定性 runtime 完成。</p>
 
       {/* 最终 request 汇总(只读) */}
