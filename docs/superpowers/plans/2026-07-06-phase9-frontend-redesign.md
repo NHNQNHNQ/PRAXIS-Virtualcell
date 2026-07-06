@@ -134,9 +134,9 @@ praxis_vc_react/src/
   @import "@fontsource/jetbrains-mono/400.css";
   ```
 - [ ] **Step 4:** 建 `src/styles/index.css`,首行 `@import "./fonts.css";`(tokens/base/components/themes 由 9.2–9.3 追加)。**暂不改 `main.tsx`**(9.3 统一切换 import,避免中途样式缺失白屏)。
-- [ ] **Step 5:** build + typecheck + lint 全过。**手动验证:** `dist/assets/` 下出现 `.woff2` 字体产物(证明 self-host 打包成功,离线可用)。
+- [ ] **Step 5:** build + typecheck + lint 全过。**手动验证:** `node_modules/@fontsource/*` 下有 woff2(依赖装成功)、fonts.css/index.css 建成且 @import 能 resolve。⚠️ **dist 含 woff2 的验证移到 Task 9.3**:本 task 按 Step 4 有意不改 main.tsx,`styles/index.css` 尚未被任何模块引用,vite 会 tree-shake 掉,故本 task `dist` woff2=0 是**预期**(不是缺陷);main.tsx 接入 `styles/index.css` import 后(9.3)才进 dist。
 
-**验收:** 三依赖入 `package.json`;`typecheck` script 存在且过;`dist` 含字体 woff2。
+**验收:** 三依赖入 `package.json`;`typecheck` script 存在且过;fonts.css/index.css 脚手架就绪(**dist 含 woff2 的验证在 Task 9.3 切 main.tsx 入口后核**,本 task 不要求 dist woff2)。
 **commit:** `git add package.json package-lock.json src/styles/fonts.css src/styles/index.css`
 ```
 git commit -m "$(cat <<'EOF'
@@ -199,7 +199,7 @@ EOF
 
 - [ ] **Step 1:** `base.css`:body 用 `--font-sans`;`h1,h2`(hero/页面大标题)用 `--font-serif`;`code,pre` 用 `--font-mono` + `--code-bg`;卡片规范(spec §3:`background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:var(--card-shadow)`),层次靠间距/字重/小标题/分隔/状态点,不靠大色块。
 - [ ] **Step 2:** `components.css`:`.btn`(深靛蓝实心)/`.btn-ghost`/表单/`.kv-table`/`.tabs .tab`/`.badge`/`.pill` 等,复用现 `App.css` 的类名以降低组件改造成本,但配色改到新 token。
-- [ ] **Step 3:** `main.tsx` 切 import;`index.css` 追加 base/components。
+- [ ] **Step 3:** `main.tsx` 切 import(`./index.css` → `./styles/index.css`);`index.css` 追加 base/components。切入口后 **build 并验证 `dist/assets/` 出现 `.woff2`**(Task 9.1 的 self-host 字体此刻真正进 dist,证明打包离线可用;此即从 Task 9.1 移来的 woff2 验证)。
 - [ ] **Step 4:** build + typecheck + lint 全过。**手动验证:** `vite preview` 现有页面用新样式渲染(标题变衬线、按钮变深靛蓝、背景变暖白),无白屏、无控制台报错。
 
 **验收:** 全局字体/配色切到新系统;旧页面仍能渲染(过渡期共存)。
