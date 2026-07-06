@@ -20,6 +20,7 @@
 5. **前端不引入测试栈**(延续用户决策),质量靠 `build` + `typecheck` + `lint` + Phase 末 playwright 冒烟。
 6. **引入依赖仅前端**(`recharts` + 三个 `@fontsource/*`),不影响 Python/后端/CI 的 `praxis_virtualcell` 口径。
 7. **提交纪律:** 每 task 一提交;commit 前 `find . -name '._*' -delete`;trailer 恒定 `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`;在分支 `feat/v0.9-phase0-module-core` 提交;**不 push**。
+8. **文案守 spec §3.5(2026-07-06 用户追加"不要太 AI 和工程"):** 面向用户文字不要太 AI(无 AI/智能/助手/一键/chatbot 第一人称/过度承诺)、不要太工程(不把 `parse/schema/candidate_request/dispatch/execution manifest/agent trace/provenance ledger/abstain` 等内部实现旁白直接抛给用户);用严谨同行科学家的自然中文,精确术语集中在 Stage 5 的 Trace/Provenance/Evidence 审计区。**P3 五 stage、P5 六 tab 的文案 task 尤其守;spec §3.5 有改写对照表。** spec 合规审须核此项。
 
 **房规(每个实现 subagent):** venv 无关(纯前端);前端命令全部在 `praxis_vc_react/` 下执行;`dist` 已 `.gitignore`,不提交构建产物;commit 前删 `._*`。
 

@@ -75,6 +75,26 @@ background: #ffffff; border: 1px solid #e8e4dc;
 border-radius: 16px; box-shadow: 0 1px 2px rgba(20,20,20,0.04);
 ```
 
+## 3.5 文案原则(UX writing —— 面向用户文字;2026-07-06 用户追加"不要太 AI 和工程")
+
+**总则:** 面向用户的文字像一个严谨的同行科学家在描述实验——**既不是 AI 产品营销腔,也不是系统在报告自己的内部状态**。
+
+- **去 AI 腔:** 不用「AI / 智能 / 助手 / 让 AI 帮你 / 轻松 / 一键 / 秒懂 / 赋能」;不过度承诺;不用 chatbot 第一人称(「我来帮你…」);系统不自称。
+- **去工程黑话(不把内部实现当文案):**「解析/parse、schema、candidate_request、dispatch、execution manifest、调用 XX agent、module routing agent、provenance ledger、abstain」这类系统视角旁白**不直接抛给用户**,换科学家的自然说法。
+- **保留但自然:** module / reliability / provenance / evidence / trace 这些科学家能懂的专业概念**可以用**,但用平实中文承载。**精确术语集中在审计区**(Stage 5 的 Trace / Provenance / Evidence tab,给要审计的科学家看);**主流程(Ask/Review/Route/Run)说人话**。
+
+**改写对照(现有或工程说法 → 建议):**
+| 现有 / 工程 | 建议 |
+|---|---|
+| ⚠ LLM 未参与预测/治理决策 | 结果由确定性模型给出,未经语言模型改写 |
+| 解析核对 / Parse Review | 核对任务解读 |
+| 运行确认 / execution manifest | 运行前确认 / 即将运行的实验 |
+| Module Routing Preview | 预计涉及的功能模块 |
+| Validating biological objects / Resolving species(运行进度) | 核对生物对象 / 确定物种背景 |
+| 生成 LLM 叙述报告 | 生成文字解读(可选) |
+
+**平衡:** PRAXIS 的卖点(可审计、module、provenance、reliability)**不能丢**,但呈现要像科学家写的,不像系统日志或 AI 营销。拿不准时:少一点术语,多想"一个同行会怎么说"。
+
 ## 4. 数据可视化方案
 
 - **标准统计图 → Recharts**(React 友好、SVG 输出、写常规图快、工程复杂度低于 visx)。
