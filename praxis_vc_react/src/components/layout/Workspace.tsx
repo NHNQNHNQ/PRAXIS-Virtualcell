@@ -5,7 +5,7 @@ import {
   type ParseResult,
   type Stage,
 } from "../../api";
-import AskView from "../../views/AskView";
+import AskStage from "../stages/AskStage";
 import ParseReviewView from "../../views/ParseReviewView";
 import ConfirmView from "../../views/ConfirmView";
 import ModuleContextView from "../../views/ModuleContextView";
@@ -47,7 +47,7 @@ export default function Workspace({
   canEnter: (s: Stage) => boolean;
   onJump: (s: Stage) => void;
   onMode: (m: Mode) => void;
-  onParsed: (r: ParseResult) => void;
+  onParsed: (r: ParseResult, query: string) => void;
   onReviewNext: () => void;
   onReviewBack: () => void;
   onConfirmed: (req: Record<string, unknown>) => void;
@@ -70,7 +70,7 @@ export default function Workspace({
   function renderStage() {
     switch (stage) {
       case "ask":
-        return <AskView mode={mode} onMode={onMode} onParsed={onParsed} />;
+        return <AskStage mode={mode} onMode={onMode} onParsed={onParsed} />;
 
       case "review":
         // 合并旧 parse_review + confirm:子步 summary(只读核对)→ form(可编辑确认)。

@@ -166,10 +166,10 @@ export default function AppShell() {
                 canEnter={canEnter}
                 onJump={jumpTo}
                 onMode={setMode}
-                onParsed={(r) => {
-                  // 旧 AskView 的 onParsed 只回传 ParseResult(不含 query 文本);
-                  // query 文本在 P3 的 AskStage 才回传,此处桥接暂留空。
-                  patchJob({ parsedIntent: r });
+                onParsed={(r, query) => {
+                  // AskStage 回传 ParseResult 与原始 query 文本,一并写入 JobState
+                  // (P2 桥接的「query 暂留空」限制到此解除)。
+                  patchJob({ parsedIntent: r, query });
                   setReviewSub("summary");
                   setStage("review");
                 }}
