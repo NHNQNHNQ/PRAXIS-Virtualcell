@@ -50,17 +50,24 @@ export default function EvidenceDistributionChart({
   disagreement,
   models,
 }: EvidenceDistributionChartProps) {
-  // 数值缺失容错:score/metric/triggered 用 ?? 兜底。
-  const score = disagreement.score ?? 0;
-  const metric = disagreement.metric ?? "";
-  const triggered = disagreement.triggered ?? false;
+  // 入参防御:disagreement / models 可能为 null 或 {}(四输入自检),
+  // 先窄化到安全形态,避免访问 .score / .used.length 时崩溃。
+  const dis: DisagreementInput = disagreement ?? {};
+  const usedArr = Array.isArray(models?.used) ? models.used : [];
+  const rejectedArr = Array.isArray(models?.rejected) ? models.rejected : [];
+  const failedArr = Array.isArray(models?.failed) ? models.failed : [];
 
-  const usedCount = models.used.length;
-  const rejectedCount = models.rejected.length;
-  const failedCount = models.failed.length;
+  // 数值缺失容错:score/metric/triggered 用 ?? 兜底。
+  const score = dis.score ?? 0;
+  const metric = dis.metric ?? "";
+  const triggered = dis.triggered ?? false;
+
+  const usedCount = usedArr.length;
+  const rejectedCount = rejectedArr.length;
+  const failedCount = failedArr.length;
 
   // 全空(无 score 且三数组皆空)→ EmptyState,不崩。
-  const hasScore = disagreement.score != null;
+  const hasScore = dis.score != null;
   const hasModels = usedCount + rejectedCount + failedCount > 0;
   if (!hasScore && !hasModels) {
     return (

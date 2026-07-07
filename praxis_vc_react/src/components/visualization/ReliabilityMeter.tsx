@@ -19,8 +19,8 @@ function scoreLabel(score: number): string {
 }
 
 export default function ReliabilityMeter({ score, mode, reliability }: ReliabilityMeterProps) {
-  // score 缺失 → 占位,不渲染 strip。
-  if (score == null) {
+  // score 缺失 / NaN → 占位,不渲染 strip(NaN 也走「未提供」,不渲染 NaN)。
+  if (score == null || Number.isNaN(score)) {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
         <div style={{ fontSize: 13, color: "var(--text-muted)" }}>结果可靠性</div>

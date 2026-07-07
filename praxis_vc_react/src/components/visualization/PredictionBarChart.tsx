@@ -24,8 +24,9 @@ function barColor(value: number, isPeak: boolean): string {
 }
 
 export default function PredictionBarChart({ data, title, kind }: PredictionBarChartProps) {
-  // 空数据(未传或空数组)→ 降级到 EmptyState,不崩。
-  if (data == null || data.length === 0) {
+  // 空数据(未传 / null / 非数组 / 空数组)→ 降级到 EmptyState,不崩。
+  // 用 Array.isArray 兜底,防非数组(如误传 {})时 .length/.forEach 崩溃。
+  if (!Array.isArray(data) || data.length === 0) {
     return (
       <EmptyState
         title={kind === "delta" ? "暂无预测变化" : "暂无模块响应"}
@@ -38,7 +39,8 @@ export default function PredictionBarChart({ data, title, kind }: PredictionBarC
   let peakIndex = -1;
   let peakAbs = -Infinity;
   data.forEach((d, i) => {
-    if (d.value >= 0 && Math.abs(d.value) > peakAbs) {
+    // 仅严格正值参与 accent 点缀:全零/全负数据集不给零柱误点缀强调绿。
+    if (d.value > 0 && Math.abs(d.value) > peakAbs) {
       peakAbs = Math.abs(d.value);
       peakIndex = i;
     }
