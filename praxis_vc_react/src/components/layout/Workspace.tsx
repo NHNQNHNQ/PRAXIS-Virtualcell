@@ -7,7 +7,7 @@ import {
 } from "../../api";
 import AskStage from "../stages/AskStage";
 import ReviewStage from "../stages/ReviewStage";
-import ModuleContextView from "../../views/ModuleContextView";
+import RouteStage from "../stages/RouteStage";
 import RunConfirmView from "../../views/RunConfirmView";
 import ResultView from "../../views/ResultView";
 import StepperRail from "./StepperRail";
@@ -79,12 +79,14 @@ export default function Workspace({
         );
 
       case "route":
+        // 9.10:RouteStage 替换旧 ModuleContextView。自派生轻量静态预期 modulePlan(overall_verdict="expected"),
+        // 经 onRouteNext 传出以满足 route→run 的 canEnter。confirmedRequest 到 route 阶段必非空,保留 null 守卫。
         if (job.confirmedRequest == null) return null;
         return (
-          <ModuleContextView
+          <RouteStage
             request={job.confirmedRequest}
             onBack={onRouteBack}
-            onNext={() => onRouteNext(staticModulePlanStub(job.confirmedRequest))}
+            onNext={onRouteNext}
           />
         );
 
@@ -106,20 +108,4 @@ export default function Workspace({
         );
     }
   }
-}
-
-// 轻量静态预期占位:仅承载 species 以满足 route→run 的 canEnter(modulePlan!=null)。
-// 非实际路由(红线):真实静态预期分组在 P3 的 RouteStage 派生,实际路由在结果页 tab。
-function staticModulePlanStub(
-  request: Record<string, unknown> | null,
-): ModulePlan {
-  const species = request?.species == null ? "" : String(request.species);
-  return {
-    species,
-    primary: "",
-    secondary: [],
-    overall_verdict: "expected",
-    entries: [],
-    notes: ["静态预期占位(非实际路由)"],
-  };
 }
