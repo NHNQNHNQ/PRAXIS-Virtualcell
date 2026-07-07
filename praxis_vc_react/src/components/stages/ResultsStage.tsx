@@ -9,7 +9,6 @@ import {
   type ProvenanceResult,
   type ReportResult,
   type TraceResult,
-  type TraceStep,
 } from "../../api";
 import Card from "../ui/Card";
 import Button from "../ui/Button";
@@ -20,6 +19,7 @@ import ReportTab from "../result/ReportTab";
 import PredictionsTab from "../result/PredictionsTab";
 import ModuleRoutingTab from "../result/ModuleRoutingTab";
 import EvidenceTab from "../result/EvidenceTab";
+import TraceTab from "../result/TraceTab";
 
 // Stage 5 · Results(spec §2 Stage5)—— 结果证据页外壳:顶部 job 头 + 下载/复制工具条 + 6 tab 容器。
 // 并发拉取 report/trace/provenance 主链(迁 ResultView 逻辑)。
@@ -48,10 +48,7 @@ const TAB_ITEMS: TabItem[] = [
   { id: "provenance", label: "溯源" },
 ];
 
-// 小工具:安全取值(迁自 ResultView)。
-function g(obj: Record<string, unknown>, key: string): unknown {
-  return obj?.[key];
-}
+// 小工具:JSON 美化(供工具条下载/复制 + 溯源摘要)。
 function pretty(v: unknown): string {
   return JSON.stringify(v, null, 2);
 }
@@ -202,7 +199,9 @@ export default function ResultsStage({
           {/* Evidence tab:report 未到显 Skeleton,到达后渲 EvidenceTab(Task 9.21)。 */}
           {tab === "evidence" &&
             (report ? <EvidenceTab report={report} /> : <Skeleton lines={6} />)}
-          {tab === "trace" && <TraceTab trace={trace} loading={!report} />}
+          {/* Trace tab:trace 未到(null)时 TraceTab 内部显 Skeleton;到达后交给
+              AgentTraceTimeline 时间线渲染(Task 9.22)。 */}
+          {tab === "trace" && <TraceTab trace={trace} />}
           {tab === "provenance" && (
             <ProvenanceTab prov={prov} loading={!report} />
           )}
@@ -212,34 +211,7 @@ export default function ResultsStage({
   );
 }
 
-// ───────── Trace tab(迁自 ResultView.TraceTab)─────────
-// 主链加载中显 Skeleton;到达后无 trace 用 EmptyState 降级。
-function TraceTab({ trace, loading }: { trace: TraceResult | null; loading: boolean }) {
-  if (loading) return <Skeleton lines={5} />;
-  const steps: TraceStep[] = trace?.trace ?? [];
-  if (steps.length === 0) return <EmptyState title="暂无运行轨迹" />;
-  return (
-    <div className="block">
-      <h3>Agent 流程({steps.length} 步)</h3>
-      <ol className="timeline">
-        {steps.map((s, i) => {
-          const r = s as Record<string, unknown>;
-          return (
-            <li key={i}>
-              <span className="ts">{String(g(r, "timestamp") ?? "")}</span>
-              <span className="hop">
-                {String(g(r, "sender") ?? "?")} → {String(g(r, "receiver") ?? "?")}
-              </span>
-              <span className="mtype">{String(g(r, "message_type") ?? "")}</span>
-            </li>
-          );
-        })}
-      </ol>
-    </div>
-  );
-}
-
-// ───────── Provenance tab(迁自 ResultView.ProvenanceTab)─────────
+// ───────── Provenance tab(迁自 ResultView.ProvenanceTab;Task 9.23 处理)─────────
 function ProvenanceTab({ prov, loading }: { prov: ProvenanceResult | null; loading: boolean }) {
   if (loading) return <Skeleton lines={5} />;
   if (!prov) return <EmptyState title="暂无溯源信息" />;
