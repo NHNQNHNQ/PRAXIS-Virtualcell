@@ -18,12 +18,9 @@ import Workspace from "./Workspace";
 // 迁移旧 App.tsx 的 loadJobs/health/newQuery/activeJobId。
 // 布局层:JobSidebar(全局历史侧栏,9.6)/ TopBar(9.6)/ Workspace(工作区,9.7,内含左侧 StepperRail)。
 // 9.7 起 Workspace/StepperRail 从本文件抽出为独立组件,本文件不再内联阶段渲染;
-// Stage 内容仍由 Workspace 桥接现有 views/*(用 JobState 字段喂旧 props),P3 再逐个替换成新 Stage 页。
+// review 阶段自 9.9 起由 ReviewStage 单页承载(旧 parse_review+confirm 双子步机制已移除);
+// 其余阶段内容仍由 Workspace 桥接现有 views/*(P3 逐个替换成新 Stage 页)。
 // 铁律:api.ts 只加类型不改请求;后端零改动。
-
-// review 阶段内部子步:旧 parse_review + confirm 合并进 review,
-// 用子步在同一阶段内先只读核对(summary)再可编辑确认(form)。
-type ReviewSub = "summary" | "form";
 
 // JobState 初值:各字段为空,回退只改 stage 不清这些字段(回退不丢数据)。
 const emptyJob: JobState = {
@@ -39,7 +36,6 @@ export default function AppShell() {
   const [mode, setMode] = useState<Mode>("offline");
   const [stage, setStage] = useState<Stage>("ask");
   const [job, setJob] = useState<JobState>(emptyJob);
-  const [reviewSub, setReviewSub] = useState<ReviewSub>("summary");
   const [openedJobId, setOpenedJobId] = useState<string | null>(null); // 侧栏载入的历史 job
   const [jobs, setJobs] = useState<JobSummary[] | null>(null);
   const [h, setH] = useState<Health | null>(null);
@@ -69,7 +65,6 @@ export default function AppShell() {
   // 新建查询:重置整个 JobState 回 ask,退出历史 job 模式。
   function newQuery() {
     setJob(emptyJob);
-    setReviewSub("summary");
     setStage("ask");
     setOpenedJobId(null);
   }
@@ -115,8 +110,6 @@ export default function AppShell() {
   // 此处再以 canEnter 兜底,非法 target 忽略)。回退只改 stage,不清 JobState 字段(不丢数据)。
   function jumpTo(target: Stage) {
     if (target !== "ask" && !canEnter(target)) return;
-    // 回退到 review 时,恢复到只读核对子步(与线性流程一致)。
-    if (target === "review") setReviewSub("summary");
     setStage(target);
   }
 
@@ -162,7 +155,6 @@ export default function AppShell() {
                 stage={effectiveStage}
                 job={job}
                 mode={mode}
-                reviewSub={reviewSub}
                 canEnter={canEnter}
                 onJump={jumpTo}
                 onMode={setMode}
@@ -170,23 +162,14 @@ export default function AppShell() {
                   // AskStage 回传 ParseResult 与原始 query 文本,一并写入 JobState
                   // (P2 桥接的「query 暂留空」限制到此解除)。
                   patchJob({ parsedIntent: r, query });
-                  setReviewSub("summary");
                   setStage("review");
                 }}
-                onReviewNext={() => setReviewSub("form")}
-                onReviewBack={() => {
-                  // summary 子步返回 ask;form 子步返回 summary 子步。
-                  if (reviewSub === "form") setReviewSub("summary");
-                  else setStage("ask");
-                }}
+                onReviewBack={() => setStage("ask")}
                 onConfirmed={(req) => {
                   patchJob({ confirmedRequest: req });
                   setStage("route");
                 }}
-                onRouteBack={() => {
-                  setReviewSub("form");
-                  setStage("review");
-                }}
+                onRouteBack={() => setStage("review")}
                 onRouteNext={(plan) => {
                   // 旧 ModuleContextView 不产出 modulePlan;为满足 route→run 的 canEnter,
                   // 用 Workspace 派生的轻量静态预期占位(P3 的 RouteStage 才产完整静态预期)。
@@ -211,4 +194,4 @@ export default function AppShell() {
 }
 
 // 说明:阶段渲染与静态预期占位(staticModulePlanStub)已迁入 Workspace,
-// AppShell 只保留状态机(stage/job/reviewSub/canEnter)与跳转编排。
+// AppShell 只保留状态机(stage/job/canEnter)与跳转编排。
