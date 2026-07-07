@@ -19,11 +19,12 @@ import Skeleton from "../ui/Skeleton";
 import ReportTab from "../result/ReportTab";
 import PredictionsTab from "../result/PredictionsTab";
 import ModuleRoutingTab from "../result/ModuleRoutingTab";
+import EvidenceTab from "../result/EvidenceTab";
 
 // Stage 5 · Results(spec §2 Stage5)—— 结果证据页外壳:顶部 job 头 + 下载/复制工具条 + 6 tab 容器。
 // 并发拉取 report/trace/provenance 主链(迁 ResultView 逻辑)。
 // Report tab 已由 components/result/ReportTab 证据化实现(Task 9.18);Trace/Provenance 暂用内联渲染
-// (Task 9.22/9.23 处理);Predictions(9.19)/Module Routing(9.20)已实现真内容;Evidence(9.21)先占位。
+// (Task 9.22/9.23 处理);Predictions(9.19)/Module Routing(9.20)/Evidence(9.21)已实现真内容。
 // module_plan 与主报告一并并发拉取(失败静默降级为空 {}),喂给 ModuleRoutingTab。
 //
 // 铁律:前端只读展示,不做预测/治理裁决;llm_used_for_prediction 如实显示 +「结果由确定性模型给出,
@@ -195,13 +196,12 @@ export default function ResultsStage({
         <div style={{ marginTop: "var(--space-3)" }}>
           {tab === "report" &&
             (report ? <ReportTab report={report} /> : <Skeleton lines={6} />)}
-          {/* Evidence tab:P5(9.21)实现真内容,此处占位。 */}
           {tab === "predictions" &&
             (report ? <PredictionsTab report={report} /> : <Skeleton lines={6} />)}
           {tab === "routing" && <ModuleRoutingTab plan={modulePlan} />}
-          {tab === "evidence" && (
-            <EmptyState title="此视图正在完善" hint="证据明细将在此呈现。" />
-          )}
+          {/* Evidence tab:report 未到显 Skeleton,到达后渲 EvidenceTab(Task 9.21)。 */}
+          {tab === "evidence" &&
+            (report ? <EvidenceTab report={report} /> : <Skeleton lines={6} />)}
           {tab === "trace" && <TraceTab trace={trace} loading={!report} />}
           {tab === "provenance" && (
             <ProvenanceTab prov={prov} loading={!report} />
