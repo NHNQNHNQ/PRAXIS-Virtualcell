@@ -74,10 +74,12 @@ export default function ReviewStage({
     return cur && !xs.includes(cur) ? [cur, ...xs] : xs;
   }
 
-  // 字段状态映射(spec §2):
-  //   missing_fields 命中 → missing;推断得到(assumptions 提及 / 候选无值但已推断)→ inferred;
-  //   候选有值且非推断 → confirmed;可编辑字段无以上信号 → editable。
-  // 判定只看解析信号(missing_fields / assumptions),不做科学裁决。
+  // 字段状态映射(spec §2 / 计划 Task 9.9 Step4):状态点须随【当前编辑值】实时反映,
+  // 而非停留在最初的静态解析结果。综合判定 = 当前编辑值 + 原始解析信号(missing_fields / assumptions):
+  //   · 当前值非空 → 若该字段来自推断(assumptions 提及)则 inferred,否则 confirmed(已确认);
+  //   · 当前值为空 → 若命中 missing_fields 则 missing(红橙缺失),否则 editable(可编辑)。
+  // 关键:值非空即不再判 missing,故 species 从空→选 human 后 StatusPill 由「缺失」变「已确认」。
+  // 仍只看解析信号 + 编辑值,不做任何科学裁决。
   const missingSet = useMemo(
     () => new Set(parsedIntent.missing_fields),
     [parsedIntent.missing_fields],
@@ -88,12 +90,14 @@ export default function ReviewStage({
     [parsedIntent.assumptions],
   );
 
-  // 单个可编辑字段的状态:缺失优先,其次推断,其次已确认(有值),否则可编辑。
+  // 单个可编辑字段的状态:先看当前编辑值有无,再叠加原始解析信号。
   function statusOf(key: string, value: string): FieldStatus {
-    if (missingSet.has(key)) return "missing";
-    if (assumptionsText.includes(key)) return "inferred";
-    if (value.trim()) return "confirmed";
-    return "editable";
+    if (value.trim()) {
+      // 有值:来自推断的仍标 inferred(便于审阅),否则视为已确认。
+      return assumptionsText.includes(key) ? "inferred" : "confirmed";
+    }
+    // 无值:命中 missing_fields → 缺失(红橙提示),否则可编辑。
+    return missingSet.has(key) ? "missing" : "editable";
   }
 
   // 组装 request:以 candidate_request 为基底覆盖可编辑字段,保留 request_id/metadata 等。

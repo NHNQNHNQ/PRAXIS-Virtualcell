@@ -182,7 +182,8 @@ export default function RouteStage({
           )}
           <div className="module-grid">
             {modules.map((m) => {
-              const group = groupOf(m.code);
+              // 高亮匹配用模块语义 id(与 preset.modules 语义码同空间);显示标签仍用 m.code(M1-M8)。
+              const group = groupOf(m.id);
               const on = group !== "inactive";
               return (
                 <div
