@@ -140,10 +140,10 @@ export default function PredictionsTab({ report }: { report: ReportResult }) {
   if (abstained || (!hasPrediction && deltaData.length === 0 && moduleData.length === 0)) {
     return (
       <EmptyState
-        title={abstained ? "已 abstain,无预测结果" : "暂无预测结果"}
+        title={abstained ? "本次未给出预测结论" : "暂无预测结果"}
         hint={
           abstained
-            ? "本次未给出预测结论;可靠性判定与原因见「报告」。"
+            ? "可靠性判定与原因见「报告」。"
             : "此次结果未包含可展示的预测数值。"
         }
       />

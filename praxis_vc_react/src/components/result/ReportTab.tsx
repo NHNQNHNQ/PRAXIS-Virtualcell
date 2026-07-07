@@ -74,10 +74,8 @@ function Mono({ children }: { children: ReactNode }) {
 
 export default function ReportTab({
   report,
-  markdown,
 }: {
   report: ReportResult;
-  markdown?: string;
 }) {
   const sr = report.structured_report ?? {};
   const disagreement = (g(sr, "model_disagreement") ?? {}) as Record<string, unknown>;
@@ -91,9 +89,6 @@ export default function ReportTab({
   const abstainReasons = asArr(g(sr, "abstain_reasons")).map((x) => String(x));
   const downgradeReasons = asArr(g(sr, "downgrade_reasons")).map((x) => String(x));
 
-  // 涉及模块:轻量一行摘要(完整路由图归 ModuleRoutingTab / Task 9.20,不在此重复)。
-  const primaryModule = String(g(sr, "primary_module") ?? "");
-
   return (
     <div style={stackStyle}>
       {/* §3.5:结果由确定性模型给出,未经语言模型改写;llm_used_for_prediction 如实显示。 */}
@@ -106,7 +101,7 @@ export default function ReportTab({
           color: "var(--text-muted)",
         }}
       >
-        <Badge tone="confirmed">
+        <Badge tone="neutral">
           结果由确定性模型给出,未经语言模型改写
         </Badge>
         <span>
@@ -129,7 +124,6 @@ export default function ReportTab({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-            <Badge tone="danger">已 abstain</Badge>
             <strong style={{ fontSize: 14 }}>本次未给出预测结论</strong>
           </div>
           {abstainReasons.length > 0 ? (
@@ -159,14 +153,6 @@ export default function ReportTab({
           <KV label="失败的模型">
             <Mono>{joinArr(g(sr, "models_failed"))}</Mono>
           </KV>
-          {primaryModule && (
-            <KV label="涉及模块">
-              <Mono>{primaryModule}</Mono>
-              <span style={{ marginLeft: "var(--space-2)", color: "var(--text-muted)" }}>
-                （完整路由见「模块路由」）
-              </span>
-            </KV>
-          )}
         </div>
       </Card>
 
@@ -175,7 +161,7 @@ export default function ReportTab({
         title="预测"
         actions={
           abstained ? (
-            <Badge tone="danger">已 abstain</Badge>
+            <Badge tone="danger">未给出预测</Badge>
           ) : (
             <Badge tone="confirmed">已给出预测</Badge>
           )
@@ -183,7 +169,7 @@ export default function ReportTab({
       >
         {abstained ? (
           <p style={{ color: "var(--text-muted)", fontSize: 13, margin: 0 }}>
-            本次已 abstain,无预测结论（原因见上方提示）。
+            本次未给出预测结论（原因见上方提示）。
           </p>
         ) : (
           <pre className="json">{pretty(prediction)}</pre>
@@ -264,8 +250,6 @@ export default function ReportTab({
             </div>
             <pre className="narrative">{report.narrative_report}</pre>
           </>
-        ) : markdown ? (
-          <pre className="narrative">{markdown}</pre>
         ) : (
           <EmptyState
             title="未生成文字解读"

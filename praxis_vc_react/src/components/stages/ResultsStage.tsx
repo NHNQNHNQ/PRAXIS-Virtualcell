@@ -103,7 +103,7 @@ export default function ResultsStage({
       .catch((e: unknown) => setErr(String(e)));
     // module_plan 独立并发:失败不阻塞主报告,静默降级为空 {}。
     getModulePlan(jobId)
-      .then((d) => setModulePlan(d.module_plan))
+      .then((d) => setModulePlan(d.module_plan ?? {}))
       .catch(() => setModulePlan({}));
   }, [jobId]);
 
