@@ -15,6 +15,7 @@ import Tabs, { type TabItem } from "../ui/Tabs";
 import EmptyState from "../ui/EmptyState";
 import Skeleton from "../ui/Skeleton";
 import ReportTab from "../result/ReportTab";
+import PredictionsTab from "../result/PredictionsTab";
 
 // Stage 5 · Results(spec §2 Stage5)—— 结果证据页外壳:顶部 job 头 + 下载/复制工具条 + 6 tab 容器。
 // 并发拉取 report/trace/provenance 主链(迁 ResultView 逻辑)。
@@ -184,10 +185,9 @@ export default function ResultsStage({
         <div style={{ marginTop: "var(--space-3)" }}>
           {tab === "report" &&
             (report ? <ReportTab report={report} /> : <Skeleton lines={6} />)}
-          {/* Predictions / Evidence / Module Routing 三 tab:P5(9.18–9.23)实现真内容,此处占位。 */}
-          {tab === "predictions" && (
-            <EmptyState title="此视图正在完善" hint="预测结果图将在此呈现。" />
-          )}
+          {/* Evidence / Module Routing 两 tab:P5(9.20–9.21)实现真内容,此处占位。 */}
+          {tab === "predictions" &&
+            (report ? <PredictionsTab report={report} /> : <Skeleton lines={6} />)}
           {tab === "routing" && (
             <EmptyState title="此视图正在完善" hint="模块路由关系图将在此呈现。" />
           )}
