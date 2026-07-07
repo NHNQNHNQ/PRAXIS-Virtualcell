@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import {
+  getModulePlan,
   getProvenance,
   getReport,
   getReportMarkdown,
   getTrace,
+  type ModulePlan,
   type ProvenanceResult,
   type ReportResult,
   type TraceResult,
@@ -16,12 +18,13 @@ import EmptyState from "../ui/EmptyState";
 import Skeleton from "../ui/Skeleton";
 import ReportTab from "../result/ReportTab";
 import PredictionsTab from "../result/PredictionsTab";
+import ModuleRoutingTab from "../result/ModuleRoutingTab";
 
 // Stage 5 · Results(spec §2 Stage5)—— 结果证据页外壳:顶部 job 头 + 下载/复制工具条 + 6 tab 容器。
 // 并发拉取 report/trace/provenance 主链(迁 ResultView 逻辑)。
 // Report tab 已由 components/result/ReportTab 证据化实现(Task 9.18);Trace/Provenance 暂用内联渲染
-// (Task 9.22/9.23 处理);Predictions/Module Routing/Evidence 三 tab 先占位(EmptyState),
-// P5(9.19–9.21)逐个实现真内容(module_plan 改由 ModuleRoutingTab 自行拉取)。
+// (Task 9.22/9.23 处理);Predictions(9.19)/Module Routing(9.20)已实现真内容;Evidence(9.21)先占位。
+// module_plan 与主报告一并并发拉取(失败静默降级为空 {}),喂给 ModuleRoutingTab。
 //
 // 铁律:前端只读展示,不做预测/治理裁决;llm_used_for_prediction 如实显示 +「结果由确定性模型给出,
 // 未经语言模型改写」语义(§3.5)。api.ts 请求方法复用,不新增/改端点。
@@ -79,15 +82,18 @@ export default function ResultsStage({
   const [report, setReport] = useState<ReportResult | null>(null);
   const [trace, setTrace] = useState<TraceResult | null>(null);
   const [prov, setProv] = useState<ProvenanceResult | null>(null);
+  // module_plan:null=加载中/未到,ModulePlan|{} = 已到(不可路由 job 后端返回 {})。
+  const [modulePlan, setModulePlan] = useState<ModulePlan | Record<string, never> | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
-  // 数据并发拉取(迁 ResultView useEffect):report/trace/provenance 主链。
-  // module_plan 由「模块路由」tab(Task 9.20 ModuleRoutingTab)自行拉取,本 tab 不再依赖。
+  // 数据并发拉取(迁 ResultView useEffect):report/trace/provenance 主链 + module_plan。
+  // module_plan 失败静默降级为空 {}(不阻塞主报告),喂给「模块路由」tab(ModuleRoutingTab)。
   useEffect(() => {
     setErr(null);
     setReport(null);
     setTrace(null);
     setProv(null);
+    setModulePlan(null);
     Promise.all([getReport(jobId), getTrace(jobId), getProvenance(jobId)])
       .then(([r, t, p]) => {
         setReport(r);
@@ -95,6 +101,10 @@ export default function ResultsStage({
         setProv(p);
       })
       .catch((e: unknown) => setErr(String(e)));
+    // module_plan 独立并发:失败不阻塞主报告,静默降级为空 {}。
+    getModulePlan(jobId)
+      .then((d) => setModulePlan(d.module_plan))
+      .catch(() => setModulePlan({}));
   }, [jobId]);
 
   // provenance summary 文本(供 copy;失败/空时给占位)。
@@ -185,12 +195,10 @@ export default function ResultsStage({
         <div style={{ marginTop: "var(--space-3)" }}>
           {tab === "report" &&
             (report ? <ReportTab report={report} /> : <Skeleton lines={6} />)}
-          {/* Evidence / Module Routing 两 tab:P5(9.20–9.21)实现真内容,此处占位。 */}
+          {/* Evidence tab:P5(9.21)实现真内容,此处占位。 */}
           {tab === "predictions" &&
             (report ? <PredictionsTab report={report} /> : <Skeleton lines={6} />)}
-          {tab === "routing" && (
-            <EmptyState title="此视图正在完善" hint="模块路由关系图将在此呈现。" />
-          )}
+          {tab === "routing" && <ModuleRoutingTab plan={modulePlan} />}
           {tab === "evidence" && (
             <EmptyState title="此视图正在完善" hint="证据明细将在此呈现。" />
           )}
