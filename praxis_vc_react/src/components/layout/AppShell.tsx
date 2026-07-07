@@ -6,6 +6,7 @@ import {
   type JobState,
   type JobSummary,
   type Mode,
+  type RunStatus,
   type Stage,
 } from "../../api";
 import ResultView from "../../views/ResultView";
@@ -177,6 +178,7 @@ export default function AppShell() {
                   setStage("run");
                 }}
                 onRunBack={() => setStage("route")}
+                onRunStatus={(s: RunStatus) => patchJob({ runStatus: s })}
                 onRan={(id) => {
                   // 实际 abstain/failed 由结果页回填;此处先置 succeeded 满足 run→results。
                   patchJob({ jobId: id, runStatus: "succeeded" });

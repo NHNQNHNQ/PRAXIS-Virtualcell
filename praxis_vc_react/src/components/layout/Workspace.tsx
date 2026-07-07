@@ -3,12 +3,13 @@ import {
   type Mode,
   type ModulePlan,
   type ParseResult,
+  type RunStatus,
   type Stage,
 } from "../../api";
 import AskStage from "../stages/AskStage";
 import ReviewStage from "../stages/ReviewStage";
 import RouteStage from "../stages/RouteStage";
-import RunConfirmView from "../../views/RunConfirmView";
+import RunStage from "../stages/RunStage";
 import ResultView from "../../views/ResultView";
 import StepperRail from "./StepperRail";
 
@@ -33,6 +34,7 @@ export default function Workspace({
   onRouteNext,
   onRunBack,
   onRan,
+  onRunStatus,
   onReset,
 }: {
   stage: Stage;
@@ -48,6 +50,7 @@ export default function Workspace({
   onRouteNext: (plan: ModulePlan) => void;
   onRunBack: () => void;
   onRan: (jobId: string) => void;
+  onRunStatus: (s: RunStatus) => void;
   onReset: () => void;
 }) {
   return (
@@ -91,13 +94,19 @@ export default function Workspace({
         );
 
       case "run":
+        // 9.11:RunStage 替换旧 RunConfirmView。最终请求汇总 + 完整参数 + 文字解读开关 + 预期模块 +
+        // 「确定性步骤指示」(非真流式,红线 4);createJob 同步一次拿 job_id。
+        // setRunStatus 由 AppShell 经 onRunStatus 落到 JobState.runStatus(running/failed);
+        // 成功的 succeeded 与 jobId 由 onRan 一并落。
         if (job.confirmedRequest == null) return null;
         return (
-          <RunConfirmView
+          <RunStage
             request={job.confirmedRequest}
             mode={mode}
             onBack={onRunBack}
             onRan={onRan}
+            setRunStatus={onRunStatus}
+            modulePlan={job.modulePlan}
           />
         );
 
