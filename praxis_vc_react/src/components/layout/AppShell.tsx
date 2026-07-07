@@ -9,7 +9,7 @@ import {
   type RunStatus,
   type Stage,
 } from "../../api";
-import ResultView from "../../views/ResultView";
+import ResultsStage from "../stages/ResultsStage";
 import JobSidebar from "./JobSidebar";
 import TopBar, { type Theme } from "./TopBar";
 import Workspace from "./Workspace";
@@ -144,13 +144,9 @@ export default function AppShell() {
         <div className="main-scroll">
           <div className="main-inner">
             {/* 右:Workspace(工作区,内含左侧 StepperRail)。
-                历史 job 模式:直接进 results,以该 job_id 渲 ResultView(等价旧 openedJobId 分支)。 */}
+                历史 job 模式:直接进 results,以该 job_id 渲 ResultsStage 6 tab 外壳(等价旧 openedJobId 分支)。 */}
             {openedJobId ? (
-              <ResultView
-                jobId={openedJobId}
-                onReset={newQuery}
-                resetLabel="＋ 新建查询"
-              />
+              <ResultsStage jobId={openedJobId} onReset={newQuery} />
             ) : (
               <Workspace
                 stage={effectiveStage}
@@ -172,8 +168,8 @@ export default function AppShell() {
                 }}
                 onRouteBack={() => setStage("review")}
                 onRouteNext={(plan) => {
-                  // 旧 ModuleContextView 不产出 modulePlan;为满足 route→run 的 canEnter,
-                  // 用 Workspace 派生的轻量静态预期占位(P3 的 RouteStage 才产完整静态预期)。
+                  // RouteStage 派生的静态预期 modulePlan 经此传入(overall_verdict="expected"),
+                  // 满足 route→run 的 canEnter;真实路由在 Results 的模块路由 tab。
                   patchJob({ modulePlan: plan });
                   setStage("run");
                 }}
@@ -195,5 +191,5 @@ export default function AppShell() {
   );
 }
 
-// 说明:阶段渲染与静态预期占位(staticModulePlanStub)已迁入 Workspace,
+// 说明:阶段渲染已迁入 Workspace;静态预期 modulePlan 由 RouteStage 派生、经 onRouteNext 传入。
 // AppShell 只保留状态机(stage/job/canEnter)与跳转编排。

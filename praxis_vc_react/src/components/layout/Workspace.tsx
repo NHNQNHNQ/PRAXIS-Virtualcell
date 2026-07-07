@@ -10,7 +10,7 @@ import AskStage from "../stages/AskStage";
 import ReviewStage from "../stages/ReviewStage";
 import RouteStage from "../stages/RouteStage";
 import RunStage from "../stages/RunStage";
-import ResultView from "../../views/ResultView";
+import ResultsStage from "../stages/ResultsStage";
 import StepperRail from "./StepperRail";
 
 // Workspace(Task 9.7)—— 主工作区:左侧阶段轨(StepperRail)+ 右侧当前阶段内容。
@@ -111,10 +111,10 @@ export default function Workspace({
         );
 
       case "results":
+        // 9.12:ResultsStage 替换旧 ResultView 桥接。6 tab 证据页外壳(报告/预测/模块路由/证据/运行轨迹/溯源)+
+        // 下载/复制工具条;并发拉取 report/trace/provenance/module-plan。保留 job.jobId==null 守卫。
         if (job.jobId == null) return null;
-        return (
-          <ResultView jobId={job.jobId} onReset={onReset} resetLabel="＋ 新建查询" />
-        );
+        return <ResultsStage jobId={job.jobId} onReset={onReset} />;
     }
   }
 }
