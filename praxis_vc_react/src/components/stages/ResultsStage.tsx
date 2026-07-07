@@ -20,12 +20,14 @@ import PredictionsTab from "../result/PredictionsTab";
 import ModuleRoutingTab from "../result/ModuleRoutingTab";
 import EvidenceTab from "../result/EvidenceTab";
 import TraceTab from "../result/TraceTab";
+import ProvenanceTab from "../result/ProvenanceTab";
 
-// Stage 5 · Results(spec §2 Stage5)—— 结果证据页外壳:顶部 job 头 + 下载/复制工具条 + 6 tab 容器。
+// Stage 5 · Results(spec §2 Stage5)—— 结果证据页外壳:顶部 job 头 + 报告下载/复制工具条 + 6 tab 容器。
 // 并发拉取 report/trace/provenance 主链(迁 ResultView 逻辑)。
-// Report tab 已由 components/result/ReportTab 证据化实现(Task 9.18);Trace/Provenance 暂用内联渲染
-// (Task 9.22/9.23 处理);Predictions(9.19)/Module Routing(9.20)/Evidence(9.21)已实现真内容。
+// 6 tab 全部由 components/result/* 真实实现:Report(9.18)/Predictions(9.19)/ModuleRouting(9.20)/
+// Evidence(9.21)/Trace(9.22)/Provenance(9.23,审计分区页 + 下载/复制,替换旧内联裸 pre)。
 // module_plan 与主报告一并并发拉取(失败静默降级为空 {}),喂给 ModuleRoutingTab。
+// provenance 下载/复制随 ProvenanceTab 迁入该 tab(不在此工具条重复),工具条只留 report 相关下载/复制。
 //
 // 铁律:前端只读展示,不做预测/治理裁决;llm_used_for_prediction 如实显示 +「结果由确定性模型给出,
 // 未经语言模型改写」语义(§3.5)。api.ts 请求方法复用,不新增/改端点。
@@ -48,7 +50,7 @@ const TAB_ITEMS: TabItem[] = [
   { id: "provenance", label: "溯源" },
 ];
 
-// 小工具:JSON 美化(供工具条下载/复制 + 溯源摘要)。
+// 小工具:JSON 美化(供工具条 report 下载/复制)。
 function pretty(v: unknown): string {
   return JSON.stringify(v, null, 2);
 }
@@ -105,12 +107,8 @@ export default function ResultsStage({
       .catch(() => setModulePlan({}));
   }, [jobId]);
 
-  // provenance summary 文本(供 copy;失败/空时给占位)。
-  const provSummary = prov
-    ? pretty({ provenance: prov.provenance, llm_meta: prov.llm_meta })
-    : "";
-
-  // 工具条:下载 report.json / narrative.md / report.md;复制 report / provenance summary。
+  // 工具条:下载 report.json / narrative.md / report.md;复制 report。
+  // provenance 的下载/复制已迁入「溯源」tab(ProvenanceTab),此处不再重复,避免双份。
   const toolbar = (
     <>
       <Button
@@ -161,14 +159,6 @@ export default function ResultsStage({
       >
         复制报告
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        disabled={!prov}
-        onClick={() => copy(provSummary)}
-      >
-        复制溯源摘要
-      </Button>
       <Button size="sm" onClick={onReset}>
         ＋ 新建查询
       </Button>
@@ -202,25 +192,11 @@ export default function ResultsStage({
           {/* Trace tab:trace 未到(null)时 TraceTab 内部显 Skeleton;到达后交给
               AgentTraceTimeline 时间线渲染(Task 9.22)。 */}
           {tab === "trace" && <TraceTab trace={trace} />}
-          {tab === "provenance" && (
-            <ProvenanceTab prov={prov} loading={!report} />
-          )}
+          {/* Provenance tab:prov 未到(null)时 ProvenanceTab 内部显 Skeleton;到达后按审计分区
+              渲染 + 下载/复制(Task 9.23)。 */}
+          {tab === "provenance" && <ProvenanceTab prov={prov} jobId={jobId} />}
         </div>
       )}
     </Card>
-  );
-}
-
-// ───────── Provenance tab(迁自 ResultView.ProvenanceTab;Task 9.23 处理)─────────
-function ProvenanceTab({ prov, loading }: { prov: ProvenanceResult | null; loading: boolean }) {
-  if (loading) return <Skeleton lines={5} />;
-  if (!prov) return <EmptyState title="暂无溯源信息" />;
-  return (
-    <div className="block">
-      <h3>Provenance</h3>
-      <pre className="json">{pretty(prov.provenance)}</pre>
-      <h3>llm_meta</h3>
-      <pre className="json">{pretty(prov.llm_meta)}</pre>
-    </div>
   );
 }
