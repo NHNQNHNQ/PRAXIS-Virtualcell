@@ -19,6 +19,9 @@ class AgentMessage:
     payload: dict[str, Any]
     timestamp: str
     parent_message_id: str | None = None
+    schema_version: str = "vc.msg.v1"   # 统一 message schema 版本
+    trace_id: str | None = None         # per-run 追踪 id(bus.send 回填)
+    task_id: str | None = None          # 任务标识(bus.send 回填)
 
 
 @dataclass
