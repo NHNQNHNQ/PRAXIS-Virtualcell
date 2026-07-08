@@ -4,7 +4,10 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 
+from praxis_virtualcell.core.exceptions import SchemaError
 from praxis_virtualcell.core.message import AgentMessage
+
+_REQUIRED = ("message_id", "sender", "receiver", "message_type", "timestamp", "schema_version")
 
 
 class MessageBus:
@@ -23,8 +26,17 @@ class MessageBus:
         if message.task_id is None:
             message.task_id = self._ctx.get("task_id") or f"task_{message.message_id}"
 
+    def _validate(self, message: AgentMessage) -> None:
+        for f in _REQUIRED:
+            if not getattr(message, f):
+                raise SchemaError(f"message 缺必需字段: {f}")
+        if not isinstance(message.payload, dict):
+            raise SchemaError(
+                f"payload 必须是 dict(禁止自由文本 handoff),实际: {type(message.payload).__name__}")
+
     def send(self, message: AgentMessage) -> None:
         self._backfill(message)
+        self._validate(message)
         self.record_trace(message)
         self._inbox.setdefault(message.receiver, []).append(message)
 

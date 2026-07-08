@@ -1,5 +1,7 @@
 from dataclasses import asdict
 
+import pytest
+
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.exceptions import PraxisVCError, SchemaError
 from praxis_virtualcell.core.message import AgentMessage
@@ -33,3 +35,26 @@ def test_bus_backfills_deterministic_fallback_without_context():
     m = bus.trace[0]
     assert m.trace_id == "trace_msg_0007"   # 确定性兜底,不 raise
     assert m.task_id == "task_msg_0007"
+
+
+def test_bus_rejects_non_dict_payload():
+    bus = MessageBus()
+    bus.set_context(trace_id="trace_abc", task_id="task_xyz")
+    bad = AgentMessage("msg_0001", "A", "B", "ping", "free text handoff", "t0001")  # payload 非 dict
+    with pytest.raises(SchemaError):
+        bus.send(bad)
+
+
+def test_bus_rejects_missing_hard_field():
+    bus = MessageBus()
+    bus.set_context(trace_id="trace_abc", task_id="task_xyz")
+    bad = AgentMessage("msg_0001", "", "B", "ping", {"k": 1}, "t0001")  # sender 空
+    with pytest.raises(SchemaError):
+        bus.send(bad)
+
+
+def test_bus_accepts_valid_message():
+    bus = MessageBus()
+    bus.set_context(trace_id="trace_abc", task_id="task_xyz")
+    bus.send(AgentMessage("msg_0001", "A", "B", "ping", {"k": 1}, "t0001"))
+    assert len(bus.trace) == 1
