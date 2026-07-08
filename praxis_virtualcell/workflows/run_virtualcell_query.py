@@ -155,7 +155,9 @@ def run_query(request_dict: dict, *, config: RuntimeConfig | None = None,
     _tr = getattr(rt.bus, "trace", None)
     _msgs = _tr() if callable(_tr) else (_tr if isinstance(_tr, list) else getattr(rt.bus, "_trace", []))
     trace = [{"message_id": m.message_id, "sender": m.sender, "receiver": m.receiver,
-              "message_type": m.message_type, "timestamp": m.timestamp} for m in _msgs]
+              "message_type": m.message_type, "timestamp": m.timestamp,
+              "schema_version": m.schema_version, "trace_id": m.trace_id,
+              "task_id": m.task_id} for m in _msgs]
     return {
         "structured_report": {k: v for k, v in report.items() if k != "narrative"},
         "narrative": report.get("narrative"),

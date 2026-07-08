@@ -1,6 +1,7 @@
 """注册 + 派发 + 驱动 workflow。predictor fan-out 也走 bus(no fake multi-agent)。"""
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import asdict
 from pathlib import Path
@@ -45,8 +46,13 @@ class AgentRuntime:
 
     def run_workflow(self, request) -> dict:
         """request: VirtualCellRequest。返回最终 report dict。全程经 bus。"""
+        _req_dict = asdict(request)
+        _h = hashlib.sha256(
+            json.dumps(_req_dict, sort_keys=True, ensure_ascii=False).encode("utf-8")
+        ).hexdigest()[:8]
+        self.bus.set_context(trace_id=f"trace_{_h}", task_id=f"task_{_h}")
         m = self.mk_message("client", "InputInterpreter", "parse_request",
-                            {"request_dict": asdict(request)})
+                            {"request_dict": _req_dict})
         out = self._dispatch_collect(m, "request_parsed")
         m = self.mk_message(out.sender, "BioObjectNormalizer", "normalize",
                             out.payload, out.message_id)

@@ -3,8 +3,10 @@ from dataclasses import asdict
 import pytest
 
 from praxis_virtualcell.core.bus import MessageBus
+from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.exceptions import PraxisVCError, SchemaError
 from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.workflows.run_virtualcell_query import run_query
 
 
 def test_schema_error_is_praxisvc_error():
@@ -58,3 +60,27 @@ def test_bus_accepts_valid_message():
     bus.set_context(trace_id="trace_abc", task_id="task_xyz")
     bus.send(AgentMessage("msg_0001", "A", "B", "ping", {"k": 1}, "t0001"))
     assert len(bus.trace) == 1
+
+
+_REQ = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+        "input_modality": "scRNA", "output_modality": "delta_expression",
+        "task_type": "predict_delta_expression"}
+_CFG = RuntimeConfig(mode=Mode.OFFLINE)
+
+
+def _trace_ids(out):
+    return {step.get("trace_id") for step in out["trace"] if isinstance(step, dict)}
+
+
+def test_trace_id_is_per_run_consistent():
+    out = run_query(dict(_REQ), config=_CFG)
+    ids = _trace_ids(out)
+    assert len(ids) == 1                 # 同一 run 所有 message 同一 trace_id
+    assert None not in ids               # 已回填
+    assert next(iter(ids)).startswith("trace_")
+
+
+def test_trace_id_deterministic_across_runs():
+    a = _trace_ids(run_query(dict(_REQ), config=_CFG))
+    b = _trace_ids(run_query(dict(_REQ), config=_CFG))
+    assert a == b                        # 两跑同 req → 同 trace_id
