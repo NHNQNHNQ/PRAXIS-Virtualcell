@@ -16,3 +16,7 @@ class RetrieveBeforePredictError(PraxisVCError):
 
 class UnknownAgentError(PraxisVCError):
     """dispatch 到未注册的 agent。"""
+
+
+class SchemaError(PraxisVCError):
+    """message/handoff schema 校验失败(缺必需字段 / payload 非 dict / 自由文本 handoff)。"""
