@@ -20,3 +20,7 @@ class UnknownAgentError(PraxisVCError):
 
 class SchemaError(PraxisVCError):
     """message/handoff schema 校验失败(缺必需字段 / payload 非 dict / 自由文本 handoff)。"""
+
+
+class UnsupportedEngine(PraxisVCError):
+    """B1 case 分发:请求的 engine/物种/扰动组合尚无接入的真实 case runner。"""
