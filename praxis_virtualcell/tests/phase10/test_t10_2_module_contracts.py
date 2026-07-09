@@ -222,3 +222,22 @@ def test_markdown_surfaces_gem_abstain_reason():
     md = render_report_md({"mode": "offline", "request": req, "report": out["structured_report"]})
     assert "all_targets_not_in_gem" in md          # 拒因如实出现在人读报告
     assert "CaseRunner` — 未记录原因" not in md      # 不再误导
+
+
+def test_dispatch_runner_gem_fba_medium():
+    from praxis_virtualcell.predictors.mechanistic.medium_shift import run_medium_shift_case
+    raw = {"species": "bacteria", "perturbation_object": "medium"}
+    assert dispatch_runner("gem_fba", raw) is run_medium_shift_case
+
+
+def test_dispatch_runner_gem_fba_medium_yeast_unsupported():
+    # 无 yeast medium runner → 诚实抛 UnsupportedEngine(会被 CaseRunner 转 abstain)
+    with pytest.raises(UnsupportedEngine):
+        dispatch_runner("gem_fba", {"species": "yeast", "perturbation_object": "medium"})
+
+
+def test_map_case_delta_gem_fba_medium():
+    report = SimpleNamespace(raw_output={"reference": "glucose minimal", "glucose_growth": 0.87392,
+        "carbon_sources": [{"carbon": "acetate", "in_model": True, "ratio_vs_glucose": 0.1983},
+                           {"carbon": "unobtainium", "in_model": False, "ratio_vs_glucose": None}]})
+    assert map_case_delta("gem_fba", report) == [-0.8017]   # 不在模型的碳源跳过
