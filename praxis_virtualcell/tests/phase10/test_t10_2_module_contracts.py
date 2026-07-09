@@ -332,3 +332,28 @@ def test_bacteria_antibiotic_non_metabolic_abstains():
     assert sr["prediction"] is None
     assert "CaseRunner" in sr["provenance"]["models_rejected"]
     assert any("non_metabolic_target" in f for f in sr["provenance"]["model_cautions"]["CaseRunner"])
+
+
+def test_b2_real_requests_rerun_byte_equal():
+    # 三条 B2 真实请求各重跑 3 次,structured_report 与 trace 字节稳(确定性红线)
+    for req in (
+        {"species": "bacteria", "perturbation_type": "medium", "perturbation_targets": ["acetate"],
+         "input_modality": "scRNA", "output_modality": "growth", "task_type": "predict_delta_expression"},
+        {"species": "bacteria", "perturbation_type": "drug", "perturbation_targets": ["trimethoprim"],
+         "input_modality": "scRNA", "output_modality": "growth", "task_type": "predict_delta_expression"},
+        {"species": "human", "perturbation_type": "ligand", "perturbation_targets": ["IFNB1"],
+         "input_modality": "scRNA", "output_modality": "flux", "task_type": "predict_delta_expression"}):
+        outs = [run_query(dict(req), config=_CFG) for _ in range(3)]
+        assert len({_canon(o["structured_report"]) for o in outs}) == 1
+        assert len({_canon(o["trace"]) for o in outs}) == 1
+
+
+def test_b2_mock_expression_request_unchanged():
+    # B2 加了 gem_fba medium/drug + pathway_scoring 引擎;确认它们不泄漏到 expression/mock 路径:
+    # human gene→delta_expression 仍只走 donor_predictor 的 3 个 mock,无任何真实 CaseRunner 接管。
+    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+           "input_modality": "scRNA", "output_modality": "delta_expression", "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    used = out["structured_report"]["provenance"]["models_used"]
+    assert "CaseRunner" not in used
+    assert set(used) <= {"MockLinear", "MockCPA", "MockGEARS"}   # 只 mock,B2 引擎零泄漏
