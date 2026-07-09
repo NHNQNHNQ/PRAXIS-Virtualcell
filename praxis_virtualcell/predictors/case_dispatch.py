@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from praxis_virtualcell.core.exceptions import UnsupportedEngine
 
-# 已接入真实预测的 engine(ModelApplicability 分诊用同一集合的镜像,见 model_applicability._REAL_ENGINES)
+# 已接入真实预测的 engine(单一真源;被 agents.model_applicability 直接 import,不镜像)
 REAL_ENGINES = frozenset({"gem_fba"})
 
 # 与 agents.route_table._GENE_LIKE 对齐:单基因/多基因联合敲除同属 gem_fba gene→growth

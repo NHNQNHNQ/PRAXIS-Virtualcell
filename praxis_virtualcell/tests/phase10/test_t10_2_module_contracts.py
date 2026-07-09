@@ -2,8 +2,11 @@ from types import SimpleNamespace
 
 import pytest
 
+from praxis_virtualcell.agents.model_applicability import ModelApplicabilityAgent
 from praxis_virtualcell.agents.request_adapter import request_to_module_input
+from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.exceptions import PraxisVCError, UnsupportedEngine
+from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.predictors.case_dispatch import dispatch_runner, map_case_delta
 from praxis_virtualcell.predictors.case_runner_agent import CaseRunnerPredictorAgent
 
@@ -86,3 +89,41 @@ def test_case_runner_assess_applicability_reject_unsupported():
            "task_type": "predict_delta_expression"}
     score, reject = agent.assess_applicability(req, {})
     assert reject is not None and score == 0.0
+
+
+def _run_applicability(req):
+    bus = MessageBus()
+    bus.set_context(trace_id="t", task_id="t")
+    agent = ModelApplicabilityAgent()
+    msg = AgentMessage("m1", "SpeciesBrain", "ModelApplicability", "decide",
+                       {"request": req, "brain_context": {"species": req["species"]}}, "t0001")
+    agent.handle(msg, bus)
+    return bus.latest("applicability_decided").payload
+
+
+def test_applicability_gem_fba_routes_to_case_runner():
+    out = _run_applicability(_BACT_GROWTH)
+    assert out["applicable"] == ["CaseRunner"]
+    assert out["rejected_candidates"] == []
+    assert out["brain_context"]["routing"]["real_engine"] == "gem_fba"
+
+
+def test_applicability_donor_predictor_keeps_mock_enumeration():
+    # human AHR gene→expression: route donor_predictor(非真实 engine)→ 走现状 mock 枚举
+    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+           "input_modality": "scRNA", "output_modality": "delta_expression",
+           "task_type": "predict_delta_expression"}
+    out = _run_applicability(req)
+    assert "CaseRunner" not in out["applicable"]
+    assert set(out["rejected_candidates"]) <= {"MockLinear", "MockCPA", "MockGEARS"}
+    assert "real_engine" not in out["brain_context"].get("routing", {})
+
+
+def test_applicability_boundary_request_falls_back_to_mock():
+    # 空 perturbation_targets → normalize_request 抛 SchemaError → engine 判不出 → 落回 mock 枚举(不崩)
+    req = {"species": "bacteria", "perturbation_type": "gene", "perturbation_targets": [],
+           "input_modality": "scRNA", "output_modality": "growth",
+           "task_type": "predict_delta_expression"}
+    out = _run_applicability(req)
+    assert "CaseRunner" not in out["applicable"]
+    assert "real_engine" not in out["brain_context"].get("routing", {})

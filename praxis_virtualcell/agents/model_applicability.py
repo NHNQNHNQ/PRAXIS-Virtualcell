@@ -7,9 +7,13 @@
 拿到不同 caution(投影非纯声明)。最终路由权威在此(LLMRouter 只能建议,W3)。"""
 from __future__ import annotations
 
+from praxis_virtualcell.agents.request_adapter import request_to_module_input
+from praxis_virtualcell.agents.route_table import route
+from praxis_virtualcell.agents.species_schema import SchemaError, normalize_request
 from praxis_virtualcell.core.agent import BaseAgent
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.predictors.case_dispatch import REAL_ENGINES
 
 _CANDIDATES = ("MockLinear", "MockCPA", "MockGEARS")
 _DEFAULT_ORIGIN = "human"            # predictor 母种缺省(可被 model_applicability[name].native_host 覆盖)
@@ -22,6 +26,22 @@ class ModelApplicabilityAgent(BaseAgent):
     def handle(self, message: AgentMessage, bus: MessageBus) -> None:
         req = message.payload["request"]
         bc = message.payload["brain_context"]
+        # B1:真实 engine 请求 → 候选=单个 CaseRunner adapter,跳过 mock 枚举(其余 engine 走现状)
+        # 请求不合 species_schema(如空 targets/未知 species)→ 判不了 engine,原样落回现状 mock 枚举
+        # (mock 枚举本就正确处理这些边界:abstain/reject),不让分诊块抢先抛错崩溃既有行为。
+        try:
+            engine = route(normalize_request(request_to_module_input(req))).engine
+        except SchemaError:
+            engine = None
+        if engine in REAL_ENGINES:
+            bc2 = {**bc, "routing": {"cautions": {}, "rejection_reasons": {},
+                                     "rules_hit": [], "real_engine": engine}}
+            bus.send(AgentMessage(message.message_id + ":app", self.name,
+                "EnsembleCoordinator", "applicability_decided",
+                {"request": req, "brain_context": bc2,
+                 "applicable": ["CaseRunner"], "rejected_candidates": []},
+                message.timestamp, message.message_id))
+            return
         appmap = bc.get("model_applicability") or {}
         vocab = set((bc.get("object_vocabulary") or {}).get("genes", []))
         species = req.get("species")
