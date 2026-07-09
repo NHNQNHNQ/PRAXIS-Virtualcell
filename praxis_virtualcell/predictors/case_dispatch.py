@@ -6,10 +6,18 @@ from __future__ import annotations
 from praxis_virtualcell.core.exceptions import UnsupportedEngine
 
 # 已接入真实预测的 engine(单一真源;被 agents.model_applicability 直接 import,不镜像)
-REAL_ENGINES = frozenset({"gem_fba"})
+REAL_ENGINES = frozenset({"gem_fba", "pathway_scoring"})
 
 # 与 agents.route_table._GENE_LIKE 对齐:单基因/多基因联合敲除同属 gem_fba gene→growth
 _GENE_LIKE = frozenset({"gene", "gene_combination"})
+
+# metabolic_tendency 只覆盖 Kang 2018 IFN-β 刺激场景(ctrl vs IFN-β stim);
+# 仅当扰动确为 IFN-β/干扰素时真实适用,其余哺乳类 flux 无基因特异代谢模型 → 诚实 abstain(不虚构)。
+_IFN_STIM_TOKENS = ("ifnb", "ifn-b", "ifnβ", "interferon")
+
+
+def _is_ifn_stim(targets) -> bool:
+    return any(any(tok in str(t).lower() for tok in _IFN_STIM_TOKENS) for t in (targets or []))
 
 
 def dispatch_runner(engine: str, raw_req: dict):
@@ -32,6 +40,11 @@ def dispatch_runner(engine: str, raw_req: dict):
             # 抗生素靶抑制目前只有 bacteria(iML1515)接入;非 bacteria 无对应 runner → 诚实 UnsupportedEngine。
             from praxis_virtualcell.predictors.mechanistic.antibiotic import run_antibiotic_case
             return run_antibiotic_case
+    elif engine == "pathway_scoring":
+        if _is_ifn_stim(raw_req.get("perturbation_targets")):
+            from praxis_virtualcell.predictors.state.metabolic_tendency import run_metabolic_tendency_case
+            return run_metabolic_tendency_case
+        # 非 IFN-β 场景:无基因特异哺乳类代谢 flux 模型 → 落末尾 UnsupportedEngine → CaseRunner 转诚实 abstain
     raise UnsupportedEngine(f"B 未接入 case runner: engine={engine} object={obj} species={species}")
 
 
@@ -53,4 +66,6 @@ def map_case_delta(engine: str, report) -> list[float]:
             return [round(r["ratio_vs_wt"] - 1.0, 4) for r in raw["antibiotics"]
                     if r.get("in_model") and r.get("ratio_vs_wt") is not None]
         raise UnsupportedEngine(f"gem_fba map_case_delta 未支持 raw_output 形状: {sorted(raw)}")
+    if engine == "pathway_scoring":  # 代谢通路 tendency:各通路 Cohen's d 效应量作 delta 分量
+        return [round(s["cohens_d"], 4) for s in report.raw_output["pathway_shifts"]]
     raise UnsupportedEngine(f"map_case_delta 未支持 engine={engine}")

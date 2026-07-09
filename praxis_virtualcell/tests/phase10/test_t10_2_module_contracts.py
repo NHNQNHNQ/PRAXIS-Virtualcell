@@ -255,3 +255,49 @@ def test_map_case_delta_gem_fba_drug():
         {"antibiotic": "ampicillin", "target_rxn": "non-metabolic", "known": True, "in_model": False}]})
     # in_model 且有 ratio_vs_wt 的项:ratio-1;非代谢/未知项跳过
     assert map_case_delta("gem_fba", report) == [-1.0]
+
+
+def test_pathway_scoring_in_real_engines():
+    from praxis_virtualcell.predictors.case_dispatch import REAL_ENGINES
+    assert "pathway_scoring" in REAL_ENGINES
+
+
+def test_dispatch_runner_pathway_scoring_ifn():
+    from praxis_virtualcell.predictors.state.metabolic_tendency import run_metabolic_tendency_case
+    raw = {"species": "human", "perturbation_object": "ligand", "perturbation_targets": ["IFNB1"]}
+    assert dispatch_runner("pathway_scoring", raw) is run_metabolic_tendency_case
+
+
+def test_dispatch_runner_pathway_scoring_non_ifn_unsupported():
+    # 非 IFN-β 哺乳类 flux(如 TP53 基因)→ 无基因特异代谢模型 → 诚实 UnsupportedEngine
+    with pytest.raises(UnsupportedEngine):
+        dispatch_runner("pathway_scoring", {"species": "human", "perturbation_object": "gene",
+                                            "perturbation_targets": ["TP53"]})
+
+
+def test_map_case_delta_pathway_scoring():
+    report = SimpleNamespace(raw_output={"max_abs_cohens_d": 0.281, "pathway_shifts": [
+        {"panel": "glycolysis", "cohens_d": 0.101}, {"panel": "oxphos", "cohens_d": 0.281}]})
+    assert map_case_delta("pathway_scoring", report) == [0.101, 0.281]
+
+
+def test_human_ifn_flux_real_pathway_scoring():
+    req = {"species": "human", "perturbation_type": "ligand", "perturbation_targets": ["IFNB1"],
+           "input_modality": "scRNA", "output_modality": "flux", "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    sr = out["structured_report"]
+    assert out["reliability_decision"]["abstain"] is False
+    assert "CaseRunner" in sr["provenance"]["models_used"]
+    assert sr["prediction"]["delta"] == [0.101, 0.281]
+    assert any("weak_pathway_effect" in f for f in sr["provenance"]["model_cautions"]["CaseRunner"])
+
+
+def test_human_gene_flux_non_ifn_abstains_honestly():
+    # 任意哺乳类基因 flux(非 IFN-β)→ 无基因特异代谢模型 → 诚实 abstain,不再返回固定 IFN 数值
+    for sp, tg in (("human", ["TP53"]), ("mouse", ["Tp53"])):
+        req = {"species": sp, "perturbation_type": "gene", "perturbation_targets": tg,
+               "input_modality": "scRNA", "output_modality": "flux", "task_type": "predict_delta_expression"}
+        out = run_query(dict(req), config=_CFG)
+        assert out["reliability_decision"]["abstain"] is True
+        assert out["structured_report"]["prediction"] is None
+        assert "CaseRunner" in out["structured_report"]["provenance"]["models_rejected"]
