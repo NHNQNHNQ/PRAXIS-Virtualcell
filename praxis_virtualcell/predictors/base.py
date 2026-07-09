@@ -37,6 +37,11 @@ class PredictorAgent(BaseAgent):
     def run_prediction(self, model_input: dict) -> dict:
         """返回 {prediction, uncertainty}。"""
 
+    def _result_status(self, out: dict) -> tuple[str, str | None]:
+        """据 run_prediction 输出改判最终状态,默认恒 success。子类可覆盖:
+        如机制模型 disposition=abstain → rejected,使主链经既有 `if not used` 如实 abstain。"""
+        return "success", None
+
     def handle(self, message: AgentMessage, bus: MessageBus) -> None:
         if not bus.has_message_type("brain_retrieved"):
             raise RetrieveBeforePredictError(
@@ -57,6 +62,14 @@ class PredictorAgent(BaseAgent):
                 agent_name=self.name, status="failed", prediction=None, uncertainty=None,
                 applicability_score=score, evidence=[], rejection_reason=None,
                 provenance={"error": str(e)}))
+            return
+        status, reject_reason = self._result_status(out)
+        if status != "success":
+            self._emit(bus, message, PredictorResultMessage(
+                agent_name=self.name, status=status, prediction=None,
+                uncertainty=out.get("uncertainty"), applicability_score=score,
+                evidence=out.get("evidence", []), rejection_reason=reject_reason,
+                provenance=out.get("provenance", {})))
             return
         self._emit(bus, message, PredictorResultMessage(
             agent_name=self.name, status="success", prediction=out["prediction"],

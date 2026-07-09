@@ -23,6 +23,8 @@ class ProvenanceAgent(BaseAgent):
             "models_rejected": p.get("models_rejected", []),
             "models_failed": p.get("models_failed", []),
             "critic_violations": p.get("critic_violations", []),
+            # B1:机制 predictor 的 disposition caution(如 targets_not_in_gem)如实透出
+            "model_cautions": p.get("model_cautions", {}),
         }
         bus.send(AgentMessage(message.message_id + ":prov", self.name, "Report",
             "provenance_done", {**p, "provenance": provenance}, message.timestamp,

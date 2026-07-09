@@ -26,6 +26,14 @@ class CaseRunnerPredictorAgent(PredictorAgent):
             return 0.0, str(e)
         return 1.0, None
 
+    def _result_status(self, out: dict) -> tuple[str, str | None]:
+        # 机制模型 disposition=abstain(全部 target 不在 GEM,delta 空)→ 不算成功预测,
+        # 让主链经既有 reliability `if not used` 如实 abstain(与接入前 mock 全拒的 abstain 语义一致)。
+        unc = out.get("uncertainty") or {}
+        if unc.get("disposition") == "abstain":
+            return "rejected", f"gem_abstain:{unc.get('caution_flags')}"
+        return "success", None
+
     def run_prediction(self, model_input: dict) -> dict:
         request = model_input["request"]
         raw = request_to_module_input(request)

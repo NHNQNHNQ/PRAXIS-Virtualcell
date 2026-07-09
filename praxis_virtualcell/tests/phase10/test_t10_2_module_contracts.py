@@ -185,3 +185,40 @@ def test_yeast_growth_also_real_fba():
     out = run_query(dict(req), config=_CFG)
     assert out["reliability_decision"]["abstain"] is False
     assert "CaseRunner" in out["structured_report"]["provenance"]["models_used"]
+
+
+def test_all_targets_not_in_gem_abstains_honestly():
+    # 全部基因不在 GEM → 机制 disposition=abstain → 主链如实 abstain(不再 abstain=False+prediction=None)
+    req = {"species": "bacteria", "perturbation_type": "gene", "perturbation_targets": ["b9999"],
+           "input_modality": "scRNA", "output_modality": "growth", "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    assert out["reliability_decision"]["abstain"] is True
+    sr = out["structured_report"]
+    assert sr["prediction"] is None
+    assert "CaseRunner" not in sr["provenance"]["models_used"]
+    assert "CaseRunner" in sr["provenance"]["models_rejected"]
+    assert sr["provenance"]["model_cautions"]["CaseRunner"] == ["all_targets_not_in_gem"]
+
+
+def test_partial_targets_surface_caution():
+    # 部分基因不在 GEM → disposition=caution → 给出 partial 预测,但 caution 如实透出(不静默吞)
+    req = {"species": "bacteria", "perturbation_type": "gene_combination",
+           "perturbation_targets": ["b0720", "b9999"],
+           "input_modality": "scRNA", "output_modality": "growth", "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    assert out["reliability_decision"]["abstain"] is False
+    assert out["structured_report"]["prediction"]["delta"] == [-1.0]   # partial 预测仍在
+    prov = out["structured_report"]["provenance"]
+    mc = prov["model_cautions"]
+    assert "CaseRunner" in mc
+    assert any("targets_not_in_gem" in f for f in mc["CaseRunner"])
+
+
+def test_markdown_surfaces_gem_abstain_reason():
+    from praxis_virtualcell.io.report_markdown import render_report_md
+    req = {"species": "bacteria", "perturbation_type": "gene", "perturbation_targets": ["b9999"],
+           "input_modality": "scRNA", "output_modality": "growth", "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    md = render_report_md({"mode": "offline", "request": req, "report": out["structured_report"]})
+    assert "all_targets_not_in_gem" in md          # 拒因如实出现在人读报告
+    assert "CaseRunner` — 未记录原因" not in md      # 不再误导

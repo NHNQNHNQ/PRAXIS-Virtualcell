@@ -50,7 +50,13 @@ class EnsembleCoordinatorAgent(BaseAgent):
             ensemble = {"delta": [sum(v[i] for v in vecs) / len(vecs) for i in range(n)]} if n else None
         disagreement = _disagreement(vecs) if vecs else {
             "score": None, "metric": "pairwise_cosine_distance", "n_models": 0, "reason": "no_models"}
+        # per-predictor caution(如机制模型 disposition=caution/abstain 的 caution_flags)表面化,
+        # 不参与裁决(ensemble 不在红线上),只为 provenance 如实透传。
+        model_cautions = {r["agent_name"]: r["uncertainty"]["caution_flags"]
+                          for r in results
+                          if (r.get("uncertainty") or {}).get("caution_flags")}
         bus.send(AgentMessage(message.message_id + ":ens", self.name, "Reliability",
             "ensemble_done", {**message.payload, "models_used": used, "models_rejected": rejected,
-            "models_failed": failed, "ensemble": ensemble, "disagreement": disagreement},
+            "models_failed": failed, "ensemble": ensemble, "disagreement": disagreement,
+            "model_cautions": model_cautions},
             message.timestamp, message.message_id))

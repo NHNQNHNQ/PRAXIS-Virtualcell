@@ -77,13 +77,16 @@ def render_report_md(job: dict) -> str:
 
     # 3. Routing Decision
     rej_reasons = prov.get("rejection_reasons") or {}
+    model_cautions = prov.get("model_cautions") or {}   # B1:机制 predictor disposition caution/abstain
     w("## 3. Routing Decision")
     w("")
     w(f"- models_used: `{_fmt_list(used)}`")
     if rejected:
         w("- models_rejected:")
         for m in rejected:
-            w(f"  - `{m}` — {rej_reasons.get(m, '未记录原因')}")
+            reason = rej_reasons.get(m) or (
+                ", ".join(model_cautions[m]) if model_cautions.get(m) else "未记录原因")
+            w(f"  - `{m}` — {reason}")
     else:
         w("- models_rejected: —")
     w(f"- models_failed: `{_fmt_list(report.get('models_failed'))}`")
@@ -202,6 +205,8 @@ def render_report_md(job: dict) -> str:
     caution = report.get("caution_flags") or {}
     if caution:
         limits.append(f"caution flags: {json.dumps(caution, ensure_ascii=False, sort_keys=True)}")
+    if model_cautions:   # B1:partial 的 targets_not_in_gem 等机制 caution 如实进 §8
+        limits.append(f"model cautions: {json.dumps(model_cautions, ensure_ascii=False, sort_keys=True)}")
     mk = _mocks(used)
     if mk:
         limits.append(f"预测数值来自 mock predictor({', '.join(mk)}),非真跑数值;"
