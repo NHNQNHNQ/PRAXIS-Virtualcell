@@ -1,3 +1,5 @@
+import hashlib
+import json as _json
 from types import SimpleNamespace
 
 import pytest
@@ -143,3 +145,23 @@ def test_bacteria_growth_runs_real_fba_end_to_end():
     assert out["llm_used_for_prediction"] is False       # 仍零 LLM
     # 真实预测:b0720 essential → delta [-1.0]
     assert sr["prediction"]["delta"] == [-1.0]
+
+
+def _canon(obj):
+    return hashlib.sha256(_json.dumps(obj, sort_keys=True, ensure_ascii=False, default=str).encode()).hexdigest()
+
+
+def test_real_request_rerun_byte_equal():
+    outs = [run_query(dict(_BACT_GROWTH), config=_CFG) for _ in range(3)]
+    assert len({_canon(o["structured_report"]) for o in outs}) == 1
+    assert len({_canon(o["trace"]) for o in outs}) == 1
+
+
+def test_mock_request_unchanged_by_adapter():
+    # AHR(donor_predictor)仍走 3 mock,models_used 不含 CaseRunner
+    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+           "input_modality": "scRNA", "output_modality": "delta_expression",
+           "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    used = out["structured_report"]["provenance"]["models_used"]
+    assert "CaseRunner" not in used                       # mock 请求不碰 adapter
