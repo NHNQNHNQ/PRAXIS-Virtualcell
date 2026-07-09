@@ -1,6 +1,6 @@
 """engine→真实 run_*_case 分发 + CaseReport→delta 映射。B1 实现 gem_fba 的 gene→growth,
-B2 Task1 加 gem_fba 的 medium(碳源切换)→growth(bacteria only)。
-其余 engine / gem_fba 的 drug 等子路径由后续增量 task 往这里加分支。"""
+B2 Task1 加 gem_fba 的 medium(碳源切换)→growth,Task2 加 gem_fba 的 drug(抗生素靶抑制)→growth
+(均 bacteria only)。其余 engine 子路径由后续增量 task 往这里加分支。"""
 from __future__ import annotations
 
 from praxis_virtualcell.core.exceptions import UnsupportedEngine
@@ -28,6 +28,10 @@ def dispatch_runner(engine: str, raw_req: dict):
             # medium 切换目前只有 bacteria(EcoliGEM)重建;yeast 无对应 runner → 诚实 UnsupportedEngine。
             from praxis_virtualcell.predictors.mechanistic.medium_shift import run_medium_shift_case
             return run_medium_shift_case
+        elif obj == "drug" and species == "bacteria":
+            # 抗生素靶抑制目前只有 bacteria(iML1515)接入;非 bacteria 无对应 runner → 诚实 UnsupportedEngine。
+            from praxis_virtualcell.predictors.mechanistic.antibiotic import run_antibiotic_case
+            return run_antibiotic_case
     raise UnsupportedEngine(f"B 未接入 case runner: engine={engine} object={obj} species={species}")
 
 
@@ -43,5 +47,10 @@ def map_case_delta(engine: str, report) -> list[float]:
             # 每个碳源 growth 相对 glucose 参照的变化:ratio_vs_glucose-1。
             # in_model=False(碳源不在模型 exchange)→跳过,不虚构。
             return [round(r["ratio_vs_glucose"] - 1.0, 4) for r in raw["carbon_sources"] if r["in_model"]]
+        if "antibiotics" in raw:
+            # 每个抗生素靶抑制后 growth 相对 WT 的变化:ratio_vs_wt-1。
+            # 非代谢靶/未知抗生素/靶反应不在模型 → 无 ratio_vs_wt → 跳过,不虚构。
+            return [round(r["ratio_vs_wt"] - 1.0, 4) for r in raw["antibiotics"]
+                    if r.get("in_model") and r.get("ratio_vs_wt") is not None]
         raise UnsupportedEngine(f"gem_fba map_case_delta 未支持 raw_output 形状: {sorted(raw)}")
     raise UnsupportedEngine(f"map_case_delta 未支持 engine={engine}")

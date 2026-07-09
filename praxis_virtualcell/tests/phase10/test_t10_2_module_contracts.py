@@ -241,3 +241,17 @@ def test_map_case_delta_gem_fba_medium():
         "carbon_sources": [{"carbon": "acetate", "in_model": True, "ratio_vs_glucose": 0.1983},
                            {"carbon": "unobtainium", "in_model": False, "ratio_vs_glucose": None}]})
     assert map_case_delta("gem_fba", report) == [-0.8017]   # 不在模型的碳源跳过
+
+
+def test_dispatch_runner_gem_fba_drug():
+    from praxis_virtualcell.predictors.mechanistic.antibiotic import run_antibiotic_case
+    raw = {"species": "bacteria", "perturbation_object": "drug"}
+    assert dispatch_runner("gem_fba", raw) is run_antibiotic_case
+
+
+def test_map_case_delta_gem_fba_drug():
+    report = SimpleNamespace(raw_output={"wt_growth": 0.877, "antibiotics": [
+        {"antibiotic": "trimethoprim", "target_rxn": "DHFR", "in_model": True, "ratio_vs_wt": 0.0},
+        {"antibiotic": "ampicillin", "target_rxn": "non-metabolic", "known": True, "in_model": False}]})
+    # in_model 且有 ratio_vs_wt 的项:ratio-1;非代谢/未知项跳过
+    assert map_case_delta("gem_fba", report) == [-1.0]
