@@ -165,3 +165,23 @@ def test_mock_request_unchanged_by_adapter():
     out = run_query(dict(req), config=_CFG)
     used = out["structured_report"]["provenance"]["models_used"]
     assert "CaseRunner" not in used                       # mock 请求不碰 adapter
+
+
+def test_gem_fba_provenance_honest():
+    out = run_query(dict(_BACT_GROWTH), config=_CFG)
+    prov = out["structured_report"]["provenance"]
+    # 真实预测 provenance 可追溯:采纳 CaseRunner
+    assert "CaseRunner" in prov["models_used"]
+    # 判别性:module_plan 记录真实 gem_fba 引擎(区分于 mock 路径的 donor_predictor)
+    assert prov["module_plan"]["entries"][0]["engine"] == "gem_fba"
+    # provenance 完整性:加载的 species 规则来源(yaml 文件路径列表)非空
+    assert prov["rules_referenced"]
+
+
+def test_yeast_growth_also_real_fba():
+    req = {"species": "yeast", "perturbation_type": "gene", "perturbation_targets": ["YBR166C"],
+           "input_modality": "scRNA", "output_modality": "growth",
+           "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    assert out["reliability_decision"]["abstain"] is False
+    assert "CaseRunner" in out["structured_report"]["provenance"]["models_used"]
