@@ -301,3 +301,34 @@ def test_human_gene_flux_non_ifn_abstains_honestly():
         assert out["reliability_decision"]["abstain"] is True
         assert out["structured_report"]["prediction"] is None
         assert "CaseRunner" in out["structured_report"]["provenance"]["models_rejected"]
+
+
+def test_bacteria_medium_shift_real_fba():
+    req = {"species": "bacteria", "perturbation_type": "medium", "perturbation_targets": ["acetate"],
+           "input_modality": "scRNA", "output_modality": "growth", "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    sr = out["structured_report"]
+    assert out["reliability_decision"]["abstain"] is False
+    assert "CaseRunner" in sr["provenance"]["models_used"]
+    assert sr["prediction"]["delta"] == [-0.8017]        # 乙酸 0.1983×葡萄糖 → 真实 FBA
+
+
+def test_bacteria_antibiotic_real_fba():
+    req = {"species": "bacteria", "perturbation_type": "drug", "perturbation_targets": ["trimethoprim"],
+           "input_modality": "scRNA", "output_modality": "growth", "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    sr = out["structured_report"]
+    assert out["reliability_decision"]["abstain"] is False
+    assert sr["prediction"]["delta"] == [-1.0]            # DHFR 抑制 growth 0
+
+
+def test_bacteria_antibiotic_non_metabolic_abstains():
+    # 非代谢靶(ampicillin)→ 机制 abstain → 主链如实弃权 + 原因透出
+    req = {"species": "bacteria", "perturbation_type": "drug", "perturbation_targets": ["ampicillin"],
+           "input_modality": "scRNA", "output_modality": "growth", "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    sr = out["structured_report"]
+    assert out["reliability_decision"]["abstain"] is True
+    assert sr["prediction"] is None
+    assert "CaseRunner" in sr["provenance"]["models_rejected"]
+    assert any("non_metabolic_target" in f for f in sr["provenance"]["model_cautions"]["CaseRunner"])
