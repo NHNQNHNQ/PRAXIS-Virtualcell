@@ -256,16 +256,9 @@ def test_bacteria_antibiotic_real_fba():
     assert sr["prediction"]["delta"] == [-1.0]            # DHFR 抑制 growth 0
 
 
-def test_human_pathway_tendency_real_scoring():
-    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["STAT1"],
-           "input_modality": "scRNA", "output_modality": "flux", "task_type": "predict_delta_expression"}
-    out = run_query(dict(req), config=_CFG)
-    sr = out["structured_report"]
-    assert out["reliability_decision"]["abstain"] is False
-    assert "CaseRunner" in sr["provenance"]["models_used"]
-    assert sr["prediction"]["delta"] == [0.101, 0.281]    # 两通路 Cohen's d
-    # 弱效应 downgrade 经 model_cautions 诚实标注(不伪装强)
-    assert any("weak_pathway_effect" in f for f in sr["provenance"]["model_cautions"]["CaseRunner"])
+# 注:pathway_scoring 的端到端(IFN-β 真实预测 + TP53/mouse 非 IFN 诚实 abstain)已在 Task 3
+# 窄门修复里覆盖(test_human_ifn_flux_real_pathway_scoring / test_human_gene_flux_non_ifn_abstains_honestly),
+# 本 Task 不重复。Task 4 只做 gem_fba 的 medium/drug 端到端 + 非代谢靶 abstain 负例。
 
 
 def test_bacteria_antibiotic_non_metabolic_abstains():
