@@ -174,30 +174,9 @@ class AgentRuntime:
 
     @staticmethod
     def _request_to_module_input(req: dict) -> dict:
-        """把管线 request(键 perturbation_type/output_modality/metadata.requested_outputs)确定性映射到
-        module 路由期望的 raw(键 perturbation_object/target_output/perturbation_targets)。零 LLM。
-
-        实读 model_applicability 产出的 req 键:species/perturbation_type/perturbation_targets/
-        input_modality/output_modality/task_type/cell_type/metadata。module 路由的 normalize_request
-        期望:species/perturbation_object/target_output/perturbation_targets(+可选 cell_type/medium/dose)。
-        """
-        # output_modality → target_output(TARGET_OUTPUTS = expression/growth/flux/state/communication)
-        _OUT_MAP = {"delta_expression": "expression", "pathway_response": "flux",
-                    "reliability_report": "expression", "growth": "growth", "flux": "flux",
-                    "state": "state", "communication": "communication", "expression": "expression"}
-        requested = ((req.get("metadata") or {}).get("requested_outputs") or [])
-        # 优先 requested_outputs 里第一个合法输出;否则由 output_modality 映射;再否则默认 expression
-        target_output = next((o for o in requested if o in _OUT_MAP.values()), None)
-        if target_output is None:
-            target_output = _OUT_MAP.get(str(req.get("output_modality", "")).lower(), "expression")
-        raw = {"species": req.get("species"),
-               "perturbation_object": req.get("perturbation_type"),
-               "target_output": target_output,
-               "perturbation_targets": list(req.get("perturbation_targets") or [])}
-        for k in ("cell_type", "medium", "dose"):
-            if req.get(k) is not None:
-                raw[k] = req[k]
-        return raw
+        """委托 agents.request_adapter.request_to_module_input(消重,行为不变)。"""
+        from praxis_virtualcell.agents.request_adapter import request_to_module_input
+        return request_to_module_input(req)
 
     def export_outputs(self, out_dir: str, report: dict) -> None:
         d = Path(out_dir)
