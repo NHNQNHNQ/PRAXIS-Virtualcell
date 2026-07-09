@@ -11,13 +11,18 @@ REAL_ENGINES = frozenset({"gem_fba", "pathway_scoring"})
 # 与 agents.route_table._GENE_LIKE 对齐:单基因/多基因联合敲除同属 gem_fba gene→growth
 _GENE_LIKE = frozenset({"gene", "gene_combination"})
 
-# metabolic_tendency 只覆盖 Kang 2018 IFN-β 刺激场景(ctrl vs IFN-β stim);
-# 仅当扰动确为 IFN-β/干扰素时真实适用,其余哺乳类 flux 无基因特异代谢模型 → 诚实 abstain(不虚构)。
-_IFN_STIM_TOKENS = ("ifnb", "ifn-b", "ifnβ", "interferon")
+# metabolic_tendency 只覆盖 human Kang 2018 IFN-β 刺激场景。
+# IFN-β 精确别名白名单(strip().lower() 后精确匹配,非子串——避免 IFNB2[IL-6 历史别名]、
+# "interferon binding protein" 等自由文本/别名碰撞被误判为 IFN-β 而张冠李戴到 Kang 数据);
+# 故 IFN-γ/α、IFNB2/IL-6、任意基因/非 human 物种 → 落 UnsupportedEngine → 诚实 abstain,不虚构固定 IFN-β 数值。
+_IFN_BETA_ALIASES = frozenset({
+    "ifnb1", "ifnb", "ifn-b1", "ifnβ", "ifn-β", "ifn-beta", "ifnbeta",
+    "interferon beta", "interferon-beta", "interferon β", "interferon beta 1", "interferon-beta-1",
+})
 
 
-def _is_ifn_stim(targets) -> bool:
-    return any(any(tok in str(t).lower() for tok in _IFN_STIM_TOKENS) for t in (targets or []))
+def _is_ifn_beta(targets) -> bool:
+    return any(str(t).strip().lower() in _IFN_BETA_ALIASES for t in (targets or []))
 
 
 def dispatch_runner(engine: str, raw_req: dict):
@@ -41,10 +46,10 @@ def dispatch_runner(engine: str, raw_req: dict):
             from praxis_virtualcell.predictors.mechanistic.antibiotic import run_antibiotic_case
             return run_antibiotic_case
     elif engine == "pathway_scoring":
-        if _is_ifn_stim(raw_req.get("perturbation_targets")):
+        if species == "human" and _is_ifn_beta(raw_req.get("perturbation_targets")):
             from praxis_virtualcell.predictors.state.metabolic_tendency import run_metabolic_tendency_case
             return run_metabolic_tendency_case
-        # 非 IFN-β 场景:无基因特异哺乳类代谢 flux 模型 → 落末尾 UnsupportedEngine → CaseRunner 转诚实 abstain
+        # 非 human 或非 IFN-β:metabolic_tendency 只有 human Kang IFN-β 数据 → 落末尾 UnsupportedEngine → 诚实 abstain
     raise UnsupportedEngine(f"B 未接入 case runner: engine={engine} object={obj} species={species}")
 
 

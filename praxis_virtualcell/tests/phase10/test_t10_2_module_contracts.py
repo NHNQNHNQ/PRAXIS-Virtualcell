@@ -357,3 +357,36 @@ def test_b2_mock_expression_request_unchanged():
     used = out["structured_report"]["provenance"]["models_used"]
     assert "CaseRunner" not in used
     assert set(used) <= {"MockLinear", "MockCPA", "MockGEARS"}   # 只 mock,B2 引擎零泄漏
+
+
+def test_dispatch_runner_pathway_scoring_mouse_unsupported():
+    # metabolic_tendency 是 human Kang IFN-β 数据 → mouse 即便 IFN-β 也无对应数据 → 诚实 UnsupportedEngine
+    with pytest.raises(UnsupportedEngine):
+        dispatch_runner("pathway_scoring", {"species": "mouse", "perturbation_object": "ligand",
+                                            "perturbation_targets": ["IFNB1"]})
+
+
+def test_dispatch_runner_pathway_scoring_non_beta_ifn_unsupported():
+    # IFN-γ/α 不是 IFN-β(Kang 数据专指 β)→ 诚实 UnsupportedEngine
+    for tg in (["interferon gamma"], ["interferon alpha"]):
+        with pytest.raises(UnsupportedEngine):
+            dispatch_runner("pathway_scoring", {"species": "human", "perturbation_object": "ligand",
+                                                "perturbation_targets": tg})
+
+
+def test_pathway_scoring_species_cytokine_leak_abstains_e2e():
+    # 端到端:mouse+IFN-β 与 human+IFN-γ 都不应拿到人类 IFN-β 固定数据,应诚实 abstain
+    for sp, tg in (("mouse", ["IFNB1"]), ("human", ["interferon gamma"])):
+        req = {"species": sp, "perturbation_type": "ligand", "perturbation_targets": tg,
+               "input_modality": "scRNA", "output_modality": "flux", "task_type": "predict_delta_expression"}
+        out = run_query(dict(req), config=_CFG)
+        assert out["reliability_decision"]["abstain"] is True
+        assert out["structured_report"]["prediction"] is None
+        assert "CaseRunner" in out["structured_report"]["provenance"]["models_rejected"]
+
+
+def test_dispatch_runner_pathway_scoring_ifnb2_il6_unsupported():
+    # IFNB2 是 IL-6 历史别名(非 IFN-β)→ 精确匹配下不放行,诚实 UnsupportedEngine
+    with pytest.raises(UnsupportedEngine):
+        dispatch_runner("pathway_scoring", {"species": "human", "perturbation_object": "ligand",
+                                            "perturbation_targets": ["IFNB2"]})
