@@ -5,6 +5,7 @@ import pytest
 from praxis_virtualcell.agents.request_adapter import request_to_module_input
 from praxis_virtualcell.core.exceptions import PraxisVCError, UnsupportedEngine
 from praxis_virtualcell.predictors.case_dispatch import dispatch_runner, map_case_delta
+from praxis_virtualcell.predictors.case_runner_agent import CaseRunnerPredictorAgent
 
 
 def test_unsupported_engine_is_praxisvc_error():
@@ -60,3 +61,28 @@ def test_map_case_delta_gem_fba():
 def test_map_case_delta_unsupported_engine():
     with pytest.raises(UnsupportedEngine):
         map_case_delta("state_scoring", SimpleNamespace(raw_output={"knockouts": []}))
+
+
+_BACT_GROWTH = {"species": "bacteria", "perturbation_type": "gene",
+                "perturbation_targets": ["b0720"], "input_modality": "scRNA",
+                "output_modality": "growth", "task_type": "predict_delta_expression"}
+
+
+def test_case_runner_run_prediction_gem_fba():
+    agent = CaseRunnerPredictorAgent()
+    out = agent.run_prediction({"request": _BACT_GROWTH})
+    assert out["prediction"]["delta"] == [-1.0]         # b0720 essential
+    assert out["uncertainty"]["disposition"] == "accept"
+    assert out["provenance"]["engine"] == "gem_fba"
+    assert out["provenance"]["tool"] == "cobrapy"
+    assert out["provenance"]["case_id"]
+
+
+def test_case_runner_assess_applicability_reject_unsupported():
+    agent = CaseRunnerPredictorAgent()
+    # human gene expression → route donor_predictor(非真实 engine)→ dispatch UnsupportedEngine → reject
+    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+           "input_modality": "scRNA", "output_modality": "delta_expression",
+           "task_type": "predict_delta_expression"}
+    score, reject = agent.assess_applicability(req, {})
+    assert reject is not None and score == 0.0
