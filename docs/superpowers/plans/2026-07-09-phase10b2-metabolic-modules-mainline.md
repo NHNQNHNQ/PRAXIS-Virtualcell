@@ -16,7 +16,8 @@
 - bacteria medium `["acetate"]` → disposition accept、`carbon_sources[0].ratio_vs_glucose=0.1983` → delta `[-0.8017]`。
 - bacteria drug `["trimethoprim"]`(靶 DHFR)→ accept、growth_arrest、`ratio_vs_wt=0.0` → delta `[-1.0]`。
 - bacteria drug `["ampicillin"]`(非代谢靶)→ **abstain**、flag `non_metabolic_target:ampicillin`。
-- human gene flux `["STAT1"]` → metabolic_tendency disposition **downgrade**(弱效应 max_d=0.281)、`pathway_shifts` cohens_d=[0.101,0.281] → delta `[0.101, 0.281]`、flag `weak_pathway_effect:max_d=0.281`。
+- **human ligand flux `["IFNB1"]`**(窄门放行的 IFN-β 真实场景)→ metabolic_tendency disposition **downgrade**(弱效应 max_d=0.281)、`pathway_shifts` cohens_d=[0.101,0.281] → delta `[0.101, 0.281]`、flag `weak_pathway_effect:max_d=0.281`。
+- 窄门收口(Task 3 修 + Task 6 补 species/β 守卫):**非 IFN-β 基因(STAT1/TP53)、非 human 物种(mouse+IFNB1)、非 β 细胞因子(interferon gamma)、IL-6 别名(IFNB2)一律诚实 abstain**——metabolic_tendency 只对 human Kang IFN-β 数据真实有效,不虚构固定数值。
 
 ---
 
@@ -301,8 +302,9 @@ def test_b2_real_requests_rerun_byte_equal():
     for req in (
         {"species": "bacteria", "perturbation_type": "medium", "perturbation_targets": ["acetate"],
          "input_modality": "scRNA", "output_modality": "growth", "task_type": "predict_delta_expression"},
-        {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["STAT1"],
+        {"species": "human", "perturbation_type": "ligand", "perturbation_targets": ["IFNB1"],
          "input_modality": "scRNA", "output_modality": "flux", "task_type": "predict_delta_expression"}):
+        # 注:窄门后真实 flux 请求用 IFN-β(IFNB1);STAT1 等非 IFN-β 已改为诚实 abstain
         outs = [run_query(dict(req), config=_CFG) for _ in range(3)]
         assert len({_canon(o["structured_report"]) for o in outs}) == 1
         assert len({_canon(o["trace"]) for o in outs}) == 1
