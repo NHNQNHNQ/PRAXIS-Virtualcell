@@ -5,10 +5,12 @@ import pytest
 from praxis_virtualcell.agents.model_applicability import ModelApplicabilityAgent
 from praxis_virtualcell.agents.request_adapter import request_to_module_input
 from praxis_virtualcell.core.bus import MessageBus
+from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.exceptions import PraxisVCError, UnsupportedEngine
 from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.predictors.case_dispatch import dispatch_runner, map_case_delta
 from praxis_virtualcell.predictors.case_runner_agent import CaseRunnerPredictorAgent
+from praxis_virtualcell.workflows.run_virtualcell_query import run_query
 
 
 def test_unsupported_engine_is_praxisvc_error():
@@ -127,3 +129,17 @@ def test_applicability_boundary_request_falls_back_to_mock():
     out = _run_applicability(req)
     assert "CaseRunner" not in out["applicable"]
     assert "real_engine" not in out["brain_context"].get("routing", {})
+
+
+_CFG = RuntimeConfig(mode=Mode.OFFLINE)
+
+
+def test_bacteria_growth_runs_real_fba_end_to_end():
+    out = run_query(dict(_BACT_GROWTH), config=_CFG)
+    rd = out["reliability_decision"]
+    assert rd["abstain"] is False                        # 接入真实 GEM → 不再 abstain
+    sr = out["structured_report"]
+    assert "CaseRunner" in sr["provenance"]["models_used"]
+    assert out["llm_used_for_prediction"] is False       # 仍零 LLM
+    # 真实预测:b0720 essential → delta [-1.0]
+    assert sr["prediction"]["delta"] == [-1.0]

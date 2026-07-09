@@ -1,23 +1,24 @@
 """组装 offline runtime + 跑一个 request。"""
 from __future__ import annotations
 
+from praxis_virtualcell.active_learning.active_learning_agent import ActiveLearningAgent
 from praxis_virtualcell.agents.critic import CriticAgent
 from praxis_virtualcell.agents.ensemble import EnsembleCoordinatorAgent
+from praxis_virtualcell.agents.evidence_level_agent import EvidenceLevelAgent
 from praxis_virtualcell.agents.input_interpreter import InputInterpreterAgent
 from praxis_virtualcell.agents.model_applicability import ModelApplicabilityAgent
+from praxis_virtualcell.agents.module_router_agent import ModuleRouterAgent
 from praxis_virtualcell.agents.object_normalizer import BioObjectNormalizerAgent
 from praxis_virtualcell.agents.provenance_agent import ProvenanceAgent
 from praxis_virtualcell.agents.reliability import ReliabilityAgent
 from praxis_virtualcell.agents.report import ReportAgent
 from praxis_virtualcell.agents.species_brain import SpeciesBrainAgent
-from praxis_virtualcell.agents.module_router_agent import ModuleRouterAgent
 from praxis_virtualcell.agents.species_context_agent import SpeciesContextAgent
-from praxis_virtualcell.agents.evidence_level_agent import EvidenceLevelAgent
-from praxis_virtualcell.active_learning.active_learning_agent import ActiveLearningAgent
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Clock, IdGen, Mode, RuntimeConfig
 from praxis_virtualcell.core.request import VirtualCellRequest
 from praxis_virtualcell.core.runtime import AgentRuntime
+from praxis_virtualcell.predictors.case_runner_agent import CaseRunnerPredictorAgent
 from praxis_virtualcell.predictors.mock_cpa import MockCPAAgent
 from praxis_virtualcell.predictors.mock_gears import MockGEARSAgent
 from praxis_virtualcell.predictors.mock_linear import MockLinearAgent
@@ -28,6 +29,7 @@ def build_runtime(config: RuntimeConfig | None = None) -> AgentRuntime:
     rt = AgentRuntime(cfg, bus=MessageBus(), clock=Clock(), idgen=IdGen())
     for a in (InputInterpreterAgent(), BioObjectNormalizerAgent(), SpeciesBrainAgent(cfg),
               ModelApplicabilityAgent(), MockLinearAgent(), MockCPAAgent(), MockGEARSAgent(),
+              CaseRunnerPredictorAgent(),
               EnsembleCoordinatorAgent(), ReliabilityAgent(mode=cfg.reliability_mode), CriticAgent(),
               ProvenanceAgent(), ReportAgent()):
         rt.register_agent(a)
