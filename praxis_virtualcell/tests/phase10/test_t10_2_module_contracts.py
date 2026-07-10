@@ -4,8 +4,10 @@ from types import SimpleNamespace
 
 import pytest
 
+from praxis_virtualcell.agents import module_rules as MR
 from praxis_virtualcell.agents.model_applicability import ModelApplicabilityAgent
 from praxis_virtualcell.agents.request_adapter import request_to_module_input
+from praxis_virtualcell.agents.species_schema import normalize_request as _norm
 from praxis_virtualcell.biological_modules import module_gene_sets as MGS
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
@@ -630,3 +632,54 @@ def test_b4_modules_hit_by_empty_and_none():
     assert MGS.modules_hit_by([]) == []
     assert MGS.modules_hit_by(None) == []
     assert MGS.modules_hit_by(["", "  "]) == []
+
+
+def _b4_norm_req(**kw):
+    base = {"species": "human", "perturbation_object": "gene",
+            "target_output": "expression", "perturbation_targets": ["SLC2A1"]}
+    base.update(kw)
+    return _norm(base)
+
+
+def test_b4_pick_secondary_membrane_gene_adds_m1():
+    sec = MR.pick_secondary(_b4_norm_req(), "genetic_hub")
+    assert "membrane_system" in sec
+
+
+def test_b4_pick_secondary_degradation_gene_adds_m8():
+    sec = MR.pick_secondary(_b4_norm_req(perturbation_targets=["PSMB5"]), "genetic_hub")
+    assert "degradation_machinery" in sec
+
+
+def test_b4_pick_secondary_non_hit_gene_adds_nothing():
+    sec = MR.pick_secondary(_b4_norm_req(perturbation_targets=["TP53"]), "genetic_hub")
+    assert not ({"membrane_system", "biosynthetic_network", "degradation_machinery"} & set(sec))
+
+
+def test_b4_pick_secondary_excludes_primary_and_dedups():
+    # 防御:即便 primary 恰为 gene-set 模块也排除(现状 primary 永不为 M1/M5/M8)
+    sec = MR.pick_secondary(_b4_norm_req(), "membrane_system")
+    assert "membrane_system" not in sec
+    # 去重:结果无重复
+    assert len(sec) == len(set(sec))
+
+
+def test_b4_pick_secondary_preserves_m3_for_mammalian_growth():
+    # 现有 M3 逻辑不变:human growth 仍加 M3;若靶标同时命中 gene-set 则并存
+    req = _b4_norm_req(target_output="growth", perturbation_targets=["SLC2A1"])
+    sec = MR.pick_secondary(req, "cytoplasmic_metabolism")
+    assert "mitochondrial_energy_metabolism" in sec   # M3 保留
+    assert "membrane_system" in sec                   # gene-set 命中并存
+    # 确定性顺序锁定(M3 由代谢规则先入,gene-set 命中随后)
+    assert sec == ["mitochondrial_energy_metabolism", "membrane_system"]
+
+
+def test_b4_pick_secondary_gene_gated_drug_ligand_not_activated():
+    # 诚实红线:drug/ligand 请求即便靶标字面撞 gene-set 符号也不激活 M1/M5/M8(非基因扰动)
+    for obj in ("drug", "ligand"):
+        req = _b4_norm_req(perturbation_object=obj, perturbation_targets=["SLC2A1"])
+        assert MR.gene_set_secondary(req) == []
+        assert "membrane_system" not in MR.pick_secondary(req, "stress_processor")
+    # gene_combination 属基因扰动 → 激活
+    req_gc = _b4_norm_req(perturbation_object="gene_combination", perturbation_targets=["SLC2A1"])
+    assert "membrane_system" in MR.gene_set_secondary(req_gc)
