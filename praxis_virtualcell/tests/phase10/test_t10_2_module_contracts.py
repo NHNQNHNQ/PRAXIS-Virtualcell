@@ -413,3 +413,19 @@ def test_map_case_delta_embedding_signature():
         {"drug": "geldanamycin", "in_db": True, "moa_enrichment": 2.646},
         {"drug": "notadrug", "in_db": False, "moa_enrichment": None}]})
     assert map_case_delta("embedding", report) == [2.646]
+
+
+def test_dispatch_runner_embedding_ligand_unsupported():
+    # route 把 ligand 也判 embedding(data_gated 未接模型)→ 不当 drug 查库 → 诚实 UnsupportedEngine
+    with pytest.raises(UnsupportedEngine):
+        dispatch_runner("embedding", {"species": "human", "perturbation_object": "ligand"})
+
+
+def test_human_ligand_not_mislabeled_as_drug():
+    req = {"species": "human", "perturbation_type": "ligand", "perturbation_targets": ["TGFB1"],
+           "input_modality": "scRNA", "output_modality": "delta_expression", "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    prov = out["structured_report"]["provenance"]
+    # ligand 无签名模型 → 诚实 abstain,但不能被误标成"药不在库"(TGFB1 是配体不是药)
+    mc = prov.get("model_cautions", {})
+    assert not any("drug_not_in_db" in f for f in mc.get("CaseRunner", []))

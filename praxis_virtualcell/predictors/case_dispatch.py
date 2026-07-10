@@ -1,6 +1,8 @@
 """engine→真实 run_*_case 分发 + CaseReport→delta 映射。B1 实现 gem_fba 的 gene→growth,
 B2 Task1 加 gem_fba 的 medium(碳源切换)→growth,Task2 加 gem_fba 的 drug(抗生素靶抑制)→growth
-(均 bacteria only)。其余 engine 子路径由后续增量 task 往这里加分支。"""
+(均 bacteria only)。B3 Task1 加 embedding 的 human+drug→MOA 签名(LINCS,human-guarded;
+route 亦把 ligand 判 embedding 但未接模型,故 embedding 分支再加 obj==drug 守卫,ligand 落诚实 abstain)。
+其余 engine 子路径由后续增量 task 往这里加分支。"""
 from __future__ import annotations
 
 from praxis_virtualcell.core.exceptions import UnsupportedEngine
@@ -51,10 +53,11 @@ def dispatch_runner(engine: str, raw_req: dict):
             return run_metabolic_tendency_case
         # 非 human 或非 IFN-β:metabolic_tendency 只有 human Kang IFN-β 数据 → 落末尾 UnsupportedEngine → 诚实 abstain
     elif engine == "embedding":
-        if raw_req.get("species") == "human":
+        if raw_req.get("species") == "human" and obj == "drug":
             from praxis_virtualcell.predictors.embedding.drug_signature import run_drug_response_case
             return run_drug_response_case
-        # 非 human:LINCS 是 human 数据 → 落末尾 UnsupportedEngine → 诚实 abstain
+        # 非 human 或非 drug(如 ligand,route 判 embedding 但 data_gated 未接模型)→ 落末尾
+        # UnsupportedEngine → 诚实 abstain(不把 ligand 当药名去查 DrugSignatureDB 而误标 drug_not_in_db)
     raise UnsupportedEngine(f"B 未接入 case runner: engine={engine} object={obj} species={species}")
 
 
