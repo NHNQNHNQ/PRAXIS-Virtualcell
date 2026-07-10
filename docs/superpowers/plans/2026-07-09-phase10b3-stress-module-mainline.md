@@ -20,13 +20,11 @@
 
 ---
 
-## ⚠️ 执行中架构修正(2026-07-09,原 Task 1 BLOCKED 发现)
+## ⚠️ 执行中的一个受影响测试(2026-07-09,用户拍板"回到 B2 一致做法")
 
-原 Task 1(embedding 接入)暴露真实架构缺口:`agents/model_applicability.py` 的短路 `if engine in REAL_ENGINES: applicable=["CaseRunner"]` **不验证 CaseRunner 是否真能 dispatch** 就跳过 mock 枚举;而 `route_table` 的 `obj==drug→embedding` 物种无关。故 mouse+drug 加 embedding 到 REAL_ENGINES 后被短路到 CaseRunner(human 守卫→abstain),绕过既有 mock 枚举,打破既有测试 `test_cross_species_routing.py::test_mouse_drug_gears_unsupported_perturbation_not_vocab`。B1 的 gem_fba 对哺乳类 growth 有同款潜伏缺口。
+原 Task 1 曾试探"dispatch-probe 短路兜底"(CaseRunner 处理不了则落回 mock),但被证实**会重开 B2 Task 6 的过度声称**——mock 枚举无 output_modality 门,non-IFN flux 落回 mock 会用表达量模型给 flux 编造 [0.3]。**故弃 probe,回到 B2 一致做法**:growth/flux/state/drug 全走 CaseRunner,处理不了就经 CaseRunner 如实 abstain(不落回 mock)。副作用是 **mock 天然只剩 expression(donor 本行),不再编造非本行模态**——整体更诚实。
 
-**修正:插入新 Task 1(ModelApplicability dispatch 感知短路)**,原 5 task 顺延为 Task 2-6:
-- **新 Task 1**:model_applicability 短路前 probe `dispatch_runner`——能 dispatch 才短路 CaseRunner,不能则**落回既有 mock 枚举**(保"mock 请求行为不变"红线 + 修 B1 潜伏缺口)。属 ModelApplicability"选哪些候选"范畴,不碰裁决。
-- **limitation 语义随之修正**:mouse+drug、emt(human 非 IFN state)、fate(mouse state)等 CaseRunner 处理不了的 → **保持既有 mock 兜底行为**(offline 标注式 mock stand-in),**不是** abstain。B3 只保证这些不被误当真实 CaseRunner 预测(CaseRunner 不在 models_used);真正 abstain 与否由既有 mock 枚举 + brain 规则决定。原 Task 4/5(现 Task 5/6)的 limitation 断言据此改为"CaseRunner not in models_used"而非"abstain=True"。
+**唯一代价 = 一个受影响测试**:加 embedding 到 REAL_ENGINES 后,所有 drug 请求 → CaseRunner(mock 不再见 drug)。既有 `praxis_virtualcell/tests/test_cross_species_routing.py::test_mouse_drug_gears_unsupported_perturbation_not_vocab`(断言 mouse+drug 走 mock 枚举、MockGEARS 拒/MockCPA 用)据此**语义提升为 mouse+drug 诚实 abstain**(CaseRunner human 守卫,无 human 药物数据给 mouse)。**必须保留 MockGEARS 拒 drug 的意图**——改为直接单测 MockGEARS.assess_applicability(drug 请求)断言 unsupported_perturbation,不丢覆盖。此更新在 Task 1 内随 embedding 接入一并做(属"受影响测试"标准处置,不迁就、是真实语义提升)。**Task 编号不变(仍原 5 task)。**
 
 ---
 
