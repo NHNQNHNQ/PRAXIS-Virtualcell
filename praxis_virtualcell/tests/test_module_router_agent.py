@@ -70,11 +70,11 @@ def test_yeast_niche_mismatch_downgrades():
     """决策 E(可达路径):yeast + niche state → primary M6 cytoskeletal_framework →
     mismatch query tissue_spatial_niche → registry 判 reject → entry verdict 降级不 accept。
 
-    注:bacteria autophagy(M8 degradation_machinery)的 mismatch 在当前 module_rules 规则下
-    端到端不可达 —— pick_primary/pick_secondary 只产 M2/M3/M4/M6/M7,M8 从不作为
-    primary/secondary 出现,故 mismatch_query_for 的 bacteria_autophagy 分支永不被路由触达。
-    这属 M1/M3 v1.0 里程碑待确认项(是否让 M8 参与路由);在此之前 mismatch 降级红线改由
-    本 yeast niche 测试端到端覆盖(原 test_bacteria_autophagy_mismatch_downgrades 为空转)。"""
+    注:本 case 是 medium 扰动(perturbation_object=medium,非 gene),gene_set_secondary 的 gene 门控
+    直接短路;且靶标 SNF1 也不在任何 P10.B4 gene-set —— 双重原因不触发 M1/M5/M8 gene-set 激活。
+    mismatch 降级红线由本 yeast niche 端到端路径覆盖。
+    (P10.B4 起 M8/M1/M5 可经 gene 扰动 + gene-set 命中作 advisory secondary,见 test_t10_2 的 B4 段;
+    但那是 rule_based/evidence_limited advisory,与本处 mismatch 降级红线是两条独立路径。)"""
     p = _plan_for(_req(species="yeast", perturbation_object="medium",
                        target_output="state", medium="niche",
                        perturbation_targets=["SNF1"]))

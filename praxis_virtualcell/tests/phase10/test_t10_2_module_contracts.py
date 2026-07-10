@@ -757,3 +757,58 @@ def test_b4_advisory_never_relaxes_route_abstain():
     assert "rule_based:membrane_system_gene_set" in m1["caution_flags"]
     assert "evidence_limited" in m1["caution_flags"]
     assert p["overall_verdict"] == "abstain"
+
+
+_B4_RUNQ = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["SLC2A1"],
+            "input_modality": "scRNA", "output_modality": "delta_expression",
+            "task_type": "predict_delta_expression"}
+
+
+def test_b4_all_three_modules_runnable_e2e():
+    # G2 8/8:M1/M5/M8 各至少一个基因请求经 run_query 进 module_plan 并产 advisory
+    # (这些基因在 mock 下会 abstain=OOD,但 module_plan 仍如实带 advisory —— 正是分离的体现)
+    for gene, module in [("SLC2A1", "membrane_system"), ("RPS6", "biosynthetic_network"),
+                         ("PSMB5", "degradation_machinery")]:
+        out = run_query(dict(_B4_RUNQ, perturbation_targets=[gene]), config=_CFG)
+        entries = out["structured_report"]["provenance"]["module_plan"]["entries"]
+        entry = next((e for e in entries if e["module"] == module), None)
+        assert entry is not None, f"{gene} 未激活 {module}"
+        assert f"rule_based:{module}_gene_set" in entry["caution_flags"]
+        assert "evidence_limited" in entry["caution_flags"]
+        assert entry["route_disposition"] == "downgrade"
+
+
+def test_b4_advisory_walled_from_reliability_e2e():
+    # module_plan advisory 是 provenance,不喂 reliability 推理/预测路径:
+    #  ① mock 预测器照常跑(models_used 有 MockLinear)——advisory 不 gate 预测;
+    #  ② advisory 的 rule_based 痕迹只在 provenance.module_plan 出现,不泄漏进任何 reliability
+    #     推理字段(abstain_reasons/downgrade_reasons/caution_flags/failed_checks/model_disagreement
+    #     等 structured_report 顶层字段)—— 去掉 provenance 后整份 report 不含 advisory 串;
+    #  ③ llm_used_for_prediction 恒 False;④ 反证:advisory 确实在 provenance.module_plan(非整份缺失)。
+    out = run_query(dict(_B4_RUNQ), config=_CFG)
+    sr = out["structured_report"]
+    assert out["llm_used_for_prediction"] is False
+    assert "MockLinear" in sr["provenance"]["models_used"]        # 预测器照跑,未被 advisory 短路
+    # 强隔离:扫描 structured_report 去 provenance 后的全部 reliability 推理面
+    sr_no_prov = _json.dumps({k: v for k, v in sr.items() if k != "provenance"},
+                             ensure_ascii=False, default=str)
+    assert "rule_based:membrane_system_gene_set" not in sr_no_prov
+    assert "membrane_system" not in sr_no_prov
+    # 反证:advisory 确实存在(在 provenance.module_plan),证明上面的排除非空断言
+    m1 = next(e for e in sr["provenance"]["module_plan"]["entries"]
+              if e["module"] == "membrane_system")
+    assert m1["verdict"] == "downgrade"
+    assert "rule_based:membrane_system_gene_set" in m1["caution_flags"]
+
+
+def test_b4_non_gene_set_gene_no_advisory_e2e():
+    # 非 gene-set 基因(TP53):module_plan 不含 M1/M5/M8
+    out = run_query(dict(_B4_RUNQ, perturbation_targets=["TP53"]), config=_CFG)
+    modules = {e["module"] for e in out["structured_report"]["provenance"]["module_plan"]["entries"]}
+    assert not ({"membrane_system", "biosynthetic_network", "degradation_machinery"} & modules)
+
+
+def test_b4_membrane_request_deterministic_byte_equal():
+    outs = [run_query(dict(_B4_RUNQ), config=_CFG) for _ in range(3)]
+    assert len({_canon(o["structured_report"]) for o in outs}) == 1
+    assert len({_canon(o["trace"]) for o in outs}) == 1
