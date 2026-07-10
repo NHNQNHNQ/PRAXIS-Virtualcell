@@ -26,7 +26,10 @@ _IFN_BETA_ALIASES = frozenset({
 
 
 def _is_ifn_beta(targets) -> bool:
-    return any(str(t).strip().lower() in _IFN_BETA_ALIASES for t in (targets or []))
+    # 非空且**全部** target 都是 IFN-β 别名才算 IFN-β 场景(固定 Kang IFN-β 数据无法建模含其它扰动的组合;
+    # 混入非 IFN-β target 若仍用 any() 放行会静默吞掉其它组分,只覆盖数据的一半却冒充完整预测)。
+    ts = [str(t).strip().lower() for t in (targets or [])]
+    return bool(ts) and all(t in _IFN_BETA_ALIASES for t in ts)
 
 
 def dispatch_runner(engine: str, raw_req: dict):

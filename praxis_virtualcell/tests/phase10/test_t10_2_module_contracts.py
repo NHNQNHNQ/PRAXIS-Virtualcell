@@ -566,3 +566,23 @@ def test_b3_mock_expression_gene_unchanged():
     used = out["structured_report"]["provenance"]["models_used"]
     assert "CaseRunner" not in used
     assert set(used) <= {"MockLinear", "MockCPA", "MockGEARS"}   # 只 mock,B3 引擎零泄漏到 gene expression
+
+
+def test_is_ifn_beta_mixed_targets_unsupported():
+    # 混合含非 IFN-β target → 固定 IFN-β 数据无法建模组合 → 诚实 UnsupportedEngine(两个引擎都收紧)
+    with pytest.raises(UnsupportedEngine):
+        dispatch_runner("state_scoring", {"species": "human", "perturbation_object": "gene",
+                                          "perturbation_targets": ["IFNB1", "ZEB1"]})
+    with pytest.raises(UnsupportedEngine):
+        dispatch_runner("pathway_scoring", {"species": "human", "perturbation_object": "gene",
+                                            "perturbation_targets": ["IFNB1", "TP53"]})
+
+
+def test_mixed_ifn_target_abstains_e2e():
+    # 端到端:human [IFNB1,ZEB1] state 不再拿只覆盖一半的 [2.485],而是诚实 abstain
+    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["IFNB1", "ZEB1"],
+           "input_modality": "scRNA", "output_modality": "state", "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    assert out["reliability_decision"]["abstain"] is True
+    assert out["structured_report"]["prediction"] is None
+    assert "CaseRunner" in out["structured_report"]["provenance"]["models_rejected"]
