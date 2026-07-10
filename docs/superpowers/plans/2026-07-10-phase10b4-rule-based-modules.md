@@ -418,6 +418,21 @@ def test_b4_advisory_entry_has_no_numeric_delta_field():
     # ModulePlanEntry 无任何数值 delta/prediction 字段(定性 advisory,零伪造)
     assert "delta" not in m1
     assert "prediction" not in m1
+
+
+def test_b4_advisory_never_relaxes_route_abstain():
+    # 诚实红线(code review 抓出):advisory 只能变严格,不能比 route() 更乐观。
+    # 微生物 gene→expression(route 判 abstain,mammalian scRNA predictor 不适用)+ 命中 gene-set 基因
+    # → M1 entry 保持 abstain,不被 advisory 放宽成 downgrade。
+    p = _b4_plan_for({"species": "bacteria", "perturbation_object": "gene",
+                      "target_output": "expression", "perturbation_targets": ["FASN"]})
+    m1 = next(e for e in p["entries"] if e["module"] == "membrane_system")
+    assert m1["route_disposition"] == "abstain"   # route() 原判,advisory 不放宽
+    assert m1["verdict"] == "abstain"
+    # advisory 标注仍如实叠加(rule_based/evidence_limited),只是不放宽 disposition
+    assert "rule_based:membrane_system_gene_set" in m1["caution_flags"]
+    assert "evidence_limited" in m1["caution_flags"]
+    assert p["overall_verdict"] == "abstain"
 ```
 
 - [ ] **Step 2:运行确认失败**
@@ -441,7 +456,10 @@ Expected: FAIL(`route_disposition` 仍为 route() 的原值 accept,无 rule_base
         caution = list(dec.caution_flags)
         reason = dec.reason
         if mid in module_rules.gene_set_secondary(req):
-            disposition = "downgrade"
+            # 诚实红线:advisory 只能变严格,不能比 route() 更乐观。
+            # route() 已判 abstain/downgrade(如微生物 gene→expression 无适用 scRNA predictor)时不放宽。
+            if disposition in ("accept", "caution"):
+                disposition = "downgrade"
             caution += [f"rule_based:{mid}_gene_set", "evidence_limited"]
             reason = (f"{reason} | rule_based_gene_set_advisory" if reason
                       else "rule_based_gene_set_advisory")
@@ -477,8 +495,11 @@ Expected: 全 PASS(既有靶标非 gene-set → advisory 分支不触发,行为�
 
 - [ ] **Step 6:ruff + commit**
 
+（注:`module_router_agent.py` 有一处 **pre-existing I001 import 排序**债务[B4 起点 4d41d1a 就有,`llm_orchestration` 应排在 `biological_modules` 之后],ruff `[*]` 可自动修。因本 task 正在改该文件且 Task 5 要求它 ruff 全绿,顺手 `ruff check --fix praxis_virtualcell/agents/module_router_agent.py` 清掉[纯 import 重排,零语义风险],改后跑测试确认不破坏。)
+
 ```bash
-.venv/bin/ruff check praxis_virtualcell/agents/module_router_agent.py
+.venv/bin/ruff check --fix praxis_virtualcell/agents/module_router_agent.py
+.venv/bin/ruff check praxis_virtualcell/agents/module_router_agent.py praxis_virtualcell/tests/phase10/test_t10_2_module_contracts.py
 git add praxis_virtualcell/agents/module_router_agent.py praxis_virtualcell/tests/phase10/test_t10_2_module_contracts.py
 git commit -m "$(cat <<'EOF'
 feat(phase10b4): Task 3 _build_entry 叠加 rule_based/evidence_limited advisory(downgrade,零 delta,不碰 engine/route)
