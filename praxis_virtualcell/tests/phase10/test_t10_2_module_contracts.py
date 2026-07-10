@@ -476,3 +476,28 @@ def test_human_drug_dose_not_in_db_abstains_honestly():
     assert out["reliability_decision"]["abstain"] is True
     assert out["structured_report"]["prediction"] is None
     assert "CaseRunner" in out["structured_report"]["provenance"]["models_rejected"]
+
+
+def test_pathway_engines_include_state_scoring():
+    from praxis_virtualcell.predictors.case_dispatch import REAL_ENGINES
+    assert "state_scoring" in REAL_ENGINES
+
+
+def test_dispatch_runner_state_scoring_ifn():
+    from praxis_virtualcell.predictors.state.cell_state import run_cellstate_case
+    raw = {"species": "human", "perturbation_object": "ligand", "perturbation_targets": ["IFNB1"]}
+    assert dispatch_runner("state_scoring", raw) is run_cellstate_case
+
+
+def test_dispatch_runner_state_scoring_non_ifn_unsupported():
+    # cell_state 是固定 Kang IFN-β 数据 → 非 IFN-β(emt 的 ZEB1)/mouse(fate)诚实 UnsupportedEngine
+    for raw in ({"species": "human", "perturbation_object": "gene", "perturbation_targets": ["ZEB1"]},
+                {"species": "mouse", "perturbation_object": "gene", "perturbation_targets": ["Gata1"]}):
+        with pytest.raises(UnsupportedEngine):
+            dispatch_runner("state_scoring", raw)
+
+
+def test_map_case_delta_state_scoring():
+    report = SimpleNamespace(raw_output={"cohens_d": 2.485, "marker_coverage": 1.0,
+        "per_cell_type": [{"cell_type": "B cells", "cohens_d": 3.472}]})
+    assert map_case_delta("state_scoring", report) == [2.485]

@@ -2,13 +2,15 @@
 B2 Task1 加 gem_fba 的 medium(碳源切换)→growth,Task2 加 gem_fba 的 drug(抗生素靶抑制)→growth
 (均 bacteria only)。B3 Task1 加 embedding 的 human+drug→MOA 签名(LINCS,human-guarded;
 route 亦把 ligand 判 embedding 但未接模型,故 embedding 分支再加 obj==drug 守卫,ligand 落诚实 abstain)。
+B3 Task3 加 state_scoring 的 human+IFN-β→cell_state(Kang 2018 ISG 激活评分,复用 B2 的
+_is_ifn_beta 窄门;非 IFN-β/mouse 是状态刻画类别错误,诚实 abstain,不冒充扰动预测)。
 其余 engine 子路径由后续增量 task 往这里加分支。"""
 from __future__ import annotations
 
 from praxis_virtualcell.core.exceptions import UnsupportedEngine
 
 # 已接入真实预测的 engine(单一真源;被 agents.model_applicability 直接 import,不镜像)
-REAL_ENGINES = frozenset({"gem_fba", "pathway_scoring", "embedding"})
+REAL_ENGINES = frozenset({"gem_fba", "pathway_scoring", "embedding", "state_scoring"})
 
 # 与 agents.route_table._GENE_LIKE 对齐:单基因/多基因联合敲除同属 gem_fba gene→growth
 _GENE_LIKE = frozenset({"gene", "gene_combination"})
@@ -63,6 +65,12 @@ def dispatch_runner(engine: str, raw_req: dict):
             return run_drug_response_case
         # 非 human 或非 drug(如 ligand,route 判 embedding 但 data_gated 未接模型)→ 落末尾
         # UnsupportedEngine → 诚实 abstain(不把 ligand 当药名去查 DrugSignatureDB 而误标 drug_not_in_db)
+    elif engine == "state_scoring":
+        if raw_req.get("species") == "human" and _is_ifn_beta(raw_req.get("perturbation_targets")):
+            from praxis_virtualcell.predictors.state.cell_state import run_cellstate_case
+            return run_cellstate_case
+        # 非 human 或非 IFN-β(emt 的 gene→state、fate 的 mouse state)→ 落 UnsupportedEngine →
+        # 诚实 abstain(cell_state 只有固定 Kang human IFN-β 数据,不接刻画类工具冒充扰动预测)
     raise UnsupportedEngine(f"B 未接入 case runner: engine={engine} object={obj} species={species}")
 
 
@@ -96,4 +104,8 @@ def map_case_delta(engine: str, report) -> list[float]:
             dr = raw["dose_response"]
             return [round(dr["spearman"], 4)] if dr is not None else []
         raise UnsupportedEngine(f"embedding map_case_delta 未支持 raw_output 形状: {sorted(raw)}")
+    if engine == "state_scoring":
+        if "per_cell_type" in report.raw_output:   # cell_state:整体 ISG 组间 Cohen's d
+            return [round(report.raw_output["cohens_d"], 4)]
+        raise UnsupportedEngine(f"state_scoring map_case_delta 未支持 raw_output 形状: {sorted(report.raw_output)}")
     raise UnsupportedEngine(f"map_case_delta 未支持 engine={engine}")
