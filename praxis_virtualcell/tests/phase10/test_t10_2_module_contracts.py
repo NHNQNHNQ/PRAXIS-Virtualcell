@@ -540,3 +540,29 @@ def test_stress_limitation_paths_abstain_honestly():
         assert out["reliability_decision"]["abstain"] is True, c
         assert out["structured_report"]["prediction"] is None, c
         assert "CaseRunner" in out["structured_report"]["provenance"]["models_rejected"], c
+
+
+def test_b3_real_requests_rerun_byte_equal():
+    # B3 真实请求各重跑 3 次,structured_report 与 trace 字节稳(确定性红线)
+    for req in (
+        {"species": "human", "perturbation_type": "drug", "perturbation_targets": ["geldanamycin"],
+         "input_modality": "scRNA", "output_modality": "delta_expression", "task_type": "predict_delta_expression"},
+        {"species": "human", "perturbation_type": "drug", "perturbation_targets": ["geldanamycin"],
+         "perturbation_dose": 10.0, "input_modality": "scRNA", "output_modality": "delta_expression",
+         "task_type": "predict_delta_expression"},
+        {"species": "human", "perturbation_type": "ligand", "perturbation_targets": ["IFNB1"],
+         "input_modality": "scRNA", "output_modality": "state", "task_type": "predict_delta_expression"}):
+        outs = [run_query(dict(req), config=_CFG) for _ in range(3)]
+        assert len({_canon(o["structured_report"]) for o in outs}) == 1
+        assert len({_canon(o["trace"]) for o in outs}) == 1
+
+
+def test_b3_mock_expression_gene_unchanged():
+    # human gene→delta_expression 仍只走 donor_predictor 3 mock
+    # (embedding/state_scoring 只吃 drug/state,不碰 gene expression)
+    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+           "input_modality": "scRNA", "output_modality": "delta_expression", "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    used = out["structured_report"]["provenance"]["models_used"]
+    assert "CaseRunner" not in used
+    assert set(used) <= {"MockLinear", "MockCPA", "MockGEARS"}   # 只 mock,B3 引擎零泄漏到 gene expression
