@@ -382,23 +382,30 @@ def run_gears_case(raw_req: dict):
     return report, dec
 ```
 
-- [ ] **Step 3c:case_dispatch.py 加 dispatch + map 分支**
+- [x] **Step 3c:case_dispatch.py 加 dispatch + map 分支(实际实现 = Option B,见下方实现记录)**
 
-`dispatch_runner` 末尾 `raise UnsupportedEngine` **之前**加:
+`dispatch_runner` 末尾 `raise UnsupportedEngine` **之前**加(**Option B:守卫含 `and gears_available()`**):
 ```python
     elif engine == "donor_predictor":
-        # M2:human gene→expression 真实 GEARS(.53 gated;分诊已保证只在 gears_available 时到达 CaseRunner)。
-        # 守卫对齐 GearsWrapper.declare_scope(human + gene/gene_combination);非此 → 诚实 UnsupportedEngine。
-        if species == "human" and obj in _GENE_LIKE and raw_req.get("target_output") == "expression":
+        # M2:human gene→expression 真实 GEARS(.53 gated)。dispatch 层也校验 gears_available()
+        # (Option B / defense-in-depth:GEARS 不可用即诚实 UnsupportedEngine,不声称 applicable 后失败)。
+        if (species == "human" and obj in _GENE_LIKE
+                and raw_req.get("target_output") == "expression" and gears_available()):
             from praxis_virtualcell.predictors.ml.gears_case import run_gears_case
             return run_gears_case
-        # 非 human/非 gene/非 expression → 落末尾 UnsupportedEngine → 诚实 abstain(不误接)
+        # 非 human/非 gene/非 expression/GEARS 不可用 → 落末尾 UnsupportedEngine → 诚实 abstain/reject
 ```
-`map_case_delta` 里 `if engine == "state_scoring":` 分支**之后**、末尾 `raise` 之前加:
+`map_case_delta` 里 `if engine == "state_scoring":` 分支**之后**、末尾 `raise` 之前加(**防御式,对齐同函数其他分支**):
 ```python
     if engine == "donor_predictor":
-        return list(report.raw_output["gears_delta"])   # GEARS-内部 delta(已在 wrapper round 定点)
+        if "gears_delta" in raw:   # GEARS-内部 delta(已在 wrapper round 定点)
+            return list(raw["gears_delta"])
+        raise UnsupportedEngine(f"donor_predictor map_case_delta 未支持 raw_output 形状: {sorted(raw)}")
 ```
+
+> **⚠️ 实现记录(2026-07-10 Task 3 收官,commit 88bd8df):Option B 决策来龙。**
+> Task 3 实现中发现 plan 原设(dispatch donor_predictor 分支**不**含 `gears_available()`)与 B1 遗留测试 `test_case_runner_assess_applicability_reject_unsupported` 冲突——该测试**绕过 ModelApplicability 直调 CaseRunner**,原设 donor_predictor 无 runner→reject;加了 dispatch 分支后它会误判 applicable。implementer 正确报 BLOCKED 挡下。**用户拍板 Option B**:dispatch 层守卫**加 `and gears_available()`**(defense-in-depth 双门控:ModelApplicability 已门控,dispatch 再门控一次;GEARS 不可用即诚实 `UnsupportedEngine`,不声称 applicable 后失败)。配套:①旧 B1 测试改 `monkeypatch.setattr(CD, "gears_available", lambda: False)` 显式锁,保持 reject 语义、使 env 无关;②M2 dispatch 测试相应 `monkeypatch` gears_available(True 测返回 runner / False 测 raise),且 non_human/non_gene 测试用 `gears=True` 隔离验证是 species/obj 守卫而非门控本身拒绝。
+> **代码质量审两处 fix(amend 到本 commit)**:①`test_m2_gears_runner_fail_closed_without_torch` 加 `@pytest.mark.skipif(_HAS_TORCH,...)` 守卫(对齐 `test_gears_wrapper.py` 既有约定,防 .53 残留 GEARS_CKPT 时误跑);②`map_case_delta` donor_predictor 分支加防御(先判 `gears_delta` 键存在、否则诊断式 `raise UnsupportedEngine`,对齐同函数惯例)。两审(spec 合规审 APPROVED + 代码质量审 CHANGES_REQUESTED→修→复审 APPROVED),全量 770/39/0。
 
 - [ ] **Step 4:运行确认通过**
 
