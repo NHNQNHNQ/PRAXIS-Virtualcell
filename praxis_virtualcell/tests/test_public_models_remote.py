@@ -33,3 +33,39 @@ def test_gears_wrapper_real_inference_structure():
     w = GearsWrapper(ckpt_stem=ckpt_stem)
     out = w.run_prediction({"targets": ["AHR"]})
     assert "prediction" in out
+
+
+def test_m2_gears_case_real_delta_e2e():
+    """P10.B M2 .53:human gene→expression 经 run_gears_case → GEARS-内部 delta(扰动−对照,
+    非 mock 0.3、非绝对表达)。GEARS 非确定性(no_fixed_seed)→ 只验结构 + 诚实标注 + delta 类型,
+    不作字节等价断言(spec §六 确定性红线细化)。诚实标注须在 CaseReport 四部分一致(raw_output/
+    baseline_comparison/reliability_decision/provenance_boundary)。"""
+    from praxis_virtualcell.predictors.ml.gears_case import run_gears_case
+
+    raw = {"species": "human", "perturbation_object": "gene",
+           "target_output": "expression", "perturbation_targets": ["AHR"]}   # AHR∈norman vocab(如非则换 vocab 内基因)
+    report, dec = run_gears_case(raw)
+
+    # 路由/引擎判别:human gene→expression → donor_predictor(经 gears_available 门控到 GEARS runner)
+    assert dec.engine == "donor_predictor"
+
+    ro = report.raw_output
+    # 诚实标注(raw_output):GEARS-内部 delta,明标非 donor 可比 + 非确定性
+    assert ro["value_type"] == "gears_internal_delta"
+    assert ro["not_comparable_to_donor_base"] is True
+    assert ro["non_deterministic"] is True
+
+    # 真实 delta 结构:非空列表、有非零分量
+    assert isinstance(ro["gears_delta"], list) and len(ro["gears_delta"]) > 0
+    assert any(abs(x) > 1e-9 for x in ro["gears_delta"])
+    # 非 mock 铁证:delta 不是 mock ensemble 的常数 0.3
+    assert ro["gears_delta"] != [0.3] * len(ro["gears_delta"])
+
+    # 诚实标注在 CaseReport 其余三部分一致(非 donor 可比 / 非确定性,多处冗余守)
+    assert report.baseline_comparison["value_type"] == "gears_internal_delta"
+    assert report.baseline_comparison["not_comparable_to_donor_base"] is True
+    assert report.reliability_decision["disposition"] == "accept"
+    assert "not_comparable_to_donor_base" in report.reliability_decision["caution_flags"]
+    assert "gears_internal_delta" in report.reliability_decision["caution_flags"]
+    assert report.provenance_boundary["non_deterministic"] is True
+    assert report.provenance_boundary["no_fixed_seed"] is True
