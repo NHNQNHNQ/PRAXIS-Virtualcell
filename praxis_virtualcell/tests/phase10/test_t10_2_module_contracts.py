@@ -6,7 +6,9 @@ import pytest
 
 from praxis_virtualcell.agents import module_rules as MR
 from praxis_virtualcell.agents.model_applicability import ModelApplicabilityAgent
+from praxis_virtualcell.agents.module_router_agent import ModuleRouterAgent
 from praxis_virtualcell.agents.request_adapter import request_to_module_input
+from praxis_virtualcell.agents.species_context_agent import SpeciesContextAgent
 from praxis_virtualcell.agents.species_schema import normalize_request as _norm
 from praxis_virtualcell.biological_modules import module_gene_sets as MGS
 from praxis_virtualcell.core.bus import MessageBus
@@ -683,3 +685,75 @@ def test_b4_pick_secondary_gene_gated_drug_ligand_not_activated():
     # gene_combination 属基因扰动 → 激活
     req_gc = _b4_norm_req(perturbation_object="gene_combination", perturbation_targets=["SLC2A1"])
     assert "membrane_system" in MR.gene_set_secondary(req_gc)
+
+
+_B4_RAW_MEMBRANE = {"species": "human", "perturbation_object": "gene",
+                    "target_output": "expression", "perturbation_targets": ["SLC2A1"]}
+
+
+def _b4_plan_for(request):
+    """SpeciesContext → ModuleRouter 全链路,返回 module_plan_ready payload(dict)。request 为 raw。"""
+    bus = MessageBus()
+    SpeciesContextAgent().handle(AgentMessage(
+        message_id="c1", sender="SpeciesBrain", receiver="SpeciesContextAgent",
+        message_type="species_context", payload={"request": request}, timestamp="t1"), bus)
+    ctx = bus.latest("species_context_ready").payload
+    ModuleRouterAgent().handle(AgentMessage(
+        message_id="c2", sender="SpeciesContextAgent", receiver="ModuleRouterAgent",
+        message_type="module_route",
+        payload={"request": request, "module_support": ctx["module_support"],
+                 "mismatch_queries": ctx["mismatch_queries"]}, timestamp="t2"), bus)
+    return bus.latest("module_plan_ready").payload
+
+
+def test_b4_membrane_entry_carries_rule_based_advisory():
+    p = _b4_plan_for(dict(_B4_RAW_MEMBRANE))
+    m1 = next(e for e in p["entries"] if e["module"] == "membrane_system")
+    assert m1["role"] == "secondary"
+    assert m1["route_disposition"] == "downgrade"            # 非 accept(不伪装)、非 reject(不拖 abstain)
+    assert m1["species_verdict"] == "caution"                # human membrane weak→caution
+    assert m1["verdict"] == "downgrade"                      # synthesize(downgrade,caution,None)=downgrade
+    assert "rule_based:membrane_system_gene_set" in m1["caution_flags"]
+    assert "evidence_limited" in m1["caution_flags"]
+    assert "rule_based_gene_set_advisory" in m1["reason"]
+
+
+def test_b4_overall_verdict_downgrades_not_abstain():
+    p = _b4_plan_for(dict(_B4_RAW_MEMBRANE))
+    assert p["overall_verdict"] == "downgrade"               # 不是 abstain/reject
+    # primary M2 entry 未被 advisory 污染
+    prim = next(e for e in p["entries"] if e["role"] == "primary")
+    assert prim["module"] == "genetic_hub"
+    assert prim["verdict"] == "accept"
+    assert "rule_based:membrane_system_gene_set" not in prim["caution_flags"]
+
+
+def test_b4_non_gene_set_gene_no_advisory_entry():
+    p = _b4_plan_for(dict(_B4_RAW_MEMBRANE, perturbation_targets=["TP53"]))
+    modules = {e["module"] for e in p["entries"]}
+    assert not ({"membrane_system", "biosynthetic_network", "degradation_machinery"} & modules)
+    prim = next(e for e in p["entries"] if e["role"] == "primary")
+    assert prim["verdict"] == "accept"                       # 非命中基因行为不变
+
+
+def test_b4_advisory_entry_has_no_numeric_delta_field():
+    p = _b4_plan_for(dict(_B4_RAW_MEMBRANE))
+    m1 = next(e for e in p["entries"] if e["module"] == "membrane_system")
+    # ModulePlanEntry 无任何数值 delta/prediction 字段(定性 advisory,零伪造)
+    assert "delta" not in m1
+    assert "prediction" not in m1
+
+
+def test_b4_advisory_never_relaxes_route_abstain():
+    # 诚实红线(code review 抓出):advisory 只能变严格,不能比 route() 更乐观。
+    # 微生物 gene→expression(route 判 abstain,mammalian scRNA predictor 不适用)+ 命中 gene-set 基因
+    # → M1 entry 保持 abstain,不被 advisory 放宽成 downgrade。
+    p = _b4_plan_for({"species": "bacteria", "perturbation_object": "gene",
+                      "target_output": "expression", "perturbation_targets": ["FASN"]})
+    m1 = next(e for e in p["entries"] if e["module"] == "membrane_system")
+    assert m1["route_disposition"] == "abstain"   # route() 原判,advisory 不放宽
+    assert m1["verdict"] == "abstain"
+    # advisory 标注仍如实叠加(rule_based/evidence_limited),只是不放宽 disposition
+    assert "rule_based:membrane_system_gene_set" in m1["caution_flags"]
+    assert "evidence_limited" in m1["caution_flags"]
+    assert p["overall_verdict"] == "abstain"

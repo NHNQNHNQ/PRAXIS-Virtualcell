@@ -14,12 +14,12 @@ from __future__ import annotations
 from praxis_virtualcell.agents import module_rules
 from praxis_virtualcell.agents.route_table import route
 from praxis_virtualcell.agents.species_schema import normalize_request
-from praxis_virtualcell.llm_orchestration import safety_contract as SC
 from praxis_virtualcell.biological_modules import modules as M
 from praxis_virtualcell.biological_modules.module_plan import ModulePlan, ModulePlanEntry
 from praxis_virtualcell.core.agent import BaseAgent
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.llm_orchestration import safety_contract as SC
 
 
 class ModuleRouterAgent(BaseAgent):
@@ -76,18 +76,34 @@ class ModuleRouterAgent(BaseAgent):
         # 4) mismatch:decision M3 推 query → SpeciesContext 暴露的 verdict
         mq = module_rules.mismatch_query_for(req, mid)
         mismatch = mismatch_queries.get(mq) if mq else None
+
+        # P10.B4:gene-set 激活的休眠模块 M1/M5/M8 挂 rule_based/evidence_limited advisory。
+        # 仅当该 module 因 gene-set 命中(且 gene 扰动)而进 plan 时叠加(gene_set_secondary 只返回
+        # gene 门控后命中的 M1/M5/M8);不伪装定量预测(downgrade,无数值 delta)、不改 engine/route()。
+        disposition = dec.disposition
+        caution = list(dec.caution_flags)
+        reason = dec.reason
+        if mid in module_rules.gene_set_secondary(req):
+            # 诚实红线:advisory 只能变严格,不能比 route() 更乐观。
+            # route() 已判 abstain/downgrade(如微生物 gene→expression 无适用 scRNA predictor)时不放宽。
+            if disposition in ("accept", "caution"):
+                disposition = "downgrade"
+            caution += [f"rule_based:{mid}_gene_set", "evidence_limited"]
+            reason = (f"{reason} | rule_based_gene_set_advisory" if reason
+                      else "rule_based_gene_set_advisory")
+
         return ModulePlanEntry(
             module=mid,
             display_name=sup.get("display_name", M.display_name(mid, species=species)),
             role=role,
             engine=dec.engine,
-            route_disposition=dec.disposition,
+            route_disposition=disposition,
             species_support=sup["support"],
             species_verdict=sup["verdict"],
-            caution_flags=list(dec.caution_flags),
+            caution_flags=caution,
             data_gated=dec.data_gated,
             pillars=list(M.MODULES[mid]["pillars"]),
             available_models=list(sup.get("models", [])),
-            reason=dec.reason,
+            reason=reason,
             mismatch=mismatch,
         )
