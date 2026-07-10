@@ -20,6 +20,16 @@
 
 ---
 
+## ⚠️ 执行中架构修正(2026-07-09,原 Task 1 BLOCKED 发现)
+
+原 Task 1(embedding 接入)暴露真实架构缺口:`agents/model_applicability.py` 的短路 `if engine in REAL_ENGINES: applicable=["CaseRunner"]` **不验证 CaseRunner 是否真能 dispatch** 就跳过 mock 枚举;而 `route_table` 的 `obj==drug→embedding` 物种无关。故 mouse+drug 加 embedding 到 REAL_ENGINES 后被短路到 CaseRunner(human 守卫→abstain),绕过既有 mock 枚举,打破既有测试 `test_cross_species_routing.py::test_mouse_drug_gears_unsupported_perturbation_not_vocab`。B1 的 gem_fba 对哺乳类 growth 有同款潜伏缺口。
+
+**修正:插入新 Task 1(ModelApplicability dispatch 感知短路)**,原 5 task 顺延为 Task 2-6:
+- **新 Task 1**:model_applicability 短路前 probe `dispatch_runner`——能 dispatch 才短路 CaseRunner,不能则**落回既有 mock 枚举**(保"mock 请求行为不变"红线 + 修 B1 潜伏缺口)。属 ModelApplicability"选哪些候选"范畴,不碰裁决。
+- **limitation 语义随之修正**:mouse+drug、emt(human 非 IFN state)、fate(mouse state)等 CaseRunner 处理不了的 → **保持既有 mock 兜底行为**(offline 标注式 mock stand-in),**不是** abstain。B3 只保证这些不被误当真实 CaseRunner 预测(CaseRunner 不在 models_used);真正 abstain 与否由既有 mock 枚举 + brain 规则决定。原 Task 4/5(现 Task 5/6)的 limitation 断言据此改为"CaseRunner not in models_used"而非"abstain=True"。
+
+---
+
 ## File Structure
 
 - **Modify** `praxis_virtualcell/predictors/case_dispatch.py` — REAL_ENGINES + dispatch_runner(embedding/state_scoring 分支)+ map_case_delta(per_drug/dose_response/per_cell_type)。
