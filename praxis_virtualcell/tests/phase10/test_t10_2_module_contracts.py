@@ -6,6 +6,7 @@ import pytest
 
 from praxis_virtualcell.agents.model_applicability import ModelApplicabilityAgent
 from praxis_virtualcell.agents.request_adapter import request_to_module_input
+from praxis_virtualcell.biological_modules import module_gene_sets as MGS
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.exceptions import PraxisVCError, UnsupportedEngine
@@ -586,3 +587,46 @@ def test_mixed_ifn_target_abstains_e2e():
     assert out["reliability_decision"]["abstain"] is True
     assert out["structured_report"]["prediction"] is None
     assert "CaseRunner" in out["structured_report"]["provenance"]["models_rejected"]
+
+
+# ==================== P10.B4:M1/M5/M8 rule-based advisory ====================
+def test_b4_gene_set_of_membrane_has_real_symbols():
+    gs = MGS.gene_set_of("membrane_system")
+    assert isinstance(gs, frozenset)
+    assert {"SLC2A1", "FASN", "SREBF1"} <= gs
+    # 非 gene-set 模块 → 空集(不崩)
+    assert MGS.gene_set_of("genetic_hub") == frozenset()
+
+
+def test_b4_modules_hit_by_single_hits():
+    assert MGS.modules_hit_by(["SLC2A1"]) == ["membrane_system"]
+    assert MGS.modules_hit_by(["RPS6"]) == ["biosynthetic_network"]
+    assert MGS.modules_hit_by(["PSMB5"]) == ["degradation_machinery"]
+
+
+def test_b4_modules_hit_by_mixed_hit_and_miss():
+    # TP53 不在任何 gene-set → 只命中 degradation
+    assert MGS.modules_hit_by(["PSMB5", "TP53"]) == ["degradation_machinery"]
+    assert MGS.modules_hit_by(["TP53"]) == []
+
+
+def test_b4_modules_hit_by_exact_match_no_substring():
+    assert MGS.modules_hit_by(["slc2a1"]) == ["membrane_system"]   # 大小写归一
+    assert MGS.modules_hit_by(["SLC2A"]) == []                     # 子串不误命中
+    assert MGS.modules_hit_by(["XSLC2A1"]) == []                   # 前缀污染不误命中
+
+
+def test_b4_modules_hit_by_multi_ordered_by_module_order():
+    hits = MGS.modules_hit_by(["PSMB5", "SLC2A1", "RPS6"])
+    assert hits == ["membrane_system", "biosynthetic_network", "degradation_machinery"]
+
+
+def test_b4_gene_set_deterministic():
+    assert MGS.gene_set_of("membrane_system") == MGS.gene_set_of("membrane_system")
+    assert MGS.modules_hit_by(["SLC2A1"]) == MGS.modules_hit_by(["SLC2A1"])
+
+
+def test_b4_modules_hit_by_empty_and_none():
+    assert MGS.modules_hit_by([]) == []
+    assert MGS.modules_hit_by(None) == []
+    assert MGS.modules_hit_by(["", "  "]) == []
