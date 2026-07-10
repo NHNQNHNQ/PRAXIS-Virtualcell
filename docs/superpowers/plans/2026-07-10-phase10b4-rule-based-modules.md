@@ -517,57 +517,66 @@ EOF
 - Modify: `praxis_virtualcell/tests/test_module_router_agent.py`(仅更新 line 69-77 陈旧 docstring)
 - Test: `praxis_virtualcell/tests/phase10/test_t10_2_module_contracts.py`(追加 B4 端到端 run_query 段)
 
-- [ ] **Step 1:写端到端失败测试**(追加;经完整 `run_query` 证明 advisory 不改预测/不拖 abstain)
+**⚠️ 控制器实证修正(重要,替换原"advisory 不拖 abstain"假设)**:控制器已用 `run_query` + pre-B4 worktree 实证坐实——**全部 gene-set 基因(SLC2A1/RPS6/PSMB5 等)在 OFFLINE mock 下都 abstain=True/prediction=None**,原因是 learned reliability 判它们 `seen_in_train=false`+高 disagreement(mock 的 OOD 基因),**与 B4 无关**(pre-B4 4d41d1a 无 M1 advisory 时 SLC2A1 同样 abstain;TP53/AHR 这类"常见基因"才 accept)。故非干扰**不能**断言 `abstain==False`。真正的非干扰证据是:①advisory 如实进 module_plan(provenance);②advisory 完全不泄漏进 reliability(reliability 串里无 rule_based/模块名);③mock 预测器照常跑(models_used 有 MockLinear)。这正是"module_plan advisory 非权威,reliability 独立"的完美分离。
+
+- [ ] **Step 1:写端到端测试**(追加;经完整 `run_query` 证明 advisory 是 provenance、不喂 reliability/预测)
 
 ```python
-_B4_RUNQ_MEMBRANE = {"species": "human", "perturbation_type": "gene",
-                     "perturbation_targets": ["SLC2A1"], "input_modality": "scRNA",
-                     "output_modality": "delta_expression",
-                     "task_type": "predict_delta_expression"}
-
-
-def test_b4_advisory_does_not_abstain_or_alter_prediction_e2e():
-    out = run_query(dict(_B4_RUNQ_MEMBRANE), config=_CFG)
-    # module_plan 是 advisory:M1 downgrade 不拖 reliability abstain
-    assert out["reliability_decision"]["abstain"] is False
-    assert out["llm_used_for_prediction"] is False
-    sr = out["structured_report"]
-    # 预测仍由 donor 引擎产(mock 3-model),非空;不含 CaseRunner
-    assert sr["prediction"] is not None
-    assert "CaseRunner" not in sr["provenance"]["models_used"]
-    # provenance.module_plan 含 M1 advisory entry
-    m1 = next(e for e in sr["provenance"]["module_plan"]["entries"]
-              if e["module"] == "membrane_system")
-    assert m1["verdict"] == "downgrade"
-    assert "rule_based:membrane_system_gene_set" in m1["caution_flags"]
-    assert "evidence_limited" in m1["caution_flags"]
-
-
-def test_b4_membrane_request_deterministic_byte_equal():
-    outs = [run_query(dict(_B4_RUNQ_MEMBRANE), config=_CFG) for _ in range(3)]
-    assert len({_canon(o["structured_report"]) for o in outs}) == 1
-    assert len({_canon(o["trace"]) for o in outs}) == 1
+_B4_RUNQ = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["SLC2A1"],
+            "input_modality": "scRNA", "output_modality": "delta_expression",
+            "task_type": "predict_delta_expression"}
 
 
 def test_b4_all_three_modules_runnable_e2e():
-    # G2 8/8:M1/M5/M8 各至少一个基因请求使其进 module_plan 并产 advisory
+    # G2 8/8:M1/M5/M8 各至少一个基因请求经 run_query 进 module_plan 并产 advisory
+    # (这些基因在 mock 下会 abstain=OOD,但 module_plan 仍如实带 advisory —— 正是分离的体现)
     for gene, module in [("SLC2A1", "membrane_system"), ("RPS6", "biosynthetic_network"),
                          ("PSMB5", "degradation_machinery")]:
-        out = run_query(dict(_B4_RUNQ_MEMBRANE, perturbation_targets=[gene]), config=_CFG)
+        out = run_query(dict(_B4_RUNQ, perturbation_targets=[gene]), config=_CFG)
         entries = out["structured_report"]["provenance"]["module_plan"]["entries"]
         entry = next((e for e in entries if e["module"] == module), None)
         assert entry is not None, f"{gene} 未激活 {module}"
         assert f"rule_based:{module}_gene_set" in entry["caution_flags"]
         assert "evidence_limited" in entry["caution_flags"]
         assert entry["route_disposition"] == "downgrade"
+
+
+def test_b4_advisory_walled_from_reliability_e2e():
+    # module_plan advisory 是 provenance,不喂 reliability/预测路径:
+    #  ① mock 预测器照常跑(models_used 有 MockLinear)——advisory 不 gate 预测;
+    #  ② reliability_decision 无 gene-set advisory 任何痕迹(rule_based/模块名);
+    #  ③ llm_used_for_prediction 恒 False;④ module_plan 仍如实带 M1 advisory。
+    out = run_query(dict(_B4_RUNQ), config=_CFG)
+    sr = out["structured_report"]
+    assert out["llm_used_for_prediction"] is False
+    assert "MockLinear" in sr["provenance"]["models_used"]        # 预测器照跑,未被 advisory 短路
+    rel_str = _json.dumps(out["reliability_decision"], ensure_ascii=False, default=str)
+    assert "rule_based:membrane_system_gene_set" not in rel_str   # advisory 不泄漏进 reliability
+    assert "membrane_system" not in rel_str
+    m1 = next(e for e in sr["provenance"]["module_plan"]["entries"]
+              if e["module"] == "membrane_system")
+    assert m1["verdict"] == "downgrade"
+    assert "rule_based:membrane_system_gene_set" in m1["caution_flags"]
+
+
+def test_b4_non_gene_set_gene_no_advisory_e2e():
+    # 非 gene-set 基因(TP53):module_plan 不含 M1/M5/M8
+    out = run_query(dict(_B4_RUNQ, perturbation_targets=["TP53"]), config=_CFG)
+    modules = {e["module"] for e in out["structured_report"]["provenance"]["module_plan"]["entries"]}
+    assert not ({"membrane_system", "biosynthetic_network", "degradation_machinery"} & modules)
+
+
+def test_b4_membrane_request_deterministic_byte_equal():
+    outs = [run_query(dict(_B4_RUNQ), config=_CFG) for _ in range(3)]
+    assert len({_canon(o["structured_report"]) for o in outs}) == 1
+    assert len({_canon(o["trace"]) for o in outs}) == 1
 ```
+（`run_query`/`_CFG`/`_canon`/`_json` 均已在 test_t10_2 顶部定义/导入,直接复用,无新 import。）
 
-- [ ] **Step 2:运行确认失败/通过判定**
+- [ ] **Step 2:运行确认通过**
 
-Run: `PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests/phase10/test_t10_2_module_contracts.py -k "b4_advisory_does_not or b4_membrane_request_deterministic or b4_all_three_modules_runnable" -p no:cacheprovider`
-Expected: **应全 PASS**(Task 1-3 已实现全部行为;本 task 是端到端断言,无新源码)。若某条 FAIL:
-- 若 `provenance.module_plan` 键不存在于 mock human 路径 → **停止报告控制器**(需确认 runtime 对 mock 路径是否建 module_plan;勘察结论是"routable 请求建",但以实跑为准,不擅自改 runtime gating)。
-- 若 `sr["prediction"]` 结构不同 → 按实际 mock 预测结构调整断言(仍须证明非空 + 不含 CaseRunner)。
+Run: `PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests/phase10/test_t10_2_module_contracts.py -k "b4_all_three_modules_runnable or b4_advisory_walled or b4_non_gene_set_gene_no_advisory_e2e or b4_membrane_request_deterministic" -p no:cacheprovider`
+Expected: **4 passed**(控制器已逐条实证预验证;本 task 端到端断言无新源码)。
 
 - [ ] **Step 3:修 `test_module_router_agent.py` 陈旧 docstring**
 
