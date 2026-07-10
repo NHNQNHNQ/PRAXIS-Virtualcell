@@ -13,7 +13,7 @@ from praxis_virtualcell.agents.species_schema import SchemaError, normalize_requ
 from praxis_virtualcell.core.agent import BaseAgent
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
-from praxis_virtualcell.predictors.case_dispatch import REAL_ENGINES
+from praxis_virtualcell.predictors.case_dispatch import REAL_ENGINES, gears_available
 
 _CANDIDATES = ("MockLinear", "MockCPA", "MockGEARS")
 _DEFAULT_ORIGIN = "human"            # predictor 母种缺省(可被 model_applicability[name].native_host 覆盖)
@@ -33,7 +33,9 @@ class ModelApplicabilityAgent(BaseAgent):
             engine = route(normalize_request(request_to_module_input(req))).engine
         except SchemaError:
             engine = None
-        if engine in REAL_ENGINES:
+        # donor_predictor 经 ckpt 门控:.53(GEARS_CKPT+torch)→ 真实 CaseRunner;Mac→落回 mock 枚举。
+        # REAL_ENGINES 本体不改(donor_predictor 不进 REAL_ENGINES,避免 Mac 无 GEARS 时误判 abstain)。
+        if engine in REAL_ENGINES or (engine == "donor_predictor" and gears_available()):
             bc2 = {**bc, "routing": {"cautions": {}, "rejection_reasons": {},
                                      "rules_hit": [], "real_engine": engine}}
             bus.send(AgentMessage(message.message_id + ":app", self.name,

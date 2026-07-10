@@ -4,10 +4,12 @@ from types import SimpleNamespace
 
 import pytest
 
+from praxis_virtualcell.agents import model_applicability as MA
 from praxis_virtualcell.agents import module_rules as MR
 from praxis_virtualcell.agents.model_applicability import ModelApplicabilityAgent
 from praxis_virtualcell.agents.module_router_agent import ModuleRouterAgent
 from praxis_virtualcell.agents.request_adapter import request_to_module_input
+from praxis_virtualcell.agents.species_brain import SpeciesBrainAgent
 from praxis_virtualcell.agents.species_context_agent import SpeciesContextAgent
 from praxis_virtualcell.agents.species_schema import normalize_request as _norm
 from praxis_virtualcell.biological_modules import module_gene_sets as MGS
@@ -838,3 +840,50 @@ def test_m2_gears_available_false_when_ckpt_empty_string(monkeypatch):
     monkeypatch.setenv("GEARS_CKPT", "")
     monkeypatch.setattr(CD, "_gears_importable", lambda: True)   # 隔离 torch 依赖,证明是空串导致 False 而非不可 import
     assert CD.gears_available() is False
+
+
+# ---- Task 2:ModelApplicabilityAgent ckpt-aware 分诊(donor_predictor + gears_available 门控) ----
+def _m2_applicable(req, brain_context=None, monkeypatch=None, gears=False):
+    """跑 ModelApplicabilityAgent,返回 applicable 列表。gears=是否 monkeypatch gears_available。"""
+    if monkeypatch is not None:
+        monkeypatch.setattr(MA, "gears_available", lambda: gears, raising=False)
+    bus = MessageBus()
+    bc = brain_context or {"model_applicability": {}, "object_vocabulary": {"genes": []}}
+    MA.ModelApplicabilityAgent().handle(AgentMessage(
+        message_id="m1", sender="s", receiver="ModelApplicability",
+        message_type="applicability", payload={"request": req, "brain_context": bc},
+        timestamp="t1"), bus)
+    return bus.latest("applicability_decided").payload["applicable"]
+
+
+_M2_REQ = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+           "input_modality": "scRNA", "output_modality": "delta_expression",
+           "task_type": "predict_delta_expression"}
+
+
+def _m2_real_human_brain_context():
+    """经真实 SpeciesBrainAgent 载入 brains/virtualcell/human 的 yaml,得到与生产路径一致的
+    brain_context(非手搓 dict)——供 Mac 回归测试真正走到 mock 枚举且判 applicable 的分支,
+    而非空 brain_context 下的空转 reject-all。"""
+    bus = MessageBus()
+    SpeciesBrainAgent(RuntimeConfig()).handle(AgentMessage(
+        message_id="b1", sender="SpeciesBrain", receiver="ModelApplicability",
+        message_type="brain_lookup", payload={"request": {"species": "human"}},
+        timestamp="t0"), bus)
+    return bus.latest("brain_retrieved").payload["brain_context"]
+
+
+def test_m2_donor_predictor_mac_falls_back_to_mock(monkeypatch):
+    # Mac(gears_available False):donor_predictor → mock 枚举,不进 CaseRunner。
+    # 用真实 human brain_context(经 SpeciesBrainAgent 载入 yaml)证明确实走到 mock 枚举分支
+    # 并判 applicable(AHR 在 human 词表内、三个 Mock* 对 human+scRNA+gene+predict_delta_expression 均适用)。
+    app = _m2_applicable(dict(_M2_REQ), brain_context=_m2_real_human_brain_context(),
+                          monkeypatch=monkeypatch, gears=False)
+    assert "CaseRunner" not in app
+    assert set(app) >= {"MockLinear", "MockCPA", "MockGEARS"}
+
+
+def test_m2_donor_predictor_gated_routes_to_case_runner(monkeypatch):
+    # .53 模拟(gears_available True):donor_predictor → CaseRunner 单一候选
+    app = _m2_applicable(dict(_M2_REQ), monkeypatch=monkeypatch, gears=True)
+    assert app == ["CaseRunner"]
