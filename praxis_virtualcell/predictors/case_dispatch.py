@@ -6,7 +6,7 @@ from __future__ import annotations
 from praxis_virtualcell.core.exceptions import UnsupportedEngine
 
 # 已接入真实预测的 engine(单一真源;被 agents.model_applicability 直接 import,不镜像)
-REAL_ENGINES = frozenset({"gem_fba", "pathway_scoring"})
+REAL_ENGINES = frozenset({"gem_fba", "pathway_scoring", "embedding"})
 
 # 与 agents.route_table._GENE_LIKE 对齐:单基因/多基因联合敲除同属 gem_fba gene→growth
 _GENE_LIKE = frozenset({"gene", "gene_combination"})
@@ -50,6 +50,11 @@ def dispatch_runner(engine: str, raw_req: dict):
             from praxis_virtualcell.predictors.state.metabolic_tendency import run_metabolic_tendency_case
             return run_metabolic_tendency_case
         # 非 human 或非 IFN-β:metabolic_tendency 只有 human Kang IFN-β 数据 → 落末尾 UnsupportedEngine → 诚实 abstain
+    elif engine == "embedding":
+        if raw_req.get("species") == "human":
+            from praxis_virtualcell.predictors.embedding.drug_signature import run_drug_response_case
+            return run_drug_response_case
+        # 非 human:LINCS 是 human 数据 → 落末尾 UnsupportedEngine → 诚实 abstain
     raise UnsupportedEngine(f"B 未接入 case runner: engine={engine} object={obj} species={species}")
 
 
@@ -73,4 +78,10 @@ def map_case_delta(engine: str, report) -> list[float]:
         raise UnsupportedEngine(f"gem_fba map_case_delta 未支持 raw_output 形状: {sorted(raw)}")
     if engine == "pathway_scoring":  # 代谢通路 tendency:各通路 Cohen's d 效应量作 delta 分量
         return [round(s["cohens_d"], 4) for s in report.raw_output["pathway_shifts"]]
+    if engine == "embedding":
+        if "per_drug" in raw:
+            # 每个在库药物的 MOA 富集比作 delta 分量;不在库(in_db=False)→无 moa_enrichment,跳过不虚构。
+            return [round(d["moa_enrichment"], 4) for d in raw["per_drug"]
+                    if d.get("in_db") and d.get("moa_enrichment") is not None]
+        raise UnsupportedEngine(f"embedding map_case_delta 未支持 raw_output 形状: {sorted(raw)}")
     raise UnsupportedEngine(f"map_case_delta 未支持 engine={engine}")

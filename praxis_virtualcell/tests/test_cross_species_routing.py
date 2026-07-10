@@ -64,14 +64,27 @@ def test_four_species_route_differently():
 
 # --- review workflow must-fix 回归 ---
 
-def test_mouse_drug_gears_unsupported_perturbation_not_vocab():
-    # must-fix#1:drug 扰动下 MockGEARS 应以 unsupported_perturbation 拒,而非把药名当基因做 vocab 比对
+def test_mouse_drug_routes_to_real_embedding_abstains():
+    # B3:drug 走真实 embedding 引擎(LINCS human);mouse 无对应数据 → 诚实 abstain(不再 mock 编造)
     r = run_request(_req("mouse", ["aspirin"], ptype="drug"))
-    rr = r["provenance"]["rejection_reasons"]
-    assert rr.get("MockGEARS", {}).get("reason") == "unsupported_perturbation"
-    assert "MockGEARS" in r["models_rejected"]
-    # MockCPA/MockLinear 声明支持 drug,不因 drug 被拒
-    assert "MockCPA" in r["models_used"]
+    assert r["abstain"] is True
+    assert "CaseRunner" in r["models_rejected"]
+
+
+def test_mockgears_rejects_drug_as_unsupported_not_vocab():
+    # must-fix#1(解耦保留):drug 扰动 → MockGEARS 经 supported_perturbations 判 unsupported_perturbation,
+    # 而非把药名当基因做 vocab 比对(gene_not_in_graph_vocabulary)
+    from praxis_virtualcell.predictors.mock_gears import MockGEARSAgent
+    bc = {"model_applicability": {"MockGEARS": {
+              "supported_species": ["mouse"], "supported_modalities": ["scRNA"],
+              "supported_tasks": ["predict_delta_expression"],
+              "supported_perturbations": ["gene", "gene_combination"],
+              "reject_if": ["gene_not_in_graph_vocabulary"]}},
+          "object_vocabulary": {"genes": []}, "species": "mouse"}
+    req = {"species": "mouse", "perturbation_type": "drug", "perturbation_targets": ["aspirin"],
+           "input_modality": "scRNA", "task_type": "predict_delta_expression"}
+    score, reject = MockGEARSAgent().assess_applicability(req, bc)
+    assert (score, reject) == (0.0, "unsupported_perturbation")
 
 
 def test_mouse_ortholog_projection_distinguishes_unmapped():

@@ -390,3 +390,26 @@ def test_dispatch_runner_pathway_scoring_ifnb2_il6_unsupported():
     with pytest.raises(UnsupportedEngine):
         dispatch_runner("pathway_scoring", {"species": "human", "perturbation_object": "ligand",
                                             "perturbation_targets": ["IFNB2"]})
+
+
+def test_pathway_engines_include_embedding():
+    from praxis_virtualcell.predictors.case_dispatch import REAL_ENGINES
+    assert "embedding" in REAL_ENGINES
+
+
+def test_dispatch_runner_embedding_signature():
+    from praxis_virtualcell.predictors.embedding.drug_signature import run_drug_response_case
+    raw = {"species": "human", "perturbation_object": "drug"}
+    assert dispatch_runner("embedding", raw) is run_drug_response_case
+
+
+def test_dispatch_runner_embedding_mouse_unsupported():
+    with pytest.raises(UnsupportedEngine):
+        dispatch_runner("embedding", {"species": "mouse", "perturbation_object": "drug"})
+
+
+def test_map_case_delta_embedding_signature():
+    report = SimpleNamespace(raw_output={"enrichment_threshold": 1.5, "per_drug": [
+        {"drug": "geldanamycin", "in_db": True, "moa_enrichment": 2.646},
+        {"drug": "notadrug", "in_db": False, "moa_enrichment": None}]})
+    assert map_case_delta("embedding", report) == [2.646]
