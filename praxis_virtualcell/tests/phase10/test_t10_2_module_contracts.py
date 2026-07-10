@@ -1000,3 +1000,22 @@ def test_m2_mac_genetic_hub_deterministic_byte_equal(monkeypatch):
     outs = [run_query(dict(_M2_REQ), config=_CFG) for _ in range(3)]
     assert len({_canon(o["structured_report"]) for o in outs}) == 1
     assert len({_canon(o["trace"]) for o in outs}) == 1
+
+
+# ---- Task 6:final-review 收口 —— 分诊门 + runner 镜像 human 守卫(消除 .53 mouse gene→expression 静默漂移) ----
+def test_m2_applicability_mouse_gene_not_case_runner_even_on_53(monkeypatch):
+    # .53 模拟(gears_available True):mouse gene→expression 不进 CaseRunner(分诊门 human 子守卫),回 mock 枚举
+    req = {"species": "mouse", "perturbation_type": "gene", "perturbation_targets": ["Ahr"],
+           "input_modality": "scRNA", "output_modality": "delta_expression",
+           "task_type": "predict_delta_expression"}
+    app = _m2_applicable(req, monkeypatch=monkeypatch, gears=True)
+    assert "CaseRunner" not in app
+
+
+def test_m2_run_gears_case_rejects_non_human_species():
+    # runner 自兜底:mouse 请求在 species 断言处 raise UnsupportedEngine(在 run_delta 之前,防 Ahr→AHR 张冠李戴)
+    from praxis_virtualcell.predictors.ml.gears_case import run_gears_case
+    raw = {"species": "mouse", "perturbation_object": "gene",
+           "target_output": "expression", "perturbation_targets": ["Ahr"]}
+    with pytest.raises(_UnsupportedEngine):
+        run_gears_case(raw)

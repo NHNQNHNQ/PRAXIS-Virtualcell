@@ -12,6 +12,7 @@ import os
 from praxis_virtualcell.agents.case_report import CaseReport
 from praxis_virtualcell.agents.route_table import route
 from praxis_virtualcell.agents.species_schema import normalize_request
+from praxis_virtualcell.core.exceptions import UnsupportedEngine
 
 
 def run_gears_case(raw_req: dict):
@@ -21,6 +22,11 @@ def run_gears_case(raw_req: dict):
     norm = normalize_request(raw_req)
     dec = route(norm)
     targets = norm["perturbation_targets"]
+
+    # runner 自兜底 human 约束(不只依赖 dispatch),防 mouse Ahr→AHR 命中 human vocab 张冠李戴
+    if norm["species"] != "human":
+        raise UnsupportedEngine(
+            f"run_gears_case 仅 human(GEARS norman human vocab);got species={norm['species']};fail-closed")
 
     wrapper = GearsWrapper(ckpt_stem=os.environ.get("GEARS_CKPT"))
     out = wrapper.run_delta({"targets": targets})       # 缺 torch/ckpt/vocab → 抛(fail-closed)
