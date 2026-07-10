@@ -501,3 +501,42 @@ def test_map_case_delta_state_scoring():
     report = SimpleNamespace(raw_output={"cohens_d": 2.485, "marker_coverage": 1.0,
         "per_cell_type": [{"cell_type": "B cells", "cohens_d": 3.472}]})
     assert map_case_delta("state_scoring", report) == [2.485]
+
+
+def test_human_drug_signature_real_e2e():
+    req = {"species": "human", "perturbation_type": "drug", "perturbation_targets": ["geldanamycin"],
+           "input_modality": "scRNA", "output_modality": "delta_expression", "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    sr = out["structured_report"]
+    assert out["reliability_decision"]["abstain"] is False
+    assert "CaseRunner" in sr["provenance"]["models_used"]
+    assert sr["prediction"]["delta"] == [2.646]          # HSP90i MOA 富集
+
+
+def test_human_ifn_cellstate_real_e2e():
+    req = {"species": "human", "perturbation_type": "ligand", "perturbation_targets": ["IFNB1"],
+           "input_modality": "scRNA", "output_modality": "state", "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    sr = out["structured_report"]
+    assert out["reliability_decision"]["abstain"] is False
+    assert "CaseRunner" in sr["provenance"]["models_used"]
+    assert sr["prediction"]["delta"] == [2.485]          # ISG 组间 Cohen's d
+
+
+def test_stress_limitation_paths_abstain_honestly():
+    # emt(human gene ZEB1→state,状态刻画非扰动)、fate(mouse gene Gata1→state)、mouse+drug(物种守卫)
+    # → 均经 CaseRunner 诚实 abstain,不虚构固定数据(类别错误/无数据)
+    cases = [
+        {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["ZEB1"],
+         "output_modality": "state"},
+        {"species": "mouse", "perturbation_type": "gene", "perturbation_targets": ["Gata1"],
+         "output_modality": "state"},
+        {"species": "mouse", "perturbation_type": "drug", "perturbation_targets": ["geldanamycin"],
+         "output_modality": "delta_expression"},
+    ]
+    for c in cases:
+        req = {**c, "input_modality": "scRNA", "task_type": "predict_delta_expression"}
+        out = run_query(dict(req), config=_CFG)
+        assert out["reliability_decision"]["abstain"] is True, c
+        assert out["structured_report"]["prediction"] is None, c
+        assert "CaseRunner" in out["structured_report"]["provenance"]["models_rejected"], c
