@@ -258,6 +258,19 @@ def test_b4_pick_secondary_preserves_m3_for_mammalian_growth():
     sec = MR.pick_secondary(req, "cytoplasmic_metabolism")
     assert "mitochondrial_energy_metabolism" in sec   # M3 保留
     assert "membrane_system" in sec                   # gene-set 命中并存
+    # 确定性顺序锁定(M3 由代谢规则先入,gene-set 命中随后)
+    assert sec == ["mitochondrial_energy_metabolism", "membrane_system"]
+
+
+def test_b4_pick_secondary_gene_gated_drug_ligand_not_activated():
+    # 诚实红线:drug/ligand 请求即便靶标字面撞 gene-set 符号也不激活 M1/M5/M8(非基因扰动)
+    for obj in ("drug", "ligand"):
+        req = _b4_norm_req(perturbation_object=obj, perturbation_targets=["SLC2A1"])
+        assert MR.gene_set_secondary(req) == []
+        assert "membrane_system" not in MR.pick_secondary(req, "stress_processor")
+    # gene_combination 属基因扰动 → 激活
+    req_gc = _b4_norm_req(perturbation_object="gene_combination", perturbation_targets=["SLC2A1"])
+    assert "membrane_system" in MR.gene_set_secondary(req_gc)
 ```
 
 - [ ] **Step 2:运行确认失败**
@@ -278,19 +291,31 @@ _M5 = "biosynthetic_network"
 from praxis_virtualcell.biological_modules import module_gene_sets
 ```
 
-把 `pick_secondary` 整体替换为:
+新增共享 helper `gene_set_secondary`(gene 门控 + gene-set 命中,单一真源;Task 3 的 _build_entry 也复用它),放在 `pick_secondary` 之前:
+```python
+def gene_set_secondary(req: dict) -> list[str]:
+    """P10.B4:gene 扰动请求中 perturbation_targets 命中 gene-set 的休眠模块 M1/M5/M8(按 MODULE_ORDER 序)。
+    仅 gene/gene_combination 扰动激活 —— drug/ligand 的靶标即便字面撞上基因符号也不激活
+    (防过度声称:药物/配体请求不是基因扰动,不该被打上"该基因模块相关"的 advisory)。
+    非 gene 扰动或无命中 → 空列表。确定性、零 LLM。"""
+    if req["perturbation_object"] not in _GENE_LIKE:
+        return []
+    return module_gene_sets.modules_hit_by(req.get("perturbation_targets", []))
+```
+
+把 `pick_secondary` 整体替换为(用 helper,现有 M3 逻辑不变):
 ```python
 def pick_secondary(req: dict, primary: str) -> list[str]:
     """决策 M1 secondary:最小确定性集。哺乳类 growth/flux 加 M3 能量代谢为 secondary;
-    P10.B4:gene-set(膜/生物合成/降解)命中的基因扰动 → 并入 M1/M5/M8 rule-based advisory
+    P10.B4:gene 扰动且 gene-set(膜/生物合成/降解)命中 → 并入 M1/M5/M8 rule-based advisory
     secondary(module_plan advisory,非权威 abstain;预测仍归请求级引擎,M1/M5/M8 零 delta)。"""
     out = req["target_output"]
     species = req["species"]
     sec: list[str] = []
     if out in _METABOLIC and species in ("human", "mouse"):
         sec.append(_M3)
-    # gene-set 命中的休眠模块作 advisory secondary(现有 M3 逻辑不变)
-    sec += module_gene_sets.modules_hit_by(req.get("perturbation_targets", []))
+    # gene 扰动且 gene-set 命中的休眠模块作 advisory secondary(现有 M3 逻辑不变;drug/ligand 不激活)
+    sec += gene_set_secondary(req)
     # 去重(保序)+ 排除 primary
     result: list[str] = []
     for m in sec:
@@ -298,6 +323,7 @@ def pick_secondary(req: dict, primary: str) -> list[str]:
             result.append(m)
     return result
 ```
+(`_GENE_LIKE = {"gene", "gene_combination"}` 已在 module_rules.py line 20 定义,复用。)
 
 - [ ] **Step 4:运行确认通过**
 
@@ -401,10 +427,7 @@ Expected: FAIL(`route_disposition` 仍为 route() 的原值 accept,无 rule_base
 
 - [ ] **Step 3:改 `_build_entry`**
 
-顶部 import 区加(与既有 module import 同块):
-```python
-from praxis_virtualcell.biological_modules import module_gene_sets
-```
+**无需新增 import**(module_router_agent 顶部已有 `from praxis_virtualcell.agents import module_rules`,复用其 `gene_set_secondary`——与 Task 2 pick_secondary 同一 gene 门控真源,drug/ligand 请求即便撞基因符号也不激活)。
 
 在 `_build_entry` 内,把「构造 `ModulePlanEntry` 之前」的部分改为(在 `mismatch = ...` 行之后、`return ModulePlanEntry(...)` 之前插入 advisory 叠加,并让 return 用叠加后的变量):
 ```python
@@ -412,12 +435,12 @@ from praxis_virtualcell.biological_modules import module_gene_sets
         mismatch = mismatch_queries.get(mq) if mq else None
 
         # P10.B4:gene-set 激活的休眠模块 M1/M5/M8 挂 rule_based/evidence_limited advisory。
-        # 仅当该 module 因 gene-set 命中而进 plan 时叠加(modules_hit_by 只返回 M1/M5/M8);
-        # 不伪装定量预测(downgrade,无数值 delta)、不改 engine/route()、不碰其余字段。
+        # 仅当该 module 因 gene-set 命中(且 gene 扰动)而进 plan 时叠加(gene_set_secondary 只返回
+        # gene 门控后命中的 M1/M5/M8);不伪装定量预测(downgrade,无数值 delta)、不改 engine/route()。
         disposition = dec.disposition
         caution = list(dec.caution_flags)
         reason = dec.reason
-        if mid in module_gene_sets.modules_hit_by(req.get("perturbation_targets", [])):
+        if mid in module_rules.gene_set_secondary(req):
             disposition = "downgrade"
             caution += [f"rule_based:{mid}_gene_set", "evidence_limited"]
             reason = (f"{reason} | rule_based_gene_set_advisory" if reason
@@ -598,6 +621,6 @@ Expected: PASS(3 跑字节一致)。
 
 ## 收官后控制器职责(不在本 plan task 内)
 
-1. **opus final review**(铁律,B1/B2/B3 每次都抓到 per-task 漏掉的跨 task 接缝/过度声称)——重点审:①`engine=dec.engine` 在 M1 advisory entry 是否读作"M1 有 donor 引擎"的过度声称;②overall_verdict=downgrade 是否有下游(report_markdown/前端/module_consistency)误读;③三 gene-set 是否有跨模块重复基因导致多激活的意外;④gene-set 数据是否夹带非真实符号。
+1. **opus final review**(铁律,B1/B2/B3 每次都抓到 per-task 漏掉的跨 task 接缝/过度声称)——重点审:①`engine=dec.engine` 在 M1 advisory entry 是否读作"M1 有 donor 引擎"的过度声称;②overall_verdict=downgrade 是否有下游(report_markdown/前端/module_consistency)误读;③三 gene-set 是否有跨模块重复基因导致多激活的意外;④gene-set 数据是否夹带非真实符号;⑤**gene 门控(`gene_set_secondary` 只在 perturbation_object∈{gene,gene_combination} 时激活)是否端到端守住** —— drug/ligand/medium 请求即便靶标撞基因符号也不得进 M1/M5/M8 advisory(perturbation_object 维度,Task 2 code review 抓出,已在 pick_secondary + _build_entry 共享 helper 统一门控)。
 2. 台账勾账:`UPGRADE-PROGRESS.md` + `memory/phase10-deep-validation.md`(M1/M5/M8 从 limitation → rule-based advisory 可运行)+ `MEMORY.md` 索引。
 3. **暂停问用户是否 FF 合并 main**(合则不 push、保留分支)。
