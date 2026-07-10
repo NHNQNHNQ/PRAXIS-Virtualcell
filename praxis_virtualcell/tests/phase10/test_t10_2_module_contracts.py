@@ -951,3 +951,52 @@ def test_m2_gears_runner_fail_closed_without_torch():
            "target_output": "expression", "perturbation_targets": ["AHR"]}
     with pytest.raises((ModuleNotFoundError, ImportError, RuntimeError)):
         run_gears_case(raw)
+
+
+# ---- Task 4:Mac 特性化回归(M2 ckpt 门控引入后,human gene→expression 仍走 mock、字节等价不变) ----
+def test_m2_mac_genetic_hub_still_mock_e2e(monkeypatch):
+    """显式锁 GEARS_CKPT 未设(M2 门控在 Mac 上确实关闭)后,human gene→expression 端到端仍走
+    mock 枚举、真实 GEARS 通道零污染。
+
+    与 test_mock_request_unchanged_by_adapter(line ~174,req 与 _M2_REQ 内容相同)的增量差异:
+      ① 后者未 monkeypatch env,只是 ambient Mac 状态下的隐式验证;本测试显式
+         monkeypatch.delenv("GEARS_CKPT") 把"M2 门控确实关闭"从环境假设变成测试内的
+         显式前提,不受未来 CI/.53 残留 env 影响。
+      ② 后者只断言 "CaseRunner" not in models_used;本测试进一步扫描整份 structured_report,
+         确认真实 GEARS 通道特有的产物标记(GearsWrapper 的 value_type
+         "gears_internal_delta"/"gears_native_absolute_expression"、gears_case 默认
+         case_id "M2_gears_delta")一个都没泄漏进来。
+         注意:不能像 plan 草稿那样简单断言 "gears" 子串不出现 —— 已用实跑验证
+         models_used 合法含 "MockGEARS"(donor_predictor mock 三件套之一,与 M2 真实 GEARS
+         通道无关的既存命名),对 "gears" 子串做排除会对 "MockGEARS" 产生假阳性误伤,
+         故改为定位真实通道的判别性标记而非笼统子串。
+    """
+    monkeypatch.delenv("GEARS_CKPT", raising=False)
+    out = run_query(dict(_M2_REQ), config=_CFG)
+    sr = out["structured_report"]
+    used = sr["provenance"]["models_used"]
+    assert "CaseRunner" not in used                        # 未走 GEARS 真实通道
+    # 精准命中真实泄漏通道:model_cautions 遍历全部 results(含非-success),CaseRunner 若接管必在此留痕
+    assert "CaseRunner" not in sr["provenance"]["model_cautions"]
+    dumped = _json.dumps(sr, default=str, ensure_ascii=False)
+    assert "gears_internal_delta" not in dumped             # 真实 GEARS delta 值类型标记未泄漏
+    assert "gears_native_absolute_expression" not in dumped # 真实 GEARS 绝对表达值类型标记未泄漏
+    assert "M2_gears_delta" not in dumped                   # 真实 GEARS runner 默认 case_id 未泄漏
+
+
+def test_m2_mac_genetic_hub_deterministic_byte_equal(monkeypatch):
+    """donor_predictor mock 路径(human gene→expression)3 跑字节等价。
+
+    与既有字节等价测试的增量差异:test_real_request_rerun_byte_equal(_BACT_GROWTH/gem_fba)、
+    test_b2_real_requests_rerun_byte_equal(gem_fba medium/drug + pathway_scoring)、
+    test_b3_real_requests_rerun_byte_equal(embedding drug/dose + state_scoring)三者
+    全部覆盖"真实 CaseRunner 引擎"路径;human gene→expression 的 donor_predictor mock 路径
+    此前的字节等价仅作为 B4 M1 advisory 隔离测试(test_b4_membrane_request_deterministic_byte_equal,
+    SLC2A1)的副产品被间接覆盖(其主旨是 M1 advisory 隔离,非 M2 门控语境)。本测试首次在
+    显式锁 M2 ckpt 门控关闭(delenv GEARS_CKPT)的前提下、用 M2 canonical gene(AHR)专门
+    验证该 mock 路径确定性 —— M2 引入 ckpt 门控后需补上这一针对性维度。
+    """
+    monkeypatch.delenv("GEARS_CKPT", raising=False)
+    outs = [run_query(dict(_M2_REQ), config=_CFG) for _ in range(3)]
+    assert len({_canon(o["structured_report"]) for o in outs}) == 1
+    assert len({_canon(o["trace"]) for o in outs}) == 1
