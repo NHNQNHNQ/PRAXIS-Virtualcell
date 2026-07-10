@@ -7,10 +7,25 @@ _is_ifn_beta 窄门;非 IFN-β/mouse 是状态刻画类别错误,诚实 abstain,
 其余 engine 子路径由后续增量 task 往这里加分支。"""
 from __future__ import annotations
 
+import os
+
 from praxis_virtualcell.core.exceptions import UnsupportedEngine
 
 # 已接入真实预测的 engine(单一真源;被 agents.model_applicability 直接 import,不镜像)
 REAL_ENGINES = frozenset({"gem_fba", "pathway_scoring", "embedding", "state_scoring"})
+
+
+def _gears_importable() -> bool:
+    """torch + gears 是否可 import(轻量探测,不载 ckpt/不跑推理)。Mac 无 torch → False。"""
+    import importlib.util
+    return (importlib.util.find_spec("torch") is not None
+            and importlib.util.find_spec("gears") is not None)
+
+
+def gears_available() -> bool:
+    """donor_predictor 是否可走真实 GEARS:GEARS_CKPT 环境变量非空 且 torch+gears 可 import。
+    确定性、无副作用。Mac(无 torch)恒 False → donor_predictor 落回 mock;.53(ckpt+torch)→ True。"""
+    return bool(os.environ.get("GEARS_CKPT")) and _gears_importable()
 
 # 与 agents.route_table._GENE_LIKE 对齐:单基因/多基因联合敲除同属 gem_fba gene→growth
 _GENE_LIKE = frozenset({"gene", "gene_combination"})

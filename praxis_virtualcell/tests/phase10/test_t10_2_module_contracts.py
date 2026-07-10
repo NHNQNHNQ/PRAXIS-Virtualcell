@@ -15,6 +15,7 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.exceptions import PraxisVCError, UnsupportedEngine
 from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.predictors import case_dispatch as CD
 from praxis_virtualcell.predictors.case_dispatch import dispatch_runner, map_case_delta
 from praxis_virtualcell.predictors.case_runner_agent import CaseRunnerPredictorAgent
 from praxis_virtualcell.workflows.run_virtualcell_query import run_query
@@ -812,3 +813,28 @@ def test_b4_membrane_request_deterministic_byte_equal():
     outs = [run_query(dict(_B4_RUNQ), config=_CFG) for _ in range(3)]
     assert len({_canon(o["structured_report"]) for o in outs}) == 1
     assert len({_canon(o["trace"]) for o in outs}) == 1
+
+
+# ==================== P10.B M2:GEARS 远端 .53 真实接入 ====================
+def test_m2_gears_available_false_without_ckpt(monkeypatch):
+    monkeypatch.delenv("GEARS_CKPT", raising=False)
+    assert CD.gears_available() is False
+
+
+def test_m2_gears_available_false_when_gears_not_importable(monkeypatch):
+    monkeypatch.setenv("GEARS_CKPT", "/fake/ckpt")
+    monkeypatch.setattr(CD, "_gears_importable", lambda: False)
+    assert CD.gears_available() is False
+
+
+def test_m2_gears_available_true_when_ckpt_and_importable(monkeypatch):
+    monkeypatch.setenv("GEARS_CKPT", "/fake/ckpt")
+    monkeypatch.setattr(CD, "_gears_importable", lambda: True)
+    assert CD.gears_available() is True
+
+
+def test_m2_gears_available_false_when_ckpt_empty_string(monkeypatch):
+    # GEARS_CKPT 设为空字符串 → 视同未设(bool("")==False),不误开真实 GEARS 分支
+    monkeypatch.setenv("GEARS_CKPT", "")
+    monkeypatch.setattr(CD, "_gears_importable", lambda: True)   # 隔离 torch 依赖,证明是空串导致 False 而非不可 import
+    assert CD.gears_available() is False
