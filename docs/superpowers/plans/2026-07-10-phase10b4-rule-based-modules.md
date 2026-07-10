@@ -36,6 +36,8 @@ spec §二 写数据落 `praxis_virtualcell/data/module_gene_sets/`,但该目录
 
 **测试口径(铁律)**:全量永远 `PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -p no:cacheprovider`;单测 `... -m pytest praxis_virtualcell/tests/phase10/test_t10_2_module_contracts.py -k b4 -p no:cacheprovider`。绝不裸跑 `pytest`。子代理环境缺 SCGPT_CKPT/GEARS_CKPT 会得一堆 ML failed,是环境依赖非回归;以规范命令为准,数值/字节等价控制器独立复验。
 
+**⚠️ import 位置约定(Task 1 code review 修正)**:`test_t10_2_module_contracts.py` 既有约定是**所有顶层 import 都在文件头部**(该文件与整个 phase10 套件无 mid-file import 先例)。下文各 task 的测试代码块里为可读性写在 `# ===== P10.B4 =====` 段内的 `from ... import ...` 行,**落地时一律移到文件顶部既有 import 块**(按 isort 字母序插入),不得留 mid-file import(否则触发 ruff E402,Task 5 ruff 全检会判红)。测试段内只保留测试函数与 `_b4_*` helper。
+
 ---
 
 ## Task 1:gene-set 数据 + 确定性加载器
