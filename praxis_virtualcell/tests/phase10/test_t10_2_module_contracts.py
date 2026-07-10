@@ -429,3 +429,50 @@ def test_human_ligand_not_mislabeled_as_drug():
     # ligand 无签名模型 → 诚实 abstain,但不能被误标成"药不在库"(TGFB1 是配体不是药)
     mc = prov.get("model_cautions", {})
     assert not any("drug_not_in_db" in f for f in mc.get("CaseRunner", []))
+
+
+def test_dispatch_runner_embedding_dose():
+    from praxis_virtualcell.predictors.embedding.drug_dose import run_drug_dose_case
+    raw = {"species": "human", "perturbation_object": "drug", "perturbation_dose": 10.0}
+    assert dispatch_runner("embedding", raw) is run_drug_dose_case
+
+
+def test_dispatch_runner_embedding_no_dose_is_signature():
+    from praxis_virtualcell.predictors.embedding.drug_signature import run_drug_response_case
+    raw = {"species": "human", "perturbation_object": "drug"}
+    assert dispatch_runner("embedding", raw) is run_drug_response_case
+
+
+def test_map_case_delta_embedding_dose():
+    report = SimpleNamespace(raw_output={"drug": "geldanamycin", "dose_response": {
+        "n_doses": 6, "spearman": 0.9, "recalls": [0.04, 0.06], "insufficient": False}})
+    assert map_case_delta("embedding", report) == [0.9]
+
+
+def test_map_case_delta_embedding_dose_not_in_db():
+    # 药在签名库但不在剂量库 → drug_dose 设 dose_response=None → 空 delta(不崩)
+    report = SimpleNamespace(raw_output={"drug": "wortmannin", "dose_response": None})
+    assert map_case_delta("embedding", report) == []
+
+
+def test_human_drug_dose_real_e2e():
+    # 带 perturbation_dose → 剂量-响应意图 → drug_dose 真实(geldanamycin spearman=0.9)
+    req = {"species": "human", "perturbation_type": "drug", "perturbation_targets": ["geldanamycin"],
+           "perturbation_dose": 10.0, "input_modality": "scRNA", "output_modality": "delta_expression",
+           "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    sr = out["structured_report"]
+    assert out["reliability_decision"]["abstain"] is False
+    assert "CaseRunner" in sr["provenance"]["models_used"]
+    assert sr["prediction"]["delta"] == [0.9]
+
+
+def test_human_drug_dose_not_in_db_abstains_honestly():
+    # wortmannin 在签名库、不在剂量库;带 perturbation_dose → drug_dose → 诚实 abstain(不崩)
+    req = {"species": "human", "perturbation_type": "drug", "perturbation_targets": ["wortmannin"],
+           "perturbation_dose": 10.0, "input_modality": "scRNA", "output_modality": "delta_expression",
+           "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    assert out["reliability_decision"]["abstain"] is True
+    assert out["structured_report"]["prediction"] is None
+    assert "CaseRunner" in out["structured_report"]["provenance"]["models_rejected"]

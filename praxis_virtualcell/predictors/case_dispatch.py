@@ -54,6 +54,11 @@ def dispatch_runner(engine: str, raw_req: dict):
         # 非 human 或非 IFN-β:metabolic_tendency 只有 human Kang IFN-β 数据 → 落末尾 UnsupportedEngine → 诚实 abstain
     elif engine == "embedding":
         if raw_req.get("species") == "human" and obj == "drug":
+            if raw_req.get("perturbation_dose") is not None:
+                # 请求带 perturbation_dose(主链 asdict 保留的字段)→ 剂量响应意图 → drug_dose
+                # (LINCS 剂量子集,Spearman 单调性)
+                from praxis_virtualcell.predictors.embedding.drug_dose import run_drug_dose_case
+                return run_drug_dose_case
             from praxis_virtualcell.predictors.embedding.drug_signature import run_drug_response_case
             return run_drug_response_case
         # 非 human 或非 drug(如 ligand,route 判 embedding 但 data_gated 未接模型)→ 落末尾
@@ -86,5 +91,9 @@ def map_case_delta(engine: str, report) -> list[float]:
             # 每个在库药物的 MOA 富集比作 delta 分量;不在库(in_db=False)→无 moa_enrichment,跳过不虚构。
             return [round(d["moa_enrichment"], 4) for d in raw["per_drug"]
                     if d.get("in_db") and d.get("moa_enrichment") is not None]
+        if "dose_response" in raw:   # drug_dose:剂量-recall 单调性 Spearman
+            # 药不在剂量库 → dose_response=None → 空 delta(→abstain,不虚构),不对 None 下标
+            dr = raw["dose_response"]
+            return [round(dr["spearman"], 4)] if dr is not None else []
         raise UnsupportedEngine(f"embedding map_case_delta 未支持 raw_output 形状: {sorted(raw)}")
     raise UnsupportedEngine(f"map_case_delta 未支持 engine={engine}")

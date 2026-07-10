@@ -17,7 +17,7 @@ def request_to_module_input(req: dict) -> dict:
            "perturbation_object": req.get("perturbation_type"),
            "target_output": target_output,
            "perturbation_targets": list(req.get("perturbation_targets") or [])}
-    for k in ("cell_type", "medium", "dose"):
+    for k in ("cell_type", "medium", "dose", "perturbation_dose"):
         if req.get(k) is not None:
             raw[k] = req[k]
     return raw
