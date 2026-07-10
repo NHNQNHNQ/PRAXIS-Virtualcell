@@ -89,6 +89,14 @@ def dispatch_runner(engine: str, raw_req: dict):
             return run_cellstate_case
         # 非 human 或非 IFN-β(emt 的 gene→state、fate 的 mouse state)→ 落 UnsupportedEngine →
         # 诚实 abstain(cell_state 只有固定 Kang human IFN-β 数据,不接刻画类工具冒充扰动预测)
+    elif engine == "donor_predictor":
+        # M2:human gene→expression 真实 GEARS(.53 gated)。dispatch 层也校验 gears_available()
+        # (defense-in-depth:GEARS 不可用即诚实 UnsupportedEngine,不声称 applicable 后失败)。
+        if (species == "human" and obj in _GENE_LIKE
+                and raw_req.get("target_output") == "expression" and gears_available()):
+            from praxis_virtualcell.predictors.ml.gears_case import run_gears_case
+            return run_gears_case
+        # 非 human/非 gene/非 expression/GEARS 不可用 → 落末尾 UnsupportedEngine → 诚实 abstain/reject
     raise UnsupportedEngine(f"B 未接入 case runner: engine={engine} object={obj} species={species}")
 
 
@@ -126,4 +134,8 @@ def map_case_delta(engine: str, report) -> list[float]:
         if "per_cell_type" in report.raw_output:   # cell_state:整体 ISG 组间 Cohen's d
             return [round(report.raw_output["cohens_d"], 4)]
         raise UnsupportedEngine(f"state_scoring map_case_delta 未支持 raw_output 形状: {sorted(report.raw_output)}")
+    if engine == "donor_predictor":
+        if "gears_delta" in raw:   # GEARS-内部 delta(已在 wrapper round 定点)
+            return list(raw["gears_delta"])
+        raise UnsupportedEngine(f"donor_predictor map_case_delta 未支持 raw_output 形状: {sorted(raw)}")
     raise UnsupportedEngine(f"map_case_delta 未支持 engine={engine}")

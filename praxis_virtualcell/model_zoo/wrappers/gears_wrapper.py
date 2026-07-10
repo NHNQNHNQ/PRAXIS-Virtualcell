@@ -76,9 +76,9 @@ class GearsWrapper(ModelWrapper):
         gears_native / not_comparable_to_donor_base(finding_w4c_gears),不冒充 donor delta。"""
         import os
 
-        import torch  # noqa: F401 — 缺 torch 即抛 ModuleNotFoundError(fail-closed 触发点)
         # GEARS 0.0.2 老包 + 新 pandas 兼容:predict 内部走 sparse_X[pandas_Series_mask] 需 .nonzero()。
         import pandas as _pd
+        import torch  # noqa: F401 — 缺 torch 即抛 ModuleNotFoundError(fail-closed 触发点)
         _pd.Series.nonzero = lambda self: self.to_numpy().nonzero()
         from gears import GEARS, PertData  # 缺 GEARS 包即抛
 
@@ -105,7 +105,8 @@ class GearsWrapper(ModelWrapper):
         # 3) 扰动基因须∈ vocab;不在则 fail-closed(不静默改测试凑绿)。GEARS.predict 自身也校验。
         for gene in targets:
             if gene not in g.pert_list:
-                raise ValueError(f"{gene} 不在 GEARS.pert_list(vocab 9853);fail-closed(建议换 vocab 内真实 norman 扰动基因)")
+                raise ValueError(
+                    f"{gene} 不在 GEARS.pert_list(vocab 9853);fail-closed(建议换 vocab 内真实 norman 扰动基因)")
 
         # 4) predict([[gene]]) → {'_'.join(pert): absolute-expression array}。key 为下划线拼接。
         res = g.predict([targets])
@@ -122,4 +123,58 @@ class GearsWrapper(ModelWrapper):
                 "not_comparable_to_donor_base": True,  # finding_w4c_gears:指标/split 不同,不同表
             },
             "uncertainty": self.estimate_uncertainty(model_input, None),  # 点估计诚实标注
+        }
+
+    def run_delta(self, model_input: dict) -> dict:
+        """P10.B M2:GEARS-内部 delta = 扰动态 − 对照态(均 mean-over-cells)。真 delta 且类型与
+        模块一致,但属 GEARS-内部、**非 donor 可比**(明标)。绝不冒充 donor delta、绝不填绝对表达进 delta 槽。
+        缺 torch/GEARS/ckpt → 抛 → fail-closed(不静默 mock)。真跑是 .53 的事(Task 5 gated),
+        对照态 API 以 .53 实测确认:GEARS ctrl 预测 vs PertData ctrl 均值。"""
+        import os
+
+        import pandas as _pd
+        import torch  # noqa: F401 — 缺 torch 即抛(fail-closed 触发点)
+        _pd.Series.nonzero = lambda self: self.to_numpy().nonzero()
+        from gears import GEARS, PertData
+
+        if not self._ckpt_stem:
+            raise RuntimeError("gears ckpt 未声明;fail-closed")
+        targets = list(model_input.get("targets") or [])
+        if not targets:
+            raise ValueError("gears run_delta 需 model_input['targets'];fail-closed")
+
+        data_root = os.environ.get("GEARS_DATA_ROOT", self._GEARS_DATA_ROOT)
+        data_name = os.environ.get("GEARS_DATA_NAME", self._GEARS_DATA_NAME)
+        pert_data = PertData(data_root)
+        pert_data.load(data_path=os.path.join(data_root, data_name))
+        pert_data.prepare_split(split="simulation", seed=1)
+        pert_data.get_dataloader(batch_size=32, test_batch_size=64)
+
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        g = GEARS(pert_data, device=device)
+        g.load_pretrained(self._ckpt_stem)
+
+        for gene in targets:
+            if gene not in g.pert_list:
+                raise ValueError(f"{gene} 不在 GEARS.pert_list;fail-closed")
+
+        import numpy as _np
+        perturbed = g.predict([targets])["_".join(targets)]
+        # 对照态:PertData ctrl 细胞 mean 表达(与 perturbed 同基因序)。
+        #   .53 实测确认字段:pert_data.adata[obs.condition=='ctrl'].X.mean(0);若 GEARS 有原生 ctrl
+        #   预测 API 亦可,以 .53 当场确认为准(Task 5)。
+        ctrl_adata = pert_data.adata[pert_data.adata.obs["condition"] == "ctrl"]
+        control = _np.asarray(ctrl_adata.X.mean(axis=0)).ravel()
+        delta = (_np.asarray(perturbed).ravel() - control)
+
+        return {
+            "prediction": {
+                "delta": [round(float(x), 4) for x in delta],
+                "n_genes": int(len(delta)),
+                "condition": "_".join(targets),
+                "value_type": "gears_internal_delta",
+                "not_comparable_to_donor_base": True,
+                "non_deterministic": True,
+            },
+            "uncertainty": self.estimate_uncertainty(model_input, None),
         }

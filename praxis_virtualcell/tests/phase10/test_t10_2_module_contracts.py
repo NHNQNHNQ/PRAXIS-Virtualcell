@@ -1,4 +1,5 @@
 import hashlib
+import importlib.util
 import json as _json
 from types import SimpleNamespace
 
@@ -6,6 +7,7 @@ import pytest
 
 from praxis_virtualcell.agents import model_applicability as MA
 from praxis_virtualcell.agents import module_rules as MR
+from praxis_virtualcell.agents.case_report import CaseReport as _CaseReport
 from praxis_virtualcell.agents.model_applicability import ModelApplicabilityAgent
 from praxis_virtualcell.agents.module_router_agent import ModuleRouterAgent
 from praxis_virtualcell.agents.request_adapter import request_to_module_input
@@ -16,11 +18,14 @@ from praxis_virtualcell.biological_modules import module_gene_sets as MGS
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.exceptions import PraxisVCError, UnsupportedEngine
+from praxis_virtualcell.core.exceptions import UnsupportedEngine as _UnsupportedEngine
 from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.predictors import case_dispatch as CD
 from praxis_virtualcell.predictors.case_dispatch import dispatch_runner, map_case_delta
 from praxis_virtualcell.predictors.case_runner_agent import CaseRunnerPredictorAgent
 from praxis_virtualcell.workflows.run_virtualcell_query import run_query
+
+_HAS_TORCH = importlib.util.find_spec("torch") is not None
 
 
 def test_unsupported_engine_is_praxisvc_error():
@@ -93,9 +98,10 @@ def test_case_runner_run_prediction_gem_fba():
     assert out["provenance"]["case_id"]
 
 
-def test_case_runner_assess_applicability_reject_unsupported():
+def test_case_runner_assess_applicability_reject_unsupported(monkeypatch):
+    monkeypatch.setattr(CD, "gears_available", lambda: False)     # GEARS 不可用(Mac 本就如此;显式锁使 env 无关)
     agent = CaseRunnerPredictorAgent()
-    # human gene expression → route donor_predictor(非真实 engine)→ dispatch UnsupportedEngine → reject
+    # human gene→expression → donor_predictor;GEARS 不可用时 dispatch UnsupportedEngine → CaseRunner 诚实 reject
     req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
            "input_modality": "scRNA", "output_modality": "delta_expression",
            "task_type": "predict_delta_expression"}
@@ -887,3 +893,61 @@ def test_m2_donor_predictor_gated_routes_to_case_runner(monkeypatch):
     # .53 模拟(gears_available True):donor_predictor → CaseRunner 单一候选
     app = _m2_applicable(dict(_M2_REQ), monkeypatch=monkeypatch, gears=True)
     assert app == ["CaseRunner"]
+
+
+# ---- Task 3:GEARS runner + dispatch/map donor_predictor 分支 + GearsWrapper.run_delta ----
+def test_m2_dispatch_donor_predictor_human_gene_returns_runner(monkeypatch):
+    from praxis_virtualcell.predictors.ml.gears_case import run_gears_case
+    monkeypatch.setattr(CD, "gears_available", lambda: True)      # 模拟 .53:GEARS 可用
+    raw = {"species": "human", "perturbation_object": "gene",
+           "target_output": "expression", "perturbation_targets": ["AHR"]}
+    assert CD.dispatch_runner("donor_predictor", raw) is run_gears_case
+
+
+def test_m2_dispatch_donor_predictor_non_human_unsupported(monkeypatch):
+    # gears_available True → 证明是 species 守卫拒绝(非 gears 不可用)
+    monkeypatch.setattr(CD, "gears_available", lambda: True)
+    raw = {"species": "mouse", "perturbation_object": "gene",
+           "target_output": "expression", "perturbation_targets": ["Ahr"]}
+    with pytest.raises(_UnsupportedEngine):
+        CD.dispatch_runner("donor_predictor", raw)
+
+
+def test_m2_dispatch_donor_predictor_non_gene_unsupported(monkeypatch):
+    # gears_available True → 证明是 obj 守卫拒绝(非 gears 不可用)
+    monkeypatch.setattr(CD, "gears_available", lambda: True)
+    raw = {"species": "human", "perturbation_object": "drug",
+           "target_output": "expression", "perturbation_targets": ["vorinostat"]}
+    with pytest.raises(_UnsupportedEngine):
+        CD.dispatch_runner("donor_predictor", raw)
+
+
+def test_m2_dispatch_donor_predictor_unsupported_when_gears_unavailable(monkeypatch):
+    # Mac/GEARS 不可用:dispatch 层 defense-in-depth 诚实 raise(不声称 applicable 后失败)
+    monkeypatch.setattr(CD, "gears_available", lambda: False)
+    raw = {"species": "human", "perturbation_object": "gene",
+           "target_output": "expression", "perturbation_targets": ["AHR"]}
+    with pytest.raises(_UnsupportedEngine):
+        CD.dispatch_runner("donor_predictor", raw)
+
+
+def test_m2_map_case_delta_gears_reads_gears_delta():
+    rep = _CaseReport(case_id="c", structured_input={"x": 1},
+                      object_normalization={"species": "human"},
+                      models_tools_selected={"engine": "donor_predictor"},
+                      raw_output={"gears_delta": [0.12, -0.34], "targets": ["AHR"],
+                                  "value_type": "gears_internal_delta"},
+                      baseline_comparison={"baseline": "gears ctrl"},
+                      reliability_decision={"disposition": "accept", "caution_flags": [], "data_gated": False},
+                      provenance_boundary={"rules_hit": ["r"], "boundary": "b"})
+    assert CD.map_case_delta("donor_predictor", rep) == [0.12, -0.34]
+
+
+@pytest.mark.skipif(_HAS_TORCH, reason="本地无 torch 才测 fail-closed;有 torch(.53)时真推理走 -m remote gated")
+def test_m2_gears_runner_fail_closed_without_torch():
+    # Mac 无 torch:run_gears_case 内 GearsWrapper.run_delta lazy import torch → 抛(fail-closed)
+    from praxis_virtualcell.predictors.ml.gears_case import run_gears_case
+    raw = {"species": "human", "perturbation_object": "gene",
+           "target_output": "expression", "perturbation_targets": ["AHR"]}
+    with pytest.raises((ModuleNotFoundError, ImportError, RuntimeError)):
+        run_gears_case(raw)
