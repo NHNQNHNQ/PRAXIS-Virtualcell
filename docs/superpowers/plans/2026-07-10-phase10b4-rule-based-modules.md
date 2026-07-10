@@ -542,17 +542,23 @@ def test_b4_all_three_modules_runnable_e2e():
 
 
 def test_b4_advisory_walled_from_reliability_e2e():
-    # module_plan advisory 是 provenance,不喂 reliability/预测路径:
+    # module_plan advisory 是 provenance,不喂 reliability 推理/预测路径:
     #  ① mock 预测器照常跑(models_used 有 MockLinear)——advisory 不 gate 预测;
-    #  ② reliability_decision 无 gene-set advisory 任何痕迹(rule_based/模块名);
-    #  ③ llm_used_for_prediction 恒 False;④ module_plan 仍如实带 M1 advisory。
+    #  ② advisory 的 rule_based 痕迹只在 provenance.module_plan 出现,不泄漏进任何 reliability
+    #     推理字段(abstain_reasons/downgrade_reasons/caution_flags/failed_checks/model_disagreement
+    #     等 structured_report 顶层字段)—— 去掉 provenance 后整份 report 不含 advisory 串;
+    #  ③ llm_used_for_prediction 恒 False;④ 反证:advisory 确实在 provenance.module_plan(非整份缺失)。
     out = run_query(dict(_B4_RUNQ), config=_CFG)
     sr = out["structured_report"]
     assert out["llm_used_for_prediction"] is False
     assert "MockLinear" in sr["provenance"]["models_used"]        # 预测器照跑,未被 advisory 短路
-    rel_str = _json.dumps(out["reliability_decision"], ensure_ascii=False, default=str)
-    assert "rule_based:membrane_system_gene_set" not in rel_str   # advisory 不泄漏进 reliability
-    assert "membrane_system" not in rel_str
+    # 强隔离:扫描 structured_report 去 provenance 后的全部 reliability 推理面(真泄漏会落 abstain_reasons
+    # /downgrade_reasons/caution_flags/failed_checks 等,而非窄的 reliability_decision 投影)
+    sr_no_prov = _json.dumps({k: v for k, v in sr.items() if k != "provenance"},
+                             ensure_ascii=False, default=str)
+    assert "rule_based:membrane_system_gene_set" not in sr_no_prov
+    assert "membrane_system" not in sr_no_prov
+    # 反证:advisory 确实存在(在 provenance.module_plan),证明上面的排除非空断言
     m1 = next(e for e in sr["provenance"]["module_plan"]["entries"]
               if e["module"] == "membrane_system")
     assert m1["verdict"] == "downgrade"
@@ -585,9 +591,10 @@ Expected: **4 passed**(控制器已逐条实证预验证;本 task 端到端断�
     """决策 E(可达路径):yeast + niche state → primary M6 cytoskeletal_framework →
     mismatch query tissue_spatial_niche → registry 判 reject → entry verdict 降级不 accept。
 
-    注:本 case 靶标(SNF1)不在 P10.B4 gene-set,故不触发 M1/M5/M8 gene-set 激活;
+    注:本 case 是 medium 扰动(perturbation_object=medium,非 gene),gene_set_secondary 的 gene 门控
+    直接短路;且靶标 SNF1 也不在任何 P10.B4 gene-set —— 双重原因不触发 M1/M5/M8 gene-set 激活。
     mismatch 降级红线由本 yeast niche 端到端路径覆盖。
-    (P10.B4 起 M8/M1/M5 可经 gene-set 命中作 advisory secondary,见 test_t10_2 的 B4 段;
+    (P10.B4 起 M8/M1/M5 可经 gene 扰动 + gene-set 命中作 advisory secondary,见 test_t10_2 的 B4 段;
     但那是 rule_based/evidence_limited advisory,与本处 mismatch 降级红线是两条独立路径。)"""
 ```
 （其余断言逐字不动——SNF1 非 gene-set 基因,plan 与断言不变。）
