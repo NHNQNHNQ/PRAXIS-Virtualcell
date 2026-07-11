@@ -11,6 +11,7 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Clock, IdGen, RuntimeConfig
 from praxis_virtualcell.core.exceptions import UnknownAgentError
 from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.governance.module_consistency import check_module_plan
 
 
 class AgentRuntime:
@@ -107,6 +108,25 @@ class AgentRuntime:
             report.setdefault("provenance", {})["llm_route_suggestion"] = llm_route
         if module_plan is not None:
             report.setdefault("provenance", {})["module_plan"] = module_plan
+        # P10.C1:跨模块一致性 governance gate。module_plan 存在时校验内部一致性(check_module_plan
+        # 纯确定性 4 规则)。一致(violations 空)→ 零动作保字节等价;检出违规 → 记录 provenance +
+        # 若 reliability 原未 abstain 则真触发对外 abstain(reliability/critic 裁决零改数值不变:
+        # 只 override report 对外 abstain/prediction/abstain_reasons,reliability 提取字段原样保留,
+        # 原 abstain 记 provenance 供审计)。确定性、无 LLM。
+        if module_plan is not None:
+            violations = check_module_plan(module_plan)
+            if violations:
+                reliability_abstain = report.get("abstain", False)   # 原判(override 前捕获)
+                gate_abstained = not reliability_abstain
+                if gate_abstained:
+                    report["abstain"] = True
+                    report["prediction"] = None
+                    report.setdefault("abstain_reasons", []).append("cross_module_inconsistency")
+                report.setdefault("provenance", {})["cross_module_consistency"] = {
+                    "violations": violations,
+                    "gate_abstained": gate_abstained,
+                    "reliability_original_abstain": reliability_abstain,
+                }
         if llm_cross_module is not None:
             report.setdefault("provenance", {})["llm_cross_module_notes"] = llm_cross_module
         # Phase 5:证据等级(插点 C)+ 主动学习(插点 D)旁路挂载。确定性零 LLM,advisory 不碰裁决。
