@@ -124,3 +124,13 @@ def test_c1_violation_when_reliability_already_abstain(monkeypatch):
     cmc = sr["provenance"]["cross_module_consistency"]
     assert cmc["gate_abstained"] is False                               # gate 未重复触发
     assert cmc["reliability_original_abstain"] is True                  # 原判 = abstain
+
+
+# ---- Task 3:确定性收尾 ----
+def test_c1_llm_never_used_for_prediction():
+    """C1 gate 全程确定性无 LLM:llm_used_for_prediction 恒 false(run_query 顶层键 line 169)。"""
+    req = {"species": "bacteria", "perturbation_type": "gene", "perturbation_targets": ["b0720"],
+           "input_modality": "scRNA", "output_modality": "growth",
+           "task_type": "predict_delta_expression"}
+    out = run_query(dict(req), config=_CFG)
+    assert out["llm_used_for_prediction"] is False
