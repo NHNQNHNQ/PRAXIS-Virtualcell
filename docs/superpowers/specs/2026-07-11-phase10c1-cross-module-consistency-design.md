@@ -42,7 +42,7 @@ P10.C 治理补齐单元的第一子单元。目标:把**跨模块结果治理**
 - **violations 为空**(一致,正常流程绝大多数):无任何动作,**report 字节等价完全不变**(见 §6 红线)。
 - **violations 非空**(module_plan 自相矛盾,异常信号):
   - **记录 provenance**:`report.provenance["cross_module_consistency"] = {"violations": [...], "gate_abstained": bool}`(advisory,始终记录)。
-  - **governance gate 真触发 abstain**:gate 只写 **report 对外字段**——`report.abstain` 置 True(最终对外弃权)、`report.prediction` 置 None(与既有 abstain 语义一致)、`report.abstain_reasons` 追加 `cross_module_inconsistency`(不覆盖既有 reasons)。**`report.reliability_decision` 整个子结构原样保留不改**(含其原 `abstain` 布尔与所有数值 delta/disagreement/disposition/reliability_score),使"reliability 原判"与"governance gate 最终判"**都可审计**。语义:report 对外 `abstain = reliability_decision.abstain OR gate_abstained`。符合 roadmap line 127"触发 abstain 不改写确定性裁决数值"——reliability/critic agent 代码零改、裁决数值零改,只在 governance 后处理层加一道对外 abstain gate。
+  - **governance gate 真触发 abstain**:gate 只写 **report 对外字段**——`report.abstain` 置 True(最终对外弃权)、`report.prediction` 置 None(与既有 abstain 语义一致)、`report.abstain_reasons` 追加 `cross_module_inconsistency`(不覆盖既有 reasons)。**report 顶层的 reliability 产物字段(`reliability`/`model_disagreement`/`failed_checks` 等)原样保留不改**;reliability 的原 `abstain` 判定在 override **前**捕获,记入 `provenance.cross_module_consistency.reliability_original_abstain` 供审计(注:report 顶层无完整 `reliability_decision` 子结构,是从 reliability_decision **提取**的字段——`abstain`/`reliability`/`model_disagreement`/`failed_checks`;gate 只 override 对外 `abstain`+`prediction`+`abstain_reasons`,其余提取字段不动)。语义:report 对外 `abstain = reliability 原 abstain OR gate_abstained`。符合 roadmap line 127"触发 abstain 不改写确定性裁决数值"——reliability/critic agent 代码零改、裁决数值零改,只在 governance 后处理层加一道对外 abstain gate。
 
 ### 4.4 为什么这样不违红线
 - reliability/critic **agent 代码零改**,它们照常裁决、其 reliability_decision/critic 数值原样保留在 report 里可审计。
@@ -68,7 +68,7 @@ P10.C 治理补齐单元的第一子单元。目标:把**跨模块结果治理**
 ## 7. 测试(T10.5 一致性子集,落 praxis_virtualcell/tests/phase10)
 
 - **Task 0 基线**:现有代表性请求的 module_plan 全部 check_module_plan 无违规(接线前提坐实)。
-- **接线单元**:runtime 后处理调 check_module_plan,一致 plan → provenance 记录 `cross_module_consistency` 且 `gate_abstained=False`、不 abstain。
+- **接线单元(一致场景零动作)**:runtime 后处理调 check_module_plan,一致 plan(无违规)→ **零动作**:不 abstain、**不往 provenance 加 `cross_module_consistency` 键**、report 与未接 gate 时字节完全一致(保 §6 字节等价红线——加任何 provenance 键都会破坏字节等价,故一致场景无痕迹,可审计性让位于确定性红线)。
 - **触发 abstain**:构造(monkeypatch/注入)一个含违规的 module_plan(如 verdict 比 route 更乐观)→ gate override abstain=True + prediction None + abstain_reasons 含 `cross_module_inconsistency` + provenance `gate_abstained=True`。
 - **裁决数值不变**:同上违规场景,断言 reliability_decision 的既有数值字段(reliability_score/disagreement/disposition 等)与未接 gate 时一致(gate 只改 abstain 布尔 + prediction)。
 - **字节等价回归**:现有全量 OFFLINE 请求(一致 plan)3 跑 structured_report + trace 字节等价不变;全量回归数(基线 774)净增 C1 测试、0 failed。
