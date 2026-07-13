@@ -11,6 +11,7 @@ from praxis_virtualcell.governance.gate_util import apply_governance_gate
 from praxis_virtualcell.governance.provenance_completeness import check_report_provenance
 from praxis_virtualcell.governance.provenance_hash import check_call_provenance, compute_call_provenance
 from praxis_virtualcell.predictors.base import PredictorAgent
+from praxis_virtualcell.predictors.ml.agent_adapter import MLBackedPredictorAgent
 from praxis_virtualcell.workflows.run_virtualcell_query import run_query
 
 _CFG = RuntimeConfig(mode=Mode.OFFLINE)
@@ -336,3 +337,20 @@ def test_c2_gate_path_deterministic_rerun(monkeypatch):
             json.dumps(o, sort_keys=True, ensure_ascii=False, default=str).encode()).hexdigest()
     outs = [run_query(dict(_ACCEPT), config=_CFG)["structured_report"] for _ in range(3)]
     assert len({_h(o) for o in outs}) == 1
+
+
+class _FakeDonorModel:
+    """Mac 无 torch 下构造 MLBackedPredictorAgent 用的最小桩(只需 eval())。"""
+
+    def eval(self):
+        return self
+
+
+def test_ml_backed_predictor_declares_model_version():
+    """C2 Gate A 兼容(opus final review 抓的跨 task 接缝):MLBackedPredictorAgent(远端真 ML 路径)
+    须声明 model_version,否则 per_call.model_version=None → Gate A fail-closed 误伤对外 abstain。
+    Mac 只验证 model_version 非 None(端到端不误伤需远端 .53 GPU,记 backlog)。"""
+    agent = MLBackedPredictorAgent(_FakeDonorModel(), control=None, pert_table=None, pert_dim=0)
+    assert agent.model_version                              # 非 None(消除 Gate A 误伤)
+    assert agent.model_version.startswith("donor_ml")       # 诚实反映 donor 模型类型
+    assert MLBackedPredictorAgent.model_version == "donor_ml"  # 类属性兜底非 None

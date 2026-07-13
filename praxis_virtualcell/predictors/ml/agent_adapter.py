@@ -18,9 +18,14 @@ from praxis_virtualcell.predictors.base import PredictorAgent  # noqa: E402
 class MLBackedPredictorAgent(PredictorAgent):
     """真 ML 模型驱动的 predictor-agent(替代 Week 2 的 mock)。"""
 
+    model_version = "donor_ml"   # 类属性兜底;__init__ 覆盖为反映具体 donor 模型类型
+    # C2 Gate A per-call hash 完整性硬门要求每个被采纳 predictor 声明 model_version,否则
+    # models_used 缺 version → fail-closed 误伤对外 abstain。真 ML 路径(远端 .53)须诚实声明。
+
     def __init__(self, donor_model, *, control, pert_table, pert_dim, name=None):
         self.model = donor_model.eval()
         self.name = name or f"ML{type(donor_model).__name__}"
+        self.model_version = f"donor_ml:{type(donor_model).__name__}"   # 诚实反映真实 donor 模型类型
         self._control = control
         self._pert_table = pert_table
         self._pert_dim = pert_dim
