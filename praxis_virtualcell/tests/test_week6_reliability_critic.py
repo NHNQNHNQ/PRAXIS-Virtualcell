@@ -128,14 +128,17 @@ def test_critic_happy_no_violations():
 
 # --- report 拆分 abstain vs downgrade (§8.4 报告诚实性, e2e 激活 cell_type 路径) ---
 
-def test_report_cell_type_downgrade_e2e():
+def test_report_cell_type_out_of_domain_abstains_e2e():
     from praxis_virtualcell.workflows.predict_delta_expression import run_request
-    # human + 不支持的 cell_type(Jurkat 不在任何 supported_cell_types) → 降级(非 abstain)
+    # C2 Gate C(用户 2026-07-13 拍板):human + 越界 cell_type(Jurkat 全越界)→ 对外 abstain
+    # (升级自 downgrade)。reliability 内部 downgrade 数值保留(经 downgrade_reasons 透出),
+    # Gate C 只 override 对外 abstain;审计经 provenance.cell_type_gate.reliability_original_abstain。
     r = run_request({"request_id": "r", "species": "human", "perturbation_type": "gene",
                      "perturbation_targets": ["AHR"], "input_modality": "scRNA",
                      "output_modality": "delta_expression", "task_type": "predict_delta_expression",
                      "cell_type": "Jurkat"})
-    assert r["abstain"] is False
-    assert r["abstain_reasons"] == []                                    # 非 abstain → 不携带 abstain_reasons
-    assert "downgrade:cell_type_not_supported" in r["downgrade_reasons"]  # 降级单列
-    assert "models_failed" in r and "model_disagreement" in r            # 契约字段齐
+    assert r["abstain"] is True
+    assert "cell_type_out_of_domain" in r["abstain_reasons"]
+    assert "downgrade:cell_type_not_supported" in r["downgrade_reasons"]   # reliability 内部数值未改
+    assert r["provenance"]["cell_type_gate"]["reliability_original_abstain"] is False  # 审计原判
+    assert "models_failed" in r and "model_disagreement" in r             # 契约字段齐

@@ -6,6 +6,7 @@ import json
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.governance.cell_type_domain import check_cell_type_domain
 from praxis_virtualcell.governance.gate_util import apply_governance_gate
 from praxis_virtualcell.governance.provenance_completeness import check_report_provenance
 from praxis_virtualcell.governance.provenance_hash import check_call_provenance, compute_call_provenance
@@ -193,3 +194,65 @@ def test_gate_b_triggers_on_missing_provenance_key(monkeypatch):
     assert "incomplete_provenance" in sr["abstain_reasons"]
     g = sr["provenance"]["provenance_completeness_gate"]
     assert g["gate_abstained"] is True and g["missing"] == ["provenance.n_messages"]
+
+
+_APPMAP = {"MockGEARS": {"supported_cell_types": ["K562", "A549"]},
+           "MockCPA": {"supported_cell_types": ["K562"]},
+           "NoDeclare": {}}
+
+
+def test_cell_type_domain_all_out_of_domain():
+    bc = {"model_applicability": _APPMAP}
+    assert check_cell_type_domain({"cell_type": "HeLa"}, bc, ["MockGEARS", "MockCPA"]) == ["MockGEARS", "MockCPA"]
+
+
+def test_cell_type_domain_in_domain_no_violation():
+    bc = {"model_applicability": _APPMAP}
+    assert check_cell_type_domain({"cell_type": "K562"}, bc, ["MockGEARS", "MockCPA"]) == []
+
+
+def test_cell_type_domain_partial_declare_only_declaring_checked():
+    """有 predictor 无声明 supported_cell_types → 只对声明者判越界(窄门,同 reliability 语义):
+    declaring=[MockGEARS],全越界 → 触发返回 [MockGEARS]。"""
+    bc = {"model_applicability": _APPMAP}
+    assert check_cell_type_domain({"cell_type": "HeLa"}, bc, ["MockGEARS", "NoDeclare"]) == ["MockGEARS"]
+
+
+def test_cell_type_domain_partial_out_of_domain_no_trigger():
+    """多声明 predictor 中仅部分越界 → 不触发(declaring=2, unsupported=1,非全越界)。"""
+    bc = {"model_applicability": _APPMAP}
+    # A549:MockGEARS 支持[K562,A549]、MockCPA 不支持[K562] → declaring=2、unsupported=1 → 不全越界
+    assert check_cell_type_domain({"cell_type": "A549"}, bc, ["MockGEARS", "MockCPA"]) == []
+
+
+def test_cell_type_domain_skips_when_reliability_abstained():
+    """reliability 已 abstain(其它原因)→ Gate C 不独立触发(镜像 reliability not-abstain 守卫)。"""
+    bc = {"model_applicability": _APPMAP}
+    assert check_cell_type_domain({"cell_type": "HeLa"}, bc, ["MockGEARS"],
+                                  reliability_abstained=True) == []
+
+
+def test_cell_type_domain_no_cell_type_or_no_used():
+    bc = {"model_applicability": _APPMAP}
+    assert check_cell_type_domain({}, bc, ["MockGEARS"]) == []                       # 无 cell_type
+    assert check_cell_type_domain({"cell_type": "HeLa"}, bc, []) == []               # 无 used
+    assert check_cell_type_domain({"cell_type": "HeLa"}, {}, ["MockGEARS"]) == []    # 无 appmap
+
+
+def test_gate_c_out_of_domain_cell_type_abstains():
+    """human gene 请求 + 越界 cell_type(Jurkat 全越界)→ Gate C 对外 abstain。"""
+    req = dict(_ACCEPT)
+    req["cell_type"] = "Jurkat"
+    sr = run_query(req, config=_CFG)["structured_report"]
+    assert sr["abstain"] is True
+    assert "cell_type_out_of_domain" in sr["abstain_reasons"]
+    g = sr["provenance"]["cell_type_gate"]
+    assert g["gate_abstained"] is True and g["out_of_domain_predictors"]
+
+
+def test_gate_c_in_domain_cell_type_no_trigger():
+    """cell_type 在库(K562)→ Gate C 不触发。"""
+    req = dict(_ACCEPT)
+    req["cell_type"] = "K562"
+    sr = run_query(req, config=_CFG)["structured_report"]
+    assert sr["provenance"].get("cell_type_gate", {}).get("gate_abstained", False) is False

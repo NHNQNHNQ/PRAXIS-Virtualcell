@@ -11,6 +11,7 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Clock, IdGen, RuntimeConfig
 from praxis_virtualcell.core.exceptions import UnknownAgentError
 from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.governance.cell_type_domain import check_cell_type_domain
 from praxis_virtualcell.governance.gate_util import apply_governance_gate
 from praxis_virtualcell.governance.module_consistency import check_module_plan
 from praxis_virtualcell.governance.provenance_completeness import check_report_provenance
@@ -107,6 +108,10 @@ class AgentRuntime:
         m = self.mk_message(prov.sender, "Report", "render", prov.payload, prov.message_id)
         rep = self._dispatch_collect(m, "report_done")
         report = rep.payload["report"]
+        # gate 链前捕获 reliability 原判 abstain(所有 gate override 前),供 Gate C 镜像
+        # reliability.py 的 not-abstain 守卫(避免 reliability 因其它原因 abstain 时 Gate C
+        # 独立记一条 reliability 从未确认的 cell_type 越界 provenance)。
+        reliability_abstained = report.get("abstain", False)
         if llm_route is not None:
             report.setdefault("provenance", {})["llm_route_suggestion"] = llm_route
         if module_plan is not None:
@@ -144,6 +149,15 @@ class AgentRuntime:
         if prov_missing:
             apply_governance_gate(report, "incomplete_provenance",
                                   "provenance_completeness_gate", {"missing": prov_missing})
+        # P10.C2 Gate C:cell_type 越界 abstain。全部被采纳 predictor 声明 supported_cell_types
+        # 且 req cell_type 全越界 → 对外 abstain。reliability 的 downgrade:cell_type 数值语义保留,
+        # Gate C 只叠加对外 abstain(不改 reliability)。
+        ct_violations = check_cell_type_domain(
+            app.payload["request"], app.payload["brain_context"],
+            report.get("models_used", []), reliability_abstained=reliability_abstained)
+        if ct_violations:
+            apply_governance_gate(report, "cell_type_out_of_domain",
+                                  "cell_type_gate", {"out_of_domain_predictors": ct_violations})
         if llm_cross_module is not None:
             report.setdefault("provenance", {})["llm_cross_module_notes"] = llm_cross_module
         # Phase 5:证据等级(插点 C)+ 主动学习(插点 D)旁路挂载。确定性零 LLM,advisory 不碰裁决。
