@@ -11,7 +11,9 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Clock, IdGen, RuntimeConfig
 from praxis_virtualcell.core.exceptions import UnknownAgentError
 from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.governance.gate_util import apply_governance_gate
 from praxis_virtualcell.governance.module_consistency import check_module_plan
+from praxis_virtualcell.governance.provenance_hash import check_call_provenance
 
 
 class AgentRuntime:
@@ -127,6 +129,14 @@ class AgentRuntime:
                     "gate_abstained": gate_abstained,
                     "reliability_original_abstain": reliability_abstain,
                 }
+        # P10.C2 Gate A:per-call hash 完整性 fail-closed。models_used 的 per_call 缺
+        # name/version/input_hash/output_hash 任一 → 对外 abstain(reliability 裁决数值不变)。
+        pch = report.get("provenance", {}).get("per_call_hashes", {})
+        hash_missing = {n: miss for n in report.get("models_used", [])
+                        if (miss := check_call_provenance(pch.get(n, {})))}
+        if hash_missing:
+            apply_governance_gate(report, "incomplete_call_provenance",
+                                  "provenance_hash_gate", {"missing": hash_missing})
         if llm_cross_module is not None:
             report.setdefault("provenance", {})["llm_cross_module_notes"] = llm_cross_module
         # Phase 5:证据等级(插点 C)+ 主动学习(插点 D)旁路挂载。确定性零 LLM,advisory 不碰裁决。

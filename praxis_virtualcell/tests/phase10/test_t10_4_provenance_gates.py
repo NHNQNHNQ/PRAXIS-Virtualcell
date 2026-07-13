@@ -6,6 +6,7 @@ import json
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.governance.gate_util import apply_governance_gate
 from praxis_virtualcell.governance.provenance_hash import check_call_provenance, compute_call_provenance
 from praxis_virtualcell.predictors.base import PredictorAgent
 from praxis_virtualcell.workflows.run_virtualcell_query import run_query
@@ -102,3 +103,48 @@ def test_failed_branch_per_call_model_version_not_none():
     pc = out["provenance"]["per_call"]
     assert pc["model_version"] == "mock:BoomPredictor", "failed 分支 model_version 须走兜底非 None"
     assert len(pc["input_hash"]) == 64 and len(pc["output_hash"]) == 64
+
+
+def test_apply_gate_overrides_when_not_already_abstain():
+    rep = {"abstain": False, "prediction": {"delta": [0.1]}, "provenance": {}}
+    gated = apply_governance_gate(rep, "some_reason", "some_gate", {"detail": 1})
+    assert gated is True
+    assert rep["abstain"] is True and rep["prediction"] is None
+    assert "some_reason" in rep["abstain_reasons"]
+    g = rep["provenance"]["some_gate"]
+    assert g["gate_abstained"] is True and g["reliability_original_abstain"] is False
+    assert g["detail"] == 1
+
+
+def test_apply_gate_records_but_no_override_when_already_abstain():
+    rep = {"abstain": True, "prediction": None, "provenance": {}}
+    gated = apply_governance_gate(rep, "r", "g", {})
+    assert gated is False
+    assert rep["provenance"]["g"]["gate_abstained"] is False
+    assert rep["provenance"]["g"]["reliability_original_abstain"] is True
+
+
+def test_gate_a_healthy_report_no_override():
+    """正常 accept 请求 per_call 完整 → Gate A 不触发(无 provenance_hash_gate 或 gate_abstained=False)。"""
+    out = run_query(dict(_ACCEPT), config=_CFG)
+    sr = out["structured_report"]
+    assert sr["abstain"] is False
+    assert "provenance_hash_gate" not in sr["provenance"] or \
+        sr["provenance"]["provenance_hash_gate"]["gate_abstained"] is False
+
+
+def test_gate_a_triggers_on_incomplete_call_provenance(monkeypatch):
+    """monkeypatch 使 per_call 缺 version → Gate A fail-closed abstain。"""
+    from praxis_virtualcell.governance import provenance_hash as PH
+    orig = PH.compute_call_provenance
+    def broken(name, version, mi, out, ev):
+        pc = orig(name, version, mi, out, ev)
+        pc["model_version"] = None
+        return pc
+    monkeypatch.setattr("praxis_virtualcell.predictors.base.compute_call_provenance", broken)
+    out = run_query(dict(_ACCEPT), config=_CFG)
+    sr = out["structured_report"]
+    assert sr["abstain"] is True
+    assert "incomplete_call_provenance" in sr["abstain_reasons"]
+    g = sr["provenance"]["provenance_hash_gate"]
+    assert g["gate_abstained"] is True and g["missing"]
