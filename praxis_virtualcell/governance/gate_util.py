@@ -8,7 +8,12 @@ def apply_governance_gate(report: dict, reason: str, prov_key: str, detail: dict
     """gate 命中时调用。返回是否真触发了 override(原未 abstain → True)。
     - 原未 abstain:override 对外 abstain=True/prediction=None/abstain_reasons+=reason。
     - 原已 abstain:不重复 override,仅记 provenance(gate_abstained=False)。
-    两种情况都记 provenance[prov_key](detail + gate_abstained + reliability_original_abstain)。"""
+    两种情况都记 provenance[prov_key](detail + gate_abstained + reliability_original_abstain)。
+
+    注:reliability_original_abstain 记的是"进入本 gate 前的对外 abstain 态"——链式多 gate
+    (C1→A→B→C)下,后序 gate 读到的可能已被前序 gate override,非 reliability 的原始裁决判定。
+    审计跨多 gate 时须据此理解(reliability 原始判定另见 reliability_decision/
+    相应 gate 的 reliability_abstained 守卫)。"""
     original = report.get("abstain", False)
     gated = not original
     if gated:

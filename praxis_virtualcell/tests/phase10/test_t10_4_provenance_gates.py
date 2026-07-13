@@ -256,3 +256,83 @@ def test_gate_c_in_domain_cell_type_no_trigger():
     req["cell_type"] = "K562"
     sr = run_query(req, config=_CFG)["structured_report"]
     assert sr["provenance"].get("cell_type_gate", {}).get("gate_abstained", False) is False
+
+
+# ---- Task 5:收尾(多 gate 交互 + 裁决数值不变红线 + 确定性) ----
+
+def test_c2_gate_preserves_reliability_numeric_fields(monkeypatch):
+    """Gate 触发 abstain 后,reliability 提取字段(reliability/failed_checks/model_disagreement)
+    与接线前一致 —— gate 只 override 对外,不改裁决数值(红线)。"""
+    base = run_query(dict(_ACCEPT), config=_CFG)["structured_report"]
+    base_fields = {k: base.get(k) for k in ("reliability", "failed_checks", "model_disagreement")}
+    from praxis_virtualcell.governance import provenance_hash as PH
+    orig = PH.compute_call_provenance
+    def broken(name, version, mi, out, ev):
+        pc = orig(name, version, mi, out, ev)
+        pc["input_hash"] = None
+        return pc
+    monkeypatch.setattr("praxis_virtualcell.predictors.base.compute_call_provenance", broken)
+    gated = run_query(dict(_ACCEPT), config=_CFG)["structured_report"]
+    assert gated["abstain"] is True                         # Gate A 触发
+    for k, v in base_fields.items():
+        assert gated.get(k) == v, f"{k} 被 gate 改动(违红线):{v} -> {gated.get(k)}"
+
+
+def test_multi_gate_reasons_accumulate_and_keys_independent(monkeypatch):
+    """多 gate 同时命中:首个触发 gate override abstain,后续 gate no-op 但各记独立 provenance 键。
+    实证(见 Task 5 报告):Gate A(缺 output_hash)先命中 → abstain_reasons=[incomplete_call_provenance]、
+    provenance_hash_gate.gate_abstained=True;Gate C(cell_type 越界)后命中,report 已 abstain →
+    no-op(不重复 append reason),但仍记 cell_type_gate 键且 gate_abstained=False、
+    reliability_original_abstain=True(记录的是"进入 Gate C 前"的对外 abstain 态,即已被 Gate A
+    override 后的状态,而非 reliability 原始判定——该请求 reliability 原判其实是 accept)。
+    该场景未触发 Gate B(hash 断裂不影响 provenance 契约完整性),故 provenance_completeness_gate
+    不出现,断言留容错分支。"""
+    from praxis_virtualcell.governance import provenance_hash as PH
+    orig = PH.compute_call_provenance
+    def broken(name, version, mi, out, ev):
+        pc = orig(name, version, mi, out, ev)
+        pc["output_hash"] = None
+        return pc
+    monkeypatch.setattr("praxis_virtualcell.predictors.base.compute_call_provenance", broken)
+    req = dict(_ACCEPT)
+    req["cell_type"] = "Jurkat"                              # Gate A 缺 hash + Gate C 越界同时命中
+    sr = run_query(req, config=_CFG)["structured_report"]
+    assert sr["abstain"] is True
+    assert sr["abstain_reasons"] == ["incomplete_call_provenance"]  # 仅 Gate A(首个命中),未重复 append
+    assert "provenance_hash_gate" in sr["provenance"]              # Gate A provenance 键
+    g_a = sr["provenance"]["provenance_hash_gate"]
+    assert g_a["gate_abstained"] is True and g_a["reliability_original_abstain"] is False
+    # Gate C 也命中但 report 已被 Gate A abstain → no-op(记 provenance 键,gate_abstained=False)
+    assert "cell_type_gate" in sr["provenance"]
+    g_c = sr["provenance"]["cell_type_gate"]
+    assert g_c["gate_abstained"] is False
+    # 进入 Gate C 前已被 Gate A override(非 reliability 原判)
+    assert g_c["reliability_original_abstain"] is True
+    assert g_c["out_of_domain_predictors"]
+    # Gate B 该场景未触发(provenance 契约完整,只是 per_call hash 值为 None,不缺键)
+    if "provenance_completeness_gate" in sr["provenance"]:
+        assert sr["provenance"]["provenance_completeness_gate"]["gate_abstained"] is False
+
+
+def test_c2_deterministic_no_llm():
+    """OFFLINE 全程无 LLM 参与预测(C2 三 gate 均纯确定性函数)。
+    llm_used_for_prediction 是 run_query() 顶层键(非 structured_report.provenance 内),
+    与 test_t10_5_cross_module_consistency.py::test_c1_llm_never_used_for_prediction 断言口径一致。"""
+    out = run_query(dict(_ACCEPT), config=_CFG)
+    assert out["llm_used_for_prediction"] is False
+
+
+def test_c2_gate_path_deterministic_rerun(monkeypatch):
+    """Gate 触发路径(缺 hash)三跑 structured_report 字节等价(gate 确定性)。"""
+    from praxis_virtualcell.governance import provenance_hash as PH
+    orig = PH.compute_call_provenance
+    def broken(name, version, mi, out, ev):
+        pc = orig(name, version, mi, out, ev)
+        pc["input_hash"] = None
+        return pc
+    monkeypatch.setattr("praxis_virtualcell.predictors.base.compute_call_provenance", broken)
+    def _h(o):
+        return hashlib.sha256(
+            json.dumps(o, sort_keys=True, ensure_ascii=False, default=str).encode()).hexdigest()
+    outs = [run_query(dict(_ACCEPT), config=_CFG)["structured_report"] for _ in range(3)]
+    assert len({_h(o) for o in outs}) == 1
