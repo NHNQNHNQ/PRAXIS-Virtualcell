@@ -7,6 +7,7 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.governance.gate_util import apply_governance_gate
+from praxis_virtualcell.governance.provenance_completeness import check_report_provenance
 from praxis_virtualcell.governance.provenance_hash import check_call_provenance, compute_call_provenance
 from praxis_virtualcell.predictors.base import PredictorAgent
 from praxis_virtualcell.workflows.run_virtualcell_query import run_query
@@ -148,3 +149,47 @@ def test_gate_a_triggers_on_incomplete_call_provenance(monkeypatch):
     assert "incomplete_call_provenance" in sr["abstain_reasons"]
     g = sr["provenance"]["provenance_hash_gate"]
     assert g["gate_abstained"] is True and g["missing"]
+
+
+def test_check_report_provenance_complete():
+    rep = {"models_used": [], "models_rejected": [], "reliability": "low",
+           "provenance": {"n_messages": 3, "rules_referenced": [], "models_used": []}}
+    assert check_report_provenance(rep) == []
+
+
+def test_check_report_provenance_missing_top_and_prov_keys():
+    rep = {"models_used": [], "provenance": {"n_messages": 3}}
+    miss = check_report_provenance(rep)
+    assert "models_rejected" in miss and "reliability" in miss
+    assert "provenance.rules_referenced" in miss and "provenance.models_used" in miss
+
+
+def test_check_report_provenance_provenance_not_dict():
+    assert "provenance" in check_report_provenance({"models_used": [], "models_rejected": [],
+                                                    "reliability": "low", "provenance": None})
+
+
+def test_check_report_provenance_provenance_key_absent():
+    rep = {"models_used": [], "models_rejected": [], "reliability": "low"}  # 无 provenance 键
+    assert "provenance" in check_report_provenance(rep)
+
+
+def test_gate_b_healthy_report_no_trigger():
+    """活体验证:正常请求 provenance 契约完整 → Gate B 不触发(防御性 gate 罕触发的诚实证明)。"""
+    out = run_query(dict(_ACCEPT), config=_CFG)
+    sr = out["structured_report"]
+    assert "provenance_completeness_gate" not in sr["provenance"] or \
+        sr["provenance"]["provenance_completeness_gate"]["gate_abstained"] is False
+    assert sr["abstain"] is False
+
+
+def test_gate_b_triggers_on_missing_provenance_key(monkeypatch):
+    """monkeypatch check_report_provenance 返回非空 → Gate B fail-closed abstain(端到端接线验证)。"""
+    monkeypatch.setattr("praxis_virtualcell.core.runtime.check_report_provenance",
+                        lambda report: ["provenance.n_messages"])
+    out = run_query(dict(_ACCEPT), config=_CFG)
+    sr = out["structured_report"]
+    assert sr["abstain"] is True
+    assert "incomplete_provenance" in sr["abstain_reasons"]
+    g = sr["provenance"]["provenance_completeness_gate"]
+    assert g["gate_abstained"] is True and g["missing"] == ["provenance.n_messages"]

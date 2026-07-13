@@ -13,6 +13,7 @@ from praxis_virtualcell.core.exceptions import UnknownAgentError
 from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.governance.gate_util import apply_governance_gate
 from praxis_virtualcell.governance.module_consistency import check_module_plan
+from praxis_virtualcell.governance.provenance_completeness import check_report_provenance
 from praxis_virtualcell.governance.provenance_hash import check_call_provenance
 
 
@@ -137,6 +138,12 @@ class AgentRuntime:
         if hash_missing:
             apply_governance_gate(report, "incomplete_call_provenance",
                                   "provenance_hash_gate", {"missing": hash_missing})
+        # P10.C2 Gate B:provenance 完整性硬门(防御性类不变量,罕触发)。必需契约缺键 →
+        # fail-closed 对外 abstain。字段恒由代码构造,正常不触发;防未来重构漏挂。
+        prov_missing = check_report_provenance(report)
+        if prov_missing:
+            apply_governance_gate(report, "incomplete_provenance",
+                                  "provenance_completeness_gate", {"missing": prov_missing})
         if llm_cross_module is not None:
             report.setdefault("provenance", {})["llm_cross_module_notes"] = llm_cross_module
         # Phase 5:证据等级(插点 C)+ 主动学习(插点 D)旁路挂载。确定性零 LLM,advisory 不碰裁决。
