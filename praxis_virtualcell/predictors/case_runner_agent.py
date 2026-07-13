@@ -13,6 +13,7 @@ from praxis_virtualcell.predictors.case_dispatch import dispatch_runner, map_cas
 
 class CaseRunnerPredictorAgent(PredictorAgent):
     name = "CaseRunner"
+    model_version = "case_runner"          # 早退分支(reject/failed)兜底;成功分支仍用真实 engine
 
     def prepare_input(self, request: dict, brain_context: dict) -> dict:
         return {"request": request}          # adapter 需完整 request(route+dispatch 用)
@@ -45,5 +46,6 @@ class CaseRunnerPredictorAgent(PredictorAgent):
             "uncertainty": {"disposition": report.reliability_decision["disposition"],
                             "caution_flags": report.reliability_decision["caution_flags"]},
             "evidence": list(report.provenance_boundary.get("rules_hit", [])),
-            "provenance": {**report.provenance_boundary, "case_id": report.case_id, "engine": engine},
+            "provenance": {**report.provenance_boundary, "case_id": report.case_id,
+                           "engine": engine, "model_version": engine},
         }

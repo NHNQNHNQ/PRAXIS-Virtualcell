@@ -25,6 +25,11 @@ class ProvenanceAgent(BaseAgent):
             "critic_violations": p.get("critic_violations", []),
             # B1:机制 predictor 的 disposition caution(如 targets_not_in_gem)如实透出
             "model_cautions": p.get("model_cautions", {}),
+            # C2:per-call hash 汇总(每个 result 的 per_call → {agent_name: per_call})。
+            # 只汇总,不裁决;供 Gate A 校验 models_used 完整性。
+            "per_call_hashes": {r.get("agent_name"): (r.get("provenance") or {}).get("per_call")
+                                for r in p.get("results", [])
+                                if (r.get("provenance") or {}).get("per_call")},
         }
         bus.send(AgentMessage(message.message_id + ":prov", self.name, "Report",
             "provenance_done", {**p, "provenance": provenance}, message.timestamp,

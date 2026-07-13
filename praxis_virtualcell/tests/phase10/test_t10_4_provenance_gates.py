@@ -1,6 +1,13 @@
 """P10.C2 provenance 完整性硬门 + per-call hash + 越界 cell type abstain 测试。
 三 gate 全 C1 模式(runtime 后处理 override,不碰 reliability/critic 裁决数值)。"""
+import hashlib
+import json
+
+from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
+from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.governance.provenance_hash import check_call_provenance, compute_call_provenance
+from praxis_virtualcell.predictors.base import PredictorAgent
 from praxis_virtualcell.workflows.run_virtualcell_query import run_query
 
 _CFG = RuntimeConfig(mode=Mode.OFFLINE)
@@ -18,3 +25,80 @@ def test_baseline_accept_report_healthy():
     prov = sr["provenance"]
     for f in ("rules_referenced", "models_used", "n_messages"):
         assert f in prov, f"provenance 缺基础字段 {f}"
+
+
+def test_compute_call_provenance_deterministic():
+    a = compute_call_provenance("MockLinear", "mock:MockLinear", {"targets": ["AHR"]},
+                                {"delta": [0.0]}, ["mock"])
+    b = compute_call_provenance("MockLinear", "mock:MockLinear", {"targets": ["AHR"]},
+                                {"delta": [0.0]}, ["mock"])
+    assert a == b
+    assert set(a) == {"model_name", "model_version", "input_hash", "output_hash", "evidence_source"}
+    assert a["model_name"] == "MockLinear"
+    assert a["model_version"] == "mock:MockLinear"
+    assert len(a["input_hash"]) == 64 and len(a["output_hash"]) == 64
+
+
+def test_compute_call_provenance_input_sensitive():
+    a = compute_call_provenance("X", "v1", {"targets": ["AHR"]}, {"delta": [0.1]}, [])
+    b = compute_call_provenance("X", "v1", {"targets": ["TP53"]}, {"delta": [0.1]}, [])
+    assert a["input_hash"] != b["input_hash"]
+
+
+def test_check_call_provenance_complete_and_missing():
+    ok = compute_call_provenance("X", "v1", {"a": 1}, {"b": 2}, [])
+    assert check_call_provenance(ok) == []
+    assert "model_version" in check_call_provenance({**ok, "model_version": None})
+    assert "model_name" in check_call_provenance({})
+    assert check_call_provenance("not_a_dict") == ["model_name", "model_version",
+                                                   "input_hash", "output_hash"]
+
+
+def test_per_call_hashes_in_report_for_used_models():
+    out = run_query(dict(_ACCEPT), config=_CFG)
+    sr = out["structured_report"]
+    pch = sr["provenance"]["per_call_hashes"]
+    assert sr["models_used"], "accept 请求应有 models_used"
+    for name in sr["models_used"]:
+        assert name in pch, f"{name} 缺 per_call_hashes"
+        pc = pch[name]
+        assert pc["model_name"] == name
+        assert pc["model_version"]
+        assert len(pc["input_hash"]) == 64 and len(pc["output_hash"]) == 64
+
+
+def test_per_call_hash_offline_byte_equal_rerun():
+    def _h(o): return hashlib.sha256(
+        json.dumps(o, sort_keys=True, ensure_ascii=False, default=str).encode()).hexdigest()
+    outs = [run_query(dict(_ACCEPT), config=_CFG)["structured_report"] for _ in range(3)]
+    assert len({_h(o) for o in outs}) == 1, "per_call hash 后 structured_report 三跑仍须字节等价"
+
+
+class _BoomPredictor(PredictorAgent):
+    """run_prediction 抛异常 → 走 handle 的 failed 分支。带 model_version 兜底。"""
+    name = "BoomPredictor"
+    model_version = "mock:BoomPredictor"
+
+    def run_prediction(self, model_input: dict) -> dict:
+        raise RuntimeError("boom")
+
+
+def test_failed_branch_per_call_model_version_not_none():
+    """failed 分支 per_call.model_version 走类属性兜底,须非 None(审查遗漏边界)。"""
+    bus = MessageBus()
+    bus.send(AgentMessage("b1", "SpeciesBrain", "X", "brain_retrieved", {}, "t0"))
+    bc = {"species": "human", "species_supported": True,
+          "model_applicability": {"BoomPredictor": {"supported_species": ["human"],
+              "supported_modalities": ["scRNA"], "supported_tasks": ["predict_delta_expression"],
+              "supported_perturbations": ["gene"]}}}
+    req = {"species": "human", "input_modality": "scRNA",
+           "task_type": "predict_delta_expression", "perturbation_type": "gene",
+           "perturbation_targets": ["AHR"]}
+    _BoomPredictor().handle(
+        AgentMessage("m1", "X", "BoomPredictor", "predict",
+                     {"request": req, "brain_context": bc}, "t1"), bus)
+    out = bus.latest("predictor_result").payload
+    assert out["status"] == "failed"
+    pc = out["provenance"]["per_call"]
+    assert pc["model_version"] == "mock:BoomPredictor", "failed 分支 model_version 须走兜底非 None"
+    assert len(pc["input_hash"]) == 64 and len(pc["output_hash"]) == 64

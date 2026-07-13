@@ -9,10 +9,16 @@ from praxis_virtualcell.core.agent import BaseAgent
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.exceptions import RetrieveBeforePredictError
 from praxis_virtualcell.core.message import AgentMessage, PredictorResultMessage
+from praxis_virtualcell.governance.provenance_hash import compute_call_provenance
 
 
 class PredictorAgent(BaseAgent):
     name = "PredictorAgent"
+    model_version: str | None = None
+
+    def _call_version(self, out: dict) -> str | None:
+        """per_call model_version:优先引擎动态 version(run_prediction 产出),否则类属性。"""
+        return (out.get("provenance") or {}).get("model_version") or self.model_version
 
     def assess_applicability(self, request: dict, brain_context: dict) -> tuple[float, str | None]:
         """返回 (score, rejection_reason)。reason 非 None 表示拒。"""
@@ -50,32 +56,41 @@ class PredictorAgent(BaseAgent):
         bc = message.payload["brain_context"]
         score, reject = self.assess_applicability(req, bc)
         if reject is not None:
+            pc = compute_call_provenance(self.name, self.model_version, req, None, [reject])
             self._emit(bus, message, PredictorResultMessage(
                 agent_name=self.name, status="rejected", prediction=None, uncertainty=None,
                 applicability_score=score, evidence=[reject], rejection_reason=reject,
-                provenance={"rules": bc.get("rules_referenced", [])}))
+                provenance={"rules": bc.get("rules_referenced", []), "per_call": pc}))
             return
+        model_input: dict = {}
         try:
-            out = self.run_prediction(self.prepare_input(req, bc))
-        except Exception as e:  # noqa: BLE001 — mock 阶段把异常归为 failed
+            model_input = self.prepare_input(req, bc)
+            out = self.run_prediction(model_input)
+        except Exception as e:  # noqa: BLE001 — prepare_input/run_prediction 异常均归 failed(故障隔离)
+            pc = compute_call_provenance(self.name, self.model_version, model_input, None, [])
             self._emit(bus, message, PredictorResultMessage(
                 agent_name=self.name, status="failed", prediction=None, uncertainty=None,
                 applicability_score=score, evidence=[], rejection_reason=None,
-                provenance={"error": str(e)}))
+                provenance={"error": str(e), "per_call": pc}))
             return
         status, reject_reason = self._result_status(out)
+        version = self._call_version(out)
         if status != "success":
+            pc = compute_call_provenance(self.name, version, model_input, None,
+                                         out.get("evidence", []))
             self._emit(bus, message, PredictorResultMessage(
                 agent_name=self.name, status=status, prediction=None,
                 uncertainty=out.get("uncertainty"), applicability_score=score,
                 evidence=out.get("evidence", []), rejection_reason=reject_reason,
-                provenance=out.get("provenance", {})))
+                provenance={**out.get("provenance", {}), "per_call": pc}))
             return
+        pc = compute_call_provenance(self.name, version, model_input, out["prediction"],
+                                     out.get("evidence", []))
         self._emit(bus, message, PredictorResultMessage(
             agent_name=self.name, status="success", prediction=out["prediction"],
             uncertainty=out.get("uncertainty"), applicability_score=score,
-            evidence=out.get("evidence", []),
-            rejection_reason=None, provenance=out.get("provenance", {})))
+            evidence=out.get("evidence", []), rejection_reason=None,
+            provenance={**out.get("provenance", {}), "per_call": pc}))
 
     def _emit(self, bus: MessageBus, src: AgentMessage, result: PredictorResultMessage) -> None:
         bus.send(AgentMessage(

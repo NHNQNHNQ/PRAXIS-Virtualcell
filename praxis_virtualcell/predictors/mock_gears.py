@@ -6,6 +6,7 @@ from praxis_virtualcell.predictors.base import PredictorAgent
 
 class MockGEARSAgent(PredictorAgent):
     name = "MockGEARS"
+    model_version = "mock:MockGEARS"
 
     def assess_applicability(self, request: dict, brain_context: dict):
         score, reject = super().assess_applicability(request, brain_context)
