@@ -1,0 +1,316 @@
+# P10.C4 未受信 LLM JSON 白名单化 + 溯源契约 设计 spec
+
+**定位**:C3 收口续作(同一失效模式、同一函数、同一批文件)。修 main 上一个活的生产 bug,并把
+C3 Task 7 漏掉的那一层根治掉。产出直接服务 D 单元(D 有大量"全覆盖"性质的主张要核验)。
+
+**基线**:main = HEAD = `c050f8a`,分支 `feat/v0.9-phase0-module-core`。
+
+---
+
+## 1. 目标与背景
+
+### 1.1 活 bug(main 上,生产可达,已复现)
+
+```
+PYTHONPATH=$PWD .venv/bin/python -c "
+from praxis_virtualcell.workflows.run_virtualcell_query import validate_candidate
+validate_candidate({'species':'human','perturbation_type':'gene','perturbation_targets':['AHR'],
+                    'task_type':'predict_delta_expression',
+                    'requested_outputs':[['delta_expression']]})"
+# → TypeError: unhashable type: 'list'   (元素为 dict 时:unhashable type: 'dict')
+```
+
+根因 `run_virtualcell_query.py:57`:`isinstance` 只守了**容器**,没守**元素**;
+`o in ALLOWED_OUTPUTS`(ALLOWED_OUTPUTS 是 **set**)对 unhashable 元素抛 TypeError。
+
+### 1.2 这次要根治的失效模式(五次复发,最后一次漏到 main)
+
+| # | 单元 | 谁抓到 | 漏了什么 | 根因层级 |
+|---|---|---|---|---|
+| 1 | C2 | opus final review | spec §5 predictor 枚举漏 MLBackedPredictorAgent → Gate A 误伤远端真 ML | 手工枚举 **predictor 清单** |
+| 2 | C3 | 代码质量审(per-task 两审) | safety_contract 自承"复刻 LLMRouter"、抄时修了漏洞却未回填原件 | **修复未回填** |
+| 3 | C3 | opus final review(自行 grep) | spec §2 手工枚举漏 cross_module_reasoner + parse_query | **入口**是手工清单 |
+| 4 | C3 | fresh 复审(66 组合枚举) | Task 6 编辑了 validate_candidate 却只修 assumptions,漏 perturbation_targets | **字段**是手工清单 |
+| 5 | main(活的) | 无人;本单元勘察复现 | 见 §1.1 + §2.2 | **畸形类型**是手工清单 |
+
+C3 spec §8 修正 4b 的最终教训是"**双层**机械枚举(入口 × 字段)"。**本单元勘察证明双层仍不够**:
+Task 7 照做了 11 字段 × 6 畸形 = 66 组合机械枚举,仍漏掉两层 —— 见 §2.3。
+
+---
+
+## 2. 勘察确立的事实地基(全部实测,2026-07-15)
+
+### 2.1 真实基线(订正全仓文档的既有错误)
+
+- **稳定基线 = 850 passed / 40 skipped / 9 deselected / 0 failed**(`-m "not llm"`,实测)。
+- 台账 `UPGRADE-PROGRESS.md`、`memory/*`、C3 commit message 全写 **858/40/0 —— 是错的**。根因:858 是某次收官
+  会话里 1 条真实网络 LLM 测试 fail 后"按红线扣除"的净值,不是任何一次真实运行的原始输出。
+- 仓库有 **9 条 `@pytest.mark.llm` 真实网络测试**(本机 `.env` 有 key → 全真跑,网络挂时是 **FAIL 不是 skip**)。
+  故**"看退出码"会给假红**,须靠 `short test summary info` 的测试名区分真红/网络红。
+- `memory/phase10-deep-validation.md` 写 main=61709b3,**实际 c050f8a**(以 git 为准)。
+- **本单元订正这些数字(Task 0)。**
+
+### 2.2 活 bug 的真实严重性(比"只 500 不破裁决"更重)
+
+崩溃类 2 个(→ `/api/parse` 500);**静默污染类 5 个,全部 `schema_valid=True` 且发明假基因名**:
+
+| 输入 `perturbation_targets` | 输出 normalized | schema_valid |
+|---|---|---|
+| `[None,'AHR']` | `['NONE','AHR']` ← **凭空发明基因 NONE** | True |
+| `[['AHR']]` | `["['AHR']"]` | True |
+| `[{'g':'AHR'}]` | `["{'G': 'AHR'}"]` | True |
+| `[123]` / `[True]` | `['123']` / `['TRUE']` | True |
+
+污染类与 C3 #4(`"AHR"`→`['A','H','R']`)**同性质**:系统声称解析成功但实际解析错了,产物带
+`schema_valid=True` 返前端,用户确认后内核真按假基因名跑。**这不是 500,是诚实性缺陷。**
+根因 `:54` 的 `str(t)` —— 对**任何**对象都成功,所以 **try/except 兜不住污染类**,必须元素级类型守卫。
+
+### 2.3 层级递归:双层不够,实际有四层
+
+- 层1 **入口**(#3 漏)→ 层2 **字段**(#4 漏)→ 层3 **畸形类型**(#5 漏)→ 层4 **后果类型**(至今活着)
+
+Task 7 的 66 组合枚举了 11 字段 × 6 畸形,但:
+- **6 种畸形类型是手工挑的** → 全是**容器级**(`"AHR"` / `123` / 非 dict),**无一个元素级**(list 里装 list/dict/None)→ 漏层3。
+- **判据是手工挑的** → 只有"零崩溃"和"零字符拆"两种后果,**没有"零发明"** → 漏层4。
+  所以 `[None,'AHR']→['NONE','AHR']` 穿过了 66 组合、19 组合复验、opus final review、850 全绿,活到今天。
+
+**教训升级(D 单元必带)**:枚举**输入侧**(入口×字段×畸形类型)是无底递归 —— 每加一层,下一层立刻成为新漏点。
+**出路是换到输出侧写契约**,见 §4.2。
+
+### 2.4 生产可达性(prompt 只列了一个消费点,实测有两个)
+
+`validate_candidate` 的**非测试**消费点:
+1. `praxis_vc_api/main.py:37` `@app.post("/api/parse")` → `runtime_service.py:44 parse_query()` → `validate_candidate()`。
+   全链无 try/except;且 `validate_candidate(cand)` 在 parse_query 的 try 块**外面**(`:147`)→ **FastAPI 500**。
+2. `praxis_vc_web/app.py:75-76`(Streamlit 界面,`praxis-vc web` 可启)。
+
+**触发条件**:`mode=llm_assisted` 且有 key(`config_for()` :31-34)→ `llm_enabled=True` → `cand = json.loads(LLM 响应)`。
+**OFFLINE 恒安全**(cand 由 `_deterministic_parse` 内部构造)。LLM 返嵌套数组是自然错误,非对抗构造。
+
+### 2.5 决定性架构证据:同一畸形,三个消费点命运不同
+
+| 消费点 | 机制 | 元素级畸形结果 |
+|---|---|---|
+| `llm_router.py:44` | `if a in candidates`(**值白名单**,candidates 是 **list** → `in` 用 `==` 不需 hash) | **天然安全** |
+| `safety_contract.py:54-65` `sanitize_llm_plan` | **整段 try 捕获 TypeError** | **天然安全**,fail-closed 保 primary |
+| `validate_candidate` | 逐字段 `isinstance` 黑名单 + **无 try** | 崩 + 污染 |
+
+**对照实验(实测)**:同型畸形喂 `sanitize_llm_plan` → `risk_flags=['llm_parse_failed']` 保 primary,不崩;
+裸调它内部的 `filter_to_supported_modules([['gene_hub']], cands)` → `TypeError: unhashable type: 'list'`。
+**崩点真实存在,只是被 try 兜住了。** 且 `sanitize_llm_plan` 的作者**从未枚举过"元素是 list"这种畸形**
+(注释只写了"非可迭代标量(如 123)")—— **except 不需要知道畸形长什么样**。
+
+**结论**:黑名单思维(挡已知坏的)→ 必然递归手工清单;白名单思维(只收契约内的,其余全丢)→
+畸形类型全集**根本不需要枚举**,因为"其余"是补集。**项目里已有两个正确先例,本单元跟随它们,不引入新抽象。**
+
+### 2.6 姊妹缺口(层2 机械枚举,形状 predicate 精确)
+
+`list(x) if isinstance(x, list) else []` —— 容器守了、元素没守。**6 处同型**:
+
+| # | 位置 | 字段 | 实测 |
+|---|---|---|---|
+| 1 | `llm_router.py:49` | risk_flags | 元素任意 |
+| 2-3 | `llm_critic.py:39-40` | notes / flags | 元素任意 |
+| 4-5 | `cross_module_reasoner.py:45-46` | notes / flags | 元素任意 |
+| 6 | `safety_contract.py:62` | risk_flags | 实测 `[{'evil':1},['nested'],None]` 原样透传 |
+
+后果:元素级畸形原样进 **provenance**(不崩、**不碰裁决**、per-call hash 仍确定性)。
+影响面小,但 provenance 是 paper 要引用的审计产物 → 用户 2026-07-15 拍板**本单元一起修**
+(理由:C3 教训 #2 正是"同型缺口未回填")。
+
+### 2.7 层1 无机械判据(残余风险,必须诚实标注)
+
+三个独立 predicate 交叉枚举,**没有一个能单独找全**:
+
+| predicate | 漏掉 | 噪声 |
+|---|---|---|
+| `\.complete\(` | **`safety_contract.py`**(接收 raw_content 参数,不自己调 LLM) | 无 |
+| `json\.loads\(` | 无 | 20+ 个读**本地数据集**的无关文件(predictors/job_store/registry…) |
+| `isinstance\(.*list\)` | `module_planner` / `llm_report` | `core/request.py` / `registry.py` 等 |
+
+`.complete(` 恰恰漏掉 `safety_contract.py` —— 而那正是 sanitize 正确实现的所在地。
+**"哪些函数消费未受信 LLM JSON"是语义问题,无机械判据。** 本单元的入口集由三 predicate 并集 + 人工判断确定,
+**这是残余风险,收官文档/paper 不得声称"全覆盖"**(表述见 §8)。
+
+**这也是"登记表 + scan 比对"方案被否决的根因的独立复证**:scan predicate 会编码错误假设
+(`.complete(` 编码了"入口 = LLM client 调用点"),而该假设不在登记表里 —— 变绿反而获得权威外观。
+
+### 2.8 无自动执行面(核实属实)
+
+`.github/workflows/ci.yml` 触发条件 `on: [push, pull_request]`,而红线是**不 push**;
+`origin/main` 停在 `7fc4aa5`(v0.8),`origin/main..main = 304` —— **最近 304 个 commit 从未触发过 CI**;
+且该 workflow 跑的正是被禁的裸 `pytest`。`.git/hooks` 下无自定义 hook。
+**唯一执行面 = 收官前的本地全量回归。** 本单元**不新建 hook/CI**(那是独立决策,不在本单元范围)。
+
+---
+
+## 3. 范围(用户 2026-07-15 三拍板)
+
+**做**:
+1. **白名单重写 `validate_candidate` + 溯源契约**(拍板1)—— 元素级只接受 `str`,其余丢弃(**不 `str()` 强转**);
+   配"不发明数据"溯源契约断言。同时消灭崩溃类 + 污染类。
+2. **姊妹 6 处同型缺口一起修**(拍板3)。
+3. **订正基线数字**(台账 + memory + 本 spec)。
+
+**不做(明列)**:
+- **不引入 hypothesis / 不建生成式 fuzz 工程**(拍板2)。理由见 §5.1。
+- **不做全仓 sanitize 层重构**(回归面大,且层1 仍无法机械根治)。
+- **不新建 hook/CI 执行面**(§2.8;独立决策)。
+- **不动 #1(predictor 域)、#2(修复未回填)、#3(入口清单)** —— 本单元只根治 #4/#5 所在的层2/3/4。
+
+---
+
+## 4. 架构设计
+
+### 4.1 白名单实现(跟随 §2.5 的两个既有先例)
+
+`validate_candidate` 三处改元素级白名单:
+
+```python
+# targets:只接受 str,其余丢弃 —— 不 str() 强转(强转 = 发明数据)
+targets = [t.strip() for t in targets if isinstance(t, str) and t.strip()] if isinstance(targets, list) else []
+# outputs:元素级类型守 + 值白名单(isinstance 短路在 `o in set` 之前 → unhashable 不再崩)
+outputs = [o for o in _raw_outputs if isinstance(o, str) and o in ALLOWED_OUTPUTS] if isinstance(_raw_outputs, list) else []
+# assumptions:只接受 str 元素(收紧:现状 list(x) 元素任意)
+assumptions = [a for a in _raw_assumptions if isinstance(a, str)] if isinstance(_raw_assumptions, list) else []
+```
+
+**原型已验证 7/7 已知实例**(实测):`"AHR"`→`[]`、`[None,'AHR']`→`['AHR']`、`[['AHR']]`→`[]`、
+`[{'g':'AHR'}]`→`[]`、`[123]`→`[]`、`[True]`→`[]`、`['AHR']`→`['AHR']`(合法零回归);
+两个崩溃实例均 NO CRASH。
+
+**"部分丢弃"语义(设计决策)**:`[None,'AHR']` → `['AHR']`(保留合法元素、丢弃畸形元素),而非整体 fail。
+理由:①满足溯源契约(既不发明 `'NONE'`、也不丢真数据 `'AHR'`);②全部元素被丢时 `targets=[]` →
+既有 `missing.append("perturbation_targets")` 校验触发 → `schema_valid=False` → **fail-closed**,
+与 Task 7 对 `"AHR"` 的既有语义一致;③**与 `llm_router:44` 的 `if a in candidates` 语义完全一致**
+(静默丢弃越界元素、不报错)—— 跟随既有先例。
+
+### 4.2 溯源契约(输出侧,不枚举输入侧)——本单元的核心贡献
+
+```
+契约:validate_candidate 对任意输入,若 schema_valid=True,
+     则 normalized["perturbation_targets"] 的每个元素,
+     必须溯源自输入 list 里的某个 str 元素(经声明的归一化:strip + 大小写)。
+     形式化:set(normalized_targets) ⊆ {norm(s) for s in raw if isinstance(s, str)}
+```
+
+**为什么这一条能替代无底的输入侧枚举**:它是**输出侧**断言 —— 不问"输入可能有多畸形",
+只问"输出有没有凭空多出东西"。一个断言同时覆盖已知全部四类后果:
+
+| 后果 | 实例 | 契约为何抓得到 |
+|---|---|---|
+| 字符拆(C3 #4) | `"AHR"`→`['A','H','R']` | `'A'` 不溯源自任何输入 str 元素 |
+| 发明(层4,现存) | `[None,'AHR']`→`['NONE','AHR']` | `'NONE'` 不溯源自 `None` |
+| 嵌套(层3,现存) | `[['AHR']]`→`["['AHR']"]` | `"['AHR']"` 不溯源自 `['AHR']`(那是 list 不是 str) |
+| 崩溃(#5) | `[['x']]` in set | 契约求值前先崩 → 测试红 |
+
+**诚实边界**:契约只适用于**有溯源语义的字段**(`perturbation_targets`)。
+`requested_outputs` 是**值白名单**(输出 ⊆ ALLOWED_OUTPUTS,更强);`assumptions` 是**类型过滤**(元素恒 str)。
+三者判据不同,不得统称"溯源契约"。
+
+### 4.3 边界 try(defense-in-depth,**非死码**)
+
+`validate_candidate` 整体包一层 try,捕获 `(TypeError, AttributeError, ValueError)` → 返回
+`schema_valid=False` + `errors=["candidate_malformed"]`,**绝不让 public 函数把未预见异常透给 `/api/parse`**。
+
+**它不是空壳,有真实可达路径(实测)**:`:83` 的 `json.dumps(d, sort_keys=True, ...)` 对**混合类型 key**
+抛 `TypeError: '<' not supported between instances of 'str' and 'int'` ——
+实测 `json.dumps({1:'a','b':2}, sort_keys=True)` 确实抛。`validate_candidate` 是 public 函数(2 个消费点),
+非 JSON 来源的 dict 可含非 str key。**Task 必须为此写一条真触发 except 分支的测试**;
+若 TDD 阶段证明不可达 → **不加 try**(避免死码),并在 §8 如实记录。
+
+### 4.4 姊妹 6 处(§2.6)
+
+统一改 `[x for x in v if isinstance(x, str)] if isinstance(v, list) else []`。
+**只收紧结构、不改语义**:产物只进 provenance,不碰裁决;`llm_router:44-47` 的 `recommended/excluded_agents`
+**不动**(已是值白名单,天然安全)。
+
+### 4.5 为什么不违红线
+
+- 只改**输入侧结构守卫**,`reliability.py` / `critic.py` 裁决逻辑与数值**零改**;核心内核 + 根 `tests/` **零触碰**。
+- OFFLINE 路径 cand 由 `_deterministic_parse` 内部构造(恒 `list[str]`)→ 白名单对其**恒等** → **字节等价不变**。
+- 合法输入零回归(§4.1 原型实证 `['AHR']`→`['AHR']`)。
+- `llm_used_for_prediction` 是 `run_query` 返回键(`:188`)恒 False,本单元不碰。
+
+---
+
+## 5. 关键风险与前置验证
+
+### 5.1 风险:本单元被证伪(勘察挡下无收益工程是本项目传统)
+
+用户拍板**不引入 hypothesis**,三条理由已勘察证成:
+1. **白名单实现后 fuzz 主价值贬值** —— 没有"畸形类型全集"要找了(§2.5)。
+2. **property 本身是手工的(层4)** —— fuzz 找到 #5 只因"不崩"是免费 property;它找不到"发明数据",
+   除非人先想到写那个 property。**fuzz 把手工清单推后一层,正是本单元诊断的失效模式本身。**
+3. 未装 = 新依赖;随机性与 OFFLINE 确定性红线有张力(`derandomize` 会退化成固定用例集,反而失去自动探索价值)。
+
+### 5.2 风险:改 `assumptions` 为"只接受 str"是行为收紧
+
+现状 `list(_raw_assumptions)` 元素任意。收紧后 dict/list 元素被丢。
+**前置验证(Task 0)**:全量回归确认无既有测试依赖非 str assumptions。
+
+### 5.3 风险:层1 残余(§2.7)
+
+无法消除。**缓解**:三 predicate 并集 + 人工判断 + §8 诚实标注。**不得声称"全覆盖"。**
+
+---
+
+## 6. 红线(全程不可破)
+
+1. 核心内核(`core/message.py`/`bus.py`/`agent.py`)+ 仓库根 `tests/` **零触碰**。
+2. `agents/reliability.py` / `agents/critic.py` 裁决逻辑与数值**零改**。
+3. 测试口径显式:`PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -p no:cacheprovider`,
+   **绝不裸跑 pytest**。稳定基线用 `-m "not llm"`。新测试落 `praxis_virtualcell/tests/phase10/`。
+4. OFFLINE 确定性字节等价(同请求多跑一致)。
+5. 诚实不伪造:能力边界须在代码 docstring + spec 如实标注;**不得为凑绿弱化断言**(实际行为与预期不符 → 先报告)。
+6. **不 push**;commit trailer 恒 `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`。
+7. **前端 WIP 全程隔离**:`praxis_vc_react/src/styles/{base,fonts,themes,tokens}.css`(M)+ `.claude/`、
+   `.playwright-mcp/`、`string.jpeg`(??)**绝不 stage/touch/revert**。每次 `git add` 只显式列本 task 的后端文件。
+
+---
+
+## 7. 测试(落 `praxis_virtualcell/tests/phase10/test_t10_7.py`)
+
+> `test_t10_{1,2,4,5,6}.py` 已存在;`t10_3` 是 D 的交付物,**本单元不占用** → 用 `t10_7`。
+> (若 D 的 playwright e2e 也想叫 T10.7,收官时在台账注明本文件是 C4 的,由 D 另取名。)
+
+1. **溯源契约**(§4.2)—— 参数化跑过全部 7 个已知实例 + 合法输入,断言
+   `schema_valid=True ⟹ set(normalized_targets) ⊆ {norm(s) for s in raw if isinstance(s,str)}`。
+2. **崩溃类**:`requested_outputs=[['delta_expression']]` / `[{'a':1}]` → 不抛异常(**修复前红**)。
+3. **发明类**:`perturbation_targets=[None,'AHR']` → `'NONE'` **不得**出现在 normalized(**修复前红**)。
+4. **fail-closed**:全部元素畸形 → `targets=[]` → `schema_valid=False` + `missing_fields` 含 `perturbation_targets`。
+5. **合法零回归**:`['AHR']`→`['AHR']`、`requested_outputs=['delta_expression']` 原样保留。
+6. **边界 try 有牙**(§4.3):构造真触发 except 的输入,断言返回 `schema_valid=False` 而非抛异常。
+7. **姊妹 6 处**:各断言元素级畸形被丢弃、合法元素保留(§4.4)。
+8. **OFFLINE 字节等价**:同请求多跑一致(白名单对 `_deterministic_parse` 产物恒等)。
+
+**变异要求**:每条断言须证"有牙"(改坏实现会红)。**永真断言 = 空壳,必须变异证伪**(C3 T10.6 的教训)。
+
+---
+
+## 8. 诚实边界(收官文档 / paper 引用须照此表述,不得夸大)
+
+1. **不得声称"全覆盖未受信 LLM JSON 消费点"**。层1(哪些函数消费未受信输入)**无机械判据**(§2.7):
+   `.complete(` 漏 `safety_contract`,`json.loads` 混进 20+ 无关文件,`isinstance` 漏 `module_planner`/`llm_report`。
+   本单元入口集 = **三 predicate 并集 + 人工判断**,属残余风险。
+2. **溯源契约只适用于 `perturbation_targets`**(有溯源语义的字段);`requested_outputs` 是值白名单、
+   `assumptions` 是类型过滤 —— 三者判据不同,**不得统称"溯源契约"**(§4.2)。
+3. **本单元不解决 #1/#2/#3**(predictor 域枚举 / 修复未回填 / 入口清单),只根治 #4/#5 所在的层2/3/4。
+   **五次失效里本单元覆盖两次。**
+4. **"850/40/0"是 `-m "not llm"` 的稳定基线**;含 9 条真实网络 LLM 测试时数字随网络浮动。
+   **858/40/0 是全仓既有错误**(按红线扣除的净值,非任何一次真实运行输出),本单元订正。
+5. 边界 try(§4.3)属**防御性 fail-closed**,若 TDD 证明不可达则不加 —— 收官须如实记录实际做法。
+6. **`str()` 强转是本类 bug 的通用根因**:它对任何对象都成功,所以 **try/except 兜不住污染类**。
+   凡"用 isinstance 守住了未受信输入"的主张,须区分**容器级**与**元素级**。
+
+---
+
+## 9. Self-Review(占位符/一致性/范围/歧义)
+
+- **占位符**:无 TBD/TODO。§4.3 的 try 去留有明确判据(TDD 可达性)+ §8.5 兜底记录要求。
+- **一致性**:§4.1"部分丢弃"与 §4.2 溯源契约一致(丢畸形元素不违反"不发明");
+  §4.5 字节等价与 §6.4 红线一致;§3"不引入 hypothesis"与 §5.1 三条理由一致;
+  §7 用 `t10_7` 与 §7 脚注(不占用 D 的 t10_3)一致。
+- **范围**:聚焦用户三拍板;fuzz/全仓重构/新建 CI 执行面/#1#2#3 明列不做。
+- **歧义**:§4.2 明确"溯源契约"仅指 `perturbation_targets`,另两字段判据已分别命名;
+  §2.7 明确"层1 无机械判据"是残余风险而非可消除项。
