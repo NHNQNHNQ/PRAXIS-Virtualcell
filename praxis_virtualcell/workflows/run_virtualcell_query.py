@@ -48,6 +48,10 @@ def validate_candidate(cand: dict) -> dict:
     targets = [str(t).strip() for t in (targets or []) if str(t).strip()]
     task = str(d.get("task_type") or d.get("task", "")).strip().lower() or "predict_delta_expression"
     outputs = [o for o in (d.get("requested_outputs") or []) if o in ALLOWED_OUTPUTS]
+    # 同守卫:assumptions 非 list(如字符串)不逐字符拆(见 parse_query 同类修复,cand 可能来自
+    # 未受信 LLM JSON)。
+    _raw_assumptions = d.get("assumptions")
+    assumptions = list(_raw_assumptions) if isinstance(_raw_assumptions, list) else []
 
     if not species:
         missing.append("species")
@@ -74,7 +78,7 @@ def validate_candidate(cand: dict) -> dict:
         "input_modality": d.get("input_modality") or "scRNA",
         "output_modality": d.get("output_modality") or "delta_expression",
         "task_type": task, "cell_type": d.get("cell_type"),
-        "metadata": {"requested_outputs": outputs, "assumptions": list(d.get("assumptions") or [])},
+        "metadata": {"requested_outputs": outputs, "assumptions": assumptions},
     }
     schema_valid = not missing and not errors
     return {"schema_valid": schema_valid, "missing_fields": missing, "errors": errors,
@@ -100,6 +104,7 @@ def _deterministic_parse(text: str) -> dict:
 def parse_query(text: str, *, config: RuntimeConfig | None = None) -> dict:
     """自然语言 → candidate_request + 校验结果 + parser 元数据。OFFLINE 不调 LLM。"""
     cfg = config or RuntimeConfig.from_env()
+    assert_llm_boundaries(cfg)                # C3 全入口守卫(此前只有 run_query/free-text 覆盖)
     llm_used = fallback_used = False
     llm_metadata: dict = {}
     cand = None
@@ -117,9 +122,16 @@ def parse_query(text: str, *, config: RuntimeConfig | None = None) -> dict:
         if content:
             try:
                 cand = json.loads(content)
+                # C3 全入口守卫(opus 终审补漏):cand.get 要求 cand 是 dict——JSON 顶层为
+                # list/数字/字符串/bool/None 时(注入/畸形产物)天然抛 AttributeError,
+                # 与下方 assumptions 的 isinstance 守卫共用同一 except,fail-closed 落回
+                # _deterministic_parse,不让 /api/parse 端点因未捕获异常 500。
+                raw_assumptions = cand.get("assumptions")
                 llm_used = True
-                assumptions = list(cand.get("assumptions") or [])
-            except json.JSONDecodeError:
+                # 只接受 list(非 list 丢弃置 [],绝不把字符串逐字符拆成 ['a','b','c']
+                # 直接返给前端用户,复刻 llm_critic.py/safety_contract.py 同一手法)。
+                assumptions = list(raw_assumptions) if isinstance(raw_assumptions, list) else []
+            except (json.JSONDecodeError, TypeError, AttributeError):
                 cand = None
     if cand is None:
         cand = _deterministic_parse(text)
