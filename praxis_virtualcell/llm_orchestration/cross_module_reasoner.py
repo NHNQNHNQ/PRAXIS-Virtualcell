@@ -45,7 +45,8 @@ class LLMCrossModuleReasoner(BaseAgent):
                 # C4 元素级白名单(同 llm_critic.py):容器守了、元素没守。
                 out["notes"] = [n for n in notes if isinstance(n, str)] if isinstance(notes, list) else []
                 out["flags"] = [f for f in flags if isinstance(f, str)] if isinstance(flags, list) else []
-            except (json.JSONDecodeError, TypeError, AttributeError):
+            # C4 修正 11:回填 RecursionError(同 llm_critic.py:43,机械枚举 7 处之一)。
+            except (json.JSONDecodeError, TypeError, AttributeError, RecursionError):
                 out["flags"] = ["llm_parse_failed"]
         else:
             out["flags"] = ["llm_unavailable"]

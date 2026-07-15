@@ -201,8 +201,14 @@ def parse_query(text: str, *, config: RuntimeConfig | None = None) -> dict:
             # json.loads 抛 RecursionError(**RuntimeError 子类**,不在前三者的继承链上)→
             # 原三元组捕不到 → 端到端实测 /api/parse **500**,且 Task 2 在 validate_candidate
             # 的边界 try 根本轮不到执行(json.loads 程序顺序在先)。
-            # 限定表述:本行使 **json.loads 这一处**不再 fail-open;**不等于** /api/parse 对
-            # RecursionError 无条件安全(是否还有第三处未捕,层1 无机械判据)。
+            # 限定表述(§10 修正 11 已更新:原写"是否还有第三处未捕,层1 无机械判据" ——
+            # 那是当时诚实的不确定标注,**现在答案已确定**,不更新就从"诚实的不确定"变成
+            # "已知而未更新"):经**机械枚举** json.loads/json.dumps 消费未受信 LLM JSON 的
+            # 调用点(命令+输出见 §10 修正 11),当前清单 **7 处**(本处 + 边界 try :75 +
+            # llm_critic:43 + llm_router:52 + cross_module_reasoner:48 + safety_contract:64 +
+            # llm_input_interpreter:53)**已全部捕获 RecursionError**。
+            # **仍不得**声称 /api/parse 或全仓"对 RecursionError 已全覆盖" —— **层1(哪些算
+            # "未受信 LLM JSON")是语义判断、无机械判据**,残余风险照旧。
             except (json.JSONDecodeError, TypeError, AttributeError, RecursionError):
                 cand = None
     if cand is None:

@@ -49,7 +49,8 @@ class LLMRouterAgent(BaseAgent):
                 # C4 元素级白名单(recommended/excluded_agents 无需改 —— `if a in candidates`
                 # 是值白名单,candidates 是 list → `in` 用 == 不需 hash,天然安全)。
                 sug["risk_flags"] = [f for f in rf if isinstance(f, str)] if isinstance(rf, list) else []
-            except (json.JSONDecodeError, TypeError, AttributeError):
+            # C4 修正 11:回填 RecursionError(同 llm_critic.py:43,机械枚举 7 处之一)。
+            except (json.JSONDecodeError, TypeError, AttributeError, RecursionError):
                 sug["risk_flags"] = ["llm_parse_failed"]
         else:
             sug["risk_flags"] = ["llm_unavailable"]

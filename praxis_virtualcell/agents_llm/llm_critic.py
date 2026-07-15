@@ -40,7 +40,11 @@ class LLMCriticAgent(BaseAgent):
                 # [{'evil':1},['nested'],None] 原样进 provenance。只接受 str,其余丢弃。
                 out["notes"] = [n for n in notes if isinstance(n, str)] if isinstance(notes, list) else []
                 out["flags"] = [f for f in flags if isinstance(f, str)] if isinstance(flags, list) else []
-            except (json.JSONDecodeError, TypeError, AttributeError):
+            # C4 修正 11:回填 RecursionError(深嵌套 JSON → json.loads 抛,它是 RuntimeError
+            # 子类、不在前三者继承链上)。同型缺口机械枚举共 7 处,本处为回填的 5 处之一 ——
+            # 穿透后经 core/runtime.py:44 `agent.handle(...)`(该处无 try/except)→ CLI 崩
+            # traceback(cli.py 全文无 try/except)/ `/api/jobs` 降级 400。
+            except (json.JSONDecodeError, TypeError, AttributeError, RecursionError):
                 out["flags"] = ["llm_parse_failed"]
         else:
             out["flags"] = ["llm_unavailable"]

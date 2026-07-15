@@ -61,7 +61,9 @@ def sanitize_llm_plan(raw_content: str | None, candidates: list[str],
         out["reasoning_summary"] = str(d.get("reasoning_summary", ""))[:500]
         # C4 元素级白名单:只接受 str 元素(原 list(rf) 元素任意 → 畸形原样进 provenance)。
         out["risk_flags"] = [f for f in rf if isinstance(f, str)] if isinstance(rf, list) else []
-    except (json.JSONDecodeError, TypeError, AttributeError):
+    # C4 修正 11:回填 RecursionError(深嵌套 JSON → json.loads 抛,RuntimeError 子类不在
+    # 前三者继承链上)。经 module_planner:50 传入 LLM 响应,机械枚举 7 处之一。
+    except (json.JSONDecodeError, TypeError, AttributeError, RecursionError):
         out["risk_flags"] = ["llm_parse_failed"]
         out["selected_modules"] = _fallback
     return out
