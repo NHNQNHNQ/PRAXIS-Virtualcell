@@ -1,6 +1,8 @@
 """P10.C3 LLM 全入口守卫 + narrative 一致性 + 抗注入边界 测试。
 narrative gate:确定性窄门(数值出处 + abstain 语义)→ 违规 fail-closed 丢弃 narrative,
 绝不碰 abstain/prediction/reliability(LLM 外层问题不得反向改写确定性裁决)。"""
+import pytest
+
 from praxis_virtualcell.core.agent import BaseAgent
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.message import AgentMessage
@@ -159,3 +161,43 @@ def test_narrative_gate_preserves_verdict_fields():
     assert "narrative_consistency_gate" in gated["provenance"]     # 确已触发
     assert gated["narrative"] == ""                                # 确已丢弃
     assert _strip(gated) == _strip(base), "gate 改动了 narrative/gate 键以外的字段(违红线)"
+
+
+class _StubInputInterpreter(BaseAgent):
+    """产固定 request 的 stub(替代真 LLMInputInterpreter,不需 API key)。"""
+    name = "LLMInputInterpreter"
+
+    def handle(self, message: AgentMessage, bus) -> None:
+        bus.send(AgentMessage(message.message_id + ":stub", self.name, "BioObjectNormalizer",
+                              "request_parsed", {"request": {**_ACCEPT, "request_id": "t10c3-ft"}},
+                              message.timestamp, message.message_id))
+
+
+def test_free_text_trace_id_consistent_across_all_messages():
+    """P10.A 遗留观察修复:free-text 全程同一 trace_id(首条 parse_text 不再走 bus 兜底 trace_msg_*)。"""
+    rt = build_runtime()
+    rt.register_agent(_StubInputInterpreter())
+    rt.run_workflow_from_text("human AHR 敲低会怎样")
+    tids = {m.trace_id for m in rt.bus.trace}
+    assert len(tids) == 1, f"free-text trace_id 不一致: {tids}"
+    tid = next(iter(tids))
+    assert tid.startswith("trace_") and not tid.startswith("trace_msg_")   # 非 bus 兜底
+
+
+def test_free_text_trace_id_deterministic_same_text():
+    """同 text 两跑同 trace_id(确定性)。"""
+    def _tids():
+        rt = build_runtime()
+        rt.register_agent(_StubInputInterpreter())
+        rt.run_workflow_from_text("human AHR 敲低会怎样")
+        return {m.trace_id for m in rt.bus.trace}
+    assert _tids() == _tids()
+
+
+def test_free_text_entry_asserts_llm_boundaries():
+    """C3 全入口覆盖:free-text 入口调 assert_llm_boundaries(三 flag 违规 → 抛 RuntimeError)。"""
+    rt = build_runtime()
+    rt.register_agent(_StubInputInterpreter())
+    rt.config.allow_llm_to_modify_prediction = True        # 违规置 True(仅本测试内)
+    with pytest.raises(RuntimeError):
+        rt.run_workflow_from_text("human AHR 敲低会怎样")

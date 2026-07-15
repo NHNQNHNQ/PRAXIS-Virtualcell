@@ -50,13 +50,17 @@ class AgentRuntime:
             raise RuntimeError(f"{message.receiver} 未产出 {expected_type}")
         return out
 
-    def run_workflow(self, request) -> dict:
-        """request: VirtualCellRequest。返回最终 report dict。全程经 bus。"""
+    def run_workflow(self, request, *, trace_id: str | None = None,
+                     task_id: str | None = None) -> dict:
+        """request: VirtualCellRequest。返回最终 report dict。全程经 bus。
+        trace_id/task_id 默认 None → 用 request canonical-hash(现有行为完全不变);
+        free-text 入口传入以全程复用同一 trace(P10.C3 修 P10.A 遗留观察)。"""
         _req_dict = asdict(request)
         _h = hashlib.sha256(
             json.dumps(_req_dict, sort_keys=True, ensure_ascii=False).encode("utf-8")
         ).hexdigest()[:8]
-        self.bus.set_context(trace_id=f"trace_{_h}", task_id=f"task_{_h}")
+        self.bus.set_context(trace_id=trace_id or f"trace_{_h}",
+                             task_id=task_id or f"task_{_h}")
         m = self.mk_message("client", "InputInterpreter", "parse_request",
                             {"request_dict": _req_dict})
         out = self._dispatch_collect(m, "request_parsed")
@@ -251,10 +255,17 @@ class AgentRuntime:
 
     def run_workflow_from_text(self, text: str) -> dict:
         """free-text(仅 llm_assisted+key):LLMInputInterpreter 解析 → run_workflow。"""
+        from praxis_virtualcell.core.config import assert_llm_boundaries
         from praxis_virtualcell.core.exceptions import InputValidationError
         from praxis_virtualcell.core.request import VirtualCellRequest
+        assert_llm_boundaries(self.config)       # P10.C3:全入口守卫(与 run_query 入口一致)
         if "LLMInputInterpreter" not in self._agents:
             raise InputValidationError("free-text 需 llm_assisted + DEEPSEEK_API_KEY")
+        # P10.C3:free-text 全程复用同一 trace(修 P10.A 遗留:首条 parse_text 曾因
+        # set_context 尚未调用而走 bus 确定性兜底 trace_msg_*,与后续 trace_<req_hash> 不一致)。
+        _th = hashlib.sha256(text.encode("utf-8")).hexdigest()[:8]
+        tid, kid = f"trace_{_th}", f"task_{_th}"
+        self.bus.set_context(trace_id=tid, task_id=kid)
         m = self.mk_message("client", "LLMInputInterpreter", "parse_text", {"text": text})
         self.dispatch_message(m)
         parsed = self.bus.latest("request_parsed")
@@ -264,4 +275,5 @@ class AgentRuntime:
                     "prediction": None, "models_used": [], "models_rejected": [],
                     "abstain_reasons": ["input_missing"], "critic_violations": [],
                     "narrative": "", "provenance": {"llm_input_failed": fail.payload if fail else None}}
-        return self.run_workflow(VirtualCellRequest.from_dict(parsed.payload["request"]))
+        return self.run_workflow(VirtualCellRequest.from_dict(parsed.payload["request"]),
+                                 trace_id=tid, task_id=kid)
