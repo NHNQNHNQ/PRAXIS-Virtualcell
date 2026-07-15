@@ -832,3 +832,107 @@ llm_used: False | llm_metadata: {}
 本轮只改**测试断言 + 文档**。Task 1 白名单 / Task 2 边界 try / Task 3 的 7 处 + `:206` 的
 `RecursionError` **逐字未动**(`git diff` 对 `run_virtualcell_query.py` 实现部分为空 —— 变异实验
 后已干净恢复并验证)。
+
+### 修正 11(末轮 —— RecursionError 同型缺口回填 5 处 + Task 4 收尾 + `:205` 过时表述更新)
+
+用户拍板修。理由 = **C3 教训 #2「同型缺口未回填」**(safety_contract 抄 llm_router 时修了漏洞却
+没回填原件)—— 我们**现在已经知道**,不修就是明知故犯;成本 5 个词。
+
+#### ① 机械枚举(**implementer 实跑,命令与输出如下 —— 照修正 5 的要求:声称机械枚举 ≠ 真跑了 predicate**)
+
+```
+$ grep -rnE 'json\.loads\((res\["content"\]|res\.get\("content"\)|content|raw_content)\)' \
+       praxis_virtualcell/ praxis_vc_api/ praxis_vc_web/ --include="*.py" | grep -v "/tests/"
+praxis_virtualcell/workflows/run_virtualcell_query.py:184:      cand = json.loads(content)
+praxis_virtualcell/agents_llm/llm_input_interpreter.py:38:      d = json.loads(res["content"])
+praxis_virtualcell/agents_llm/llm_router.py:36:                 d = json.loads(res["content"])
+praxis_virtualcell/agents_llm/llm_critic.py:33:                 d = json.loads(res["content"])
+praxis_virtualcell/llm_orchestration/cross_module_reasoner.py:39: d = json.loads(res["content"])
+praxis_virtualcell/llm_orchestration/safety_contract.py:55:     d = json.loads(raw_content)
+```
+6 处 `json.loads` 消费 LLM 响应 + `validate_candidate` 的 `json.dumps(:136)`/边界 try(`:75`)
+= **清单 7 处**。修前状态(实跑 `grep -n "except (" <各文件>`):`:75` 与 `:206` 已含
+`RecursionError`(Task 2 / 修正 9),**其余 5 处全缺**。
+
+> **枚举的上游是 50 个 `json.loads`/`json.dumps` 原始命中**(实跑
+> `grep -rnE 'json\.(loads|dumps)\('`),其中十几处读本地数据集(predictors/*、
+> governance/*、io/job_store 等)—— **"哪些算未受信 LLM JSON"是语义判断**,
+> **层1 无机械判据**(此处 predicate 用 `res["content"]|content|raw_content` 作代理,
+> **它本身是启发式、不是判据**)。
+
+#### ② 回填的 5 处 + 可达性(照本单元纪律限定作用域,implementer 亲验)
+
+| 位置 | 可达性(实证) |
+|---|---|
+| `agents_llm/llm_critic.py:43` | 经 `core/runtime.py:44` `agent.handle(...)` —— **该处无 try/except**(亲验) |
+| `agents_llm/llm_router.py:52` | 同上 |
+| `llm_orchestration/cross_module_reasoner.py:48` | 同上(runtime 同步 `_dispatch_collect`) |
+| `llm_orchestration/safety_contract.py:64` | 经 `module_planner:50` 传入 LLM 响应 |
+| `agents_llm/llm_input_interpreter.py:53` | **可达性最弱**,见下 |
+
+- 经 `POST /api/jobs`:端点**有** `except Exception`(`praxis_vc_api/main.py:60`)→ 降级 **400**
+  (非 500)。**小瑕疵记录不修**:原始异常文本经 `detail=str(e)` 泄漏给调用方。
+- 经 **CLI**:`cli.py` **全文无任何 try/except**(实跑 `grep -nE "try:|except" cli.py` **零输出**)
+  → **直接崩 Python traceback 给用户**。
+- 5 处均同受 `max_tokens` **默认值** 1024 的"当前生产不可达"论证覆盖(**是函数默认参数、
+  可被调用点覆盖,不是硬编码**)。
+
+**⚠️ 订正一处措辞(implementer 亲验后不同意原表述)**:控制器称 `llm_input_interpreter`
+"**当前未接入任何生产入口**…**近似死码**"。**结论对,机制描述不准**:该 agent **确被注册进
+生产 runtime**(`workflows/predict_delta_expression.py:55`)、**也确由生产代码
+`core/runtime.py:269` 派发** → **不是"未接入的死码"**。准确说法:**通往它的唯一方法
+`runtime.run_workflow_from_text` 当前无任何生产调用点**(实跑 grep:仅
+`test_llm_e2e_demo.py`、`test_t10_6_llm_guard.py` 调用;无 API route、无 CLI 子命令)
+→ **当前无生产入口可达**。
+
+#### ③ 测试:**5 处全测**(控制器要求"至少 2 处",但 5 处均低成本 → 不取下限)
+
+`_critic_notes` / `_xmod_notes` / `_route_suggestion` 三个 helper 本已存在(Task 3 建),
+`safety_contract` 是纯函数,`llm_input_interpreter` 照 `test_t10_6:295` 既有模式 →
+**5 处各一条,无一"难以低成本测试"** → **不存在"如实说明未测"的项**。
+
+TDD:5 条**全红**(实际报错 `RecursionError` at `json/decoder.py:361`,穿透 `handle()`)→
+补 `RecursionError` → **5 条全绿** → **逐处变异**(**5 个文件各单独去掉 `RecursionError`**)
+→ **每处对应测试各自红**(5/5)→ 全部恢复 → 复绿。**每条测试都被证明是承重的。**
+
+#### ④ `:205` 过时表述已更新(**"诚实的不确定" → "已知而未更新" 的防线**)
+
+原注释:「是否还有第三处未捕,**层1 无机械判据**」—— 那是当时诚实的不确定标注,
+**现在答案已确定**(机械枚举出 7 处清单)。不更新它就从"诚实的不确定"**变质成"已知而未更新"**。
+
+**更新后的表述纪律(第 11 次就在这里等着,已守)**:
+- ✅ 只写:"经**机械枚举** `json.loads`/`json.dumps` 消费未受信 LLM JSON 的调用点
+  (命令+输出见修正 11①),**当前清单 7 处已全部捕获 `RecursionError`**"。
+- ❌ **不得**写 "`/api/parse` / 全仓对 RecursionError 已全覆盖"。
+- **层1 仍无机械判据**("哪些算未受信 LLM JSON"是语义判断;predicate 是启发式代理)
+  → **残余风险照旧标注**。
+
+#### ⑤ Task 4 两条 e2e(implementer 自己重跑,非采信预期)
+
+**A `test_e2e_offline_deterministic_byte_equivalence`** —— 红线 §6.4:OFFLINE 同请求三跑
+**字节等价**、`llm_used_for_prediction` **恒 False**、`mode=='offline'`。**全部复现通过**。
+定性限定:是"**同版本多跑一致**",**非跨版本不变**。
+**本条不需要可区分锚点**(照修正 10③ 自问):它走 OFFLINE、不涉 LLM 分支,不存在"没跑就
+退化成同形"的塌缩 —— "跑"即确定性 runtime,无退化路径。
+
+**B `test_e2e_provenance_contract_no_invented_gene_reaches_frontend`** —— LLM 返
+`[None,"AHR"]`(自然错误)→ `/api/parse` → **200**,前端收到 `['AHR']`,`'NONE'` **不在其中**。
+
+**🔴 B 的静默空壳排查(照修正 10③ 判据,实测坐实控制器的预警)**:
+自问"期望结果和'它根本没跑'的退化结果,能区分吗?" → **实测:不能** ——
+`_deterministic_parse("human AHR 敲低")` 正则抓出的 targets **恰好也是 `['AHR']`**(亲跑打印),
+故无 key 退化时 status 仍 200、targets 仍 `['AHR']`、`'NONE'` 仍不在其中 →
+**三条断言全为真而 LLM 分支一次没走**。
+
+**修法 + 三段式证据(比修正 10② 更完整)**:
+1. 加 `setenv` stub key(自足)+ **两重锚点**:`llm_metadata.response_hash`(无 key 时
+   `llm_metadata == {}`)与 `llm_used is True`,**置于三条同形断言之前**。
+2. **变异 a**(抽掉 stub key、**留**锚点)→ **FAILED**(`LLM 分支未被走过(llm_metadata={})`)。
+3. **变异 b**(抽掉 stub key **且**抽掉锚点)→ **PASSED(静默绿!)** ←
+   **这一步才真正证明"锚点是唯一在挡的东西"**,而非"stub key 恰好在"。恢复后复绿。
+
+#### ⑥ 本轮红线核对
+
+Task 1 白名单 / Task 2 边界 try(`:75`)/ Task 3 的 7 处元素级白名单 / `:206` **均未动**
+(`:205` 只改**注释文本**,`except` 元组逐字未变)。核心内核(`core/message.py`/`bus.py`/
+`agent.py`)+ 根 `tests/` + `agents/reliability.py`/`critic.py` **零触碰**。

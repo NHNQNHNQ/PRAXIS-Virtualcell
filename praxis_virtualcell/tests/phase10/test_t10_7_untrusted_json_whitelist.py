@@ -69,6 +69,7 @@ from praxis_virtualcell.llm_orchestration.cross_module_reasoner import LLMCrossM
 from praxis_virtualcell.workflows.run_virtualcell_query import (
     ALLOWED_OUTPUTS,
     parse_query,
+    run_query,
     validate_candidate,
 )
 
@@ -533,3 +534,139 @@ def test_arch_invariant_sanitize_llm_plan_fail_closed_on_element_malformed():
                                ["gene_hub"], primary="gene_hub")
     assert out["risk_flags"] == ["llm_parse_failed"]
     assert out["selected_modules"] == ["gene_hub"]
+
+
+# ---------------------------------------------------------------------------
+# 末轮:RecursionError 同型缺口回填(§10 修正 11)
+# 清单来自**实跑**机械枚举(命令与输出见 §10 修正 11),**非手工挑** ——
+# json.loads 消费 LLM 响应 6 处 + validate_candidate 的 json.dumps 边界 1 处 = **7 处**;
+# 已修 2 处(:75 边界 try、:206 json.loads),本轮回填**其余 5 处**。
+# ⚠️ 表述纪律:只能说"经机械枚举,当前清单 7 处已全部捕获 RecursionError";
+# **不得**说"/api/parse 或全仓对 RecursionError 已全覆盖" —— **层1(哪些算"未受信 LLM
+# JSON")是语义判断、无机械判据**,残余风险照旧。
+# ---------------------------------------------------------------------------
+
+_DEEP_JSON = "[" * 20000 + "]" * 20000      # json.loads 必抛 RecursionError(实测阈值约 9999)
+
+
+def test_backfill_critic_deep_nested_recursionerror_fail_closed():
+    """llm_critic.py:43 —— 回填 RecursionError。修复前:RecursionError 穿透 handle()
+    → 经 core/runtime.py:44 的 `agent.handle(...)`(**该处无 try/except**,已核实)
+    → CLI 直接崩 traceback(`cli.py` 全文无 try/except,grep 零输出实证)/
+    `/api/jobs` 降级 400(端点有 except Exception)。"""
+    out = _critic_notes(_DEEP_JSON)
+    assert out["flags"] == ["llm_parse_failed"]        # fail-closed,与 JSONDecodeError 同语义
+    assert out["notes"] == []
+
+
+def test_backfill_xmod_deep_nested_recursionerror_fail_closed():
+    """cross_module_reasoner.py:48 —— 同型回填(经 runtime 同步 _dispatch_collect 调用)。"""
+    out = _xmod_notes(_DEEP_JSON)
+    assert out["flags"] == ["llm_parse_failed"]
+    assert out["notes"] == []
+
+
+def test_backfill_router_deep_nested_recursionerror_fail_closed():
+    """llm_router.py:52 —— 同型回填。"""
+    sug = _route_suggestion(_DEEP_JSON)
+    assert sug["risk_flags"] == ["llm_parse_failed"]
+    assert sug["recommended_agents"] == []             # fail-closed 不放行任何 agent
+
+
+def test_backfill_safety_contract_deep_nested_recursionerror_fail_closed():
+    """safety_contract.py:64 —— 同型回填(纯函数,经 module_planner:50 传入 LLM 响应)。
+    fail-closed 语义:保 primary 不丢主模块。"""
+    out = SC.sanitize_llm_plan(_DEEP_JSON, ["gene_hub"], primary="gene_hub")
+    assert out["risk_flags"] == ["llm_parse_failed"]
+    assert out["selected_modules"] == ["gene_hub"]     # primary 保底
+
+
+def test_backfill_input_interpreter_deep_nested_recursionerror_fail_closed():
+    """llm_input_interpreter.py:53 —— 五元组(含 InputValidationError/KeyError)仍缺
+    RecursionError,同型回填。
+
+    **可达性最弱(照本单元纪律限定作用域,且订正一处措辞)**:该 agent **确实被注册进生产
+    runtime**(`workflows/predict_delta_expression.py:55`)、**也确实由生产代码
+    `core/runtime.py:269` 派发** —— 故**不是"未接入的死码"**;准确说法是:
+    **通往它的唯一方法 `runtime.run_workflow_from_text` 当前无任何生产调用点**
+    (实跑 grep:仅 `test_llm_e2e_demo.py` 与 `test_t10_6_llm_guard.py` 调用,
+    无 API route、无 CLI 子命令)→ **当前无生产入口可达**,可达性最弱。
+    """
+    from praxis_virtualcell.agents_llm.llm_input_interpreter import LLMInputInterpreterAgent
+    bus = MessageBus()
+    bus.set_context(trace_id="trace_c4", task_id="task_c4")
+    LLMInputInterpreterAgent(_StubClient(_DEEP_JSON)).handle(
+        AgentMessage("m1", "client", "LLMInputInterpreter", "parse_text", {"text": "x"}, "t1"), bus)
+    m = bus.latest("llm_input_failed")
+    assert m is not None, "RecursionError 未被捕获 → 未走 fail 分支"
+    assert "llm_parse_invalid" in m.payload["reason"]
+
+
+# ---------------------------------------------------------------------------
+# Task 4 收尾:把两条已实证的性质固化成 e2e 测试(§10 修正 11)
+# ---------------------------------------------------------------------------
+
+
+def test_e2e_offline_deterministic_byte_equivalence():
+    """**红线 §6.4**:OFFLINE 同请求多跑**字节等价**(注意:是"同版本多跑一致",
+    **非跨版本不变** —— 不得过读成后者)。
+
+    与本单元的关系:白名单对 `_deterministic_parse` 产物(恒 `list[str]`)**恒等**
+    → 本单元三处收紧 + 5 处 RecursionError 回填对 OFFLINE 路径**零行为漂移**。
+    本条为**防回归**,非修 bug。
+
+    ⚠️ 本条**不需要**可区分锚点:它走 OFFLINE、根本不涉 LLM 分支,
+    `llm_used_for_prediction` 恒 False 是被断言的**目标性质本身**,不存在"没跑就退化"的
+    同形塌缩(判据见 §10 修正 10③:问"期望结果与'没跑'的退化结果能区分吗"——
+    本条的"跑"就是确定性 runtime,无退化路径)。
+    """
+    req = {"request_id": "c4-det", "species": "human", "perturbation_type": "gene",
+           "perturbation_targets": ["AHR"], "input_modality": "scRNA",
+           "output_modality": "delta_expression", "task_type": "predict_delta_expression"}
+    cfg = RuntimeConfig(mode=Mode.OFFLINE)
+    outs = [json.dumps(run_query(dict(req), config=cfg)["structured_report"],
+                       sort_keys=True, default=str) for _ in range(3)]
+    assert len(set(outs)) == 1, "OFFLINE 同请求三跑不字节等价 → 红线 §6.4 破"
+    out = run_query(dict(req), config=cfg)
+    assert out["llm_used_for_prediction"] is False      # 恒 False:LLM 不碰预测
+    assert out["mode"] == "offline"
+
+
+def test_e2e_provenance_contract_no_invented_gene_reaches_frontend(monkeypatch):
+    """**溯源契约的端到端形态**:LLM 返 `[None, "AHR"]`(**自然错误**,非对抗构造)→
+    经 `/api/parse` → 前端**不得**收到发明出来的 `'NONE'`。
+
+    修复前的真实危害:`candidate_request.perturbation_targets = ['NONE', 'AHR']` 且
+    `schema_valid=True` → 用户在页面 2 确认后,**内核真按假基因名 NONE 跑**。
+
+    ⚠️ **本条曾会是静默空壳,已排查并加锚点**(照 §10 修正 10③ 的判据自问:
+    "期望结果和'它根本没跑'的退化结果,能区分吗?")—— **实测:不能** ——
+    `_deterministic_parse("human AHR 敲低")` 正则抓出的 targets **恰好也是 `['AHR']`**
+    (亲跑实证),故无 key 退化时:status 仍 200、targets 仍 `['AHR']`、`'NONE'` 仍不在其中
+    → **三条断言全为真而 LLM 分支一次没走**。
+    → 故必须(a)`setenv` stub key 让本条自足、(b)加**只有真走过 LLM 分支才成立**的锚点
+    `llm_metadata.response_hash`(无 key 时 `llm_metadata == {}`)。
+    """
+    monkeypatch.setenv("PRAXIS_VIRTUALCELL_MODE", "offline")   # setitem 无条件登记 undo
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "stub-key-not-a-real-credential")
+    from fastapi.testclient import TestClient
+
+    import praxis_virtualcell.agents_llm.llm_client as _llmc
+    monkeypatch.setattr(_llmc, "make_llm_client", lambda cfg: _StubClient(json.dumps({
+        "species": "human", "perturbation_type": "gene",
+        "perturbation_targets": [None, "AHR"],          # LLM 把缺失值写成 null:自然错误
+        "task_type": "predict_delta_expression",
+    })))
+    from praxis_vc_api.main import app
+    c = TestClient(app, raise_server_exceptions=False)
+    r = c.post("/api/parse", json={"text": "human AHR 敲低", "mode": "llm_assisted"})
+    assert r.status_code == 200, f"实际 {r.status_code}"
+    d = r.json()
+    # **可区分锚点必须在最前**:无 key 退化时 llm_metadata=={} → 红。
+    assert d["llm_metadata"].get("response_hash"), (
+        f"LLM 分支未被走过(llm_metadata={d['llm_metadata']})—— 本条退化成静默空壳:"
+        "_deterministic_parse 恰好也产 ['AHR'],下面三条断言对'没跑'恒真")
+    assert d["llm_used"] is True                        # 第二重锚点:确证走的是 LLM 分支
+    targets = d["candidate_request"]["perturbation_targets"]
+    assert targets == ["AHR"], f"发明/丢失 target:{targets}"
+    assert "NONE" not in targets, "发明了输入里不存在的假基因名 NONE → 溯源契约破"
