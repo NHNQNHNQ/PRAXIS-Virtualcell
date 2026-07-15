@@ -248,3 +248,50 @@ def test_critic_guard_valid_lists_pass_through():
     """合法 list → 原样透传(守卫不改语义)。"""
     out = _critic_notes('{"notes": ["n1"], "flags": ["f1"]}')
     assert out["notes"] == ["n1"] and out["flags"] == ["f1"]
+
+
+def _router_suggestion(content, candidates=("MockGEARS", "MockCPA")):
+    """跑一次 LLMRouterAgent.handle,取其产出的 llm_route_suggestion payload 里的 suggestion 子结构。"""
+    from praxis_virtualcell.agents_llm.llm_router import LLMRouterAgent
+    bus = MessageBus()
+    bus.set_context(trace_id="trace_t", task_id="task_t")
+    LLMRouterAgent(_StubClient(content)).handle(
+        AgentMessage("m1", "ModelApplicability", "LLMRouter", "route_suggest",
+                     {"request": {"species": "human"}, "brain_context": {},
+                      "applicable": list(candidates), "rejected_candidates": []}, "t1"), bus)
+    return bus.latest("llm_route_suggestion").payload["suggestion"]
+
+
+def test_router_guard_rejects_non_list_risk_flags_no_char_split():
+    """C3 全入口守卫:risk_flags 为字符串 → 置 [](不逐字符拆成 ['d','a','n',...])。"""
+    out = _router_suggestion('{"recommended_agents": [], "excluded_agents": [], "risk_flags": "danger"}')
+    assert out["risk_flags"] == []
+
+
+def test_router_guard_string_agents_not_char_split_into_fake_names():
+    """字符串 agent 名不被逐字符拆(否则单字符候选会被静默注入垃圾 agent 名)。"""
+    out = _router_suggestion('{"recommended_agents": "AB", "excluded_agents": [], "risk_flags": []}',
+                             candidates=("A", "B"))
+    assert out["recommended_agents"] == []      # 不是 ['A','B']
+
+
+def test_router_guard_scalar_agents_does_not_crash():
+    """标量 → 不崩(原 `for a in 123` 抛 TypeError 未捕获)。"""
+    out = _router_suggestion('{"recommended_agents": 123, "excluded_agents": [], "risk_flags": []}')
+    assert isinstance(out["recommended_agents"], list)
+
+
+def test_router_guard_json_top_level_not_object_does_not_crash():
+    """JSON 顶层非 object → 不崩(原 d.get 抛 AttributeError 未捕获)。"""
+    out = _router_suggestion("[1,2,3]")
+    assert isinstance(out.get("risk_flags"), list)
+
+
+def test_input_interpreter_guard_json_top_level_not_object_does_not_crash():
+    """LLMInputInterpreter(暴露面最大:直接处理用户自由文本)顶层非 object → 不崩,走 fail 分支。"""
+    from praxis_virtualcell.agents_llm.llm_input_interpreter import LLMInputInterpreterAgent
+    bus = MessageBus()
+    bus.set_context(trace_id="trace_t", task_id="task_t")
+    LLMInputInterpreterAgent(_StubClient("[1,2,3]")).handle(
+        AgentMessage("m1", "client", "LLMInputInterpreter", "parse_text", {"text": "x"}, "t1"), bus)
+    assert bus.latest("llm_input_failed") is not None      # 优雅失败而非崩溃

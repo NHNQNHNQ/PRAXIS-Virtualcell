@@ -48,7 +48,10 @@ class LLMInputInterpreterAgent(BaseAgent):
                     "BioObjectNormalizer", "request_parsed", {"request": asdict(req)},
                     message.timestamp, message.message_id))
                 return
-            except (json.JSONDecodeError, InputValidationError, KeyError, TypeError) as e:
+            # C3:补 AttributeError —— JSON 顶层非 object(如 "[1,2,3]")时 d.get 会抛,
+            # 该 agent 直接处理用户自由文本是暴露面最大的一环,须优雅失败而非崩溃。
+            except (json.JSONDecodeError, InputValidationError, KeyError, TypeError,
+                    AttributeError) as e:
                 reason = f"llm_parse_invalid: {e}"
         bus.send(AgentMessage(message.message_id + ":llmfail", self.name, "client",
             "llm_input_failed", {"reason": reason, "text": text},

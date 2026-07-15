@@ -34,11 +34,20 @@ class LLMRouterAgent(BaseAgent):
         if res.get("content"):
             try:
                 d = json.loads(res["content"])
-                sug["recommended_agents"] = [a for a in (d.get("recommended_agents") or []) if a in candidates]
-                sug["excluded_agents"] = [a for a in (d.get("excluded_agents") or []) if a in candidates]
+                rec, exc = d.get("recommended_agents"), d.get("excluded_agents")
+                rf = d.get("risk_flags")
+                # C3 全入口结构守卫:只接受 list(非 list 丢弃置 [],绝不把字符串逐字符拆 ——
+                # "AB" 会被拆成 ['A','B'],候选名恰好命中单字符时静默注入垃圾 agent 名);
+                # 捕获 TypeError/AttributeError(JSON 顶层非 object、值为标量)防畸形/注入产物崩溃。
+                # 做法与 llm_orchestration/safety_contract.py 一致 —— 该文件复刻本 agent 的过滤逻辑时
+                # 已修此 fail-closed 漏洞但未回填原件,本 task 回填。
+                sug["recommended_agents"] = [a for a in (rec if isinstance(rec, list) else [])
+                                             if a in candidates]
+                sug["excluded_agents"] = [a for a in (exc if isinstance(exc, list) else [])
+                                          if a in candidates]
                 sug["reasoning_summary"] = str(d.get("reasoning_summary", ""))[:500]
-                sug["risk_flags"] = list(d.get("risk_flags") or [])
-            except json.JSONDecodeError:
+                sug["risk_flags"] = list(rf) if isinstance(rf, list) else []
+            except (json.JSONDecodeError, TypeError, AttributeError):
                 sug["risk_flags"] = ["llm_parse_failed"]
         else:
             sug["risk_flags"] = ["llm_unavailable"]
