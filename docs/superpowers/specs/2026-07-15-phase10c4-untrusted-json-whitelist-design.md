@@ -461,3 +461,61 @@ llm_orchestration/safety_contract.py:62
 
 **paper 若写"溯源契约保证 target 可溯源",读者会过读成"保证归一化无损" → 必须一并披露
 该盲区。** 已在测试文件 docstring 诚实边界补记。
+
+### 修正 7(Task 2 执行期 —— **§4.3"可达"表述不精确;同一份 spec 对"可达"用了两个标准**)
+
+**§4.3 原写"它不是空壳,有真实可达路径(实测)…… 若 TDD 阶段证明不可达 → 不加 try"**,
+其中"可达"**未限定作用域,表述不精确**。实测坐实的是**直接调用 `validate_candidate({1:'a',...})`
+会崩**,**不是生产路径可达**。Task 2 implementer 在前置门之外自行勘察两个消费点的调用链,
+戳破了这一点(控制器采信并复核确认属实):
+
+- **`/api/parse` → `parse_query`**:`cand` 只可能来自 `json.loads(content)`(**JSON object 的
+  key 恒为 str** —— 混合类型 key 在 JSON 里根本不可表示)或 `_deterministic_parse`(固定 str
+  key 的字面量构造)。且 `:174` 的 `cand.get`(C3 补的 AttributeError 守卫)已把非 dict 顶层
+  值挡回 `_deterministic_parse`。
+- **`praxis_vc_web/app.py:75`**:`cand = dict(p["candidate_request"])` —— 是 `validate_candidate`
+  **自产的 normalized dict** 的拷贝,key 恒 str。
+
+→ **当前两个已知消费点的正常路径,边界 try 的 except 分支不可达。**
+
+**同一份 spec 里"可达"滑动成了两个标准(本条的核心问题)**:
+
+| 出处 | "可达"的实际含义 | 证据 |
+|---|---|---|
+| **§2.4 活 bug** | **真·生产路径可达** | LLM 返嵌套数组是**自然错误** → `/api/parse` → 端到端 **500**(已端到端实测) |
+| **§4.3 边界 try** | **仅直接调用可达** | `validate_candidate({1:'a',…})` 直接调用会崩;**生产路径到不了** |
+
+**精确定性(收官文档 / paper 一律照此,已同步进 `validate_candidate` docstring 与
+`test_boundary_try_non_str_key_returns_invalid_not_raises` docstring)**:
+
+> 边界 try = **public API 契约防线 / 防御性罕触发**。触发需**非 JSON 来源的 dict**(混合类型
+> key);**当前两个已知消费点的正常路径不可达**(JSON object key 恒 str)。它防的是脚本 /
+> notebook / 直接调用 / **未来第 3 个调用点**,**不是**当前生产 500 的防线 —— 那个由 Task 1
+> 的元素级白名单管。定性对标 **C2 的 Gate B**(防御性完整性断言:字段恒由代码构造、正常
+> 路径不触发、防未来重构漏挂),**非死码,但也不得说成"生产可达"**。
+
+**"罕触发" ≠ "当前不可达",两词在本项目有实质区别,不得混用**:C1/C2 的 gate 是**罕触发但
+理论上生产可达**(违规 module_plan 真会触发 → 真 override abstain);本层是**当前正常路径
+根本到不了**。
+
+**保留决策(implementer 判断 + 控制器采信)**:**保留**。依据 = C2 Gate B 先例已确立"正常
+路径不触发的防御性断言"是项目接受的模式;`validate_candidate` 是**无下划线前缀的 public 名**、
+已被跨包直接 import(`app.py`),契约防线有正当性;成本 = 4 行、正常路径零行为改变
+(870 全绿 + 字节等价条恒绿实证)。**但其价值主张必须按上表限定,不得记入"修生产 500"的账。**
+
+### 修正 7b(Task 2 —— 对照组的**已知局限**,implementer 主动实测并披露)
+
+`test_boundary_try_does_not_swallow_legit_results`(对照组)**挡不住"捕获范围过宽"**:
+把 except 变异成 `except Exception:`(过度捕获)→ **两条测试均仍绿**(因为正常路径本来就不
+抛异常,过度捕获对它无影响)。
+
+**即:当前两条测试能证明"except 真的在捕获"**(反向变异 `except ():` → 上条红,**非永真
+空壳**)、**但不能证明"except 的捕获范围不过宽"**。当前实现取 `(TypeError, AttributeError,
+ValueError)` 而非 `Exception` 属**人工克制**,**无测试兜底** —— 未来若有人放宽成
+`except Exception:`(会吞掉 KeyboardInterrupt 以外的一切,含真 bug),测试套件**不会红**。
+已在对照组 docstring 标注。**D 单元若对边界 try 做"测试充分"表述,须计入本条。**
+
+**教训(承修正 5 的元层面教训)**:**"可达"这个词必须限定作用域** —— 生产路径可达 /
+直接调用可达 / 理论可达,三者证据强度递减。不限定就会在同一文档内滑动(本条即实例:
+§2.4 与 §4.3 同词异义),且**读者会默认取最强的那个含义**。同理适用于"罕触发"
+(≠ 不可达)与"非空壳"(≠ 覆盖充分)。

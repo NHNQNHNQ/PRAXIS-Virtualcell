@@ -206,17 +206,21 @@ def test_offline_deterministic_parse_products_pass_through_unchanged():
 
 
 def test_boundary_try_non_str_key_returns_invalid_not_raises():
-    """**边界 try(defense-in-depth,非死码 —— 可达路径已实测)**:validate_candidate 是
-    public 函数,有 2 个非测试消费点(`/api/parse` → parse_query:147 与
-    `praxis_vc_web/app.py:75`),二者链路均无 try/except → 未捕获异常 = FastAPI 500。
+    """**边界 try = public API 契约防线**:validate_candidate 是 public 函数,
+    `/api/parse` → parse_query 与 `praxis_vc_web/app.py:75` 两条链路均无 try/except
+    → 未捕获异常会成为 FastAPI 500。本层 fail-closed:返回 schema_valid=False 而非抛。
 
-    Task 1 的元素级白名单已消灭**已知**崩溃类;本层只兜**未预见**异常。可达实例:
-    非 JSON 来源的 dict 含混合类型 key → normalized 构造里的
-    `json.dumps(d, sort_keys=True)` 抛 TypeError: '<' not supported between 'str' and 'int'。
+    **定性须精确(§10 修正 7)——"可达"分两种,本条测的是后一种**:
+    - **当前两个已知消费点的正常路径不可达**:`parse_query` 的 cand 来自 `json.loads`
+      (**JSON object key 恒 str**)或 `_deterministic_parse`(固定 str key);`app.py:75`
+      的 cand 是 validate_candidate 自产 normalized dict 的拷贝(key 恒 str)。
+      → 本层**不是**当前生产 500 的防线(那个由 Task 1 的元素级白名单管)。
+    - **直接调用可达**(实测,故非死码):非 JSON 来源的 dict 含混合类型 key →
+      `json.dumps(d, sort_keys=True)` 抛 TypeError: '<' not supported between 'str' and 'int'。
 
-    语义:public 函数**绝不把未预见异常透给端点** → 返回 schema_valid=False 而非抛。
-    诚实定性:这是**防御性 fail-closed**(同 C1/C2 的类不变量断言),**罕触发但非空壳**
-    —— 可达路径已实测(C3 T10.6 的"永真空壳"教训)。
+    真实价值 = 防脚本 / notebook / 直接调用 / **未来第 3 个调用点**;对标 **C2 Gate B**
+    (防御性完整性断言,正常路径不触发、防未来重构漏挂)。**非空壳但非生产可达** ——
+    变异实证:except 改 `except ():` → 本条红(C3 T10.6 的"永真空壳"教训)。
     """
     v = validate_candidate({1: "a", "species": "human", "perturbation_type": "gene",
                             "perturbation_targets": ["AHR"],
@@ -228,7 +232,13 @@ def test_boundary_try_non_str_key_returns_invalid_not_raises():
 
 def test_boundary_try_does_not_swallow_legit_results():
     """**对照组**:边界 try 不得吞掉正常路径(若 try 把一切都变成 invalid,本条会红)。
-    这条防的是"为了不崩而把所有东西都 fail-closed"这种过度防御。"""
+    这条防的是"为了不崩而把所有东西都 fail-closed"这种过度防御。
+
+    **已知局限(实测,§10 修正 7)**:本条**挡不住"捕获范围过宽"** —— 把 except 变异成
+    `except Exception:`(过度捕获)→ 本条与上条**均仍绿**,因为正常路径本来就不抛异常。
+    即:当前两条测试能证明"except 真在捕获"(`except ():` → 上条红),
+    **不能证明"except 的捕获范围不过宽"**。
+    """
     v = validate_candidate({"species": "human", "perturbation_type": "gene",
                             "perturbation_targets": ["AHR"],
                             "task_type": "predict_delta_expression"})

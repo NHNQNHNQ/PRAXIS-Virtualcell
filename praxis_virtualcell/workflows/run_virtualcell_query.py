@@ -39,14 +39,22 @@ def _hash(s: str) -> str:
 def validate_candidate(cand: dict) -> dict:
     """确定性校验 + 归一。返回 {schema_valid, missing_fields, errors, normalized}。
 
-    **C4 边界 try(defense-in-depth)**:本函数是 public 入口,有 2 个非测试消费点
-    (`/api/parse` → parse_query,与 `praxis_vc_web/app.py:75`),二者链路均无
-    try/except → 未捕获异常 = FastAPI 500。元素级白名单(见 `_validate_candidate_impl`)
-    已消灭**已知**崩溃类,本层只兜**未预见**异常 —— 可达实例:非 JSON 来源的 dict 含
-    混合类型 key → `json.dumps(d, sort_keys=True)` 抛 TypeError(实测,故非死码)。
-    fail-closed:任何异常 → schema_valid=False + errors=["candidate_malformed"]。
+    **C4 边界 try = public API 契约防线(defense-in-depth)**:fail-closed —— 捕获
+    TypeError/AttributeError/ValueError → schema_valid=False + errors=["candidate_malformed"],
+    绝不把未预见异常透给调用方。
 
-    诚实定性:**防御性罕触发**(同 C1/C2 的类不变量断言),非高频路径、非空壳。
+    **定性必须精确 —— "可达"分两种,本层只占后一种**:
+    - **当前两个已知消费点的正常路径不可达**(勘察实证):`/api/parse` → `parse_query` 的
+      `cand` 只可能来自 `json.loads`(**JSON object key 恒为 str**)或 `_deterministic_parse`
+      (固定 str key);`praxis_vc_web/app.py:75` 的 `cand` 是本函数自产 normalized dict 的
+      拷贝(key 亦恒 str)。→ **本层不是当前生产 500 的防线**,那个由 `_validate_candidate_impl`
+      里的元素级白名单管(C4 Task 1)。
+    - **直接调用可达**(实测,故非死码):触发需**非 JSON 来源的 dict**(混合类型 key)→
+      `json.dumps(d, sort_keys=True)` 抛 `TypeError: '<' not supported between 'str' and 'int'`。
+
+    **真实价值** = public API 契约防线:防脚本 / notebook / 直接调用 / **未来第 3 个调用点**。
+    定性对标 **C2 的 Gate B**(防御性完整性断言:字段恒由代码构造、正常路径不触发、防未来
+    重构漏挂)—— 项目已接受的模式。**非死码,但也不得说成"生产可达"**(C4 §10 修正 7)。
     """
     try:
         return _validate_candidate_impl(cand)
