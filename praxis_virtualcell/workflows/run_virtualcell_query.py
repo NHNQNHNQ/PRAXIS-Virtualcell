@@ -51,14 +51,25 @@ def validate_candidate(cand: dict) -> dict:
     targets = d.get("perturbation_targets")
     if targets is None and _perturbation:
         targets = _perturbation.get("targets")
-    targets = [str(t).strip() for t in targets if str(t).strip()] if isinstance(targets, list) else []
+    # C4 元素级白名单:容器级 isinstance 只守了"targets 是不是 list",没守元素 ——
+    # 原 `str(t).strip()` 对**任何**对象都成功,把 [None,'AHR'] 变成 ['NONE','AHR']
+    # (凭空发明基因 NONE)、[['AHR']] 变成 ["['AHR']"],且带 schema_valid=True 返给前端,
+    # 用户确认后内核真按假基因名跑。**try/except 兜不住这一类**(str() 不抛异常)。
+    # 修法跟随 llm_router.py 的值白名单先例:只接受契约内类型(str),其余丢弃 ——
+    # 畸形类型全集无需枚举,因为"其余"是补集。
+    targets = ([t.strip() for t in targets if isinstance(t, str) and t.strip()]
+               if isinstance(targets, list) else [])
     task = str(d.get("task_type") or d.get("task", "")).strip().lower() or "predict_delta_expression"
     _raw_outputs = d.get("requested_outputs")
-    outputs = [o for o in _raw_outputs if o in ALLOWED_OUTPUTS] if isinstance(_raw_outputs, list) else []
-    # 同守卫:assumptions 非 list(如字符串)不逐字符拆(见 parse_query 同类修复,cand 可能来自
-    # 未受信 LLM JSON)。
+    # C4:`o in ALLOWED_OUTPUTS`(set)对 unhashable 元素抛 TypeError → /api/parse 500
+    # (main 活 bug)。isinstance 短路在 `in` 之前 → 元素级畸形不再崩;值白名单同时保证
+    # 输出 ⊆ ALLOWED_OUTPUTS。
+    outputs = ([o for o in _raw_outputs if isinstance(o, str) and o in ALLOWED_OUTPUTS]
+               if isinstance(_raw_outputs, list) else [])
+    # C4:元素级类型过滤(原 list(x) 元素任意 → dict/list 原样进 normalized.metadata)。
     _raw_assumptions = d.get("assumptions")
-    assumptions = list(_raw_assumptions) if isinstance(_raw_assumptions, list) else []
+    assumptions = ([a for a in _raw_assumptions if isinstance(a, str)]
+                   if isinstance(_raw_assumptions, list) else [])
 
     if not species:
         missing.append("species")
