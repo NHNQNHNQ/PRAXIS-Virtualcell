@@ -45,7 +45,9 @@
   `_norm` 定义的**,所以任何**本身就在损毁数据的归一化**都在盲区 —— 实测:实现改成
   `t.strip().upper()[:3]`、`_norm` 同步改 → `'TP53'`→`'TP5'`(数据已损毁)**照样 PASS**。
   下方 `_norm` docstring 记的 `.upper()`→`.lower()` 变异只证伪了**单侧漂移**(实现改、
-  oracle 没改 → 红 6 条,证明 `_norm` 是独立 oracle),**挡不住协同修改**。
+  oracle 没改 → **本文件多条红**,证明 `_norm` 是独立 oracle),**挡不住协同修改**。
+  (§10 修正 10④:此处原亦写"红 6 条" —— **同一陈旧计数的第 2 处**,review 只点了 `_norm`
+  那处,本轮一并扫;两处均改为不钉死数字。)
   **paper 若写"溯源契约保证 target 可溯源",读者会过读成"保证归一化无损" → 必须一并披露。**
 - 本文件**不覆盖"哪些函数消费未受信 LLM JSON"**(层1 无机械判据:`.complete(` 恰漏
   `safety_contract.py`、`json.loads` 混进 20+ 读本地数据集的无关文件)——属残余风险,
@@ -80,7 +82,9 @@ def _norm(s: str) -> str:
     **scope 限制(诚实标注)**:硬编码 `.strip().upper()` 只对应实现的
     `gene`/`gene_combination`/`ligand` 分支;本文件全部用例均为 `perturbation_type: "gene"`,
     **`drug` 分支(归一为小写)本文件未覆盖**。
-    非同义反复(审查者实测证伪该风险):把实现的 `.upper()` 变异成 `.lower()` → 本文件红 6 条
+    非同义反复(审查者实测证伪该风险):把实现的 `.upper()` 变异成 `.lower()`(oracle `_norm`
+    不动)→ **本文件多条红**(§10 修正 10④:原写"红 6 条"是**陈旧计数** —— Task 3 新增用例后
+    实测为 **8 条**;此处**有意不钉死数字**,以免每次加用例都变成新的陈旧计数)
     → `_norm` 是**独立 oracle**,不是跟着实现走的空壳。
     """
     return s.strip().upper()
@@ -385,12 +389,21 @@ def test_sibling1_parse_query_assumptions_e2e_api_not_500(monkeypatch):
     `'llm_assisted'`**。`setenv` → `setitem` **无条件**登记 `dic.get(name, notset)`,
     key 之前存不存在都能精确复原。
 
-    **DEEPSEEK_API_KEY 同理须显式置(本轮新发现,非 review 指出)**:`config_for()` 走
-    `from_env()`,而 `llm_enabled = (mode in LLM_MODES and bool(key))` —— **无 key 则
-    llm_enabled=False** → 根本不进 LLM 分支、回落 `_deterministic_parse` → assumptions
-    恒 `["deterministic keyword parse"]`。即本条**在无 `.env` 的 CI 里不是"红",而是
-    静默地不再测它声称要测的 bug**(status 仍 200)。显式 setenv 一个 stub key 让本条
-    对环境**自足**(stub client 已接管 make_llm_client,不发网络请求)。
+    **DEEPSEEK_API_KEY 同理须显式置**:`config_for()` 走 `from_env()`,而
+    `llm_enabled = (mode in LLM_MODES and bool(key))` —— **无 key 则 llm_enabled=False**
+    → 根本不进 LLM 分支、回落 `_deterministic_parse` → assumptions 恒
+    `["deterministic keyword parse"]`。显式 setenv 一个 stub key 让本条对环境**自足**
+    (stub client 已接管 make_llm_client,不发网络请求)。
+
+    ⚠️ **归属订正(§10 修正 10①)**:修正 9⑥ 原在此处写"**本条**在无 `.env` 的 CI 里
+    不是'红',而是静默地不再测它声称要测的 bug" —— **这句是错的,且与它自己下一句
+    '实测:修前红'自相矛盾**。**本条是吵闹会红的**:第二条断言
+    `assert r.json()["assumptions"] == ["单基因敲低"]` 必然拦下退化值
+    `["deterministic keyword parse"]` → 红(敌对环境抽掉 stub key 行实测 **FAILED**)。
+    **真正静默的是 `test_parse_query_deep_nested_json_loads_recursionerror_not_500`**
+    (修正 9 自己新造的那条,期望结果与退化结果同形 → 实测 **PASSED 静默空过**),
+    已在该条补 `llm_metadata.response_hash` 可区分锚点。**"静默"归错对象 = 本单元第 10 次
+    过度声称**(形状讽刺:修正 9⑥ 末尾那句正确的教训,恰好精准描述了它自己没发现的那条)。
     """
     monkeypatch.setenv("PRAXIS_VIRTUALCELL_MODE", "offline")   # setitem 无条件登记 undo
     monkeypatch.setenv("DEEPSEEK_API_KEY", "stub-key-not-a-real-credential")
@@ -428,6 +441,22 @@ def test_parse_query_deep_nested_json_loads_recursionerror_not_500(monkeypatch):
     **修后不得声称"/api/parse 对 RecursionError 无条件安全"** —— 只能说
     **`json.loads`(:184)与 `validate_candidate` 边界(:75)两处已捕 RecursionError**;
     是否还有第三处未捕,**层1 无机械判据**(本单元反复吃到的教训)。
+
+    ⚠️ **本条曾是"环境依赖的静默空壳"(§10 修正 10 —— 本单元第 10 次,且形状极讽刺:
+    修正 9⑥ 把"静默"归给了另一条**吵闹会红**的测试,而真正静默的正是本条,是修正 9 自己
+    新造的)**:本条的期望结果 = `200 / fallback_used=True / assumptions=deterministic`,
+    **与"根本没跑 LLM 分支"的退化结果完全同形** —— 无 `DEEPSEEK_API_KEY` 时
+    `llm_enabled=False` → 压根不进 LLM 分支、`json.loads` 一次都没执行,**三条断言照样全
+    True → 静默绿**。此前只靠下面那行 stub key 撑着,**谁将来删掉它,本条就永远静默绿**。
+
+    **可区分锚点(结构性修法,不再依赖"那行还在")**:`llm_metadata.response_hash` ——
+    实测**有 key**:`{'provider':'deepseek', …, 'response_hash':'31851d9adc33c985', …}`;
+    **无 key**:`llm_metadata == {}`。该断言**只有真走过 LLM 分支才可能成立** →
+    本条结构上不可能再静默空过。变异证伪:抽掉 stub key 行 → 加锚点前**绿**、加锚点后**红**。
+
+    **判据(§10 修正 10,比"测试在本机绿 ≠ 测试在测它声称测的东西"更可操作)**:
+    > **问"这条测试的期望结果,和'它根本没跑'的退化结果,能区分吗?"**
+    > 不能区分 → 它就是环境依赖的静默空壳,必须补一个**只有真跑过才成立**的锚点。
     """
     monkeypatch.setenv("PRAXIS_VIRTUALCELL_MODE", "offline")
     monkeypatch.setenv("DEEPSEEK_API_KEY", "stub-key-not-a-real-credential")
@@ -440,8 +469,14 @@ def test_parse_query_deep_nested_json_loads_recursionerror_not_500(monkeypatch):
     c = TestClient(app, raise_server_exceptions=False)
     r = c.post("/api/parse", json={"text": "human AHR 敲低", "mode": "llm_assisted"})
     assert r.status_code == 200, f"补 RecursionError 前是 500;实际 {r.status_code}"
-    # fail-closed 落回 _deterministic_parse(与 JSONDecodeError 路径同语义)
     d = r.json()
+    # **可区分锚点必须在最前**(§10 修正 10):下面三条与"没跑"的退化结果同形、无区分力,
+    # 本条断言只有**真走过 LLM 分支**(json.loads 真被执行、response_hash 真被算出)才成立。
+    # 无 key 退化时 llm_metadata == {} → 本条红。
+    assert d["llm_metadata"].get("response_hash"), (
+        f"LLM 分支未被走过(llm_metadata={d['llm_metadata']})—— 本条退化成静默空壳,"
+        "json.loads 根本没执行,后面三条断言对'没跑'恒真")
+    # fail-closed 落回 _deterministic_parse(与 JSONDecodeError 路径同语义)
     assert d["fallback_used"] is True
     assert d["assumptions"] == ["deterministic keyword parse"]
 

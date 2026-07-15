@@ -722,7 +722,13 @@ implementer 亲算:1024 token 粗估 ~3584 字符(~3.5 char/token)→ dict ~597 
 → 结论(**当前生产不可达**)**不变**,但"15x"是**最好情况**,应写成
 "余量存在但**随嵌套形状变化**(dict ~15x / list ≤5x)",**不是一个稳定常数**。
 
-#### ⑥(**本轮 implementer 新发现,两轮审查均未指出**)e2e 测试**非自足**:无 key 时静默不再测目标 bug
+#### ⑥(**本轮 implementer 新发现,两轮审查均未指出**)e2e 测试**非自足**:无 key 时不再测目标 bug
+
+> ### ⚠️ 本节的「静默」归属**已被修正 10① 判定为错误** —— 读本节必须连带读修正 10①
+> 现象(非自足)属实、修法(setenv stub key)有效且已保留;**但"谁在静默"归错了对象**。
+> 本节点名的 `test_sibling1_..._e2e_api_not_500` **是吵闹会红的**(敌对环境实测 FAILED);
+> **真正静默空过的是本修正 9 自己新造的 `test_parse_query_deep_nested_..._not_500`**
+> (敌对环境实测 PASSED),本节**完全没提它**。详见修正 10①。
 
 修 ① 的实验中顺带实测发现:`test_sibling1_parse_query_assumptions_e2e_api_not_500` 经
 `config_for("llm_assisted")` → `from_env()`,而
@@ -730,9 +736,15 @@ implementer 亲算:1024 token 粗估 ~3584 字符(~3.5 char/token)→ dict ~597 
 → 根本不进 LLM 分支、回落 `_deterministic_parse` → `assumptions` 恒
 `["deterministic keyword parse"]`。
 
-**危害形状与 C3「永真空壳」同类但更隐蔽**:在无 `.env` 的 CI 里,本条**不是简单地红** ——
-`status_code` 仍 **200**(确定性解析产出合法 assumptions),它只是**静默地不再测它声称要测的那个
-500 bug**;今天能测到**纯因为本仓 `.env` 恰好供了真 key**(与 ① 同一个"环境侥幸"根因)。
+**【已作废的错句(勿复活;保留原文仅为留审计痕迹,不得作为有效陈述引用)】**:
+~~"危害形状与 C3「永真空壳」同类但更隐蔽:在无 `.env` 的 CI 里,本条**不是简单地红** ——
+`status_code` 仍 200,它只是静默地不再测它声称要测的那个 500 bug"~~
+→ **错**。本条有第二条断言 `assert r.json()["assumptions"] == ["单基因敲低"]`,必然拦下退化值
+`["deterministic keyword parse"]` → **红**。该错句与本节自己下一段"实测:修前**红**"**直接自相矛盾**
+(**后者才是对的**)。正确归属见修正 10①。
+
+**成立的部分**:今天能测到**纯因为本仓 `.env` 恰好供了真 key**(与 ① 同一个"环境侥幸"根因)——
+这一点对本条与那条深嵌套测试**都**成立,故"须显式 setenv"的修法对两条都保留。
 
 **修法**:`monkeypatch.setenv("DEEPSEEK_API_KEY", "stub-key-not-a-real-credential")` 让本条对环境
 **自足**(stub client 已接管 `make_llm_client`,**不发网络请求**;setenv 函数级作用域,teardown 精确
@@ -742,3 +754,81 @@ DEEPSEEK_API_KEY` 环境下,修前**红**(assumptions 落回 deterministic)、�
 **教训(与 ① 同源)**:**"测试在本机绿"不等于"测试在测它声称测的东西"** —— 二者都靠仓库 `.env`
 的环境副作用侥幸成立。凡测试依赖 `from_env()` 一类**读环境**的构造路径,须显式 setenv 全部相关变量,
 否则该测试的有效性**取决于运行环境**而非代码。
+
+### 修正 10(Task 3 收口第二轮 —— **第 10 次过度声称:「静默」归错对象,且放过了真正静默的那条**)
+
+Task 3 收口轮代码经 spec 审独立证实全部落实(敌对环境变异、`traceback.extract_tb` 亲验抛出点
+`:184`、二分阈值**不抛=9998 / 抛=9999**)。**但修正 9⑥ 把"静默"归错了对象** —— 形状极讽刺:
+它是**修正 9 自己新造的测试**在静默,而 9⑥ 却去点名了另一条**吵闹会红**的测试。
+
+#### ① 「静默」归属订正(implementer 已独立复现,非采信转述)
+
+抽掉两处 stub key 行、在敌对环境(无 `.env` cwd + `env -u PRAXIS_VIRTUALCELL_MODE
+-u DEEPSEEK_API_KEY`)实测:
+
+| 测试 | 抽掉 stub key 后 | 与修正 9⑥ 的描述 |
+|---|---|---|
+| `test_sibling1_..._e2e_api_not_500`(**9⑥ 点名的就是它**) | **FAILED(红,吵闹)** | ❌ 9⑥ 说它"不是简单地红…静默地不再测" |
+| `test_parse_query_deep_nested_json_loads_recursionerror_not_500`(**9⑥ 完全没提**) | **PASSED(静默空过!)** | ⚠️ **真正的静默实例,修正 9 没发现** |
+
+**为什么 9⑥ 点名那条不静默**:它有第二条断言 `assert r.json()["assumptions"] == ["单基因敲低"]`
+—— 必然拦下退化值 `["deterministic keyword parse"]` → 红。
+
+**为什么修正 9 新造的那条真静默**(implementer 实测打印):
+```
+status: 200 | fallback_used: True | assumptions: ['deterministic keyword parse']
+llm_used: False | llm_metadata: {}
+→ 三条断言(status==200 / fallback_used is True / assumptions==deterministic)全 True
+→ 静默通过,但 json.loads 根本没被执行过
+```
+**根因**:该条的**期望结果与"没跑"的退化结果完全同形** → **断言集结构上无法区分"修复生效"与
+"测试没跑"**。此前只靠那行 stub key 撑着,而其 docstring **对此只字未提**(解释都写在另一条
+不需要的测试上)→ **谁将来删掉那行,它就永远静默绿**。
+
+**修正 9⑥ 自身还自相矛盾**:同一节既写"本条**不是简单地红** —— status 仍 200…**静默地不再测**",
+又写"实测:…修前**红**(assumptions 落回 deterministic)"。**后者才是对的。** 同样的错句也进了
+测试 docstring,且其上一行刚写"→ assumptions 恒 `['deterministic keyword parse']`",**内部即已矛盾**。
+两处均已订正(spec 侧保留原文并加 **【已作废的错句】** 标记,遵循本 spec"已作废措辞(勿复活)"
+的既有惯例 —— **删掉会毁掉审计痕迹**,故标作废而非物理删除)。
+
+**最讽刺的一点**:修正 9⑥ 末尾那句教训「**"测试在本机绿"不等于"测试在测它声称测的东西"**」
+**完全正确**,而且**恰好精准描述了 9⑥ 自己没发现的那条测试**。
+
+#### ② 新增可区分锚点(结构性修法)+ 变异证据
+
+给 `test_parse_query_deep_nested_json_loads_recursionerror_not_500` 加(**置于三条同形断言之前**):
+```python
+    assert d["llm_metadata"].get("response_hash")   # 证明 LLM 分支真被走过,而非无 key 退化
+```
+实测依据(implementer 亲跑):**有 key** → `llm_metadata = {'provider':'deepseek', 'model':
+'deepseek-chat', 'prompt_hash':'976107cbf0829ee2', 'response_hash':'31851d9adc33c985', …}`
+(`response_hash` 与审查者报的值**逐字一致**);**无 key** → `llm_metadata == {}`。
+→ 该条**结构上不可能再静默空过**,不再依赖"stub key 那行还在"。
+
+**变异证伪(即该锚点自身的证据)**:抽掉 stub key 行 + 敌对环境 → **加锚点前 PASSED(静默)、
+加锚点后 FAILED**(报错 `LLM 分支未被走过(llm_metadata={})`);加回 stub key → **绿**。
+
+#### ③ 新判据(**比修正 9⑥ 那句教训更可操作**;与修正 9③ 的"①论域全覆盖 ∧ ②每分支行为满足"并列)
+
+> **问:"这条测试的期望结果,和'它根本没跑'的退化结果,能区分吗?"**
+> **不能区分 → 它就是环境依赖的静默空壳**,必须补一个**只有真跑过才可能成立**的锚点
+> (如 `response_hash`、真实副作用、真实计算产物)。
+
+**与 C3「永真空壳」教训的关系**:C3 那次是**断言在任何输入下恒真**;本次是**断言在"没跑"时恒真**
+—— **同一失效族的另一支**,且更隐蔽(它在"跑了"时也真的有区分力,只在退化路径上塌掉)。
+**保留修正 9⑥ 那句正确的教训**:"测试在本机绿" ≠ "测试在测它声称测的东西"。
+
+#### ④ 陈旧计数订正(Minor)+ **同型第 2 处(review 未点,implementer 一并扫)**
+
+`_norm` docstring 写"把实现的 `.upper()` 变异成 `.lower()` → 本文件**红 6 条**" —— **陈旧计数**
+(Task 3 新增用例后,implementer 亲跑变异实测为 **红 8 条**)。
+
+**同型缺口第 2 处**:**文件级 docstring 里同样写着"红 6 条"**(review 只点了 `_norm` 那处)。
+**两处均已改为不钉死数字**("本文件多条红"),避免每次加用例都制造新的陈旧计数 —— 照 C3 教训 #2
+「同型缺口未回填」一并回填。
+
+#### ⑤ 本轮未动实现代码(约束核对)
+
+本轮只改**测试断言 + 文档**。Task 1 白名单 / Task 2 边界 try / Task 3 的 7 处 + `:206` 的
+`RecursionError` **逐字未动**(`git diff` 对 `run_virtualcell_query.py` 实现部分为空 —— 变异实验
+后已干净恢复并验证)。
