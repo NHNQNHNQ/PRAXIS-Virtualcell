@@ -1,14 +1,21 @@
 """P10.C3 LLM 全入口守卫 + narrative 一致性 + 抗注入边界 测试。
 narrative gate:确定性窄门(数值出处 + abstain 语义)→ 违规 fail-closed 丢弃 narrative,
 绝不碰 abstain/prediction/reliability(LLM 外层问题不得反向改写确定性裁决)。"""
+from praxis_virtualcell.core.agent import BaseAgent
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
+from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.core.request import VirtualCellRequest
 from praxis_virtualcell.governance.narrative_consistency import check_narrative
+from praxis_virtualcell.workflows.predict_delta_expression import build_runtime
 from praxis_virtualcell.workflows.run_virtualcell_query import run_query
 
 _CFG = RuntimeConfig(mode=Mode.OFFLINE)
 _ACCEPT = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
            "input_modality": "scRNA", "output_modality": "delta_expression",
            "task_type": "predict_delta_expression"}
+_ABSTAIN_REQ = {"request_id": "t10c3-abstain", "species": "bacteria", "perturbation_type": "gene",
+                "perturbation_targets": ["b0720"], "input_modality": "scRNA",
+                "output_modality": "delta_expression", "task_type": "predict_delta_expression"}
 
 
 def test_baseline_offline_has_no_narrative_and_no_c3_gate():
@@ -88,3 +95,67 @@ def test_narrative_non_abstain_not_checked_at_all():
     即使编造 8.88 也不报(自由文本无法可靠区分预测值与版本号/章节号 → 诚实放弃覆盖)。"""
     assert check_narrative({"abstain": False, "prediction": {"delta": [0.42]}},
                            "模型 v9.99 预测 delta 为 8.88。") == []
+
+
+class _StubLLMReport(BaseAgent):
+    """产指定 narrative 的 stub(替代真 LLMReport,不需 API key)。"""
+    name = "LLMReport"
+
+    def __init__(self, narrative: str) -> None:
+        self._n = narrative
+
+    def handle(self, message: AgentMessage, bus) -> None:
+        bus.send(AgentMessage(message.message_id + ":stub", self.name, "client",
+                              "llm_narrative", {"narrative": self._n},
+                              message.timestamp, message.message_id))
+
+
+def test_narrative_gate_drops_unfaithful_narrative_e2e():
+    """abstain 请求 + 不忠实 narrative(编造 9.99 且无弃权词)→ fail-closed 丢弃 + 记 provenance。"""
+    rt = build_runtime()
+    rt.register_agent(_StubLLMReport("模型预测 delta 为 9.99,结论明确。"))
+    r = rt.run_workflow(VirtualCellRequest.from_dict(dict(_ABSTAIN_REQ)))
+    assert r["abstain"] is True                                   # 前提:确是 abstain 场景
+    assert r["narrative"] == ""                                   # 丢弃
+    g = r["provenance"]["narrative_consistency_gate"]
+    assert any("9.99" in v for v in g["violations"])
+    assert "narrative_omits_abstain" in g["violations"]
+    assert "9.99" in g["original_narrative"]                      # 原文留审计
+
+
+def test_narrative_gate_keeps_faithful_narrative_e2e():
+    """abstain 请求 + 忠实 narrative(无编造浮点 + 含弃权词)→ 不触发,原样保留、无 gate 键。"""
+    rt = build_runtime()
+    rt.register_agent(_StubLLMReport("覆盖不足,系统弃权,未给出预测。"))
+    r = rt.run_workflow(VirtualCellRequest.from_dict(dict(_ABSTAIN_REQ)))
+    assert r["narrative"] == "覆盖不足,系统弃权,未给出预测。"
+    assert "narrative_consistency_gate" not in r["provenance"]
+
+
+def test_narrative_gate_not_triggered_on_non_abstain_e2e():
+    """收窄边界(用户拍板):非 abstain 请求即使 narrative 编造数值也不触发(诚实放弃覆盖)。"""
+    rt = build_runtime()
+    rt.register_agent(_StubLLMReport("模型 v9.99 预测 delta 为 8.88。"))
+    r = rt.run_workflow(VirtualCellRequest.from_dict({**_ACCEPT, "request_id": "t10c3-accept"}))
+    assert r["abstain"] is False
+    assert r["narrative"] == "模型 v9.99 预测 delta 为 8.88。"      # 原样(gate 不检非 abstain)
+    assert "narrative_consistency_gate" not in r["provenance"]
+
+
+def test_narrative_gate_preserves_verdict_fields():
+    """红线:gate 触发前后**整个 report**(除 narrative 文本与 gate 自身 provenance 键外)
+    逐字段一致 —— narrative 不忠实 ≠ 预测不可靠,LLM 外层问题不得反向改写确定性裁决。
+    用全量比对而非字段白名单,防未来重构悄悄改到未覆盖字段。"""
+    def _strip(r: dict) -> dict:
+        d = {k: v for k, v in r.items() if k != "narrative"}
+        d["provenance"] = {k: v for k, v in (d.get("provenance") or {}).items()
+                           if k != "narrative_consistency_gate"}
+        return d
+
+    base = build_runtime().run_workflow(VirtualCellRequest.from_dict(dict(_ABSTAIN_REQ)))
+    rt = build_runtime()
+    rt.register_agent(_StubLLMReport("delta 为 9.99,结论明确。"))
+    gated = rt.run_workflow(VirtualCellRequest.from_dict(dict(_ABSTAIN_REQ)))
+    assert "narrative_consistency_gate" in gated["provenance"]     # 确已触发
+    assert gated["narrative"] == ""                                # 确已丢弃
+    assert _strip(gated) == _strip(base), "gate 改动了 narrative/gate 键以外的字段(违红线)"

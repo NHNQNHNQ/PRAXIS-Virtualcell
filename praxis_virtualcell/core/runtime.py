@@ -14,6 +14,7 @@ from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.governance.cell_type_domain import check_cell_type_domain
 from praxis_virtualcell.governance.gate_util import apply_governance_gate
 from praxis_virtualcell.governance.module_consistency import check_module_plan
+from praxis_virtualcell.governance.narrative_consistency import check_narrative
 from praxis_virtualcell.governance.provenance_completeness import check_report_provenance
 from praxis_virtualcell.governance.provenance_hash import check_call_provenance
 
@@ -185,6 +186,16 @@ class AgentRuntime:
             nm = self.mk_message("Report", "LLMReport", "llm_render", {"report": report},
                                  rep.message_id)
             report["narrative"] = self._dispatch_collect(nm, "llm_narrative").payload["narrative"]
+            # P10.C3 narrative 一致性 gate:确定性窄门校验 narrative 对 report 的忠实性
+            # (仅 abstain 场景生效,见 governance/narrative_consistency.py 的范围与 limitation)。
+            # 违规 → fail-closed 丢弃 narrative + 记 provenance(原文留审计)。
+            # **绝不碰 abstain/prediction/reliability**:narrative 不忠实 ≠ 预测不可靠,
+            # LLM 外层问题不得反向改写确定性裁决。
+            nv = check_narrative(report, report["narrative"])
+            if nv:
+                report.setdefault("provenance", {})["narrative_consistency_gate"] = {
+                    "violations": nv, "original_narrative": report["narrative"]}
+                report["narrative"] = ""
         return report
 
     @staticmethod
