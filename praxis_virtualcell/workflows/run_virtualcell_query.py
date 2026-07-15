@@ -41,13 +41,20 @@ def validate_candidate(cand: dict) -> dict:
     errors, missing = [], []
     d = dict(cand or {})
     species = str(d.get("species", "")).strip().lower()
-    ptype = str(d.get("perturbation_type") or d.get("perturbation", {}).get("type", "")).strip().lower()
+    # C3 全入口守卫(fresh 复审补漏):cand 来自未受信 LLM JSON —— 只接受 list/dict,
+    # 绝不把字符串逐字符拆(perturbation_targets:"AHR" → ['A','H','R'] 会带着
+    # schema_valid=True 返给前端用户,内核随后真按 ['A','H','R'] 跑);标量/非 dict 亦不得
+    # 让 /api/parse(无 try/except)因未捕获异常 500。手法同 llm_critic.py/safety_contract.py。
+    _perturbation = d.get("perturbation")
+    _perturbation = _perturbation if isinstance(_perturbation, dict) else {}
+    ptype = str(d.get("perturbation_type") or _perturbation.get("type", "")).strip().lower()
     targets = d.get("perturbation_targets")
-    if targets is None and isinstance(d.get("perturbation"), dict):
-        targets = d["perturbation"].get("targets")
-    targets = [str(t).strip() for t in (targets or []) if str(t).strip()]
+    if targets is None and _perturbation:
+        targets = _perturbation.get("targets")
+    targets = [str(t).strip() for t in targets if str(t).strip()] if isinstance(targets, list) else []
     task = str(d.get("task_type") or d.get("task", "")).strip().lower() or "predict_delta_expression"
-    outputs = [o for o in (d.get("requested_outputs") or []) if o in ALLOWED_OUTPUTS]
+    _raw_outputs = d.get("requested_outputs")
+    outputs = [o for o in _raw_outputs if o in ALLOWED_OUTPUTS] if isinstance(_raw_outputs, list) else []
     # 同守卫:assumptions 非 list(如字符串)不逐字符拆(见 parse_query 同类修复,cand 可能来自
     # 未受信 LLM JSON)。
     _raw_assumptions = d.get("assumptions")

@@ -11,7 +11,7 @@ from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.core.request import VirtualCellRequest
 from praxis_virtualcell.governance.narrative_consistency import check_narrative
 from praxis_virtualcell.workflows.predict_delta_expression import build_runtime
-from praxis_virtualcell.workflows.run_virtualcell_query import parse_query, run_query
+from praxis_virtualcell.workflows.run_virtualcell_query import parse_query, run_query, validate_candidate
 
 _CFG = RuntimeConfig(mode=Mode.OFFLINE)
 _ACCEPT = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
@@ -434,6 +434,83 @@ def test_injection_router_products_still_filtered_to_candidates():
                             "applicable": ["MockGEARS"], "rejected_candidates": []}, "t1"), bus)
     sug = bus.latest("llm_route_suggestion").payload["suggestion"]
     assert "EVIL_INJECTED_AGENT" not in sug["recommended_agents"]   # 注入的 agent 名被过滤
+
+
+# ---------------------------------------------------------------------------
+# Task 7:fresh 复审(66 组合机械枚举)抓到的第 3 处同类缺口 —— validate_candidate 对
+# 未受信 LLM JSON 的 perturbation_targets / requested_outputs / perturbation 缺 isinstance
+# 守卫。Task 6 编辑了同一函数却只修了 assumptions,漏掉这三处更要害的字段
+# (可达 /api/parse,该端点无 try/except)。
+# ---------------------------------------------------------------------------
+
+
+def test_validate_candidate_perturbation_targets_string_not_char_split():
+    """最要害场景:LLM 单基因时返标量是自然错误(非对抗构造)。修复前字符拆产物是合法
+    list[str] 且 schema_valid=True,会带着污染数据直接返给前端,用户确认后内核真按其跑。
+    修复后:字符串归一为 [](不逐字符拆),既有的"缺 perturbation_targets"校验随即触发
+    → schema_valid=False、normalized=None,不再静默放行污染数据。"""
+    v = validate_candidate({"species": "human", "perturbation_type": "gene",
+                            "perturbation_targets": "AHR",
+                            "task_type": "predict_delta_expression"})
+    assert v["normalized"] is None                       # 不再是字符拆产物 ['A','H','R']
+    assert v["schema_valid"] is False
+    assert "perturbation_targets" in v["missing_fields"]
+
+
+def test_validate_candidate_perturbation_targets_int_does_not_crash():
+    """原 `for t in (123 or [])` 抛 TypeError(未捕获,/api/parse 无 try/except → 500)。"""
+    v = validate_candidate({"species": "human", "perturbation_type": "gene",
+                            "perturbation_targets": 123,
+                            "task_type": "predict_delta_expression"})
+    assert v["normalized"] is None
+    assert "perturbation_targets" in v["missing_fields"]
+
+
+def test_validate_candidate_requested_outputs_int_does_not_crash():
+    """原 `for o in (123 or [])` 抛 TypeError。"""
+    v = validate_candidate({"species": "human", "perturbation_type": "gene",
+                            "perturbation_targets": ["AHR"],
+                            "task_type": "predict_delta_expression",
+                            "requested_outputs": 123})
+    assert v["schema_valid"] is True
+    assert v["normalized"]["metadata"]["requested_outputs"] == []
+
+
+def test_validate_candidate_requested_outputs_bool_does_not_crash():
+    """原 `for o in (True or [])` → `for o in True` 抛 TypeError(bool 不可迭代)。"""
+    v = validate_candidate({"species": "human", "perturbation_type": "gene",
+                            "perturbation_targets": ["AHR"],
+                            "task_type": "predict_delta_expression",
+                            "requested_outputs": True})
+    assert v["schema_valid"] is True
+    assert v["normalized"]["metadata"]["requested_outputs"] == []
+
+
+def test_validate_candidate_perturbation_non_dict_does_not_crash():
+    """perturbation 为字符串(非 dict)+ 无 perturbation_type → 原
+    `d.get("perturbation", {}).get("type", "")` 对字符串调 .get 抛 AttributeError。
+    非 dict 视为缺失,走既有的 missing perturbation_type 语义。"""
+    v = validate_candidate({"species": "human", "perturbation": "gene:AHR",
+                            "task_type": "predict_delta_expression"})
+    assert v["normalized"] is None
+    assert "perturbation_type" in v["missing_fields"]
+
+
+def test_validate_candidate_legit_input_passes_through_unchanged():
+    """守卫不改既有合法语义:list targets / list outputs / dict perturbation 原样透传。"""
+    v = validate_candidate({"species": "human", "perturbation_type": "gene",
+                            "perturbation_targets": ["AHR"],
+                            "task_type": "predict_delta_expression",
+                            "requested_outputs": ["delta_expression"]})
+    assert v["schema_valid"] is True
+    assert v["normalized"]["perturbation_targets"] == ["AHR"]
+    assert v["normalized"]["metadata"]["requested_outputs"] == ["delta_expression"]
+
+    v2 = validate_candidate({"species": "human",
+                             "perturbation": {"type": "gene", "targets": ["AHR"]},
+                             "task_type": "predict_delta_expression"})
+    assert v2["schema_valid"] is True
+    assert v2["normalized"]["perturbation_targets"] == ["AHR"]
 
 
 def test_c3_offline_determinism_and_no_llm():
