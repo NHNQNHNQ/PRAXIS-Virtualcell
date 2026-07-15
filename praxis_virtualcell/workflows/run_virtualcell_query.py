@@ -39,18 +39,32 @@ def _hash(s: str) -> str:
 def validate_candidate(cand: dict) -> dict:
     """确定性校验 + 归一。返回 {schema_valid, missing_fields, errors, normalized}。
 
-    **C4 边界 try = public API 契约防线(defense-in-depth)**:fail-closed —— 捕获
-    TypeError/AttributeError/ValueError → schema_valid=False + errors=["candidate_malformed"],
-    绝不把未预见异常透给调用方。
+    **C4 边界 try = public API 契约防线(defense-in-depth)**:fail-closed —— 捕获**已识别的
+    4 类** → schema_valid=False + errors=["candidate_malformed"]:
+    `TypeError`(混合类型 key)· `AttributeError` · `ValueError`(含 `UnicodeEncodeError`
+    孤立代理项 与 循环引用 "Circular reference detected",实测二者均为其子类)·
+    `RecursionError`(深嵌套 dict —— 它是 **RuntimeError 子类**,曾穿透原三元组,§10 修正 8)。
+
+    **不声称捕获一切(设计上的有意取舍,非遗漏)**:**任何有限白名单都不可能兑现"绝不把
+    异常透给调用方"** —— 全称主张 vs 枚举,量词就对不上。`MemoryError`、未来代码路径的
+    未知异常类型均在白名单外;`except BaseException` 能兑现"绝不"却是**坏实践**(会吞掉
+    `KeyboardInterrupt`/`SystemExit`,让进程杀不掉、真 bug 被静默)。故此处**只捕已识别 4 类**,
+    并明示边界。**"绝不"一词已作废(§10 修正 8:本单元第 6 次未限定作用域的全称词)。**
 
     **定性必须精确 —— "可达"分两种,本层只占后一种**:
     - **当前两个已知消费点的正常路径不可达**(勘察实证):`/api/parse` → `parse_query` 的
       `cand` 只可能来自 `json.loads`(**JSON object key 恒为 str**)或 `_deterministic_parse`
-      (固定 str key);`praxis_vc_web/app.py:75` 的 `cand` 是本函数自产 normalized dict 的
-      拷贝(key 亦恒 str)。→ **本层不是当前生产 500 的防线**,那个由 `_validate_candidate_impl`
-      里的元素级白名单管(C4 Task 1)。
+      (固定 str key);`praxis_vc_web/app.py:75` 的 `cand` 来自 `json.loads` 产物或本函数自产
+      normalized 二者之一(**schema_valid=False 时 `parse_query` 返的是未归一的原始 LLM JSON /
+      `_deterministic_parse` 产物的展开** —— 页面 2 让用户补充/修正的常见路径),
+      **两者 key 皆恒 str**。→ **本层不是当前生产 500 的防线**,那个由 `_validate_candidate_impl`
+      里的元素级白名单管(C4 Task 1)。深嵌套那条**当前**亦生产不可达,但**依据更弱**:
+      `llm_client.py:23` `max_tokens` **默认值** 1024(**可调默认参数,非结构不变量** ——
+      与"JSON key 恒 str"这种格式级保证不同级)→ LLM 产不出所需深度;**调大到 128k 级则
+      余量被吃穿**(§10 修正 8)。
     - **直接调用可达**(实测,故非死码):触发需**非 JSON 来源的 dict**(混合类型 key)→
-      `json.dumps(d, sort_keys=True)` 抛 `TypeError: '<' not supported between 'str' and 'int'`。
+      `json.dumps(d, sort_keys=True)` 抛 `TypeError: '<' not supported between 'str' and 'int'`;
+      或深嵌套 dict → `RecursionError`。
 
     **真实价值** = public API 契约防线:防脚本 / notebook / 直接调用 / **未来第 3 个调用点**。
     定性对标 **C2 的 Gate B**(防御性完整性断言:字段恒由代码构造、正常路径不触发、防未来
@@ -58,13 +72,14 @@ def validate_candidate(cand: dict) -> dict:
     """
     try:
         return _validate_candidate_impl(cand)
-    except (TypeError, AttributeError, ValueError):
+    except (TypeError, AttributeError, ValueError, RecursionError):
         return {"schema_valid": False, "missing_fields": [],
                 "errors": ["candidate_malformed"], "normalized": None}
 
 
 def _validate_candidate_impl(cand: dict) -> dict:
-    """validate_candidate 的实现体(未预见异常由外层边界 try 兜,见其 docstring)。"""
+    """validate_candidate 的实现体(**已识别的 4 类**异常由外层边界 try 兜 —— 非"一切异常",
+    见其 docstring)。"""
     errors, missing = [], []
     d = dict(cand or {})
     species = str(d.get("species", "")).strip().lower()

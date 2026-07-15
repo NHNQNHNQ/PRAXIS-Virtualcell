@@ -519,3 +519,89 @@ ValueError)` 而非 `Exception` 属**人工克制**,**无测试兜底** —— �
 直接调用可达 / 理论可达,三者证据强度递减。不限定就会在同一文档内滑动(本条即实例:
 §2.4 与 §4.3 同词异义),且**读者会默认取最强的那个含义**。同理适用于"罕触发"
 (≠ 不可达)与"非空壳"(≠ 覆盖充分)。
+
+### 修正 8(代码质量审 —— **`RecursionError` fail-open 缺口(已补)+ "绝不"是不可能兑现的主张**)
+
+**Critical(真实缺口,已修)**:代码质量审**逐类枚举 `_validate_candidate_impl` 内可抛异常
+的操作**(方法与修正 5 的实跑 predicate 同源:枚举而非手工挑),发现原三元组
+`(TypeError, AttributeError, ValueError)` **漏了 `RecursionError`**:
+
+| 异常 | 来源 | 原三元组是否捕获 | 实证 |
+|---|---|---|---|
+| `TypeError`(混合类型 key) | `json.dumps(d, sort_keys=True)` | ✅ | Task 2 前置门 |
+| `ValueError`(循环引用 "Circular reference detected") | 同上 | ✅ | 审查者实测 |
+| `UnicodeEncodeError`(孤立代理项,`json.loads('"\ud800"')`) | 同上 | ✅ | **`issubclass(UnicodeEncodeError, ValueError) is True`**(implementer 复核实测) |
+| **`RecursionError`(深嵌套非循环 dict)** | 同上 | ❌ **穿透** | `RecursionError.__mro__` = `(RecursionError, **RuntimeError**, Exception, BaseException, object)` —— **不属三元组任一**(implementer 复核实测) |
+
+**已补** `RecursionError` 进白名单(成本 1 个 token,正常路径零行为改变)+ 新增
+`test_boundary_try_deep_nested_dict_returns_invalid_not_raises` 钉死。**TDD 红→绿实证**:
+补之前该条报 `RecursionError: maximum recursion depth exceeded while encoding a JSON object`;
+补之后绿。**变异证伪**:去掉 `RecursionError` → **仅该条红**、另两条边界 try 条仍绿
+→ 该条精确钉住这一类,非空壳、无冗余重叠。
+
+**阈值不是稳定常数(implementer 实测订正,spec 不得钉死数字)**:本机(CPython 3.13/macOS)
+**8000 层不抛、10000 层抛** —— 审查者给的"约 8000–10000 层"**区间准确**(implementer 初读时
+误当成"8000 触发"而声称其数字不准,**当场实测自证其非并收回** —— 又一次"没验证就下结论")。
+Python **3.13 按 C 栈指针判定**而非 `recursionlimit` 计数(实测 `sys.getrecursionlimit()==1000`
+却需约万层)→ **阈值随栈大小/解释器版本浮动**。故测试取 **20000 层**(远超阈值的余量),
+**不写死具体阈值**。
+
+**"绝不把未预见异常透给调用方"是不可能兑现的主张(本条的根本问题,比缺口本身更重要)**:
+docstring 原写"**绝不**把未预见异常透给调用方",被 `RecursionError` 直接证伪。但**补上
+`RecursionError` 并不能让"绝不"成立** —— 这是量词层面的错配,不是白名单不够全:
+
+- **全称主张 vs 有限枚举**:"绝不"要求对**一切**异常类型成立;`except (A, B, C, D)` 是**枚举**。
+  枚举永远兑现不了全称。`MemoryError`(深/大结构序列化时真实可能)、未来代码路径引入的
+  未知异常类型,都在白名单外。
+- **唯一能兑现"绝不"的写法 `except BaseException` 是坏实践**:会吞掉 `KeyboardInterrupt` /
+  `SystemExit`(进程杀不掉)与真 bug(静默)。
+
+→ **表述改为**:"捕获**已识别的 4 类**(`TypeError`/`AttributeError`/`ValueError`[含
+`UnicodeEncodeError`]/`RecursionError`),**不声称捕获一切** —— 这是设计上的**有意取舍**,
+非遗漏"。已同步进 `validate_candidate` docstring。**收官文档 / paper 一律照此,"绝不"作废。**
+
+**可达性限定(照修正 7 确立的纪律,审查者主动套用)**:`RecursionError` 缺口
+**直接调用可达**(脚本/notebook 传深嵌套 dict);**生产路径不可达** ——
+`praxis_virtualcell/agents_llm/llm_client.py:23` `max_tokens: int = 1024` → LLM 单次
+补全被截断,**物理上产不出触发阈值所需的嵌套深度(约 5–6 万字符)**;`app.py:75` 的 cand 是
+浅结构。→ **缺口的可达层级与这个 try 本身的价值主张同级**(都只在"直接调用"层),
+**不是新增的生产风险面**,不得记入"修生产 500"的账。
+
+**⚠️ 但两条"生产不可达"的证据强度不同(implementer 复核 `max_tokens` 时发现,审查者与
+控制器均未说透 —— 收官文档不得把二者并列成同等强度)**:
+
+| 缺口 | "生产不可达"的依据 | 强度 | 会不会被改动破坏 |
+|---|---|---|---|
+| 混合类型 key(`TypeError`) | **JSON object 的 key 恒为 str** | **强:JSON 格式的结构性保证** | **不会** —— 除非换掉 `json.loads` 这个数据来源 |
+| 深嵌套(`RecursionError`) | `max_tokens` **默认值** 1024 | **弱:可调默认参数,非结构不变量** | **会** —— 调大即可能失效 |
+
+`max_tokens` 是**默认参数**(非常量):实测全仓 `.complete(` 7 个调用点,**唯一覆盖点是
+`llm_report.py:29` 的 `max_tokens=800`(更小,且不在本函数路径上)**,`parse_query:172` 用默认
+1024 → **当前树上主张成立**。但这是**当前树的事实,不是不变量**:粗算 1024 token ≈ 3–4 千
+字符 ÷ 每层约 6 字符(`{"n":` + `}`)≈ **500–600 层**,距阈值约万层有 ~15x 余量;**若未来把
+`max_tokens` 调到 128k 级(≈50 万字符 ≈ 8 万层),该余量被吃穿、缺口转为生产可达**。
+→ **深嵌套那条的"生产不可达"须表述为"依赖 `max_tokens` 当前默认值",不得写成结构性保证。**
+(这也是补 `RecursionError` 的**正当性来源之一**:它把一条"依赖可调配置"的防线变成
+无条件成立 —— 成本 1 个 token,不必赌配置不变。)
+
+### 修正 8b(spec 合规审 Minor —— `app.py:75` 那句的适用范围被夸大)
+
+修正 7 与 Task 2 commit 写的"`app.py:75` 的 `cand` 是 `validate_candidate` **自产 normalized
+dict 的拷贝**" —— **只在 `schema_valid=True` 分支成立**。`schema_valid=False` 时(**页面 2
+专门给用户"补充/修正"的常见路径**)`parse_query` 返的 `candidate_request` 是 `{**cand, ...}`,
+即**未经归一的原始 LLM JSON / `_deterministic_parse` 产物**的展开。
+
+**结论方向不变**(`json.loads` 产物与自产 normalized **两者 key 皆恒 str** → except 分支
+仍生产不可达),但那句话的适用范围被夸大到了另一分支。**改为**:"`app.py:75` 的 `cand`
+来自 `json.loads` 产物或 `validate_candidate` 自产 normalized 二者之一,**两者 key 皆恒 str**"。
+已同步进 docstring。
+
+**教训(承修正 5/7 的元层面,本单元第 6 次"未限定作用域的全称词")**:前五次是
+**"四类"**(修正 1)· **"三种"**(修正 1 第二轮)· **"机械找全"**(修正 5)· **"可达"**(修正 7)·
+**"自产 normalized 的拷贝"**(修正 8b,全称化了只在一个分支成立的事实);这次是 **"绝不"**。
+
+> **凡出现"绝不 / 全部 / 所有 / 一律 / 永不 / 一定"这类全称词,必须能当场给出判据
+> (枚举命令 + 输出、或形式化论证),否则一定被反例证伪。** 本单元的经验是:
+> **反例总会被下一轮审查找到 —— 六次无一例外。** 更强的做法是**先自问"这是全称还是枚举"**:
+> 若实现是枚举(如 except 白名单、手工清单),就**不得用全称词描述它**,应改为
+> "已识别的 N 类 + 明示边界"。

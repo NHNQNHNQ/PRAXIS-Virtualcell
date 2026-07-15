@@ -230,6 +230,30 @@ def test_boundary_try_non_str_key_returns_invalid_not_raises():
     assert "candidate_malformed" in v["errors"]
 
 
+def test_boundary_try_deep_nested_dict_returns_invalid_not_raises():
+    """**RecursionError 缺口**(代码质量审逐类枚举 `json.dumps` 可抛异常时发现,已补):
+    深嵌套非循环 dict → `json.dumps(sort_keys=True)` 抛 RecursionError,而它是
+    **RuntimeError 子类**(`RecursionError.__mro__` 实测不含 TypeError/AttributeError/
+    ValueError)→ 原三元组**捕不到、原样穿透**边界 try。
+
+    可达性(照本单元纪律限定作用域):**直接调用可达**(本测试即是);**生产路径不可达**
+    —— `agents_llm/llm_client.py:23` 硬编码 `max_tokens: int = 1024` → LLM 单次补全被截断,
+    物理上产不出触发阈值所需的嵌套深度(约 5-6 万字符)。
+
+    **20000 层是"远高于阈值"的余量取值,不是阈值本身**:实测本机(CPython 3.13/macOS)
+    8000 层**不抛**、10000 层抛 —— 且 3.13 按 **C 栈指针**判定而非 `recursionlimit` 计数
+    (故 `sys.getrecursionlimit()==1000` 却需约万层),**阈值随栈大小/版本浮动、非稳定常数**
+    → 测试取远超阈值的层数,不钉死具体数字。
+    """
+    d = cur = {}
+    for _ in range(20000):
+        cur["n"] = {}
+        cur = cur["n"]
+    v = validate_candidate({**_BASE, "perturbation_targets": ["AHR"], "deep": d})
+    assert v["schema_valid"] is False
+    assert "candidate_malformed" in v["errors"]
+
+
 def test_boundary_try_does_not_swallow_legit_results():
     """**对照组**:边界 try 不得吞掉正常路径(若 try 把一切都变成 invalid,本条会红)。
     这条防的是"为了不崩而把所有东西都 fail-closed"这种过度防御。
