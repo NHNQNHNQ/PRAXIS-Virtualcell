@@ -55,7 +55,20 @@ import json
 
 import pytest
 
-from praxis_virtualcell.workflows.run_virtualcell_query import ALLOWED_OUTPUTS, validate_candidate
+from praxis_virtualcell.agents_llm.llm_critic import LLMCriticAgent
+from praxis_virtualcell.agents_llm.llm_router import LLMRouterAgent
+from praxis_virtualcell.core.bus import MessageBus
+from praxis_virtualcell.core.config import Mode, RuntimeConfig
+from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.llm_orchestration import safety_contract as SC
+# ⚠️ 类名订正:该 agent 类实际名 LLMCrossModuleReasoner(非 CrossModuleReasonerAgent ——
+# 原 task prompt 此处的类名是错的,已用 grep + Read 实测核对,见 llm_orchestration/cross_module_reasoner.py)。
+from praxis_virtualcell.llm_orchestration.cross_module_reasoner import LLMCrossModuleReasoner
+from praxis_virtualcell.workflows.run_virtualcell_query import (
+    ALLOWED_OUTPUTS,
+    parse_query,
+    validate_candidate,
+)
 
 _BASE = {"species": "human", "perturbation_type": "gene",
          "task_type": "predict_delta_expression"}
@@ -268,3 +281,152 @@ def test_boundary_try_does_not_swallow_legit_results():
                             "task_type": "predict_delta_expression"})
     assert v["schema_valid"] is True
     assert v["normalized"]["perturbation_targets"] == ["AHR"]
+
+
+# ---------------------------------------------------------------------------
+# 姊妹 7 处同型缺口:`list(x) if isinstance(x, list) else []` —— 容器守了、元素没守。
+# ⚠️ 清单来自**实跑** predicate(7 处),非 spec §2.6 手工挑的 6 处(那条是不实表述)。
+# 第 1 处(parse_query 的 assumptions)是**第二个活的生产 500**;其余 6 处只进 provenance。
+# ---------------------------------------------------------------------------
+
+_GARBAGE = ["ok_flag", {"evil": 1}, ["nested"], None, 42]      # 1 合法 str + 4 类畸形元素
+
+
+class _StubClient:
+    """返回指定 content 的假 LLMClient(不需 API key)。同 test_t10_6 的既有模式。"""
+
+    def __init__(self, content) -> None:
+        self._c = content
+
+    def complete(self, messages, **kw) -> dict:
+        return {"content": self._c}
+
+
+def _critic_notes(content) -> dict:
+    bus = MessageBus()
+    bus.set_context(trace_id="trace_c4", task_id="task_c4")
+    LLMCriticAgent(_StubClient(content)).handle(
+        AgentMessage("m1", "Report", "LLMCritic", "llm_review", {"report": {"abstain": False}},
+                     "t1"), bus)
+    return bus.latest("llm_critic_notes").payload
+
+
+def _xmod_notes(content) -> dict:
+    bus = MessageBus()
+    bus.set_context(trace_id="trace_c4", task_id="task_c4")
+    LLMCrossModuleReasoner(_StubClient(content)).handle(
+        AgentMessage("m1", "ModuleRouter", "LLMCrossModuleReasoner", "llm_cross_module",
+                     {"module_plan": {"primary": "gene_hub", "entries": []}}, "t1"), bus)
+    return bus.latest("llm_cross_module_notes").payload
+
+
+def _route_suggestion(content) -> dict:
+    bus = MessageBus()
+    bus.set_context(trace_id="trace_c4", task_id="task_c4")
+    LLMRouterAgent(_StubClient(content)).handle(
+        AgentMessage("m1", "ModelApplicability", "LLMRouter", "llm_route",
+                     {"applicable": ["MockPredictor"], "rejected_candidates": [],
+                      "request": {"species": "human"}}, "t1"), bus)
+    return bus.latest("llm_route_suggestion").payload["suggestion"]
+
+
+def test_sibling1_parse_query_assumptions_drops_non_str_elements(monkeypatch):
+    """**第二个活的生产 500**(端到端实测坐实,非构造):parse_query 里**独立的**
+    `list(raw_assumptions)` 元素级无守卫 → 返回 → ParseOut.assumptions: list[str] →
+    pydantic 对 dict/list/None/int 四种元素**全抛 ValidationError** → HTTP 500。
+
+    LLM 把 assumption 写成对象是**自然错误**。仅 llm_assisted 可达(OFFLINE 的
+    _deterministic_parse 恒产 ["deterministic keyword parse"])。
+    ⚠️ 与 Task 1 修的那处**不是同一处** —— Task 1 改的是 validate_candidate 内部的
+    assumptions,parse_query 这处独立且不受其保护;包着它的 try 也捕不到
+    (list() 不抛,ValidationError 在 return 之后)。
+    """
+    import praxis_virtualcell.agents_llm.llm_client as _llmc
+    monkeypatch.setattr(_llmc, "make_llm_client", lambda cfg: _StubClient(json.dumps({
+        "species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+        "task_type": "predict_delta_expression",
+        "assumptions": ["单基因敲低", {"note": "LLM 返了个对象"}, ["nested"], None, 42],
+    })))
+    out = parse_query("human AHR 敲低", config=RuntimeConfig(mode=Mode.LLM_ASSISTED, llm_enabled=True))
+    assert out["assumptions"] == ["单基因敲低"]          # 畸形元素丢弃、合法保留
+    assert all(isinstance(a, str) for a in out["assumptions"])
+
+
+def test_sibling1_parse_query_assumptions_e2e_api_not_500(monkeypatch):
+    """同上,但走**真实生产链路** /api/parse(FastAPI TestClient)—— 修复前 HTTP 500。
+
+    ⚠️ 防泄漏:`runtime_service.config_for()` 内部对 llm_assisted 分支直接
+    `os.environ["PRAXIS_VIRTUALCELL_MODE"] = "llm_assisted"`(不经 monkeypatch),
+    若不先用 monkeypatch 记录基线,这个进程级副作用会**跨测试残留**、污染同一 pytest
+    session 后面所有依赖 RuntimeConfig.from_env() 默认 offline 的用例
+    (phase10/ 在 tests/ 目录序里排在 test_*.py 前面,污染面是整个后续套件)。
+    monkeypatch.delenv 在此处先"登记"基线,teardown 时无论期间被谁改写都会精确复原。
+    """
+    monkeypatch.delenv("PRAXIS_VIRTUALCELL_MODE", raising=False)
+    from fastapi.testclient import TestClient
+
+    import praxis_virtualcell.agents_llm.llm_client as _llmc
+    monkeypatch.setattr(_llmc, "make_llm_client", lambda cfg: _StubClient(json.dumps({
+        "species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
+        "task_type": "predict_delta_expression",
+        "assumptions": ["单基因敲低", {"note": "LLM 返了个对象"}],
+    })))
+    from praxis_vc_api.main import app
+    c = TestClient(app, raise_server_exceptions=False)
+    r = c.post("/api/parse", json={"text": "human AHR 敲低", "mode": "llm_assisted"})
+    assert r.status_code == 200, f"修复前是 500,现应 200;实际 {r.status_code}"
+    assert r.json()["assumptions"] == ["单基因敲低"]
+
+
+def test_sibling_critic_notes_flags_drop_non_str_elements():
+    """llm_critic.py notes/flags —— 元素级畸形不得原样进 provenance。"""
+    out = _critic_notes(json.dumps({"notes": _GARBAGE, "flags": _GARBAGE}))
+    assert out["notes"] == ["ok_flag"]
+    assert out["flags"] == ["ok_flag"]
+
+
+def test_sibling_xmod_notes_flags_drop_non_str_elements():
+    """cross_module_reasoner.py notes/flags —— 同型(经 core/runtime.py::_dispatch_collect 同步调用)。"""
+    out = _xmod_notes(json.dumps({"notes": _GARBAGE, "flags": _GARBAGE}))
+    assert out["notes"] == ["ok_flag"]
+    assert out["flags"] == ["ok_flag"]
+
+
+def test_sibling_router_risk_flags_drop_non_str_elements():
+    """llm_router.py risk_flags —— 元素级。
+    ⚠️ recommended/excluded_agents **不在本 task 范围**:它们已是**值白名单**
+    (`if a in candidates`,candidates 是 **list** → `in` 用 `==` 不需 hash),天然安全。"""
+    sug = _route_suggestion(json.dumps({"recommended_agents": ["MockPredictor"],
+                                        "excluded_agents": [], "reasoning_summary": "x",
+                                        "risk_flags": _GARBAGE}))
+    assert sug["risk_flags"] == ["ok_flag"]
+    assert sug["recommended_agents"] == ["MockPredictor"]      # 值白名单零回归
+
+
+def test_sibling_safety_contract_risk_flags_drop_non_str_elements():
+    """safety_contract.py risk_flags —— 实测修复前 [{'evil':1},['nested'],None] 原样透传。"""
+    out = SC.sanitize_llm_plan(
+        json.dumps({"selected_modules": ["gene_hub"], "risk_flags": _GARBAGE}),
+        ["gene_hub"], primary="gene_hub")
+    assert out["risk_flags"] == ["ok_flag"]
+    assert out["selected_modules"] == ["gene_hub"]             # 零回归
+
+
+def test_arch_invariant_router_value_whitelist_natively_safe():
+    """**架构不变量的文档化**(非回归测试,修复前后都应绿):值白名单对元素级畸形
+    **天然安全** —— candidates 是 list → `in` 用 `==` 不需 hash → 畸形元素恒不匹配被丢。
+    这是本单元"跟随既有正确先例"的证据之一。"""
+    sug = _route_suggestion(json.dumps({"recommended_agents": [["nested"], {"d": 1}, None],
+                                        "excluded_agents": [], "reasoning_summary": "",
+                                        "risk_flags": []}))
+    assert sug["recommended_agents"] == []
+
+
+def test_arch_invariant_sanitize_llm_plan_fail_closed_on_element_malformed():
+    """**架构不变量的文档化**(修复前后都应绿):整段 try 对元素级畸形 fail-closed 保 primary
+    —— 且**作者从未枚举过该畸形**(注释只写"非可迭代标量(如 123)")→ except 不需要
+    知道畸形长什么样。这是本单元"白名单/fail-closed > 枚举畸形类型"论点的证据。"""
+    out = SC.sanitize_llm_plan(json.dumps({"selected_modules": [["gene_hub"]]}),
+                               ["gene_hub"], primary="gene_hub")
+    assert out["risk_flags"] == ["llm_parse_failed"]
+    assert out["selected_modules"] == ["gene_hub"]

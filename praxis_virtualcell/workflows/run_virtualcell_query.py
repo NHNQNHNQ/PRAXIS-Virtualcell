@@ -190,7 +190,12 @@ def parse_query(text: str, *, config: RuntimeConfig | None = None) -> dict:
                 llm_used = True
                 # 只接受 list(非 list 丢弃置 [],绝不把字符串逐字符拆成 ['a','b','c']
                 # 直接返给前端用户,复刻 llm_critic.py/safety_contract.py 同一手法)。
-                assumptions = list(raw_assumptions) if isinstance(raw_assumptions, list) else []
+                # C4 Task 3 元素级白名单:本处与 validate_candidate 内那处**是两处独立代码**,
+                # Task 1 的收紧保护不到这里。原 list(x) 元素任意 → 返回 →
+                # ParseOut.assumptions: list[str] → pydantic 对 dict/list/None/int 全抛
+                # ValidationError → /api/parse **HTTP 500**(第二个活 bug,端到端实测)。
+                # 包着本行的 try 捕不到(list() 不抛,ValidationError 在 return 之后)。
+                assumptions = [a for a in raw_assumptions if isinstance(a, str)] if isinstance(raw_assumptions, list) else []
             except (json.JSONDecodeError, TypeError, AttributeError):
                 cand = None
     if cand is None:

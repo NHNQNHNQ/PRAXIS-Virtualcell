@@ -46,7 +46,9 @@ class LLMRouterAgent(BaseAgent):
                 sug["excluded_agents"] = [a for a in (exc if isinstance(exc, list) else [])
                                           if a in candidates]
                 sug["reasoning_summary"] = str(d.get("reasoning_summary", ""))[:500]
-                sug["risk_flags"] = list(rf) if isinstance(rf, list) else []
+                # C4 元素级白名单(recommended/excluded_agents 无需改 —— `if a in candidates`
+                # 是值白名单,candidates 是 list → `in` 用 == 不需 hash,天然安全)。
+                sug["risk_flags"] = [f for f in rf if isinstance(f, str)] if isinstance(rf, list) else []
             except (json.JSONDecodeError, TypeError, AttributeError):
                 sug["risk_flags"] = ["llm_parse_failed"]
         else:

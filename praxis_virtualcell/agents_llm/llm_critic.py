@@ -36,8 +36,10 @@ class LLMCriticAgent(BaseAgent):
                 # ['d','a','n',...] 污染 provenance);捕获 TypeError/AttributeError
                 # (JSON 顶层非 object、值为标量)防畸形/注入产物污染 provenance。
                 # 本 agent 产物只进 provenance 不碰裁决,守卫仅保结构合法、不改语义。
-                out["notes"] = list(notes) if isinstance(notes, list) else []
-                out["flags"] = list(flags) if isinstance(flags, list) else []
+                # C4 元素级白名单:C3 只守了容器(notes 是不是 list),没守元素 ——
+                # [{'evil':1},['nested'],None] 原样进 provenance。只接受 str,其余丢弃。
+                out["notes"] = [n for n in notes if isinstance(n, str)] if isinstance(notes, list) else []
+                out["flags"] = [f for f in flags if isinstance(f, str)] if isinstance(flags, list) else []
             except (json.JSONDecodeError, TypeError, AttributeError):
                 out["flags"] = ["llm_parse_failed"]
         else:

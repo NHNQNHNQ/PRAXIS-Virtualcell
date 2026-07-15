@@ -42,8 +42,9 @@ class LLMCrossModuleReasoner(BaseAgent):
                 # (非 list 丢弃置 [],绝不把字符串逐字符拆成 ['d','a','n',...] 污染 provenance);
                 # 捕获 TypeError/AttributeError(JSON 顶层非 object、值为标量)防畸形/注入产物
                 # 崩掉 core/runtime.py 的同步 _dispatch_collect 调用。
-                out["notes"] = list(notes) if isinstance(notes, list) else []
-                out["flags"] = list(flags) if isinstance(flags, list) else []
+                # C4 元素级白名单(同 llm_critic.py):容器守了、元素没守。
+                out["notes"] = [n for n in notes if isinstance(n, str)] if isinstance(notes, list) else []
+                out["flags"] = [f for f in flags if isinstance(f, str)] if isinstance(flags, list) else []
             except (json.JSONDecodeError, TypeError, AttributeError):
                 out["flags"] = ["llm_parse_failed"]
         else:

@@ -59,7 +59,8 @@ def sanitize_llm_plan(raw_content: str | None, candidates: list[str],
         rf = d.get("risk_flags")
         out["selected_modules"] = sel
         out["reasoning_summary"] = str(d.get("reasoning_summary", ""))[:500]
-        out["risk_flags"] = list(rf) if isinstance(rf, list) else []  # 只接受 list,否则丢弃(不把字符串逐字符拆)
+        # C4 元素级白名单:只接受 str 元素(原 list(rf) 元素任意 → 畸形原样进 provenance)。
+        out["risk_flags"] = [f for f in rf if isinstance(f, str)] if isinstance(rf, list) else []
     except (json.JSONDecodeError, TypeError, AttributeError):
         out["risk_flags"] = ["llm_parse_failed"]
         out["selected_modules"] = _fallback
