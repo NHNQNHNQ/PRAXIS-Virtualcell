@@ -314,3 +314,75 @@ assumptions = [a for a in _raw_assumptions if isinstance(a, str)] if isinstance(
 - **范围**:聚焦用户三拍板;fuzz/全仓重构/新建 CI 执行面/#1#2#3 明列不做。
 - **歧义**:§4.2 明确"溯源契约"仅指 `perturbation_targets`,另两字段判据已分别命名;
   §2.7 明确"层1 无机械判据"是残余风险而非可消除项。
+
+---
+
+## 10. 执行期修正(以本节为准 —— 上文 §4.2/§7/§8 的原文已被这些发现取代)
+
+Task 1 实现后由代码质量审(⚠️ APPROVED_WITH_MINORS,2 条 Important)抓到,implementer
+逐条独立变异复核确认属实。**本节优先于上文;收官文档 / paper 引用一律照本节表述。**
+
+### 修正 1:§4.2"一条断言覆盖四类后果"是**过度声称**(实测 2/4)
+
+§4.2 原写"一个断言同时覆盖已知全部四类后果",**不成立**。逐类变异实证(删掉 targets 的
+`isinstance(t, str)` 守卫、退回 `str(t).strip()`)归属如下:
+
+| 后果 | 实际由谁覆盖 | 实证 |
+|---|---|---|
+| 发明(`[None,'AHR']`→`'NONE'`) | **溯源契约(本单元新增)** | 变异 → 红 ✅ |
+| 嵌套(`[['AHR']]`→`"['AHR']"`) | **溯源契约(本单元新增)** | 变异 → 红 ✅ |
+| 字符拆(`"AHR"`→`['A','H','R']`) | **C3 既有的容器级 `isinstance(targets, list)`** —— **非本单元贡献** | 同变异 → **仍绿**(C3 守卫先返 `[]` → fail-closed 早退) |
+| 崩溃 | **`requested_outputs` 的值白名单(`o in ALLOWED_OUTPUTS`,机制完全不同)** | targets 路径**根本不会崩**:`str()`/`isinstance()` 对 JSON 可产生的全部元素类型(null/int/float/bool/str/list/dict)均不抛 |
+
+**正确表述**:**跨字段的三种判据(溯源契约 / 值白名单 / 类型过滤)合计覆盖四类后果;
+溯源契约本身贡献「发明」+「嵌套」两类。** 字符拆由 C3 既有容器级守卫覆盖(本 task 只是让
+契约能抓其**未来回归**);崩溃由值白名单覆盖,与溯源契约不是同一机制。
+**收官文档/paper 不得再写"一条断言覆盖四类"。**
+
+**§4.2 表格末行"崩溃(#5)|`[['x']]` in set|契约求值前先崩 → 测试红"一并作废** ——
+审查者指出它只在"任何未捕获异常都会让任何 pytest 测试红"这个**平凡意义**上成立,
+**不是 ⊆ 契约本身的性质**,是空洞断言。
+
+### 修正 2:§4.2/§8 未披露 `got ⊆ src` 的**不对称性**
+
+⊆ **只禁"多出"(发明)、不禁"少掉"(丢真数据)**:丢掉部分合法元素 → `schema_valid=True`
+→ 契约恒 PASS;且 `∅ ⊆ src` 恒真 → 全丢亦 PASS。审查者搜遍全套测试
+(`test_run_virtualcell_query.py` / `test_negative_cases.py` / `test_t10_6_llm_guard.py` /
+`test_t10_7_*.py`)**无一条 3+ 合法混畸形用例** → 未来"丢一个合法 target"的 bug 会穿过整套。
+
+**已补** `test_targets_no_silent_partial_loss`(3+ 合法混畸形,**精确相等**断言,不多不少保序)
+从反侧覆盖;全丢那侧由既有 `test_targets_all_elements_malformed_fails_closed` 从
+`missing_fields` 兜住。**当前实现无此 bug**(per-element 独立 filter,已核实),本条属**防回归**。
+
+**实证佐证(implementer 补做)**:把 filter 变异成 `[:1]`(丢真数据)→ **溯源契约的 8 条参数化
+测试全部保持绿**,只有新增的精确相等条 + 2 条零回归条变红 → **独立坐实 ⊆ 抓不到"少掉"**。
+
+**paper 引用溯源契约时须同时说明它是单向的(只保证"不发明",不保证"不丢失")。**
+
+**另记残余风险(审查者提)**:**静默丢弃无信号** —— 部分元素被丢弃时调用方/前端收不到
+任何信号(与"用户本来就传得少"无法区分)。这是"部分丢弃"设计(跟随 `llm_router` 先例)的
+已知代价,非 bug,但 D 单元若做用户可见性表述须计入。
+
+### 修正 3:§8 残余风险清单**漏了同函数内 4 个零守卫标量字段**
+
+`validate_candidate` 内 `request_id` / `cell_type` / `input_modality` / `output_modality`
+**完全无类型守卫**(比本 task 修的三处更彻底地无保护)。端到端实测(控制器 + implementer
+双方独立复核):
+
+- **不崩溃**:`cell_type` 下游 `supported_cell_types` 是 **list**(实证:
+  `brains/virtualcell/human/model_applicability.yaml:13` `[K562, A549, MCF7, HEK293T]`,
+  YAML 加载后 `type=list`)→ `in` 用 `==` 比较**不需 hash** → unhashable 值不崩,
+  恒不匹配 → **fail-closed abstain=True**(与 `requested_outputs` 的 set 命运相反 —— 正是
+  §2.5"同一畸形三个消费点命运不同"的又一实例)。
+- **不发明数据**:4 处**原样透传、不经 `str()` 强转**(实测 `cell_type=['evil']` → 输出仍是
+  `['evil']` 而非 `"['evil']"`)。
+
+→ **不构成本单元的两类失效模式**(崩溃 / 发明),故本单元不修;**但 D 单元若要对
+`validate_candidate` 做"全覆盖"表述,须把这 4 处计入残余风险。**
+
+### 修正 4(Minor):测试文件 `_norm` 的 scope 限制
+
+`_norm` 硬编码 `.strip().upper()`,只对应实现的 `gene`/`gene_combination`/`ligand` 分支;
+本文件全部用例均为 `perturbation_type: "gene"` → **`drug` 分支(归一小写)未覆盖**。已在
+`_norm` docstring 标注。**非同义反复**(审查者实测证伪该风险):把实现的 `.upper()` 变异成
+`.lower()` → 测试红 6 条 → `_norm` 是**独立 oracle**,不是跟着实现走的空壳。

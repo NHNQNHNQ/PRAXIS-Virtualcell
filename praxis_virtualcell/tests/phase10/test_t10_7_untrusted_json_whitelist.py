@@ -3,13 +3,34 @@
 本文件的判据是**输出侧**的 —— 不枚举输入侧畸形类型。理由:输入侧枚举是无底递归
 (入口→字段→畸形类型→后果类型),C3 Task 7 照"双层机械枚举"教训做了
 11 字段 × 6 畸形 = 66 组合,仍漏了层3(6 种畸形全是容器级、无一元素级)与层4
-(判据只有"崩溃/字符拆"、没有"零发明")。溯源契约只问"输出有没有凭空多出东西",
-故一条断言同时覆盖字符拆/发明/嵌套/崩溃四类后果。
+(判据只有"崩溃/字符拆"、没有"零发明")。溯源契约只问"输出有没有凭空多出东西"。
+
+**覆盖主张(经代码质量审逐类变异实证订正 —— 收官文档/paper 须照此表述)**:
+**跨字段的三种判据(溯源契约 / 值白名单 / 类型过滤)合计覆盖四类后果;溯源契约本身
+只贡献「发明」+「嵌套」两类。** 逐类归属:
+
+| 后果 | 谁覆盖的 | 变异实证 |
+|---|---|---|
+| 发明(`[None,'AHR']`→`'NONE'`) | **溯源契约(本单元新增)** | 删 isinstance 守卫 → 红 |
+| 嵌套(`[['AHR']]`→`"['AHR']"`) | **溯源契约(本单元新增)** | 删 isinstance 守卫 → 红 |
+| 字符拆(`"AHR"`→`['A','H','R']`) | **C3 既有的容器级 `isinstance(targets, list)`** —— 非本单元贡献 | 同变异 → **仍绿**(C3 守卫先返 `[]` → fail-closed) |
+| 崩溃(`o in ALLOWED_OUTPUTS`) | **`requested_outputs` 的值白名单(不同机制)** | targets 路径**根本不会崩**(`str()`/`isinstance()` 对 JSON 可产生的全部元素类型均不抛) |
+
+**不得写"一条断言覆盖四类"** —— 该措辞已作废。原 docstring 里"崩溃:契约求值前先抛
+TypeError → 红"这条 bullet 亦作废:它只在"任何未捕获异常都会让任何 pytest 测试红"这个
+**平凡意义**上成立,**不是 ⊆ 契约本身的性质**。
 
 诚实边界(收官文档/paper 引用须照此表述):
 - **溯源契约仅适用 `perturbation_targets`**(有溯源语义的字段);`requested_outputs` 是
   **值白名单**(输出 ⊆ ALLOWED_OUTPUTS,更强)、`assumptions` 是**类型过滤**(元素恒 str)
   —— 三者判据不同,**不得统称"溯源契约"**。
+- **⊆ 是单向的(不对称)**:`got ⊆ src` **只禁"多出"(发明)、不禁"少掉"(丢真数据)** ——
+  丢掉部分合法元素仍恒 PASS,且 `∅ ⊆ src` 恒真(全丢亦 PASS)。**paper 引用溯源契约时
+  须同时说明它是单向的。** "不丢真数据"由另两条从反侧覆盖:
+  `test_targets_no_silent_partial_loss`(3+ 合法混畸形,**精确相等**)+
+  `test_targets_all_elements_malformed_fails_closed`(全丢 → fail-closed)。
+- **静默丢弃无信号(已知残余风险)**:部分元素被丢弃时,调用方/前端**收不到任何信号**
+  (与"用户本来就传得少"无法区分)。这是"部分丢弃"设计(跟随 llm_router 先例)的已知代价。
 - 本文件**不覆盖"哪些函数消费未受信 LLM JSON"**(层1 无机械判据:`.complete(` 恰漏
   `safety_contract.py`、`json.loads` 混进 20+ 读本地数据集的无关文件)——属残余风险,
   **不得声称"全覆盖"**。
@@ -25,7 +46,14 @@ _BASE = {"species": "human", "perturbation_type": "gene",
 
 
 def _norm(s: str) -> str:
-    """声明的归一化(与 validate_candidate 的 strip + gene/ligand 大写一致)。"""
+    """声明的归一化(与 validate_candidate 的 strip + gene/ligand 大写一致)。
+
+    **scope 限制(诚实标注)**:硬编码 `.strip().upper()` 只对应实现的
+    `gene`/`gene_combination`/`ligand` 分支;本文件全部用例均为 `perturbation_type: "gene"`,
+    **`drug` 分支(归一为小写)本文件未覆盖**。
+    非同义反复(审查者实测证伪该风险):把实现的 `.upper()` 变异成 `.lower()` → 本文件红 6 条
+    → `_norm` 是**独立 oracle**,不是跟着实现走的空壳。
+    """
     return s.strip().upper()
 
 
@@ -51,11 +79,16 @@ def test_provenance_contract_targets_never_invented(desc, raw):
 
     形式化:set(normalized_targets) ⊆ {_norm(s) for s in raw if isinstance(s, str)}
 
-    为何一条覆盖四类后果:
-    - 字符拆:"AHR" 是 str 不是 list → src=∅ → 若放行 ['A','H','R'] 则 ⊄ ∅ → 红
+    **本契约新覆盖的后果 = 发明 + 嵌套两类**(变异实证:删 isinstance 守卫则该两类红):
     - 发明:'NONE' 不溯源自 None → ⊄ {'AHR'} → 红
     - 嵌套:"['AHR']" 不溯源自 ['AHR'](那是 list 不是 str)→ ⊄ ∅ → 红
-    - 崩溃:契约求值前先抛 TypeError → 红
+
+    **不属本契约贡献**(见文件 docstring 归属表,不得混为一谈):
+    - 字符拆("AHR"):由 **C3 既有的容器级 `isinstance(targets, list)`** 挡住(→ `[]` →
+      fail-closed,走下面的早退分支)。本契约"会"抓该处未来回归,但本 task 没修它。
+    - 崩溃:targets 路径不会崩;真崩溃在 `requested_outputs`,由值白名单那条覆盖。
+
+    **方向性**:本条只禁"多出",不禁"少掉" —— 见 test_targets_no_silent_partial_loss。
     """
     v = validate_candidate({**_BASE, "perturbation_targets": raw})
     if not v["schema_valid"]:
@@ -106,6 +139,21 @@ def test_targets_partial_malformed_keeps_legit_drops_garbage():
     assert v["schema_valid"] is True
     assert v["normalized"]["perturbation_targets"] == ["AHR"]
     assert "NONE" not in v["normalized"]["perturbation_targets"]   # 层4:不发明
+
+
+def test_targets_no_silent_partial_loss():
+    """溯源契约的 ⊆ 只禁"多出"、不禁"少掉" —— 本条从另一侧钉住"不丢真数据"。
+
+    背景(代码质量审指出):`got ⊆ src` 对"丢掉部分合法元素"恒 PASS(`∅ ⊆ src` 亦真);
+    全套测试(test_run_virtualcell_query / test_negative_cases / test_t10_6_llm_guard /
+    本文件)**无一条 3+ 合法混畸形用例** → 未来"丢一个合法 target"的 bug 会穿过整个测试套件。
+    本条用**精确相等**(不多不少、保序)补上这一侧。当前实现是 per-element 独立 filter,
+    不丢真数据 —— 本条是**防回归**,非修 bug。
+    """
+    v = validate_candidate({**_BASE, "perturbation_targets":
+                            ["AHR", None, "TP53", ["x"], "MYC", {"g": 1}]})
+    assert v["schema_valid"] is True
+    assert v["normalized"]["perturbation_targets"] == ["AHR", "TP53", "MYC"]   # 精确相等
 
 
 def test_assumptions_non_str_elements_dropped():
