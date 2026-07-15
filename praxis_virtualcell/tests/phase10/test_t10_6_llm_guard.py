@@ -3,7 +3,9 @@ narrative gate:确定性窄门(数值出处 + abstain 语义)→ 违规 fail-clo
 绝不碰 abstain/prediction/reliability(LLM 外层问题不得反向改写确定性裁决)。"""
 import pytest
 
+from praxis_virtualcell.agents_llm.llm_critic import LLMCriticAgent
 from praxis_virtualcell.core.agent import BaseAgent
+from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.core.request import VirtualCellRequest
@@ -201,3 +203,48 @@ def test_free_text_entry_asserts_llm_boundaries():
     rt.config.allow_llm_to_modify_prediction = True        # 违规置 True(仅本测试内)
     with pytest.raises(RuntimeError):
         rt.run_workflow_from_text("human AHR 敲低会怎样")
+
+
+class _StubClient:
+    """返回指定 content 的假 LLMClient(不需 API key)。"""
+
+    def __init__(self, content) -> None:
+        self._c = content
+
+    def complete(self, messages, **kw) -> dict:
+        return {"content": self._c}
+
+
+def _critic_notes(content) -> dict:
+    """跑一次 LLMCriticAgent.handle,取其产出的 llm_critic_notes payload。"""
+    bus = MessageBus()
+    bus.set_context(trace_id="trace_t", task_id="task_t")
+    LLMCriticAgent(_StubClient(content)).handle(
+        AgentMessage("m1", "Report", "LLMCritic", "llm_review", {"report": {"abstain": False}},
+                     "t1"), bus)
+    return bus.latest("llm_critic_notes").payload
+
+
+def test_critic_guard_rejects_non_list_flags_no_char_split():
+    """C3 结构守卫:flags 为字符串 → 置 [](绝不 list('danger') 逐字符拆污染 provenance)。"""
+    out = _critic_notes('{"notes": [], "flags": "danger"}')
+    assert out["flags"] == []
+    assert out["notes"] == []
+
+
+def test_critic_guard_scalar_notes_does_not_crash():
+    """notes 为标量 123 → 不崩(原 list(123) 抛 TypeError 未捕获),结果仍是 list。"""
+    out = _critic_notes('{"notes": 123, "flags": []}')
+    assert isinstance(out["notes"], list) and isinstance(out["flags"], list)
+
+
+def test_critic_guard_json_top_level_not_object():
+    """JSON 顶层非 object(如 list)→ 不崩(原 d.get 抛 AttributeError),标 llm_parse_failed。"""
+    out = _critic_notes("[1,2,3]")
+    assert out["flags"] == ["llm_parse_failed"]
+
+
+def test_critic_guard_valid_lists_pass_through():
+    """合法 list → 原样透传(守卫不改语义)。"""
+    out = _critic_notes('{"notes": ["n1"], "flags": ["f1"]}')
+    assert out["notes"] == ["n1"] and out["flags"] == ["f1"]

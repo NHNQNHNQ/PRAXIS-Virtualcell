@@ -31,9 +31,14 @@ class LLMCriticAgent(BaseAgent):
         if res.get("content"):
             try:
                 d = json.loads(res["content"])
-                out["notes"] = list(d.get("notes") or [])
-                out["flags"] = list(d.get("flags") or [])
-            except json.JSONDecodeError:
+                notes, flags = d.get("notes"), d.get("flags")
+                # C3 结构守卫:只接受 list(非 list 丢弃置 [],绝不把字符串逐字符拆成
+                # ['d','a','n',...] 污染 provenance);捕获 TypeError/AttributeError
+                # (JSON 顶层非 object、值为标量)防畸形/注入产物污染 provenance。
+                # 本 agent 产物只进 provenance 不碰裁决,守卫仅保结构合法、不改语义。
+                out["notes"] = list(notes) if isinstance(notes, list) else []
+                out["flags"] = list(flags) if isinstance(flags, list) else []
+            except (json.JSONDecodeError, TypeError, AttributeError):
                 out["flags"] = ["llm_parse_failed"]
         else:
             out["flags"] = ["llm_unavailable"]
