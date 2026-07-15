@@ -37,7 +37,26 @@ def _hash(s: str) -> str:
 
 
 def validate_candidate(cand: dict) -> dict:
-    """确定性校验 + 归一。返回 {schema_valid, missing_fields, errors, normalized}。"""
+    """确定性校验 + 归一。返回 {schema_valid, missing_fields, errors, normalized}。
+
+    **C4 边界 try(defense-in-depth)**:本函数是 public 入口,有 2 个非测试消费点
+    (`/api/parse` → parse_query,与 `praxis_vc_web/app.py:75`),二者链路均无
+    try/except → 未捕获异常 = FastAPI 500。元素级白名单(见 `_validate_candidate_impl`)
+    已消灭**已知**崩溃类,本层只兜**未预见**异常 —— 可达实例:非 JSON 来源的 dict 含
+    混合类型 key → `json.dumps(d, sort_keys=True)` 抛 TypeError(实测,故非死码)。
+    fail-closed:任何异常 → schema_valid=False + errors=["candidate_malformed"]。
+
+    诚实定性:**防御性罕触发**(同 C1/C2 的类不变量断言),非高频路径、非空壳。
+    """
+    try:
+        return _validate_candidate_impl(cand)
+    except (TypeError, AttributeError, ValueError):
+        return {"schema_valid": False, "missing_fields": [],
+                "errors": ["candidate_malformed"], "normalized": None}
+
+
+def _validate_candidate_impl(cand: dict) -> dict:
+    """validate_candidate 的实现体(未预见异常由外层边界 try 兜,见其 docstring)。"""
     errors, missing = [], []
     d = dict(cand or {})
     species = str(d.get("species", "")).strip().lower()

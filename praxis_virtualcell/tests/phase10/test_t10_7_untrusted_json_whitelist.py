@@ -203,3 +203,34 @@ def test_offline_deterministic_parse_products_pass_through_unchanged():
     b = validate_candidate(dict(cand))
     assert json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True)
     assert a["normalized"]["perturbation_targets"] == ["AHR", "TP53"]
+
+
+def test_boundary_try_non_str_key_returns_invalid_not_raises():
+    """**边界 try(defense-in-depth,非死码 —— 可达路径已实测)**:validate_candidate 是
+    public 函数,有 2 个非测试消费点(`/api/parse` → parse_query:147 与
+    `praxis_vc_web/app.py:75`),二者链路均无 try/except → 未捕获异常 = FastAPI 500。
+
+    Task 1 的元素级白名单已消灭**已知**崩溃类;本层只兜**未预见**异常。可达实例:
+    非 JSON 来源的 dict 含混合类型 key → normalized 构造里的
+    `json.dumps(d, sort_keys=True)` 抛 TypeError: '<' not supported between 'str' and 'int'。
+
+    语义:public 函数**绝不把未预见异常透给端点** → 返回 schema_valid=False 而非抛。
+    诚实定性:这是**防御性 fail-closed**(同 C1/C2 的类不变量断言),**罕触发但非空壳**
+    —— 可达路径已实测(C3 T10.6 的"永真空壳"教训)。
+    """
+    v = validate_candidate({1: "a", "species": "human", "perturbation_type": "gene",
+                            "perturbation_targets": ["AHR"],
+                            "task_type": "predict_delta_expression"})
+    assert v["schema_valid"] is False
+    assert v["normalized"] is None
+    assert "candidate_malformed" in v["errors"]
+
+
+def test_boundary_try_does_not_swallow_legit_results():
+    """**对照组**:边界 try 不得吞掉正常路径(若 try 把一切都变成 invalid,本条会红)。
+    这条防的是"为了不崩而把所有东西都 fail-closed"这种过度防御。"""
+    v = validate_candidate({"species": "human", "perturbation_type": "gene",
+                            "perturbation_targets": ["AHR"],
+                            "task_type": "predict_delta_expression"})
+    assert v["schema_valid"] is True
+    assert v["normalized"]["perturbation_targets"] == ["AHR"]
