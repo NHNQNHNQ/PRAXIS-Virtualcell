@@ -102,9 +102,16 @@ Phase 10 治理单元 C 的第三(末)子单元(C1 跨模块一致性、C2 prove
 **修正 4(opus 终审 · Task 6)—— ⚠️ §2 的 LLM 入口枚举残缺,是"全入口覆盖"过度声称的根因**:§2 勘察手工枚举时只列了 critic/report/router/planner,**漏掉 `llm_orchestration/cross_module_reasoner.py` 与 `workflows/run_virtualcell_query.py::parse_query`**。opus 终审**自行 `grep "\.complete("` 枚举出 LLM 出口全集 = 7 个**,实证这 2 个完全无守卫:
 - `cross_module_reasoner` **逐字复刻了 Task 4 已修掉的 pre-C3 漏洞代码**,且经 `core/runtime.py::_dispatch_collect` **同步调用 → 异常直接崩掉整个 run_workflow**(fail-open)。
 - `parse_query` 是**生产 API 自由文本入口**(`/api/parse` → .53 线上;另有 CLI/web):`assumptions` 字符串被拆成 `['a','b','c']` **直接返给前端用户**;顶层非 object → `AttributeError`,端点无 try/except → **500**;且**缺 `assert_llm_boundaries`**。
-Task 6 已补齐两处(+ 同源的 `validate_candidate`)。**失效模式与 C2 完全相同**(C2 的 spec §5 枚举漏 MLBackedPredictorAgent → Gate A 误伤远端真 ML):**手工枚举入口清单不可靠,须用 grep 枚举全集核对**——这是本单元最重要的教训,后续单元(D)凡涉及"全覆盖"主张必须机械枚举而非手写清单。
+Task 6 补齐了这两个**入口**。**失效模式与 C2 完全相同**(C2 的 spec §5 枚举漏 MLBackedPredictorAgent → Gate A 误伤远端真 ML):**手工枚举入口清单不可靠,须用 grep 枚举全集核对**——这是本单元最重要的教训,后续单元(D)凡涉及"全覆盖"主张必须机械枚举而非手写清单。
 
-**修正 5(opus 终审 · Task 6)—— T10.6 注入断言原为永真空壳**:`test_injection_via_free_text_cannot_forge_verdict` 原 4 条断言全部恒真(实际 `delta=[]`,`assert 9.99 not in delta` 在空列表上恒成立;三个 `allow_llm_to_*` 全仓无写入路径恒 False),防御全被拆掉测试照样绿;§7 要求的"与无注入同请求一致"**对照组未实现**。Task 6 已改为钉住真实行为(注入 target → 诚实 abstain)+ 与无注入同请求的裁决字段逐条对照。
+**修正 4b(fresh 复审 · Task 7)—— ⚠️ 同一教训在同一函数里立刻复现了一次**:Task 6 修 `parse_query` 时**顺手编辑了 `validate_candidate` 却只修了 `assumptions` 一个字段**,并在本 §8 初版写下"(+ 同源的 `validate_candidate`)"——**这是不实声称,现已订正**。fresh 复审用 **66 组合机械枚举**(11 字段 × 6 畸形类型)抓到该函数仍有三处缺口:
+- `perturbation_targets` 为字符串 → 逐字符拆成 `['A','H','R']`,且 **`schema_valid=True`、`fallback=False`** → 污染产物**被当合法解析返给前端用户**,确认后内核真按 `['A','H','R']` 执行。**`{"perturbation_targets": "AHR"}` 是 LLM 的自然错误**(单基因返标量而非数组),**无需对抗构造**,.53 上 llm_assisted 单基因查询即可触发。`core/request.py::from_dict` 的 isinstance 守卫**救不了**(字符拆在上游已发生,产出是合法 `list[str]`)。
+- `perturbation_targets`/`requested_outputs` 为标量 → TypeError;`perturbation` 为非 dict → AttributeError。二者均使**无 try/except 的 `/api/parse` 直接 500**。
+诚实归因:该 bug 自 **v0.6 `60a29a1`** 既存、非 C3 引入、**裁决红线未破**(内核仍诚实 abstain)。Task 7 已补齐三处。
+**教训升级**:"用 grep 枚举入口全集"**还不够** —— 入口找全后,**每个入口内部的字段也须机械枚举**(复审用 11 字段 × 6 畸形类型的笛卡尔积才抓到)。手工挑几个字段修 = 换个粒度重犯同一错误。D 单元凡"全覆盖"主张须双层机械枚举(入口 × 字段)。
+
+**修正 5(opus 终审 · Task 6;fresh 复审补充定性)—— T10.6 注入断言原为永真空壳**:`test_injection_via_free_text_cannot_forge_verdict` 原 4 条断言全部恒真(实际 `delta=[]`,`assert 9.99 not in delta` 在空列表上恒成立;三个 `allow_llm_to_*` 全仓无写入路径恒 False),防御全被拆掉测试照样绿;§7 要求的"与无注入同请求一致"**对照组未实现**。Task 6 已改为钉住真实行为(注入 target → 诚实 abstain)+ 与无注入同请求的裁决字段逐条对照。
+**fresh 复审的变异测试定性(须据此表述,勿夸大)**:主断言 `assert r["abstain"] is True` **真有牙**(变异:让注入 target 换成被覆盖的真基因伪造 accept → 测试变红,抓到)。**但对照组近乎恒真**——`_InjectedInterpreter` emit 的 dict 与测试里的 `injected_req` 是同一份字面量,两条路径走同一确定性内核仅差 trace_id;变异实证其鉴别力几乎为零(连把 free-text 里的 species 偷改成 mouse 都抓不到,因所有未覆盖基因塌缩进同一 abstain 吸收态)。故**该测试 docstring 里"证明注入没能改变确定性内核的任何裁决"属过度声称**:对照组只证"free-text 包装层对同一 request 无漂移";**真正的抗注入证据来自 abstain 主断言 + router 候选过滤测试 + numeric_invariance**,收官文档/paper 须按此表述。
 
 **修正 6 —— narrative gate 是与 C1/C2 不同的第三类 gate**:它**不产生** `gate_abstained`/`reliability_original_abstain` 字段(C2 三 gate 用 `gate_util.apply_governance_gate` 才有),因其语义是**丢弃文本**而非**覆盖裁决**。未复用该 helper 是**有意的设计区分**(helper 的职责恰是 override abstain,与本 gate"绝不碰 abstain"的核心红线相反)。收官文档/paper 引用时须标明这个区别,避免与 C2 provenance 结构混淆。
 
