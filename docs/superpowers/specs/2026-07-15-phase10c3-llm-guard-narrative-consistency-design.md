@@ -91,7 +91,24 @@ Phase 10 治理单元 C 的第三(末)子单元(C1 跨模块一致性、C2 prove
 - **确定性/字节等价**:OFFLINE(无 LLMReport)report 无 narrative 键、gate 不进、`test_offline_rerun_byte_equal` 仍 PASS;`test_t10_1` 全绿。
 - **既有 27 条 LLM 测试全绿**(不重建、不改断言凑绿)。
 
-## 8. Self-Review(占位符/一致性/范围/歧义)
+## 8. 执行期修正(2026-07-15,以本节为准 —— 上文 §2/§3/§4.1/§4.4/§7 的原文已被这些拍板/发现取代)
+
+**修正 1(用户拍板 · Task 1 阶段)—— 判据收窄到 abstain-only**:§4.1 原写"判据1 全场景检"。代码质量审**实测**证明:自由文本里 `v1.2`(版本号)/`1.1 节`(章节号)/`2026.07`(日期)/`12.5%`(百分比)与预测值**格式完全相同**,纯正则无法区分;而 gate 是 fail-closed(违规丢弃整段 narrative),误伤代价高。用户拍板:**两判据均仅在 `report["abstain"] is True` 时生效,非 abstain 场景完全不校验**。正则同时加 lookbehind 修两个 bug(`0.28-0.42` 区间连字符被 `-?` 吞成负号产幽灵违规;`v1.2`/`12.5%` 误抓)。`_collect_numbers` 收 int(bool 显式排除)修 int/float 不等价。
+
+**修正 2 —— limitation 清单以代码 docstring 为准(§4.1 原清单缺最重要一条)**:`governance/narrative_consistency.py` 的 docstring 是权威版,含 5 条,**其中最重要的"非 abstain 场景完全不校验"是 §4.1 原文所缺**。opus 终审逐条实证 5 条 limitation **全部属实**(含 L4 实证:"模型无法排除该结论,因此给出以下明确预测" → gate **放行**)。
+
+**修正 3(用户拍板 · Task 4b)—— 范围扩到姊妹入口**:§3.4/§4.4/§7 原文只列 LLMCritic。代码质量审实测 `llm_router`(字符串逐字符拆 → **候选名命中单字符时静默注入垃圾 agent 名**;标量/顶层非 object → 未捕获崩溃)与 `llm_input_interpreter`(except 缺 `AttributeError` → 崩溃)有**同型缺口**;且 `safety_contract.py` 自承"复刻 LLMRouter"、抄时修了漏洞**却未回填原件**。用户拍板补齐(Task 4b,plan 外插入)。
+
+**修正 4(opus 终审 · Task 6)—— ⚠️ §2 的 LLM 入口枚举残缺,是"全入口覆盖"过度声称的根因**:§2 勘察手工枚举时只列了 critic/report/router/planner,**漏掉 `llm_orchestration/cross_module_reasoner.py` 与 `workflows/run_virtualcell_query.py::parse_query`**。opus 终审**自行 `grep "\.complete("` 枚举出 LLM 出口全集 = 7 个**,实证这 2 个完全无守卫:
+- `cross_module_reasoner` **逐字复刻了 Task 4 已修掉的 pre-C3 漏洞代码**,且经 `core/runtime.py::_dispatch_collect` **同步调用 → 异常直接崩掉整个 run_workflow**(fail-open)。
+- `parse_query` 是**生产 API 自由文本入口**(`/api/parse` → .53 线上;另有 CLI/web):`assumptions` 字符串被拆成 `['a','b','c']` **直接返给前端用户**;顶层非 object → `AttributeError`,端点无 try/except → **500**;且**缺 `assert_llm_boundaries`**。
+Task 6 已补齐两处(+ 同源的 `validate_candidate`)。**失效模式与 C2 完全相同**(C2 的 spec §5 枚举漏 MLBackedPredictorAgent → Gate A 误伤远端真 ML):**手工枚举入口清单不可靠,须用 grep 枚举全集核对**——这是本单元最重要的教训,后续单元(D)凡涉及"全覆盖"主张必须机械枚举而非手写清单。
+
+**修正 5(opus 终审 · Task 6)—— T10.6 注入断言原为永真空壳**:`test_injection_via_free_text_cannot_forge_verdict` 原 4 条断言全部恒真(实际 `delta=[]`,`assert 9.99 not in delta` 在空列表上恒成立;三个 `allow_llm_to_*` 全仓无写入路径恒 False),防御全被拆掉测试照样绿;§7 要求的"与无注入同请求一致"**对照组未实现**。Task 6 已改为钉住真实行为(注入 target → 诚实 abstain)+ 与无注入同请求的裁决字段逐条对照。
+
+**修正 6 —— narrative gate 是与 C1/C2 不同的第三类 gate**:它**不产生** `gate_abstained`/`reliability_original_abstain` 字段(C2 三 gate 用 `gate_util.apply_governance_gate` 才有),因其语义是**丢弃文本**而非**覆盖裁决**。未复用该 helper 是**有意的设计区分**(helper 的职责恰是 override abstain,与本 gate"绝不碰 abstain"的核心红线相反)。收官文档/paper 引用时须标明这个区别,避免与 C2 provenance 结构混淆。
+
+## 9. Self-Review(占位符/一致性/范围/歧义)
 - 占位符:无 TBD/TODO。
 - 一致性:§4.1 gate 响应(丢 narrative 不碰裁决)与 §6 红线一致;§4.3 trace_id 默认参数与 §5 风险3、§6 确定性一致;§2 勘察(已有 27 条覆盖)与 §3 不做(不重建)一致。
 - 范围:聚焦用户拍板五项;独立注入防御层/语义级 hypothesis 检测明列不做。
