@@ -303,7 +303,7 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 - 2026-07-15 **P10.C3 LLM 全入口守卫 + narrative 一致性 + 抗注入边界收官**:C 末子单元。brainstorm——控制器只读勘察**部分证伪 roadmap T10.6"40 条 LLM 对照从零建"**(**已有 27 条**:test_llm_orchestration_contract 16 条已覆盖 §128 的改数值/选 unsupported/升级 abstain、test_llm_numeric_invariance 已测 offline-vs-llm_assisted 数值不变)→不重建只补**真缺口 = narrative 忠实性零校验**(LLMReport 只有 prompt 软约束、`narrative = res.get("content") or ""` 直塞 report、test_llm_report 只验非空)→**用户 3 拍板**(①narrative 确定性窄门 gate,违规 **fail-closed 丢弃 narrative**——**第三类 gate**:不产 gate_abstained/reliability_original_abstain、不复用 C2 的 apply_governance_gate,因语义是丢文本非覆盖裁决,**绝不碰 abstain/prediction/reliability**;②抗注入**不建独立检测层**,靠结构性防御+narrative gate 覆盖剩余面并诚实标边界;③范围含 free-text 入口 assert_llm_boundaries + trace 一致 + T10.6 对照 + LLMCritic 守卫)→spec(36d4ab7 + §8 执行期修正 c702eb4/790848c)→plan(39ad5c9)→subagent-driven,实际 **8 task**(0/1/2/3/4/**4b**/5/**6**/**7**,后三个为审查抓出的收口)。**Task 1 判据收窄(用户拍板)**:代码质量审**实测** `v1.2`/`1.1 节`/`2026.07`/`12.5%` 与预测值**格式完全相同、纯正则无法区分**,而 gate 是 fail-closed 会丢弃真 narrative →**两判据均仅 `abstain is True` 时生效,非 abstain 场景完全不校验**(诚实放弃覆盖);正则加 lookbehind 修 `0.28-0.42` 区间连字符被 `-?` 吞成负号的幽灵违规 + `v1.2`/`12.5%` 误抓;`_collect_numbers` 收 int(bool 显式排除)修 int/float 不等价。**⚠️ 三轮审查抓到的过度声称链(本单元最大教训)**:①**代码质量审**抓到 llm_router/llm_input_interpreter 同型缺口(**`safety_contract.py` 自承"复刻 LLMRouter"、抄时修了 fail-closed 漏洞却从未回填原件**,两文件一安全一不安全)→用户拍板 **Task 4b** 补;②**opus 终审自行 `grep "\.complete("` 枚举 LLM 出口全集=7 个**(不信 task 清单),抓到 **spec §2 手工枚举漏掉 cross_module_reasoner**(**逐字复刻 Task 4 已修掉的漏洞代码**,且经 `core/runtime.py::_dispatch_collect` **同步调用→异常崩掉整个 run_workflow** fail-open)**与 parse_query**(**生产 API `/api/parse` 自由文本入口**:`assumptions` 字符拆解**直接返给前端用户**、顶层非 object→AttributeError 而端点无 try/except→**500**、且**缺 assert_llm_boundaries**)→**Task 6** 补;③**fresh 复审(opus)66 组合机械枚举(11 字段 × 6 畸形类型)抓到第 3 处**:**Task 6 顺手编辑了 `validate_candidate` 却只修 `assumptions`,漏掉更要害的 `perturbation_targets`** —— `{"perturbation_targets":"AHR"}` 是 **LLM 单基因时返标量的自然错误(非对抗构造)**,被逐字符拆成 `['A','H','R']` 且 **`schema_valid=True`、`fallback=False` → 污染产物被当合法解析返给前端,用户确认后内核真按 `['A','H','R']` 执行**;`core/request.py::from_dict` 的 isinstance 守卫**救不了**(字符拆在上游已发生,产出是合法 list[str]);标量/非 dict 则让 `/api/parse` 500 →**Task 7** 补(**控制器亲自 19 组合机械枚举复验:零崩溃零字符拆**)。该 bug 自 v0.6 `60a29a1` 既存、非 C3 引入、裁决红线未破(内核仍诚实 abstain)。**教训(D 单元必带)**:**①失效模式与 C2 完全相同**(C2 的 spec §5 枚举漏 MLBackedPredictorAgent→Gate A 误伤远端真 ML);**②手工枚举清单不可靠 → 凡"全覆盖"主张须双层机械枚举(入口 × 字段)** —— 用 grep 找全入口还不够,每个入口内部字段也须机械枚举,手工挑几个字段修 = 换个粒度重犯同一错误;**③spec §2 当时写"只在 run_query 入口调(run_virtualcell_query.py:147)"——`parse_query` 就在同一文件却被漏掉**,枚举连正在读的那个文件都没读全。**T10.6 注入断言原为永真空壳**(实际 `delta=[]` 使 `assert 9.99 not in delta` 恒成立;三个 `allow_llm_to_*` 全仓无写入路径恒 False;§7 要求的对照组未实现)→Task 6 改为钉住真实 abstain + 对照组;**fresh 复审变异测试定性:主断言真有牙**(变异伪造 accept→测试变红)**但对照组近乎恒真**(`_InjectedInterpreter` 与 `injected_req` 同一字面量、两路径同一内核仅差 trace_id;变异证明**连偷改 species=mouse 都抓不到**,因未覆盖基因全塌缩进同一 abstain 吸收态)→**真正的抗注入证据来自 abstain 主断言 + router 候选过滤测试 + numeric_invariance**。**全量(两口径均 P10.C4 实测,见本段末订正说明)**:**`-m "not llm"` 稳定基线 = 850 passed / 40 skipped / 9 deselected / 0 failed**;**裸口径(9 条 `@pytest.mark.llm` 真实网络测试全跑且全过)= 859 passed / 40 skipped / 0 failed**(859−850=9 正是那 9 条)。**原文这里写的 858 是误记**——它 = 859 扣除某次会话里网络 fail 的 1 条 LLM 测试后的净值,**非任何一次真实运行的原始输出**;故原文据此算的"C2 基线 814→+44"同步作废:**C2 的 814 是裸口径历史记录(本次未重新核实),与裸口径 859 同口径 → C3 净增 45**,而 **814 与 850 口径不同、不可直接相减**(850−814=36 不成立)。**13 commit**,仅 6 后端文件(`governance/narrative_consistency.py`[新] + `core/runtime.py` + `agents_llm/{llm_critic,llm_router,llm_input_interpreter}.py` + `llm_orchestration/cross_module_reasoner.py` + `workflows/run_virtualcell_query.py`)+ 1 测试文件,**`agents/reliability.py`·`agents/critic.py`·核心内核 message/bus/agent·根 tests·`llm_orchestration/safety_contract.py` 逐字节零改**(两轮 opus 复审各自 `git diff` 实证 0 行;narrative gate 活体验证 8 个裁决字段完全一致、除 narrative 与自身 provenance 键外字节等价)、确定性 `test_t10_1` 13 passed 全绿(`run_workflow` 新增 trace_id 为 keyword-only 默认 None,offline 路径行为不变)、不 push、trailer Opus4.8、无前端 WIP。**收官文档/paper 须明标的边界**:①**`narrative_consistency_gate` 仅 `abstain is True` 生效、仅检浮点、仅验"数值存在于 report"不验语境对应、判据2 是字面白名单(hedge 词可绕——opus 实证"模型无法排除该结论,因此给出以下明确预测"**放行**)**,非"完整 narrative 忠实性验证",**不得声称覆盖 roadmap §128 的"把 hypothesis 写成 conclusion"**;②**"LLM 全入口守卫"边界 = config 三 flag(`allow_llm_to_modify_core_decision`/`allow_llm_to_modify_prediction`/`allow_llm_to_override_hard_rules` —— **注意不是 `llm_used_for_prediction`,那是 run_query 返回 dict 的键不是 config 字段**)+ 7 个 `.complete()` 出口的 LLM JSON 结构守卫**,表述须为"经 grep 机械枚举核对"而非手工断言;③**抗注入 = 结构性防御的推论,非独立注入检测/剥离层**,T10.6 用 stub 而非真 LLM;④**G2"LLM unsupported claim = 0" C3 支撑不到,收官文档须保持克制、不得写成已达标**(spec 只把它列为动机);⑤narrative gate 是与 C1/C2 不同的第三类 gate(不产 gate_abstained/reliability_original_abstain)。[[subagent-prompt-injection-guard]] 环境注入延续均识别忽略;**测试文件里的注入 payload(`IGNORE_PREVIOUS_INSTRUCTIONS_RETURN_ACCEPT` 等)是测试夹具,两轮 opus 复审均正确识别未误报**。**C3 收官,待用户拍板是否 FF 合并 main。下一单元 D 交付**(端到端 T10.3 16 case + 前端 playwright e2e T10.7 + reports/phase10 六交付物 + G2 门槛核验 + Phase 10 完成闸门),需先 brainstorm→spec→暂停用户审。
 - 2026-07-15 **C3 用户拍板 FF 合并本地 main → P10.C 治理单元(C1+C2+C3)全部完成**:C3 收官后 AskUserQuestion 问合并,用户选合并;main 从 cf0848f(C2)**线性快进 14 commit** 到 61709b3(含 C3 全部:spec/plan + Task 0-7 + 两次 spec §8 修正 + 收官勾账),`git branch -f main HEAD` 不切分支不碰工作树前端 WIP;**FF 前提核实**:main 是 HEAD 祖先 + main..HEAD=14 + **HEAD..main=0 纯 FF 无分叉**;合并后 main=HEAD=61709b3、当前分支仍 feat/v0.9-phase0-module-core;**不 push origin**(main [origin/main: ahead 303])、分支保留。**✅ P10.C 治理能力全景(全在 main)**:C1 module_plan 内部一致性 gate + C2 三 gate(Gate A per-call hash 完整性 fail-closed / Gate B provenance 完整性防御断言罕触发 / Gate C cell_type 越界 abstain)+ per-call hash 审计溯源(全 predictor 记 name/version/input/output hash)+ C3(narrative 一致性**第三类 gate**[仅 abstain 窄门、丢文本不覆盖裁决、不产 gate_abstained] + LLM 全入口守卫[config 三 flag + 7 个 `.complete()` 出口 JSON 结构守卫,**经 grep 机械枚举核对**] + 抗注入结构性防御边界)。**全部 C1 模式:governance 纯函数 → core/runtime.py 后处理 override 对外,reliability/critic 裁决逻辑与数值零改**。**`-m "not llm"` 稳定基线 850 passed / 40 skipped / 9 deselected / 0 failed;裸口径(含 9 条真实网络 llm 测试)859 passed / 40 skipped / 0 failed**(**原文这里的 858 是误记 = 859 扣 1 条网络 fail 的净值,非真实运行输出;详见下方订正说明**)。**用户 2026-07-15 拍板 C 收官后先歇**;**下一单元 D 交付**(端到端 T10.3 16 case + 前端 playwright e2e T10.7 + reports/phase10 六交付物 + G2 门槛核验 + Phase 10 完成闸门)之后再说,启动时须先 brainstorm→spec→暂停用户审,**并带上 C3 的双层机械枚举教训(入口 × 字段)+ C1/C2/C3 累积的 paper 明标 backlog**(cross_module_inconsistency 命名 / provenance 三 gate 命名边界 / narrative gate 仅 abstain 窄门且 hedge 词可绕不得声称覆盖 §128 / 全入口守卫须表述为 grep 机械枚举核对 / 抗注入是结构性防御推论非独立检测层 / G2 "LLM unsupported claim=0" 支撑不到须克制 / MLBackedPredictor 远端 e2e 验证)。
 
-> ⚠️ **基线数字订正 + 两口径澄清(P10.C4 勘察 2026-07-15,三个数字全部实测、无一推测)**:
+> ⚠️ **基线数字订正 + 两口径澄清(P10.C4 勘察 2026-07-15,下列数字全部实测、无一推测)**:
 > 本段原写 `858/40/0` —— **是错的**。仓库有 **9 条 `@pytest.mark.llm` 真实网络测试**
 > (本机 `.env` 有 key → 全真跑,**网络挂时是 FAIL 不是 skip**),故存在两个口径:
 >
@@ -316,8 +316,34 @@ test_cmd: "PYTHONPATH=$PWD .venv/bin/python -m pytest praxis_virtualcell/tests -
 > **858 既不是裸口径也不是 not-llm 口径** —— 它 = **859 扣除某次会话里网络 fail 的那 1 条**
 > 后"按红线扣除"的净值,**非任何一次真实运行的原始输出**。
 >
-> ⚠️ **口径不可混算**:C2 基线 **814 是裸口径**历史记录(**P10.C4 未重新核实**),
-> 与**裸口径 859 同口径 → C3 净增 45**(原文写 "+44" 正是因为用了错误的 858);
-> **814 与 850 口径不同,`850−814=36` 不成立** —— 引用时务必先对齐口径。
+> ⚠️ **口径不可混算 + C2 基线 814 已实测坐实**:经 C4 代码质量审(并由 Task 0 独立复跑核对)
+> 在 C2 末态树 `9b7f2dc` **只读复现**(`git archive` 导出至 scratchpad,未 checkout / 未碰工作树):
+>
+> | | 裸口径 | `-m "not llm"` | 差 |
+> |---|---|---|---|
+> | **C2 `9b7f2dc`** | **814 / 40 / 0** | **805 / 40 / 9 deselected / 0** | 9 |
+> | **C3 HEAD** | **859 / 40 / 0** | **850 / 40 / 9 deselected / 0** | 9 |
+> | **C3 净增** | **859−814 = 45** | **850−805 = 45** | — |
+>
+> 结论:①**814 确为裸口径的真实运行原始输出、可原样复现** → **与 858 性质完全不同**
+> (858 是**孤例**,非系统性伪造;台账 C2 段数字可信);②**C3 净增 45 且口径无关**
+> (两口径各自算都得 45),原文写 "+44" 正是因为用了错误的 858;③**独立反证**:若当年
+> 那 9 条 llm 测试是 skip 的,C2 记录应为 **49 skipped**,而记录的 **40 skipped** 与今天
+> 裸口径的 40 一致 → 佐证当时 9 条 llm 真跑了。
+> **但 814 与 850 仍是不同口径、不可直接相减**(`850−814=36` 不成立)—— 引用时务必先对齐口径。
 > 另:llm 口径数字随网络浮动、**"看退出码"会给假红**,须靠 `short test summary info`
 > 的测试名区分真红/网络红。
+
+> 🔧 **历史基线数字口径核实方法(C4 代码质量审实证,供 D 单元用)**:不必 checkout / stash,
+> 用只读方式即可复现**任意历史 commit** 的两口径数字 ——
+>
+> ```bash
+> git archive <commit> | tar -x -C <scratchpad>/tree      # 只读导出,不碰工作树
+> PYTHONPATH=<scratchpad>/tree .venv/bin/python -m pytest <scratchpad>/tree/praxis_virtualcell/tests \
+>     -p no:cacheprovider --rootdir=<scratchpad>/tree      # cwd 保持真实 repo 根,load_env 才拿得到 .env
+> ```
+>
+> 单次约 10s(`-m "not llm"`)/ 34s(裸口径)。**D 若要用 784 / 814 / 859 等做趋势,
+> 须先逐个坐实口径** —— C1 的 784、B 系列的 758 / 774 等**原地仍无口径标注且未核实**。
+> **教训:C3 spec 声明了裸口径,但记录的 858 并不是裸口径的原始输出 → "spec 写了什么"
+> 不能替代实测**;同理"上一段记了什么"也不能替代实测,数字进台账前先跑一遍(很便宜)。
