@@ -220,13 +220,19 @@ def test_offline_deterministic_parse_products_pass_through_unchanged():
 
 def test_boundary_try_non_str_key_returns_invalid_not_raises():
     """**边界 try = public API 契约防线**:validate_candidate 是 public 函数,
-    `/api/parse` → parse_query 与 `praxis_vc_web/app.py:75` 两条链路均无 try/except
-    → 未捕获异常会成为 FastAPI 500。本层 fail-closed:返回 schema_valid=False 而非抛。
+    `/api/parse` → parse_query 与 `praxis_vc_web/app.py`(调用点 :76)两条链路均无
+    try/except → 未捕获异常会成为 FastAPI 500。本层 fail-closed:返回 schema_valid=False 而非抛。
 
     **定性须精确(§10 修正 7)——"可达"分两种,本条测的是后一种**:
     - **当前两个已知消费点的正常路径不可达**:`parse_query` 的 cand 来自 `json.loads`
-      (**JSON object key 恒 str**)或 `_deterministic_parse`(固定 str key);`app.py:75`
-      的 cand 是 validate_candidate 自产 normalized dict 的拷贝(key 恒 str)。
+      (**JSON object key 恒 str**)或 `_deterministic_parse`(固定 str key);
+      `app.py:59` 的 `cand = dict(p["candidate_request"])` —— **"validate_candidate 自产
+      normalized 的拷贝"这一说法只在 `schema_valid=True` 分支成立**(§10 修正 8b/9④:
+      原句被夸大,此前只订正了生产 docstring、**本测试 docstring 漏改**,现补):
+      `run_virtualcell_query.py:217` 是 `v["normalized"] or {**cand, ...}` →
+      **`schema_valid=False` 时是未经归一的原始 LLM JSON / `_deterministic_parse` 产物的
+      展开**(页面 2 让用户补充/修正的常见路径)。**但结论不变**:两分支 key 皆恒 str
+      (JSON object key 恒 str)→ 正常路径仍不可达;**依据不同,不得混为一谈**。
       → 本层**不是**当前生产 500 的防线(那个由 Task 1 的元素级白名单管)。
     - **直接调用可达**(实测,故非死码):非 JSON 来源的 dict 含混合类型 key →
       `json.dumps(d, sort_keys=True)` 抛 TypeError: '<' not supported between 'str' and 'int'。
@@ -249,9 +255,18 @@ def test_boundary_try_deep_nested_dict_returns_invalid_not_raises():
     **RuntimeError 子类**(`RecursionError.__mro__` 实测不含 TypeError/AttributeError/
     ValueError)→ 原三元组**捕不到、原样穿透**边界 try。
 
-    可达性(照本单元纪律限定作用域):**直接调用可达**(本测试即是);**生产路径不可达**
-    —— `agents_llm/llm_client.py:23` 硬编码 `max_tokens: int = 1024` → LLM 单次补全被截断,
-    物理上产不出触发阈值所需的嵌套深度(约 5-6 万字符)。
+    可达性(照本单元纪律限定作用域):**直接调用可达**(本测试即是);**当前生产路径不可达**
+    —— `agents_llm/llm_client.py:23` 的 `max_tokens: int = 1024` 是**函数默认参数**
+    (**可被调用点覆盖,非硬编码、非结构不变量** —— §10 修正 8/9④:"硬编码"一词已作废,
+    此前的 commit 宣布作废却在同一 commit 新写了它,现补扫)→ LLM 单次补全被截断,
+    产不出触发阈值所需的嵌套深度。
+
+    **余量随嵌套形状变化(§10 修正 9⑤),"15x" 只是最好情况**:dict 形状每层 6 字符
+    (`{"n":` + `}`)→ 1024 token(粗估 ~3.5 char/token ≈ 3584 字符)约 597 层,对
+    ~10000 层阈值余量 **~15x**;但 **list 形状每层仅 2 字符**(`[`+`]`)→ 约 1792 层 →
+    余量降到 **~5x**,再叠 BPE 对重复括号的打包,余量继续被吃。且 `{"x": [[[…]]]}`
+    这种深 list 嵌在 dict 值里**确实能走到** `json.dumps`。→ 结论(当前生产不可达)不变,
+    但**依据是"余量存在且随形状浮动(dict ~15x / list ≤5x)",不是一个稳定常数**。
 
     **20000 层是"远高于阈值"的余量取值,不是阈值本身**:实测本机(CPython 3.13/macOS)
     8000 层**不抛**、10000 层抛 —— 且 3.13 按 **C 栈指针**判定而非 `recursionlimit` 计数
@@ -357,12 +372,28 @@ def test_sibling1_parse_query_assumptions_e2e_api_not_500(monkeypatch):
 
     ⚠️ 防泄漏:`runtime_service.config_for()` 内部对 llm_assisted 分支直接
     `os.environ["PRAXIS_VIRTUALCELL_MODE"] = "llm_assisted"`(不经 monkeypatch),
-    若不先用 monkeypatch 记录基线,这个进程级副作用会**跨测试残留**、污染同一 pytest
-    session 后面所有依赖 RuntimeConfig.from_env() 默认 offline 的用例
-    (phase10/ 在 tests/ 目录序里排在 test_*.py 前面,污染面是整个后续套件)。
-    monkeypatch.delenv 在此处先"登记"基线,teardown 时无论期间被谁改写都会精确复原。
+    该进程级副作用会**跨测试残留**、污染同一 pytest session 后面依赖
+    RuntimeConfig.from_env() 默认 offline 的用例(phase10/ 在 tests/ 目录序里排在
+    test_*.py 前面)。
+
+    **必须用 setenv 而非 delenv(§10 修正 9①,读 pytest 源码 + 实验双证)**:
+    `delenv(raising=False)` → `delitem`,`if name not in dic: pass` —— **key 不存在时是
+    纯 no-op、不登记 undo 记录**,只有 key 已存在才登记。本仓 `.env` 有
+    `PRAXIS_VIRTUALCELL_MODE=offline` 且 conftest 收集期 `load_env()` 用 `setdefault`
+    预置了它 → delenv 恰好命中"已存在"分支 → **本地能复原纯属环境侥幸,非 delenv 的保证**;
+    实测把 cwd 换到无 `.env` 处(load_env 用相对路径,找不到即 no-op)→ **真泄漏
+    `'llm_assisted'`**。`setenv` → `setitem` **无条件**登记 `dic.get(name, notset)`,
+    key 之前存不存在都能精确复原。
+
+    **DEEPSEEK_API_KEY 同理须显式置(本轮新发现,非 review 指出)**:`config_for()` 走
+    `from_env()`,而 `llm_enabled = (mode in LLM_MODES and bool(key))` —— **无 key 则
+    llm_enabled=False** → 根本不进 LLM 分支、回落 `_deterministic_parse` → assumptions
+    恒 `["deterministic keyword parse"]`。即本条**在无 `.env` 的 CI 里不是"红",而是
+    静默地不再测它声称要测的 bug**(status 仍 200)。显式 setenv 一个 stub key 让本条
+    对环境**自足**(stub client 已接管 make_llm_client,不发网络请求)。
     """
-    monkeypatch.delenv("PRAXIS_VIRTUALCELL_MODE", raising=False)
+    monkeypatch.setenv("PRAXIS_VIRTUALCELL_MODE", "offline")   # setitem 无条件登记 undo
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "stub-key-not-a-real-credential")
     from fastapi.testclient import TestClient
 
     import praxis_virtualcell.agents_llm.llm_client as _llmc
@@ -376,6 +407,43 @@ def test_sibling1_parse_query_assumptions_e2e_api_not_500(monkeypatch):
     r = c.post("/api/parse", json={"text": "human AHR 敲低", "mode": "llm_assisted"})
     assert r.status_code == 200, f"修复前是 500,现应 200;实际 {r.status_code}"
     assert r.json()["assumptions"] == ["单基因敲低"]
+
+
+def test_parse_query_deep_nested_json_loads_recursionerror_not_500(monkeypatch):
+    """**第 3 个潜在 500**(§10 修正 9②):`:184` 的 `cand = json.loads(content)` 与
+    Task 2 修前的边界 try 是**同一形状的缺口** —— 它所在的
+    `except (json.JSONDecodeError, TypeError, AttributeError)` 同样**不含 RecursionError**
+    (RecursionError 是 **RuntimeError 子类**,实测 `__mro__` 不含这三者)→ 深嵌套 JSON →
+    **UNCAUGHT RecursionError** → /api/parse 500,且 Task 2 在 validate_candidate 的边界 try
+    **根本轮不到执行**(json.loads 程序顺序在先)。
+
+    实测阈值(本机 CPython 3.13/macOS,二分):`json.loads` 约 **9999 层**(list 形状)
+    vs `json.dumps` 约万层 —— 且 **loads 在先** → 深到能让 dumps 崩的输入基本都先崩在 loads。
+    与 Task 2 同,阈值随栈大小/版本浮动、非稳定常数,故取远超阈值的 20000 层。
+
+    **可达性(照本单元纪律限定作用域)**:与 Task 2 同 —— 因 `llm_client.py` 的
+    `max_tokens: int = 1024` 是**函数默认参数**(可被调用点覆盖,**非硬编码、非结构不变量**)
+    而当前生产不可达;本条是**直接可达**的防御(stub client 绕过 max_tokens)。
+
+    **修后不得声称"/api/parse 对 RecursionError 无条件安全"** —— 只能说
+    **`json.loads`(:184)与 `validate_candidate` 边界(:75)两处已捕 RecursionError**;
+    是否还有第三处未捕,**层1 无机械判据**(本单元反复吃到的教训)。
+    """
+    monkeypatch.setenv("PRAXIS_VIRTUALCELL_MODE", "offline")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "stub-key-not-a-real-credential")
+    from fastapi.testclient import TestClient
+
+    deep = "[" * 20000 + "]" * 20000          # json.loads 必抛 RecursionError(远超阈值)
+    import praxis_virtualcell.agents_llm.llm_client as _llmc
+    monkeypatch.setattr(_llmc, "make_llm_client", lambda cfg: _StubClient(deep))
+    from praxis_vc_api.main import app
+    c = TestClient(app, raise_server_exceptions=False)
+    r = c.post("/api/parse", json={"text": "human AHR 敲低", "mode": "llm_assisted"})
+    assert r.status_code == 200, f"补 RecursionError 前是 500;实际 {r.status_code}"
+    # fail-closed 落回 _deterministic_parse(与 JSONDecodeError 路径同语义)
+    d = r.json()
+    assert d["fallback_used"] is True
+    assert d["assumptions"] == ["deterministic keyword parse"]
 
 
 def test_sibling_critic_notes_flags_drop_non_str_elements():

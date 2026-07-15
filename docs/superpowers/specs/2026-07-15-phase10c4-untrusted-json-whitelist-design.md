@@ -605,3 +605,140 @@ dict 的拷贝**" —— **只在 `schema_valid=True` 分支成立**。`schema_v
 > **反例总会被下一轮审查找到 —— 六次无一例外。** 更强的做法是**先自问"这是全称还是枚举"**:
 > 若实现是枚举(如 except 白名单、手工清单),就**不得用全称词描述它**,应改为
 > "已识别的 N 类 + 明示边界"。
+
+### 修正 9(Task 3 收口轮 —— 两轮审查 5 项;含**第 3 个潜在 500** 与**判据自身不完备**)
+
+Task 3 的核心修复(实跑 predicate 命中的 7 处元素级白名单)经 spec 审在父树亲验 **predicate 恰好 7 处
+且与改动 1:1 对应**、e2e 500 亲测坐实、6 红 2 绿、全量 879 / phase10 单跑 230 双跑一致、红线全守 ——
+**判定合规**。以下 5 项为收口,其中 ②⑥ 是**新发现的真问题**。
+
+#### ①(implementer 自写的过度声称,**本单元第 9 次**)env 泄漏防御的"无论…都"不成立
+
+Task 3 commit 与测试 docstring 写的:
+
+> "monkeypatch.delenv 在此处先'登记'基线,teardown 时**无论期间被谁改写都会精确复原**"
+
+**证伪(审查者读 pytest 源码,implementer 已亲自复核 `_pytest/monkeypatch.py` 确认)**:
+`delenv(name, raising=False)` → `delitem`,逻辑是
+`if name not in dic: if raising: raise; else: pass`(**key 不存在 → 纯 no-op,不登记任何 undo**);
+**只有 key 已存在**才 `self._setitem.append((dic, name, dic.get(name, notset)))`。
+对比 `setenv` → `setitem`:**无条件** append undo 记录。
+
+**为什么本地实测"没事"是巧合**:`praxis_virtualcell/tests/conftest.py::pytest_collection_modifyitems`
+在**收集阶段**调 `load_env()`,而本仓 `.env` 有 `PRAXIS_VIRTUALCELL_MODE=offline`,`load_env()` 用
+`os.environ.setdefault(...)` **预置**了该 key → delenv 恰好命中"已存在"分支。
+**纯属环境副作用侥幸,非 delenv 的设计保证。**
+
+**双方独立实验复现真泄漏**(implementer 亲跑,非转述):cwd 换到**无 `.env`** 的目录
+(`load_env()` 用**相对路径** `Path(".env")`,找不到即 no-op)、`PYTHONPATH` 指向真实仓库、
+`env -u PRAXIS_VIRTUALCELL_MODE`,同一 session 顺序跑 e2e + 泄漏探针 →
+**实测 `PRAXIS_VIRTUALCELL_MODE` 残留为 `'llm_assisted'`**。→ **CI / 无 `.env` 环境下会真泄漏。**
+
+**修法(已验)**:`monkeypatch.setenv("PRAXIS_VIRTUALCELL_MODE", "offline")`。
+变异证伪:改回 `delenv` → 无 `.env` 环境下探针**红**(泄漏 `'llm_assisted'`);改回 `setenv` → 绿。
+
+**爆炸半径(核实后如实记录,不夸大)**:全仓**只有该条测试**经 API 层调
+`config_for("llm_assisted")`(其余 llm_assisted 测试都直接构造 `RuntimeConfig` 不经 `config_for`)
+→ **当前无第二个受害者,回归数字未失真**(879/230 双跑一致已亲验)。属**防未来**,非修活 bug。
+
+**订正表述**:删"无论期间被谁改写都会精确复原";改为限定式 ——
+"`setenv` 底层 `setitem` **无条件登记 undo**,故 key 之前存不存在都能精确复原"(这是对
+`setitem` 实现的**封闭陈述**,非对"任意改写者"的全称主张)。
+
+#### ② 🔴 第 3 个潜在 500:`:184` 的 `json.loads` 同型缺口(**已修**)
+
+**端到端实测(implementer 亲验抛出点)**:stub LLM 返 20000 层嵌套 JSON →
+`parse_query(llm_enabled=True)` → **UNCAUGHT RecursionError**,`traceback` 定位抛出点
+**`run_virtualcell_query.py:184` 的 `cand = json.loads(content)`**(源码行实测为
+`'cand = json.loads(content)'`)→ `/api/parse` **仍 500**,Task 2 在 `validate_candidate` 的边界 try
+**根本轮不到执行**。
+
+**根因**:`:184` 所在的 `except (json.JSONDecodeError, TypeError, AttributeError)` **同样不含
+RecursionError** —— 与 Task 2 修前的三元组是**同一形状的缺口**(`RecursionError.__mro__` 实测
+= RecursionError → RuntimeError → Exception,不含那三者;`json.JSONDecodeError` 是 `ValueError` 子类)。
+**这正是 C3 教训 #2「同型缺口未回填」的又一实例**(safety_contract 抄 llm_router 时修了漏洞却没回填原件)。
+
+**阈值实测**(implementer 二分,非转述):`json.loads` 约 **9999 层**(list 形状),落在审查者报的
+9835–10140 带内;`json.dumps` 约万层;且 **`json.loads` 程序顺序在先** → 深到能让 dumps 崩的输入,
+基本都会先崩在 loads。阈值随栈大小/版本浮动、**非稳定常数**(CPython 3.13 按 **C 栈指针**判定而非
+`recursionlimit` 计数)→ 测试取远超阈值的 20000 层,不钉死数字。
+
+**决策**:控制器决定修(审查者建议不修/超范围)。理由:**我们现在已经知道它**,不修就是明知故犯;
+成本 1 个 token。TDD:测试先红(实测 500)→ 补 `RecursionError` → 绿 → 变异(去掉它)→ 红 → 改回。
+
+**⚠️ 修后的限定表述(不得越界)**:只能说
+> **`json.loads`(:184)与 `validate_candidate` 边界(:75)两处已捕 `RecursionError`**。
+
+**不得声称**"`/api/parse` 对 RecursionError 无条件安全" —— **是否还有第三处未捕,层1 无机械判据**
+(这正是本单元反复吃到的教训)。**当前生产可达性**:与 Task 2 同 —— 因 `max_tokens` **默认值** 1024
+(**函数默认参数,可被调用点覆盖,非硬编码**)而生产不可达。
+
+#### ③ "封闭二分 vs 枚举"判据**本身不完备**(第 7 次 —— 藏在**用来防过度声称的判据**里)
+
+上一个 implementer 提炼的判据(`isinstance` 是封闭二分 → 可用全称词;`except (A,B,C,D)` 是枚举 →
+只能说"已识别 N 类")**方向对,但不完备**。审查者构造反例、implementer **亲跑复现**:
+
+```python
+x = data if isinstance(data, list) else list(data)   # 也是封闭二分!两分支都处理了
+# 实跑:data='AHR' → ['A','H','R']   ← 恰恰是那条全称禁止的行为
+```
+
+**封闭二分只保证"论域全覆盖",不保证全称性质成立。**
+
+**正确判据(以本条为准)**:
+> 全称成立 ⟺ **①判据对论域全覆盖**(存在补集 / else 分支)**且 ②每个分支的行为各自都满足该性质**。
+> `except (A,B,C,D)` 卡在 ①(无补集;`except BaseException` 是唯一补集且是坏实践)→ 只能写
+> "已识别 N 类";`isinstance + else` 过 ①,**必须再验 ②** 才可用全称词。
+
+对照:`[x for x in data if isinstance(x, str)] if isinstance(data, list) else []` —— 实跑
+`'AHR'` → `[]`,**else 分支行为本身也满足性质** → ①② 双过 → 才可用全称词。
+**照原文进收官文档会授权假全称**(上面那行 `list(data)` 就能通过原判据)。
+
+#### ④ 残留原词已扫(**同一 commit 一边宣布作废、一边新写了它**)
+
+- `test_t10_7_untrusted_json_whitelist.py` 深嵌套那条 docstring(Task 2 那轮**新写**)仍写
+  "**硬编码** `max_tokens: int = 1024`" —— 正是那个 commit 宣布作废、改成"**默认值**
+  (可调默认参数,非结构不变量)"的词。**已改**。
+- 同文件边界 try 那条仍写"`app.py:75` 的 `cand` 是 **validate_candidate 自产 normalized dict 的
+  拷贝**" —— 正是修正 8b 判定被夸大的原句。**已改**为分支限定式,并补记
+  `app.py:59` 是 `cand = dict(p["candidate_request"])`、`run_virtualcell_query.py:217` 是
+  `v["normalized"] or {**cand, ...}`(implementer 实测核对;另:`validate_candidate` 调用点
+  实为 **`app.py:76`**,原文写的 `:75` 是 off-by-one)。
+- **连带订正修正 8b 自身**:8b 末句"**已同步进 docstring**"**本身未限定作用域** —— 实际只同步了
+  `run_virtualcell_query.py` 的生产 docstring,**测试 docstring 两处未动**。应表述为
+  "已同步进**生产 docstring**;测试 docstring 遗漏,由修正 9④ 补"。
+
+- **`_norm` 那处的"硬编码"不在本次扫除范围**(implementer 判定并说明):它描述的是**测试自己的
+  字面量**(`return s.strip().upper()` 确实是硬编码的独立 oracle)—— **用词准确,非本单元作废的
+  那个语境**(作废的是把"函数默认参数"说成"硬编码"从而夸大其不可变性)。
+
+#### ⑤ "15x 余量"须标 **shape-dependent**
+
+6 字符/层是 **dict 形状**(`{"n":` + `}`);**list 形状每层仅 2 字符**(`[`+`]`)。
+implementer 亲算:1024 token 粗估 ~3584 字符(~3.5 char/token)→ dict ~597 层(对 ~10000 层阈值
+余量 **~16.8x**)、list ~1792 层(余量 **~5.6x**);再叠 BPE 对重复括号的打包,余量继续被吃。
+且 `{"x": [[[…]]]}` 这种深 list 嵌在 dict 值里**确实能走到** `json.dumps`。
+
+→ 结论(**当前生产不可达**)**不变**,但"15x"是**最好情况**,应写成
+"余量存在但**随嵌套形状变化**(dict ~15x / list ≤5x)",**不是一个稳定常数**。
+
+#### ⑥(**本轮 implementer 新发现,两轮审查均未指出**)e2e 测试**非自足**:无 key 时静默不再测目标 bug
+
+修 ① 的实验中顺带实测发现:`test_sibling1_parse_query_assumptions_e2e_api_not_500` 经
+`config_for("llm_assisted")` → `from_env()`,而
+`llm_enabled = (mode in LLM_MODES and bool(key))` —— **无 `DEEPSEEK_API_KEY` 则 llm_enabled=False**
+→ 根本不进 LLM 分支、回落 `_deterministic_parse` → `assumptions` 恒
+`["deterministic keyword parse"]`。
+
+**危害形状与 C3「永真空壳」同类但更隐蔽**:在无 `.env` 的 CI 里,本条**不是简单地红** ——
+`status_code` 仍 **200**(确定性解析产出合法 assumptions),它只是**静默地不再测它声称要测的那个
+500 bug**;今天能测到**纯因为本仓 `.env` 恰好供了真 key**(与 ① 同一个"环境侥幸"根因)。
+
+**修法**:`monkeypatch.setenv("DEEPSEEK_API_KEY", "stub-key-not-a-real-credential")` 让本条对环境
+**自足**(stub client 已接管 `make_llm_client`,**不发网络请求**;setenv 函数级作用域,teardown 精确
+复原;collection 期的 `llm` mark skip 逻辑早已跑完,不受影响)。实测:无 `.env` + `env -u
+DEEPSEEK_API_KEY` 环境下,修前**红**(assumptions 落回 deterministic)、修后**绿**。
+
+**教训(与 ① 同源)**:**"测试在本机绿"不等于"测试在测它声称测的东西"** —— 二者都靠仓库 `.env`
+的环境副作用侥幸成立。凡测试依赖 `from_env()` 一类**读环境**的构造路径,须显式 setenv 全部相关变量,
+否则该测试的有效性**取决于运行环境**而非代码。

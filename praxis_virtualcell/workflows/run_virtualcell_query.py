@@ -196,7 +196,14 @@ def parse_query(text: str, *, config: RuntimeConfig | None = None) -> dict:
                 # ValidationError → /api/parse **HTTP 500**(第二个活 bug,端到端实测)。
                 # 包着本行的 try 捕不到(list() 不抛,ValidationError 在 return 之后)。
                 assumptions = [a for a in raw_assumptions if isinstance(a, str)] if isinstance(raw_assumptions, list) else []
-            except (json.JSONDecodeError, TypeError, AttributeError):
+            # C4 修正 9②:补 RecursionError —— `:184` 的 json.loads 与 Task 2 修前的边界 try
+            # 是**同一形状的缺口**(C3 教训 #2「同型缺口未回填」的又一实例)。深嵌套 JSON →
+            # json.loads 抛 RecursionError(**RuntimeError 子类**,不在前三者的继承链上)→
+            # 原三元组捕不到 → 端到端实测 /api/parse **500**,且 Task 2 在 validate_candidate
+            # 的边界 try 根本轮不到执行(json.loads 程序顺序在先)。
+            # 限定表述:本行使 **json.loads 这一处**不再 fail-open;**不等于** /api/parse 对
+            # RecursionError 无条件安全(是否还有第三处未捕,层1 无机械判据)。
+            except (json.JSONDecodeError, TypeError, AttributeError, RecursionError):
                 cand = None
     if cand is None:
         cand = _deterministic_parse(text)
