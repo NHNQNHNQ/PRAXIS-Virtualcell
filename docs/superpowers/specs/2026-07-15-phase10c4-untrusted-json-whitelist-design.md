@@ -319,25 +319,42 @@ assumptions = [a for a in _raw_assumptions if isinstance(a, str)] if isinstance(
 
 ## 10. 执行期修正(以本节为准 —— 上文 §4.2/§7/§8 的原文已被这些发现取代)
 
-Task 1 实现后由代码质量审(⚠️ APPROVED_WITH_MINORS,2 条 Important)抓到,implementer
-逐条独立变异复核确认属实。**本节优先于上文;收官文档 / paper 引用一律照本节表述。**
+Task 1 实现后由**两轮**代码质量审(第一轮 2 条 Important;复核轮 1 条 Important + 2 条 Minor,
+其中一条 Minor 坐实为**第二个活的生产 500**)抓到,implementer 逐条独立变异/实跑复核确认属实。
+**本节优先于上文;收官文档 / paper 引用一律照本节表述。**
+修正 1 经**两轮**订正(第一轮的订正本身仍是 conflate,见下);修正 5/6 为复核轮新增。
 
-### 修正 1:§4.2"一条断言覆盖四类后果"是**过度声称**(实测 2/4)
+### 修正 1:§4.2"一条断言覆盖四类后果"是**过度声称**(实测:溯源契约 2/4)
 
 §4.2 原写"一个断言同时覆盖已知全部四类后果",**不成立**。逐类变异实证(删掉 targets 的
 `isinstance(t, str)` 守卫、退回 `str(t).strip()`)归属如下:
 
-| 后果 | 实际由谁覆盖 | 实证 |
-|---|---|---|
-| 发明(`[None,'AHR']`→`'NONE'`) | **溯源契约(本单元新增)** | 变异 → 红 ✅ |
-| 嵌套(`[['AHR']]`→`"['AHR']"`) | **溯源契约(本单元新增)** | 变异 → 红 ✅ |
-| 字符拆(`"AHR"`→`['A','H','R']`) | **C3 既有的容器级 `isinstance(targets, list)`** —— **非本单元贡献** | 同变异 → **仍绿**(C3 守卫先返 `[]` → fail-closed 早退) |
-| 崩溃 | **`requested_outputs` 的值白名单(`o in ALLOWED_OUTPUTS`,机制完全不同)** | targets 路径**根本不会崩**:`str()`/`isinstance()` 对 JSON 可产生的全部元素类型(null/int/float/bool/str/list/dict)均不抛 |
+| 后果 | 实际由谁覆盖 | 是本单元判据吗 | 实证 |
+|---|---|---|---|
+| 发明(`[None,'AHR']`→`'NONE'`) | **溯源契约** | ✅ 本单元新增 | 变异 → 红 |
+| 嵌套(`[['AHR']]`→`"['AHR']"`) | **溯源契约** | ✅ 本单元新增 | 变异 → 红 |
+| 崩溃 | **`requested_outputs` 的值白名单**(`o in ALLOWED_OUTPUTS`,机制完全不同) | ✅ 本单元新增 | targets 路径**根本不会崩**:`str()`/`isinstance()` 对 JSON 可产生的全部元素类型(null/int/float/bool/str/list/dict)均不抛 |
+| 字符拆(`"AHR"`→`['A','H','R']`) | **C3 既有的容器级 `isinstance(targets, list)`** | ❌ **非本单元贡献** | 同变异 → **仍绿**(C3 守卫先返 `[]` → fail-closed 早退);反向变异(只删 C3 容器守卫、留元素级)→ 字符拆**红** → 证实元素级 `isinstance(t,str)` 对字符拆毫无防护(拆出的字符本身就是 str),契约仅提供**回归防护** |
 
-**正确表述**:**跨字段的三种判据(溯源契约 / 值白名单 / 类型过滤)合计覆盖四类后果;
-溯源契约本身贡献「发明」+「嵌套」两类。** 字符拆由 C3 既有容器级守卫覆盖(本 task 只是让
-契约能抓其**未来回归**);崩溃由值白名单覆盖,与溯源契约不是同一机制。
-**收官文档/paper 不得再写"一条断言覆盖四类"。**
+**⚠️ 第一轮的订正表述"跨字段的三种判据(溯源契约/值白名单/类型过滤)合计覆盖四类后果"
+仍是 conflate,第二次被抓,一并作废** —— 复核审按上表**自己的归属列**逐行核:
+只有 3 行落在本单元三处收紧内,**第 4 行(字符拆)落在三者之外**。
+且**「类型过滤」(assumptions)对这四类贡献 0 类**(实测:修复前 `list(x)` 元素**原样透传、
+不经 `str()`** → 无发明;不字符串化 → 非嵌套;`metadata.assumptions` 无 `in set` 消费点,
+且 `ParseOut.candidate_request: dict[str, Any]` 无 pydantic 约束 → 不崩;容器守卫 C3 已有
+→ 非字符拆)—— 它是**正当的纵深加固**,却被算进"合计覆盖四类"的分子。
+
+**真实账目**:溯源契约 **2/4**(发明、嵌套)· 值白名单 **1/4**(崩溃)· 类型过滤 **0/4**
+(独立加固,防非 str 元素进 metadata,不属四类)· C3 既有容器守卫(**非本单元判据**)
+**1/4**(字符拆),本单元契约仅对其提供**回归防护**。
+
+**唯一正确表述(按贡献直说,去掉"三种"这类凑数量词)**:
+
+> 本单元三处收紧中,**溯源契约贡献「发明」「嵌套」两类、值白名单贡献「崩溃」一类、
+> 类型过滤不对应这四类中任何一类**(独立加固)。第四类「字符拆」由 **C3 既有容器级守卫**
+> 覆盖,本单元的溯源契约仅对其提供**回归防护**,非新覆盖。
+
+**收官文档/paper 不得再写"一条断言覆盖四类",亦不得写"三种判据合计覆盖四类"。**
 
 **§4.2 表格末行"崩溃(#5)|`[['x']]` in set|契约求值前先崩 → 测试红"一并作废** ——
 审查者指出它只在"任何未捕获异常都会让任何 pytest 测试红"这个**平凡意义**上成立,
@@ -386,3 +403,61 @@ Task 1 实现后由代码质量审(⚠️ APPROVED_WITH_MINORS,2 条 Important)�
 本文件全部用例均为 `perturbation_type: "gene"` → **`drug` 分支(归一小写)未覆盖**。已在
 `_norm` docstring 标注。**非同义反复**(审查者实测证伪该风险):把实现的 `.upper()` 变异成
 `.lower()` → 测试红 6 条 → `_norm` 是**独立 oracle**,不是跟着实现走的空壳。
+
+### 修正 5(复核轮 —— **第七次复发,发生在"我声称机械枚举"的那句话上**)
+
+**§2.6 写的"6 处同型"是错的,实际 7 处** —— 漏掉 `run_virtualcell_query.py:151`
+(`parse_query` 内独立的一处 `list(raw_assumptions)`,**不是** `validate_candidate` 的那处)。
+
+**§2.6 声称"这 6 处是精确形状 predicate 能机械找全的(不是语义猜测)"是不实表述**:
+控制器当时**根本没跑那个 predicate**,是手工从 `grep "isinstance(.*, *list)"` 的结果里挑的,
+并把 `:151` 误归类成了"validate_candidate 的一部分"。
+
+**implementer 复核轮实跑 predicate(命令与输出照贴,不再只声称)**:
+
+```bash
+grep -rnE 'list\(.*\) if isinstance\(.*, *list\) else \[\]' \
+     praxis_virtualcell/ praxis_vc_api/ --include="*.py" | grep -v "/tests/"
+```
+```
+run_virtualcell_query.py:151   ← §2.6 的"6 处"清单漏了这个
+agents_llm/llm_router.py:49
+agents_llm/llm_critic.py:39
+agents_llm/llm_critic.py:40
+llm_orchestration/cross_module_reasoner.py:45
+llm_orchestration/cross_module_reasoner.py:46
+llm_orchestration/safety_contract.py:62
+```
+**命中 = 7**。另在 spec 写作时的树(`7fb70e5`)上实跑:该文件当时命中 **2 处**(`:61` + `:140`)
+→ 全仓 **8 处**,减去 Task 1 自身范围内的 `:61` = **7 处姊妹**,spec 却写 6 —— 漏的正是
+`:140`(Task 1 加注释行后现为 `:151`)。**算术与归属双向对得上,清单错误坐实。**
+
+**漏掉的这处是第二个活的生产 500**(端到端实测,与 main 活 bug 同类、路径不同):
+`parse_query:151` `list(raw_assumptions)` 元素级无守卫 → `:169` 原样返回
+(**注意:返的是 `parse_query` 自己的 `assumptions`,不是 `validate_candidate` 的
+`normalized.metadata.assumptions` → Task 1 的收紧保护不到这条路径**)→
+`praxis_vc_api/models/api_schema.py:23 ParseOut.assumptions: list[str]` → pydantic 对
+**dict/list/None/int 四种元素全抛 ValidationError** → **HTTP 500**。
+自然触发例:LLM 把 assumption 写成对象 `['单基因敲低', {'note':'...'}]`。
+`:152` 的 `try` **捕不到**(`list()` 对 list 不抛;ValidationError 发生在 `parse_query`
+**返回之后**)。**仅 llm_assisted 模式可达**(实证:`:119` `_deterministic_parse` 恒产
+`["deterministic keyword parse"]` → OFFLINE 不可达)。
+
+**修复归属 Task 3**(姊妹处,在用户已拍板"一起修"的范围内 —— 它本就是同一形状 predicate
+的一员,只是清单漏了)。**Task 3 的清单须用上面实跑的 7 处,不得再用 §2.6 的 6 处。**
+
+**教训(本单元第七次复发,且这次发生在元层面)**:**"机械枚举"这个词本身也会被当成挡箭牌
+—— 声称机械枚举 ≠ 真跑了 predicate。** 凡写"已机械枚举全集",须在文档里**贴出实际跑的
+命令与输出**(如本节),否则与手工清单无异,且因带着"机械"二字而更具误导性。
+
+### 修正 6(复核轮 Minor):契约的**归一化盲区**未披露
+
+**契约是相对于「声明的归一化」而言的,不校验归一化规则本身是否无损。** `src` 是**用
+`_norm` 定义的**,故任何**本身就在损毁数据的归一化**都在盲区 —— 实测:实现改成
+`t.strip().upper()[:3]`、`_norm` 同步改 → `'TP53'`→`'TP5'`(数据已损毁)**照样 PASS**。
+
+修正 4 记的 `.upper()`→`.lower()` 变异只证伪了**单侧漂移**(实现改、oracle 没改 → 红 6 条,
+证明 `_norm` 是独立 oracle),**挡不住协同修改**。
+
+**paper 若写"溯源契约保证 target 可溯源",读者会过读成"保证归一化无损" → 必须一并披露
+该盲区。** 已在测试文件 docstring 诚实边界补记。
