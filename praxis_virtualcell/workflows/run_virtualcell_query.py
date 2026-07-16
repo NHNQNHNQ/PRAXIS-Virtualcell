@@ -36,6 +36,28 @@ def _hash(s: str) -> str:
     return hashlib.sha256(s.encode("utf-8")).hexdigest()[:16]
 
 
+def coerce_str_list(value) -> list[str]:
+    """未受信值 → `list[str]`(**两层**守卫:容器级 + 元素级),供**消费 `parse_query` 的
+    `schema_valid=False` 分支产物**的 UI 层使用(§10 修正 12)。
+
+    **为什么必须两层(§10 修正 9③ 的判据②,亦是 opus 建议的修法里的缺陷)**:
+    只加**元素级** `isinstance(t, str)` **挡不住字符拆** —— 实测
+    `[t for t in "AHR" if isinstance(t, str)] == ['A','H','R']`(**拆出来的字符本身就是 str**)。
+    字符拆只能由**容器级** `isinstance(value, list)` 挡(C3 既有手法)。两者**各挡各的**:
+    容器级挡字符拆、元素级挡 dict/None/int 混进来。
+
+    **存在理由**:`parse_query` 在 `schema_valid=False` 时**按设计**返回**未归一、未白名单化**
+    的原始 LLM dict(见 `test_parse_query_false_branch_returns_raw_uncoerced_contract`),
+    好让用户在 UI 上看到"LLM 到底答了什么"并修正 —— 故**守卫的责任在消费侧**。
+    本函数是**共享**的消费侧守卫:任何新增的第三个消费者都应调它,而不是各自重写
+    (C3 教训 #2「同型缺口未回填」:safety_contract 抄 llm_router 时修了漏洞却没回填原件)。
+
+    fail-closed:非 list → `[]`(**不字符拆**);list → 只保留 str 元素(丢弃 dict/None/int,
+    **不发明**、不抛 TypeError)。
+    """
+    return [t for t in value if isinstance(t, str)] if isinstance(value, list) else []
+
+
 def validate_candidate(cand: dict) -> dict:
     """确定性校验 + 归一。返回 {schema_valid, missing_fields, errors, normalized}。
 

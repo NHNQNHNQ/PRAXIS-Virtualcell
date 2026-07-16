@@ -68,6 +68,7 @@ from praxis_virtualcell.llm_orchestration import safety_contract as SC
 from praxis_virtualcell.llm_orchestration.cross_module_reasoner import LLMCrossModuleReasoner
 from praxis_virtualcell.workflows.run_virtualcell_query import (
     ALLOWED_OUTPUTS,
+    coerce_str_list,
     parse_query,
     run_query,
     validate_candidate,
@@ -670,3 +671,75 @@ def test_e2e_provenance_contract_no_invented_gene_reaches_frontend(monkeypatch):
     targets = d["candidate_request"]["perturbation_targets"]
     assert targets == ["AHR"], f"发明/丢失 target:{targets}"
     assert "NONE" not in targets, "发明了输入里不存在的假基因名 NONE → 溯源契约破"
+
+
+# ---------------------------------------------------------------------------
+# §10 修正 12:第六次复发 —— `praxis_vc_web/app.py:66` 消费 parse_query 的
+# schema_valid=False 分支产物(**未归一、未白名单化的原始 LLM dict**)时字符拆。
+#
+# ⚠️ **本单元的失职**:rvq:57-59 与本文件边界 try 那条 docstring **明确点名分析了 app.py**,
+# 甚至白纸黑字写出"schema_valid=False 时是未经归一的原始 LLM JSON",然后**只问了"key 是不是
+# str"**就下结论"结论不变" —— **值从没被问过**。与 C2 漏 MLBackedPredictor、C3 漏
+# cross_module_reasoner 是**同一形状**:消费点只枚举了一半,结论却按已结案陈述。
+# → 规矩(§10 修正 12):**prose 里一旦点名某消费者,就必须对它做「字段 × 行」的枚举**。
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("raw,expected,desc", [
+    ("AHR",            [],       "C3 认定的『自然错误』:LLM 单基因返标量 → 修前 'A,H,R' → ['A','H','R']"),
+    ({"g": "AHR"},     [],       "targets 本身是 dict → join 迭代 **key** → 'g' → 发明"),
+    ([{"g": "AHR"}],   [],       "list 含 dict → join 抛 TypeError → Streamlit 异常页"),
+    ([1, 2],           [],       "list 含 int → join 抛 TypeError"),
+    (None,             [],       "None"),
+    (["AHR", None, 7], ["AHR"],  "部分畸形:保留合法、丢弃畸形(与 llm_router 先例同语义)"),
+    (["AHR", "TP53"],  ["AHR", "TP53"], "合法输入零回归"),
+])
+def test_coerce_str_list_two_layer_guard(raw, expected, desc):
+    """`coerce_str_list` = **消费侧共享守卫**(两层:容器级 + 元素级)。
+
+    **两层缺一不可(实测,亦是 opus 建议修法里的缺陷)**:
+    - 只加**元素级** `isinstance(t, str)` → `[t for t in "AHR" if isinstance(t,str)]`
+      == `['A','H','R']` → **字符拆照样发生**(拆出的字符本身就是 str)。
+    - 字符拆只能由**容器级** `isinstance(value, list)` 挡(C3 既有手法)。
+    """
+    assert coerce_str_list(raw) == expected, desc
+
+
+def test_coerce_str_list_kills_char_split_that_element_guard_alone_cannot():
+    """**钉死"为什么必须两层"**(防未来有人"简化"成单层元素级过滤)。
+    本条直接对比两种写法在 `"AHR"` 上的行为差异 —— 单层元素级过滤会退化成字符拆。"""
+    naive_element_only = [t for t in "AHR" if isinstance(t, str)]
+    assert naive_element_only == ["A", "H", "R"]          # 单层:字符拆(反面教材)
+    assert coerce_str_list("AHR") == []                   # 两层:fail-closed
+    assert ",".join(coerce_str_list("AHR")) == ""         # app.py:66 的 join 不再拆
+
+
+def test_parse_query_false_branch_returns_raw_uncoerced_contract(monkeypatch):
+    """**契约测试(设计,非疏漏)**:`parse_query` 在 `schema_valid=False` 时返回的
+    `candidate_request` 是 **未归一、未白名单化的原始 LLM dict**(`rvq:223` 的
+    `v["normalized"] or {**cand, ...}` 的 False 分支)。
+
+    **存在理由**:让用户在 UI 上看到"LLM 到底答了什么"并补充/修正(spec §2.4)——
+    若在产出侧白名单化,`"AHR"` 会变成 `[]`,用户**反而丢失**"LLM 其实答了 AHR"这一信息。
+
+    **→ 因此守卫的责任在消费侧**:任何消费本分支产物的代码(当前:`praxis_vc_web/app.py:66`;
+    未来的第三个消费者同理)**必须自己调 `coerce_str_list`**,不得直接 `join`/迭代。
+    本条即为那份契约的**可执行文档** —— 未来读者由此知道这是**设计**而非疏漏。
+    """
+    monkeypatch.setenv("PRAXIS_VIRTUALCELL_MODE", "offline")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "stub-key-not-a-real-credential")
+    import praxis_virtualcell.agents_llm.llm_client as _llmc
+    monkeypatch.setattr(_llmc, "make_llm_client", lambda cfg: _StubClient(json.dumps({
+        "species": "human", "perturbation_type": "gene",
+        "perturbation_targets": "AHR",              # 自然错误 → 触发 schema_valid=False
+        "task_type": "predict_delta_expression",
+    })))
+    out = parse_query("human AHR 敲低",
+                      config=RuntimeConfig(mode=Mode.LLM_ASSISTED, llm_enabled=True))
+    # 可区分锚点(§10 修正 10③):证明真走过 LLM 分支,而非无 key 静默退化
+    assert out["llm_metadata"].get("response_hash"), "LLM 分支未被走过 → 本条退化成静默空壳"
+    assert out["schema_valid"] is False
+    # **契约本体**:False 分支原样透传 LLM 的标量,**未被白名单化**(这是设计)
+    assert out["candidate_request"]["perturbation_targets"] == "AHR"
+    # **消费侧守卫是唯一防线**:直接 join 会字符拆,调 coerce_str_list 才安全
+    assert ",".join(coerce_str_list(out["candidate_request"]["perturbation_targets"])) == ""

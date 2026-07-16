@@ -936,3 +936,134 @@ TDD:5 条**全红**(实际报错 `RecursionError` at `json/decoder.py:361`,穿�
 Task 1 白名单 / Task 2 边界 try(`:75`)/ Task 3 的 7 处元素级白名单 / `:206` **均未动**
 (`:205` 只改**注释文本**,`except` 元组逐字未变)。核心内核(`core/message.py`/`bus.py`/
 `agent.py`)+ 根 `tests/` + `agents/reliability.py`/`critic.py` **零触碰**。
+
+### 修正 12(opus final review —— **第六次复发活在 HEAD 上** + "根治"作废 + 判据 A 补两条适用条件)
+
+#### ① 🔴 `praxis_vc_web/app.py:66` —— 第五次复发的失效模式**原封不动活着**(已修)
+
+`rvq:223` 的 `"candidate_request": v["normalized"] or {**cand, ...}` 在 `schema_valid=False`
+时返回**未归一、未白名单化的原始 LLM dict**;消费者 `app.py:66` 直接
+`",".join(cand.get("perturbation_targets", []))`。
+
+**implementer 在 HEAD 上独立复现(未采信转述)**:
+
+| LLM 返回 | 实测结果 | 危害 |
+|---|---|---|
+| `"AHR"`(**C3 认定的"自然错误"**) | join → `'A,H,R'` → 回填 `['A','H','R']` → 用户确认 → **`validate_candidate` 返 schema_valid=True、targets=`['A','H','R']`** | **第五次复发,原封不动;内核真按假基因 A/H/R 跑** |
+| `{"g":"AHR"}`(targets **本身**是 dict) | `','.join({'g':'AHR'})` → `'g'` | **发明** —— 溯源契约得名的那类危害 |
+| `[{"g":"AHR"}]` / `[1,2]` | `TypeError: sequence item 0: expected str instance, dict found` | Streamlit 异常页 |
+
+**这是 C4 的失职(opus 原话,implementer 认同)**:`rvq:57-59` 与测试边界 try 那条 docstring
+**明确点名分析了 `app.py`**,甚至白纸黑字写出"schema_valid=False 时是未经归一的原始 LLM JSON",
+然后**只问了"key 是不是 str"**就下结论"**结论不变**"。**值从没被问过。**
+与 **C2 漏 `MLBackedPredictor`**、**C3 漏 `cross_module_reasoner`** 是**同一形状**:
+**消费点只枚举了一半,结论却按已结案陈述。**
+
+**可达性(照纪律限定)**:`praxis-vc web` 是 pyproject 挂着的入口(`cli.py:76-80` →
+`streamlit run praxis_vc_web/app.py`);需 llm_assisted + schema_valid=False。**非 C4 引入**
+(v0.6 既存)。**不在 .53 部署栈上**(那是 FastAPI+React)。故 **Important 非 Critical**。
+
+**React 侧为何没事 = 纯属走运,不是设计**(implementer 用 node 实跑 `readStr` 复核):
+`readStr` 用 `String(v)` 而非 `join` → `"AHR"` → `"AHR"` → split → `['AHR']` **安全**。
+**但 React 并非全身而退**:实测 `[{g:'AHR'}]` → `String(v)` → `"[object Object]"` →
+`['[object Object]']` —— **仍是发明,只是可见**。→ **记录为残余风险,本轮不修**
+(`praxis_vc_react/` 是前端 WIP,红线禁碰)。
+
+#### ② 修法决策:**(a) 消费侧修** —— 但**opus 建议的具体写法有缺陷,已订正为两层**
+
+**🔴 opus 建议的 (a)「`app.py:66` 加 `isinstance(t, str)` 过滤」修不好主危害**(implementer 实跑):
+```python
+[t for t in "AHR" if isinstance(t, str)] == ['A','H','R']   # ← 字符拆照样发生
+```
+**拆出来的字符本身就是 str** → **元素级 isinstance 对字符拆毫无防护**。这正是本文件 docstring
+与**修正 9③ 判据②**早已记录的事实(字符拆只能由**容器级** `isinstance(value, list)` 挡)。
+→ 必须**两层**:容器级挡字符拆 + 元素级挡 dict/None/int。
+
+**为什么选 (a) 不选 (b)(产出侧白名单化)** —— implementer 的理由:
+1. **(b) 摧毁 False 分支的设计目的**:该分支存在就是为了把 LLM 原样返回的东西给用户看、让用户
+   补充/修正(spec §2.4)。白名单化后 `"AHR"` → `[]`,用户**反而丢失**"LLM 其实答了 AHR"这一
+   信息,只能重打 —— **信息丢失,UX 更差**。
+2. **(b) 只治一个字段,却给人"根治"的错觉**:False 分支返的 `{**cand, ...}` 里
+   `species`/`cell_type`/`perturbation_type` **全是原始值**。要真"产出侧根治"就得把整个 dict
+   白名单化 = 让 False 分支等同 True 分支 → **等于删掉该设计**,远超末轮范围。
+3. **末轮改契约无复审预算**,风险不对称。
+4. **(a) 的"只修一个消费者"缺点是真实的** → 用**共享守卫 + 契约测试**补(见 ③),
+   拿到 (b) 的主要收益(可复用、不各自重写)而不改契约。
+
+#### ③ 实现:**共享**消费侧守卫 `coerce_str_list`(而非 app.py 内联)
+
+新增 `rvq::coerce_str_list(value) -> list[str]`(**纯增函数,不动 Task 1/2/3 与 7 处回填**),
+`app.py` 导入使用(`app.py` 本就 import 自 rvq,无新依赖方向)。
+**为什么做成共享函数**:直接回应 (a) 的缺点 —— **未来第三个消费者复用它,而不是各自重写**
+(C3 教训 #2「同型缺口未回填」的预防)。
+
+**测试(真实覆盖,非"抄一份表达式来测"的假覆盖)**:
+- `test_coerce_str_list_two_layer_guard`(7 参数化):5 类畸形 → `[]`、部分畸形保留合法、
+  合法零回归。
+- `test_coerce_str_list_kills_char_split_that_element_guard_alone_cannot`:**直接钉死"为什么
+  必须两层"**,防未来有人"简化"成单层。
+- `test_parse_query_false_branch_returns_raw_uncoerced_contract`:**契约测试** ——
+  钉住"False 分支返原始未归一 dict"是**设计而非疏漏**,并写明**守卫责任在消费侧**;
+  带**可区分锚点**(`response_hash`,照修正 10③)防静默空壳。
+- **变异证伪**:把 `coerce_str_list` 退化成**单层元素级**(即 opus 建议的写法)→ **5 条红**
+  (含字符拆那条)→ 恢复 → 9 条复绿。**证明测试抓得住 opus 那版缺陷。**
+
+**诚实边界**:`app.py` 是 Streamlit 顶层脚本(import 即执行 `st.*`)→ **其第 66 行本身未被
+直接测试覆盖**。**implementer 有意不写"抄一份 join 表达式"的测试** —— 那正是
+**safety_contract 抄 llm_router** 的失效模式(测试绿而真实那行腐烂)。改为:
+**被调用的 `coerce_str_list` 有真实覆盖** + `app.py:66` 注释指向契约测试。
+**残余**:若未来有人把 `app.py:66` 改回直接 `join`,测试**抓不到** —— 如实记录。
+
+#### ④ 🔴 第 11 次过度声称:**"根治"**,就住在 commit 标题里
+
+- `a8c7f97`:「…+ **根治第五次复发**」 · `388a261`:「…+ **根治发明假基因名**」
+
+**未限定作用域的全称词**,从未收窄到 `validate_candidate`,被 ① 的复现**直接证伪**。
+**最讽刺(opus 原话)**:`7301b37` 正文写着"**表述纪律(第 11 次已守)**" ——
+**纪律施加于 docstring 和 spec,却从没回头扫自己的 commit 标题。第 11 次就住在那儿。**
+commit 已提交、不 amend → **在此作废该措辞**:
+> **"根治" 加入已作废措辞黑名单。** 正确写法:"修复 `validate_candidate` 这一处的字符拆",
+> **不得**写"根治第五次复发"(论域=全仓消费未受信 LLM 值的代码点,**无机械枚举**)。
+
+#### ⑤ 判据 A 补两条适用条件(opus 要求;**A 本来就能抓到 ④,只是从没被施于自己的散文**)
+
+原判据 A(修正 9③):全称成立 ⟺ ①论域全覆盖 ∧ ②每个分支的行为各自满足该性质。
+**补**:
+1. **① 要求论域可机械枚举**;论域是**语义判断**(层1)时 ① **永远无法兑现** → 全称就不能提。
+   *施于"发明假基因名已根治":论域 = 全仓消费未受信 LLM 值的代码点 → 无机械枚举 → ① 不成立
+   → 全称不可声称。* **A 与层1 自洽且有效。**
+2. **A 必须施于 prose**(**commit 标题** / 台账 / paper / 报告),**不止代码分支** ——
+   本单元漏的就是这一步。
+
+#### ⑥ 🔴 "层1 无机械判据"**是否变成免罪符 —— 是,已经开始了**(opus 最重的一句)
+
+它被写了 4+ 次,但在本单元里它被用来**关闭**一个分析(`app.py` 的 key),而不是**打开**一个。
+Task 3 质量审那句"**标注风险 ≠ 枚举风险**"又应验了一次:风险标注了,而标注里**唯一点名的
+那个消费者从没被逐字段枚举**。
+
+**立规矩(写进 §10,收官文档须照此执行)**:
+> **prose 里一旦点名某消费者,就必须对它做「字段 × 行」的枚举,不能只问"key 是不是 str"。**
+
+**本轮已照此执行**(implementer 实跑 `grep -nE 'cand\.get\(|cand\[|p\["|p\.get\('
+praxis_vc_web/app.py`),app.py 从 cand 读的**全部 4 个字段 × 行**及逐一裁定:
+
+| 字段 × 行 | 消费方式 | 裁定(**带证据**) |
+|---|---|---|
+| `perturbation_targets` `:64-66` | `",".join(...)` —— **迭代** | 🔴 **高危**:字符拆(静默)/ 发明 / TypeError → **已修** |
+| `species` `:61` | `st.text_input(label, value)` | 低:Streamlit 源码实证 `value = str(value) if value is not None else None` → dict 渲染成**可见垃圾**、非静默、非崩溃 → 用户能看见并改 |
+| `cell_type` `:62` | 同上(`or ""`) | 同上 |
+| `perturbation_type` `:63` | 同上 | 同上 |
+| (`assumptions` `:70` 来自 `p` 非 `cand`) | `"; ".join(...)` | 安全:**Task 3 已在 `parse_query` 侧白名单化为 `list[str]`** |
+
+→ **只有 `join` 那处需修**(其余经 `str()` cast,危害形状不同)—— 这是**枚举后的裁定**,
+不是"只看了一眼"。
+
+#### ⑦ Minor 处理
+
+1. **修正 3 引用路径笔误**:`brains/virtualcell/human/model_applicability.yaml:13` →
+   应为 **`praxis_virtualcell/brains/virtualcell/human/model_applicability.yaml:13`**
+   (行号与内容都对,纯前缀)。**照 §10 append-only 惯例在此订正,不回改修正 3 原文。**
+2. **敌对环境数字 238 vs 239 —— 双方都对,是口径差**(implementer 复跑核对):
+   **phase10 单跑 = 238**(opus 口径);**phase10 + 泄漏探针 = 239**(implementer 口径,
+   探针是 scratchpad 里的外部文件,+1)。**非错误,但报数须显式标口径**。
+   本轮新增测试后:**247**(不带探针)/ **248**(带探针)。

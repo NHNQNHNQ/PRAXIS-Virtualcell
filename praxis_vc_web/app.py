@@ -18,6 +18,7 @@ import streamlit as st  # noqa: E402
 from praxis_virtualcell.core.config import Mode, RuntimeConfig  # noqa: E402
 from praxis_virtualcell.io.job_store import JobStore  # noqa: E402
 from praxis_virtualcell.workflows.run_virtualcell_query import (  # noqa: E402
+    coerce_str_list,
     parse_query,
     run_query,
 )
@@ -61,9 +62,17 @@ if ss.get("parsed"):
     cand["species"] = c1.text_input("species", cand.get("species", ""))
     cand["cell_type"] = c2.text_input("cell_type", cand.get("cell_type") or "")
     cand["perturbation_type"] = c3.text_input("perturbation_type", cand.get("perturbation_type", ""))
+    # C4 §10 修正 12(**第六次复发,活在 HEAD 上**):`parse_query` 在 schema_valid=False 时
+    # **按设计**返回未归一、未白名单化的原始 LLM dict(契约见
+    # `tests/phase10/test_t10_7_...::test_parse_query_false_branch_returns_raw_uncoerced_contract`)
+    # → **守卫的责任在消费侧**。修前实测:LLM 返标量 "AHR"(C3 认定的自然错误)→
+    # `",".join("AHR")` → `'A,H,R'` → 回填 `['A','H','R']` → 用户确认 → schema_valid=True →
+    # **内核真按假基因 A/H/R 跑**;targets 为 dict → join 迭代 **key** → 发明;含 dict/int → TypeError。
+    # `coerce_str_list` 是**两层**守卫(容器级挡字符拆 + 元素级挡 dict/None/int)——
+    # 只加元素级挡不住字符拆(拆出的字符本身就是 str)。**新增消费者请复用它,勿各自重写。**
     cand["perturbation_targets"] = [t.strip() for t in st.text_input(
         "perturbation_targets(逗号分隔)",
-        ",".join(cand.get("perturbation_targets", []))).split(",") if t.strip()]
+        ",".join(coerce_str_list(cand.get("perturbation_targets")))).split(",") if t.strip()]
     st.caption(f"parser={p['parser']} · llm_used={p['llm_used']} · fallback={p['fallback_used']} "
                f"· schema_valid={p['schema_valid']}")
     if p.get("assumptions"):
