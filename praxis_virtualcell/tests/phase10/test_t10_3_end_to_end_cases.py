@@ -16,6 +16,8 @@ agent 一条假 bug)。三条 paper 级诚实事实钉死:
 **只有 S2b(M2 真实 GEARS)需 .53**,本计划延后;此文件的 16 core case 全本地。
 """
 
+import json
+
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.workflows.run_virtualcell_query import run_query
 
@@ -233,3 +235,65 @@ def test_X4_M4_M8_bacteria_mismatch():
     assert e["mismatch"] == "caution"
     assert "rule_based:degradation_machinery_gene_set" in e["caution_flags"]
     assert mp["overall_verdict"] == "downgrade"
+
+
+def test_X5_negative_transfer_unroutable():
+    """负迁移 unroutable:bacteria gene b0720 **expression**(哺乳 scRNA 预测器禁用于 bacteria)→
+    abstain,all mock rejected,**module_plan is None**(不可路由,无 plan)。最干净的
+    应 abstain 且不产 plan 的负例。"""
+    sr, prov, mp, out = _run(_req("bacteria", "gene", ["b0720"]))
+    assert sr["abstain"] is True
+    assert "all_predictors_rejected" in sr["abstain_reasons"]
+    assert sr["models_used"] == []
+    assert set(sr["models_rejected"]) == {"MockLinear", "MockCPA", "MockGEARS"}
+    assert mp is None
+    assert sr["prediction"] is None
+
+
+def test_X6_C1_gate_noop_and_deterministic():
+    """**C1 跨模块一致性 gate 在自然输入上从不触发**(spec §2.2 paper 级事实):
+    human gene MYC growth 是真 2-entry plan(gate 的检查对象),但 check_module_plan 返 []
+    → provenance **无 cross_module_consistency 键**。且同请求 3 跑 structured_report 字节等价。
+    **NOTE:gate 触发只能 monkeypatch runtime.check_module_plan(先例 test_t10_5),
+    不可由任何自然请求达成 —— 不声称自然触发。**"""
+    req = _req("human", "gene", ["MYC"], "growth")
+    sr, prov, mp, out = _run(req)
+    assert "cross_module_consistency" not in prov          # gate NO-OP:plan 内部一致
+    assert mp["primary"] == "cytoplasmic_metabolism"       # 真 ≥2-entry plan(gate 的检查对象)
+    assert mp["secondary"] == ["mitochondrial_energy_metabolism"]
+    assert out["llm_used_for_prediction"] is False
+    # 确定性:3 跑 structured_report canonical 一致
+    hashes = {json.dumps(_run(req)[0], sort_keys=True, default=str) for _ in range(3)}
+    assert len(hashes) == 1
+
+
+def test_X7_M2_cross_species_ortholog_caution():
+    """M2 跨物种:mouse gene GATA1 → genetic_hub primary caution(ortholog_required),
+    仍产 mock prediction {'delta':[0.3]}, abstain=False。跨物种路由聚光。"""
+    sr, prov, mp, out = _run(_req("mouse", "gene", ["GATA1"]))
+    assert sr["abstain"] is False
+    assert sr["reliability"] == "high"
+    assert sr["prediction"] == {"delta": [0.3]}
+    assert mp["primary"] == "genetic_hub"
+    e = _entry(mp, "genetic_hub")
+    assert e["verdict"] == "caution" and "ortholog_required" in e["caution_flags"]
+    assert mp["overall_verdict"] == "caution"
+
+
+def test_X8_route_declaration_diverges_from_engine():
+    """**路由声明与引擎实际背离**(spec §2.2 paper 级事实,最重要的诚实 case):
+    human gene SNAI1 state → module_plan overall_verdict=='accept'(路由层声明)
+    **YET** structured_report.abstain==True(引擎层:state_scoring 只 wire IFN-β ligand,
+    gene→state 走 UnsupportedEngine → CaseRunner rejected)。**同时断两者,把背离文档化**——
+    module_plan.overall_verdict 是 ROUTE-level 声明,不等于引擎实际执行。"""
+    sr, prov, mp, out = _run(_req("human", "gene", ["SNAI1"], "state"))
+    # 路由层:声明 accept
+    assert mp["primary"] == "stress_processor"
+    e = _entry(mp, "stress_processor")
+    assert e["engine"] == "state_scoring" and e["verdict"] == "accept"
+    assert mp["overall_verdict"] == "accept"
+    # 引擎层:实际 abstain(背离)
+    assert sr["abstain"] is True
+    assert "CaseRunner" in sr["models_rejected"]
+    assert sr["models_used"] == []
+    assert sr["prediction"] is None
