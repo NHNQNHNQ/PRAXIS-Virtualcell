@@ -41,3 +41,7 @@ secrets/
 # P10.D:phase10 junit 测试报告(生成物,同 dist 不入库)
 reports/phase10/junit-*.xml
 reports/phase10/trace_bundle.json
+
+# D-B playwright 生成物
+praxis_vc_react/test-results/
+praxis_vc_react/playwright-report/
