@@ -37,3 +37,6 @@ data/paul15/
 runs/
 *.key
 secrets/
+
+# P10.D:phase10 junit 测试报告(生成物,同 dist 不入库)
+reports/phase10/junit-*.xml
