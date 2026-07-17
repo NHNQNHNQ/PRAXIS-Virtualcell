@@ -110,3 +110,62 @@ def test_S4_M4_cobra_fba_accept():
     assert e["engine"] == "gem_fba" and e["verdict"] == "accept"
     assert mp["overall_verdict"] == "accept"
     assert out["llm_used_for_prediction"] is False
+
+
+def test_S5_M5_biosynthetic_advisory():
+    """M5 生物合成 rule-based advisory:human gene RPL5(∈生物合成基因集,OOV)。
+    实测同 S1 形状:请求 abstain,primary genetic_hub accept,biosynthetic_network secondary
+    advisory downgrade,overall downgrade。断 advisory entry 非预测。"""
+    sr, prov, mp, out = _run(_req("human", "gene", ["RPL5"]))
+    assert sr["abstain"] is True
+    assert sr["prediction"] is None
+    assert mp["primary"] == "genetic_hub"
+    assert "biosynthetic_network" in mp["secondary"]
+    e = _entry(mp, "biosynthetic_network")
+    assert e["verdict"] == "downgrade"
+    assert "rule_based:biosynthetic_network_gene_set" in e["caution_flags"]
+    assert "evidence_limited" in e["caution_flags"]
+    assert mp["overall_verdict"] == "downgrade"
+
+
+def test_S6_M6_spatial_niche_pipeline_limitation():
+    """M6 细胞骨架/spatial_niche:管线**完全不可达**(∉ REAL_ENGINES ∉ dispatch_runner,
+    _is_routable 门掉 medium 请求 → applicable 空)。诚实 limitation:
+    human medium stromal_niche state → module_plan is None + abstain。
+    (引擎级真值另在 tests/test_spatial_niche_case.py cohens_d~0.74,非本管线 case。)"""
+    sr, prov, mp, out = _run(_req("human", "medium", ["stromal_niche"], "state"))
+    assert sr["abstain"] is True
+    assert mp is None                      # 管线不可达 = module_plan None
+    assert sr["prediction"] is None
+    assert sr["models_used"] == []
+
+
+def test_S7_M7_state_scoring_accept():
+    """M7 应激处理器真 state_scoring:human ligand IFNB1 state(Kang 2018 ISG)。
+    实测:abstain=False, reliability=medium, models_used [CaseRunner], prediction {'delta':[2.485]}
+    (ISG 强激活 cohens_d~2.5 映射), state_scoring accept。真实机制,非 mock。"""
+    sr, prov, mp, out = _run(_req("human", "ligand", ["IFNB1"], "state"))
+    assert sr["abstain"] is False
+    assert sr["reliability"] == "medium"
+    assert sr["models_used"] == ["CaseRunner"]
+    assert sr["prediction"] == {"delta": [2.485]}
+    assert mp["primary"] == "stress_processor"
+    e = _entry(mp, "stress_processor")
+    assert e["engine"] == "state_scoring" and e["verdict"] == "accept"
+    assert mp["overall_verdict"] == "accept"
+
+
+def test_S8_M8_degradation_advisory_mismatch():
+    """M8 降解机器 rule-based advisory + 物种 mismatch:bacteria gene UBB growth。
+    实测:primary cytoplasmic_metabolism(gem_fba)accept,degradation_machinery secondary
+    verdict=downgrade **且 mismatch=='caution'**(bacteria_autophagy:原核无真核自噬),
+    请求 abstain(UBB 非真实 E.coli 位点)。"""
+    sr, prov, mp, out = _run(_req("bacteria", "gene", ["UBB"], "growth"))
+    assert sr["abstain"] is True
+    assert mp["primary"] == "cytoplasmic_metabolism"
+    assert "degradation_machinery" in mp["secondary"]
+    e = _entry(mp, "degradation_machinery")
+    assert e["verdict"] == "downgrade"
+    assert e["mismatch"] == "caution"
+    assert "rule_based:degradation_machinery_gene_set" in e["caution_flags"]
+    assert mp["overall_verdict"] == "downgrade"
