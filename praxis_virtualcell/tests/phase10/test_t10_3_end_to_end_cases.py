@@ -169,3 +169,67 @@ def test_S8_M8_degradation_advisory_mismatch():
     assert e["mismatch"] == "caution"
     assert "rule_based:degradation_machinery_gene_set" in e["caution_flags"]
     assert mp["overall_verdict"] == "downgrade"
+
+
+# ============ 8 跨模块 ============
+
+def test_X1_M4_M3_flux_positive():
+    """跨模块正例:human ligand IFNB1 flux → primary cytoplasmic_metabolism + secondary
+    mitochondrial_energy_metabolism,**均 pathway_scoring caution**,真实 prediction
+    {'delta':[0.101,0.281]}(IFN 弱代谢信号 |d|<0.8), abstain=False。旗舰跨模块正例。"""
+    sr, prov, mp, out = _run(_req("human", "ligand", ["IFNB1"], "flux"))
+    assert sr["abstain"] is False
+    assert sr["models_used"] == ["CaseRunner"]
+    assert sr["prediction"] == {"delta": [0.101, 0.281]}
+    assert mp["primary"] == "cytoplasmic_metabolism"
+    assert mp["secondary"] == ["mitochondrial_energy_metabolism"]
+    for m in ("cytoplasmic_metabolism", "mitochondrial_energy_metabolism"):
+        e = _entry(mp, m)
+        assert e["engine"] == "pathway_scoring" and e["verdict"] == "caution"
+    assert mp["overall_verdict"] == "caution"
+
+
+def test_X2_M4_M3_growth_negative_abstain():
+    """跨模块应 abstain 负例:human gene_combination [MYC,KRAS] growth → 2-entry 均 downgrade,
+    abstain(mammalian growth GEM 未 wire), prediction None。"""
+    sr, prov, mp, out = _run(_req("human", "gene_combination", ["MYC", "KRAS"], "growth"))
+    assert sr["abstain"] is True
+    assert "CaseRunner" in sr["models_rejected"]
+    assert sr["prediction"] is None
+    assert mp["primary"] == "cytoplasmic_metabolism"
+    assert mp["secondary"] == ["mitochondrial_energy_metabolism"]
+    for m in ("cytoplasmic_metabolism", "mitochondrial_energy_metabolism"):
+        assert _entry(mp, m)["verdict"] == "downgrade"
+    assert mp["overall_verdict"] == "downgrade"
+
+
+def test_X3_quad_four_module_advisory():
+    """最富 module_plan(4 entry):human gene [SLC2A1,RPL5,PSMB5] 一次命中 3 个基因集 →
+    primary genetic_hub + 3 advisory secondary(membrane/biosynthetic/degradation,MODULE_ORDER 序),
+    全 downgrade,请求 abstain(全 OOV)。"""
+    sr, prov, mp, out = _run(_req("human", "gene", ["SLC2A1", "RPL5", "PSMB5"]))
+    assert sr["abstain"] is True
+    assert sr["prediction"] is None
+    assert mp["primary"] == "genetic_hub"
+    assert mp["secondary"] == ["membrane_system", "biosynthetic_network", "degradation_machinery"]
+    assert len(mp["entries"]) == 4
+    for m in ("membrane_system", "biosynthetic_network", "degradation_machinery"):
+        e = _entry(mp, m)
+        assert e["verdict"] == "downgrade"
+        assert f"rule_based:{m}_gene_set" in e["caution_flags"]
+        assert "evidence_limited" in e["caution_flags"]
+    assert mp["overall_verdict"] == "downgrade"
+
+
+def test_X4_M4_M8_bacteria_mismatch():
+    """跨模块 + 物种 mismatch:bacteria gene UBB growth → M4 primary(gem_fba)+ M8 secondary
+    携 mismatch=='caution'(bacteria 无真核自噬),abstain。跨模块与 mismatch 治理同 plan。"""
+    sr, prov, mp, out = _run(_req("bacteria", "gene", ["UBB"], "growth"))
+    assert sr["abstain"] is True
+    assert mp["primary"] == "cytoplasmic_metabolism"
+    assert _entry(mp, "cytoplasmic_metabolism")["engine"] == "gem_fba"
+    assert "degradation_machinery" in mp["secondary"]
+    e = _entry(mp, "degradation_machinery")
+    assert e["mismatch"] == "caution"
+    assert "rule_based:degradation_machinery_gene_set" in e["caution_flags"]
+    assert mp["overall_verdict"] == "downgrade"
