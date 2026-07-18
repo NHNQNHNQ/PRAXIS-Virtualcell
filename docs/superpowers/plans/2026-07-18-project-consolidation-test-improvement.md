@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — A0 迁移硬门完成，A1 进行中
+> 状态：active — A0/A1 完成，A2 进行中
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -72,14 +72,14 @@
 ### A1 — 三端同步台账、分支与版本历史整理
 
 - [x] 在 APFS clone、任何整理提交之前，从当前 HEAD 新建本地工作分支 `codex/project-consolidation`；不移动 `main`，不改 tag。
-- [ ] 记录分支关系：`HEAD...main`、`HEAD...origin/feat/...`、`main...origin/main`，并明确 tracking ref 可能陈旧。
-- [ ] 在 APFS clone 执行经凭证允许的只读 `git fetch --prune --tags origin`；fetch 失败则保留 tracking-ref 快照并写明原因，不猜测 GitHub 现状。
-- [ ] 新建 `docs/status/SYNC-STATE.md`，逐端记录 local APFS、GitHub、`.53` 的仓库路径/remote URL/branch/HEAD/main/tag/dirty 状态/核验时间/核验方式；未实时核验的值标 `UNKNOWN` 或 `LAST_RECORDED`。
-- [ ] 定义同步不变量：发布检查点上 `local main == GitHub origin/main == .53 deployed SHA`；工作分支允许仅存在于 local/GitHub，不要求部署到 `.53`，但必须在 ledger 标明 intentionally ahead。
-- [ ] 取得 `.53` 访问权时先只读执行 `pwd`、`git status --short --branch`、`git remote -v`、`git rev-parse HEAD`、`git show-ref --heads --tags`；不 fetch/checkout/pull，不触碰运行进程。
-- [ ] 记录远端唯一提交 `b9abdbd` 与本地 `4359602` 的文件级差异；结论只能写“待远端核对/本地是否超集”，不得自动 merge。
-- [ ] 将 `stash@{0}` 的唯一文件名和来源写进状态文档；stash 保留原样。
-- [ ] 建立发布历史简表：bootstrap → v0.1 → v0.3 alpha → v0.8 → v0.9 → v1.0–v1.5；标明哪些 tag 仅能确认在本地存在。
+- [x] 记录分支关系：`HEAD...main`、`HEAD...origin/feat/...`、`main...origin/main`，并明确 tracking ref 可能陈旧。
+- [x] 在 APFS clone 执行经凭证允许的只读 `git fetch --prune --tags origin`；SSH banner 超时后以一次性 HTTPS URL 重写成功 fetch，并以 `ls-remote` 交叉核验；持久 origin URL 未变。
+- [x] 新建 `docs/status/SYNC-STATE.md`，逐端记录 local APFS、GitHub、`.53` 的仓库路径/remote URL/branch/HEAD/main/tag/dirty 状态/核验时间/核验方式；未实时核验的值标 `UNKNOWN` 或 `LAST_RECORDED`。
+- [x] 定义同步不变量：发布检查点上 `local main == GitHub origin/main == .53 deployed SHA`；工作分支允许仅存在于 local/GitHub，不要求部署到 `.53`，但必须在 ledger 标明 intentionally ahead。
+- [x] 取得 `.53` 访问权时先只读执行 `pwd`、`git status --short --branch`、`git remote -v`、`git rev-parse HEAD`、`git show-ref --heads --tags`；未 fetch/checkout/pull，未触碰运行进程。
+- [x] 记录远端唯一提交 `b9abdbd` 与本地 `4359602` 的文件级差异；结论为同父兄弟提交、生产代码相同、本地多一个 fail-closed 空字符串测试，故不自动 merge。
+- [x] 将 `stash@{0}` 的唯一文件名和来源写进状态文档；stash 保留原样。
+- [x] 建立发布历史简表：bootstrap → v0.1 → v0.3 alpha → v0.8 → v0.9 → v1.0–v1.5；实时 GitHub/`.53` 均仅到 v0.8，v0.9–v1.5 明标本地里程碑。
 
 验收：当前工作分支名与任务相符；`SYNC-STATE.md` 明确三端真实/未知状态和预期目标；主线、旧远端分支和 tag 均未被改写；没有 push/pull/merge，也没有修改 `.53`。
 

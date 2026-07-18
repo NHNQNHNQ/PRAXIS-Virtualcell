@@ -1,6 +1,6 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 13:01 CST (+0800)
+> Captured: 2026-07-18 13:12 CST (+0800)
 >
 > Overall status: `PHASE_A_IN_PROGRESS`
 >
@@ -15,8 +15,8 @@ This file is the restart authority for the consolidation goal. It records observ
 | Active local development truth | `/Users/mzy/Projects/PRAXIS-virtualcell` | All Phase A–D work happens here |
 | Read-only source archive | `/Volumes/T7/PRAXIS-virtualcell` | Do not stage, clean, reset, stash, gc, prune, or edit |
 | Recovery material | `/Users/mzy/Projects/PRAXIS-virtualcell-recovery-20260718` | Preserve through final synchronization and release verification |
-| Published truth | GitHub `NHNQNHNQ/PRAXIS-Virtualcell` | Not live-fetched yet in this phase |
-| Deployment/validation mirror | `.53` | Current live state is `UNKNOWN`; last recorded value is not proof |
+| Published truth | GitHub `NHNQNHNQ/PRAXIS-Virtualcell` | Live-observed at `main=7fc4aa5`, tags through `v0.8.0` |
+| Deployment/validation mirror | `.53` | Live-observed detached at `b9abdbd`; details in `SYNC-STATE.md` |
 
 The source volume is ExFAT and was 93% full. The active clone and recovery directory are on APFS with approximately 46 GiB available at migration time.
 
@@ -25,27 +25,27 @@ The source volume is ExFAT and was 93% full. The active clone and recovery direc
 | Item | Observed value |
 |---|---|
 | Audit anchor / current branch base | `24475f2eb14c27c7cfbb82b016b881e88e98b17c` |
-| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream yet |
+| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream yet; pre-ledger checkpoint `620b4d5` |
 | Preserved former working branch | `feat/v0.9-phase0-module-core=24475f2` |
 | Local `main` | `176019ebd9c198f93a5a645f1ecefce9baaf0522` |
 | Annotated tag `v1.5.0` | tag object `df04e74`; peeled commit `176019e` |
-| Saved `origin/main` tracking ref | `7fc4aa5b3bd03871358385f1d467a515be15aafe` |
-| Saved `origin/feat/v0.9-phase0-module-core` | `b9abdbdf733406853c4a338b29b705ca801d7ac7` |
+| Live-fetched `origin/main` tracking ref | `7fc4aa5b3bd03871358385f1d467a515be15aafe` |
+| Live-fetched `origin/feat/v0.9-phase0-module-core` | `b9abdbdf733406853c4a338b29b705ca801d7ac7` |
 | `refs/stash` | `77cb06d392a8a547e37c390d86769de23437cc83` |
 | GitHub origin URL | `git@github.com:NHNQNHNQ/PRAXIS-Virtualcell.git` |
 | Recovery remote URL | `/Users/mzy/Projects/PRAXIS-virtualcell-recovery-20260718/praxis-all.bundle` |
 
-Observed graph relationships before any live fetch:
+Observed graph relationships at local checkpoint `620b4d5` after live fetch:
 
 ```text
-HEAD...main                                      1 left / 0 right
-HEAD...origin/feat/v0.9-phase0-module-core      82 left / 1 right
+HEAD...main                                      3 left / 0 right
+HEAD...origin/feat/v0.9-phase0-module-core      84 left / 1 right
 main...origin/main                              342 left / 0 right
 ```
 
-The two `origin/*` values above are recovered local tracking snapshots, not a 2026-07-18 GitHub observation. A read-only `fetch --prune --tags` is the next source-of-truth check. No pull, merge, rebase, push, PR, tag, or remote write has occurred.
+The two `origin/*` values now match a 2026-07-18 HTTPS `ls-remote` and an HTTPS-backed `fetch --prune --tags`. The persisted origin URL remains SSH. No pull, merge, rebase, push, PR, tag, or remote write has occurred.
 
-The `.53` host was last documented on 2026-07-17 as restored to `b9abdbd`; that value is `LAST_RECORDED`, not current evidence. Until a live read-only check, its branch, HEAD, remote, dirty state, and deployed process SHA are all `UNKNOWN`.
+The `.53` host was live-checked read-only at 2026-07-18 13:12 CST. It is detached at `b9abdbd`, has `main=7fc4aa5`, tags through `v0.8.0`, and one untracked 32,504-byte `vc_api.log`. It also preserves `.53`-only branch `remote-gears-l4-95dc764=95dc764`. No process or environment check was performed. See `docs/status/SYNC-STATE.md`.
 
 ## Protected worktree state
 
@@ -67,6 +67,8 @@ The exact four-file CSS diff matches the recovery patch at SHA-256 `2c300a185c97
 `refs/stash^3` contains only `docs/PRAXIS-生物科学智能体-总介绍.md`. The stash commit has the same `77cb06d` OID in source, bundle, and clone. It was not popped or dropped. Its exported copy is in the recovery directory and has SHA-256 `6dacab11a753fda58b6c2b926a098648d4becf18dcef5b7cc148909431360d20`.
 
 The ignored root `.env` existed in the source archive and was 252 bytes. Its contents were not read, displayed, or copied. No secret is included in the recovery manifest.
+
+The recovery audit also found ignored reproducibility data and Phase 10 evidence that Git bundle could not carry. The following non-secret files were copied from T7 into the same ignored paths in the APFS clone and verified by source/target SHA-256: three `.h5ad` files (1,499,342,078 bytes total), `data/paul15/paul15.h5`, both LINCS L1000 up/down signature files, two JUnit XML files, and `reports/phase10/trace_bundle.json`. Exact hashes are in the recovery manifest. Rebuildable `.venv`, `node_modules`, caches, `dist`, `test-results`, `runs`, `egg-info`, and `__pycache__` were not copied.
 
 ## Migration integrity evidence
 
@@ -108,11 +110,11 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 
 ## Next authorized work
 
-Continue Phase A1 in this APFS clone:
+Continue Phase A2 in this APFS clone:
 
-1. Record the graph relationships in the three-way synchronization ledger.
-2. Live-fetch GitHub refs read-only; if credentials/network fail, preserve the recovered snapshot and record the exact reason.
-3. Create `docs/status/SYNC-STATE.md` with local, GitHub, and `.53` values clearly labeled `OBSERVED`, `LAST_RECORDED`, or `UNKNOWN`.
-4. Perform only read-only `.53` checks if access is discoverable; do not fetch, checkout, pull, deploy, or touch processes there.
+1. Classify the four CSS files, `.claude/launch.json`, `.playwright-mcp/`, `string.jpeg`, and the stashed overview document.
+2. Keep the CSS theme work isolated from documentation and test-baseline commits.
+3. Preserve generated/browser artifacts and scientific screenshot provenance without deleting the live copies.
+4. Do not restore or publish the stashed overview until its v1.4-era claims are checked against the Phase 10 gate.
 
 No Phase B baseline test may start before `PHASE_A_COMPLETE` is written at A5. No external synchronization is authorized before the Phase D approval gate.
