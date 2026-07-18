@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — A0/A1/A2 完成，A3 进行中
+> 状态：active — A0/A1/A2/A3 完成，A4 进行中
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -101,11 +101,11 @@
 
 ### A3 — 文档信息架构
 
-- [ ] 新建 `docs/INDEX.md`，至少分为：当前状态、用户文档、架构/能力边界、发布记录、执行计划、测试报告、论文/历史材料。
-- [ ] 指定当前权威入口：根 `README.md`、`docs/INDEX.md`、`docs/status/PROJECT-STATE-2026-07-18.md`、`reports/phase10/PHASE10_GATE.md`。
-- [ ] 对旧计划/旧 handoff 采用“索引标注历史状态”，不批量移动或改写 256 个文档，避免断链。
-- [ ] 记录明显陈旧项：README 的 `277 passed`、前端 Vite 模板 README、旧根测试失败数、旧 runtime 展示版本。
-- [ ] 新建 `docs/VERSIONING.md` 设计稿，区分：产品发行版、API 版本、消息/schema 版本、治理 artifact/model 版本、前端包版本。
+- [x] 新建 `docs/INDEX.md`，至少分为：当前状态、用户文档、架构/能力边界、发布记录、执行计划、测试报告、论文/历史材料。
+- [x] 指定当前权威入口：根 `README.md`、`docs/INDEX.md`、`docs/status/PROJECT-STATE-2026-07-18.md`、`reports/phase10/PHASE10_GATE.md`。
+- [x] 对旧计划/旧 handoff 采用“索引标注历史状态”，不批量移动或改写 256 个文档，避免断链。
+- [x] 记录明显陈旧项：README 的 `277 passed`、前端 Vite 模板 README、旧根测试失败数、旧 runtime 展示版本。
+- [x] 新建 `docs/VERSIONING.md` 设计稿，区分：产品发行版、API 版本、消息/schema 版本、治理 artifact/model 版本、前端包版本。
 
 验收：一个新贡献者能从 `docs/INDEX.md` 找到当前真相，并能区分历史记录与有效操作文档；不改科学结果正文。
 

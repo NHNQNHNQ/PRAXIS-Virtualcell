@@ -54,10 +54,12 @@ praxis-vc ask --text "在 human K562 里敲掉 AHR 会怎么样" --mode offline 
 
 | 文档 | 内容 |
 |---|---|
+| [docs/INDEX.md](docs/INDEX.md) | 当前文档地图、权威顺序、历史/草稿边界 |
+| [docs/status/PROJECT-STATE-2026-07-18.md](docs/status/PROJECT-STATE-2026-07-18.md) · [SYNC-STATE.md](docs/status/SYNC-STATE.md) | 当前项目状态与本地/GitHub/`.53` 同步台账 |
 | [docs/INSTALL.md](docs/INSTALL.md) | 安装(pip / Docker / tar.gz)+ 自检 |
 | [docs/USER-GUIDE.md](docs/USER-GUIDE.md) | CLI / 本地网页 / 输出 / 模式与边界 |
 | [docs/EXAMPLES.md](docs/EXAMPLES.md) | 三例(accept / caution / abstain,verdict 已实跑核实) |
-| [docs/项目说明.md](docs/项目说明.md) · [PROVENANCE.md](PROVENANCE.md) | 系统现状 / 派生关系 |
+| [reports/phase10/PHASE10_GATE.md](reports/phase10/PHASE10_GATE.md) · [PROVENANCE.md](PROVENANCE.md) | 当前科学能力边界 / 派生关系 |
 
 ## 开发
 
