@@ -82,5 +82,11 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
-markers = ["integration: needs docker PG/Redis (skipped if unavailable)"]
+markers = [
+    "integration: needs explicitly enabled service, container, or release dependencies",
+    "llm: makes a real external LLM request and requires explicit opt-in plus credentials",
+    "remote: needs an explicitly enabled remote GPU, checkpoint, donor, or private service",
+    "operational: probes a live deployed service rather than an isolated test dependency",
+]
+strict_markers = true
 addopts = "-q"

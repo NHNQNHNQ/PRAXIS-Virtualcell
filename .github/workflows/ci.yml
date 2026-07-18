@@ -1,13 +1,101 @@
 name: ci
-on: [push, pull_request]
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
+  python-core:
+    name: Python lint and VirtualCell core
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      - run: pip install -e ".[dev]"
-      - run: ruff check .
-      - run: pytest -m "not integration" -q
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Create Python environment
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -e ".[dev,api,mechanistic]"
+      - name: Ruff
+        run: .venv/bin/ruff check .
+      - name: Check Python dependencies
+        run: .venv/bin/python -m pip check
+      - name: VirtualCell core
+        run: .venv/bin/pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra
+
+  frontend:
+    name: Frontend build and Playwright
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: praxis_vc_react/package-lock.json
+      - name: Install API backend
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -e ".[api,mechanistic]"
+      - name: Install frontend dependencies
+        working-directory: praxis_vc_react
+        run: npm ci
+      - name: Check Python dependencies
+        run: .venv/bin/python -m pip check
+      - name: Install Chromium
+        working-directory: praxis_vc_react
+        run: npx playwright install --with-deps chromium
+      - name: Typecheck
+        working-directory: praxis_vc_react
+        run: npm run typecheck
+      - name: Lint
+        working-directory: praxis_vc_react
+        run: npm run lint
+      - name: Build
+        working-directory: praxis_vc_react
+        run: npm run build
+      - name: Playwright
+        working-directory: praxis_vc_react
+        run: npm run e2e
+
+  legacy-unit:
+    name: Legacy unit tests (external suites gated)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Create Python environment
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -e ".[dev,api,mechanistic]"
+      - name: Check Python dependencies
+        run: .venv/bin/python -m pip check
+      - name: Legacy unit suite
+        run: .venv/bin/pytest tests -m "not (integration or llm or remote)" -o addopts='' -q -ra

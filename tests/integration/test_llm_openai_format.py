@@ -24,7 +24,11 @@ import os
 
 import pytest
 
-pytestmark = pytest.mark.integration
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.llm,
+    pytest.mark.remote,
+]
 
 
 @pytest.fixture

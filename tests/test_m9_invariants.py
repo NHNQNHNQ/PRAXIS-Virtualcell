@@ -136,6 +136,8 @@ async def test_inv4_logout_all_kills_all_sessions():
     await deps.redis.aclose()
 
 
+@pytest.mark.remote
+@pytest.mark.operational
 def test_inv5_v1_backend_still_healthy():
     """§0.1 不变量:M9 全程不干扰 v1 — .53:7788 健康。
 
