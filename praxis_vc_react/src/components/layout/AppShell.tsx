@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   health,
   listJobs,
@@ -34,6 +34,7 @@ const emptyJob: JobState = {
 };
 
 export default function AppShell() {
+  const mainScrollRef = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<Mode>("offline");
   const [stage, setStage] = useState<Stage>("ask");
   const [job, setJob] = useState<JobState>(emptyJob);
@@ -107,6 +108,12 @@ export default function AppShell() {
   // 实际渲染的阶段:守卫兜底时回落到 ask(异常路径不渲半成品阶段)。
   const effectiveStage: Stage = stageReady ? stage : "ask";
 
+  // 每个阶段都是独立页面；阶段切换后应从新页面顶部开始，而不是继承上一阶段的滚动位置。
+  // layout effect 在浏览器绘制新阶段前归零，避免标题短暂出现在视口上方。
+  useLayoutEffect(() => {
+    mainScrollRef.current?.scrollTo({ top: 0, left: 0 });
+  }, [effectiveStage, openedJobId]);
+
   // StepperRail 的 jump:已完成阶段回退 / 紧邻可达阶段前进(rail 内部已做逐步不跳过约束,
   // 此处再以 canEnter 兜底,非法 target 忽略)。回退只改 stage,不清 JobState 字段(不丢数据)。
   function jumpTo(target: Stage) {
@@ -141,7 +148,7 @@ export default function AppShell() {
           }
         />
 
-        <div className="main-scroll">
+        <main ref={mainScrollRef} className="main-scroll">
           <div className="main-inner">
             {/* 右:Workspace(工作区,内含左侧 StepperRail)。
                 历史 job 模式:直接进 results,以该 job_id 渲 ResultsStage 6 tab 外壳(等价旧 openedJobId 分支)。 */}
@@ -185,7 +192,7 @@ export default function AppShell() {
               />
             )}
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

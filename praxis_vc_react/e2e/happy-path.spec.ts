@@ -36,3 +36,28 @@ test("5 阶段 happy path 五跳到达 Results", async ({ page }) => {
   // ── 阶段 5:Results ──(heading /^结果 · job/ 出现 = 五跳到达)
   await expect(page.getByRole("heading", { name: /^结果 · job/ })).toBeVisible();
 });
+
+test("Review 切换到 Route 时主内容从顶部开始", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("研究问题").fill("在 human 细胞敲 AHR");
+  await page.getByRole("button", { name: "解读任务 →" }).click();
+  await expect(page.getByRole("heading", { name: "核对任务解读" })).toBeVisible();
+
+  const mainScroll = page.getByRole("main");
+  await mainScroll.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect
+    .poll(() => mainScroll.evaluate((element) => element.scrollTop))
+    .toBeGreaterThan(0);
+
+  await page.getByRole("button", { name: "确认并继续 →" }).click();
+
+  const routeHeading = page.getByRole("heading", {
+    name: "预计涉及的功能模块",
+  });
+  await expect(routeHeading).toBeInViewport();
+  await expect
+    .poll(() => mainScroll.evaluate((element) => element.scrollTop))
+    .toBe(0);
+});
