@@ -68,6 +68,9 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 include-package-data = true
 
+[tool.setuptools.package-data]
+praxis_virtualcell = ["**/*.yaml", "**/*.json", "**/*.txt", "**/*.md", "**/*.gz"]
+
 [tool.setuptools.packages.find]
 include = ["praxis2*", "praxis_virtualcell*", "praxis_vc_api*"]
 

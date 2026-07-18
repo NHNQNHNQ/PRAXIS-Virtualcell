@@ -1,3 +1,3 @@
-recursive-include praxis_virtualcell *.yaml *.json
+recursive-include praxis_virtualcell *.yaml *.json *.txt *.md *.gz
 global-exclude ._*
 global-exclude .DS_Store

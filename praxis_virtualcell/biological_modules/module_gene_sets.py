@@ -8,12 +8,12 @@ from __future__ import annotations
 
 import json
 from functools import cache
-from pathlib import Path
+from importlib.resources import files
 
 from praxis_virtualcell.biological_modules import modules as M
 
-# gene-set 数据目录:仓库根 data/(与 data/gems、data/drug_signatures、data/cellstate 同源约定)
-_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "module_gene_sets"
+# gene-set 是默认工作流的发行时依赖，必须从已安装包读取，不能依赖仓库父目录。
+_DATA_DIR = files("praxis_virtualcell").joinpath("data", "module_gene_sets")
 
 # gene-set 覆盖的模块 id(∈ MODULE_ORDER)→ 数据文件名。声明序 = M1,M5,M8。
 _MODULE_FILES: dict[str, str] = {

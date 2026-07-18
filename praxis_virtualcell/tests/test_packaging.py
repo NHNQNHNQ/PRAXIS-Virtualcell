@@ -1,7 +1,9 @@
 """打包配置守卫:wheel 必须含 praxis_virtualcell/praxis_vc_api + 运行时数据。
 防 packages.find 回退到只打 praxis2(否则 praxis-vc CLI ImportError)。"""
+import json
 import re
 import tomllib
+from importlib.resources import files
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -19,6 +21,22 @@ def test_include_package_data_and_manifest():
     assert cfg["tool"]["setuptools"].get("include-package-data") is True
     manifest = (_ROOT / "MANIFEST.in").read_text(encoding="utf-8")
     assert "recursive-include praxis_virtualcell" in manifest
+    assert "*.md" in manifest
+
+
+def test_default_gene_sets_are_licensed_package_resources():
+    resource_dir = files("praxis_virtualcell").joinpath("data", "module_gene_sets")
+    expected = {
+        "membrane_system.json",
+        "biosynthetic_network.json",
+        "degradation_machinery.json",
+    }
+    for name in expected:
+        doc = json.loads(resource_dir.joinpath(name).read_text(encoding="utf-8"))
+        assert doc["license"] == "MIT (this qualitative mapping only)"
+        assert doc["gene_set"]
+
+    assert not list((_ROOT / "data" / "module_gene_sets").glob("*.json"))
 
 
 def _locked_names(path: Path) -> set[str]:
