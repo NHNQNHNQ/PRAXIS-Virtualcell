@@ -2,9 +2,9 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，`C1_COMPLETE`，`C2_COMPLETE`，C3 下一步
+> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，`C1_COMPLETE`，`C2_COMPLETE`，`C3_COMPLETE_LOCAL`，C4 下一步
 >
-> 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
+> 整理起点：`24475f2`；C3 证据 HEAD：`4106403`
 >
 > 配套执行提示词：`docs/superpowers/plans/2026-07-18-project-consolidation-goal-prompt.md`
 
@@ -197,7 +197,7 @@
 
 ### C2 — 版本、文档与 CLI 收口
 
-- [x] 按 `docs/VERSIONING.md` 建立单一产品版本源；根据 C0–C2 的兼容性整理范围选择未发布候选 `1.5.1`，若 C3 接受并提交可见主题扩展则在 D0 前重新评估 `1.6.0`。
+- [x] 按 `docs/VERSIONING.md` 建立单一产品版本源；C0–C2 的兼容性整理先形成未发布 `1.5.1` 候选，C3 接受可见主题/UI/工作流扩展后已在 `b5dfc80` 按契约提升为本地未发布 `1.6.0`。
 - [x] 让 Python metadata、前端 package、API/UI 展示引用明确的发行版本；API/runtime protocol 与 schema/artifact 版本保持独立。
 - [x] 更新根 README 的测试数字、安装/开发命令和能力边界；替换前端 Vite 模板 README，并新增测试指南与 changelog。
 - [x] 重新验证 editable metadata、`praxis-vc --version`/`--help`；提交 `73f3324` 的干净 wheel 在独立 Python 3.13 venv 中完成安装/import/CLI smoke。
@@ -205,12 +205,14 @@
 
 ### C3 — 前端 WIP 与全面 E2E
 
-- [ ] 先对 4 个主题 CSS 做人工视觉验收；通过后单独提交，未通过则继续保留 WIP，不和测试改动混交。
-- [ ] 若已不使用 Newsreader，删除对应依赖并更新 lockfile，重新 build/audit。
-- [ ] 按 `2026-07-17-frontend-full-e2e-test-plan.md` 的优先级实现：S3 → S9 → S4 → S6 → S7/S8 → S11 → S5 → S12 → S13；S10 无 key 时诚实 skip。
-- [ ] 本整理计划覆盖旧 E2E 计划的编排细节：不盲杀占用 8000 端口的未知进程，优先使用独立端口/明确归属的 webServer；提交不写固定模型署名；console/page error/500 使用 Playwright 原生 listener 采集，不依赖未定义的浏览器 MCP 指令。
-- [ ] 每个 suite 先真跑获取页面/API 真值，再写 role/label/text 断言，并做一次变异证伪。
-- [ ] 发现 UI/API 真 bug 时修生产代码并补回归，禁止弱化 E2E 凑绿。
+- [x] 对 4 个主题 CSS 完成人工视觉与可访问性验收，经 refinement 后在 `92ab4ee` 独立提交；原恢复 patch 仍保留，最终主题不是声称“原 patch 原样入库”。
+- [x] 确认 Newsreader 未使用，删除对应依赖并由 npm 更新 lockfile；typecheck/lint/build/audit 全绿。
+- [x] 按 `2026-07-17-frontend-full-e2e-test-plan.md` 完成本地 S1–S9、S11–S13；S10 真实 LLM 门保持显式 skip/pending，未冒充通过。
+- [x] 本整理计划覆盖旧 E2E 计划的编排细节：只停止明确归属的 webServer，不盲杀未知 8000 进程；console/page/service 失败使用 Playwright 原生采集。
+- [x] suite 先观察页面/API 真值，再写窄断言并做变异证伪；Results 工具栏的 1280×720 `.card-actions`/`getBoundingClientRect()` 是保护真实重叠 bug 的有意窄几何例外。
+- [x] 发现并修复 UI/API 真 bug：阶段滚动、Results 动作区、结构化输入、Review 类型/修正、Ask/Run/Results 竞态均有回归覆盖，没有弱化断言。
+
+C3 gate：`docs/status/PHASE-C3-GATE-2026-07-18.md`，状态 `C3_COMPLETE_LOCAL`。最终本地复现为 core `947/40/9/0`、legacy broad non-LLM `1136/158/6/0`、Playwright 55 collected = `54 passed / 1 skipped / 0 failed`；Ruff、typecheck、lint、build、audit、diff-check 均通过。候选版本为本地未发布 `1.6.0`，主 chunk `635.51 kB`（gzip `185.40 kB`）继续由 C4 负责。C3 未 push、未 tag、未部署、未修改 `.53`。
 
 ### C4 — 依赖、包体与发布复现
 

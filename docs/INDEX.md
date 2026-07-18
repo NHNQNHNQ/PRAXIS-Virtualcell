@@ -25,8 +25,9 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [Project State](status/PROJECT-STATE-2026-07-18.md) | APFS migration, current branch/ref facts, protected assets, phase restart point |
 | [Phase A Completion Gate](status/PHASE-A-GATE-2026-07-18.md) | proof that migration/organization protections passed before baseline testing |
 | [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | Phase B commands, exact results, failure ownership, and `PHASE_B_COMPLETE` gate |
-| [Three-Way Sync State](status/SYNC-STATE.md) | live local/GitHub/`.53` ledger and Phase D synchronization protocol |
-| [Worktree Asset Classification](status/WORKTREE-ASSETS.md) | disposition of CSS WIP, `.claude/`, Playwright MCP output, screenshot, and stash |
+| [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | local theme/full-E2E/request-boundary evidence, exact final counts, honest S10 skip, and `C3_COMPLETE_LOCAL` boundary |
+| [Three-Way Sync State](status/SYNC-STATE.md) | three-way ledger with explicit freshness labels and the Phase D synchronization protocol |
+| [Worktree Asset Classification](status/WORKTREE-ASSETS.md) | accepted theme disposition plus continuing protection of `.claude/`, Playwright MCP output, screenshot, and stash |
 | [Versioning Contract](VERSIONING.md) | implemented product/protocol/schema/artifact version boundaries and release invariants |
 | [Testing Guide](TESTING.md) | current local commands, exact scopes, external gates, and GitHub-CI evidence boundary |
 | [Repository Layout](REPOSITORY-LAYOUT.md) | tracked-tree responsibilities and evidence-versus-generated policy |
@@ -69,7 +70,7 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 |---|---|
 | [Project consolidation, test, and improvement plan](superpowers/plans/2026-07-18-project-consolidation-test-improvement.md) | the only active orchestration plan |
 | [Consolidation goal prompt](superpowers/plans/2026-07-18-project-consolidation-goal-prompt.md) | restart/persistence protocol for the active plan |
-| [Full frontend E2E plan](superpowers/plans/2026-07-17-frontend-full-e2e-test-plan.md) | subordinate C3 test design; its orchestration is overridden where the active plan says so |
+| [Full frontend E2E plan](superpowers/plans/2026-07-17-frontend-full-e2e-test-plan.md) | subordinate C3 design implemented locally for S1–S9/S11–S13; S10 real-LLM gate remains pending, and active-plan orchestration overrides its historical mechanics |
 
 Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*` documents are dated implementation history unless the active plan explicitly references them.
 
@@ -78,7 +79,8 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 | Report | Scope |
 |---|---|
 | [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | current B0–B4 environment, static, core, frontend, wheel/CLI, legacy, and remote-boundary evidence |
-| [Testing Guide](TESTING.md) | post-C2 local commands and counts; distinguishes local reproduction from GitHub Actions |
+| [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | current local C3 gate: core 947, Playwright 54+1, theme acceptance, mutation evidence, and remaining C4/C5 ownership |
+| [Testing Guide](TESTING.md) | post-C3 local commands and counts; distinguishes local reproduction from GitHub Actions |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | capability gate plus `.53` evidence and remaining remote backlog |
 | [Phase 10 Summary](../reports/phase10/PHASE10_SUMMARY.md) | `952 tests = 912 passed + 40 skipped` for the non-LLM package scope; 9 LLM tests are deselected in the `912/40/9` reporting style |
 | [Phase 10 UI E2E](../reports/phase10/PHASE10_UI_E2E.md) | three structural Playwright specs; explicitly excludes CSS/pixel and deep abstain assertions |

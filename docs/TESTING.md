@@ -10,10 +10,11 @@
 |---|---|---|
 | 依赖 | `.venv/bin/python -m pip check` | PASS，0 broken requirements |
 | Python lint | `.venv/bin/ruff check .` | PASS，0 diagnostics |
-| VirtualCell 核心 | `.venv/bin/pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` | `917 passed / 40 skipped / 9 deselected / 0 failed`；1 个既有 Starlette/httpx 弃用警告 |
+| VirtualCell 核心 | `.venv/bin/python -m pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` | `947 passed / 40 skipped / 9 deselected / 0 failed`；1 个既有 Starlette/httpx 弃用警告 |
 | Legacy unit | `.venv/bin/pytest tests -m "not (integration or llm or remote)" -o addopts='' -q -ra` | `1136 passed / 59 skipped / 105 deselected / 0 failed` |
-| 前端 | `npm ci` → typecheck → lint → build → `CI=1 npm run e2e` | 0 vulnerabilities；build PASS；`4 passed` |
-| 干净 wheel | 从提交 `73f3324` 的 `git archive` 构建；独立 Python 3.13 venv `--no-deps` 安装后验证 import、version、CLI | `praxis_virtualcell-1.5.1-py3-none-any.whl`，714,871 bytes，SHA-256 `b571ee71a42d028774221b068a5d0b5a613bcebb456ba655c1a3b4e1d1690580` |
+| Legacy broad non-LLM | `.venv/bin/python -m pytest tests -m "not llm" -o addopts='' -q -ra` | `1136 passed / 158 skipped / 6 deselected / 0 failed`；广义本地口径，不替代 CI isolation |
+| 前端 | `npm audit` → typecheck → lint → build → `npx playwright test` | 0 vulnerabilities；build PASS；13 specs / 55 collected = `54 passed / 1 skipped / 0 failed` |
+| C2 历史干净 wheel | 从提交 `73f3324` 的 `git archive` 构建；独立 Python 3.13 venv `--no-deps` 安装后验证 import、version、CLI | `praxis_virtualcell-1.5.1-py3-none-any.whl`，714,871 bytes，SHA-256 `b571ee71a42d028774221b068a5d0b5a613bcebb456ba655c1a3b4e1d1690580`；不是当前 `1.6.0` wheel 证据 |
 
 核心结果与根 `tests/` 不能相加成一个“总通过数”。前者是 VirtualCell 发布权威口径；后者是继承的 PRAXIS-2 unit 范围。Phase 10 的 `912/40/9` 是新增产品版本契约测试之前的冻结证据，不应在原报告中回写成新数字。
 
@@ -32,6 +33,10 @@ python3 -m venv .venv
   -m "not (integration or llm or remote)" \
   -o addopts='' -q -ra
 
+# 可选的广义 legacy 本地盘点；与上面的 CI isolation 分开记数
+.venv/bin/pytest tests \
+  -m "not llm" -o addopts='' -q -ra
+
 cd praxis_vc_react
 npm ci
 npm run typecheck
@@ -40,7 +45,7 @@ npm run build
 CI=1 npm run e2e
 ```
 
-CI 配置使用 Python 3.13 和 Node 24。C1 在这些版本下复现的是当时的 `912` 条核心测试和 3 条 E2E；C2 当前的 `917` 条核心测试、legacy 与 4 条 E2E 是在 Python `3.12.13` / Node `26.4.0` 下复现。C2 另在独立 Python 3.13 venv 安装干净 wheel，并验证两个包名、`--version` 和 `--help`。只有远端 CI 对候选 SHA 跑完后，才能把当前完整口径记为 Python 3.13 / Node 24 通过。
+CI 配置使用 Python 3.13 和 Node 24。C1 在这些版本下复现的是当时的 `912` 条核心测试和 3 条 E2E；C2 的 `917` 核心/4 E2E 与 C3 的 `947` 核心/54+1 E2E 是在本机 Python `3.12.13` / Node `26.4.0` 下复现。C2 另在独立 Python 3.13 venv 安装过历史 `1.5.1` clean wheel；当前 `1.6.0` clean wheel 和完整发行复现属于 C4。只有远端 CI 对候选 SHA 跑完后，才能把当前完整口径记为 Python 3.13 / Node 24 通过。
 
 ## Marker 与外部门
 
@@ -66,9 +71,11 @@ pytest 启用 strict markers，并静态注册：
 
 ## 前端覆盖边界
 
-四条 Playwright 测试覆盖：五阶段 happy path、六个结果 tab、首屏结构，以及 UI 从后端 health 消费产品版本/build SHA。它们不覆盖 CSS/像素视觉验收、深层 abstain/failed 数值、真实 LLM 或远端模型。
+13 个 Playwright spec 共收集 55 个 case，覆盖本地 S1–S9 与 S11–S13：五阶段/返回/重置、abstain、敌对输入、扰动矩阵、高级字段、预设、六个结果 tab 与审计产物、主题/历史、离线重复性、响应式语义可达和稳定性。S10 是真实 LLM 外部门的 1 条显式 skip；没有运行，不能写成通过。
 
-Vite 仍报告主 JavaScript chunk 超过 500 kB；这是 C4 的测量驱动优化项，不是当前 build 失败。
+视觉/几何边界：C3 已完成人工浅色/深色验收并自动验证实际 `data-theme`。Results 工具栏在 1280×720 使用 `.card-actions` 与 `getBoundingClientRect()` 做一条窄几何回归，因为它保护已复现的标题/按钮挤压 bug；mobile/tablet 只证明语义可达，不声称逐像素等价。
+
+Vite 仍报告主 JavaScript chunk `635.51 kB`（gzip `185.40 kB`）超过 500 kB；CSS 为 `40.70 kB`（gzip `12.91 kB`）。这是 C4 的测量驱动优化项，不是当前 build 失败。
 
 ## GitHub Actions
 

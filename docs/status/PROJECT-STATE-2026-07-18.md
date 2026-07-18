@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 15:12 CST (+0800)
+> Captured: 2026-07-18 17:47 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — C1_COMPLETE — C2_COMPLETE — Phase C3 next`
+> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — C1_COMPLETE — C2_COMPLETE — C3_COMPLETE_LOCAL — Phase C4 next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -25,7 +25,7 @@ The source volume is ExFAT and was 93% full. The active clone and recovery direc
 | Item | Observed value |
 |---|---|
 | Audit anchor / current branch base | `24475f2eb14c27c7cfbb82b016b881e88e98b17c` |
-| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream yet; C2 implementation `73f3324`, docs `8659c82` |
+| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream; C3 evidence HEAD `4106403`, local candidate `1.6.0` |
 | Preserved former working branch | `feat/v0.9-phase0-module-core=24475f2` |
 | Local `main` | `176019ebd9c198f93a5a645f1ecefce9baaf0522` |
 | Annotated tag `v1.5.0` | tag object `df04e74`; peeled commit `176019e` |
@@ -35,34 +35,35 @@ The source volume is ExFAT and was 93% full. The active clone and recovery direc
 | GitHub origin URL | `git@github.com:NHNQNHNQ/PRAXIS-Virtualcell.git` |
 | Recovery remote URL | `/Users/mzy/Projects/PRAXIS-virtualcell-recovery-20260718/praxis-all.bundle` |
 
-Observed graph relationships at local checkpoint `620b4d5` after live fetch:
+Observed graph relationships at local C3 evidence checkpoint `4106403`; remote refs are the last values fetched in Phase A:
 
 ```text
-HEAD...main                                      3 left / 0 right
-HEAD...origin/feat/v0.9-phase0-module-core      84 left / 1 right
+HEAD...main                                     42 left / 0 right
+HEAD...origin/feat/v0.9-phase0-module-core     123 left / 1 right
 main...origin/main                              342 left / 0 right
+HEAD...origin/main                              384 left / 0 right
 ```
 
-The two `origin/*` values now match a 2026-07-18 HTTPS `ls-remote` and an HTTPS-backed `fetch --prune --tags`. The persisted origin URL remains SSH. No pull, merge, rebase, push, PR, tag, or remote write has occurred.
+The two `origin/*` values matched during Phase A's 2026-07-18 HTTPS `ls-remote` and HTTPS-backed `fetch --prune --tags`; they are now last-observed remote evidence and were not revalidated in C3. The persisted origin URL remains SSH. No pull, merge, rebase, push, PR, tag, or remote write has occurred.
 
-The `.53` host was live-checked read-only at 2026-07-18 13:12 CST. It is detached at `b9abdbd`, has `main=7fc4aa5`, tags through `v0.8.0`, and one untracked 32,504-byte `vc_api.log`. It also preserves `.53`-only branch `remote-gears-l4-95dc764=95dc764`. No process or environment check was performed. See `docs/status/SYNC-STATE.md`.
+The `.53` host was live-checked read-only during Phase A at 2026-07-18 13:12 CST. That last-observed evidence showed detached `b9abdbd`, `main=7fc4aa5`, tags through `v0.8.0`, and one untracked 32,504-byte `vc_api.log`; it also showed `.53`-only branch `remote-gears-l4-95dc764=95dc764`. C3 did not revalidate those remote values. No process or environment check was performed. See `docs/status/SYNC-STATE.md`.
 
 ## Protected worktree state
 
-The APFS clone intentionally reproduces the source's dirty worktree:
+The APFS clone preserves all original assets. C3 accepted the theme workstream; the remaining local-only assets are still protected:
 
 | Asset | State | Protection |
 |---|---|---|
-| `praxis_vc_react/src/styles/base.css` | modified | do not modify or stage before C3 |
-| `praxis_vc_react/src/styles/fonts.css` | modified | do not modify or stage before C3 |
-| `praxis_vc_react/src/styles/themes.css` | modified | do not modify or stage before C3 |
-| `praxis_vc_react/src/styles/tokens.css` | modified | do not modify or stage before C3 |
+| `praxis_vc_react/src/styles/base.css` | committed in accepted theme | tracked at `92ab4ee`; no worktree diff |
+| `praxis_vc_react/src/styles/fonts.css` | committed in accepted theme | tracked at `92ab4ee`; no worktree diff |
+| `praxis_vc_react/src/styles/themes.css` | committed in accepted theme | tracked at `92ab4ee`; no worktree diff |
+| `praxis_vc_react/src/styles/tokens.css` | committed in accepted theme | tracked at `92ab4ee`; no worktree diff |
 | `.claude/launch.json` | untracked | portable local configuration; preserve pending user decision |
 | `.playwright-mcp/` (4 files) | ignored, present | archive-with-provenance; do not delete |
 | `string.jpeg` | untracked | STRING screenshot; preserve pending provenance decision |
 | `docs/superpowers/plans/2026-07-18-*.md` (2 files) | tracked | consolidation authority documents |
 
-The exact four-file CSS diff matches the recovery patch at SHA-256 `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`.
+The original four-file CSS recovery patch remains preserved at SHA-256 `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`. C3 visually reviewed and refined that WIP before committing it; the final tracked theme must not be described as the patch being committed byte-for-byte.
 
 `refs/stash^3` contains only `docs/PRAXIS-生物科学智能体-总介绍.md`. The stash commit has the same `77cb06d` OID in source, bundle, and clone. It was not popped or dropped. Its exported copy is in the recovery directory and has SHA-256 `6dacab11a753fda58b6c2b926a098648d4becf18dcef5b7cc148909431360d20`.
 
@@ -70,7 +71,7 @@ The ignored root `.env` existed in the source archive and was 252 bytes. Its con
 
 The recovery audit also found ignored reproducibility data and Phase 10 evidence that Git bundle could not carry. The following non-secret files were copied from T7 into the same ignored paths in the APFS clone and verified by source/target SHA-256: three `.h5ad` files (1,499,342,078 bytes total), `data/paul15/paul15.h5`, both LINCS L1000 up/down signature files, two JUnit XML files, and `reports/phase10/trace_bundle.json`. Exact hashes are in the recovery manifest. Rebuildable `.venv`, `node_modules`, caches, `dist`, `test-results`, `runs`, `egg-info`, and `__pycache__` were not copied.
 
-Every protected CSS/untracked/stash item now has an explicit four-way disposition in `docs/status/WORKTREE-ASSETS.md`. No disposition was implemented destructively; the original dirty/untracked/stash state remains intact.
+Every protected CSS/untracked/stash item has an explicit disposition in `docs/status/WORKTREE-ASSETS.md`. Only the approved theme disposition was implemented, non-destructively, in `92ab4ee`; `.claude/`, ignored `.playwright-mcp/`, `string.jpeg`, stash, recovery material, and the T7 archive remain preserved.
 
 ## Migration integrity evidence
 
@@ -216,13 +217,25 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 - Publication boundary: no push, PR, merge, tag, deployment, `.53` mutation, or GitHub Actions run occurred. The historical local `v1.5.0` tag was not moved or recreated.
 - Protected assets: four CSS files remain unstaged and retain patch SHA-256 `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`; `.claude/`, ignored `.playwright-mcp/`, `string.jpeg`, stash, recovery material, and the T7 archive remain preserved.
 
+`C3_COMPLETE_LOCAL`
+
+- Gate: `docs/status/PHASE-C3-GATE-2026-07-18.md`; evidence HEAD `410640360e6d98d399bd53867d8bbb25131dc144`.
+- Change range: `afe9fc0..4106403` contains 19 local commits and 49 changed tracked files. The accepted theme is `92ab4ee`; request validation, workflow-race fixes, E2E hardening, the `1.6.0` version decision, and C4 §0 corrections are separately committed.
+- Authoritative core rerun: `947 passed / 40 skipped / 9 deselected / 0 failed` in `9.53s`, with the existing Starlette/httpx warning.
+- Legacy broad non-LLM rerun: `1136 passed / 158 skipped / 6 deselected / 0 failed` in `16.57s`; this remains a separate inherited scope.
+- Frontend: typecheck, lint, build, and `npm audit` passed; audit reported 0 vulnerabilities. The current JS bundle is `635.51 kB` (`185.40 kB` gzip), CSS `40.70 kB` (`12.91 kB` gzip); the >500 kB warning remains C4.
+- Playwright: 13 specs / 55 collected = `54 passed / 1 skipped / 0 unexpected / 0 flaky` in `30.34s`. S10 is the deliberately unexecuted real-LLM external gate, not a pass.
+- Version surfaces: `pyproject.toml` remains the sole manual source; editable metadata, both Python exports, CLI, npm package and lock root report local candidate `1.6.0`. The C2 `1.5.1` clean wheel stays historical; a clean `1.6.0` wheel is C4.
+- Protected assets: theme CSS has no worktree diff and the recovery patch remains archived. `.claude/`, ignored `.playwright-mcp/`, `string.jpeg`, stash, recovery material, and T7 remain unchanged.
+- Publication boundary: branch has no upstream. No push, PR, merge, tag, deployment, `.53` mutation, or GitHub Actions run occurred; status remains `KNOWN_DIVERGENCE`.
+
 ## Next authorized work
 
-Continue Phase C3 in this APFS clone:
+Continue Phase C4 in this APFS clone:
 
-1. Visually inspect the four protected theme CSS files without staging or editing them; preserve the exact patch unless the C3 theme review explicitly accepts a minimal follow-up.
-2. Confirm whether Newsreader is still referenced before changing dependencies or lockfiles.
-3. Expand Playwright in the plan's S3 → S9 → S4 → S6 → S7/S8 → S11 → S5 → S12 → S13 order, first observing real UI/API behavior and then adding narrow assertions plus mutation proof.
-4. Keep CSS/theme work, E2E changes, and any production bug fix in separate explicit commits. If accepted user-visible theme work enters the candidate, reassess the product version as `1.6.0` before D0.
+1. Establish a reproducible Python constraints/lock strategy and address the FastAPI/Starlette/TestClient deprecation boundary.
+2. Measure and split the `635.51 kB` main chunk without weakening the 54-pass/1-skip E2E gate.
+3. Build and inspect a clean `1.6.0` wheel, then verify CLI, API, Streamlit/web assets, same-origin React dist, and Docker-local paths in clean environments.
+4. Keep Linux/Docker/`.53` work at its explicit remote gate. After C4, continue C5 scientific/remote backlog; neither phase authorizes external synchronization.
 
 No external synchronization is authorized before the Phase D approval gate.

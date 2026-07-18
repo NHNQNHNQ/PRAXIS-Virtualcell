@@ -3,14 +3,16 @@
 > 用法：把下面代码块整体复制为新的 `/goal`。若环境不识别 `/goal`，作为普通指令发送也可。
 >
 > 权威计划：`docs/superpowers/plans/2026-07-18-project-consolidation-test-improvement.md`
+>
+> 当前重启点：`C3_COMPLETE_LOCAL`，证据 HEAD `4106403`，下一任务 C4；以现场 Git 和权威计划为准。
 
 ```text
 /goal 持续执行 docs/superpowers/plans/2026-07-18-project-consolidation-test-improvement.md，按“Phase A 迁入 APFS 并整理项目 → Phase B 建立测试基线 → Phase C 依据证据完善 → Phase D 同步 GitHub/本地/.53”的顺序推进，直到最终完成闸门通过或撞到硬门。
 
-启动时先完整阅读计划、reports/phase10/PHASE10_GATE.md、docs/superpowers/plans/2026-07-17-frontend-full-e2e-test-plan.md，以及当前 git status/log/branch/tag/stash；把审计锚点 24475f2 与现场状态对比。若状态有变化，先更新 PROJECT-STATE，不照抄旧数字。
+启动时先完整阅读计划、docs/status/PHASE-C3-GATE-2026-07-18.md、reports/phase10/PHASE10_GATE.md、docs/superpowers/plans/2026-07-17-frontend-full-e2e-test-plan.md，以及当前 git status/log/branch/tag/stash；把整理起点 24475f2、C3 证据 4106403 与现场状态对比。若状态有变化，先更新 PROJECT-STATE，不照抄旧数字。
 
 执行协议：
-1. 每轮只取权威计划中当前阶段第一个未勾选的任务；先复核范围与保护项，再做到验收完成。第一轮必须先完成 A0 的 APFS bundle/clone 恢复硬门；后续所有修改只在 APFS clone 进行，T7 原仓库只读留档。
+1. 每轮只取权威计划中当前阶段第一个未勾选的任务；先复核范围与保护项，再做到验收完成。A0–C3 已有 gate 时不得重做；当前从 C4 继续。所有修改只在 APFS clone 进行，T7 原仓库只读留档。
 2. 阶段不可穿越：A5 未写 PHASE_A_COMPLETE，不得跑全面基线或顺手修 bug；B5 未写 PHASE_B_COMPLETE，不得修 lint、CI、版本或功能。A 阶段只允许窄验证，B 阶段只测量和归因，C 阶段才修复。
 3. 每项开始前运行 git status --short；结束后检查 git diff、git diff --check、git diff --cached --name-only。只显式 git add 本任务文件，禁止 git add -A 和 git add .。
 4. A–C 每项完成后更新计划勾选、PROJECT-STATE、SYNC-STATE 或 BASELINE 报告，做一个边界清楚的本地提交；不 push、不打 tag、不创建 PR、不 amend 其他任务提交。D 阶段只有在展示 refs/SHA/回滚清单并得到用户明确同步授权后，才可按清单 push 和快进 `.53`。若任务尚未通过验收，不提交假完成。
@@ -20,7 +22,7 @@
 8. 每次恢复/自动续跑都重新读取计划和 git 状态，从第一个未勾选任务继续；不要依赖聊天记忆，不重复已完成工作。
 
 必须保护：
-- 4 个未提交 CSS：praxis_vc_react/src/styles/base.css、fonts.css、themes.css、tokens.css。除 C3 主题专项外只允许只读检查，不修改、不 stage、不回滚。
+- 原 4 个主题 CSS 已经 C3 验收并在 92ab4ee 提交；原恢复 patch 2c300a...aff7e 继续保留。不得把 T7 旧 WIP 覆盖回当前主题，也不得把它误记为原样提交。
 - 未跟踪的 .claude/、.playwright-mcp/、string.jpeg，以及 stash@{0}。先分类，未经用户批准不删、不覆盖、不 pop/drop。
 - 本地 main=v1.5.0、全部 tag、远端 tracking refs 和提交历史。不得 reset --hard、checkout --、clean、gc、rebase、force、删除 branch/tag。
 - .git 内 AppleDouble sidecar 只记录风险；本 goal 不编辑 .git、不清理 sidecar。需要清理时先给出已验证备份与迁盘方案并停下等批准。
@@ -50,5 +52,5 @@
 
 三端同步协议：本地 feature branch 完成本地闸门 → push GitHub branch → CI → 经批准合入 GitHub main → 本地 main 只做 fast-forward → .53 只从同一 GitHub origin fast-forward 到已批准 SHA → 同时记录 local main、git ls-remote origin/main、.53 deployed SHA 和 tag。工作分支 intentionally ahead 可以存在，但必须记入 SYNC-STATE；未记录的 main/deployed SHA 差异一律视为 drift。禁止直接在 .53 改代码；远端测试失败回到本地修复后重走 GitHub。
 
-撞硬门时不要继续试探性修改：更新计划/PROJECT-STATE/SYNC-STATE 为 BLOCKED，写清已完成项、原始命令与输出摘要、未改动的保护项、三端 SHA，以及需要用户拍板的唯一问题。正常完成时给出 Phase A/B/C/D 的提交列表、最终测试矩阵、GitHub/本地/.53 一致性证明和仍 pending 的科学项；若 D 未获授权，状态只能写 READY_TO_SYNC，不能写已同步。
+撞硬门时不要继续试探性修改：更新计划/PROJECT-STATE/SYNC-STATE 为 BLOCKED，写清已完成项、原始命令与输出摘要、未改动的保护项、三端 SHA，以及需要用户拍板的唯一问题。正常完成时给出 Phase A/B/C/D 的提交列表、最终测试矩阵、GitHub/本地/.53 一致性证明和仍 pending 的科学项；只有全部本地 C4/C5 闸门完成后，若 D 未获授权才可写 READY_TO_SYNC，不能提前写或写成已同步。
 ```
