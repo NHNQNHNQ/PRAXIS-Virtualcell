@@ -1,6 +1,6 @@
 # PRAXIS-VirtualCell Three-Way Sync State
 
-> Local observed: 2026-07-18 17:47 CST (+0800); GitHub and `.53` refs last observed 2026-07-18 13:33 CST and not revalidated by C3
+> Local observed: 2026-07-18 19:42 CST (+0800); GitHub and `.53` refs last observed 2026-07-18 13:33 CST and not revalidated by C3/C4
 >
 > Status: `KNOWN_DIVERGENCE`
 >
@@ -26,27 +26,27 @@ Feature branches may be intentionally ahead locally or on GitHub, but every exce
 
 | Field | APFS local | GitHub | `.53` mirror |
 |---|---|---|---|
-| Observation method | local Git commands re-run through C3 gate | Phase A HTTPS `ls-remote`, then HTTPS-backed `fetch --prune --tags`; last observed, not re-read by C3 | Phase A batch-mode read-only SSH; last observed, not re-read by C3 |
+| Observation method | local Git commands re-run through C4 gate | Phase A HTTPS `ls-remote`, then HTTPS-backed `fetch --prune --tags`; last observed, not re-read by C3/C4 | Phase A batch-mode read-only SSH; last observed, not re-read by C3/C4 |
 | Repository | `/Users/mzy/Projects/PRAXIS-virtualcell` | `https://github.com/NHNQNHNQ/PRAXIS-Virtualcell` | `/home/zkyd/data1/mzy/PRAXIS-virtualcell` |
 | Configured origin | `git@github.com:NHNQNHNQ/PRAXIS-Virtualcell.git` | same repository | `git@github.com:NHNQNHNQ/PRAXIS-Virtualcell.git` |
-| Checked-out state | `codex/project-consolidation`; fixed C3 implementation/spec evidence head `4106403`; gate docs follow it; intentionally no upstream; local `1.6.0` candidate | no observed `codex/project-consolidation` branch | detached HEAD at `b9abdbd` |
+| Checked-out state | `codex/project-consolidation`; fixed C4 implementation evidence head `8ce42fe`; gate docs follow it; intentionally no upstream; local `1.6.0` candidate | no observed `codex/project-consolidation` branch | detached HEAD at `b9abdbd` |
 | `main` | `176019e` | `7fc4aa5` | `7fc4aa5` |
 | former feature branch | `24475f2` | `b9abdbd` | local branch `b9abdbd` |
 | highest release tag present | local `v1.5.0 → 176019e` | `v0.8.0 → 7fc4aa5` | `v0.8.0 → 7fc4aa5` |
-| worktree | theme CSS committed at `92ab4ee`; protected `.claude/` and `string.jpeg` untracked; ignored `.playwright-mcp/` present | not applicable | last observed dirty: untracked `vc_api.log` only |
+| worktree | C4 implementation committed through `8ce42fe`; protected `.claude/` and `string.jpeg` untracked; ignored `.playwright-mcp/` present | not applicable | last observed dirty: untracked `vc_api.log` only |
 | extra refs | recovery refs and stash preserved | none beyond observed `main`/feature/tags | `remote-gears-l4-95dc764 → 95dc764` |
 
 The `.53` log was inspected by metadata only: `vc_api.log`, 32,504 bytes, mtime `2026-07-12 12:07:01 UTC`. Its contents were not read. No process state or environment secret was inspected.
 
-GitHub and `.53` values in this ledger are **last-observed evidence**, not a claim that C3 revalidated them. C3 performed no push, PR, merge, tag, fetch-to-`.53`, checkout, deployment, process, or other external mutation.
+GitHub and `.53` values in this ledger are **last-observed evidence**, not a claim that C3 or C4 revalidated them. C4 performed no push, PR, merge, tag, fetch-to-`.53`, checkout, deployment, process, or other external mutation.
 
 ## Divergence explanation
 
-### Local C3 candidate versus published/deployed truth
+### Local C4 candidate versus published/deployed truth
 
-At the fixed C3 implementation/spec checkpoint `4106403`, local `codex/project-consolidation` is 42 commits ahead of local `main`, 384 commits ahead of the last-observed `origin/main`, and has no upstream. Relative to the last-observed remote former feature branch it is `123 left / 1 right`; C3 gate documentation follows that checkpoint locally. The single sibling divergence remains the already documented `b9abdbd` versus local `4359602` case.
+At the fixed C4 implementation checkpoint `8ce42fe`, local `codex/project-consolidation` is 54 commits ahead of local `main`, 396 commits ahead of the last-observed `origin/main`, and has no upstream. Relative to the last-observed remote former feature branch it is `135 left / 1 right`; C4 gate documentation follows that checkpoint locally. The single sibling divergence remains the already documented `b9abdbd` versus local `4359602` case.
 
-The local product metadata is `1.6.0`, but no `v1.6.0` tag exists and no candidate ref has been published. This is an intentionally local feature-branch state, not synchronization drift hidden as a release. C4 and C5 remain incomplete, so the correct status is `KNOWN_DIVERGENCE`, not `READY_TO_SYNC` and not synchronized.
+The local product metadata is `1.6.0`, but no `v1.6.0` tag exists and no candidate ref has been published. This is an intentionally local feature-branch state, not synchronization drift hidden as a release. C4 is complete locally while C5 remains incomplete, so the correct status is `KNOWN_DIVERGENCE`, not `READY_TO_SYNC` and not synchronized.
 
 ### Local `main` versus GitHub `main`
 
@@ -95,7 +95,7 @@ Decision: treat this as a remote experimental/evidence ref, not deployed truth. 
 
 No step below is authorized yet. Before external writes, present the exact target refs, rollback refs, dirty-file disposition, and approved SHA to the user.
 
-1. Finish remaining local C4/C5 gates on `codex/project-consolidation`; C3 is complete locally and protected non-theme assets remain explicit.
+1. Finish the remaining local C5 classification gate on `codex/project-consolidation`; C3/C4 are complete locally and protected non-theme assets remain explicit.
 2. With approval, push only the named GitHub feature branch; run/observe CI.
 3. With separate merge approval, fast-forward GitHub `main` to the reviewed commit. Do not force-push.
 4. Fast-forward local `main` from the now-authoritative GitHub `main`; do not rewrite local milestone history.

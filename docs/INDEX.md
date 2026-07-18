@@ -25,7 +25,8 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [Project State](status/PROJECT-STATE-2026-07-18.md) | APFS migration, current branch/ref facts, protected assets, phase restart point |
 | [Phase A Completion Gate](status/PHASE-A-GATE-2026-07-18.md) | proof that migration/organization protections passed before baseline testing |
 | [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | Phase B commands, exact results, failure ownership, and `PHASE_B_COMPLETE` gate |
-| [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | local theme/full-E2E/request-boundary evidence, exact final counts, honest S10 skip, and `C3_COMPLETE_LOCAL` boundary |
+| [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | current local dependency/bundle/wheel/API/Linux-container evidence and `C4_COMPLETE_LOCAL` boundary |
+| [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen local theme/full-E2E/request-boundary evidence, exact C3 counts, honest S10 skip, and `C3_COMPLETE_LOCAL` boundary |
 | [Three-Way Sync State](status/SYNC-STATE.md) | three-way ledger with explicit freshness labels and the Phase D synchronization protocol |
 | [Worktree Asset Classification](status/WORKTREE-ASSETS.md) | accepted theme disposition plus continuing protection of `.claude/`, Playwright MCP output, screenshot, and stash |
 | [Versioning Contract](VERSIONING.md) | implemented product/protocol/schema/artifact version boundaries and release invariants |
@@ -38,8 +39,8 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | Document | Status |
 |---|---|
 | [README](../README.md) | current product overview, quick start, capability limits, tests, and synchronization flow |
-| [Installation Guide](INSTALL.md) | verified local pip/React flow plus explicit wheel/Docker gaps owned by C4 |
-| [User Guide](USER-GUIDE.md) | CLI, five-stage/six-tab UI, output, modes, and current wheel boundary |
+| [Installation Guide](INSTALL.md) | source, full release wheel, Docker container, portable checkout, and optional-extra contracts |
+| [User Guide](USER-GUIDE.md) | CLI, five-stage/six-tab UI, output, modes, packaged web entry, and same-origin React flow |
 | [Examples](EXAMPLES.md) | offline accept/caution/abstain examples and interpretation boundaries |
 | [LLM Interface Guide](USAGE-llm-interface.md) | v0.6-era optional LLM/API interface; deterministic-runtime red lines remain applicable |
 
@@ -79,8 +80,9 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 | Report | Scope |
 |---|---|
 | [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | current B0–B4 environment, static, core, frontend, wheel/CLI, legacy, and remote-boundary evidence |
-| [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | current local C3 gate: core 947, Playwright 54+1, theme acceptance, mutation evidence, and remaining C4/C5 ownership |
-| [Testing Guide](TESTING.md) | post-C3 local commands and counts; distinguishes local reproduction from GitHub Actions |
+| [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | current local C4 gate: Python 3.13 core 957, Playwright 56+1, reproducible full wheel, and Linux-container smoke |
+| [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen C3 gate: core 947, Playwright 54+1, theme acceptance, mutation evidence, and then-remaining C4/C5 ownership |
+| [Testing Guide](TESTING.md) | post-C4 local commands and counts; distinguishes local reproduction from GitHub Actions |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | capability gate plus `.53` evidence and remaining remote backlog |
 | [Phase 10 Summary](../reports/phase10/PHASE10_SUMMARY.md) | `952 tests = 912 passed + 40 skipped` for the non-LLM package scope; 9 LLM tests are deselected in the `912/40/9` reporting style |
 | [Phase 10 UI E2E](../reports/phase10/PHASE10_UI_E2E.md) | three structural Playwright specs; explicitly excludes CSS/pixel and deep abstain assertions |

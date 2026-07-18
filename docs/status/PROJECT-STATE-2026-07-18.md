@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 17:47 CST (+0800)
+> Captured: 2026-07-18 19:42 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — C1_COMPLETE — C2_COMPLETE — C3_COMPLETE_LOCAL — Phase C4 next`
+> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — C1_COMPLETE — C2_COMPLETE — C3_COMPLETE_LOCAL — C4_COMPLETE_LOCAL — Phase C5 next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -15,8 +15,8 @@ This file is the restart authority for the consolidation goal. It records observ
 | Active local development truth | `/Users/mzy/Projects/PRAXIS-virtualcell` | All Phase A–D work happens here |
 | Read-only source archive | `/Volumes/T7/PRAXIS-virtualcell` | Do not stage, clean, reset, stash, gc, prune, or edit |
 | Recovery material | `/Users/mzy/Projects/PRAXIS-virtualcell-recovery-20260718` | Preserve through final synchronization and release verification |
-| Published truth | GitHub `NHNQNHNQ/PRAXIS-Virtualcell` | Live-observed at `main=7fc4aa5`, tags through `v0.8.0` |
-| Deployment/validation mirror | `.53` | Live-observed detached at `b9abdbd`; details in `SYNC-STATE.md` |
+| Published truth | GitHub `NHNQNHNQ/PRAXIS-Virtualcell` | Phase A last-observed at `main=7fc4aa5`, tags through `v0.8.0` |
+| Deployment/validation mirror | `.53` | Phase A last-observed detached at `b9abdbd`; details in `SYNC-STATE.md` |
 
 The source volume is ExFAT and was 93% full. The active clone and recovery directory are on APFS with approximately 46 GiB available at migration time.
 
@@ -25,7 +25,7 @@ The source volume is ExFAT and was 93% full. The active clone and recovery direc
 | Item | Observed value |
 |---|---|
 | Audit anchor / current branch base | `24475f2eb14c27c7cfbb82b016b881e88e98b17c` |
-| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream; C3 evidence HEAD `4106403`, local candidate `1.6.0` |
+| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream; C4 evidence HEAD `8ce42fe`, local candidate `1.6.0` |
 | Preserved former working branch | `feat/v0.9-phase0-module-core=24475f2` |
 | Local `main` | `176019ebd9c198f93a5a645f1ecefce9baaf0522` |
 | Annotated tag `v1.5.0` | tag object `df04e74`; peeled commit `176019e` |
@@ -35,18 +35,18 @@ The source volume is ExFAT and was 93% full. The active clone and recovery direc
 | GitHub origin URL | `git@github.com:NHNQNHNQ/PRAXIS-Virtualcell.git` |
 | Recovery remote URL | `/Users/mzy/Projects/PRAXIS-virtualcell-recovery-20260718/praxis-all.bundle` |
 
-Observed graph relationships at local C3 evidence checkpoint `4106403`; remote refs are the last values fetched in Phase A:
+Observed graph relationships at local C4 evidence checkpoint `8ce42fe`; remote refs are the last values fetched in Phase A:
 
 ```text
-HEAD...main                                     42 left / 0 right
-HEAD...origin/feat/v0.9-phase0-module-core     123 left / 1 right
+HEAD...main                                     54 left / 0 right
+HEAD...origin/feat/v0.9-phase0-module-core     135 left / 1 right
 main...origin/main                              342 left / 0 right
-HEAD...origin/main                              384 left / 0 right
+HEAD...origin/main                              396 left / 0 right
 ```
 
-The two `origin/*` values matched during Phase A's 2026-07-18 HTTPS `ls-remote` and HTTPS-backed `fetch --prune --tags`; they are now last-observed remote evidence and were not revalidated in C3. The persisted origin URL remains SSH. No pull, merge, rebase, push, PR, tag, or remote write has occurred.
+The two `origin/*` values matched during Phase A's 2026-07-18 HTTPS `ls-remote` and HTTPS-backed `fetch --prune --tags`; they are now last-observed remote evidence and were not revalidated in C3 or C4. The persisted origin URL remains SSH. No pull, merge, rebase, push, PR, tag, or remote write has occurred.
 
-The `.53` host was live-checked read-only during Phase A at 2026-07-18 13:12 CST. That last-observed evidence showed detached `b9abdbd`, `main=7fc4aa5`, tags through `v0.8.0`, and one untracked 32,504-byte `vc_api.log`; it also showed `.53`-only branch `remote-gears-l4-95dc764=95dc764`. C3 did not revalidate those remote values. No process or environment check was performed. See `docs/status/SYNC-STATE.md`.
+The `.53` host was initially checked read-only during Phase A at 2026-07-18 13:12 CST and re-read at 13:33 immediately before the Phase A gate. That last observation showed detached `b9abdbd`, `main=7fc4aa5`, tags through `v0.8.0`, and one untracked 32,504-byte `vc_api.log`; it also showed `.53`-only branch `remote-gears-l4-95dc764=95dc764`. C3 and C4 did not revalidate those remote values. No process or environment check was performed. See `docs/status/SYNC-STATE.md`.
 
 ## Protected worktree state
 
@@ -122,6 +122,8 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 - External writes: none.
 
 ## Phase B baseline progress
+
+The B0–C3 entries in this chronology are frozen phase snapshots. Present-tense wording inside them describes the state at that gate; the header and latest completed-phase entry are the current authority.
 
 `B0_COMPLETE`
 
@@ -229,13 +231,25 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 - Protected assets: theme CSS has no worktree diff and the recovery patch remains archived. `.claude/`, ignored `.playwright-mcp/`, `string.jpeg`, stash, recovery material, and T7 remain unchanged.
 - Publication boundary: branch has no upstream. No push, PR, merge, tag, deployment, `.53` mutation, or GitHub Actions run occurred; status remains `KNOWN_DIVERGENCE`.
 
+`C4_COMPLETE_LOCAL`
+
+- Gate: `docs/status/PHASE-C4-GATE-2026-07-18.md`; fixed implementation evidence HEAD `8ce42fe5d167bc4f41bbee596cdc9ab255591056`.
+- Change range: `b573f01..8ce42fe` contains 11 local commits covering lazy Results loading and budgets, Python 3.13 hash locks, release data/static packaging, API error redaction, reproducible wheel/container construction, package-test exclusion, and the offline Docker smoke harness.
+- Python 3.13.12 locked environment: `pip check` and Ruff passed. Authoritative core `957 passed / 35 skipped / 9 deselected / 0 failed`; legacy CI isolation `1136/59/105/0`; legacy broad non-LLM `1136/158/6/0`.
+- Frontend on local Node 26.4.0 / npm 11.17.0: audit, typecheck, lint, build, and bundle budget passed. Initial JavaScript is 226,046 bytes / 70,320 gzip; Results is deferred as 410,889 bytes / 114,914 gzip. Playwright 14 specs / 57 collected = `56 passed / 1 real-LLM skip / 0 failed`.
+- Full `1.6.0` release wheel: two clean archive builds were byte-identical at 922,334 bytes, SHA-256 `78e5287a5dd61478b041fd1a28783732cb75a250de02eec306d3803b3128fd4f`; locked clean install, `pip check`, installed console entry/offline outputs, API job, same-origin root/asset, and package-presence checks passed.
+- Docker Desktop Linux/arm64: the committed release image built and all five non-root/health/CLI/static/API smoke checks passed with the container on `--network none`; owned resources were cleaned. This is not native Linux/amd64 or `.53` evidence.
+- CI configuration now has five jobs (`python-core`, `frontend`, `release-wheel`, `release-container`, `legacy-unit`), but the candidate remains unpushed; no GitHub run or required-check status exists.
+- Explicitly unclaimed: complete Streamlit server startup, clean-wheel `praxis-vc ask`, real LLM, `.53` GPU/checkpoints/services, publication, deployment, and any expansion of Phase 10 scientific claims.
+- Protected assets and publication boundary remain unchanged: `.claude/`, ignored `.playwright-mcp/`, `string.jpeg`, stash, recovery material, T7 archive, local tags, GitHub, and `.53` were not modified.
+
 ## Next authorized work
 
-Continue Phase C4 in this APFS clone:
+Continue Phase C5 in this APFS clone:
 
-1. Establish a reproducible Python constraints/lock strategy and address the FastAPI/Starlette/TestClient deprecation boundary.
-2. Measure and split the `635.51 kB` main chunk without weakening the 54-pass/1-skip E2E gate.
-3. Build and inspect a clean `1.6.0` wheel, then verify CLI, API, Streamlit/web assets, same-origin React dist, and Docker-local paths in clean environments.
-4. Keep Linux/Docker/`.53` work at its explicit remote gate. After C4, continue C5 scientific/remote backlog; neither phase authorizes external synchronization.
+1. Classify Gate A true-ML end-to-end evidence, W4B checkpoint availability, corpus/rate claims, independent conflict detection, and unsupported-claim detection as `met`, `narrowed`, `unsupported`, or `pending` without changing scientific conclusions.
+2. Add local status/asset/runbook documentation and any prerequisite/provenance assertions that can be proven without private checkpoints or remote mutation.
+3. Keep current-candidate W4B/GPU/checkpoint execution at its explicit remote gate. Historical paths conflict, so checkpoint presence requires a fresh authorized `.53` check.
+4. Complete the C5 local classification gate before preparing Phase D's read-only three-end audit and synchronization proposal.
 
 No external synchronization is authorized before the Phase D approval gate.

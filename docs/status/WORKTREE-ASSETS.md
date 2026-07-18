@@ -20,7 +20,7 @@ This ledger assigns one of the plan's four dispositions to every protected workt
 
 The four CSS files were one indivisible theme workstream for this consolidation. They were not mixed into repository migration, CI cleanup, or baseline measurement commits; the accepted theme landed in the dedicated `92ab4ee` commit after C3 review.
 
-C3 completed light/dark visual and accessibility review, removed the unused Newsreader dependency, and verified actual theme state plus responsive workflow reachability. Final frontend evidence is typecheck/lint/build/audit PASS and 55 Playwright cases with 54 passed plus the honest S10 external-gate skip. Geometry/pixel equivalence is not claimed beyond the documented narrow Results-toolbar regression.
+C3 completed light/dark visual and accessibility review, removed the unused Newsreader dependency, and verified actual theme state plus responsive workflow reachability. The frozen C3 theme-acceptance evidence is typecheck/lint/build/audit PASS and 55 Playwright cases with 54 passed plus the honest S10 external-gate skip. C4's broader current suite is 57 cases with 56 passed plus the same honest skip; see the [C4 gate](PHASE-C4-GATE-2026-07-18.md) and [testing guide](../TESTING.md). Geometry/pixel equivalence is not claimed beyond the documented narrow Results-toolbar regression.
 
 ## Backup versus authority
 

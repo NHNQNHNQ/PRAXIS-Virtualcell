@@ -2,9 +2,9 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，`C1_COMPLETE`，`C2_COMPLETE`，`C3_COMPLETE_LOCAL`，C4 下一步
+> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，`C1_COMPLETE`，`C2_COMPLETE`，`C3_COMPLETE_LOCAL`，`C4_COMPLETE_LOCAL`，C5 下一步
 >
-> 整理起点：`24475f2`；C3 证据 HEAD：`4106403`
+> 整理起点：`24475f2`；C3 证据 HEAD：`4106403`；C4 证据 HEAD：`8ce42fe`
 >
 > 配套执行提示词：`docs/superpowers/plans/2026-07-18-project-consolidation-goal-prompt.md`
 
@@ -216,10 +216,12 @@ C3 gate：`docs/status/PHASE-C3-GATE-2026-07-18.md`，状态 `C3_COMPLETE_LOCAL`
 
 ### C4 — 依赖、包体与发布复现
 
-- [ ] 为 Python 建立可复现 constraints/lock 策略，处理 FastAPI/Starlette/TestClient 弃用风险。
-- [ ] 对约 632 KB 主 chunk 做测量驱动的 lazy load/code splitting；优化前后记录 gzip 大小和 E2E。
-- [ ] 完成 wheel 内容、CLI、API、同源 dist、Dockerfile 的本地可验部分。
-- [ ] Linux Docker smoke 若需 `.53`/镜像网络则停在远端硬门，不伪造通过。
+- [x] 为 Python 建立可复现 constraints/lock 策略，处理 FastAPI/Starlette/TestClient 弃用风险。
+- [x] 对约 632 KB 主 chunk 做测量驱动的 lazy load/code splitting；优化前后记录 gzip 大小和 E2E。
+- [x] 完成 wheel 内容、CLI、API、同源 dist、Dockerfile 的本地可验部分。
+- [x] 在本地 Docker Desktop 完成 Linux-container smoke；`.53`、原生 Linux/amd64 和远端服务仍保留各自硬门，不伪造通过。
+
+C4 gate：`docs/status/PHASE-C4-GATE-2026-07-18.md`，状态 `C4_COMPLETE_LOCAL`，固定实现证据 HEAD `8ce42fe`。Python 3.13 core `957/35/9/0`，legacy isolation `1136/59/105/0`，legacy broad non-LLM `1136/158/6/0`，Playwright 57 collected = `56 passed / 1 real-LLM skip / 0 failed`，Linux-container smoke `5 passed / 0 failed`。完整 `1.6.0` wheel 两次 clean build 字节一致，922,334 bytes，SHA-256 `78e5287a5dd61478b041fd1a28783732cb75a250de02eec306d3803b3128fd4f`；locked clean install、installed console entry 与 CLI/API/static verifier 通过。初始 JS 为 226,046 bytes / 70,320 gzip，Results 延迟包 410,889 / 114,914。C4 未 push、未 tag、未部署、未修改 `.53`；GitHub CI、原生 Linux/amd64、完整 Streamlit server 和 `praxis-vc ask` 未冒充通过。
 
 ### C5 — 科学能力与远端 backlog
 

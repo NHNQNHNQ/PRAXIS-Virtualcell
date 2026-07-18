@@ -4,15 +4,15 @@
 >
 > 权威计划：`docs/superpowers/plans/2026-07-18-project-consolidation-test-improvement.md`
 >
-> 当前重启点：`C3_COMPLETE_LOCAL`，证据 HEAD `4106403`，下一任务 C4；以现场 Git 和权威计划为准。
+> 当前重启点：`C4_COMPLETE_LOCAL`，证据 HEAD `8ce42fe`，下一任务 C5；以现场 Git 和权威计划为准。
 
 ```text
 /goal 持续执行 docs/superpowers/plans/2026-07-18-project-consolidation-test-improvement.md，按“Phase A 迁入 APFS 并整理项目 → Phase B 建立测试基线 → Phase C 依据证据完善 → Phase D 同步 GitHub/本地/.53”的顺序推进，直到最终完成闸门通过或撞到硬门。
 
-启动时先完整阅读计划、docs/status/PHASE-C3-GATE-2026-07-18.md、reports/phase10/PHASE10_GATE.md、docs/superpowers/plans/2026-07-17-frontend-full-e2e-test-plan.md，以及当前 git status/log/branch/tag/stash；把整理起点 24475f2、C3 证据 4106403 与现场状态对比。若状态有变化，先更新 PROJECT-STATE，不照抄旧数字。
+启动时先完整阅读计划、docs/status/PHASE-C4-GATE-2026-07-18.md、docs/status/PHASE-C3-GATE-2026-07-18.md、reports/phase10/PHASE10_GATE.md、docs/superpowers/plans/2026-07-17-frontend-full-e2e-test-plan.md，以及当前 git status/log/branch/tag/stash；把整理起点 24475f2、C3 证据 4106403、C4 证据 8ce42fe 与现场状态对比。若状态有变化，先更新 PROJECT-STATE，不照抄旧数字。
 
 执行协议：
-1. 每轮只取权威计划中当前阶段第一个未勾选的任务；先复核范围与保护项，再做到验收完成。A0–C3 已有 gate 时不得重做；当前从 C4 继续。所有修改只在 APFS clone 进行，T7 原仓库只读留档。
+1. 每轮只取权威计划中当前阶段第一个未勾选的任务；先复核范围与保护项，再做到验收完成。A0–C4 已有 gate 时不得重做；当前从 C5 继续。所有修改只在 APFS clone 进行，T7 原仓库只读留档。
 2. 阶段不可穿越：A5 未写 PHASE_A_COMPLETE，不得跑全面基线或顺手修 bug；B5 未写 PHASE_B_COMPLETE，不得修 lint、CI、版本或功能。A 阶段只允许窄验证，B 阶段只测量和归因，C 阶段才修复。
 3. 每项开始前运行 git status --short；结束后检查 git diff、git diff --check、git diff --cached --name-only。只显式 git add 本任务文件，禁止 git add -A 和 git add .。
 4. A–C 每项完成后更新计划勾选、PROJECT-STATE、SYNC-STATE 或 BASELINE 报告，做一个边界清楚的本地提交；不 push、不打 tag、不创建 PR、不 amend 其他任务提交。D 阶段只有在展示 refs/SHA/回滚清单并得到用户明确同步授权后，才可按清单 push 和快进 `.53`。若任务尚未通过验收，不提交假完成。
