@@ -173,7 +173,7 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 
 - Baseline report: `reports/quality/BASELINE-2026-07-18.md`
 - Evidence parent: `5f359831faf0fba6d7a0c36532862adfe3454e18`
-- Completion commit: `PENDING_PHASE_B_GATE_COMMIT`
+- Completion commit: `42ee96b0390bf1fcc7c8a7d004b3a51368d3672e`
 - Independent review: two read-only audits passed after checking all commands, exits, numbers, scope boundaries, links, single C0–C5 ownership, and protected assets.
 - Result: core `912/40/9/0`; frontend typecheck/lint/build and 3 E2E pass; Ruff has 13 mapped items; Legacy is `1136/163/1` with the sole failure owned by remote operations.
 - External writes: none.
