@@ -2,7 +2,6 @@
 测:白名单校验、verdict 保守合成、overall_verdict 取最保守、to_dict 序列化、mismatch 降级。"""
 import pytest
 
-from praxis_virtualcell.biological_modules import modules as M
 from praxis_virtualcell.biological_modules.module_plan import (
     ModulePlan,
     ModulePlanEntry,

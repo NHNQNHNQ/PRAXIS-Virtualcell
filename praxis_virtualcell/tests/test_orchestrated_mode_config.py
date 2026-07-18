@@ -1,6 +1,5 @@
 """Phase 4:LLM_ORCHESTRATED 模式开关。测枚举新增不破坏、from_env 识别、make_llm_client enabled 扩展、
 三 flag 仍恒 False(红线 2)、无 key 时 orchestrated 仍不 enabled(红线 1/6)。"""
-import os
 
 from praxis_virtualcell.agents_llm.llm_client import make_llm_client
 from praxis_virtualcell.core.config import Mode, RuntimeConfig, assert_llm_boundaries

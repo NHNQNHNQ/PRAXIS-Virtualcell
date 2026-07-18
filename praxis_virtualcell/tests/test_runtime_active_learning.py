@@ -1,8 +1,8 @@
 """Phase 5:接管线 —— evidence_level + learning_queue 旁路挂 report.provenance(插点 C/D)。
 OFFLINE 零 LLM;不改 prediction/裁决;无 evidence/AL agent 时不挂(gated)。"""
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
-from praxis_virtualcell.workflows.predict_delta_expression import build_runtime
 from praxis_virtualcell.core.request import VirtualCellRequest
+from praxis_virtualcell.workflows.predict_delta_expression import build_runtime
 
 _HUMAN = {"request_id": "al_ahr", "species": "human", "cell_type": "K562",
           "perturbation_type": "gene", "perturbation_targets": ["AHR"],

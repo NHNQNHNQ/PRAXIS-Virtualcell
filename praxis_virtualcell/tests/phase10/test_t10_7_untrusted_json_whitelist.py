@@ -17,8 +17,14 @@
 |---|---|---|---|
 | 发明(`[None,'AHR']`→`'NONE'`) | **溯源契约** | ✅ 本单元新增 | 删 isinstance 守卫 → 红 |
 | 嵌套(`[['AHR']]`→`"['AHR']"`) | **溯源契约** | ✅ 本单元新增 | 删 isinstance 守卫 → 红 |
-| 崩溃(`o in ALLOWED_OUTPUTS`) | **值白名单**(机制不同) | ✅ 本单元新增 | targets 路径**根本不会崩**(`str()`/`isinstance()` 对 JSON 可产生的全部元素类型均不抛) |
-| 字符拆(`"AHR"`→`['A','H','R']`) | **C3 既有的容器级 `isinstance(targets, list)`** | ❌ **非本单元贡献**,契约仅提供回归防护 | 同变异 → **仍绿**(C3 守卫先返 `[]` → fail-closed);反向变异(只删 C3 容器守卫、留元素级)→ 字符拆**红** → 证实元素级 `isinstance(t,str)` 对字符拆毫无防护(拆出的字符本身就是 str) |
+| 崩溃(`o in ALLOWED_OUTPUTS`) | **值白名单**(机制不同) | ✅ 本单元新增 | targets 路径不崩,详见下文 |
+| 字符拆(`"AHR"`→`['A','H','R']`) | **C3 既有容器级守卫** | ❌ 非本单元贡献 | 同变异仍绿,详见下文 |
+
+- 崩溃补充:targets 路径**根本不会崩**(`str()`/`isinstance()` 对 JSON 可产生的
+  全部元素类型均不抛)。
+- 字符拆补充:同变异 → **仍绿**(C3 守卫先返 `[]` → fail-closed);反向变异
+  (只删 C3 容器守卫、留元素级)→ 字符拆**红** → 证实元素级
+  `isinstance(t,str)` 对字符拆毫无防护(拆出的字符本身就是 str)。
 
 **类型过滤(assumptions)对这四类贡献 0 类**(实测:修复前 `list(x)` 元素**原样透传、不经
 `str()`** → 无发明;不字符串化 → 非嵌套;`metadata.assumptions` 无 `in set` 消费点 → 不崩;
@@ -63,6 +69,7 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.llm_orchestration import safety_contract as SC
+
 # ⚠️ 类名订正:该 agent 类实际名 LLMCrossModuleReasoner(非 CrossModuleReasonerAgent ——
 # 原 task prompt 此处的类名是错的,已用 grep + Read 实测核对,见 llm_orchestration/cross_module_reasoner.py)。
 from praxis_virtualcell.llm_orchestration.cross_module_reasoner import LLMCrossModuleReasoner

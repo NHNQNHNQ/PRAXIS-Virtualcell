@@ -90,9 +90,9 @@ def test_llm_out_of_candidate_secondary_dropped():
     但把 human 的 membrane_system 覆写成 support=unsupported 后,它既非确定性 primary(genetic_hub)
     也非确定性 secondary([]),故 ∉ build_candidate_modules(req, module_support)。LLM 选它 → 必被 P2 剔除。
     """
+    from praxis_virtualcell.agents.species_schema import normalize_request
     from praxis_virtualcell.biological_modules import modules as M
     from praxis_virtualcell.llm_orchestration import safety_contract as SC
-    from praxis_virtualcell.agents.species_schema import normalize_request
 
     ctx = _ctx(_HUMAN_GENE)
     # 覆写 membrane_system → unsupported(它就此掉出 candidate 全集,但仍是合法 module 名)

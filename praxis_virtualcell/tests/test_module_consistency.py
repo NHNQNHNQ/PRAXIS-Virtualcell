@@ -77,9 +77,29 @@ def test_detects_engine_out_of_module_whitelist():
 def test_all_representative_golden_plans_are_consistent():
     """全 representative golden 的实跑 plan 都应零违规(冒烟:确定性路由自洽)。"""
     for req in (
-        {"species": "human", "perturbation_object": "gene", "target_output": "expression", "perturbation_targets": ["AHR"]},
-        {"species": "bacteria", "perturbation_object": "gene", "target_output": "growth", "perturbation_targets": ["b0720"]},
-        {"species": "mouse", "perturbation_object": "gene", "target_output": "expression", "perturbation_targets": ["Gata1"]},
-        {"species": "yeast", "perturbation_object": "gene", "target_output": "growth", "perturbation_targets": ["YBR166C"]},
+        {
+            "species": "human",
+            "perturbation_object": "gene",
+            "target_output": "expression",
+            "perturbation_targets": ["AHR"],
+        },
+        {
+            "species": "bacteria",
+            "perturbation_object": "gene",
+            "target_output": "growth",
+            "perturbation_targets": ["b0720"],
+        },
+        {
+            "species": "mouse",
+            "perturbation_object": "gene",
+            "target_output": "expression",
+            "perturbation_targets": ["Gata1"],
+        },
+        {
+            "species": "yeast",
+            "perturbation_object": "gene",
+            "target_output": "growth",
+            "perturbation_targets": ["YBR166C"],
+        },
     ):
         assert check_module_plan(_plan_for(req)) == [], f"{req} plan 有一致性违规"

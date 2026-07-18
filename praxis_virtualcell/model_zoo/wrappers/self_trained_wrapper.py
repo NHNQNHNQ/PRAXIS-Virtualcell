@@ -77,6 +77,7 @@ class SelfTrainedWrapper(ModelWrapper):
                 "fail-closed —— 不静默返回假 delta")
         # donor mean_baseline 顶层链 import torch;本地无 torch → ModuleNotFoundError(fail-closed 触发点)
         import torch  # noqa: F401 — 缺 torch 即抛
+
         from praxis_virtualcell.benchmarks.mean_baseline import _build_mean_predictor
 
         # 1) load 落盘 mean_delta(.53 训练产物;torch.load 小 tensor ≈ 8KB)
