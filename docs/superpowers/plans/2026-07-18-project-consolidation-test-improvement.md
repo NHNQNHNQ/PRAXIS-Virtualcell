@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`B0_COMPLETE`，`B1_COMPLETE`，`B2_COMPLETE`，`B3_COMPLETE`，`B4_COMPLETE`，B5 待执行
+> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，C0 待执行
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -172,10 +172,10 @@
 
 ### B5 — 基线完成闸门
 
-- [ ] 新建 `reports/quality/BASELINE-2026-07-18.md`，汇总 B0–B4 的命令、环境、退出码、数字、失败归因和待修列表。
-- [ ] 每个失败能映射到 C 阶段的一个任务；无法归因的标 `BLOCKED`。
-- [ ] 基线报告不得使用“整仓全绿”，除非所有分层口径确实为 0 failed。
-- [ ] 写入 `PHASE_B_COMPLETE`；完成前不得修代码或改测试。
+- [x] 新建 `reports/quality/BASELINE-2026-07-18.md`，汇总 B0–B4 的命令、环境、退出码、数字、失败归因和待修列表。
+- [x] 每个失败能映射到 C 阶段的一个任务；无法归因的标 `BLOCKED`。
+- [x] 基线报告不得使用“整仓全绿”，除非所有分层口径确实为 0 failed。
+- [x] 写入 `PHASE_B_COMPLETE`；完成前不得修代码或改测试。
 
 ## 5. Phase C — 完善项目
 

@@ -24,6 +24,7 @@ Plans describe intended work. A task is not complete merely because a plan says 
 |---|---|
 | [Project State](status/PROJECT-STATE-2026-07-18.md) | APFS migration, current branch/ref facts, protected assets, phase restart point |
 | [Phase A Completion Gate](status/PHASE-A-GATE-2026-07-18.md) | proof that migration/organization protections passed before baseline testing |
+| [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | Phase B commands, exact results, failure ownership, and `PHASE_B_COMPLETE` gate |
 | [Three-Way Sync State](status/SYNC-STATE.md) | live local/GitHub/`.53` ledger and Phase D synchronization protocol |
 | [Worktree Asset Classification](status/WORKTREE-ASSETS.md) | disposition of CSS WIP, `.claude/`, Playwright MCP output, screenshot, and stash |
 | [Versioning Contract](VERSIONING.md) | version namespaces and the planned single-source release contract; design only until C2 |
@@ -75,12 +76,13 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 
 | Report | Scope |
 |---|---|
+| [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | current B0–B4 environment, static, core, frontend, wheel/CLI, legacy, and remote-boundary evidence |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | capability gate plus `.53` evidence and remaining remote backlog |
 | [Phase 10 Summary](../reports/phase10/PHASE10_SUMMARY.md) | `952 tests = 912 passed + 40 skipped` for the non-LLM package scope; 9 LLM tests are deselected in the `912/40/9` reporting style |
 | [Phase 10 UI E2E](../reports/phase10/PHASE10_UI_E2E.md) | three structural Playwright specs; explicitly excludes CSS/pixel and deep abstain assertions |
 | [Phase 10 Cases](../reports/phase10/PHASE10_CASES.md), [Failures](../reports/phase10/PHASE10_FAILURES.md), [Trace Audit](../reports/phase10/PHASE10_TRACE_AUDIT.md) | supporting case, negative, and trace evidence |
 
-The new post-consolidation baseline will live under `reports/quality/` only after Phase A5 allows Phase B. Do not treat the pre-migration anchors as a fresh baseline.
+The post-consolidation baseline under `reports/quality/` is current as of `PHASE_B_COMPLETE`. Pre-migration anchors remain historical and must not override it.
 
 ## Paper and research evidence
 

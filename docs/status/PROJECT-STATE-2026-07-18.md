@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 13:54 CST (+0800)
+> Captured: 2026-07-18 14:11 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — B0_COMPLETE — B1_COMPLETE — B2_COMPLETE — B3_COMPLETE — B4_COMPLETE — Phase B5 next`
+> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — Phase C0 next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -135,17 +135,18 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 
 - Authoritative command `.venv/bin/pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` exited `0`: `912 passed / 40 skipped / 9 deselected / 0 failed`, with one Starlette/httpx deprecation warning, in `16.67s`.
 - The 40 local skips are fully accounted for: 30 require Torch/GPU/remote donor capabilities and 10 require Linux/Docker. The 9 deselected tests are the `llm` scope.
-- `env -u DEEPSEEK_API_KEY .venv/bin/python scripts/phase10/run_phase10_all.py` exited `0`. The stable package-only run produced JUnit `tests=952, skipped=40, failures=0, errors=0`, hence `912 passed`; the root `tests/` tree was not included.
-- The script's full package-only run had no API key and therefore safely skipped the 9 LLM tests: JUnit `tests=961, skipped=49, failures=0, errors=0`, hence `912 passed`. It made no real LLM request.
+- `env -u DEEPSEEK_API_KEY .venv/bin/python scripts/phase10/run_phase10_all.py` exited `0`. Its top-level status returns only the stable run's rc; that stable package-only run produced JUnit `tests=952, skipped=40, failures=0, errors=0`, hence `912 passed`; the root `tests/` tree was not included.
+- The script's full package-only run had no API key and therefore safely skipped the 9 LLM tests: the separately observed `full rc=0` plus JUnit `tests=961, skipped=49, failures=0, errors=0` establish `912 passed`. It made no real LLM request.
 - `reports/phase10/PHASE10_SUMMARY.md` is consistent for the stable scope: its `952 tests` includes 912 passed plus 40 skipped. Its historical full-scope `40 skipped` reflects an authenticated run where 9 LLM tests executed; this run has `49 skipped` because those 9 were deliberately not executed. This is an environment distinction, not a core regression.
 
 `B2_COMPLETE`
 
 - `npm run typecheck` and `npm run lint` each exited `0` with TypeScript `6.0.3` and Oxlint `1.72.0`.
 - `npm run build` exited `0` with Vite `8.1.2`; 610 modules were transformed. The main JavaScript chunk is `631.61 kB` (`184.21 kB` gzip), and the main CSS chunk is `42.53 kB` (`13.08 kB` gzip).
-- The build retains the known warning that at least one minified chunk exceeds `500 kB`; this is a C3 optimization item, not a Phase B failure.
+- The build retains the known warning that at least one minified chunk exceeds `500 kB`; this is a C4 optimization item, not a Phase B failure.
 - `CI=1 npm run e2e` exited `0`: all three Chromium specs passed in `3.9s` (happy path, six result tabs, and initial Ask screen).
-- Playwright started a new Uvicorn server and its configuration assigned `PRAXIS_VC_RUNS` from `mktemp -d`. The repository `runs/` path was absent both before and after the run, port 8000 was released, and only ignored `dist/`, `test-results/`, and `node_modules/` outputs were present.
+- Playwright started a new Uvicorn server and its configuration assigned `PRAXIS_VC_RUNS` from `mktemp -d`. The repository `runs/` path was absent both before and after the run, port 8000 was released, and B2 only generated/updated ignored `dist/`, `test-results/`, and `node_modules/.tmp/*.tsbuildinfo`; the `node_modules/` directory itself already existed from B0.
+- The three specs ran against the protected CSS worktree patch `2c300a...aff7e`. They cover navigation, structure, and happy-path API behavior, not pixel/CSS visual acceptance, deep abstain/failed values, or LLM mode.
 - No tracked source/manifest changed. The protected CSS patch still hashes to `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`.
 
 `B3_COMPLETE`
@@ -154,8 +155,9 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 - `.venv/bin/python -m pip wheel <archive> --no-deps` exited `0` and produced `praxis_virtualcell-0.0.0-py3-none-any.whl`: 712,807 bytes, 439 files, SHA-256 `a52031a770bbb97fcbe8b14d4f5cc008f25ba3f06e661ea04312b0d2eb8967c0`.
 - The wheel contains `praxis_virtualcell/cli.py`, `praxis_vc_api/main.py`, VirtualCell brain YAML, cell catalog, model registry, governance JSON artifacts, and `praxis-vc = praxis_virtualcell.cli:main`.
 - Wheel metadata and the editable install both report product version `0.0.0`; `.venv/bin/praxis-vc` exists. This agrees internally but conflicts with the local historical `v1.5.0` release tag and remains a C2 versioning task.
-- A separate Python 3.12 virtual environment installed the wheel with `--no-deps`. From an empty working directory, the imported package resolved inside that environment's `site-packages`, and `praxis-vc --help` exited `0` with the four declared subcommands.
-- Packaging gap: the wheel does not contain `praxis_vc_web/app.py`, although the installed CLI exposes a `web` subcommand that invokes that path. The React `dist/` tree is also checkout-built rather than wheel-contained. These are recorded C2 packaging/documentation items; Phase B did not alter packaging.
+- A separate Python 3.12 virtual environment installed the wheel with `--no-deps`. From an empty working directory, the imported package resolved inside that environment's `site-packages`, and `praxis-vc --help` exited `0` with the four declared subcommands. This proves install/import/entry-point wiring only, not dependency resolution or subcommand execution.
+- Version gap: wheel/editable metadata `0.0.0` conflicts with the local historical `v1.5.0` tag; this is a C2 version/documentation item.
+- Packaging gap: the wheel does not contain `praxis_vc_web/app.py`, although the installed CLI exposes a `web` subcommand that invokes that path. The React `dist/` tree is checkout-built rather than wheel-contained. These are C4 packaging/reproducibility items; Phase B did not alter packaging.
 
 `B4_COMPLETE`
 
@@ -165,13 +167,24 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 - No real LLM request ran. Existing Phase 10 evidence remains authoritative for `.53`: real GEARS/scGPT and Norman mean-baseline remote tests passed on 2026-07-17, while donor `W4B_CKPT_DIR`, Docker smoke, and Gate A true-ML end-to-end validation remain explicitly pending.
 - No `.53` repository, process, environment, checkpoint, Docker state, or deployment was changed during B4.
 
+## Phase B completion
+
+`PHASE_B_COMPLETE`
+
+- Baseline report: `reports/quality/BASELINE-2026-07-18.md`
+- Evidence parent: `5f359831faf0fba6d7a0c36532862adfe3454e18`
+- Completion commit: `PENDING_PHASE_B_GATE_COMMIT`
+- Independent review: two read-only audits passed after checking all commands, exits, numbers, scope boundaries, links, single C0–C5 ownership, and protected assets.
+- Result: core `912/40/9/0`; frontend typecheck/lint/build and 3 E2E pass; Ruff has 13 mapped items; Legacy is `1136/163/1` with the sole failure owned by remote operations.
+- External writes: none.
+
 ## Next authorized work
 
-Continue Phase B5 in this APFS clone:
+Continue Phase C0 in this APFS clone:
 
-1. Create `reports/quality/BASELINE-2026-07-18.md` with the exact B0–B4 commands, versions, exit codes, counts, scope boundaries, warnings, and failure ownership.
-2. Map every measured issue to one C-phase task; mark any item without a safe owner as blocked.
-3. Validate every report link and number against command evidence, then write `PHASE_B_COMPLETE`.
-4. Do not modify source or tests until the Phase B gate commit exists.
+1. Re-run the 13-item Ruff command to bind the reproduction to the post-gate commit.
+2. Apply the six safe import/unused-import fixes with human diff review, then manually wrap the seven `E501` lines without changing assertions or scientific behavior.
+3. Require `ruff check .` to reach 0, then run the complete authoritative core pytest scope.
+4. Commit only the explicit C0 source/test files; never stage or modify the four protected CSS files.
 
-No Phase C fix may start before `PHASE_B_COMPLETE` is written at B5. No external synchronization is authorized before the Phase D approval gate.
+No external synchronization is authorized before the Phase D approval gate.
