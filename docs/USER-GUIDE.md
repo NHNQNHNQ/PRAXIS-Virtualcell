@@ -17,14 +17,14 @@ praxis-vc ask  --text "..." --mode llm-assisted --yes --out runs/ahr_llm
 
 # 本地服务 / 网页
 praxis-vc serve --host 127.0.0.1 --port 8000     # FastAPI(需 .[api])
-praxis-vc web   --api http://127.0.0.1:8000       # 旧 Streamlit,源码 checkout + .[web]
+praxis-vc web   --api http://127.0.0.1:8000       # 旧 Streamlit,需 .[web]
 ```
 
-当前 wheel 不包含 `praxis_vc_web`，所以 `web` 子命令尚不是已验证的 wheel 能力；即使在源码 checkout 中也需安装 `.[web]` 并从仓库根目录运行。打包修复归 C4。推荐使用下方 React 同源页面。
+完整 release wheel 已包含 `praxis_vc_web/app.py`，`web` 子命令使用打包后的绝对路径；运行仍需安装 `.[web]`。当前门只验证入口内容与路径接线，尚未启动完整 Streamlit server，推荐使用下方 React 同源页面。
 
 ## 2. 本地网页流程
 
-先执行 `cd praxis_vc_react && npm ci && npm run build && cd ..`，再运行 `praxis-vc serve`，浏览器打开 `http://127.0.0.1:8000`。没有预先构建的 `dist/` 时只提供 API。
+源码 checkout 先执行 `cd praxis_vc_react && npm ci && npm run build && cd ..`，再运行 `praxis-vc serve`。完整 release wheel 和发布容器已内含 React 静态资源，不需要外置源码 `dist/`。浏览器打开 `http://127.0.0.1:8000`。
 
 1. **提问（Ask）**：描述扰动实验并选择模式，调用 Parse。
 2. **核对（Review）**：查看解析摘要，确认或修改 species、cell、perturbation、task 等字段。

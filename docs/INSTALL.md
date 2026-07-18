@@ -18,13 +18,25 @@ praxis-vc --version
 bash deploy/vc/check_install.sh    # 验 python + CLI + 一次 offline demo 产 report.md
 ```
 
-### 当前 wheel 验证边界
+### 完整 release wheel
 
 ```bash
-python -m pip install "./praxis_virtualcell-<版本>-py3-none-any.whl[api]"
+PYTHON_BIN=python3.13 \
+  scripts/build_release_wheel.sh /tmp/praxis-dist
+PRAXIS_REPO_ROOT="$(pwd)"
+
+python3.13 -m venv /tmp/praxis-release-venv
+/tmp/praxis-release-venv/bin/python -m pip install \
+  --require-hashes -r requirements/runtime-py313.lock
+/tmp/praxis-release-venv/bin/python -m pip install \
+  --no-deps /tmp/praxis-dist/praxis_virtualcell-*.whl
+(cd /tmp && /tmp/praxis-release-venv/bin/python \
+  "${PRAXIS_REPO_ROOT}/scripts/verify_release_install.py")
 ```
 
-C2 只在独立 Python 3.13 环境验证了 wheel metadata、`praxis_virtualcell`/`praxis2` import、`praxis-vc --version` 和 `praxis-vc --help`。完整依赖解析、offline run/ask、API、React/Streamlit 与同源 `dist` 的 wheel 复现仍归 C4；不能把上面的 smoke 扩写成完整 wheel 发布保证。
+该脚本拒绝 tracked dirty state，从 `git archive HEAD` 建立全新临时源码树，在其中用 `npm ci && npm run build` 生成 React 产物；随后在临时 Python 3.13 环境按 `requirements/build-py313.lock` 安装 hash-locked build backend，并以 `--no-build-isolation` 构建完整 wheel。这样不会复用 checkout 中旧的 `build/`、egg-info 或 hashed static asset。wheel 内含 CLI/API、React 静态资源、`praxis_vc_web/app.py` 和默认 gene-set 数据，不包含测试包。
+
+发行 verifier 从源码仓库外运行，覆盖 CLI `run` 的四项产物、API health/job、同源首页与 hashed asset，以及 Streamlit app 内容存在。它没有运行 `praxis-vc ask` 或启动完整 Streamlit server，不能把这些能力写成已验证。
 
 ## 2. React 同源页面
 
@@ -36,20 +48,34 @@ cd ..
 praxis-vc serve
 ```
 
-FastAPI 必须在 `dist/` 构建完成后启动，才会把 React 挂到 `/`。没有 `dist/` 时 `praxis-vc serve` 只提供 API。
+源码 editable 安装必须在 `dist/` 构建完成后启动 FastAPI，才会把 React 挂到 `/`；没有 `dist/` 时源码服务只提供 API。完整 release wheel 与发布容器使用包内 `praxis_vc_api/static`，不依赖源码目录。
 
-`praxis-vc web` 是源码 checkout 中的旧 Streamlit 入口；当前 wheel 未包含 `praxis_vc_web`，因此 C2 的 wheel smoke 不声明该子命令可运行。该打包缺口归 C4。
+`praxis-vc web` 是旧 Streamlit 入口。完整 wheel 已包含入口文件并使用包内绝对路径，但仍需安装 `web` extra；当前发行门没有启动 Streamlit server。
 
-## 3. Docker（待 C4 验证）
+## 3. Docker 发布容器
 
-当前 Dockerfile 的依赖 stub 未复制 `README.md`，React `dist` 复制也尚未纳入镜像契约；历史 `.53` Docker smoke 仍是 pending。现阶段不能把 Docker 称为“最稳”或已通过的评审复现路径。
+容器使用固定 multi-platform digest 的 Node 24 与 Python 3.13.14 基础镜像。四阶段构建先生成 React、构建同一完整 wheel、在 `--network=none` 的 installer 中从 hash-verified wheelhouse 安装，最终镜像只复制 `/opt/venv`。运行用户为 UID/GID 10001，持久化目录是 `/var/lib/praxis-vc/runs`。
 
-下面命令只供 C4 修复/验证使用，不构成当前发布保证：
+构建必须显式注入完整候选 SHA 与 commit epoch；缺少或格式非法时 Dockerfile 会拒绝构建：
 
 ```bash
-docker build -f deploy/vc/Dockerfile -t praxis-virtualcell .
-docker run -p 8000:8000 praxis-virtualcell
+scripts/build_release_container.sh praxis-virtualcell:local
+docker run --rm -p 127.0.0.1:8000:8000 \
+  -v praxis-vc-runs:/var/lib/praxis-vc/runs \
+  praxis-virtualcell:local
 ```
+
+脚本从当前 committed HEAD 取完整 SHA 与 epoch，并拒绝 tracked dirty state 或不在保护清单中的 untracked 文件，防止镜像内容与 OCI/health 身份错配。若直接调用 Dockerfile，同样必须显式提供两项 build arg。
+
+完整 Docker smoke 是显式双门，普通 core 测试只会 skip：
+
+```bash
+PRAXIS_RUN_DOCKER_SMOKE=1 .venv/bin/python -m pytest \
+  praxis_virtualcell/tests/test_linux_docker_smoke.py \
+  --run-integration -o addopts='' -q -ra
+```
+
+该 smoke 使用每次唯一的 image/container 名和 owner label，只清理本次创建的资源；验证 non-root、health/version/SHA、容器内 CLI、React hashed assets 与 offline API report。Docker Desktop 的 Linux-container 结果不等同于原生 Linux/amd64 或 `.53` 已验证；远端结果必须单列。
 
 ## 4. 便携源码目录（无 Docker 的 Linux）
 
@@ -59,7 +85,7 @@ python -m pip install -e ".[api]"
 bash deploy/vc/start.sh            # 启动 API；已有 dist 时才同源提供 React
 ```
 
-这些脚本依赖源码仓库相对路径，必须从仓库根目录运行。`start.sh` 本身不构建 React；需要网页时先按第 2 节生成 `dist/`。这不是独立 wheel 安装的证明。
+这些脚本依赖源码仓库相对路径，必须从仓库根目录运行。`start.sh` 本身不构建 React；需要网页时先按第 2 节生成 `dist/`。`check_install.sh` 也读取根 `examples/ahr_k562.json`，不能在只含已安装 wheel 的最终容器中直接使用。这些脚本不是独立 wheel 安装的证明。
 
 ## 5. 可选:LLM 辅助模式
 

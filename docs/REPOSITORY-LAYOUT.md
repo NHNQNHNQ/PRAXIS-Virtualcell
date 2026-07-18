@@ -31,7 +31,7 @@ Before this A4 change, checkpoint `b52ab5c` had 1,133 tracked files: the baselin
 | `praxis2/` | inherited PRAXIS-2 runtime compatibility layer | retained dependency; do not confuse its legacy service/version line with the VirtualCell product |
 | `praxis_vc_api/` | thin FastAPI/local-service adapter | maintained product API surface |
 | `praxis_vc_react/` | current React/Vite local UI and Playwright E2E | maintained frontend; build/test output is generated |
-| `praxis_vc_web/` | inherited/optional web entry | supporting component until version/packaging review decides its lifecycle |
+| `praxis_vc_web/` | inherited/optional Streamlit web entry | packaged supporting component; requires the `web` extra, while React remains the primary UI |
 | `tests/` | inherited PRAXIS-2 legacy/integration suite | run and report separately; never use it to inflate or block the core KPI without explicit policy |
 | `docs/` | current navigation/status plus historical plans, findings, handoffs, and paper drafts | preserve; lifecycle is defined by `docs/INDEX.md`, not directory age |
 | `data/` | tracked curated subsets/provenance plus ignored large local reproducibility data | never delete by extension; distinguish tracked curated evidence from ignored source datasets |

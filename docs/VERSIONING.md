@@ -1,6 +1,6 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `IMPLEMENTED_C3 — 1.6.0_LOCAL_CANDIDATE_UNPUBLISHED`
+> Status: `IMPLEMENTED_C4 — 1.6.0_LOCAL_CANDIDATE_UNPUBLISHED`
 >
 > Audited: 2026-07-18; local branch `codex/project-consolidation`
 
@@ -52,7 +52,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented through C3:
+Implemented through C4:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -61,6 +61,8 @@ Implemented through C3:
 5. `/api/health` separately exposes product, API protocol, runtime protocol, and injected build SHA while retaining `runtime_version="v0.3"`.
 6. The UI consumes backend `product_version` and `git_sha`; an E2E mock with product `9.9.9` proves that it does not invent this truth from frontend metadata.
 7. `npm version 1.6.0 --no-git-tag-version` synchronized the private package and lock root as a generated mirror. Neither is manually authoritative.
+8. The full release wheel is built with hash-locked Python 3.13 build dependencies and contains the packaged React UI; clean-install verification reads the installed distribution metadata rather than the checkout.
+9. The release container installs that same wheel into `/opt/venv`, injects `GIT_SHA` into both its OCI revision label and health response, and never infers identity from an image tag or embedded `.git` directory.
 
 ## Release invariants
 
@@ -93,12 +95,22 @@ The equality above deliberately excludes `vc.msg.v1`, runtime/API protocol ident
 ## Required candidate verification
 
 ```bash
-python -m build
-python -m pip check
-python -c "from importlib.metadata import version; print(version('praxis-virtualcell'))"
-python -c "import praxis_virtualcell, praxis2; print(praxis_virtualcell.__version__, praxis2.__version__)"
-praxis-vc --version
+PYTHON_BIN=python3.13 scripts/build_release_wheel.sh /tmp/release-one
+PYTHON_BIN=python3.13 scripts/build_release_wheel.sh /tmp/release-two
+cmp /tmp/release-one/praxis_virtualcell-*.whl \
+    /tmp/release-two/praxis_virtualcell-*.whl
+
+python3.13 -m venv /tmp/release-venv
+/tmp/release-venv/bin/python -m pip install \
+  --require-hashes -r requirements/runtime-py313.lock
+/tmp/release-venv/bin/python -m pip install \
+  --no-deps /tmp/release-one/praxis_virtualcell-*.whl
+/tmp/release-venv/bin/python -m pip check
+(cd /tmp && /tmp/release-venv/bin/python \
+  /absolute/path/to/repository/scripts/verify_release_install.py)
+
 npm --prefix praxis_vc_react pkg get version
+scripts/build_release_container.sh praxis-virtualcell:local
 ```
 
-Also query OpenAPI and `/api/health` in a clean install, verify the UI value through Playwright, and test that all frozen governance artifact hashes still match their recorded content. Tagging, pushing, or changing `.53` remains a Phase D action requiring explicit approval.
+The verifier queries the installed API/health and same-origin static UI. The opt-in Docker smoke separately proves that the OCI revision, health SHA, installed CLI, UI assets, and offline API report all refer to the candidate commit. Playwright remains the browser-level UI gate, and frozen governance artifact hashes remain separate integrity checks. Tagging, pushing, or changing `.53` remains a Phase D action requiring explicit approval.
