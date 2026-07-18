@@ -39,6 +39,8 @@ build
 dist
 
 # Frontend dependencies and generated/test artifacts
+# Retain the inherited frontend path explicitly as well as the repo-wide rule.
+frontend/node_modules
 **/node_modules
 praxis_vc_react/dist
 praxis_vc_react/test-results
