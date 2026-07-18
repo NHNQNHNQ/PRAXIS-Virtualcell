@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`B0_COMPLETE`，`B1_COMPLETE`，`B2_COMPLETE`，`B3_COMPLETE`，B4 待执行
+> 状态：active — `PHASE_A_COMPLETE`，`B0_COMPLETE`，`B1_COMPLETE`，`B2_COMPLETE`，`B3_COMPLETE`，`B4_COMPLETE`，B5 待执行
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -165,10 +165,10 @@
 
 ### B4 — Legacy 与远端能力（单独口径）
 
-- [ ] 根 `tests/` 单独运行并标 `legacy`，不计入 VirtualCell 核心绿灯。
-- [ ] 固定 IP/服务健康检查失败归类为 `remote operational`，不在普通单元 CI 中无条件阻断。
-- [ ] `.53` GPU、donor checkpoint、Docker 等仅复用已有亲验证据；没有本轮远端授权时保持 pending。
-- [ ] 不运行需要真实 API key 的 LLM 测试。
+- [x] 根 `tests/` 单独运行并标 `legacy`，不计入 VirtualCell 核心绿灯。
+- [x] 固定 IP/服务健康检查失败归类为 `remote operational`，不在普通单元 CI 中无条件阻断。
+- [x] `.53` GPU、donor checkpoint、Docker 等仅复用已有亲验证据；没有本轮远端授权时保持 pending。
+- [x] 不运行需要真实 API key 的 LLM 测试。
 
 ### B5 — 基线完成闸门
 

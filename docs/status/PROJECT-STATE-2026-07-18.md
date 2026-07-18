@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 13:52 CST (+0800)
+> Captured: 2026-07-18 13:54 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — B0_COMPLETE — B1_COMPLETE — B2_COMPLETE — B3_COMPLETE — Phase B4 next`
+> Overall status: `PHASE_A_COMPLETE — B0_COMPLETE — B1_COMPLETE — B2_COMPLETE — B3_COMPLETE — B4_COMPLETE — Phase B5 next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -157,13 +157,21 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 - A separate Python 3.12 virtual environment installed the wheel with `--no-deps`. From an empty working directory, the imported package resolved inside that environment's `site-packages`, and `praxis-vc --help` exited `0` with the four declared subcommands.
 - Packaging gap: the wheel does not contain `praxis_vc_web/app.py`, although the installed CLI exposes a `web` subcommand that invokes that path. The React `dist/` tree is also checkout-built rather than wheel-contained. These are recorded C2 packaging/documentation items; Phase B did not alter packaging.
 
+`B4_COMPLETE`
+
+- With real LLM and integration variables explicitly unset, `.venv/bin/pytest tests -m "not llm" -o addopts='' -q -ra` exited `1`: `1136 passed / 163 skipped / 1 failed` in `20.80s`. This is the separate inherited PRAXIS-2/legacy scope and is not counted as the VirtualCell core result.
+- All 163 skips are accounted for: 104 integration cases require the explicit Docker/Postgres/Redis integration environment; 37 are missing/invalid inherited skill fixtures; 20 are explicitly quarantined inherited file/HPC cases; and 2 require optional `aiosmtpd` or `rdkit` dependencies.
+- The only failure is `tests/test_m9_invariants.py::test_inv5_v1_backend_still_healthy`. TCP port `10.102.106.53:7788` accepted a connection, but `/api/info` returned HTTP 502 to urllib; follow-up curl with and without proxy bypass both reached `10.102.106.53` and received an empty reply (`curl` exit 52). This is `remote operational`, not a local product assertion failure.
+- No real LLM request ran. Existing Phase 10 evidence remains authoritative for `.53`: real GEARS/scGPT and Norman mean-baseline remote tests passed on 2026-07-17, while donor `W4B_CKPT_DIR`, Docker smoke, and Gate A true-ML end-to-end validation remain explicitly pending.
+- No `.53` repository, process, environment, checkpoint, Docker state, or deployment was changed during B4.
+
 ## Next authorized work
 
-Continue Phase B4 in this APFS clone:
+Continue Phase B5 in this APFS clone:
 
-1. Run the root `tests/` suite as an explicitly separate legacy scope without a real LLM key.
-2. Attribute fixed private-IP/service health failures to `remote operational`, not the VirtualCell core.
-3. Reuse existing `.53` GPU, donor checkpoint, and Docker evidence only; do not mutate or deploy to `.53`.
-4. Preserve exact passed/skipped/failed counts and map every failure to the Phase C backlog.
+1. Create `reports/quality/BASELINE-2026-07-18.md` with the exact B0–B4 commands, versions, exit codes, counts, scope boundaries, warnings, and failure ownership.
+2. Map every measured issue to one C-phase task; mark any item without a safe owner as blocked.
+3. Validate every report link and number against command evidence, then write `PHASE_B_COMPLETE`.
+4. Do not modify source or tests until the Phase B gate commit exists.
 
 No Phase C fix may start before `PHASE_B_COMPLETE` is written at B5. No external synchronization is authorized before the Phase D approval gate.
