@@ -18,6 +18,7 @@ import argparse
 import json
 import os
 import sys
+from importlib.resources import files
 
 from praxis_virtualcell import __version__
 
@@ -78,8 +79,9 @@ def _cmd_serve(a) -> int:
 def _cmd_web(a) -> int:
     os.environ["PRAXIS_VC_API"] = a.api
     import subprocess
+    app_path = files("praxis_vc_web").joinpath("app.py")
     return subprocess.call([sys.executable, "-m", "streamlit", "run",
-                            "praxis_vc_web/app.py", "--server.address", a.host, "--server.port", str(a.port)])
+                            str(app_path), "--server.address", a.host, "--server.port", str(a.port)])
 
 
 def main(argv=None) -> int:

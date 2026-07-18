@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -126,9 +127,25 @@ def report_markdown(job_id: str):
         raise HTTPException(status_code=404, detail="job not found") from e
 
 
-# 生产托管:若 React 已构建(praxis_vc_react/dist),把它挂到 "/",
-# 让 `praxis-vc serve` 同源托管前端(此时前端与 API 同源,无需 CORS)。
-# 必须在所有 /api 路由声明之后 mount,API 路由优先匹配。
-_REACT_DIST = Path(__file__).resolve().parent.parent / "praxis_vc_react" / "dist"
-if _REACT_DIST.is_dir():
+def _react_dist() -> Path | None:
+    """Resolve explicit, packaged, then source-checkout static assets."""
+    configured = os.environ.get("PRAXIS_VC_STATIC_ROOT")
+    if configured:
+        path = Path(configured).expanduser().resolve()
+        if not path.is_dir():
+            raise RuntimeError(f"PRAXIS_VC_STATIC_ROOT is not a directory: {path}")
+        return path
+
+    package_static = Path(__file__).resolve().parent / "static"
+    if package_static.is_dir():
+        return package_static
+
+    checkout_dist = Path(__file__).resolve().parent.parent / "praxis_vc_react" / "dist"
+    return checkout_dist if checkout_dist.is_dir() else None
+
+
+# 必须在所有 /api 路由声明之后 mount，API 路由优先匹配。release wheel 使用包内
+# static；开发 checkout 回退到 Vite dist；容器也可显式设置 PRAXIS_VC_STATIC_ROOT。
+_REACT_DIST = _react_dist()
+if _REACT_DIST is not None:
     app.mount("/", StaticFiles(directory=str(_REACT_DIST), html=True), name="react")

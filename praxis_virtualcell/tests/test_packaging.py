@@ -2,9 +2,11 @@
 防 packages.find 回退到只打 praxis2(否则 praxis-vc CLI ImportError)。"""
 import json
 import re
+import subprocess
 import tomllib
 from importlib.resources import files
 from pathlib import Path
+from types import SimpleNamespace
 
 _ROOT = Path(__file__).resolve().parents[2]
 
@@ -14,6 +16,7 @@ def test_packages_find_includes_virtualcell():
     include = cfg["tool"]["setuptools"]["packages"]["find"]["include"]
     assert any(p.startswith("praxis_virtualcell") for p in include), include
     assert any(p.startswith("praxis_vc_api") for p in include), include
+    assert any(p.startswith("praxis_vc_web") for p in include), include
 
 
 def test_include_package_data_and_manifest():
@@ -67,3 +70,33 @@ def test_python313_hash_locks_cover_ci_and_runtime_dependencies():
 def test_build_backend_is_exactly_pinned():
     cfg = tomllib.loads((_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert cfg["build-system"]["requires"] == ["setuptools==83.0.0", "wheel==0.47.0"]
+
+
+def test_web_command_uses_packaged_absolute_app_path(monkeypatch):
+    from praxis_virtualcell.cli import _cmd_web
+
+    captured: list[str] = []
+
+    def fake_call(command):
+        captured.extend(command)
+        return 0
+
+    monkeypatch.setattr(subprocess, "call", fake_call)
+    result = _cmd_web(SimpleNamespace(api="http://127.0.0.1:8000", host="127.0.0.1", port=8501))
+
+    assert result == 0
+    assert captured[1:4] == ["-m", "streamlit", "run"]
+    app_path = Path(captured[4])
+    assert app_path.is_absolute()
+    assert app_path.name == "app.py"
+    assert app_path.parent.name == "praxis_vc_web"
+    assert app_path.is_file()
+
+
+def test_api_static_resolver_prefers_explicit_directory(tmp_path, monkeypatch):
+    from praxis_vc_api.main import _react_dist
+
+    static = tmp_path / "static"
+    static.mkdir()
+    monkeypatch.setenv("PRAXIS_VC_STATIC_ROOT", str(static))
+    assert _react_dist() == static.resolve()
