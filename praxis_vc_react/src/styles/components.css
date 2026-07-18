@@ -19,6 +19,28 @@
   font-size: 17px;
   margin-bottom: var(--space-1);
 }
+.card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.card-header > h2 {
+  min-width: 0;
+}
+.card-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 100%;
+  margin-left: auto;
+}
+.card-actions > .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
 
 /* ---------- 按钮 ---------- */
 .btn {

@@ -169,6 +169,8 @@ export default function ResultsStage({
     <Card
       title={<>结果 · job {jobId}</>}
       actions={toolbar}
+      ariaLabel={`结果 · job ${jobId}`}
+      actionsLabel="结果操作"
     >
       <Tabs
         tabs={TAB_ITEMS}
