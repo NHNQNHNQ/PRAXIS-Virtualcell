@@ -11,7 +11,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | Namespace | Current value | Source | Meaning |
 |---|---|---|---|
 | local product milestone | annotated `v1.5.0 → 176019e` | Git tag/local `main` | latest local release checkpoint; not published on GitHub on 2026-07-18 |
-| GitHub published main/tag | `v0.8.0 → 7fc4aa5` | Phase A live `ls-remote`; last observed, D0 refresh pending | last-observed published truth, not a current live assertion |
+| GitHub published main/tag | `v0.8.0 → 7fc4aa5` | fresh D0 HTTPS `ls-remote`, 2026-07-18 20:38 CST | current observed published truth; still unchanged by this local candidate |
 | local product candidate | `1.6.0` | `pyproject.toml` `[project].version` | accessible theme, workflow/UI, and supported-input expansion; local only, not a tag or publication |
 | Python distribution | `1.6.0` | installed `praxis-virtualcell` metadata | derived from the only manually edited product source |
 | inherited `praxis2.__version__` | `1.6.0` | compatibility alias | aliases `praxis_virtualcell.__version__`; no second literal |

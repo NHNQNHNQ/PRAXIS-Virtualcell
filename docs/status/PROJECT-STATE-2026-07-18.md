@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 20:07 CST (+0800)
+> Captured: 2026-07-18 20:43 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — C1_COMPLETE — C2_COMPLETE — C3_COMPLETE_LOCAL — C4_COMPLETE_LOCAL — C5_LOCAL_CLASSIFIED — Phase D0 read-only audit next`
+> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — C1_COMPLETE — C2_COMPLETE — C3_COMPLETE_LOCAL — C4_COMPLETE_LOCAL — C5_LOCAL_CLASSIFIED — D0_READ_ONLY_AUDIT_COMPLETE — final D0 commit/artifact binding next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -15,8 +15,8 @@ This file is the restart authority for the consolidation goal. It records observ
 | Active local development truth | `/Users/mzy/Projects/PRAXIS-virtualcell` | All Phase A–D work happens here |
 | Read-only source archive | `/Volumes/T7/PRAXIS-virtualcell` | Do not stage, clean, reset, stash, gc, prune, or edit |
 | Recovery material | `/Users/mzy/Projects/PRAXIS-virtualcell-recovery-20260718` | Preserve through final synchronization and release verification |
-| Published truth | GitHub `NHNQNHNQ/PRAXIS-Virtualcell` | Phase A last-observed at `main=7fc4aa5`, tags through `v0.8.0` |
-| Deployment/validation mirror | `.53` | Phase A last-observed detached at `b9abdbd`; details in `SYNC-STATE.md` |
+| Published truth | GitHub `NHNQNHNQ/PRAXIS-Virtualcell` | D0 fresh read-only observation: `main=7fc4aa5`, tags through `v0.8.0` |
+| Deployment/validation mirror | `.53` | D0 fresh read-only observation: detached at `b9abdbd`; details in `SYNC-STATE.md` |
 
 The source volume is ExFAT and was 93% full. The active clone and recovery directory are on APFS with approximately 46 GiB available at migration time.
 
@@ -24,29 +24,29 @@ The source volume is ExFAT and was 93% full. The active clone and recovery direc
 
 | Item | Observed value |
 |---|---|
-| Audit anchor / current branch base | `24475f2eb14c27c7cfbb82b016b881e88e98b17c` |
-| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream; C4 evidence `8ce42fe`, C5 implementation evidence `038e747`, local candidate `1.6.0` |
+| Consolidation start / branch creation point | `24475f2eb14c27c7cfbb82b016b881e88e98b17c` |
+| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream; C4 evidence `8ce42fe`, C5 implementation `038e747`, C5 docs `d39b4a9`, local candidate `1.6.0` |
 | Preserved former working branch | `feat/v0.9-phase0-module-core=24475f2` |
 | Local `main` | `176019ebd9c198f93a5a645f1ecefce9baaf0522` |
 | Annotated tag `v1.5.0` | tag object `df04e74`; peeled commit `176019e` |
-| Live-fetched `origin/main` tracking ref | `7fc4aa5b3bd03871358385f1d467a515be15aafe` |
-| Live-fetched `origin/feat/v0.9-phase0-module-core` | `b9abdbdf733406853c4a338b29b705ca801d7ac7` |
+| Local `origin/main` tracking ref; matched fresh D0 HTTPS head | `7fc4aa5b3bd03871358385f1d467a515be15aafe` |
+| Local `origin/feat/v0.9-phase0-module-core`; matched fresh D0 HTTPS head | `b9abdbdf733406853c4a338b29b705ca801d7ac7` |
 | `refs/stash` | `77cb06d392a8a547e37c390d86769de23437cc83` |
 | GitHub origin URL | `git@github.com:NHNQNHNQ/PRAXIS-Virtualcell.git` |
 | Recovery remote URL | `/Users/mzy/Projects/PRAXIS-virtualcell-recovery-20260718/praxis-all.bundle` |
 
-Observed graph relationships at local C5 implementation checkpoint `038e747`; remote refs are the last values fetched in Phase A:
+Observed graph relationships at D0 audit anchor `d39b4a9`; local tracking refs matched fresh D0 HTTPS heads without a fetch:
 
 ```text
-HEAD...main                                     56 left / 0 right
-HEAD...origin/feat/v0.9-phase0-module-core     137 left / 1 right
+HEAD...main                                     57 left / 0 right
+HEAD...origin/feat/v0.9-phase0-module-core     138 left / 1 right
 main...origin/main                              342 left / 0 right
-HEAD...origin/main                              398 left / 0 right
+HEAD...origin/main                              399 left / 0 right
 ```
 
-The two `origin/*` values matched during Phase A's 2026-07-18 HTTPS `ls-remote` and HTTPS-backed `fetch --prune --tags`; they are now last-observed remote evidence and were not revalidated in C3, C4, or C5. The persisted origin URL remains SSH. No pull, merge, rebase, push, PR, tag, or remote write has occurred.
+Fresh D0 HTTPS `ls-remote --heads --tags` returned the same two GitHub heads and tags through `v0.8.0`; no candidate branch exists remotely. The persisted origin URL remains SSH, and D0 did not fetch or mutate local tracking refs. No pull, merge, rebase, push, PR, tag, or remote write has occurred.
 
-The `.53` host was initially checked read-only during Phase A at 2026-07-18 13:12 CST and re-read at 13:33 immediately before the Phase A gate. That last observation showed detached `b9abdbd`, `main=7fc4aa5`, tags through `v0.8.0`, and one untracked 32,504-byte `vc_api.log`; it also showed `.53`-only branch `remote-gears-l4-95dc764=95dc764`. C3–C5 did not revalidate those remote values. No process or environment check was performed. See `docs/status/SYNC-STATE.md`.
+The `.53` host was freshly re-read in D0 using batch-mode SSH and `GIT_OPTIONAL_LOCKS=0`. It remains detached at `b9abdbd`, with `main=7fc4aa5`, tags through `v0.8.0`, one untracked 32,504-byte `vc_api.log`, and `.53`-only `remote-gears-l4-95dc764=95dc764`. The log contents, processes, services, secrets, donor code, checkpoints, and environment were not inspected or changed. See `docs/status/SYNC-STATE.md`.
 
 ## Protected worktree state
 
@@ -255,13 +255,22 @@ The B0–C4 entries in this chronology are frozen phase snapshots. Present-tense
 - Remote procedure: `docs/runbooks/REMOTE-SCIENCE-VALIDATION.md` requires the approved candidate SHA, an independently approved clean donor Git SHA/remote, an independently approved digest set for three JSON sidecars plus three PT weights, manifest-matching Norman data, and exactly `2 passed / 0 skipped / 0 failed`. Because current PT loading uses `weights_only=False`, discovery alone never authorizes execution.
 - External/protected boundary unchanged: no GitHub or `.53` read/write occurred in C5; `.claude/`, ignored `.playwright-mcp/`, `string.jpeg`, stash, recovery material, T7, refs, and tags remain untouched.
 
+## Phase D0 read-only audit
+
+`D0_READ_ONLY_AUDIT_COMPLETE`
+
+- Fresh GitHub and `.53` refs/status matched the Phase A observations; this is a new D0 observation, not recycled evidence.
+- GitHub main is an ancestor of local main, which is an ancestor of the candidate line. The candidate can remain an exact non-force fast-forward target if GitHub does not change before D1b.
+- `.53`'s `b9abdbd` sibling is already semantically superseded by local `4359602` plus later GEARS work, but remains protected history; `.53`-only `95dc764` remains protected experimental evidence.
+- The `d39b4a9` pre-report rehearsal produced two byte-identical 923,687-byte wheels at SHA-256 `d1d536022bae9d67d14c806d889934a89e8119b0feb8219db458f15311bc0500`; hash-locked clean install, console, offline/API/UI verifier passed. Because the D0 close commit changes `SOURCE_DATE_EPOCH`, this digest is explicitly intermediate and must be rebound after the containing commit.
+- Exact candidate-ref, CI, main/tag, local-main, `.53` deployment-branch, protected-log, validation, and rollback steps are frozen in [the Phase D0 synchronization proposal](PHASE-D0-SYNC-PROPOSAL-2026-07-18.md).
+- No GitHub or `.53` mutation was performed. The recommended next authorization is D1a branch push only.
+
 ## Next authorized work
 
-Continue Phase D0 with read-only/local preparation only:
-
-1. Freeze the exact release-candidate SHA after the C5 documentation commit and bind a final clean wheel/install verification to that SHA.
-2. Freshly re-read local refs/worktree, GitHub live refs, and `.53` refs/status by read-only commands; preserve unknown/dirty evidence rather than changing it.
-3. Compute ancestry/range differences and write the exact target feature ref, proposed main path, `.53` deployment branch, preserved refs/log disposition, validation order, and rollback plan.
-4. Present that ledger and proposal to the user. Stop before the first push, PR, tag, `.53` fetch/checkout, deployment, or remote test until explicit authorization is received.
+1. Commit the D0 ledger/proposal locally and record its self-identifying report-anchor SHA.
+2. Bind the current clean branch-tip 40-hex by rebuilding that exact post-commit candidate wheel twice and repeating hash-locked clean install/installed verifier.
+3. Present the exact candidate SHA, final artifact digest, live ledger, and proposal to the user.
+4. Stop before the first push, PR, tag, `.53` fetch/checkout, deployment, or remote test until explicit authorization is received.
 
 No external synchronization or `.53` science execution is authorized before the Phase D approval gate.

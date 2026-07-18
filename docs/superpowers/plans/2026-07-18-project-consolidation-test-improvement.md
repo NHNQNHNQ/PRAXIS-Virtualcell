@@ -2,9 +2,9 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，`C1_COMPLETE`，`C2_COMPLETE`，`C3_COMPLETE_LOCAL`，`C4_COMPLETE_LOCAL`，`C5_LOCAL_CLASSIFIED`，D0 只读对账下一步
+> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，`C1_COMPLETE`，`C2_COMPLETE`，`C3_COMPLETE_LOCAL`，`C4_COMPLETE_LOCAL`，`C5_LOCAL_CLASSIFIED`，`D0_READ_ONLY_AUDIT_COMPLETE`；包含 D0 报告的提交须在交接前完成 post-commit artifact binding
 >
-> 整理起点：`24475f2`；C3 证据 HEAD：`4106403`；C4 证据 HEAD：`8ce42fe`；C5 实现证据 HEAD：`038e747`
+> 整理起点：`24475f2`；C3 证据 HEAD：`4106403`；C4 证据 HEAD：`8ce42fe`；C5 实现证据 HEAD：`038e747`；C5 文档 HEAD：`d39b4a9`
 >
 > 配套执行提示词：`docs/superpowers/plans/2026-07-18-project-consolidation-goal-prompt.md`
 
@@ -239,23 +239,25 @@ C5 gate：`docs/status/PHASE-C5-GATE-2026-07-18.md`，状态 `C5_LOCAL_CLASSIFIE
 
 ### D0 — 冻结候选与同步前对账
 
-- [ ] 在 C5 文档提交后选择唯一 release-candidate SHA、目标产品版本和目标 GitHub branch；从该精确提交重建并复验最终 wheel/clean install，把核心测试、前端测试及其冻结证据边界与候选 SHA 一并登记。
-- [ ] 更新 `SYNC-STATE.md`：local APFS HEAD/main、GitHub live refs、`.53` live HEAD/branch/dirty、预期同步后的 SHA。
-- [ ] 确认本地工作树（不含明确保留的本地 WIP 分支）干净；`.53` 除台账已登记且已有明确批准 disposition 的非源码日志外不得有 dirty 状态或未回传提交。未知、源码重叠或未批准的 dirty 一律停止，不 reset/覆盖。
-- [ ] 对 GitHub divergence 做 ancestry/range-diff/cherry 检查；只允许可解释的 fast-forward 或经人工审查的正常 PR/merge，禁止 force push。
-- [ ] 提交“将要 push 哪些 refs/tags、`.53` 将切到哪个 SHA、如何回滚”的清单，请用户确认同步授权。
+- [x] D0 report anchor 定义为首次加入 `PHASE-D0-SYNC-PROPOSAL-2026-07-18.md` 的 commit；真正 release candidate 始终是当前 approval handoff 明示的 clean `refs/heads/codex/project-consolidation` 精确 40-hex，版本 `1.6.0`。该 SHA 的双 wheel/clean-install 原始摘要必须在 handoff 中给出；任何新 commit 都使旧 artifact/CI/approval 失效并要求新 handoff。
+- [x] 更新 `SYNC-STATE.md`：fresh local APFS HEAD/main、GitHub live refs、`.53` live HEAD/branch/dirty、预期同步流向。
+- [x] 确认本地 tracked worktree clean，只有受保护 `.claude/`/`string.jpeg`；`.53` 只有台账登记的非源码 `vc_api.log`。未知、源码重叠或未批准 dirty 仍为停止条件。
+- [x] 完成 ancestry/cherry/tree 对账：GitHub main 可非强制快进；`b9abdbd` 为由本地 `4359602` 超集覆盖的兄弟历史；`.53`-only `95dc764` 独立保留，均不盲 merge。
+- [x] 写出 [Phase D0 synchronization proposal](../../status/PHASE-D0-SYNC-PROPOSAL-2026-07-18.md)：精确 branch/main/tag 次序、五项 CI、`.53` 新部署分支、日志/refs 保护、停止条件与回滚。第一次只请求 D1a branch push 授权。
+
+D0 的 fresh 只读账本锚定 2026-07-18 20:38–20:43 CST。没有发生 GitHub 或 `.53` 写入。包含本段的 D0 close commit 只有在 post-commit 双构建与 clean-install handoff 通过后才可称 `READY_TO_SYNC`；任何新提交都会使 artifact binding 失效并要求重跑。
 
 ### D1 — 同步 GitHub
 
-- [ ] 先 push release-candidate 工作分支，不直接覆盖 main；验证 `git ls-remote` 返回的 SHA 与本地完全一致。
+- [ ] 先机器核 `HEAD == local branch tip == artifact-bound approved 40-hex` 与 expected remote branch SHA，再以 exact `<approved_sha>:refs/heads/codex/project-consolidation` push；唯一允许的 `--force-with-lease=<exact-ref>:<exact-expected>` 只作原子 compare-and-swap，必须先证明 previous→candidate ancestry，不授权 non-FF/改写；同时显式 `--no-follow-tags`。不直接覆盖 main，live `ls-remote` 必须完全一致。
 - [ ] 等待/核对该 SHA 的 CI；没有可见 CI 证据时不得声称 GitHub 全绿。
-- [ ] 通过用户批准的 PR 或非强制 fast-forward 更新 GitHub main；再按批准清单 push release tag，禁止一次性 `push --all`/`push --tags` 把历史草稿全发出。
-- [ ] 本地 APFS clone `fetch` 后只用 fast-forward 更新本地 main；验证 `local main == origin/main`。
+- [ ] 经独立 D1b 批准，机器核 live old-main、candidate branch/CI SHA、ancestry，以及 local/GitHub `v1.6.0` 均不存在；以绑定 exact old-main 的 CAS lease 和 exact SHA 执行非强制快进，再创建/推送唯一 annotated `v1.6.0`。lease 不得绕过 ancestry；所有 push 显式 `--no-follow-tags`。main 成功而 tag 失败时标 `MAIN_UPDATED_TAG_PENDING`，不倒退 main；禁止 `push --all`/`push --tags`。
+- [ ] 经独立 D1c 批准，本地 APFS clone 只 fetch exact main ref，再用 `merge --ff-only origin/main` 更新本地 main；验证 `local main == origin/main == approved SHA`。D1b 不隐含 D1c。
 
 ### D2 — 同步 `.53`
 
 - [ ] 在 `.53` 再次确认仓库路径、remote、branch、HEAD、dirty、运行服务状态；生产服务在运行时先给出无扰动更新窗口方案。
-- [ ] `.53` 只从同一个 GitHub origin fetch；目标必须是 D1 已通过 CI 的精确 SHA。若当前提交是目标祖先且工作树符合台账，才允许显式 `git fetch --tags origin` + `git merge --ff-only <approved-ref>`。若是已知且已登记的 `b9abdbd` 非祖先历史线，则保留旧分支/commit，按批准清单新建跟踪 GitHub main 的 deployment branch 并切到目标 SHA；若出现任何其他未知非祖先、未批准 dirty 或无法解释的 ref，则停止。所有路径均禁止 `reset --hard`、盲 merge 或删除旧分支。
+- [ ] `.53` 目标必须是 D1 已通过 CI 的精确 SHA。对祖先型现有部署只允许批准的 fast-forward；对已登记 `b9abdbd` sibling 则保留旧 ref，机器核 detached HEAD、旧 main、实验 ref 与唯一日志后，显式 `git fetch --atomic --no-tags origin refs/heads/main:refs/remotes/origin/main refs/tags/v1.6.0:refs/tags/v1.6.0`，再新建 `codex/deploy-v1.6.0`；绝不 merge/reset 旧线。任何其他未知非祖先、未批准 dirty/ref/tag 冲突都停止；禁止 broad tags、prune、盲 merge 或删除旧 ref。
 - [ ] 不在 `.53` 修改源码或提交；部署分支的每个 commit 必须先存在于 GitHub。
 - [ ] 在目标 SHA 运行约定的 remote/Docker/API smoke，记录解释器/环境/模型 checkpoint 和结果；W4B 在 donor Git SHA/clean 状态与六文件可信 digest 集另行批准前不得 import/反序列化。失败则 ledger 标 `SYNCED_BUT_NOT_VALIDATED` 或按事先回滚方案处理，不伪造健康。
 
@@ -308,7 +310,7 @@ C5 gate：`docs/status/PHASE-C5-GATE-2026-07-18.md`，状态 `C5_LOCAL_CLASSIFIE
 3. D 阶段前需要 GitHub 凭证、push、PR、远端 merge/rebase 或 `.53` SSH/GPU/Docker 操作；D 阶段已展示清单但尚未获得用户同步授权。
 4. `git fsck` 出现 missing/corrupt object，而非仅 AppleDouble garbage warning。
 5. 工作树出现本计划未产生的新改动，或与 4 个 CSS WIP 重叠。
-6. GitHub、本地或 `.53` 出现非 fast-forward、dirty worktree、未知提交或 SHA 无法解释。
+6. GitHub、本地或 `.53` 出现**未知/未批准** dirty、未解释提交/非 fast-forward/tag 冲突或 SHA 无法解释；台账内受保护 `.claude/`、`string.jpeg`、`.53 vc_api.log` 以及批准后新建 deployment branch 处置已知 `b9abdbd` sibling 不误判为未知，但绝不 merge/reset/clean 它们。
 7. 测试数字与基线无法解释，或修复需要改变科学裁决、可靠性数值、LLM 边界。
 8. 需要下载受限数据、私有 checkpoint、付费服务或使用真实 API key。
 9. 需要改变论文中的科学结论或把 narrowed/unsupported 改成 met。
