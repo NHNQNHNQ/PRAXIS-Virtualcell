@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 13:48 CST (+0800)
+> Captured: 2026-07-18 13:52 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — B0_COMPLETE — B1_COMPLETE — B2_COMPLETE — Phase B3 next`
+> Overall status: `PHASE_A_COMPLETE — B0_COMPLETE — B1_COMPLETE — B2_COMPLETE — B3_COMPLETE — Phase B4 next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -148,13 +148,22 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 - Playwright started a new Uvicorn server and its configuration assigned `PRAXIS_VC_RUNS` from `mktemp -d`. The repository `runs/` path was absent both before and after the run, port 8000 was released, and only ignored `dist/`, `test-results/`, and `node_modules/` outputs were present.
 - No tracked source/manifest changed. The protected CSS patch still hashes to `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`.
 
+`B3_COMPLETE`
+
+- `git archive` exported committed HEAD `4ae055c343c146fde133214e8bdcf96605e4fe15` to `/private/tmp`; the archive had no `.git` directory and therefore excluded all protected/untracked WIP.
+- `.venv/bin/python -m pip wheel <archive> --no-deps` exited `0` and produced `praxis_virtualcell-0.0.0-py3-none-any.whl`: 712,807 bytes, 439 files, SHA-256 `a52031a770bbb97fcbe8b14d4f5cc008f25ba3f06e661ea04312b0d2eb8967c0`.
+- The wheel contains `praxis_virtualcell/cli.py`, `praxis_vc_api/main.py`, VirtualCell brain YAML, cell catalog, model registry, governance JSON artifacts, and `praxis-vc = praxis_virtualcell.cli:main`.
+- Wheel metadata and the editable install both report product version `0.0.0`; `.venv/bin/praxis-vc` exists. This agrees internally but conflicts with the local historical `v1.5.0` release tag and remains a C2 versioning task.
+- A separate Python 3.12 virtual environment installed the wheel with `--no-deps`. From an empty working directory, the imported package resolved inside that environment's `site-packages`, and `praxis-vc --help` exited `0` with the four declared subcommands.
+- Packaging gap: the wheel does not contain `praxis_vc_web/app.py`, although the installed CLI exposes a `web` subcommand that invokes that path. The React `dist/` tree is also checkout-built rather than wheel-contained. These are recorded C2 packaging/documentation items; Phase B did not alter packaging.
+
 ## Next authorized work
 
-Continue Phase B3 in this APFS clone:
+Continue Phase B4 in this APFS clone:
 
-1. Export the current committed tree with `git archive` to an external temporary directory so protected WIP cannot enter the build.
-2. Build a wheel from that clean tree and inspect package files, metadata, console entry point, and runtime data.
-3. Compare wheel metadata with the editable install and verify `.venv/bin/praxis-vc` exists.
-4. Install the wheel without dependencies into a separate temporary virtual environment and run CLI help smoke without changing the main `.venv`.
+1. Run the root `tests/` suite as an explicitly separate legacy scope without a real LLM key.
+2. Attribute fixed private-IP/service health failures to `remote operational`, not the VirtualCell core.
+3. Reuse existing `.53` GPU, donor checkpoint, and Docker evidence only; do not mutate or deploy to `.53`.
+4. Preserve exact passed/skipped/failed counts and map every failure to the Phase C backlog.
 
 No Phase C fix may start before `PHASE_B_COMPLETE` is written at B5. No external synchronization is authorized before the Phase D approval gate.

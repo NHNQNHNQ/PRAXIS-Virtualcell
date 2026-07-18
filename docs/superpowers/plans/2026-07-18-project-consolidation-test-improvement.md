@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`B0_COMPLETE`，`B1_COMPLETE`，`B2_COMPLETE`，B3 待执行
+> 状态：active — `PHASE_A_COMPLETE`，`B0_COMPLETE`，`B1_COMPLETE`，`B2_COMPLETE`，`B3_COMPLETE`，B4 待执行
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -158,10 +158,10 @@
 
 ### B3 — 打包、CLI 与依赖
 
-- [ ] 从 `git archive` 的干净树构建 wheel，不让工作区 WIP 混入产物。
-- [ ] 检查 wheel 是否包含 `praxis_virtualcell/cli.py`、`praxis_vc_api/main.py`、运行时数据和 console entry point。
-- [ ] 记录 wheel metadata 版本、当前 editable install 版本和 `.venv/bin/praxis-vc` 是否存在。
-- [ ] 在临时虚拟环境做 `--no-deps` 或可控依赖的 CLI help smoke；不修改主 `.venv` 来掩盖安装漂移。
+- [x] 从 `git archive` 的干净树构建 wheel，不让工作区 WIP 混入产物。
+- [x] 检查 wheel 是否包含 `praxis_virtualcell/cli.py`、`praxis_vc_api/main.py`、运行时数据和 console entry point。
+- [x] 记录 wheel metadata 版本、当前 editable install 版本和 `.venv/bin/praxis-vc` 是否存在。
+- [x] 在临时虚拟环境做 `--no-deps` 或可控依赖的 CLI help smoke；不修改主 `.venv` 来掩盖安装漂移。
 
 ### B4 — Legacy 与远端能力（单独口径）
 
