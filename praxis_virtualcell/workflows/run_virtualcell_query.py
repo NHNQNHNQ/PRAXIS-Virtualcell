@@ -152,8 +152,8 @@ def _extract_structured_description(text: str) -> tuple[str, dict | None, list[s
 
 
 def coerce_str_list(value) -> list[str]:
-    """未受信值 → `list[str]`(**两层**守卫:容器级 + 元素级),供**消费 `parse_query` 的
-    `schema_valid=False` 分支产物**的 UI 层使用(§10 修正 12)。
+    """未受信值 → `list[str]`(**两层**守卫:容器级 + 元素级),供消费 `parse_query`
+    candidate 字段的 UI 层使用(§10 修正 12)。
 
     **为什么必须两层(§10 修正 9③ 的判据②,亦是 opus 建议的修法里的缺陷)**:
     只加**元素级** `isinstance(t, str)` **挡不住字符拆** —— 实测
@@ -161,9 +161,10 @@ def coerce_str_list(value) -> list[str]:
     字符拆只能由**容器级** `isinstance(value, list)` 挡(C3 既有手法)。两者**各挡各的**:
     容器级挡字符拆、元素级挡 dict/None/int 混进来。
 
-    **存在理由**:`parse_query` 在 `schema_valid=False` 时**按设计**返回**未归一、未白名单化**
-    的原始 LLM dict(见 `test_parse_query_false_branch_returns_raw_uncoerced_contract`),
-    好让用户在 UI 上看到"LLM 到底答了什么"并修正 —— 故**守卫的责任在消费侧**。
+    **存在理由**:`parse_query` 在 validator 无 normalized 产物时按设计返回 response-safe、但
+    **未做语义归一/值白名单**的 raw-like candidate,好让用户看到并修正 LLM 产物。最终
+    `schema_valid=False` 也可能因 structured error 携带 normalized candidate,所以消费侧不能靠
+    该布尔值猜字段形状,必须始终按声明类型读取。
     本函数是**共享**的消费侧守卫:任何新增的第三个消费者都应调它,而不是各自重写
     (C3 教训 #2「同型缺口未回填」:safety_contract 抄 llm_router 时修了漏洞却没回填原件)。
 
@@ -188,24 +189,10 @@ def validate_candidate(cand: dict) -> dict:
     `KeyboardInterrupt`/`SystemExit`,让进程杀不掉、真 bug 被静默)。故此处**只捕已识别 4 类**,
     并明示边界。**"绝不"一词已作废(§10 修正 8:本单元第 6 次未限定作用域的全称词)。**
 
-    **定性必须精确 —— "可达"分两种,本层只占后一种**:
-    - **当前两个已知消费点的正常路径不可达**(勘察实证):`/api/parse` → `parse_query` 的
-      `cand` 只可能来自 `json.loads`(**JSON object key 恒为 str**)或 `_deterministic_parse`
-      (固定 str key);`praxis_vc_web/app.py:75` 的 `cand` 来自 `json.loads` 产物或本函数自产
-      normalized 二者之一(**schema_valid=False 时 `parse_query` 返的是未归一的原始 LLM JSON /
-      `_deterministic_parse` 产物的展开** —— 页面 2 让用户补充/修正的常见路径),
-      **两者 key 皆恒 str**。→ **本层不是当前生产 500 的防线**,那个由 `_validate_candidate_impl`
-      里的元素级白名单管(C4 Task 1)。深嵌套那条**当前**亦生产不可达,但**依据更弱**:
-      `llm_client.py:23` `max_tokens` **默认值** 1024(**可调默认参数,非结构不变量** ——
-      与"JSON key 恒 str"这种格式级保证不同级)→ LLM 产不出所需深度;**调大到 128k 级则
-      余量被吃穿**(§10 修正 8)。
-    - **直接调用可达**(实测,故非死码):触发需**非 JSON 来源的 dict**(混合类型 key)→
-      `json.dumps(d, sort_keys=True)` 抛 `TypeError: '<' not supported between 'str' and 'int'`;
-      或深嵌套 dict → `RecursionError`。
-
-    **真实价值** = public API 契约防线:防脚本 / notebook / 直接调用 / **未来第 3 个调用点**。
-    定性对标 **C2 的 Gate B**(防御性完整性断言:字段恒由代码构造、正常路径不触发、防未来
-    重构漏挂)—— 项目已接受的模式。**非死码,但也不得说成"生产可达"**(C4 §10 修正 7)。
+    **定性必须精确**:validator 函数本身由 `/api/parse` 与 `/api/jobs` 生产调用;后者把它作为
+    runner/save 前最终复验。具体异常形状的可达性仍不同:标准 HTTP JSON 的 object key 恒为
+    string 且不能表达循环引用,而混合类型 key/循环/某些超深 Python dict 可由脚本、notebook 或
+    直接调用触发。故本层既不是“生产不可达”,也不能把每一种捕获异常都写成 HTTP 可构造。
     """
     try:
         return _validate_candidate_impl(cand)

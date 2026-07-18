@@ -34,7 +34,7 @@ C3 Task 7 漏掉的那一层根治掉。产出直接服务 D 单元(D 有大量"
 | **第六次复发:`app.py:66` 消费侧字符拆** | 修(共享两层守卫 `coerce_str_list`) | HEAD 上实测:`"AHR"` → `','.join(...)` → `'A,H,R'` → 回填 `['A','H','R']` → 用户确认 → **`validate_candidate` 返 schema_valid=True → 内核真按假基因 A/H/R 跑**。修后 `','.join(coerce_str_list("AHR")) == ''` |
 | **RecursionError 清单 7 处** | 全捕获 | 机械枚举命令+输出见 §10 修正 11①;5 处回填**逐处变异 → 各自红 5/5** |
 | **姊妹 7 处元素级白名单** | 全修 | 清单来自**实跑 predicate**(非手工挑);变异 → 红 |
-| **`validate_candidate` 边界 try** | 在(defense-in-depth) | 变异 `except ():` → 红(非空壳);**非生产可达**,对标 C2 Gate B |
+| **`validate_candidate` 边界 try** | 在;函数本身生产可达 | `/api/parse` 与 `/api/jobs` 都调用 validator,其中 `run_job` 把它作为 runner/save 前的最终复验。四类具体异常触发条件的可达性不同:混合 key/循环等不是标准 HTTP JSON 形状,直接 Python 调用仍可达;变异 `except ():` → 红(非空壳) |
 | **溯源契约** | 在(仅 `perturbation_targets`) | `[None,'AHR']` → 修前发明 `'NONE'`;端到端 e2e:前端收到 `['AHR']`,`'NONE'` 不在其中 |
 | **显式结构化 overlay** | 严格;与 LLM 容错候选分层 | 仅识别行首 `结构化描述:`;payload 必须是 object 且字段属于声明集合。显式 `requested_outputs` 必须是允许值组成的 `list[str]`,`perturbation_targets` 必须是 `list[str]`;畸形/未知字段进入稳定澄清错误,合法显式值在解析后覆盖 LLM/offline 候选 |
 | **`ParseOut` 响应安全** | 标准 JSON / UTF-8 / 结构预算内 | assumptions、error、model 与 candidate 均做 surrogate/NaN/深度防护;超预算候选降为浅层安全壳。独立 API fuzz **1,092 组**零失败 |
@@ -57,8 +57,9 @@ C3 Task 7 漏掉的那一层根治掉。产出直接服务 D 单元(D 有大量"
 **③ 边界 try 的定性**:
 > `validate_candidate` 的边界 try 是 **public API 契约防线**(defense-in-depth),
 > **捕获已识别的 4 类**(TypeError/AttributeError/ValueError/RecursionError),
-> **不声称捕获一切**;**当前生产路径不可达**,价值在防脚本/notebook/直接调用/未来第 3 个调用点,
-> 对标 **C2 Gate B**。
+> **不声称捕获一切**。validator 函数本身已由 `/api/parse` 与 `/api/jobs` 生产路径调用,
+> `/api/jobs` 还把它作为 runner/save 前最终复验;但混合 key、循环等**具体异常触发形状**不属于标准
+> HTTP JSON,须与直接 Python 调用可达性分开陈述。不得再写笼统的“当前生产路径不可达”。
 
 **④ RecursionError 的覆盖主张(**唯一许可的写法**)**:
 > 经**机械枚举** `json.loads`/`json.dumps` 消费未受信 LLM JSON 的调用点(命令与输出见
@@ -67,11 +68,12 @@ C3 Task 7 漏掉的那一层根治掉。产出直接服务 D 单元(D 有大量"
 > → 残余风险照旧。
 
 **⑤ `parse_query` 的输出契约(极易被过读)**:
-> **只有 `schema_valid=True` 分支的产物经过归一 + 白名单**。`schema_valid=False` 时
-> **按设计**保留**未做语义归一/值白名单的 LLM 候选**(让用户在 UI 上看到 LLM 到底答了什么并
-> 修正),但响应整体仍须通过标准 JSON、UTF-8 与结构预算防线;不能安全承载的深层/异常候选会降为
-> 浅层安全壳。→ **字段类型守卫的责任仍在消费侧**,消费者必须严格读取声明类型;Python 字符串列表
-> 消费者须调 `coerce_str_list`。
+> `candidate_request` 的选择看 validator 是否产出 `normalized`,**不直接看最终 `schema_valid`**。
+> 例如显式 structured error 可使最终 `schema_valid=False`,同时仍返回 validator 的 normalized 候选。
+> 只有 validator 无 normalized 时,才保留**未做语义归一/值白名单的 raw-like 候选**供用户修正;
+> 该候选仍须通过标准 JSON、UTF-8 与结构预算防线,超 UTF-8/strict-JSON、深度 64、节点 4096 或
+> 262144 bytes 的异常候选降为固定浅层安全壳。→ **消费侧不能用 `schema_valid` 猜字段类型**,
+> 必须始终严格读取声明类型;Python 字符串列表消费者须调 `coerce_str_list`。
 
 **⑥ 显式结构化输入与 LLM 候选不是同一信任策略**:
 > 行首 `结构化描述:` 是用户明确提交的机器可读 overlay,采用严格字段/类型/值域校验并在合法时覆盖
@@ -84,7 +86,7 @@ C3 Task 7 漏掉的那一层根治掉。产出直接服务 D 单元(D 有大量"
 |---|---|
 | "**根治**〔第五次复发 / 发明假基因名〕" | 论域=全仓消费未受信 LLM 值的代码点,**无机械枚举** → 判据 A① 不成立。**第六次复发就活在 HEAD 上被 opus 抓到** |
 | "`validate_candidate` 已覆盖所有未受信输入/未来字段" | 当前只对**已声明的请求字段与 metadata 控制字段**完成归一和最终校验;入口/未来字段仍属层1语义判断,不能外推成开放世界全覆盖 |
-| "`parse_query` 输出已白名单化" | **只有 True 分支**;False 分支按设计返原始 LLM dict(§0.3⑤) |
+| "`parse_query` 输出已白名单化" | validator 无 normalized 时会返 response-safe raw-like 候选;且最终 `schema_valid=False` 也可能携带 normalized 候选,不能把布尔值当作产物形状的判据(§0.3⑤) |
 | "`/api/parse` 对 RecursionError 无条件安全" | 只能说"**当前清单 7 处已全部捕获**"(§0.3④) |
 | 任何对**消费点**的"全覆盖" | 消费点是**语义判断**(层1),**无机械枚举** |
 | "LLM unsupported claim = 0"(G2) | C3 支撑不到,须克制 |
@@ -96,7 +98,7 @@ C3 Task 7 漏掉的那一层根治掉。产出直接服务 D 单元(D 有大量"
 | "**根治**〔某复发〕" | "修复 **`validate_candidate` 这一处**的字符拆" |
 | "**绝不**把异常透给调用方" | "**捕获已识别的 4 类**;`MemoryError`/未知类型在白名单外" |
 | "**硬编码** `max_tokens: int = 1024`" | "`max_tokens` 的**函数默认参数**(**可被调用点覆盖**,非结构不变量)" |
-| "**可达**"(未限定) | 分开写:"**直接调用可达**"/"**当前生产路径不可达**" |
+| "**可达**"(未限定) | 分开写:"validator 函数由 `/api/parse`/`/api/jobs` **生产调用**"/"某个具体异常形状只在**直接 Python 调用可达**或也可由标准 HTTP JSON 触发" |
 | "`app.py` 的 cand 是**自产 normalized 拷贝**" | "**只在 `schema_valid=True` 分支**成立;False 分支是未归一原始 LLM JSON" |
 | "**三种判据合计覆盖四类**" / "**一条断言覆盖四类**" | 照 §0.3① 的**逐类归属**写 |
 | "**无条件成立**" / "**无论…都**〔精确复原〕" | "`setenv` 底层 `setitem` **无条件登记 undo**"(对实现的封闭陈述,非对"任意改写者"的全称) |
