@@ -2,6 +2,9 @@
 三 gate 全 C1 模式(runtime 后处理 override,不碰 reliability/critic 裁决数值)。"""
 import hashlib
 import json
+import re
+
+import pytest
 
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
@@ -12,6 +15,10 @@ from praxis_virtualcell.governance.provenance_completeness import check_report_p
 from praxis_virtualcell.governance.provenance_hash import check_call_provenance, compute_call_provenance
 from praxis_virtualcell.predictors.base import PredictorAgent
 from praxis_virtualcell.predictors.ml.agent_adapter import MLBackedPredictorAgent
+from praxis_virtualcell.predictors.ml.checkpoint_identity import (
+    ML_SLOT_CHECKPOINTS,
+    checkpoint_model_version,
+)
 from praxis_virtualcell.workflows.run_virtualcell_query import run_query
 
 _CFG = RuntimeConfig(mode=Mode.OFFLINE)
@@ -56,6 +63,12 @@ def test_check_call_provenance_complete_and_missing():
     assert "model_name" in check_call_provenance({})
     assert check_call_provenance("not_a_dict") == ["model_name", "model_version",
                                                    "input_hash", "output_hash"]
+
+
+@pytest.mark.parametrize("bad_hash", ["x", "a" * 63, "A" * 64])
+def test_check_call_provenance_rejects_malformed_sha256(bad_hash):
+    ok = compute_call_provenance("X", "v1", {"a": 1}, {"b": 2}, [])
+    assert "input_hash" in check_call_provenance({**ok, "input_hash": bad_hash})
 
 
 def test_per_call_hashes_in_report_for_used_models():
@@ -346,6 +359,72 @@ class _FakeDonorModel:
         return self
 
 
+class _AdapterSeamMLAgent(MLBackedPredictorAgent):
+    """No-torch adapter seam double; this is not evidence of a real donor inference."""
+
+    def prepare_input(self, request: dict, brain_context: dict) -> dict:
+        return {"targets": tuple(request.get("perturbation_targets", []))}
+
+    def run_prediction(self, model_input: dict) -> dict:
+        return {
+            "prediction": {"delta": [0.25], "n_genes": 1},
+            "uncertainty": {"std": 0.0},
+        }
+
+
+def _run_ml_adapter_seam(monkeypatch, *, broken_slot: str | None = None) -> tuple[dict, list]:
+    from praxis_virtualcell.core.request import VirtualCellRequest
+    from praxis_virtualcell.workflows.predict_delta_expression import build_runtime
+
+    monkeypatch.setattr(
+        "praxis_virtualcell.agents.model_applicability.gears_available", lambda: False
+    )
+    runtime = build_runtime(_CFG)
+    for index, (slot, (_stem, class_name)) in enumerate(ML_SLOT_CHECKPOINTS.items(), start=1):
+        agent = _AdapterSeamMLAgent(
+            _FakeDonorModel(),
+            control=None,
+            pert_table=None,
+            pert_dim=0,
+            name=slot,
+            model_version=f"donor_ml:{class_name}@sha256:{index:064x}",
+        )
+        if slot == broken_slot:
+            agent.model_version = ""
+        runtime.register_agent(agent)
+    request = VirtualCellRequest.from_dict({**_ACCEPT, "request_id": "adapter-seam"})
+    report = runtime.run_workflow(request)
+    results = [
+        message.payload
+        for message in runtime.bus.trace
+        if message.message_type == "predictor_result"
+    ]
+    return report, results
+
+
+def test_ml_adapter_seam_three_successes_do_not_trigger_gate_a(monkeypatch):
+    """Local adapter/runtime seam proof only; real checkpoint inference remains remote pending."""
+    report, results = _run_ml_adapter_seam(monkeypatch)
+
+    assert report["abstain"] is False, report
+    assert report["models_used"] == list(ML_SLOT_CHECKPOINTS)
+    assert report["models_rejected"] == report["models_failed"] == []
+    assert [result["agent_name"] for result in results] == list(ML_SLOT_CHECKPOINTS)
+    assert all(result["status"] == "success" for result in results)
+    assert "provenance_hash_gate" not in report["provenance"]
+
+
+def test_ml_adapter_seam_missing_version_triggers_gate_a(monkeypatch):
+    """The seam still fails closed when one accepted ML adapter loses its version."""
+    report, _results = _run_ml_adapter_seam(monkeypatch, broken_slot="MockLinear")
+
+    assert report["abstain"] is True
+    assert "incomplete_call_provenance" in report["abstain_reasons"]
+    assert report["provenance"]["provenance_hash_gate"]["missing"] == {
+        "MockLinear": ["model_version"]
+    }
+
+
 def test_ml_backed_predictor_declares_model_version():
     """C2 Gate A 兼容(opus final review 抓的跨 task 接缝):MLBackedPredictorAgent(远端真 ML 路径)
     须声明 model_version,否则 per_call.model_version=None → Gate A fail-closed 误伤对外 abstain。
@@ -354,3 +433,54 @@ def test_ml_backed_predictor_declares_model_version():
     assert agent.model_version                              # 非 None(消除 Gate A 误伤)
     assert agent.model_version.startswith("donor_ml")       # 诚实反映 donor 模型类型
     assert MLBackedPredictorAgent.model_version == "donor_ml"  # 类属性兜底非 None
+
+
+def test_ml_backed_predictor_can_bind_version_to_checkpoint_content(tmp_path):
+    """C5:真 ML per-call version 可绑定 checkpoint config + weights，而不只绑定类名。"""
+    stem = tmp_path / "linear_additive"
+    stem.with_suffix(".json").write_text(
+        '{"class_name":"LinearAdditivePredictor","kwargs":{}}', encoding="utf-8"
+    )
+    stem.with_suffix(".pt").write_bytes(b"first checkpoint")
+    first = checkpoint_model_version(stem)
+
+    assert re.fullmatch(r"donor_ml:LinearAdditivePredictor@sha256:[0-9a-f]{64}", first)
+    agent = MLBackedPredictorAgent(
+        _FakeDonorModel(), control=None, pert_table=None, pert_dim=0, model_version=first
+    )
+    assert agent.model_version == first
+
+    stem.with_suffix(".json").write_text(
+        '{"class_name":"LinearAdditivePredictor","kwargs":{"changed":true}}',
+        encoding="utf-8",
+    )
+    assert checkpoint_model_version(stem) != first
+
+    stem.with_suffix(".json").write_text(
+        '{"class_name":"LinearAdditivePredictor","kwargs":{}}', encoding="utf-8"
+    )
+    stem.with_suffix(".pt").write_bytes(b"second checkpoint")
+    assert checkpoint_model_version(stem) != first
+
+    moved = tmp_path / "elsewhere" / stem.name
+    moved.parent.mkdir()
+    moved.with_suffix(".json").write_bytes(stem.with_suffix(".json").read_bytes())
+    moved.with_suffix(".pt").write_bytes(stem.with_suffix(".pt").read_bytes())
+    assert checkpoint_model_version(moved) == checkpoint_model_version(stem)
+
+
+def test_ml_backed_predictor_rejects_empty_explicit_model_version():
+    with pytest.raises(ValueError, match="model_version"):
+        MLBackedPredictorAgent(
+            _FakeDonorModel(), control=None, pert_table=None, pert_dim=0, model_version=""
+        )
+
+
+def test_checkpoint_identity_rejects_wrong_slot_class(tmp_path):
+    stem = tmp_path / "linear_additive"
+    stem.with_suffix(".json").write_text(
+        '{"class_name":"LatentAdditivePredictor","kwargs":{}}', encoding="utf-8"
+    )
+    stem.with_suffix(".pt").write_bytes(b"checkpoint")
+    with pytest.raises(ValueError, match="class mismatch"):
+        checkpoint_model_version(stem, expected_class="LinearAdditivePredictor")

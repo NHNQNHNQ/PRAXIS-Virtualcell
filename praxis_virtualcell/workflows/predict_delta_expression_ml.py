@@ -23,6 +23,10 @@ def build_runtime_ml(ckpt_dir: str, *, config=None, norman_ds=None):
     from praxis_virtualcell.core.config import Clock, IdGen, RuntimeConfig
     from praxis_virtualcell.core.runtime import AgentRuntime
     from praxis_virtualcell.predictors.ml.agent_adapter import make_ml_agent
+    from praxis_virtualcell.predictors.ml.checkpoint_identity import (
+        ML_SLOT_CHECKPOINTS,
+        checkpoint_model_version,
+    )
     from praxis_virtualcell.predictors.ml.donor_bridge import build_predictor_from_ckpt, load_norman
 
     cfg = config or RuntimeConfig()
@@ -30,10 +34,14 @@ def build_runtime_ml(ckpt_dir: str, *, config=None, norman_ds=None):
     ds = norman_ds if norman_ds is not None else load_norman(split="test", max_perts=2, max_cells=2)
 
     # 真 model 借用 Mock* name 槽位:ModelApplicability._CANDIDATES + brain 规则已含,路由不变,实现换真。
-    slots = {"MockLinear": "linear_additive", "MockCPA": "latent_additive", "MockGEARS": "gnn_pert"}
-    for name, pn in slots.items():
-        model, _ = build_predictor_from_ckpt(os.path.join(ckpt_dir, pn))
-        rt.register_agent(make_ml_agent(model, norman_ds=ds, name=name))
+    for name, (pn, expected_class) in ML_SLOT_CHECKPOINTS.items():
+        checkpoint_stem = os.path.join(ckpt_dir, pn)
+        model_version = checkpoint_model_version(
+            checkpoint_stem, expected_class=expected_class
+        )
+        model, _ = build_predictor_from_ckpt(checkpoint_stem)
+        rt.register_agent(make_ml_agent(model, norman_ds=ds, name=name,
+                                        model_version=model_version))
 
     for a in (InputInterpreterAgent(), BioObjectNormalizerAgent(), SpeciesBrainAgent(cfg),
               ModelApplicabilityAgent(), EnsembleCoordinatorAgent(), ReliabilityAgent(mode=cfg.reliability_mode),

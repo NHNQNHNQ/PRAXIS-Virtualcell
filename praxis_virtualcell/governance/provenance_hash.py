@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 
 _REQUIRED = ("model_name", "model_version", "input_hash", "output_hash")
+_SHA256 = re.compile(r"[0-9a-f]{64}")
 
 
 def _canon_sha256(obj) -> str:
@@ -33,7 +35,12 @@ def compute_call_provenance(model_name: str, model_version: str | None,
 
 
 def check_call_provenance(per_call) -> list[str]:
-    """返回缺失/为空的必需键清单(空=完整)。非 dict → 全部缺。"""
+    """返回缺失、为空或 hash 格式无效的必需键清单(空=完整)。"""
     if not isinstance(per_call, dict):
         return list(_REQUIRED)
-    return [k for k in _REQUIRED if not per_call.get(k)]
+    invalid = [key for key in ("model_name", "model_version") if not per_call.get(key)]
+    invalid.extend(
+        key for key in ("input_hash", "output_hash")
+        if not isinstance(per_call.get(key), str) or not _SHA256.fullmatch(per_call[key])
+    )
+    return invalid

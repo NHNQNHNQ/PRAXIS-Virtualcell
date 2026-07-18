@@ -22,10 +22,18 @@ class MLBackedPredictorAgent(PredictorAgent):
     # C2 Gate A per-call hash 完整性硬门要求每个被采纳 predictor 声明 model_version,否则
     # models_used 缺 version → fail-closed 误伤对外 abstain。真 ML 路径(远端 .53)须诚实声明。
 
-    def __init__(self, donor_model, *, control, pert_table, pert_dim, name=None):
+    def __init__(self, donor_model, *, control, pert_table, pert_dim, name=None,
+                 model_version: str | None = None):
         self.model = donor_model.eval()
         self.name = name or f"ML{type(donor_model).__name__}"
-        self.model_version = f"donor_ml:{type(donor_model).__name__}"   # 诚实反映真实 donor 模型类型
+        if model_version is not None and (
+            not isinstance(model_version, str) or not model_version.strip()
+        ):
+            raise ValueError("model_version must be a non-empty string when provided")
+        self.model_version = (
+            model_version if model_version is not None
+            else f"donor_ml:{type(donor_model).__name__}"
+        )
         self._control = control
         self._pert_table = pert_table
         self._pert_dim = pert_dim
@@ -52,10 +60,11 @@ class MLBackedPredictorAgent(PredictorAgent):
                 "uncertainty": {"std": float(mean.std())}}
 
 
-def make_ml_agent(donor_model, *, norman_ds=None, name=None) -> MLBackedPredictorAgent:
+def make_ml_agent(donor_model, *, norman_ds=None, name=None,
+                  model_version: str | None = None) -> MLBackedPredictorAgent:
     """从 norman dataset 取 control baseline + pert_table 初始化(测试/workflow 用)。"""
     from praxis_virtualcell.predictors.ml.donor_bridge import load_norman
 
     ds = norman_ds if norman_ds is not None else load_norman(split="test", max_perts=2, max_cells=2)
     return MLBackedPredictorAgent(donor_model, control=ds[0].control, pert_table=ds.pert_table,
-                                  pert_dim=ds.pert_dim, name=name)
+                                  pert_dim=ds.pert_dim, name=name, model_version=model_version)
