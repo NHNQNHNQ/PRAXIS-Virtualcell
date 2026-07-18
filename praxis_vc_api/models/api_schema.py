@@ -39,4 +39,8 @@ class HealthOut(BaseModel):
     status: str
     mode: str
     llm_enabled: bool
+    product_version: str
+    api_protocol_version: str
+    runtime_protocol_version: str
     runtime_version: str
+    git_sha: str

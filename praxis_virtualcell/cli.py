@@ -19,6 +19,8 @@ import json
 import os
 import sys
 
+from praxis_virtualcell import __version__
+
 
 def _config(mode: str):
     from praxis_virtualcell.core.config import Mode, RuntimeConfig
@@ -82,6 +84,7 @@ def _cmd_web(a) -> int:
 
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="praxis-vc", description="PRAXIS-VirtualCell 本地科学家界面")
+    p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run", help="从 request JSON 跑一次(离线确定性)")
     r.add_argument("--request", required=True)

@@ -14,8 +14,9 @@ from fastapi.staticfiles import StaticFiles
 
 from praxis_vc_api.models.api_schema import HealthOut, JobIn, JobOut, ParseIn, ParseOut
 from praxis_vc_api.services import runtime_service as svc
+from praxis_virtualcell import __version__
 
-app = FastAPI(title="PRAXIS-VirtualCell Local API", version="0.6")
+app = FastAPI(title="PRAXIS-VirtualCell Local API", version=__version__)
 
 # CORS:仅放行本地 Vite dev(5173)。前端只读展示,不影响后端科学决策。
 app.add_middleware(

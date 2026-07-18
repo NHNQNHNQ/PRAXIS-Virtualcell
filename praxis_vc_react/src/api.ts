@@ -16,7 +16,11 @@ export interface Health {
   status: string;
   mode: string;
   llm_enabled: boolean;
+  product_version: string;
+  api_protocol_version: string;
+  runtime_protocol_version: string;
   runtime_version: string;
+  git_sha: string;
 }
 
 export interface ParseResult {

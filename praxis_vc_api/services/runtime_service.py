@@ -7,6 +7,13 @@ import os
 
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.io.job_store import JobStore
+from praxis_virtualcell.version import (
+    API_PROTOCOL_VERSION,
+    LEGACY_RUNTIME_VERSION,
+    PRODUCT_VERSION,
+    RUNTIME_PROTOCOL_VERSION,
+    git_sha,
+)
 from praxis_virtualcell.workflows.run_virtualcell_query import (
     SUPPORTED_PERTURBATION,
     SUPPORTED_SPECIES,
@@ -16,7 +23,6 @@ from praxis_virtualcell.workflows.run_virtualcell_query import (
 )
 
 RUNS_DIR = os.environ.get("PRAXIS_VC_RUNS", "runs")
-RUNTIME_VERSION = "v0.3"
 
 # UI 辅助:cell_type 后端不做枚举校验(自由字符串),这里仅给常见示例供前端下拉,
 # 允许自由填写。物种/扰动类型的合法值直接复用 runtime 白名单(单一真相源)。
@@ -36,8 +42,16 @@ def config_for(mode: str) -> RuntimeConfig:
 
 def health() -> dict:
     cfg = RuntimeConfig.from_env()
-    return {"status": "ok", "mode": cfg.mode.value, "llm_enabled": cfg.llm_enabled,
-            "runtime_version": RUNTIME_VERSION}
+    return {
+        "status": "ok",
+        "mode": cfg.mode.value,
+        "llm_enabled": cfg.llm_enabled,
+        "product_version": PRODUCT_VERSION,
+        "api_protocol_version": API_PROTOCOL_VERSION,
+        "runtime_protocol_version": RUNTIME_PROTOCOL_VERSION,
+        "runtime_version": LEGACY_RUNTIME_VERSION,
+        "git_sha": git_sha(),
+    }
 
 
 def parse(text: str, mode: str) -> dict:

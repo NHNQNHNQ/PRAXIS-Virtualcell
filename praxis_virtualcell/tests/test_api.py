@@ -26,10 +26,22 @@ def client(tmp_path, monkeypatch):
     return TestClient(app)
 
 
-def test_health(client):
+def test_health(client, monkeypatch):
+    from praxis_virtualcell import __version__
+
+    monkeypatch.setenv("GIT_SHA", "abcdef1234567890")
     r = client.get("/api/health")
     assert r.status_code == 200
-    assert r.json()["status"] == "ok" and "mode" in r.json()
+    assert r.json() == {
+        "status": "ok",
+        "mode": "offline",
+        "llm_enabled": False,
+        "product_version": __version__,
+        "api_protocol_version": "vc.api.v1",
+        "runtime_protocol_version": "vc.runtime.v1",
+        "runtime_version": "v0.3",
+        "git_sha": "abcdef1234567890",
+    }
 
 
 def test_parse_offline(client):

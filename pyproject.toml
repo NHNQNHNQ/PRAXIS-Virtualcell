@@ -1,6 +1,6 @@
 [project]
 name = "praxis-virtualcell"
-version = "0.0.0"
+version = "1.5.1"
 description = "PRAXIS-2-derived multi-agent framework for virtual-cell prediction"
 readme = "README.md"
 license = { text = "MIT" }

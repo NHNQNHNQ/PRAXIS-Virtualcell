@@ -1,3 +1,5 @@
 """PRAXIS-2 内核包。"""
 
-__version__ = "0.0.0"
+from praxis_virtualcell import __version__
+
+__all__ = ["__version__"]

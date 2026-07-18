@@ -23,6 +23,10 @@ export default function JobSidebar({
   healthErr: string | null;
   mode: Mode;
 }) {
+  const buildSha = health?.git_sha === "unknown"
+    ? "unknown"
+    : health?.git_sha.slice(0, 7);
+
   return (
     <aside className="js-sidebar">
       <div className="js-brand">
@@ -73,13 +77,14 @@ export default function JobSidebar({
         <div className="js-foot-status">
           <span className={health ? "js-dot ok" : "js-dot off"} />
           {health
-            ? `后端 ${health.status} · 运行时 ${health.runtime_version}`
+            ? `后端 ${health.status} · 产品 ${health.product_version}`
             : healthErr
               ? "后端未连通"
               : "连接中…"}
         </div>
         <div className="js-foot-note">
-          {mode === "offline" ? "本地模式" : "语言模型辅助"} · 同源 · 不保存密钥
+          {mode === "offline" ? "本地模式" : "语言模型辅助"}
+          {health ? ` · ${health.runtime_protocol_version} · build ${buildSha}` : " · 同源 · 不保存密钥"}
         </div>
       </div>
     </aside>
