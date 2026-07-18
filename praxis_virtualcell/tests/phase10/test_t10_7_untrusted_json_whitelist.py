@@ -547,7 +547,7 @@ def test_backfill_critic_deep_nested_recursionerror_fail_closed():
     """llm_critic.py:43 —— 回填 RecursionError。修复前:RecursionError 穿透 handle()
     → 经 core/runtime.py:44 的 `agent.handle(...)`(**该处无 try/except**,已核实)
     → CLI 直接崩 traceback(`cli.py` 全文无 try/except,grep 零输出实证)/
-    `/api/jobs` 降级 400(端点有 except Exception)。"""
+    `/api/jobs` 由端点捕获并返回不含原始异常文本的稳定 500。"""
     out = _critic_notes(_DEEP_JSON)
     assert out["flags"] == ["llm_parse_failed"]        # fail-closed,与 JSONDecodeError 同语义
     assert out["notes"] == []

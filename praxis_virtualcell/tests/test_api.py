@@ -206,7 +206,7 @@ def test_job_endpoint_revalidates_confirmed_request(client):
                "output_modality": "invented_output", "task_type": "predict_delta_expression"}
     r = client.post("/api/jobs", json={"request": invalid, "mode": "offline"})
     assert r.status_code == 400
-    assert "unsupported_output_modality" in r.json()["detail"]
+    assert r.json()["detail"] == "invalid_request"
 
 
 def test_job_endpoint_normalizes_metadata_routing_controls(client):
@@ -248,7 +248,7 @@ def test_job_endpoint_rejects_invalid_perturbation_dose(client, bad_dose):
     }
     response = client.post("/api/jobs", json={"request": req, "mode": "offline"})
     assert response.status_code == 400
-    assert "invalid_perturbation_dose" in response.json()["detail"]
+    assert response.json()["detail"] == "invalid_request"
 
 
 def test_job_endpoint_normalizes_finite_perturbation_dose(client):
@@ -343,7 +343,30 @@ def test_job_endpoint_rejects_missing_targets_before_module_plan(client):
            "task_type": "predict_delta_expression"}
     r = client.post("/api/jobs", json={"request": req, "mode": "offline"})
     assert r.status_code == 400
-    assert "perturbation_targets" in r.json()["detail"]
+    assert r.json()["detail"] == "invalid_request"
+
+
+def test_job_endpoint_does_not_expose_internal_exception(client, monkeypatch):
+    import praxis_vc_api.main as api_main
+
+    sentinel = "secret-path-/srv/private/checkpoint.bin"
+
+    def fail_job(*args, **kwargs):
+        raise RuntimeError(sentinel)
+
+    monkeypatch.setattr(api_main.svc, "run_job", fail_job)
+    req = {
+        "species": "human",
+        "perturbation_type": "gene",
+        "perturbation_targets": ["AHR"],
+        "input_modality": "scRNA",
+        "output_modality": "delta_expression",
+        "task_type": "predict_delta_expression",
+    }
+    response = client.post("/api/jobs", json={"request": req, "mode": "offline"})
+    assert response.status_code == 500
+    assert response.json()["detail"] == "job_execution_failed"
+    assert sentinel not in response.text
 
 
 def test_legacy_module_plan_missing_is_empty_not_500(client):

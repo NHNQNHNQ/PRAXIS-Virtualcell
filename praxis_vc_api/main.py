@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 
@@ -16,6 +17,9 @@ from fastapi.staticfiles import StaticFiles
 from praxis_vc_api.models.api_schema import HealthOut, JobIn, JobOut, ParseIn, ParseOut
 from praxis_vc_api.services import runtime_service as svc
 from praxis_virtualcell import __version__
+from praxis_virtualcell.core.exceptions import InputValidationError
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="PRAXIS-VirtualCell Local API", version=__version__)
 
@@ -59,8 +63,11 @@ def create_job(body: JobIn):
     """已确认的 request → 离线 runtime 执行 → 落盘 job。"""
     try:
         return svc.run_job(body.request, body.mode, body.enable_llm_report)
+    except InputValidationError as e:
+        raise HTTPException(status_code=400, detail="invalid_request") from e
     except Exception as e:  # noqa: BLE001
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        logger.exception("job execution failed")
+        raise HTTPException(status_code=500, detail="job_execution_failed") from e
 
 
 @app.get("/api/jobs")

@@ -141,7 +141,9 @@ C3 Task 7 漏掉的那一层根治掉。产出直接服务 D 单元(D 有大量"
    LLM tolerant 分支仍可能保留合法元素并静默丢弃畸形元素而不提示。
 6. **except 捕获范围过宽无测试兜底**:现有测试能证明"except 真在捕获"(`except ():` → 红),
    **不能证明"范围不过宽"**(改成 `except Exception:` → 全绿)。
-7. **`/api/jobs` 的 `detail=str(e)`** 把原始异常文本泄漏给调用方(小瑕疵,记录不修)。
+7. **`/api/jobs` 异常信息边界已收紧**:已识别的输入校验失败固定返回
+   `400 invalid_request`;未知执行异常记服务端日志并固定返回 `500 job_execution_failed`。
+   回归测试注入含私有路径的异常,断言响应不含原始文本;不把该端点外推为全服务错误处理覆盖。
 8. **narrative gate**:仅 abstain / 仅浮点 / 不验语境对应 / hedge 词可绕 →
    **不得声称覆盖 §128 hypothesis-写成-conclusion**。
 9. **response depth/node/byte 预算仅是出站序列化安全**,不是通用 ingress/anti-DoS 限额;
