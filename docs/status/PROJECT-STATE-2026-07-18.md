@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 14:22 CST (+0800)
+> Captured: 2026-07-18 15:12 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — C1_COMPLETE — Phase C2 next`
+> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — C1_COMPLETE — C2_COMPLETE — Phase C3 next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -25,7 +25,7 @@ The source volume is ExFAT and was 93% full. The active clone and recovery direc
 | Item | Observed value |
 |---|---|
 | Audit anchor / current branch base | `24475f2eb14c27c7cfbb82b016b881e88e98b17c` |
-| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream yet; C1 implementation `57bc258` |
+| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream yet; C2 implementation `73f3324`, docs `8659c82` |
 | Preserved former working branch | `feat/v0.9-phase0-module-core=24475f2` |
 | Local `main` | `176019ebd9c198f93a5a645f1ecefce9baaf0522` |
 | Annotated tag `v1.5.0` | tag object `df04e74`; peeled commit `176019e` |
@@ -202,13 +202,27 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 - Independent review: PASS for workflow execution paths, hook ordering, marker registration, remote isolation, and unchanged assertions. This is local reproduction evidence only; the branch has not been pushed and no GitHub Actions run is claimed.
 - Protected assets: four CSS files remained unstaged and retain patch SHA-256 `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`.
 
+`C2_COMPLETE`
+
+- Implementation commit: `73f33246e22157d288829dc95e9ea2bd60ab10c3`; current-documentation commit: `8659c82f644744aeab24219e2f2cab6102afc24a`.
+- Version contract: `pyproject.toml` is the sole manually edited product-version source. Installed metadata exposes the local, unreleased `1.5.1` candidate through `praxis_virtualcell.__version__`, the `praxis2` compatibility alias, CLI, FastAPI/OpenAPI, and health. The frontend package/lock is an npm-generated mirror; the UI consumes backend product/build identity.
+- Protocol boundary: API `vc.api.v1`, runtime `vc.runtime.v1`, legacy health field `runtime_version="v0.3"`, message/schema/artifact/model versions, and injected build SHA remain separate from the product release.
+- Editable verification: `pip check` passed; installed metadata and both package exports reported `1.5.1`; `praxis-vc --version` and `praxis-vc --help` exited `0`.
+- Authoritative core regression: `917 passed / 40 skipped / 9 deselected / 0 failed` in `8.71s`, with the same single Starlette/httpx deprecation warning. The five additional passes are version/API contract tests; the frozen Phase 10 report remains `912/40/9`.
+- Legacy isolation rerun: `1136 passed / 59 skipped / 105 deselected / 0 failed` in `15.88s`; the `.53` operational probe remained excluded and no real LLM request ran.
+- Frontend on Node `26.4.0`: `npm ci` reported 0 vulnerabilities; typecheck, lint, and build passed; all four Chromium E2E specs passed. Main JavaScript remained `631.72 kB` (`184.27 kB` gzip) and CSS `42.53 kB` (`13.08 kB` gzip); the chunk warning stays owned by C4. C1's separate Node 24 evidence covered the earlier three-spec suite, not this four-spec C2 result.
+- Clean distribution smoke: `git archive 73f3324` produced `praxis_virtualcell-1.5.1-py3-none-any.whl`, 714,871 bytes, SHA-256 `b571ee71a42d028774221b068a5d0b5a613bcebb456ba655c1a3b4e1d1690580`. A fresh Python 3.13 venv installed it with `--no-deps`; imports, metadata, `--version`, and `--help` passed from an empty working directory. Full dependency/run/API/web/dist/Docker reproduction remains C4.
+- Independent reviews: version/API contract review PASS; documentation review PASS after correcting wheel, Streamlit, Docker, environment, and build-time configuration boundaries. All eight current-document links resolve and `git diff --check` passed.
+- Publication boundary: no push, PR, merge, tag, deployment, `.53` mutation, or GitHub Actions run occurred. The historical local `v1.5.0` tag was not moved or recreated.
+- Protected assets: four CSS files remain unstaged and retain patch SHA-256 `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`; `.claude/`, ignored `.playwright-mcp/`, `string.jpeg`, stash, recovery material, and the T7 archive remain preserved.
+
 ## Next authorized work
 
-Continue Phase C2 in this APFS clone:
+Continue Phase C3 in this APFS clone:
 
-1. Reconcile `docs/VERSIONING.md`, local `v1.5.0` history, Python metadata, frontend package metadata, API/UI labels, and schema/artifact versions before choosing a product-version source.
-2. Implement one product-version source without rewriting historical tags or conflating schema/artifact versions.
-3. Update root/frontend documentation and development commands to match the measured C1 scopes and explicit external gates.
-4. Reinstall the editable package, verify `praxis-vc --help`, and repeat a clean wheel install smoke before committing.
+1. Visually inspect the four protected theme CSS files without staging or editing them; preserve the exact patch unless the C3 theme review explicitly accepts a minimal follow-up.
+2. Confirm whether Newsreader is still referenced before changing dependencies or lockfiles.
+3. Expand Playwright in the plan's S3 → S9 → S4 → S6 → S7/S8 → S11 → S5 → S12 → S13 order, first observing real UI/API behavior and then adding narrow assertions plus mutation proof.
+4. Keep CSS/theme work, E2E changes, and any production bug fix in separate explicit commits. If accepted user-visible theme work enters the candidate, reassess the product version as `1.6.0` before D0.
 
 No external synchronization is authorized before the Phase D approval gate.

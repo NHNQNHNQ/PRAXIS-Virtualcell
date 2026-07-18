@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，`C1_COMPLETE`，C2 待执行
+> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，`C1_COMPLETE`，`C2_COMPLETE`，C3 下一步
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -197,11 +197,11 @@
 
 ### C2 — 版本、文档与 CLI 收口
 
-- [ ] 按 `docs/VERSIONING.md` 建立单一产品版本源；当前历史基线是 `v1.5.0`，下一发行号由改动范围决定。
-- [ ] 让 Python metadata、前端 package、API/UI 展示引用明确的发行版本；保留独立 schema/artifact 版本。
-- [ ] 更新根 README 的测试数字、安装/开发命令和能力边界；替换前端 Vite 模板 README。
-- [ ] 重新安装 editable 环境并验证 `praxis-vc --help`；干净 wheel 安装 smoke 通过。
-- [ ] 不在未验证远端/tag 状态时创建或 push 新 release tag。
+- [x] 按 `docs/VERSIONING.md` 建立单一产品版本源；根据 C0–C2 的兼容性整理范围选择未发布候选 `1.5.1`，若 C3 接受并提交可见主题扩展则在 D0 前重新评估 `1.6.0`。
+- [x] 让 Python metadata、前端 package、API/UI 展示引用明确的发行版本；API/runtime protocol 与 schema/artifact 版本保持独立。
+- [x] 更新根 README 的测试数字、安装/开发命令和能力边界；替换前端 Vite 模板 README，并新增测试指南与 changelog。
+- [x] 重新验证 editable metadata、`praxis-vc --version`/`--help`；提交 `73f3324` 的干净 wheel 在独立 Python 3.13 venv 中完成安装/import/CLI smoke。
+- [x] 没有创建或 push release tag；候选仍未 push、未部署，GitHub Actions 状态仍只能记为未观察。
 
 ### C3 — 前端 WIP 与全面 E2E
 
