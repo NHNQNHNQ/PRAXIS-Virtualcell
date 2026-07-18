@@ -13,7 +13,7 @@ export default function LazyResultsStage(props: ResultsStageProps) {
     <Suspense
       fallback={
         <Card title="正在加载结果" ariaLabel="正在加载结果">
-          <div role="status" aria-live="polite">
+          <div role="status" aria-label="正在加载结果" aria-live="polite">
             <Skeleton lines={6} />
           </div>
         </Card>
