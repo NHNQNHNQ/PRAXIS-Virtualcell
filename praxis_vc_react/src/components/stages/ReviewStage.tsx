@@ -125,7 +125,7 @@ export default function ReviewStage({
       <div style={{ marginBottom: "var(--space-5)" }}>
         <h1
           style={{
-            fontFamily: "var(--font-serif)",
+            fontFamily: "var(--font-display)",
             fontSize: "28px",
             fontWeight: 500,
             lineHeight: 1.15,

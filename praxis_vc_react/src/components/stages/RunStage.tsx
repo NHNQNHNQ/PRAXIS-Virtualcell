@@ -129,7 +129,7 @@ export default function RunStage({
       <div style={{ marginBottom: "var(--space-4)" }}>
         <h1
           style={{
-            fontFamily: "var(--font-serif)",
+            fontFamily: "var(--font-display)",
             fontSize: "28px",
             fontWeight: 500,
             lineHeight: 1.15,
@@ -307,7 +307,7 @@ export default function RunStage({
                       alignItems: "center",
                       justifyContent: "center",
                       fontSize: "11px",
-                      color: "#fff",
+                      color: "var(--on-accent)",
                       lineHeight: 1,
                     }}
                   >

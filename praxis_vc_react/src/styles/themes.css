@@ -1,20 +1,24 @@
 /* 主题 —— light/dark 双主题。
    默认跟随 prefers-color-scheme,但可被 <html data-theme="..."> 手动覆盖(配合 TopBar 主题开关,Task 9.6)。
-   dark:暖白→深底;深靛蓝提亮以保对比;翠绿仍仅状态色,不作主色/大面积。
-   注:与 spec §3 light 色值一一对应;light 权威值在 tokens.css。 */
+   dark:深中性底 + 高对比浅蓝主色。
+   注:light 权威值在 tokens.css。 */
 
 /* —— dark 覆盖(共享变量集,供显式类与系统偏好复用) —— */
 :root[data-theme="dark"] {
-  --bg: #14141F;                 /* 深底(暖白的深色对位) */
-  --surface: #1C1C2B;            /* 主面板(深) */
-  --text: #ECECF2;              /* 主文字(高对比浅色) */
-  --text-muted: #9AA0AE;        /* 次级文字 */
-  --primary: #6C93C4;           /* 深靛蓝提亮(#1E3A5F 在深底上提亮以保对比) */
-  --accent: #4FB3A6;            /* 翠绿提亮(仅状态色) */
-  --warn: #D9A441;              /* 警告(深底提亮) */
-  --danger: #E5675C;            /* 危险(深底提亮) */
-  --border: #2C2C3D;            /* 边框(深) */
-  --code-bg: #22222F;           /* 代码背景(深) */
+  --bg: #131314;                 /* 深底(中性近黑) */
+  --surface: #1E1F22;            /* 主面板(深中性灰) */
+  --text: #E3E3E6;              /* 主文字(暖白) */
+  --text-muted: #9AA0A6;        /* 次级文字(中性灰) */
+  --primary: #8AB4F8;           /* 主色(浅蓝) */
+  --on-primary: #202124;
+  --accent: #A8C7FA;            /* 强调:更亮的暗色蓝 */
+  --on-accent: #202124;
+  --warn: #FDD663;              /* 警告(琥珀) */
+  --danger: #F28B82;            /* 危险(浅红) */
+  --on-danger: #202124;
+  --border: #3C4043;            /* 装饰分隔边框 */
+  --control-border: #70757A;    /* 可交互控件边界 */
+  --code-bg: #26282B;           /* 代码背景(深) */
 
   --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
@@ -22,16 +26,20 @@
 /* —— 系统偏好为 dark 且未被 data-theme="light" 显式覆盖时,套用同一套 dark 值 —— */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #14141F;
-    --surface: #1C1C2B;
-    --text: #ECECF2;
-    --text-muted: #9AA0AE;
-    --primary: #6C93C4;
-    --accent: #4FB3A6;
-    --warn: #D9A441;
-    --danger: #E5675C;
-    --border: #2C2C3D;
-    --code-bg: #22222F;
+    --bg: #131314;
+    --surface: #1E1F22;
+    --text: #E3E3E6;
+    --text-muted: #9AA0A6;
+    --primary: #8AB4F8;
+    --on-primary: #202124;
+    --accent: #A8C7FA;
+    --on-accent: #202124;
+    --warn: #FDD663;
+    --danger: #F28B82;
+    --on-danger: #202124;
+    --border: #3C4043;
+    --control-border: #70757A;
+    --code-bg: #26282B;
 
     --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   }

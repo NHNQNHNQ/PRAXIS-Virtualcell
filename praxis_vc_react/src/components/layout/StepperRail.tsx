@@ -4,7 +4,7 @@ import { type Stage } from "../../api";
 // 注意:这是「工作区内」的阶段轨,不是全局侧栏(全局历史 job 侧栏是 JobSidebar)。
 //
 // 规则(spec §6 stepper):
-//  - 当前阶段:高亮(深靛蓝 --primary);
+//  - 当前阶段:高亮(--primary);
 //  - 已完成阶段(在当前之前):可点回退(回退只改 stage 不清 JobState 字段,故不丢数据);
 //  - 未满足 canEnter 的靠后阶段:禁用置灰,点不动;
 //  - 不允许跳过 review:即便更靠后的阶段恰好可达,也不能从 ask 直接跳到 route 之后

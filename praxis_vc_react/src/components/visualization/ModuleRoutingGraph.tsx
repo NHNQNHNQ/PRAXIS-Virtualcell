@@ -9,7 +9,7 @@ import EmptyState from "../ui/EmptyState";
 // primary→secondary 用连线(handoff)。坐标完全由节点数推导,不用随机。
 //
 // 节点着色按 verdict(取自 entries 中对应 module 的 verdict):
-//   ok/accept → --accent(翠绿) / caution → --warn(amber) / mismatch → --danger(red)。
+//   ok/accept → --accent / caution → --warn / mismatch → --danger。
 //   abstain → 虚线边框特殊标记(中性描边,不着 verdict 色)。
 //   未知/缺失 verdict → 中性(--text-muted 描边),不假造裁决。
 // confidence:ModulePlan 无该字段,故不以节点大小/标签编造置信度。

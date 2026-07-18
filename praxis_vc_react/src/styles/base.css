@@ -1,5 +1,5 @@
 /* 基础排版 —— reset + 全局字体/标题/代码,全部走 tokens.css 变量。
-   spec §3:正文用 Inter,大标题(h1/h2)用 Newsreader 衬线,code/pre 用 JetBrains Mono。
+   正文与大标题统一用 Inter(几何无衬线),code/pre 用 JetBrains Mono。
    前端只读展示,不参与预测/治理决策。 */
 
 /* —— reset —— */
@@ -26,7 +26,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* —— 标题:大标题用衬线(Newsreader),小标题回落无衬线 —— */
+/* —— 标题:统一几何无衬线;大标题偏大偏轻,保持透气观感 —— */
 h1,
 h2,
 h3 {
@@ -38,7 +38,8 @@ h3 {
 
 h1,
 h2 {
-  font-family: var(--font-serif); /* hero / 页面大标题 用衬线 */
+  font-family: var(--font-display);
+  font-weight: 500;
   letter-spacing: -0.02em;
 }
 
@@ -116,11 +117,9 @@ button {
   --surface-2: var(--code-bg);
   --surface-hover: color-mix(in srgb, var(--primary) 6%, var(--surface));
   --text-faint: color-mix(in srgb, var(--text-muted) 70%, transparent);
-  --border-strong: color-mix(in srgb, var(--border) 70%, var(--text-muted));
 
-  --accent-solid: var(--primary); /* 旧 --accent 主按钮位改指深靛蓝(不用黑) */
+  --accent-solid: var(--primary); /* 旧主按钮位统一指向主色 */
   --accent-hover: color-mix(in srgb, var(--primary) 85%, #000);
-  --accent-text: #ffffff;
 
   --focus: var(--accent);
   --focus-soft: color-mix(in srgb, var(--accent) 14%, transparent);
@@ -136,6 +135,6 @@ button {
   --shadow: 0 2px 8px rgba(20, 20, 20, 0.06);
 }
 
-/* 旧 App.css 的主按钮 .btn 已改指 --accent-solid(深靛蓝,见 App.css)。
-   --accent 保留为 tokens 的 spec 翠绿(#2F8F83,强调/success/active),不再覆盖。
+/* 旧 App.css 的主按钮 .btn 已改指 --accent-solid(见 App.css)。
+   --accent 保留为独立强调色,不再被兼容变量覆盖。
    旧 App.css 在 P3/P5 迁完删除。 */

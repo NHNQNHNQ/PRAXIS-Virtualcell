@@ -2,7 +2,7 @@ import { useState } from "react";
 import { parse, type Mode, type ParseResult } from "../../api";
 
 // Stage 1 · Ask(spec §2 Stage1)—— 科研感 hero 输入,不是聊天窗:
-// 衬线大标题 + 简短说明 + 大输入 textarea + 模式选择 + 示例入口 + Advanced 折叠区。
+// 无衬线大标题 + 简短说明 + 大输入 textarea + 模式选择 + 示例入口 + Advanced 折叠区。
 // 解析全在后端(POST /api/parse,复用 api.ts 的 parse());前端绝不自己解析自然语言。
 // parse 成功回传 (result, query);失败显错误态、不崩溃。
 
@@ -56,11 +56,11 @@ export default function AskStage({
 
   return (
     <section style={{ maxWidth: "760px" }}>
-      {/* 科研感 hero:衬线大标题 + 一句平实说明(非「我来帮你」的聊天窗观感)。 */}
+      {/* 科研感 hero:轻字重大标题 + 一句平实说明(非「我来帮你」的聊天窗观感)。 */}
       <div style={{ marginBottom: "var(--space-6)" }}>
         <h1
           style={{
-            fontFamily: "var(--font-serif)",
+            fontFamily: "var(--font-display)",
             fontSize: "34px",
             fontWeight: 500,
             lineHeight: 1.15,

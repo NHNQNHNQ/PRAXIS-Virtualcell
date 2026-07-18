@@ -1,4 +1,4 @@
-/* PRAXIS-VirtualCell 前端 — ChatGPT 风格布局与组件。前端只读展示。 */
+/* PRAXIS-VirtualCell 前端 — 科研控制台布局与组件。前端只读展示。 */
 
 /* ---------- 外壳:侧栏 + 主区 ---------- */
 .app-shell {
@@ -35,7 +35,7 @@
   width: 100%;
   padding: 10px 12px;
   background: var(--surface);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius);
   color: var(--text);
   font-size: 14px;
@@ -151,7 +151,7 @@
 
 .muted { color: var(--text-muted); font-size: 13px; }
 
-/* ---------- Ask 空状态(ChatGPT hero)---------- */
+/* ---------- Ask 空状态(任务 hero) ---------- */
 .hero { text-align: center; padding: 40px 0 8px; }
 .hero h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
 .hero .hero-sub { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
@@ -162,7 +162,7 @@ textarea, input[type="text"], input:not([type]), select {
   width: 100%;
   padding: 11px 14px;
   background: var(--surface);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius);
   color: var(--text);
   transition: border-color 0.12s, box-shadow 0.12s;
@@ -195,7 +195,7 @@ textarea:focus, input:focus, select:focus {
   border: 1px solid transparent;
   border-radius: var(--radius);
   background: var(--accent-solid);
-  color: var(--accent-text);
+  color: var(--on-primary);
   transition: background 0.12s, opacity 0.12s;
   display: inline-flex;
   align-items: center;
@@ -206,7 +206,7 @@ textarea:focus, input:focus, select:focus {
 .btn-ghost {
   background: transparent;
   color: var(--text);
-  border-color: var(--border-strong);
+  border-color: var(--control-border);
 }
 .btn-ghost:hover { background: var(--surface-hover); }
 .btn-sm { padding: 6px 12px; font-size: 13px; }
@@ -322,7 +322,7 @@ code.sha { font-size: 0.68em; }
   color: var(--text-faint);
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  border-bottom: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border);
 }
 .module-table td {
   font-size: 13px;

@@ -53,8 +53,8 @@
   padding: 9px 16px;
   border: 1px solid transparent;
   border-radius: var(--radius);
-  background: var(--primary); /* 深靛蓝实心,不用黑 */
-  color: #fff;
+  background: var(--primary);
+  color: var(--on-primary);
   transition: background 0.12s, opacity 0.12s;
 }
 .btn:hover {
@@ -67,14 +67,14 @@
 .btn-ghost {
   background: transparent;
   color: var(--text);
-  border-color: var(--border);
+  border-color: var(--control-border);
 }
 .btn-ghost:hover {
   background: color-mix(in srgb, var(--primary) 6%, var(--surface));
 }
 .btn-danger {
   background: var(--danger);
-  color: #fff;
+  color: var(--on-danger);
 }
 .btn-danger:hover {
   background: color-mix(in srgb, var(--danger) 85%, #000);
@@ -93,7 +93,7 @@ select {
   width: 100%;
   padding: 11px 14px;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius);
   color: var(--text);
   transition: border-color 0.12s, box-shadow 0.12s;
@@ -339,7 +339,7 @@ select:focus {
   width: 100%;
   padding: 10px 12px;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius);
   color: var(--text);
   font-family: var(--font-sans);
@@ -532,7 +532,7 @@ select:focus {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   background: var(--surface);
   color: var(--text);
   font-family: var(--font-sans);
@@ -620,7 +620,7 @@ select:focus {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--control-border);
   background: var(--surface);
   color: var(--text-muted);
   font-size: 12px;
@@ -643,7 +643,7 @@ select:focus {
   color: var(--text-muted);
   line-height: 1.3;
 }
-/* 连接线:节点之间的竖线;已完成段落用深靛蓝提示进度 */
+/* 连接线:节点之间的竖线;已完成段落用主色提示进度 */
 .sr-connector {
   position: absolute;
   left: calc(var(--space-2) + 12px); /* 对齐 marker 中心 */
@@ -656,7 +656,7 @@ select:focus {
   background: color-mix(in srgb, var(--primary) 45%, var(--border));
 }
 
-/* —— 当前阶段:高亮(深靛蓝) —— */
+/* —— 当前阶段:主色高亮 —— */
 .sr-current {
   background: color-mix(in srgb, var(--primary) 8%, var(--surface));
   border-color: color-mix(in srgb, var(--primary) 30%, transparent);
@@ -665,14 +665,14 @@ select:focus {
 .sr-current .sr-marker {
   border-color: var(--primary);
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
 }
 .sr-current .sr-label {
   color: var(--primary);
   font-weight: 600;
 }
 
-/* —— 已完成:可点回退(翠绿勾,状态色) —— */
+/* —— 已完成:可点回退(强调色勾) —— */
 .sr-done {
   cursor: pointer;
 }

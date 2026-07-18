@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 // 状态徽标(spec §2 字段/状态语义)。tone 决定配色,全部走 components.css 的 .badge* 类:
-//   confirmed → 深靛蓝   inferred/warn → amber   missing/danger → 红橙   neutral → 中性描边
+//   confirmed → 主色   inferred/warn → 警告色   missing/danger → 危险色   neutral → 中性描边
 // 纯展示原子,无副作用。
 
 export type BadgeTone =
@@ -17,7 +17,7 @@ export type BadgeProps = {
   children: ReactNode;
 };
 
-// tone → .badge 修饰类。warn 复用 inferred(amber),danger 复用 missing(红橙),neutral 用基类。
+// tone → .badge 修饰类。warn 复用 inferred,danger 复用 missing,neutral 用基类。
 const TONE_CLASS: Record<BadgeTone, string> = {
   confirmed: "badge badge-confirmed",
   inferred: "badge badge-inferred",

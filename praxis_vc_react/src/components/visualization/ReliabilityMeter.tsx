@@ -1,6 +1,6 @@
 // 可靠性条(spec §4 ③:reliability score strip)。
 // 纯展示、无副作用、不请求数据:score 由 P5 从 learned_reliability.reliability_score 提取后传入。
-// 横向 0–1 strip,按阈值分段着色(高=--accent 翠绿,中=--warn amber,低=--danger),
+// 横向 0–1 strip,按阈值分段着色(高=--accent,中=--warn,低=--danger),
 // 指针标出当前 score 位置。配色走 token(不硬编码 hex)。
 // score == null → 显示「未提供」占位,不崩。
 // 文案守 spec §3.5:用平实中文,不外泄内部名词。

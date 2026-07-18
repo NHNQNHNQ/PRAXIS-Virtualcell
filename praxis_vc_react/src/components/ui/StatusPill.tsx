@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 
 // 字段状态点 + 标签(spec §2:confirmed/inferred/missing/editable/locked)。
-// confirmed=深靛蓝勾选态、inferred=amber(推断)、missing=红橙(缺失);
+// confirmed=主色勾选态、inferred=警告色(推断)、missing=危险色(缺失);
 // editable=可编辑(中性,铅笔意味)、locked=不可改(中性,锁意味)。
 // 走 components.css 的 .pill + .status-dot 类;editable/locked 无状态色,用中性描边。
 // 纯展示原子,无副作用。

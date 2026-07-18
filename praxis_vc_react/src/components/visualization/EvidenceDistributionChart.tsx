@@ -18,7 +18,7 @@ import EmptyState from "../ui/EmptyState";
 // offline 为 mock 数值时如实展示,不推断真值。配色走 token(不硬编码 hex)。
 //   - 分歧度(disagreement)高于阈值(triggered)时,gauge 走 --warn(amber)以示警示;
 //     正常态走 --primary/--accent。
-//   - 模型计数分布:采纳=--accent(翠绿)/未采纳=--warn(amber,克制)/失败=--danger。
+//   - 模型计数分布:采纳=--accent/未采纳=--warn/失败=--danger。
 // recharts 的 fill 接受 CSS 变量字符串,直接 fill="var(--...)"。
 // 文案守 spec §3.5:不外泄 model_disagreement / pairwise_cosine_distance 等原始内部名词,
 //   metric 仅作自然化副标签呈现,不当主文案抛给用户。

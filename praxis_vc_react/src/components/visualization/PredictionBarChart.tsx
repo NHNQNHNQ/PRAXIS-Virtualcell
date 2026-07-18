@@ -4,7 +4,7 @@ import EmptyState from "../ui/EmptyState";
 // 预测柱状图(spec §4 ①②:module response score bar / top predicted changes)。
 // 纯展示、无副作用、不请求数据:数据由 P5 各 result tab 从 structured_report 提取后传入。
 // offline 为 mock 数值时如实展示,不推断真值。配色走 token(不硬编码 hex)。
-//   - 正值柱:--primary(深靛蓝);绝对值最大的一根用 --accent(翠绿)点缀,给一处克制的强调。
+//   - 正值柱:--primary;绝对值最大的一根用 --accent 点缀,给一处克制的强调。
 //   - 负值柱:--danger。
 // recharts 的 fill 接受 CSS 变量字符串,直接 fill="var(--...)"。
 

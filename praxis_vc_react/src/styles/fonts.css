@@ -1,7 +1,5 @@
-/* self-host 字体(@fontsource,只引所需字重以控制打包体积) */
-@import "@fontsource/newsreader/400.css";
-@import "@fontsource/newsreader/500.css";
-@import "@fontsource/newsreader/600.css";
+/* self-host 字体(@fontsource,只引所需字重以控制打包体积)。
+   Inter 兼作正文与大标题;JetBrains Mono 供 code/trace。 */
 @import "@fontsource/inter/400.css";
 @import "@fontsource/inter/500.css";
 @import "@fontsource/inter/600.css";
