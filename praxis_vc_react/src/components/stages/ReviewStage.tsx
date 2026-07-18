@@ -22,12 +22,17 @@ import type { FieldStatus } from "../ui/StatusPill";
 //   initialRequest(= job.confirmedRequest)非空 → 从它回填(保留用户上次编辑值,回退再进不丢);
 //   否则 → 从 parsedIntent.candidate_request seed。
 
-// 从来源对象读取可编辑字段的字符串初值(数组按逗号拼接)。
+// 不可信解析候选只按声明类型读取；对象/数字不得经 String() 伪装成可确认值。
 function readStr(src: Record<string, unknown>, key: string): string {
   const v = src[key];
-  if (v == null) return "";
-  if (Array.isArray(v)) return v.join(", ");
-  return String(v);
+  return typeof v === "string" ? v : "";
+}
+
+function readStringList(src: Record<string, unknown>, key: string): string {
+  const v = src[key];
+  return Array.isArray(v)
+    ? v.filter((item): item is string => typeof item === "string").join(", ")
+    : "";
 }
 
 export default function ReviewStage({
@@ -35,11 +40,13 @@ export default function ReviewStage({
   initialRequest,
   onConfirmed,
   onBack,
+  onEdited,
 }: {
   parsedIntent: ParseResult;
   initialRequest: Record<string, unknown> | null;
   onConfirmed: (request: Record<string, unknown>) => void;
-  onBack: () => void;
+  onBack: (draft: Record<string, unknown>) => void;
+  onEdited: (draft: Record<string, unknown>) => void;
 }) {
   // 候选请求(解析结果)始终作为基底,承载 request_id/metadata/task_type 等非编辑字段。
   const cand = parsedIntent.candidate_request as Record<string, unknown>;
@@ -52,8 +59,9 @@ export default function ReviewStage({
     readStr(seed, "perturbation_type"),
   );
   const [targets, setTargets] = useState(() =>
-    readStr(seed, "perturbation_targets"),
+    readStringList(seed, "perturbation_targets"),
   );
+  const [targetsEdited, setTargetsEdited] = useState(false);
   const [opts, setOpts] = useState<Options | null>(null);
 
   useEffect(() => {
@@ -62,10 +70,23 @@ export default function ReviewStage({
 
   // 选中预设 → 填充 species/cell_type/perturbation_type/targets(便捷,仍可手改)。迁自 ConfirmView.applyPreset。
   function applyPreset(p: CellPreset) {
+    const nextPertType = p.example_perturbation_type ?? pertType;
+    const nextTargets = p.example_targets
+      ? p.example_targets.join(", ")
+      : targets;
+    onEdited(
+      currentDraft({
+        species: p.species,
+        cellType: p.cell_type,
+        pertType: nextPertType,
+        targets: nextTargets,
+      }),
+    );
     setSpecies(p.species);
     setCellType(p.cell_type);
-    if (p.example_perturbation_type) setPertType(p.example_perturbation_type);
-    if (p.example_targets) setTargets(p.example_targets.join(", "));
+    setPertType(nextPertType);
+    setTargets(nextTargets);
+    setTargetsEdited(true);
   }
 
   // 下拉选项:枚举 + 保留当前值(避免锁死非枚举内的历史值)。迁自 ConfirmView.withCurrent。
@@ -101,23 +122,77 @@ export default function ReviewStage({
   }
 
   // 组装 request:以 candidate_request 为基底覆盖可编辑字段,保留 request_id/metadata 等。
-  // 迁自 ConfirmView.confirm——只交出组装好的 request,不在此发起运行。
-  function confirm() {
-    const request: Record<string, unknown> = {
+  // 确认和返回共用同一草稿快照；返回只保存编辑，不会触发运行或越过 Review。
+  function currentDraft(
+    overrides: Partial<{
+      species: string;
+      cellType: string;
+      pertType: string;
+      targets: string;
+    }> = {},
+  ): Record<string, unknown> {
+    const values = { species, cellType, pertType, targets, ...overrides };
+    return {
       ...cand,
-      species,
-      cell_type: cellType.trim() === "" ? null : cellType.trim(),
-      perturbation_type: pertType,
-      perturbation_targets: targets
+      species: values.species,
+      cell_type:
+        values.cellType.trim() === "" ? null : values.cellType.trim(),
+      perturbation_type: values.pertType,
+      perturbation_targets: values.targets
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
     };
-    onConfirmed(request);
+  }
+
+  // 迁自 ConfirmView.confirm——只交出组装好的 request,不在此发起运行。
+  function confirm() {
+    onConfirmed(currentDraft());
   }
 
   // 请求输出(只读):task_type 等来自候选,不在此编辑。
   const taskType = readStr(cand, "task_type");
+  function errorIsUnresolved(error: string): boolean {
+    if (error.startsWith("unsupported_species:")) {
+      const current = species.trim().toLowerCase();
+      const original = error.slice("unsupported_species:".length).trim().toLowerCase();
+      return opts ? !opts.species.includes(current) : !current || current === original;
+    }
+    if (error.startsWith("unsupported_perturbation_type:")) {
+      const current = pertType.trim().toLowerCase();
+      const original = error
+        .slice("unsupported_perturbation_type:".length)
+        .trim()
+        .toLowerCase();
+      return opts
+        ? !opts.perturbation_type.includes(current)
+        : !current || current === original;
+    }
+    // cell_type 是可选自由文本；严格读取已把非法类型安全归零，当前草稿可直接修正。
+    if (error === "invalid_cell_type_type") return false;
+    if (error === "invalid_perturbation_targets_type") {
+      return !(targetsEdited && (pertType === "medium" || targets.trim()));
+    }
+    // 输出、任务、metadata 等不可在本页编辑的错误仍必须返回 Ask 修正。
+    return true;
+  }
+  const unresolvedErrors = parsedIntent.errors.filter(errorIsUnresolved);
+  const resolvedErrors = parsedIntent.errors.filter(
+    (error) => !errorIsUnresolved(error),
+  );
+  const unresolvedMissing = parsedIntent.missing_fields.filter((field) => {
+    if (field === "species") return !species.trim();
+    if (field === "perturbation_type") return !pertType.trim();
+    if (field === "perturbation_targets") {
+      return pertType !== "medium" && !targets.trim();
+    }
+    return true;
+  });
+  const confirmationBlocked =
+    !species.trim() ||
+    !pertType.trim() ||
+    (pertType !== "medium" && !targets.trim()) ||
+    unresolvedErrors.length > 0;
 
   return (
     <section style={{ maxWidth: "820px" }}>
@@ -185,7 +260,14 @@ export default function ReviewStage({
 
         <FieldRow label="物种" status={statusOf("species", species)}>
           {opts ? (
-            <select value={species} onChange={(e) => setSpecies(e.target.value)}>
+            <select
+              value={species}
+              onChange={(e) => {
+                const value = e.target.value;
+                onEdited(currentDraft({ species: value }));
+                setSpecies(value);
+              }}
+            >
               {withCurrent(opts.species, species).map((s) => (
                 <option key={s} value={s}>
                   {s}
@@ -193,7 +275,14 @@ export default function ReviewStage({
               ))}
             </select>
           ) : (
-            <input value={species} onChange={(e) => setSpecies(e.target.value)} />
+            <input
+              value={species}
+              onChange={(e) => {
+                const value = e.target.value;
+                onEdited(currentDraft({ species: value }));
+                setSpecies(value);
+              }}
+            />
           )}
         </FieldRow>
 
@@ -201,7 +290,14 @@ export default function ReviewStage({
           label="细胞类型（可留空）"
           status={cellType.trim() ? "confirmed" : "editable"}
         >
-          <input value={cellType} onChange={(e) => setCellType(e.target.value)} />
+          <input
+            value={cellType}
+            onChange={(e) => {
+              const value = e.target.value;
+              onEdited(currentDraft({ cellType: value }));
+              setCellType(value);
+            }}
+          />
         </FieldRow>
       </Card>
 
@@ -212,7 +308,14 @@ export default function ReviewStage({
           status={statusOf("perturbation_type", pertType)}
         >
           {opts ? (
-            <select value={pertType} onChange={(e) => setPertType(e.target.value)}>
+            <select
+              value={pertType}
+              onChange={(e) => {
+                const value = e.target.value;
+                onEdited(currentDraft({ pertType: value }));
+                setPertType(value);
+              }}
+            >
               {withCurrent(opts.perturbation_type, pertType).map((t) => (
                 <option key={t} value={t}>
                   {t}
@@ -220,7 +323,14 @@ export default function ReviewStage({
               ))}
             </select>
           ) : (
-            <input value={pertType} onChange={(e) => setPertType(e.target.value)} />
+            <input
+              value={pertType}
+              onChange={(e) => {
+                const value = e.target.value;
+                onEdited(currentDraft({ pertType: value }));
+                setPertType(value);
+              }}
+            />
           )}
         </FieldRow>
 
@@ -230,7 +340,12 @@ export default function ReviewStage({
         >
           <input
             value={targets}
-            onChange={(e) => setTargets(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              onEdited(currentDraft({ targets: value }));
+              setTargets(value);
+              setTargetsEdited(true);
+            }}
             placeholder="例:AHR, TP53"
           />
         </FieldRow>
@@ -266,22 +381,27 @@ export default function ReviewStage({
             推断的假设:{parsedIntent.assumptions.join(";")}
           </div>
         )}
-        {parsedIntent.missing_fields.length > 0 && (
+        {unresolvedMissing.length > 0 && (
           <div className="warn">
-            尚缺信息:{parsedIntent.missing_fields.join(", ")}
+            尚缺信息:{unresolvedMissing.join(", ")}
           </div>
         )}
-        {parsedIntent.errors.length > 0 && (
+        {unresolvedErrors.length > 0 && (
           <div className="err">
-            解读时的问题:{parsedIntent.errors.join(";")}
+            解读时的问题:{unresolvedErrors.join(";")}
           </div>
         )}
-        {parsedIntent.clarification_required && (
+        {resolvedErrors.length > 0 && (
+          <div className="note">
+            已在当前草稿修正的原始问题:{resolvedErrors.join(";")}
+          </div>
+        )}
+        {confirmationBlocked && (
           <div className="warn">这项描述还需进一步澄清后再运行。</div>
         )}
       </Card>
 
-      {/* 操作行:返回上一步 / 确认继续。disabled 规则等价旧 Confirm(species 必填)。 */}
+      {/* 操作行:返回上一步 / 确认继续。不可编辑的解析错误需返回 Ask 修正。 */}
       <div
         style={{
           display: "flex",
@@ -290,10 +410,10 @@ export default function ReviewStage({
           marginTop: "var(--space-4)",
         }}
       >
-        <Button variant="ghost" onClick={onBack}>
+        <Button variant="ghost" onClick={() => onBack(currentDraft())}>
           ← 返回
         </Button>
-        <Button onClick={confirm} disabled={!species.trim()}>
+        <Button onClick={confirm} disabled={confirmationBlocked}>
           确认并继续 →
         </Button>
       </div>

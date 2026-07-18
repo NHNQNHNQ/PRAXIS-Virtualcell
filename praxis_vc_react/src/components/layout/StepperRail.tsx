@@ -27,10 +27,12 @@ export default function StepperRail({
   stage,
   canEnter,
   onJump,
+  locked,
 }: {
   stage: Stage;
   canEnter: (s: Stage) => boolean;
   onJump: (s: Stage) => void;
+  locked: boolean;
 }) {
   const currentIdx = STAGES.findIndex((s) => s.key === stage);
 
@@ -40,6 +42,7 @@ export default function StepperRail({
   //  - 紧邻下一个(idx===current+1)且 canEnter:可前进点击(逐步推进,不跳过 review);
   //  - 其余靠后阶段:一律禁用(既未达标,也不允许跨步跳过中间阶段)。
   function nodeState(idx: number): NodeState {
+    if (locked && idx !== currentIdx) return "disabled";
     if (idx < currentIdx) return "done";
     if (idx === currentIdx) return "current";
     if (idx === currentIdx + 1 && canEnter(STAGES[idx].key)) return "enabled";

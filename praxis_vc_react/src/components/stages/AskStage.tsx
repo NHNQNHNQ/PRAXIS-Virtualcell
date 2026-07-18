@@ -1,5 +1,10 @@
-import { useState } from "react";
-import { parse, type Mode, type ParseResult } from "../../api";
+import { useEffect, useRef, useState } from "react";
+import {
+  parse,
+  type AskDraft,
+  type Mode,
+  type ParseResult,
+} from "../../api";
 
 // Stage 1 · Ask(spec §2 Stage1)—— 科研感 hero 输入,不是聊天窗:
 // 无衬线大标题 + 简短说明 + 大输入 textarea + 模式选择 + 示例入口 + Advanced 折叠区。
@@ -15,42 +20,106 @@ const EXAMPLES: { label: string; text: string }[] = [
 ];
 
 export default function AskStage({
+  initialDraft,
   mode,
   onMode,
+  onDraftChanged,
   onParsed,
 }: {
+  initialDraft: AskDraft | null;
   mode: Mode;
   onMode: (m: Mode) => void;
-  onParsed: (result: ParseResult, query: string) => void;
+  onDraftChanged: (draft: AskDraft, composedQuery: string) => void;
+  onParsed: (
+    result: ParseResult,
+    query: string,
+    draft: AskDraft,
+    parsedMode: Mode,
+  ) => void;
 }) {
-  const [text, setText] = useState("在 human 细胞敲 AHR");
+  const [text, setText] = useState(
+    () => initialDraft?.text || "在 human 细胞敲 AHR",
+  );
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   // Advanced 折叠区:可选物种(占位)与直接粘贴结构化描述——仅前端组装,不新增端点。
-  const [advSpecies, setAdvSpecies] = useState("");
-  const [advJson, setAdvJson] = useState("");
+  const [advSpecies, setAdvSpecies] = useState(
+    () => initialDraft?.species ?? "",
+  );
+  const [advJson, setAdvJson] = useState(
+    () => initialDraft?.structuredDescription ?? "",
+  );
+  const mountedRef = useRef(true);
+  const requestEpochRef = useRef(0);
+  const latestModeRef = useRef(mode);
+  latestModeRef.current = mode;
+
+  useEffect(() => {
+    // React StrictMode 开发态会执行 setup→cleanup→setup；每次 setup 都恢复活动标记。
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    // 模式属于解析请求身份；切换后旧请求的成功、失败和 finally 都不可写回。
+    requestEpochRef.current += 1;
+    setBusy(false);
+    setErr(null);
+  }, [mode]);
 
   // 把可选的高级输入(物种/结构化描述)在前端拼进问题文本一起提交——
   // 不新增端点,仍走同一个 parse(text, mode);后端负责真正的解读。
-  function composedQuery(): string {
+  function currentDraft(overrides: Partial<AskDraft> = {}): AskDraft {
+    return {
+      text,
+      species: advSpecies,
+      structuredDescription: advJson,
+      ...overrides,
+    };
+  }
+
+  function composedQuery(draft: AskDraft): string {
     const extra: string[] = [];
-    if (advSpecies.trim()) extra.push(`物种:${advSpecies.trim()}`);
-    if (advJson.trim()) extra.push(`结构化描述:${advJson.trim()}`);
-    return extra.length ? `${text}\n${extra.join("\n")}` : text;
+    if (draft.species.trim()) extra.push(`物种:${draft.species.trim()}`);
+    if (draft.structuredDescription.trim()) {
+      extra.push(`结构化描述:${draft.structuredDescription.trim()}`);
+    }
+    return extra.length ? `${draft.text}\n${extra.join("\n")}` : draft.text;
+  }
+
+  function updateDraft(next: AskDraft) {
+    // 同一 Ask 挂载内也允许编辑 pending 请求的草稿。编辑即使旧请求失效，
+    // 并立即恢复提交能力，避免旧 finally 覆盖新草稿状态。
+    requestEpochRef.current += 1;
+    setBusy(false);
+    setErr(null);
+    onDraftChanged(next, composedQuery(next));
   }
 
   async function submit() {
     setBusy(true);
     setErr(null);
-    const query = composedQuery();
+    const draft = currentDraft();
+    const query = composedQuery(draft);
+    const submittedMode = mode;
+    const requestEpoch = requestEpochRef.current + 1;
+    requestEpochRef.current = requestEpoch;
+    const isCurrentRequest = () =>
+      mountedRef.current &&
+      requestEpochRef.current === requestEpoch &&
+      latestModeRef.current === submittedMode;
     try {
-      const result = await parse(query, mode);
-      onParsed(result, query);
+      const result = await parse(query, submittedMode);
+      if (isCurrentRequest()) onParsed(result, query, draft, submittedMode);
     } catch {
       // 面向用户的错误文案(spec §3.5):不暴露内部实现名词,给可操作的提示。
-      setErr("暂时无法连接到运行后端,任务解读未能完成。请确认服务可达后重试。");
+      if (isCurrentRequest()) {
+        setErr("暂时无法连接到运行后端,任务解读未能完成。请确认服务可达后重试。");
+      }
     } finally {
-      setBusy(false);
+      if (isCurrentRequest()) setBusy(false);
     }
   }
 
@@ -103,7 +172,12 @@ export default function AskStage({
           id="ask-input"
           rows={4}
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            const next = currentDraft({ text: value });
+            setText(value);
+            updateDraft(next);
+          }}
           placeholder="例:在 human 细胞敲 AHR"
         />
 
@@ -122,7 +196,11 @@ export default function AskStage({
             <button
               key={ex.text}
               type="button"
-              onClick={() => setText(ex.text)}
+              onClick={() => {
+                const next = currentDraft({ text: ex.text });
+                setText(ex.text);
+                updateDraft(next);
+              }}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "13px",
@@ -223,7 +301,12 @@ export default function AskStage({
             物种(可留空)
             <select
               value={advSpecies}
-              onChange={(e) => setAdvSpecies(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                const next = currentDraft({ species: value });
+                setAdvSpecies(value);
+                updateDraft(next);
+              }}
             >
               <option value="">不指定(由文字推断)</option>
               <option value="human">human</option>
@@ -247,7 +330,12 @@ export default function AskStage({
             id="adv-json"
             rows={4}
             value={advJson}
-            onChange={(e) => setAdvJson(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              const next = currentDraft({ structuredDescription: value });
+              setAdvJson(value);
+              updateDraft(next);
+            }}
             placeholder='{ "species": "human", "perturbation_targets": ["AHR"] }'
             style={{ fontFamily: "var(--font-mono)", fontSize: "12px" }}
           />

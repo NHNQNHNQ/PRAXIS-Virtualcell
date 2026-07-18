@@ -144,6 +144,9 @@ test.describe("S7 主题切换", () => {
     await expect(switchToDark).toBeVisible();
 
     await switchToDark.click();
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dataset.theme))
+      .toBe("dark");
     const switchToLight = page.getByRole("button", {
       name: "切换到浅色主题",
     });
@@ -153,8 +156,14 @@ test.describe("S7 主题切换", () => {
     ).toBeVisible();
 
     await switchToLight.click();
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dataset.theme))
+      .toBe("light");
     await expect(switchToDark).toBeVisible();
     await switchToDark.click();
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dataset.theme))
+      .toBe("dark");
     await expect(switchToLight).toBeVisible();
 
     const jobId = await runQueryFromAsk(page, "在 human 细胞敲 AHR");
@@ -166,6 +175,9 @@ test.describe("S7 主题切换", () => {
     ).toBeVisible();
 
     await switchToLight.click();
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dataset.theme))
+      .toBe("light");
     await expect(switchToDark).toBeVisible();
     await expect(
       page.getByRole("group", { name: "结果操作" }),
@@ -183,12 +195,14 @@ test("S8 两个不同请求可按唯一 job_id 从历史回看，收藏保持占
   const firstJobId = await runQueryFromAsk(page, "在 human 细胞敲 AHR");
   const firstEntry = historyEntry(page, firstJobId);
   await expect(firstEntry).toHaveCount(1);
+  await expect(firstEntry).toContainText("human · AHR");
 
   await startNewQuery(page);
   const secondJobId = await runQueryFromAsk(page, "在 human 细胞敲 FASN");
   expect(secondJobId).not.toBe(firstJobId);
   const secondEntry = historyEntry(page, secondJobId);
   await expect(secondEntry).toHaveCount(1);
+  await expect(secondEntry).toContainText("human · FASN");
 
   await openHistoryJob(page, firstJobId);
   await openHistoryJob(page, secondJobId);
@@ -196,5 +210,65 @@ test("S8 两个不同请求可按唯一 job_id 从历史回看，收藏保持占
   await expect(page.getByText("收藏", { exact: true })).toBeVisible();
   await expect(page.getByText("暂无收藏", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: /收藏/ })).toHaveCount(0);
+  expectNoBrowserFailures(failures);
+});
+
+test("S8 快速切换历史任务时迟到的旧响应不会覆盖当前结果", async ({ page }) => {
+  const failures = collectBrowserFailures(page);
+  await page.goto("/");
+  const firstJobId = await runQueryFromAsk(page, "在 human 细胞敲 AHR");
+  await startNewQuery(page);
+  const secondJobId = await runQueryFromAsk(page, "在 human 细胞敲 FASN");
+
+  let releaseFirst!: () => void;
+  const firstGate = new Promise<void>((resolve) => {
+    releaseFirst = resolve;
+  });
+  await page.route("**/api/reports/**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path.startsWith(`/api/reports/${firstJobId}`)) await firstGate;
+    await route.continue();
+  });
+
+  const firstMainRequest = page.waitForRequest((request) => {
+    const path = new URL(request.url()).pathname;
+    return path === `/api/reports/${firstJobId}`;
+  });
+  const firstMainResponse = page.waitForResponse((response) => {
+    const path = new URL(response.url()).pathname;
+    return path === `/api/reports/${firstJobId}`;
+  });
+  await historyEntry(page, firstJobId).click();
+  await firstMainRequest;
+
+  const secondMainResponse = page.waitForResponse((response) => {
+    const path = new URL(response.url()).pathname;
+    return path === `/api/reports/${secondJobId}`;
+  });
+  await historyEntry(page, secondJobId).click();
+  expect((await secondMainResponse).status()).toBe(200);
+  await expect(
+    page.getByRole("heading", {
+      name: `结果 · job ${secondJobId}`,
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("本次未给出预测结论", { exact: true }),
+  ).toBeVisible();
+
+  releaseFirst();
+  expect((await firstMainResponse).status()).toBe(200);
+  await page.waitForLoadState("networkidle");
+  await expect(
+    page.getByRole("heading", {
+      name: `结果 · job ${secondJobId}`,
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("本次未给出预测结论", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("已给出预测", { exact: true })).toHaveCount(0);
   expectNoBrowserFailures(failures);
 });

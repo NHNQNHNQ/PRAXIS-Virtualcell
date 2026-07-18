@@ -63,10 +63,13 @@ export default function RunStage({
   const [activeStep, setActiveStep] = useState(-1); // 已点亮到第几步(-1=未开始)
   const [err, setErr] = useState<string | null>(null);
   const timerRef = useRef<number | null>(null);
+  const mountedRef = useRef(true);
 
   // 卸载时清掉步骤定时器,避免泄漏。
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
+      mountedRef.current = false;
       if (timerRef.current != null) window.clearInterval(timerRef.current);
     };
   }, []);
@@ -93,6 +96,7 @@ export default function RunStage({
     try {
       // 同步一次拿 job_id(createJob 复用现有签名,不改请求)。
       const ref = await createJob(request, mode, enableLlmReport);
+      if (!mountedRef.current) return;
       if (timerRef.current != null) {
         window.clearInterval(timerRef.current);
         timerRef.current = null;
@@ -102,6 +106,7 @@ export default function RunStage({
       setRunStatus("succeeded");
       onRan(ref.job_id);
     } catch (e: unknown) {
+      if (!mountedRef.current) return;
       // 失败:停指示、置 failed、显面向用户错误态(不崩,可重试)。
       if (timerRef.current != null) {
         window.clearInterval(timerRef.current);

@@ -11,6 +11,12 @@ export const API_BASE: string =
 
 export type Mode = "offline" | "llm_assisted";
 
+export interface AskDraft {
+  text: string;
+  species: string;
+  structuredDescription: string;
+}
+
 // ---- 类型(对应后端 pydantic schema) ----
 export interface Health {
   status: string;
@@ -222,7 +228,10 @@ export type RunStatus =
 // 集中式作业状态:回退只改 stage 不清以下字段,故回退不丢数据。
 export interface JobState {
   query: string; // Ask 阶段自然语言输入
+  askDraft: AskDraft | null; // Ask 的三个表单字段,回退时按原结构恢复
+  parsedMode: Mode | null; // 最近一次 /api/parse 使用的模式
   parsedIntent: ParseResult | null; // /api/parse 结果(复用现有 ParseResult)
+  reviewDraft: Record<string, unknown> | null; // Review 尚未确认的编辑,供回退后恢复
   confirmedRequest: Record<string, unknown> | null; // Review 阶段编辑组装的 request
   modulePlan: ModulePlan | null; // Route 静态预期(前端派生)/ Results 实际(/module-plan)
   runStatus: RunStatus;

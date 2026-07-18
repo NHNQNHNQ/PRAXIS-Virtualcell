@@ -89,6 +89,7 @@ export default function ResultsStage({
   // 数据并发拉取(迁 ResultView useEffect):report/trace/provenance 主链 + module_plan。
   // module_plan 失败静默降级为空 {}(不阻塞主报告),喂给「模块路由」tab(ModuleRoutingTab)。
   useEffect(() => {
+    let cancelled = false;
     setErr(null);
     setReport(null);
     setTrace(null);
@@ -96,15 +97,25 @@ export default function ResultsStage({
     setModulePlan(null);
     Promise.all([getReport(jobId), getTrace(jobId), getProvenance(jobId)])
       .then(([r, t, p]) => {
+        if (cancelled) return;
         setReport(r);
         setTrace(t);
         setProv(p);
       })
-      .catch((e: unknown) => setErr(String(e)));
+      .catch((e: unknown) => {
+        if (!cancelled) setErr(String(e));
+      });
     // module_plan 独立并发:失败不阻塞主报告,静默降级为空 {}。
     getModulePlan(jobId)
-      .then((d) => setModulePlan(d.module_plan ?? {}))
-      .catch(() => setModulePlan({}));
+      .then((d) => {
+        if (!cancelled) setModulePlan(d.module_plan ?? {});
+      })
+      .catch(() => {
+        if (!cancelled) setModulePlan({});
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [jobId]);
 
   // 工具条:下载 report.json / narrative.md / report.md;复制 report。

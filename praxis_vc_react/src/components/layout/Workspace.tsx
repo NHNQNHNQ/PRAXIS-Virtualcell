@@ -1,4 +1,5 @@
 import {
+  type AskDraft,
   type JobState,
   type Mode,
   type ModulePlan,
@@ -27,8 +28,10 @@ export default function Workspace({
   canEnter,
   onJump,
   onMode,
+  onAskDraftChanged,
   onParsed,
   onReviewBack,
+  onReviewEdited,
   onConfirmed,
   onRouteBack,
   onRouteNext,
@@ -43,8 +46,15 @@ export default function Workspace({
   canEnter: (s: Stage) => boolean;
   onJump: (s: Stage) => void;
   onMode: (m: Mode) => void;
-  onParsed: (r: ParseResult, query: string) => void;
-  onReviewBack: () => void;
+  onAskDraftChanged: (draft: AskDraft, composedQuery: string) => void;
+  onParsed: (
+    r: ParseResult,
+    query: string,
+    draft: AskDraft,
+    parsedMode: Mode,
+  ) => void;
+  onReviewBack: (draft: Record<string, unknown>) => void;
+  onReviewEdited: (draft: Record<string, unknown>) => void;
   onConfirmed: (req: Record<string, unknown>) => void;
   onRouteBack: () => void;
   onRouteNext: (plan: ModulePlan) => void;
@@ -56,7 +66,12 @@ export default function Workspace({
   return (
     <div className="ws">
       {/* 阶段轨:工作区内部左侧竖轨(窄屏降级为顶部水平 stepper,由 CSS 控制) */}
-      <StepperRail stage={stage} canEnter={canEnter} onJump={onJump} />
+      <StepperRail
+        stage={stage}
+        canEnter={canEnter}
+        onJump={onJump}
+        locked={job.runStatus === "running"}
+      />
       {/* 阶段内容区 */}
       <div className="ws-stage">{renderStage()}</div>
     </div>
@@ -66,18 +81,27 @@ export default function Workspace({
   function renderStage() {
     switch (stage) {
       case "ask":
-        return <AskStage mode={mode} onMode={onMode} onParsed={onParsed} />;
+        return (
+          <AskStage
+            initialDraft={job.askDraft}
+            mode={mode}
+            onMode={onMode}
+            onDraftChanged={onAskDraftChanged}
+            onParsed={onParsed}
+          />
+        );
 
       case "review":
         // 9.9:ReviewStage 合并旧 parse_review + confirm 为同一页(上部解析摘要 + 下部可编辑分组表单)。
-        // 可编辑初值优先回填 confirmedRequest(回退再进保留上次编辑值),否则用 parsedIntent 候选。
+        // 可编辑初值优先回填尚未确认的草稿,其次是已确认请求,否则用 parsedIntent 候选。
         if (job.parsedIntent == null) return null;
         return (
           <ReviewStage
             parsedIntent={job.parsedIntent}
-            initialRequest={job.confirmedRequest}
+            initialRequest={job.reviewDraft ?? job.confirmedRequest}
             onConfirmed={onConfirmed}
             onBack={onReviewBack}
+            onEdited={onReviewEdited}
           />
         );
 
