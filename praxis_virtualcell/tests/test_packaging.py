@@ -25,6 +25,10 @@ def test_packages_find_includes_virtualcell():
 def test_include_package_data_and_manifest():
     cfg = tomllib.loads((_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert cfg["tool"]["setuptools"].get("include-package-data") is True
+    assert cfg["tool"]["setuptools"]["exclude-package-data"]["praxis_virtualcell"] == [
+        "tests/*",
+        "tests/**/*",
+    ]
     manifest = (_ROOT / "MANIFEST.in").read_text(encoding="utf-8")
     assert "recursive-include praxis_virtualcell" in manifest
     assert "*.md" in manifest

@@ -72,6 +72,9 @@ include-package-data = true
 praxis_virtualcell = ["**/*.yaml", "**/*.json", "**/*.txt", "**/*.md", "**/*.gz"]
 praxis_vc_api = ["static/**/*"]
 
+[tool.setuptools.exclude-package-data]
+praxis_virtualcell = ["tests/*", "tests/**/*"]
+
 [tool.setuptools.packages.find]
 include = ["praxis2*", "praxis_virtualcell*", "praxis_vc_api*", "praxis_vc_web*"]
 exclude = ["praxis_virtualcell.tests*"]
