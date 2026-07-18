@@ -2,7 +2,7 @@
 
 > Captured: 2026-07-18 13:12 CST (+0800)
 >
-> Overall status: `PHASE_A_IN_PROGRESS`
+> Overall status: `PHASE_A_IN_PROGRESS — A0/A1/A2 complete`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -70,6 +70,8 @@ The ignored root `.env` existed in the source archive and was 252 bytes. Its con
 
 The recovery audit also found ignored reproducibility data and Phase 10 evidence that Git bundle could not carry. The following non-secret files were copied from T7 into the same ignored paths in the APFS clone and verified by source/target SHA-256: three `.h5ad` files (1,499,342,078 bytes total), `data/paul15/paul15.h5`, both LINCS L1000 up/down signature files, two JUnit XML files, and `reports/phase10/trace_bundle.json`. Exact hashes are in the recovery manifest. Rebuildable `.venv`, `node_modules`, caches, `dist`, `test-results`, `runs`, `egg-info`, and `__pycache__` were not copied.
 
+Every protected CSS/untracked/stash item now has an explicit four-way disposition in `docs/status/WORKTREE-ASSETS.md`. No disposition was implemented destructively; the original dirty/untracked/stash state remains intact.
+
 ## Migration integrity evidence
 
 | Check | Result |
@@ -110,11 +112,11 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 
 ## Next authorized work
 
-Continue Phase A2 in this APFS clone:
+Continue Phase A3 in this APFS clone:
 
-1. Classify the four CSS files, `.claude/launch.json`, `.playwright-mcp/`, `string.jpeg`, and the stashed overview document.
-2. Keep the CSS theme work isolated from documentation and test-baseline commits.
-3. Preserve generated/browser artifacts and scientific screenshot provenance without deleting the live copies.
-4. Do not restore or publish the stashed overview until its v1.4-era claims are checked against the Phase 10 gate.
+1. Create `docs/INDEX.md` as the current documentation map.
+2. Mark historical plans/handoffs as historical through the index instead of bulk-moving files.
+3. Record known stale entry points and test/version claims.
+4. Create `docs/VERSIONING.md` to separate release, API, schema, artifact/model, and frontend package versions.
 
 No Phase B baseline test may start before `PHASE_A_COMPLETE` is written at A5. No external synchronization is authorized before the Phase D approval gate.

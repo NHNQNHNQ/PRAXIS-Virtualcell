@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — A0/A1 完成，A2 进行中
+> 状态：active — A0/A1/A2 完成，A3 进行中
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -85,17 +85,17 @@
 
 ### A2 — 工作区资产分类
 
-- [ ] 为以下每项写出 `keep-and-commit / keep-local-and-ignore / archive-with-provenance / pending-user-decision` 四选一分类：
+- [x] 为以下每项写出 `keep-and-commit / keep-local-and-ignore / archive-with-provenance / pending-user-decision` 四选一分类：
   - 4 个主题 CSS WIP；
   - `.claude/launch.json`；
   - `.playwright-mcp/` 页面快照与日志；
   - `string.jpeg`（STRING TP53/EGFR 映射截图）；
   - stash 中的项目总介绍文档。
-- [ ] CSS WIP 独立为“主题专项”，不得与整理、测试、版本修复混交；记录其已通过结构性 E2E、尚未完成视觉验收。
-- [ ] 若 `string.jpeg` 要入库，先改为语义化文件名、放入明确的文档 assets 目录并补来源/用途；否则保持未跟踪等待人工决定。
-- [ ] `.playwright-mcp/` 默认视为工具生成物候选，不把日志/页面快照直接提交。
-- [ ] stash 中的总介绍仍以 v1.4 为主且可能含超出 Phase 10 闸门的旧措辞；若恢复，只能进独立草稿分支并逐项对照 `PHASE10_GATE.md`，不得原样发布。
-- [ ] 不通过移动或复制制造第二份不清楚谁是权威源的文件。
+- [x] CSS WIP 独立为“主题专项”，不得与整理、测试、版本修复混交；记录其已通过结构性 E2E、尚未完成视觉验收。
+- [x] 若 `string.jpeg` 要入库，先改为语义化文件名、放入明确的文档 assets 目录并补来源/用途；当前选择 archive-with-provenance，保持未跟踪且不入库。
+- [x] `.playwright-mcp/` 默认视为工具生成物候选，不把日志/页面快照直接提交。
+- [x] stash 中的总介绍仍以 v1.4 为主且可能含超出 Phase 10 闸门的旧措辞；若恢复，只能进独立草稿分支并逐项对照 `PHASE10_GATE.md`，不得原样发布。
+- [x] 不通过移动或复制制造第二份不清楚谁是权威源的文件；恢复目录明确标为 checksum-addressed backup，非编辑权威源。
 
 验收：每个脏项都有去向和理由；未获批准的内容仍原样存在；整理提交不包含 CSS WIP 或工具输出。
 
