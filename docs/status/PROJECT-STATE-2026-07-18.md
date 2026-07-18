@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 13:42 CST (+0800)
+> Captured: 2026-07-18 13:46 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — B0_COMPLETE — Phase B1 next`
+> Overall status: `PHASE_A_COMPLETE — B0_COMPLETE — B1_COMPLETE — Phase B2 next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -131,13 +131,21 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 - Connectivity-only fsck exited `0`; there are no missing/corrupt objects and no AppleDouble diagnostics. Eight dangling blobs are non-corrupt staging leftovers and were not pruned.
 - Environment creation changed no tracked manifest or source file. The four protected CSS files still produce the exact recovery patch SHA-256 `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`.
 
+`B1_COMPLETE`
+
+- Authoritative command `.venv/bin/pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` exited `0`: `912 passed / 40 skipped / 9 deselected / 0 failed`, with one Starlette/httpx deprecation warning, in `16.67s`.
+- The 40 local skips are fully accounted for: 30 require Torch/GPU/remote donor capabilities and 10 require Linux/Docker. The 9 deselected tests are the `llm` scope.
+- `env -u DEEPSEEK_API_KEY .venv/bin/python scripts/phase10/run_phase10_all.py` exited `0`. The stable package-only run produced JUnit `tests=952, skipped=40, failures=0, errors=0`, hence `912 passed`; the root `tests/` tree was not included.
+- The script's full package-only run had no API key and therefore safely skipped the 9 LLM tests: JUnit `tests=961, skipped=49, failures=0, errors=0`, hence `912 passed`. It made no real LLM request.
+- `reports/phase10/PHASE10_SUMMARY.md` is consistent for the stable scope: its `952 tests` includes 912 passed plus 40 skipped. Its historical full-scope `40 skipped` reflects an authenticated run where 9 LLM tests executed; this run has `49 skipped` because those 9 were deliberately not executed. This is an environment distinction, not a core regression.
+
 ## Next authorized work
 
-Continue Phase B1 in this APFS clone:
+Continue Phase B2 in this APFS clone:
 
-1. Run `.venv/bin/pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` without changing tests or source.
-2. Record passed, skipped, deselected, failed, duration, and every skip category.
-3. Run the Phase 10 delivery command only with its declared package scope and compare the result with the existing Phase 10 summary.
+1. Run `npm run typecheck`, `npm run lint`, and `npm run build` separately, preserving each exit code and build-size warning.
+2. Run `npm run e2e` with a temporary absolute `PRAXIS_VC_RUNS` directory outside the repository.
+3. Record all Playwright spec results and verify that neither `runs/` nor protected CSS/assets changed.
 4. Treat any newly observed failure as baseline evidence for Phase C; do not fix it during Phase B.
 
 No Phase C fix may start before `PHASE_B_COMPLETE` is written at B5. No external synchronization is authorized before the Phase D approval gate.

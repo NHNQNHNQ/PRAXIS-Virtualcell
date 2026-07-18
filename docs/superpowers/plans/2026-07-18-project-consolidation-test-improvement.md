@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`B0_COMPLETE`，B1 待执行
+> 状态：active — `PHASE_A_COMPLETE`，`B0_COMPLETE`，`B1_COMPLETE`，B2 待执行
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -143,10 +143,10 @@
 
 ### B1 — VirtualCell 核心后端
 
-- [ ] 运行：`.venv/bin/pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra`。
-- [ ] 记录本机 40 条 skip 的具体类别：torch/GPU、Docker、remote donor 等。
-- [ ] 运行 Phase 10 交付脚本时只使用其声明的包口径，不把根 tests 混入。
-- [ ] 核对 `reports/phase10/PHASE10_SUMMARY.md` 与实测；`tests=passed+skipped` 的不同表述不得误报为漂移。
+- [x] 运行：`.venv/bin/pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra`。
+- [x] 记录本机 40 条 skip 的具体类别：torch/GPU、Docker、remote donor 等。
+- [x] 运行 Phase 10 交付脚本时只使用其声明的包口径，不把根 tests 混入。
+- [x] 核对 `reports/phase10/PHASE10_SUMMARY.md` 与实测；`tests=passed+skipped` 的不同表述不得误报为漂移。
 
 ### B2 — 前端与同源 E2E
 
