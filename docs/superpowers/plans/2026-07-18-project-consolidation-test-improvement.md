@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`B0_COMPLETE`，`B1_COMPLETE`，B2 待执行
+> 状态：active — `PHASE_A_COMPLETE`，`B0_COMPLETE`，`B1_COMPLETE`，`B2_COMPLETE`，B3 待执行
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -150,11 +150,11 @@
 
 ### B2 — 前端与同源 E2E
 
-- [ ] `npm run typecheck`。
-- [ ] `npm run lint`。
-- [ ] `npm run build`，记录 chunk size warning 和主要 bundle 大小。
-- [ ] `npm run e2e`，记录现有 3 个 spec 的 passed/failed。
-- [ ] 确认 E2E 使用临时 `PRAXIS_VC_RUNS`，不污染仓库 `runs/`。
+- [x] `npm run typecheck`。
+- [x] `npm run lint`。
+- [x] `npm run build`，记录 chunk size warning 和主要 bundle 大小。
+- [x] `npm run e2e`，记录现有 3 个 spec 的 passed/failed。
+- [x] 确认 E2E 使用临时 `PRAXIS_VC_RUNS`，不污染仓库 `runs/`。
 
 ### B3 — 打包、CLI 与依赖
 

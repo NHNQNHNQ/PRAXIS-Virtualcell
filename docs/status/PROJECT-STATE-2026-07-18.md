@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 13:46 CST (+0800)
+> Captured: 2026-07-18 13:48 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — B0_COMPLETE — B1_COMPLETE — Phase B2 next`
+> Overall status: `PHASE_A_COMPLETE — B0_COMPLETE — B1_COMPLETE — B2_COMPLETE — Phase B3 next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -139,13 +139,22 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 - The script's full package-only run had no API key and therefore safely skipped the 9 LLM tests: JUnit `tests=961, skipped=49, failures=0, errors=0`, hence `912 passed`. It made no real LLM request.
 - `reports/phase10/PHASE10_SUMMARY.md` is consistent for the stable scope: its `952 tests` includes 912 passed plus 40 skipped. Its historical full-scope `40 skipped` reflects an authenticated run where 9 LLM tests executed; this run has `49 skipped` because those 9 were deliberately not executed. This is an environment distinction, not a core regression.
 
+`B2_COMPLETE`
+
+- `npm run typecheck` and `npm run lint` each exited `0` with TypeScript `6.0.3` and Oxlint `1.72.0`.
+- `npm run build` exited `0` with Vite `8.1.2`; 610 modules were transformed. The main JavaScript chunk is `631.61 kB` (`184.21 kB` gzip), and the main CSS chunk is `42.53 kB` (`13.08 kB` gzip).
+- The build retains the known warning that at least one minified chunk exceeds `500 kB`; this is a C3 optimization item, not a Phase B failure.
+- `CI=1 npm run e2e` exited `0`: all three Chromium specs passed in `3.9s` (happy path, six result tabs, and initial Ask screen).
+- Playwright started a new Uvicorn server and its configuration assigned `PRAXIS_VC_RUNS` from `mktemp -d`. The repository `runs/` path was absent both before and after the run, port 8000 was released, and only ignored `dist/`, `test-results/`, and `node_modules/` outputs were present.
+- No tracked source/manifest changed. The protected CSS patch still hashes to `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`.
+
 ## Next authorized work
 
-Continue Phase B2 in this APFS clone:
+Continue Phase B3 in this APFS clone:
 
-1. Run `npm run typecheck`, `npm run lint`, and `npm run build` separately, preserving each exit code and build-size warning.
-2. Run `npm run e2e` with a temporary absolute `PRAXIS_VC_RUNS` directory outside the repository.
-3. Record all Playwright spec results and verify that neither `runs/` nor protected CSS/assets changed.
-4. Treat any newly observed failure as baseline evidence for Phase C; do not fix it during Phase B.
+1. Export the current committed tree with `git archive` to an external temporary directory so protected WIP cannot enter the build.
+2. Build a wheel from that clean tree and inspect package files, metadata, console entry point, and runtime data.
+3. Compare wheel metadata with the editable install and verify `.venv/bin/praxis-vc` exists.
+4. Install the wheel without dependencies into a separate temporary virtual environment and run CLI help smoke without changing the main `.venv`.
 
 No Phase C fix may start before `PHASE_B_COMPLETE` is written at B5. No external synchronization is authorized before the Phase D approval gate.
