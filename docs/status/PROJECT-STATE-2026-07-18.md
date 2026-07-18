@@ -116,7 +116,7 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 
 - Gate report: `docs/status/PHASE-A-GATE-2026-07-18.md`
 - Evidence parent: `a55ee8be20e2383a541dc2dd87277dd3cb855e4f`
-- Completion commit: `PENDING_PHASE_A_GATE_COMMIT`
+- Completion commit: `bf644d268bd3029b233dc100d8f735ebfb09edc5`
 - Result: all APFS, ref, WIP, asset, link, change-boundary, and three-way-ledger checks passed.
 - External writes: none.
 

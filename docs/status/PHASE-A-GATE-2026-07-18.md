@@ -6,7 +6,7 @@
 >
 > Evidence parent: `a55ee8be20e2383a541dc2dd87277dd3cb855e4f`
 >
-> Phase A completion commit: `PENDING_PHASE_A_GATE_COMMIT`
+> Phase A completion commit: `bf644d268bd3029b233dc100d8f735ebfb09edc5`
 
 Phase A migrated the active repository to APFS, preserved every protected asset/ref, documented the three-way divergence, classified the worktree, established documentation/version/layout policy, and made no functional/scientific code changes. This gate authorizes local Phase B measurement only; it does not authorize GitHub writes or `.53` changes.
 
