@@ -6,6 +6,7 @@ import json
 import os
 
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
+from praxis_virtualcell.core.exceptions import InputValidationError
 from praxis_virtualcell.io.job_store import JobStore
 from praxis_virtualcell.version import (
     API_PROTOCOL_VERSION,
@@ -20,6 +21,7 @@ from praxis_virtualcell.workflows.run_virtualcell_query import (
     SUPPORTED_TASKS,
     parse_query,
     run_query,
+    validate_candidate,
 )
 
 RUNS_DIR = os.environ.get("PRAXIS_VC_RUNS", "runs")
@@ -92,9 +94,18 @@ def _job_id(request: dict) -> str:
 
 def run_job(request: dict, mode: str, enable_llm_report: bool) -> dict:
     cfg = config_for(mode)
-    out = run_query(request, config=cfg, enable_llm_report=enable_llm_report)
-    job_id = _job_id(request)
-    JobStore(RUNS_DIR).save(job_id, request=request, result=out)
+    validation = validate_candidate(request)
+    if not validation["schema_valid"]:
+        raise InputValidationError(
+            "confirmed_request_invalid:"
+            f"missing={validation['missing_fields']} errors={validation['errors']}"
+        )
+    normalized = validation["normalized"]
+    # 运行与落盘只能消费 validator 的完整白名单产物；不把原始控制字段混回去。
+    validated_request = dict(normalized)
+    out = run_query(validated_request, config=cfg, enable_llm_report=enable_llm_report)
+    job_id = _job_id(validated_request)
+    JobStore(RUNS_DIR).save(job_id, request=validated_request, result=out)
     return {"job_id": job_id, "status": "done"}
 
 

@@ -3,6 +3,9 @@
 无 fastapi 或无法 import praxis_vc_api(不在 path)时 skip。offline 不调 LLM。
 """
 
+import json
+from pathlib import Path
+
 import pytest
 
 pytest.importorskip("fastapi")
@@ -51,6 +54,134 @@ def test_parse_offline(client):
     assert d["llm_used"] is False and d["candidate_request"]["species"] == "human"
 
 
+def test_parse_surrogate_in_structured_input_returns_safe_clarification(client):
+    text = (
+        "human AHR knockout\n结构化描述:"
+        '{"species":"human","perturbation_type":"gene",'
+        '"perturbation_targets":["AHR"],"output_modality":"\ud800"}'
+    )
+    body = json.dumps({"text": text, "mode": "offline"}, ensure_ascii=True)
+    r = client.post(
+        "/api/parse",
+        content=body.encode("utf-8"),
+        headers={"content-type": "application/json"},
+    )
+    assert r.status_code == 200
+    d = r.json()
+    assert d["schema_valid"] is False
+    assert d["clarification_required"] is True
+    assert d["errors"] == ["query_not_utf8_safe"]
+
+
+@pytest.mark.parametrize(
+    ("assumptions", "llm_error"),
+    [
+        (["\ud800"], None),
+        (["safe"], "\ud800"),
+        (["safe"], {"nested": "\ud800"}),
+    ],
+)
+def test_parse_llm_metadata_and_assumptions_are_response_safe(
+    client, monkeypatch, assumptions, llm_error
+):
+    import praxis_vc_api.services.runtime_service as rs
+    import praxis_virtualcell.agents_llm.llm_client as llm_client
+    from praxis_virtualcell.core.config import Mode, RuntimeConfig
+
+    config = RuntimeConfig(
+        mode=Mode.LLM_ASSISTED,
+        llm_enabled=True,
+        deepseek_api_key="stub-not-a-real-key",
+    )
+    monkeypatch.setattr(rs, "config_for", lambda mode: config)
+
+    class StubClient:
+        def complete(self, messages, **kwargs):
+            return {
+                "content": json.dumps({
+                    "species": "human",
+                    "perturbation_type": "gene",
+                    "perturbation_targets": ["AHR"],
+                    "task_type": "predict_delta_expression",
+                    "assumptions": assumptions,
+                }, ensure_ascii=True),
+                "error": llm_error,
+            }
+
+    monkeypatch.setattr(llm_client, "make_llm_client", lambda config: StubClient())
+    safe_client = TestClient(app, raise_server_exceptions=False)
+    response = safe_client.post(
+        "/api/parse",
+        json={"text": "human AHR knockout", "mode": "llm_assisted"},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    json.dumps(payload, ensure_ascii=False, allow_nan=False).encode("utf-8")
+    assert all("\ud800" not in value for value in payload["assumptions"])
+
+
+def test_parse_deep_structured_candidate_is_response_safe(client):
+    nested: object = []
+    for _ in range(400):
+        nested = [nested]
+    structured = json.dumps({
+        "species": "human",
+        "perturbation_type": "gene",
+        "perturbation_targets": nested,
+        "output_modality": "delta_expression",
+    })
+    safe_client = TestClient(app, raise_server_exceptions=False)
+    response = safe_client.post(
+        "/api/parse",
+        json={
+            "text": f"请核对深层输入\n结构化描述:{structured}",
+            "mode": "offline",
+        },
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["schema_valid"] is False
+    assert payload["candidate_request"] == {"perturbation_targets": []}
+    json.dumps(payload, ensure_ascii=False, allow_nan=False).encode("utf-8")
+
+
+def test_parse_llm_huge_integer_dose_returns_safe_clarification(client, monkeypatch):
+    import praxis_vc_api.services.runtime_service as rs
+    import praxis_virtualcell.agents_llm.llm_client as llm_client
+    from praxis_virtualcell.core.config import Mode, RuntimeConfig
+
+    config = RuntimeConfig(
+        mode=Mode.LLM_ASSISTED,
+        llm_enabled=True,
+        deepseek_api_key="stub-not-a-real-key",
+    )
+    monkeypatch.setattr(rs, "config_for", lambda mode: config)
+
+    class StubClient:
+        def complete(self, messages, **kwargs):
+            return {
+                "content": json.dumps({
+                    "species": "human",
+                    "perturbation_type": "drug",
+                    "perturbation_targets": ["geldanamycin"],
+                    "task_type": "predict_delta_expression",
+                    "perturbation_dose": 10**400,
+                }),
+                "error": None,
+            }
+
+    monkeypatch.setattr(llm_client, "make_llm_client", lambda config: StubClient())
+    safe_client = TestClient(app, raise_server_exceptions=False)
+    response = safe_client.post(
+        "/api/parse",
+        json={"text": "human drug response", "mode": "llm_assisted"},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["schema_valid"] is False
+    assert payload["errors"] == ["invalid_perturbation_dose"]
+
+
 def test_job_flow_offline(client):
     req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
            "input_modality": "scRNA", "output_modality": "delta_expression",
@@ -67,6 +198,75 @@ def test_job_flow_offline(client):
     assert tr.status_code == 200 and tr.json()["trace"]
     pv = client.get(f"/api/reports/{jid}/provenance")
     assert pv.status_code == 200 and "provenance" in pv.json()
+
+
+def test_job_endpoint_revalidates_confirmed_request(client):
+    invalid = {"species": "human", "perturbation_type": "gene",
+               "perturbation_targets": ["AHR"], "input_modality": "scRNA",
+               "output_modality": "invented_output", "task_type": "predict_delta_expression"}
+    r = client.post("/api/jobs", json={"request": invalid, "mode": "offline"})
+    assert r.status_code == 400
+    assert "unsupported_output_modality" in r.json()["detail"]
+
+
+def test_job_endpoint_normalizes_metadata_routing_controls(client):
+    import praxis_vc_api.services.runtime_service as rs
+
+    req = {
+        "species": "human",
+        "perturbation_type": "gene",
+        "perturbation_targets": ["AHR"],
+        "input_modality": "scRNA",
+        "output_modality": "delta_expression",
+        "task_type": "predict_delta_expression",
+        "metadata": {
+            "requested_outputs": {"growth": True},
+            "assumptions": ["safe", {"not": "text"}],
+            "note": "preserve me",
+        },
+    }
+    response = client.post("/api/jobs", json={"request": req, "mode": "offline"})
+    assert response.status_code == 200
+    saved = rs.get_job(response.json()["job_id"])["request"]
+    assert saved["metadata"] == {
+        "requested_outputs": [],
+        "assumptions": ["safe"],
+        "note": "preserve me",
+    }
+
+
+@pytest.mark.parametrize("bad_dose", [{}, "not-a-number", True, 10**400])
+def test_job_endpoint_rejects_invalid_perturbation_dose(client, bad_dose):
+    req = {
+        "species": "human",
+        "perturbation_type": "drug",
+        "perturbation_targets": ["geldanamycin"],
+        "input_modality": "scRNA",
+        "output_modality": "delta_expression",
+        "task_type": "predict_delta_expression",
+        "perturbation_dose": bad_dose,
+    }
+    response = client.post("/api/jobs", json={"request": req, "mode": "offline"})
+    assert response.status_code == 400
+    assert "invalid_perturbation_dose" in response.json()["detail"]
+
+
+def test_job_endpoint_normalizes_finite_perturbation_dose(client):
+    import praxis_vc_api.services.runtime_service as rs
+
+    req = {
+        "species": "human",
+        "perturbation_type": "drug",
+        "perturbation_targets": ["geldanamycin"],
+        "input_modality": "scRNA",
+        "output_modality": "delta_expression",
+        "task_type": "predict_delta_expression",
+        "perturbation_dose": 10,
+    }
+    response = client.post("/api/jobs", json={"request": req, "mode": "offline"})
+    assert response.status_code == 200
+    saved = rs.get_job(response.json()["job_id"])["request"]
+    assert saved["perturbation_dose"] == 10.0
 
 
 def test_list_jobs(client):
@@ -136,15 +336,28 @@ def test_module_plan_endpoint(client):
     assert mp.get("primary") and "entries" in mp and "overall_verdict" in mp
 
 
-def test_module_plan_missing_is_empty_not_500(client):
-    # 不可路由请求(空 targets → abstain,无 module_plan)→ 空 dict,不崩
+def test_job_endpoint_rejects_missing_targets_before_module_plan(client):
+    # 已确认请求仍须经过后端最终校验，不能绕过 Review 直接执行空 targets。
     req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": [],
            "input_modality": "scRNA", "output_modality": "delta_expression",
            "task_type": "predict_delta_expression"}
-    jid = client.post("/api/jobs", json={"request": req, "mode": "offline"}).json()["job_id"]
-    r = client.get(f"/api/reports/{jid}/module-plan")
-    assert r.status_code == 200
-    assert r.json()["module_plan"] == {}
+    r = client.post("/api/jobs", json={"request": req, "mode": "offline"})
+    assert r.status_code == 400
+    assert "perturbation_targets" in r.json()["detail"]
+
+
+def test_legacy_module_plan_missing_is_empty_not_500(client):
+    import praxis_vc_api.services.runtime_service as rs
+
+    job_id = "legacy_without_module_plan"
+    job_dir = Path(rs.RUNS_DIR) / job_id
+    job_dir.mkdir(parents=True)
+    (job_dir / "status").write_text("done", encoding="utf-8")
+    (job_dir / "report.json").write_text("{}", encoding="utf-8")
+
+    response = client.get(f"/api/reports/{job_id}/module-plan")
+    assert response.status_code == 200
+    assert response.json()["module_plan"] == {}
 
 
 def test_module_plan_404(client):
