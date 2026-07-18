@@ -41,6 +41,11 @@ type Tab =
   | "trace"
   | "provenance";
 
+export type ResultsStageProps = {
+  jobId: string;
+  onReset: () => void;
+};
+
 const TAB_ITEMS: TabItem[] = [
   { id: "report", label: "报告" },
   { id: "predictions", label: "预测" },
@@ -74,10 +79,7 @@ function copy(text: string) {
 export default function ResultsStage({
   jobId,
   onReset,
-}: {
-  jobId: string;
-  onReset: () => void;
-}) {
+}: ResultsStageProps) {
   const [tab, setTab] = useState<Tab>("report");
   const [report, setReport] = useState<ReportResult | null>(null);
   const [trace, setTrace] = useState<TraceResult | null>(null);

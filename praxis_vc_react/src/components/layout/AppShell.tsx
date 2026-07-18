@@ -9,7 +9,7 @@ import {
   type RunStatus,
   type Stage,
 } from "../../api";
-import ResultsStage from "../stages/ResultsStage";
+import LazyResultsStage from "../stages/LazyResultsStage";
 import JobSidebar from "./JobSidebar";
 import TopBar, { type Theme } from "./TopBar";
 import Workspace from "./Workspace";
@@ -196,7 +196,7 @@ export default function AppShell() {
             {/* 右:Workspace(工作区,内含左侧 StepperRail)。
                 历史 job 模式:直接进 results,以该 job_id 渲 ResultsStage 6 tab 外壳(等价旧 openedJobId 分支)。 */}
             {openedJobId ? (
-              <ResultsStage
+              <LazyResultsStage
                 key={openedJobId}
                 jobId={openedJobId}
                 onReset={newQuery}
