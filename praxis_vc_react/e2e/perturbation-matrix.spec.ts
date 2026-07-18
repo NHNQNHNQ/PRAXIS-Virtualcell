@@ -22,6 +22,17 @@ type MatrixCase = {
   emptyRouting: boolean;
 };
 
+type StructuredOutputCase = {
+  name: string;
+  species: "human" | "bacteria";
+  cellType: string;
+  perturbationType: "gene" | "ligand";
+  targets: string[];
+  normalizedTargets?: string[];
+  outputModality: "growth" | "state";
+  expectedDelta: number[];
+};
+
 const MATRIX: MatrixCase[] = [
   {
     name: "human gene AHR",
@@ -79,6 +90,28 @@ const MATRIX: MatrixCase[] = [
     abstain: true,
     abstainReason: "all_predictors_rejected",
     emptyRouting: true,
+  },
+];
+
+const STRUCTURED_OUTPUT_CASES: StructuredOutputCase[] = [
+  {
+    name: "bacteria gene b0720 + b1136 growth",
+    species: "bacteria",
+    cellType: "E. coli",
+    perturbationType: "gene",
+    targets: ["b0720", "b1136"],
+    normalizedTargets: ["B0720", "B1136"],
+    outputModality: "growth",
+    expectedDelta: [-1, -1],
+  },
+  {
+    name: "human ligand IFNB1 state",
+    species: "human",
+    cellType: "PBMC",
+    perturbationType: "ligand",
+    targets: ["IFNB1"],
+    outputModality: "state",
+    expectedDelta: [2.485],
   },
 ];
 
@@ -160,6 +193,79 @@ async function reachReviewAndEdit(page: Page, matrixCase: MatrixCase): Promise<v
   await expect(comboboxes.nth(2)).toHaveValue(matrixCase.perturbationType);
   await expect(textboxes.nth(0)).toHaveValue(matrixCase.cellType);
   await expect(textboxes.nth(1)).toHaveValue(matrixCase.targets.join(", "));
+}
+
+async function reachReviewFromStructuredInput(
+  page: Page,
+  outputCase: StructuredOutputCase,
+): Promise<void> {
+  const normalizedTargets = outputCase.normalizedTargets ?? outputCase.targets;
+  const question = "请执行以下结构化非表达输出任务";
+  const structuredDescription = JSON.stringify({
+    species: outputCase.species,
+    cell_type: outputCase.cellType,
+    perturbation_type: outputCase.perturbationType,
+    perturbation_targets: outputCase.targets,
+    output_modality: outputCase.outputModality,
+  });
+
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "描述一次扰动实验" }),
+  ).toBeVisible();
+  await page.getByLabel("研究问题").fill(question);
+  await page.getByText("高级输入(可选)", { exact: true }).click();
+  await page
+    .getByLabel("结构化描述(可留空)")
+    .fill(structuredDescription);
+
+  const parseResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/parse") &&
+      response.request().method() === "POST",
+  );
+  const optionsResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/options") &&
+      response.request().method() === "GET",
+  );
+  await page.getByRole("button", { name: "解读任务 →" }).click();
+
+  const [parseResponse, optionsResponse] = await Promise.all([
+    parseResponsePromise,
+    optionsResponsePromise,
+  ]);
+  expect(parseResponse.status()).toBe(200);
+  expect(optionsResponse.status()).toBe(200);
+  expect(parseResponse.request().postDataJSON()).toEqual({
+    text: `${question}\n结构化描述:${structuredDescription}`,
+    mode: "offline",
+  });
+
+  const parsed = (await parseResponse.json()) as {
+    candidate_request: Record<string, unknown>;
+    schema_valid: boolean;
+    clarification_required: boolean;
+  };
+  expect(parsed.schema_valid).toBe(true);
+  expect(parsed.clarification_required).toBe(false);
+  expect(parsed.candidate_request).toMatchObject({
+    species: outputCase.species,
+    cell_type: outputCase.cellType,
+    perturbation_type: outputCase.perturbationType,
+    perturbation_targets: normalizedTargets,
+    output_modality: outputCase.outputModality,
+  });
+
+  await expect(page.getByRole("heading", { name: "核对任务解读" })).toBeVisible();
+  const comboboxes = page.getByRole("combobox");
+  const textboxes = page.getByRole("textbox");
+  await expect(comboboxes).toHaveCount(3);
+  await expect(textboxes).toHaveCount(2);
+  await expect(comboboxes.nth(1)).toHaveValue(outputCase.species);
+  await expect(comboboxes.nth(2)).toHaveValue(outputCase.perturbationType);
+  await expect(textboxes.nth(0)).toHaveValue(outputCase.cellType);
+  await expect(textboxes.nth(1)).toHaveValue(normalizedTargets.join(", "));
 }
 
 async function submitAndReachResults(page: Page): Promise<{
@@ -256,6 +362,38 @@ for (const matrixCase of MATRIX) {
       await expect(page.getByRole("heading", { name: "结果可靠性" })).toBeVisible();
     }
 
+    expectNoBrowserFailures(failures);
+  });
+}
+
+for (const outputCase of STRUCTURED_OUTPUT_CASES) {
+  test(`S4 高级输入非 expression 正例 · ${outputCase.name}`, async ({ page }) => {
+    const normalizedTargets = outputCase.normalizedTargets ?? outputCase.targets;
+    const failures = collectBrowserFailures(page);
+    await reachReviewFromStructuredInput(page, outputCase);
+    const { submittedRequest, structuredReport } = await submitAndReachResults(page);
+
+    expect(submittedRequest).toMatchObject({
+      species: outputCase.species,
+      cell_type: outputCase.cellType,
+      perturbation_type: outputCase.perturbationType,
+      perturbation_targets: normalizedTargets,
+      output_modality: outputCase.outputModality,
+    });
+    expect(structuredReport.abstain).toBe(false);
+    expect(structuredReport.models_used).toEqual(["CaseRunner"]);
+    const prediction = structuredReport.prediction as {
+      delta?: unknown;
+    } | null;
+    expect(prediction).not.toBeNull();
+    expect(prediction?.delta).toEqual(outputCase.expectedDelta);
+
+    const resultRegion = page.getByRole("region", { name: /^结果 · job/ });
+    await expect(
+      resultRegion.getByText("已给出预测", { exact: true }),
+    ).toBeVisible();
+    await page.getByRole("tab", { name: "预测" }).click();
+    await expect(page.getByRole("heading", { name: "结果可靠性" })).toBeVisible();
     expectNoBrowserFailures(failures);
   });
 }

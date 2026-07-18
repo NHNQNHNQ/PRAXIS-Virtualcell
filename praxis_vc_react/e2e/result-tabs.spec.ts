@@ -1,7 +1,48 @@
 import { test, expect, type Download, type Page } from "@playwright/test";
 
+type BrowserFailures = {
+  pageErrors: string[];
+  consoleErrors: string[];
+  http500: string[];
+};
+
+type ResultsTruth = {
+  jobId: string;
+  report: {
+    llm_used_for_prediction: boolean;
+  };
+};
+
+function collectBrowserFailures(page: Page): BrowserFailures {
+  const failures: BrowserFailures = {
+    pageErrors: [],
+    consoleErrors: [],
+    http500: [],
+  };
+
+  page.on("pageerror", (error) => failures.pageErrors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") failures.consoleErrors.push(message.text());
+  });
+  page.on("response", (response) => {
+    if (response.status() >= 500) {
+      failures.http500.push(
+        `${response.status()} ${response.request().method()} ${response.url()}`,
+      );
+    }
+  });
+
+  return failures;
+}
+
+function expectNoBrowserFailures(failures: BrowserFailures): void {
+  expect(failures.pageErrors).toEqual([]);
+  expect(failures.consoleErrors).toEqual([]);
+  expect(failures.http500).toEqual([]);
+}
+
 // 先走完 5 阶段到 Results,再逐个点 6 tab 断面板 h2(切 tab 纯前端不发请求)。
-async function reachResults(page: Page): Promise<string> {
+async function reachResults(page: Page): Promise<ResultsTruth> {
   await page.goto("/");
   await page.getByLabel("研究问题").fill("在 human 细胞敲 AHR");
   await page.getByRole("button", { name: "解读任务 →" }).click();
@@ -12,12 +53,50 @@ async function reachResults(page: Page): Promise<string> {
       response.url().endsWith("/api/jobs") &&
       response.request().method() === "POST",
   );
+  const reportResponsePromise = page.waitForResponse((response) => {
+    const path = new URL(response.url()).pathname;
+    return (
+      /^\/api\/reports\/[^/]+$/.test(path) &&
+      response.request().method() === "GET"
+    );
+  });
+  const traceResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/trace") && response.request().method() === "GET",
+  );
+  const provenanceResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/provenance") &&
+      response.request().method() === "GET",
+  );
+  const modulePlanResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/module-plan") &&
+      response.request().method() === "GET",
+  );
   await page.getByRole("button", { name: "开始运行 →" }).click();
-  const jobResponse = await jobResponsePromise;
+  const [
+    jobResponse,
+    reportResponse,
+    traceResponse,
+    provenanceResponse,
+    modulePlanResponse,
+  ] = await Promise.all([
+    jobResponsePromise,
+    reportResponsePromise,
+    traceResponsePromise,
+    provenanceResponsePromise,
+    modulePlanResponsePromise,
+  ]);
   expect(jobResponse.status()).toBe(200);
+  expect(reportResponse.status()).toBe(200);
+  expect(traceResponse.status()).toBe(200);
+  expect(provenanceResponse.status()).toBe(200);
+  expect(modulePlanResponse.status()).toBe(200);
   const body = (await jobResponse.json()) as { job_id: string };
+  const report = (await reportResponse.json()) as ResultsTruth["report"];
   await expect(page.getByRole("heading", { name: /^结果 · job/ })).toBeVisible();
-  return body.job_id;
+  return { jobId: body.job_id, report };
 }
 
 async function downloadedBytes(download: Download): Promise<number> {
@@ -39,17 +118,29 @@ const TABS: Array<[string, string]> = [
 ];
 
 test("Results 6 tab 逐个可达 + 面板 h2 出现", async ({ page }) => {
+  const failures = collectBrowserFailures(page);
   await reachResults(page);
   for (const [tab, h2] of TABS) {
     await page.getByRole("tab", { name: tab }).click();
     await expect(page.getByRole("heading", { name: h2 })).toBeVisible();
   }
+  expectNoBrowserFailures(failures);
 });
 
 test("Results 关键结论、路由、证据与溯源均可审计", async ({ page }) => {
-  const jobId = await reachResults(page);
+  const failures = collectBrowserFailures(page);
+  const { jobId, report } = await reachResults(page);
   const result = page.getByRole("region", { name: `结果 · job ${jobId}` });
 
+  expect(report.llm_used_for_prediction).toBe(false);
+  await expect(
+    result.getByText("结果由确定性模型给出,未经语言模型改写", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(result.getByText(/llm_used_for_prediction:/)).toContainText(
+    "llm_used_for_prediction:false",
+  );
   await expect(result.getByText("request_id", { exact: true })).toBeVisible();
   await expect(result.getByText(/^vc-[a-f0-9]{16}$/)).toBeVisible();
   await expect(
@@ -79,11 +170,13 @@ test("Results 关键结论、路由、证据与溯源均可审计", async ({ pag
     result.getByRole("row", { name: `job 标识 ${jobId}` }),
   ).toBeVisible();
   await expect(result.getByText("完整 provenance JSON", { exact: true })).toBeVisible();
+  expectNoBrowserFailures(failures);
 });
 
 test("Results 下载、离线禁用与复制操作保持诚实", async ({ page, context }) => {
+  const failures = collectBrowserFailures(page);
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-  const jobId = await reachResults(page);
+  const { jobId } = await reachResults(page);
   const actions = page.getByRole("group", { name: "结果操作" });
 
   const jsonDownloadPromise = page.waitForEvent("download");
@@ -108,9 +201,11 @@ test("Results 下载、离线禁用与复制操作保持诚实", async ({ page, 
   await expect
     .poll(() => page.evaluate(() => navigator.clipboard.readText()))
     .toContain('"prediction"');
+  expectNoBrowserFailures(failures);
 });
 
 test("1280×720 Results 动作区不挤压标题或按钮", async ({ page }) => {
+  const failures = collectBrowserFailures(page);
   await reachResults(page);
 
   const title = page.getByRole("heading", { name: /^结果 · job/ });
@@ -164,4 +259,5 @@ test("1280×720 Results 动作区不挤压标题或按钮", async ({ page }) => 
     expect(button.contentFits).toBe(true);
     expect(button.whiteSpace).toBe("nowrap");
   }
+  expectNoBrowserFailures(failures);
 });

@@ -117,16 +117,44 @@ test("Results 六面板反复切换并滚动真实轨迹与溯源时保持稳定
   );
 
   await page.getByRole("button", { name: "开始运行 →" }).click();
-  const responses = await Promise.all([
+  const [
+    jobResponse,
+    reportResponse,
+    traceResponse,
+    provenanceResponse,
+    modulePlanResponse,
+  ] = await Promise.all([
     jobResponsePromise,
     reportResponsePromise,
     traceResponsePromise,
     provenanceResponsePromise,
     modulePlanResponsePromise,
   ]);
-  expect(responses.map((response) => response.status())).toEqual([
-    200, 200, 200, 200, 200,
-  ]);
+  expect(
+    [
+      jobResponse,
+      reportResponse,
+      traceResponse,
+      provenanceResponse,
+      modulePlanResponse,
+    ].map((response) => response.status()),
+  ).toEqual([200, 200, 200, 200, 200]);
+
+  const tracePayload = (await traceResponse.json()) as { trace?: unknown };
+  const traceSteps = Array.isArray(tracePayload.trace) ? tracePayload.trace : [];
+  expect(traceSteps.length).toBeGreaterThan(0);
+
+  const provenancePayload = (await provenanceResponse.json()) as {
+    provenance?: unknown;
+  };
+  const provenance = provenancePayload.provenance;
+  const provenanceKeys =
+    provenance !== null &&
+    typeof provenance === "object" &&
+    !Array.isArray(provenance)
+      ? Object.keys(provenance)
+      : [];
+  expect(provenanceKeys.length).toBeGreaterThan(0);
 
   const result = page.getByRole("region", { name: /^结果 · job/ });
   await expect(result).toHaveCount(1);
@@ -153,10 +181,20 @@ test("Results 六面板反复切换并滚动真实轨迹与溯源时保持稳定
   await result
     .getByRole("tab", { name: "运行轨迹", exact: true })
     .click();
-  const traceSummary = result.getByText(/运行轨迹 · 共 \d+ 步/);
+  const traceSummary = result.getByText(
+    new RegExp(
+      `^运行轨迹 · 共 ${traceSteps.length} 步(?:,精简显示 \\d+ 步)?$`,
+    ),
+  );
   await expect(traceSummary).toHaveCount(1);
   await traceSummary.scrollIntoViewIfNeeded();
   await expect(traceSummary).toBeVisible();
+  await expect(
+    result.getByRole("list", {
+      name: `运行轨迹时间线,共 ${traceSteps.length} 步`,
+      exact: true,
+    }),
+  ).toBeVisible();
 
   await result.getByRole("tab", { name: "溯源", exact: true }).click();
   const provenanceJson = result.getByText("完整 provenance JSON", {
