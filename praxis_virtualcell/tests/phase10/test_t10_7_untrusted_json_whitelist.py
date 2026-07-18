@@ -233,26 +233,13 @@ def test_offline_deterministic_parse_products_pass_through_unchanged():
 
 def test_boundary_try_non_str_key_returns_invalid_not_raises():
     """**边界 try = public API 契约防线**:validate_candidate 是 public 函数,
-    `/api/parse` → parse_query 与 `praxis_vc_web/app.py`(调用点 :76)两条链路均无
-    try/except → 未捕获异常会成为 FastAPI 500。本层 fail-closed:返回 schema_valid=False 而非抛。
+    `/api/parse`、Streamlit 确认页与 `/api/jobs` 都会调用它;`/api/jobs` 还把它作为
+    runner/save 前最终复验。函数本身因此生产可达,不能再写“非生产可达”。
 
-    **定性须精确(§10 修正 7)——"可达"分两种,本条测的是后一种**:
-    - **当前两个已知消费点的正常路径不可达**:`parse_query` 的 cand 来自 `json.loads`
-      (**JSON object key 恒 str**)或 `_deterministic_parse`(固定 str key);
-      `app.py:59` 的 `cand = dict(p["candidate_request"])` —— **"validate_candidate 自产
-      normalized 的拷贝"这一说法只在 `schema_valid=True` 分支成立**(§10 修正 8b/9④:
-      原句被夸大,此前只订正了生产 docstring、**本测试 docstring 漏改**,现补):
-      `run_virtualcell_query.py:217` 是 `v["normalized"] or {**cand, ...}` →
-      **`schema_valid=False` 时是未经归一的原始 LLM JSON / `_deterministic_parse` 产物的
-      展开**(页面 2 让用户补充/修正的常见路径)。**但结论不变**:两分支 key 皆恒 str
-      (JSON object key 恒 str)→ 正常路径仍不可达;**依据不同,不得混为一谈**。
-      → 本层**不是**当前生产 500 的防线(那个由 Task 1 的元素级白名单管)。
-    - **直接调用可达**(实测,故非死码):非 JSON 来源的 dict 含混合类型 key →
-      `json.dumps(d, sort_keys=True)` 抛 TypeError: '<' not supported between 'str' and 'int'。
-
-    真实价值 = 防脚本 / notebook / 直接调用 / **未来第 3 个调用点**;对标 **C2 Gate B**
-    (防御性完整性断言,正常路径不触发、防未来重构漏挂)。**非空壳但非生产可达** ——
-    变异实证:except 改 `except ():` → 本条红(C3 T10.6 的"永真空壳"教训)。
+    本条的**具体混合 key 形状**仍须单独定性:标准 HTTP JSON object key 恒为 string,
+    但脚本/notebook/直接 Python 调用可以构造混合类型 key,使
+    `json.dumps(d, sort_keys=True)` 抛 TypeError。测试证明边界对此 fail-closed 且非空壳;
+    它不证明该具体形状能穿过 HTTP JSON parser。
     """
     v = validate_candidate({1: "a", "species": "human", "perturbation_type": "gene",
                             "perturbation_targets": ["AHR"],
@@ -268,18 +255,16 @@ def test_boundary_try_deep_nested_dict_returns_invalid_not_raises():
     **RuntimeError 子类**(`RecursionError.__mro__` 实测不含 TypeError/AttributeError/
     ValueError)→ 原三元组**捕不到、原样穿透**边界 try。
 
-    可达性(照本单元纪律限定作用域):**直接调用可达**(本测试即是);**当前生产路径不可达**
-    —— `agents_llm/llm_client.py:23` 的 `max_tokens: int = 1024` 是**函数默认参数**
-    (**可被调用点覆盖,非硬编码、非结构不变量** —— §10 修正 8/9④:"硬编码"一词已作废,
-    此前的 commit 宣布作废却在同一 commit 新写了它,现补扫)→ LLM 单次补全被截断,
-    产不出触发阈值所需的嵌套深度。
+    可达性(照本单元纪律限定作用域):**直接调用可达**(本测试即是)。LLM parse 路径受
+    `max_tokens` 默认值限制,而 `/api/jobs` 已把 validator 接到生产入口;超深 HTTP body
+    是否能穿过上游 JSON parser 到达本层未在此证明,故两者均不得外推成笼统的可达/不可达。
 
     **余量随嵌套形状变化(§10 修正 9⑤),"15x" 只是最好情况**:dict 形状每层 6 字符
     (`{"n":` + `}`)→ 1024 token(粗估 ~3.5 char/token ≈ 3584 字符)约 597 层,对
     ~10000 层阈值余量 **~15x**;但 **list 形状每层仅 2 字符**(`[`+`]`)→ 约 1792 层 →
     余量降到 **~5x**,再叠 BPE 对重复括号的打包,余量继续被吃。且 `{"x": [[[…]]]}`
-    这种深 list 嵌在 dict 值里**确实能走到** `json.dumps`。→ 结论(当前生产不可达)不变,
-    但**依据是"余量存在且随形状浮动(dict ~15x / list ≤5x)",不是一个稳定常数**。
+    这种深 list 嵌在 dict 值里**确实能走到** `json.dumps`。这些余量只解释 LLM 默认输出,
+    **不是 `/api/jobs` ingress 的结构保证**,也不是一个稳定常数。
 
     **20000 层是"远高于阈值"的余量取值,不是阈值本身**:实测本机(CPython 3.13/macOS)
     8000 层**不抛**、10000 层抛 —— 且 3.13 按 **C 栈指针**判定而非 `recursionlimit` 计数
@@ -547,9 +532,10 @@ def test_arch_invariant_sanitize_llm_plan_fail_closed_on_element_malformed():
 # ---------------------------------------------------------------------------
 # 末轮:RecursionError 同型缺口回填(§10 修正 11)
 # 清单来自**实跑**机械枚举(命令与输出见 §10 修正 11),**非手工挑** ——
-# json.loads 消费 LLM 响应 6 处 + validate_candidate 的 json.dumps 边界 1 处 = **7 处**;
-# 已修 2 处(:75 边界 try、:206 json.loads),本轮回填**其余 5 处**。
-# ⚠️ 表述纪律:只能说"经机械枚举,当前清单 7 处已全部捕获 RecursionError";
+# 历史执行时:json.loads 消费 LLM 响应 6 处 + validator json.dumps 1 处 = **原 7 处**;
+# 当时已修 2 处并回填其余 5 处。2026-07-18 新增 response-safe json.dumps 后,
+# 原 LLM JSON 口径登记 8 处;显式 structured user JSON 的 json.loads 独立再 +1。
+# ⚠️ 表述纪律:8/8+1 都只是当前 predicate 命中清单;
 # **不得**说"/api/parse 或全仓对 RecursionError 已全覆盖" —— **层1(哪些算"未受信 LLM
 # JSON")是语义判断、无机械判据**,残余风险照旧。
 # ---------------------------------------------------------------------------
@@ -682,10 +668,10 @@ def test_e2e_provenance_contract_no_invented_gene_reaches_frontend(monkeypatch):
 
 # ---------------------------------------------------------------------------
 # §10 修正 12:第六次复发 —— `praxis_vc_web/app.py:66` 消费 parse_query 的
-# schema_valid=False 分支产物(**未归一、未白名单化的原始 LLM dict**)时字符拆。
+# validator-invalid 且无 normalized 时的 raw-like candidate(**未做语义归一/值白名单**)字符拆。
 #
 # ⚠️ **本单元的失职**:rvq:57-59 与本文件边界 try 那条 docstring **明确点名分析了 app.py**,
-# 甚至白纸黑字写出"schema_valid=False 时是未经归一的原始 LLM JSON",然后**只问了"key 是不是
+# 甚至白纸黑字写出“该 validator-invalid 分支保留 raw-like LLM 候选”,然后**只问了"key 是不是
 # str"**就下结论"结论不变" —— **值从没被问过**。与 C2 漏 MLBackedPredictor、C3 漏
 # cross_module_reasoner 是**同一形状**:消费点只枚举了一半,结论却按已结案陈述。
 # → 规矩(§10 修正 12):**prose 里一旦点名某消费者,就必须对它做「字段 × 行」的枚举**。
@@ -722,14 +708,14 @@ def test_coerce_str_list_kills_char_split_that_element_guard_alone_cannot():
 
 
 def test_parse_query_false_branch_returns_raw_uncoerced_contract(monkeypatch):
-    """**契约测试(设计,非疏漏)**:`parse_query` 在 `schema_valid=False` 时返回的
-    `candidate_request` 是 **未归一、未白名单化的原始 LLM dict**(`rvq:223` 的
-    `v["normalized"] or {**cand, ...}` 的 False 分支)。
+    """**契约测试(设计,非疏漏)**:本例让 validator 无 normalized,故 `parse_query` 的
+    `candidate_request` 是 response-safe、但**未做语义归一/值白名单**的 raw-like LLM 候选。
+    `schema_valid=False` 本身不是分支判据:structured error 可令最终 False 仍携带 normalized。
 
     **存在理由**:让用户在 UI 上看到"LLM 到底答了什么"并补充/修正(spec §2.4)——
     若在产出侧白名单化,`"AHR"` 会变成 `[]`,用户**反而丢失**"LLM 其实答了 AHR"这一信息。
 
-    **→ 因此守卫的责任在消费侧**:任何消费本分支产物的代码(当前:`praxis_vc_web/app.py:66`;
+    **→ 因此守卫的责任在消费侧**:任何消费这种 raw-like 产物的代码(当前:`praxis_vc_web/app.py`;
     未来的第三个消费者同理)**必须自己调 `coerce_str_list`**,不得直接 `join`/迭代。
     本条即为那份契约的**可执行文档** —— 未来读者由此知道这是**设计**而非疏漏。
     """
@@ -746,7 +732,7 @@ def test_parse_query_false_branch_returns_raw_uncoerced_contract(monkeypatch):
     # 可区分锚点(§10 修正 10③):证明真走过 LLM 分支,而非无 key 静默退化
     assert out["llm_metadata"].get("response_hash"), "LLM 分支未被走过 → 本条退化成静默空壳"
     assert out["schema_valid"] is False
-    # **契约本体**:False 分支原样透传 LLM 的标量,**未被白名单化**(这是设计)
+    # **契约本体**:本例的 validator-invalid 分支保留 LLM 标量,未做值白名单(这是设计)
     assert out["candidate_request"]["perturbation_targets"] == "AHR"
     # **消费侧守卫是唯一防线**:直接 join 会字符拆,调 coerce_str_list 才安全
     assert ",".join(coerce_str_list(out["candidate_request"]["perturbation_targets"])) == ""

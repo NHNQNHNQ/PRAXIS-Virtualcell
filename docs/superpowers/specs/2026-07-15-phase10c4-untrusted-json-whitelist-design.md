@@ -32,14 +32,14 @@ C3 Task 7 漏掉的那一层根治掉。产出直接服务 D 单元(D 有大量"
 |---|---|---|
 | **3 个活的生产 500 路径** | 全修 | ①`requested_outputs` 元素 unhashable → `o in ALLOWED_OUTPUTS` 抛 TypeError;②`parse_query` 的 `assumptions` 元素级无守 → `ParseOut.assumptions: list[str]` pydantic ValidationError;③`:184` `json.loads` 深嵌套 → RecursionError。**三者均 FastAPI TestClient 端到端实测 HTTP 500 → 修后 200** |
 | **第六次复发:`app.py:66` 消费侧字符拆** | 修(共享两层守卫 `coerce_str_list`) | HEAD 上实测:`"AHR"` → `','.join(...)` → `'A,H,R'` → 回填 `['A','H','R']` → 用户确认 → **`validate_candidate` 返 schema_valid=True → 内核真按假基因 A/H/R 跑**。修后 `','.join(coerce_str_list("AHR")) == ''` |
-| **RecursionError 清单 7 处** | 全捕获 | 机械枚举命令+输出见 §10 修正 11①;5 处回填**逐处变异 → 各自红 5/5** |
+| **RecursionError 已登记清单** | 已捕获;不外推全仓 | 原 C4 的 7 处仍在;2026-07-18 新增 response-safe `json.dumps` 后,原 LLM JSON 口径为 **8 处**。显式 structured user JSON 的 `json.loads` 独立再计 **+1**;数字只描述当前 predicate 命中项,不是全仓覆盖证明 |
 | **姊妹 7 处元素级白名单** | 全修 | 清单来自**实跑 predicate**(非手工挑);变异 → 红 |
 | **`validate_candidate` 边界 try** | 在;函数本身生产可达 | `/api/parse` 与 `/api/jobs` 都调用 validator,其中 `run_job` 把它作为 runner/save 前的最终复验。四类具体异常触发条件的可达性不同:混合 key/循环等不是标准 HTTP JSON 形状,直接 Python 调用仍可达;变异 `except ():` → 红(非空壳) |
 | **溯源契约** | 在(仅 `perturbation_targets`) | `[None,'AHR']` → 修前发明 `'NONE'`;端到端 e2e:前端收到 `['AHR']`,`'NONE'` 不在其中 |
-| **显式结构化 overlay** | 严格;与 LLM 容错候选分层 | 仅识别行首 `结构化描述:`;payload 必须是 object 且字段属于声明集合。显式 `requested_outputs` 必须是允许值组成的 `list[str]`,`perturbation_targets` 必须是 `list[str]`;畸形/未知字段进入稳定澄清错误,合法显式值在解析后覆盖 LLM/offline 候选 |
-| **`ParseOut` 响应安全** | 标准 JSON / UTF-8 / 结构预算内 | assumptions、error、model 与 candidate 均做 surrogate/NaN/深度防护;超预算候选降为浅层安全壳。独立 API fuzz **1,092 组**零失败 |
-| **`/api/jobs` 最终执行边界** | 只消费完整 normalized 白名单 | `run_job` 在 runner/save 前复验全部已声明请求字段及 metadata 控制字段;未知顶层字段不透传,非法请求不调用 runner/save。独立 validator fuzz **2,000 组**零失败;最新 core 口径实跑 **947 passed / 40 skipped / 9 deselected / 0 failed** |
-| **React Review 消费侧** | 严格类型读取 + 显式修正 | 不再用 `String(v)` 把对象发明成 `"[object Object]"`;可编辑的非法值须经用户实际编辑后才解除阻断,不可编辑错误继续 fail-closed |
+| **显式结构化 overlay** | 严格;与 LLM 容错候选分层 | 仅识别行首 `结构化描述:` 且取最后一处;只允许 species/cell_type/perturbation_type/targets/input/output/task/requested_outputs 这 **8 字段**。畸形/non-object/unknown、非法 outputs/targets 进入澄清;合法显式值最后覆盖 LLM/offline 候选 |
+| **`ParseOut` 响应安全** | 标准 JSON / UTF-8 / 出站结构预算内 | candidate/assumptions/llm_metadata/result 经 strict JSON(`allow_nan=False`)与 UTF-8 检查;预算为 depth≤64、nodes≤4096、UTF-8 JSON≤262144B,超限 raw-like 候选降为固定浅壳。本轮独立 review audit:API fuzz **1,092 组**零失败(抽样证据,非持久 CI 门) |
+| **`/api/jobs` 最终执行边界** | 只消费 validator normalized 顶层请求 | `run_job` 在 runner/save 前复验已声明请求字段与 metadata 控制字段;未知顶层字段不透传,响应安全的 metadata 扩展 key 仍保留,非法请求不调用 runner/save。本轮独立 review audit:validator fuzz **2,000 组**零失败;最新 core 实跑 **947 passed / 40 skipped / 9 deselected / 0 failed** |
+| **React Review 消费侧** | 严格类型读取 + 显式修正 | 不再用 `String(v)` 把对象发明成 `"[object Object]"`;显式非法 targets 必须经用户实际编辑/载入 preset 才解除阻断。React 是消费侧保护,最终合法性仍由 `/api/jobs` validator 权威复验 |
 
 ### 0.3 可直接引用的表述(照抄,勿改写)
 
@@ -62,10 +62,11 @@ C3 Task 7 漏掉的那一层根治掉。产出直接服务 D 单元(D 有大量"
 > HTTP JSON,须与直接 Python 调用可达性分开陈述。不得再写笼统的“当前生产路径不可达”。
 
 **④ RecursionError 的覆盖主张(**唯一许可的写法**)**:
-> 经**机械枚举** `json.loads`/`json.dumps` 消费未受信 LLM JSON 的调用点(命令与输出见
-> §10 修正 11①),**当前清单 7 处已全部捕获 `RecursionError`**。
+> 原 C4 机械枚举的 **7 处**仍捕获 `RecursionError`;2026-07-18 新增 response-safe
+> `json.dumps` 也在边界内捕获,故按原“LLM JSON”口径当前登记 **8 处**。显式 structured
+> user JSON 的 `json.loads` 是独立口径再 **+1**。
 > **层1 仍无机械判据**("哪些算未受信 LLM JSON"是语义判断;predicate 只是启发式代理)
-> → 残余风险照旧。
+> → 8 或 8+1 都只是当前清单,不是全仓覆盖证明。
 
 **⑤ `parse_query` 的输出契约(极易被过读)**:
 > `candidate_request` 的选择看 validator 是否产出 `normalized`,**不直接看最终 `schema_valid`**。
@@ -76,18 +77,21 @@ C3 Task 7 漏掉的那一层根治掉。产出直接服务 D 单元(D 有大量"
 > 必须始终严格读取声明类型;Python 字符串列表消费者须调 `coerce_str_list`。
 
 **⑥ 显式结构化输入与 LLM 候选不是同一信任策略**:
-> 行首 `结构化描述:` 是用户明确提交的机器可读 overlay,采用严格字段/类型/值域校验并在合法时覆盖
-> LLM/offline 候选;LLM 候选仍采用容错过滤与澄清。**不得**为了保留 LLM 容错而放宽显式 overlay,
-> 也不得把显式 overlay 的拒绝策略套到所有 LLM 候选上。
+> 最后一处行首 `结构化描述:` 是用户明确提交的机器可读 overlay,只允许当前声明的 8 字段,
+> 采用严格字段/类型/值域校验并在合法时覆盖 LLM/offline 候选;LLM 候选仍采用容错过滤与澄清。
+> **不得**为了保留 LLM 容错而放宽显式 overlay,也不得把显式 overlay 的拒绝策略套到所有 LLM 候选上。
 
 ### 0.4 ❌ 不得声称清单(每条都被实证证伪过)
 
 | ❌ 不得写 | 为什么 |
 |---|---|
 | "**根治**〔第五次复发 / 发明假基因名〕" | 论域=全仓消费未受信 LLM 值的代码点,**无机械枚举** → 判据 A① 不成立。**第六次复发就活在 HEAD 上被 opus 抓到** |
-| "`validate_candidate` 已覆盖所有未受信输入/未来字段" | 当前只对**已声明的请求字段与 metadata 控制字段**完成归一和最终校验;入口/未来字段仍属层1语义判断,不能外推成开放世界全覆盖 |
+| "`validate_candidate` 已覆盖所有未受信输入/未来字段" | 已知 API request 字段已逐项归一/校验,不等于全仓消费者或扩展字段全覆盖;metadata 仍保留响应安全的扩展 key,legacy perturbation/task alias 仍是容错语义 |
 | "`parse_query` 输出已白名单化" | validator 无 normalized 时会返 response-safe raw-like 候选;且最终 `schema_valid=False` 也可能携带 normalized 候选,不能把布尔值当作产物形状的判据(§0.3⑤) |
-| "`/api/parse` 对 RecursionError 无条件安全" | 只能说"**当前清单 7 处已全部捕获**"(§0.3④) |
+| "`/api/parse` 对 RecursionError 无条件安全" | 只能按 §0.3④ 分开报告当前 8 / 8+1 清单及语义口径 |
+| "显式 overlay 与 LLM 候选采用同一严格度" | 显式机器可读字段 fail-closed;LLM 候选为保留澄清信息而容错过滤,两者故意分轨 |
+| "响应预算等于入口/抗 DoS 预算" | depth/node/byte 预算只证明 `/api/parse` 出站序列化安全,不覆盖大而浅 request body、MemoryError 或通用 ingress 限流 |
+| "所有 run/save 都 normalized-only" | 该性质当前只属于 API `run_job`;`praxis-vc run` 与直接 `run_query` 可绕过 validator,CLI run 还会保存 raw request |
 | 任何对**消费点**的"全覆盖" | 消费点是**语义判断**(层1),**无机械枚举** |
 | "LLM unsupported claim = 0"(G2) | C3 支撑不到,须克制 |
 
@@ -99,7 +103,7 @@ C3 Task 7 漏掉的那一层根治掉。产出直接服务 D 单元(D 有大量"
 | "**绝不**把异常透给调用方" | "**捕获已识别的 4 类**;`MemoryError`/未知类型在白名单外" |
 | "**硬编码** `max_tokens: int = 1024`" | "`max_tokens` 的**函数默认参数**(**可被调用点覆盖**,非结构不变量)" |
 | "**可达**"(未限定) | 分开写:"validator 函数由 `/api/parse`/`/api/jobs` **生产调用**"/"某个具体异常形状只在**直接 Python 调用可达**或也可由标准 HTTP JSON 触发" |
-| "`app.py` 的 cand 是**自产 normalized 拷贝**" | "**只在 `schema_valid=True` 分支**成立;False 分支是未归一原始 LLM JSON" |
+| "`app.py` 的 cand 形状可由 `schema_valid` 判断" | 候选选择看 validator 是否有 normalized;structured error 可令最终 False 仍携带 normalized,validator-invalid 才走 response-safe raw-like/shell |
 | "**三种判据合计覆盖四类**" / "**一条断言覆盖四类**" | 照 §0.3① 的**逐类归属**写 |
 | "**无条件成立**" / "**无论…都**〔精确复原〕" | "`setenv` 底层 `setitem` **无条件登记 undo**"(对实现的封闭陈述,非对"任意改写者"的全称) |
 | "**6 处**已机械找全" | "**实跑 predicate 命中的 N 处**(命令+输出附后);**predicate 找不找得全是另一回事**" |
@@ -128,17 +132,22 @@ C3 Task 7 漏掉的那一层根治掉。产出直接服务 D 单元(D 有大量"
 2. **`app.py:66` 无直接测试覆盖**(Streamlit 顶层脚本,import 即执行)——
    被调用的 `coerce_str_list` 有真实覆盖,但若有人把 `:66` 改回直接 `join`,**测试抓不到**。
    (**有意不写"抄一份表达式"的测试** —— 那正是 safety_contract 抄 llm_router 的失效模式。)
-3. **React 当前声明字段已改为严格类型读取**,且非法可编辑值须经用户实际修正;但“谁是未来消费者”
-   仍是层1语义判断,新增字段/消费者时仍须重做字段 × 行审计,不能把本轮修复外推成全仓永久安全。
-4. **normalized-only 的审计标识变化**:合法但原始格式非规范的请求现在会在 run/save 前归一;
-   科学预测与裁决保持一致,但 job/trace/provenance ID 或 input hash 可能相对旧行为变化,须在 1.6.0
-   版本说明中披露。
-5. **`⊆` 单向**(§0.3②)+ **`_norm` 协同修改盲区**。
+3. **React 的对象 `String()` 发明已修**,但这是消费侧保护而非 validator。`/api/options` 失败时,
+   可编辑 species/type 只按“非空且不同于原值”本地解锁,最终合法性仍依赖 `/api/jobs` 复验。
+4. **仅 `/api/jobs` normalized-only 的审计标识变化**:它会补默认字段、丢未知顶层字段并清洗
+   metadata 控制字段;raw-but-normalizable 请求的 job/trace/provenance ID 或 input hash 可能变化。
+   只能说已 normalized 的合法请求科学输出不变,不能声称跨版本字节/ID 不变。
+5. **`⊆` 单向 + `_norm` 协同修改盲区**仍在。显式 structured mixed targets 会拒绝;
+   LLM tolerant 分支仍可能保留合法元素并静默丢弃畸形元素而不提示。
 6. **except 捕获范围过宽无测试兜底**:现有测试能证明"except 真在捕获"(`except ():` → 红),
    **不能证明"范围不过宽"**(改成 `except Exception:` → 全绿)。
 7. **`/api/jobs` 的 `detail=str(e)`** 把原始异常文本泄漏给调用方(小瑕疵,记录不修)。
 8. **narrative gate**:仅 abstain / 仅浮点 / 不验语境对应 / hedge 词可绕 →
    **不得声称覆盖 §128 hypothesis-写成-conclusion**。
+9. **response depth/node/byte 预算仅是出站序列化安全**,不是通用 ingress/anti-DoS 限额;
+   大而浅 body、`MemoryError`、CLI/直接 `run_query` 均不由此主张覆盖。
+10. **显式 overlay 当前只有 8 字段**;tissue/dose/time/baseline/metadata/constraints 虽由
+    `/api/jobs` validator 支持,却不能经 `结构化描述:` 传入。这是当前支持范围,不是“全部字段”能力。
 
 ### 0.8 新规矩(本单元用 12 次复发换来的)
 

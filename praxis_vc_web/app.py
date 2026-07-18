@@ -62,10 +62,10 @@ if ss.get("parsed"):
     cand["species"] = c1.text_input("species", cand.get("species", ""))
     cand["cell_type"] = c2.text_input("cell_type", cand.get("cell_type") or "")
     cand["perturbation_type"] = c3.text_input("perturbation_type", cand.get("perturbation_type", ""))
-    # C4 §10 修正 12(**第六次复发,活在 HEAD 上**):`parse_query` 在 schema_valid=False 时
-    # **按设计**返回未归一、未白名单化的原始 LLM dict(契约见
-    # `tests/phase10/test_t10_7_...::test_parse_query_false_branch_returns_raw_uncoerced_contract`)
-    # → **守卫的责任在消费侧**。修前实测:LLM 返标量 "AHR"(C3 认定的自然错误)→
+    # C4 §10 修正 12(**第六次复发,活在 HEAD 上**):validator 无 normalized 时,
+    # `parse_query` 按设计返回 response-safe、但未做语义归一/值白名单的 raw-like 候选;
+    # structured error 也可能让最终 schema_valid=False 但仍返回 normalized 候选。因此消费侧
+    # 不能靠该布尔值猜类型。修前实测:LLM 返标量 "AHR"(C3 认定的自然错误)→
     # `",".join("AHR")` → `'A,H,R'` → 回填 `['A','H','R']` → 用户确认 → schema_valid=True →
     # **内核真按假基因 A/H/R 跑**;targets 为 dict → join 迭代 **key** → 发明;含 dict/int → TypeError。
     # `coerce_str_list` 是**两层**守卫(容器级挡字符拆 + 元素级挡 dict/None/int)——

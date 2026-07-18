@@ -52,7 +52,7 @@ def _is_utf8_safe(value: str) -> bool:
 
 
 def _response_safe_candidate(cand: dict) -> dict:
-    """保留安全的 raw false-branch 契约；不可 UTF-8/不可 JSON 的候选改为固定空壳。"""
+    """保留安全的 validator-invalid raw-like 候选；不安全时改为固定空壳。"""
     if not _is_json_response_safe(cand):
         return {"perturbation_targets": []}
     return cand
@@ -189,10 +189,11 @@ def validate_candidate(cand: dict) -> dict:
     `KeyboardInterrupt`/`SystemExit`,让进程杀不掉、真 bug 被静默)。故此处**只捕已识别 4 类**,
     并明示边界。**"绝不"一词已作废(§10 修正 8:本单元第 6 次未限定作用域的全称词)。**
 
-    **定性必须精确**:validator 函数本身由 `/api/parse` 与 `/api/jobs` 生产调用;后者把它作为
-    runner/save 前最终复验。具体异常形状的可达性仍不同:标准 HTTP JSON 的 object key 恒为
-    string 且不能表达循环引用,而混合类型 key/循环/某些超深 Python dict 可由脚本、notebook 或
-    直接调用触发。故本层既不是“生产不可达”,也不能把每一种捕获异常都写成 HTTP 可构造。
+    **定性必须精确**:validator 函数由 `/api/parse`、Streamlit 确认页与 `/api/jobs` 生产调用;
+    后者把它作为 runner/save 前最终复验。具体异常形状的可达性仍不同:标准 HTTP JSON 的
+    object key 恒为 string 且不能表达循环引用,而混合类型 key/循环/某些超深 Python dict 可由
+    脚本、notebook 或直接调用触发。故本层既不是“生产不可达”,也不能把每一种捕获异常都写成
+    HTTP 可构造。
     """
     try:
         return _validate_candidate_impl(cand)
@@ -452,9 +453,9 @@ def parse_query(text: str, *, config: RuntimeConfig | None = None) -> dict:
             # 限定表述(§10 修正 11 已更新:原写"是否还有第三处未捕,层1 无机械判据" ——
             # 那是当时诚实的不确定标注,**现在答案已确定**,不更新就从"诚实的不确定"变成
             # "已知而未更新"):经**机械枚举** json.loads/json.dumps 消费未受信 LLM JSON 的
-            # 调用点(命令+输出见 §10 修正 11),当前清单 **7 处**(本处 + 边界 try :75 +
-            # llm_critic:43 + llm_router:52 + cross_module_reasoner:48 + safety_contract:64 +
-            # llm_input_interpreter:53)**已全部捕获 RecursionError**。
+            # 调用点(命令+输出见 §10 修正 11),原清单 7 处仍捕获;加上 2026-07-18 新增的
+            # response-safe json.dumps,按原 LLM JSON 口径当前登记 **8 处**。显式 structured
+            # user JSON 的 json.loads 另计 +1,也在边界内捕获。
             # **仍不得**声称 /api/parse 或全仓"对 RecursionError 已全覆盖" —— **层1(哪些算
             # "未受信 LLM JSON")是语义判断、无机械判据**,残余风险照旧。
             except (json.JSONDecodeError, TypeError, AttributeError, RecursionError):

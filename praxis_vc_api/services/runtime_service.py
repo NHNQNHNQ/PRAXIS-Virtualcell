@@ -101,7 +101,8 @@ def run_job(request: dict, mode: str, enable_llm_report: bool) -> dict:
             f"missing={validation['missing_fields']} errors={validation['errors']}"
         )
     normalized = validation["normalized"]
-    # 运行与落盘只能消费 validator 的完整白名单产物；不把原始控制字段混回去。
+    # API 运行与落盘只消费 validator normalized 的顶层请求；metadata 响应安全扩展 key
+    # 可保留，但 requested_outputs/assumptions 等控制字段已清洗，且不把原始请求混回去。
     validated_request = dict(normalized)
     out = run_query(validated_request, config=cfg, enable_llm_report=enable_llm_report)
     job_id = _job_id(validated_request)
