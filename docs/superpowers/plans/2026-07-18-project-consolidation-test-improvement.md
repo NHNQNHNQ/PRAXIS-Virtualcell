@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，B0 待执行
+> 状态：active — `PHASE_A_COMPLETE`，`B0_COMPLETE`，B1 待执行
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -133,13 +133,13 @@
 
 ### B0 — 环境与静态检查
 
-- [ ] 在 APFS clone 创建新的本地 `.venv`，按项目声明安装 `.[dev,api,mechanistic]`；不复制 T7 的旧 editable 环境。安装失败记录依赖/网络硬门，不用旧环境冒充干净基线。
-- [ ] 在前端运行 `npm ci` 重建 lockfile 对应依赖；不复制旧 `node_modules`。
-- [ ] 记录 Python、Node、npm、pytest、ruff、FastAPI、Starlette、httpx、React、Vite、Playwright 版本。
-- [ ] 运行 `.venv/bin/python -m pip check`。
-- [ ] 运行 `cd praxis_vc_react && npm audit`。
-- [ ] 运行 `.venv/bin/ruff check . --output-format concise`，把 13 个已知问题按生产代码/测试代码/自动可修分类。
-- [ ] 运行只读 `git fsck --no-reflogs --connectivity-only`，区分对象损坏与 AppleDouble garbage warning。
+- [x] 在 APFS clone 创建新的本地 `.venv`，按项目声明安装 `.[dev,api,mechanistic]`；不复制 T7 的旧 editable 环境。安装失败记录依赖/网络硬门，不用旧环境冒充干净基线。
+- [x] 在前端运行 `npm ci` 重建 lockfile 对应依赖；不复制旧 `node_modules`。
+- [x] 记录 Python、Node、npm、pytest、ruff、FastAPI、Starlette、httpx、React、Vite、Playwright 版本。
+- [x] 运行 `.venv/bin/python -m pip check`。
+- [x] 运行 `cd praxis_vc_react && npm audit`。
+- [x] 运行 `.venv/bin/ruff check . --output-format concise`，把 13 个已知问题按生产代码/测试代码/自动可修分类。
+- [x] 运行只读 `git fsck --no-reflogs --connectivity-only`，区分对象损坏与 AppleDouble garbage warning。
 
 ### B1 — VirtualCell 核心后端
 

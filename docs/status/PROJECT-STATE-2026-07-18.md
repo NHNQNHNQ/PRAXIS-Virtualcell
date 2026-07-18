@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 13:33 CST (+0800)
+> Captured: 2026-07-18 13:42 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — Phase B0 next`
+> Overall status: `PHASE_A_COMPLETE — B0_COMPLETE — Phase B1 next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -57,10 +57,10 @@ The APFS clone intentionally reproduces the source's dirty worktree:
 | `praxis_vc_react/src/styles/fonts.css` | modified | do not modify or stage before C3 |
 | `praxis_vc_react/src/styles/themes.css` | modified | do not modify or stage before C3 |
 | `praxis_vc_react/src/styles/tokens.css` | modified | do not modify or stage before C3 |
-| `.claude/launch.json` | untracked | classify in A2; do not delete |
-| `.playwright-mcp/` (4 files) | untracked | classify in A2; do not delete |
-| `string.jpeg` | untracked | classify in A2; do not delete |
-| `docs/superpowers/plans/2026-07-18-*.md` (2 files) | untracked task artifacts | commit only with consolidation documentation |
+| `.claude/launch.json` | untracked | portable local configuration; preserve pending user decision |
+| `.playwright-mcp/` (4 files) | ignored, present | archive-with-provenance; do not delete |
+| `string.jpeg` | untracked | STRING screenshot; preserve pending provenance decision |
+| `docs/superpowers/plans/2026-07-18-*.md` (2 files) | tracked | consolidation authority documents |
 
 The exact four-file CSS diff matches the recovery patch at SHA-256 `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`.
 
@@ -120,13 +120,24 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 - Result: all APFS, ref, WIP, asset, link, change-boundary, and three-way-ledger checks passed.
 - External writes: none.
 
+## Phase B baseline progress
+
+`B0_COMPLETE`
+
+- Clean backend environment: Python `3.12.13`, pip `25.0.1`, pytest `9.1.1`, Ruff `0.15.22`; editable install `praxis-virtualcell==0.0.0` with `.[dev,api,mechanistic]` succeeded.
+- Installed API stack: FastAPI `0.139.2`, Starlette `1.3.1`, httpx `0.28.1`; `pip check` exited `0` with no broken requirements.
+- Clean frontend install: Node `v26.4.0`, npm `11.17.0`, React `19.2.7`, Vite `8.1.2`, Playwright `1.61.1`; `npm ci` and explicit `npm audit` exited `0`, with `0 vulnerabilities`.
+- Ruff exited `1` with the expected 13 diagnostics: 2 in production code and 11 in tests; 4 `I001`, 7 `E501`, and 2 `F401`, of which 6 are marked automatically fixable. No fix was applied.
+- Connectivity-only fsck exited `0`; there are no missing/corrupt objects and no AppleDouble diagnostics. Eight dangling blobs are non-corrupt staging leftovers and were not pruned.
+- Environment creation changed no tracked manifest or source file. The four protected CSS files still produce the exact recovery patch SHA-256 `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`.
+
 ## Next authorized work
 
-Continue Phase B0 in this APFS clone:
+Continue Phase B1 in this APFS clone:
 
-1. Create a fresh `.venv` on APFS and install the declared development/API/mechanistic dependencies; do not reuse the T7 environment.
-2. Recreate frontend dependencies with `npm ci`; do not copy the T7 `node_modules`.
-3. Record tool/dependency versions, `pip check`, `npm audit`, Ruff output, and connectivity-only fsck results without fixing anything.
-4. Keep all B0 measurements separate by command, exit code, and scope.
+1. Run `.venv/bin/pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` without changing tests or source.
+2. Record passed, skipped, deselected, failed, duration, and every skip category.
+3. Run the Phase 10 delivery command only with its declared package scope and compare the result with the existing Phase 10 summary.
+4. Treat any newly observed failure as baseline evidence for Phase C; do not fix it during Phase B.
 
-No Phase B baseline test may start before `PHASE_A_COMPLETE` is written at A5. No external synchronization is authorized before the Phase D approval gate.
+No Phase C fix may start before `PHASE_B_COMPLETE` is written at B5. No external synchronization is authorized before the Phase D approval gate.
