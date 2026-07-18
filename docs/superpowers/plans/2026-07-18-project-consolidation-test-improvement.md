@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — A0/A1/A2/A3 完成，A4 进行中
+> 状态：active — A0/A1/A2/A3/A4 完成，A5 进行中
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -111,10 +111,10 @@
 
 ### A4 — 目录与生成物规则
 
-- [ ] 检查 `.gitignore` 是否覆盖构建、Playwright、runs、AppleDouble；列出 `.claude/` 与 `.playwright-mcp/` 的建议，不在未分类前直接忽略用户文件。
-- [ ] 记录 1126 个 tracked files 中 code/test/docs/data/audit 的职责，不以“大扫除”为由删除继承代码或研究证据。
-- [ ] 明确 `_audit/`、`reports/`、`docs/findings/` 是证据/历史，`runs/`、`dist/`、`test-results/` 是生成物。
-- [ ] 为 Git 外置盘污染写一份非破坏维护 runbook：备份、迁移到 APFS/本机、只读 `git fsck`、人工批准后清理、再次 `git fsck`；本计划不执行清理。
+- [x] 检查 `.gitignore` 是否覆盖构建、Playwright、runs、AppleDouble；在完成 A2 分类/恢复归档后新增 `.playwright-mcp/` 与 React `blob-report/`，`.claude/` 保持未忽略等待决定。
+- [x] 记录 1126 个 tracked files 中 code/test/docs/data/audit 的职责，不以“大扫除”为由删除继承代码或研究证据。
+- [x] 明确 `_audit/`、`reports/`、`docs/findings/` 是证据/历史，`runs/`、`dist/`、`test-results/` 是生成物。
+- [x] 为 Git 外置盘污染写一份非破坏维护 runbook：备份、迁移到 APFS/本机、只读 `git fsck`、人工批准后隔离 sidecar、再次 `git fsck`；本计划未执行清理。
 
 验收：目录职责和生成物规则写清；未删除任何 legacy、audit、paper、data 或 `.git` 内容。
 

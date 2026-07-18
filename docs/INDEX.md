@@ -26,6 +26,7 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [Three-Way Sync State](status/SYNC-STATE.md) | live local/GitHub/`.53` ledger and Phase D synchronization protocol |
 | [Worktree Asset Classification](status/WORKTREE-ASSETS.md) | disposition of CSS WIP, `.claude/`, Playwright MCP output, screenshot, and stash |
 | [Versioning Contract](VERSIONING.md) | version namespaces and the planned single-source release contract; design only until C2 |
+| [Repository Layout](REPOSITORY-LAYOUT.md) | tracked-tree responsibilities and evidence-versus-generated policy |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | highest authority for met/narrowed/needs-new/unsupported scientific claims |
 
 ## User and operator documents
@@ -109,3 +110,5 @@ The new post-consolidation baseline will live under `reports/quality/` only afte
 | API/UI version surfaces | Python/frontend `0.0.0`, OpenAPI `0.6`, runtime `v0.3` | implement the contract in [Versioning](VERSIONING.md) during C2 |
 
 Do not bulk-move or rewrite old documents during consolidation. Update this index when a document's authority or lifecycle changes.
+
+Repository storage maintenance must follow [External-Disk Git Maintenance](runbooks/EXTERNAL-DISK-GIT-MAINTENANCE.md); its optional cleanup section always requires separate approval.

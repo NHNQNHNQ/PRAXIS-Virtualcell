@@ -2,7 +2,7 @@
 
 > Captured: 2026-07-18 13:12 CST (+0800)
 >
-> Overall status: `PHASE_A_IN_PROGRESS — A0/A1/A2/A3 complete`
+> Overall status: `PHASE_A_IN_PROGRESS — A0/A1/A2/A3/A4 complete`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -112,11 +112,11 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 
 ## Next authorized work
 
-Continue Phase A4 in this APFS clone:
+Continue Phase A5 in this APFS clone:
 
-1. Audit and minimally update generated-output ignore rules without ignoring `.claude/` prematurely.
-2. Record tracked directory responsibilities and evidence-versus-generated boundaries.
-3. Add the non-destructive external-disk Git maintenance runbook.
-4. Preserve all legacy, audit, paper, data, report, and `.git` contents.
+1. Run narrow documentation/link/diff/ref/APFS integrity checks.
+2. Prove protected CSS, `.claude/`, ignored `.playwright-mcp/`, `string.jpeg`, and stash remain present and unchanged.
+3. Confirm every consolidation commit contains only the explicitly classified documentation/configuration scope.
+4. Write `PHASE_A_COMPLETE` only if the synchronization ledger has no unexplained SHA and every protection condition passes.
 
 No Phase B baseline test may start before `PHASE_A_COMPLETE` is written at A5. No external synchronization is authorized before the Phase D approval gate.

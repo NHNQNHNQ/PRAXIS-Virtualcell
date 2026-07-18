@@ -45,3 +45,7 @@ reports/phase10/trace_bundle.json
 # D-B playwright 生成物
 praxis_vc_react/test-results/
 praxis_vc_react/playwright-report/
+praxis_vc_react/blob-report/
+
+# 浏览器 MCP 会话日志/页面快照(A0 已 checksum 归档,非确定性项目资产)
+.playwright-mcp/
