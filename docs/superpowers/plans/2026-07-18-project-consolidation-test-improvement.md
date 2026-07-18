@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，C1 待执行
+> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，`C1_COMPLETE`，C2 待执行
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -189,11 +189,11 @@
 
 ### C1 — 测试配置与 CI 分层
 
-- [ ] 在 pytest 配置注册 `integration`、`llm`、`remote` 等实际使用 marker，并评估启用 strict markers。
-- [ ] CI 拆成至少三个清晰 job：Python lint/core、frontend build/E2E、legacy/integration（可按环境设非阻断或条件触发）。
-- [ ] 核心 job 明确运行 `praxis_virtualcell/tests -m "not llm"`；不把固定私网服务当普通 CI 前提。
-- [ ] 前端使用 `npm ci`，依次执行 typecheck、lint、build、Playwright。
-- [ ] 本地复现 CI 命令后再提交，不声称无法看到的 GitHub 绿勾。
+- [x] 在 pytest 配置注册 `integration`、`llm`、`remote` 等实际使用 marker，并评估启用 strict markers。
+- [x] CI 拆成至少三个清晰 job：Python lint/core、frontend build/E2E、legacy/integration（可按环境设非阻断或条件触发）。
+- [x] 核心 job 明确运行 `praxis_virtualcell/tests -m "not llm"`；不把固定私网服务当普通 CI 前提。
+- [x] 前端使用 `npm ci`，依次执行 typecheck、lint、build、Playwright。
+- [x] 本地复现 CI 命令后再提交，不声称无法看到的 GitHub 绿勾。
 
 ### C2 — 版本、文档与 CLI 收口
 

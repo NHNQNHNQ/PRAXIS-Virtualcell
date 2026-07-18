@@ -2,7 +2,7 @@
 
 > Captured: 2026-07-18 14:22 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — Phase C1 next`
+> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — C1_COMPLETE — Phase C2 next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -25,7 +25,7 @@ The source volume is ExFAT and was 93% full. The active clone and recovery direc
 | Item | Observed value |
 |---|---|
 | Audit anchor / current branch base | `24475f2eb14c27c7cfbb82b016b881e88e98b17c` |
-| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream yet; Phase A evidence parent `a55ee8b` |
+| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream yet; C1 implementation `57bc258` |
 | Preserved former working branch | `feat/v0.9-phase0-module-core=24475f2` |
 | Local `main` | `176019ebd9c198f93a5a645f1ecefce9baaf0522` |
 | Annotated tag `v1.5.0` | tag object `df04e74`; peeled commit `176019e` |
@@ -189,13 +189,26 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 - Authoritative core regression: `912 passed / 40 skipped / 9 deselected / 0 failed`, with the same single warning.
 - Protected assets: four CSS files remained unstaged and retain patch SHA-256 `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`.
 
+`C1_COMPLETE`
+
+- Implementation commit: `57bc2581695e9eb48d0f51d3bb8e139f3f19d908`.
+- Pytest policy: `integration`, `llm`, `remote`, and `operational` are statically registered and `strict_markers = true` is enabled. Repository-wide `--run-integration`, `--run-llm`, and `--run-remote` flags now make external suites explicit opt-ins; `PRAXIS_INTEGRATION=1` remains a compatibility path.
+- Remote boundary: the fixed `10.102.106.53:7788` health invariant is marked `remote` plus `operational`; its socket, HTTP status, and service-name assertions were unchanged. The live LLM integration module is marked `integration`, `llm`, and `remote`, so a normal integration run cannot accidentally invoke it.
+- CI policy: `.github/workflows/ci.yml` now has three blocking jobs: Python lint/VirtualCell core, frontend build/Playwright, and isolated legacy unit tests. Integration, LLM, GPU/checkpoint, and private-service execution remain explicit environment-specific gates rather than GitHub-hosted prerequisites.
+- Python 3.12 local reproduction: `pip check` and Ruff passed; core remained `912 passed / 40 skipped / 9 deselected / 0 failed` with the existing Starlette/httpx warning; legacy isolation produced `1136 passed / 59 skipped / 105 deselected / 0 failed` and did not execute the `.53` operational probe.
+- Fresh Python 3.13 reproduction: editable `.[dev,api,mechanistic]` install and `pip check` passed; Ruff passed; core again produced `912/40/9/0`, and legacy again produced `1136/59/105/0`.
+- Node `24.18.0` / npm `11.17.0` reproduction: `npm ci` reported 0 vulnerabilities; typecheck, Oxlint, and Vite build passed; all three Chromium E2E specs passed. The known 631.61 kB main-chunk warning remains owned by C4.
+- Configuration validation: strict all-suite collection passed, the fixed private-service test defaulted to one gated skip without a network call, and the live LLM integration module stayed skipped until all relevant opt-ins are present.
+- Independent review: PASS for workflow execution paths, hook ordering, marker registration, remote isolation, and unchanged assertions. This is local reproduction evidence only; the branch has not been pushed and no GitHub Actions run is claimed.
+- Protected assets: four CSS files remained unstaged and retain patch SHA-256 `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`.
+
 ## Next authorized work
 
-Continue Phase C1 in this APFS clone:
+Continue Phase C2 in this APFS clone:
 
-1. Audit existing pytest markers and GitHub Actions jobs against the B5 scope table before editing configuration.
-2. Register and separate core, frontend, legacy/integration, LLM, and remote contracts without weakening tests.
-3. Make fixed private-IP checks explicit remote/operational gates rather than unconditional ordinary-CI blockers.
-4. Reproduce each proposed CI command locally, then run Ruff, core pytest, frontend checks, and the appropriate legacy selection before committing.
+1. Reconcile `docs/VERSIONING.md`, local `v1.5.0` history, Python metadata, frontend package metadata, API/UI labels, and schema/artifact versions before choosing a product-version source.
+2. Implement one product-version source without rewriting historical tags or conflating schema/artifact versions.
+3. Update root/frontend documentation and development commands to match the measured C1 scopes and explicit external gates.
+4. Reinstall the editable package, verify `praxis-vc --help`, and repeat a clean wheel install smoke before committing.
 
 No external synchronization is authorized before the Phase D approval gate.
