@@ -1,14 +1,32 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Download, type Page } from "@playwright/test";
 
 // 先走完 5 阶段到 Results,再逐个点 6 tab 断面板 h2(切 tab 纯前端不发请求)。
-async function reachResults(page: Page): Promise<void> {
+async function reachResults(page: Page): Promise<string> {
   await page.goto("/");
   await page.getByLabel("研究问题").fill("在 human 细胞敲 AHR");
   await page.getByRole("button", { name: "解读任务 →" }).click();
   await page.getByRole("button", { name: "确认并继续 →" }).click();
   await page.getByRole("button", { name: "下一步 →" }).click();
+  const jobResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/jobs") &&
+      response.request().method() === "POST",
+  );
   await page.getByRole("button", { name: "开始运行 →" }).click();
+  const jobResponse = await jobResponsePromise;
+  expect(jobResponse.status()).toBe(200);
+  const body = (await jobResponse.json()) as { job_id: string };
   await expect(page.getByRole("heading", { name: /^结果 · job/ })).toBeVisible();
+  return body.job_id;
+}
+
+async function downloadedBytes(download: Download): Promise<number> {
+  const stream = await download.createReadStream();
+  let size = 0;
+  for await (const chunk of stream) {
+    size += (chunk as Uint8Array).byteLength;
+  }
+  return size;
 }
 
 const TABS: Array<[string, string]> = [
@@ -26,6 +44,70 @@ test("Results 6 tab 逐个可达 + 面板 h2 出现", async ({ page }) => {
     await page.getByRole("tab", { name: tab }).click();
     await expect(page.getByRole("heading", { name: h2 })).toBeVisible();
   }
+});
+
+test("Results 关键结论、路由、证据与溯源均可审计", async ({ page }) => {
+  const jobId = await reachResults(page);
+  const result = page.getByRole("region", { name: `结果 · job ${jobId}` });
+
+  await expect(result.getByText("request_id", { exact: true })).toBeVisible();
+  await expect(result.getByText(/^vc-[a-f0-9]{16}$/)).toBeVisible();
+  await expect(
+    result.getByText("MockLinear, MockCPA, MockGEARS", { exact: true }),
+  ).toBeVisible();
+  await expect(result.getByText(/"delta":\s*\[\s*0\.3\s*\]/)).toBeVisible();
+  await expect(result.getByText("已给出预测", { exact: true })).toBeVisible();
+
+  await result.getByRole("tab", { name: "预测" }).click();
+  await expect(result.getByRole("heading", { name: "结果可靠性" })).toBeVisible();
+  await expect(result.getByText("可靠性判定:high", { exact: true })).toBeVisible();
+
+  await result.getByRole("tab", { name: "模块路由" }).click();
+  await expect(
+    result.getByRole("row", { name: "genetic_hub primary accept —" }),
+  ).toBeVisible();
+
+  await result.getByRole("tab", { name: "证据" }).click();
+  await expect(
+    result.getByRole("row", {
+      name: "采纳模型 3 个 MockLinear MockCPA MockGEARS",
+    }),
+  ).toBeVisible();
+
+  await result.getByRole("tab", { name: "溯源" }).click();
+  await expect(
+    result.getByRole("row", { name: `job 标识 ${jobId}` }),
+  ).toBeVisible();
+  await expect(result.getByText("完整 provenance JSON", { exact: true })).toBeVisible();
+});
+
+test("Results 下载、离线禁用与复制操作保持诚实", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  const jobId = await reachResults(page);
+  const actions = page.getByRole("group", { name: "结果操作" });
+
+  const jsonDownloadPromise = page.waitForEvent("download");
+  await actions.getByRole("button", { name: "下载 report.json" }).click();
+  const jsonDownload = await jsonDownloadPromise;
+  expect(jsonDownload.suggestedFilename()).toBe(
+    `${jobId}_structured_report.json`,
+  );
+  expect(await downloadedBytes(jsonDownload)).toBeGreaterThan(0);
+
+  const markdownDownloadPromise = page.waitForEvent("download");
+  await actions.getByRole("button", { name: "下载 report.md" }).click();
+  const markdownDownload = await markdownDownloadPromise;
+  expect(markdownDownload.suggestedFilename()).toBe(`${jobId}_report.md`);
+  expect(await downloadedBytes(markdownDownload)).toBeGreaterThan(0);
+
+  await expect(
+    actions.getByRole("button", { name: "下载 narrative.md" }),
+  ).toBeDisabled();
+
+  await actions.getByRole("button", { name: "复制报告" }).click();
+  await expect
+    .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+    .toContain('"prediction"');
 });
 
 test("1280×720 Results 动作区不挤压标题或按钮", async ({ page }) => {
