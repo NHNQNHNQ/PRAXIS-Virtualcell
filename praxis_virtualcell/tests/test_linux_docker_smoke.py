@@ -13,6 +13,7 @@ only after its ownership and immutable ID have been verified.
 
 from __future__ import annotations
 
+import base64
 import json
 import os
 import re
@@ -20,9 +21,6 @@ import shutil
 import subprocess
 import time
 import tomllib
-import urllib.error
-import urllib.parse
-import urllib.request
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
@@ -35,22 +33,30 @@ _RUN_ID = uuid.uuid4().hex
 _OWNER_LABEL = "io.praxis-virtualcell.smoke-run"
 _IMAGE_TAG = f"praxis-vc-smoke:{_RUN_ID}"
 _CONTAINER_NAME = f"praxis-vc-smoke-{_RUN_ID}"
-_NETWORK_NAME = f"praxis-vc-smoke-{_RUN_ID}"
 
 _QUICK_TIMEOUT = 60
 _BUILD_TIMEOUT = 1200
 _START_TIMEOUT = 90
 
+_CONTAINER_HTTP_PROBE = """
+import base64
+import http.client
+import json
+import sys
 
-class _NoRedirect(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, request, file_pointer, code, message, headers, new_url):
-        return None
-
-
-_DIRECT_HTTP = urllib.request.build_opener(
-    urllib.request.ProxyHandler({}),
-    _NoRedirect(),
-)
+method, path, payload = sys.argv[1:4]
+connection = http.client.HTTPConnection("127.0.0.1", 8000, timeout=10)
+body = payload.encode("utf-8") if payload else None
+headers = {"Content-Type": "application/json"} if body else {}
+connection.request(method, path, body=body, headers=headers)
+response = connection.getresponse()
+content = response.read()
+print(json.dumps({
+    "status": response.status,
+    "content_type": response.getheader("content-type", ""),
+    "body": base64.b64encode(content).decode("ascii"),
+}))
+"""
 
 pytestmark = [
     pytest.mark.integration,
@@ -72,8 +78,14 @@ class BuiltImage:
 @dataclass(frozen=True)
 class RunningContainer:
     container_id: str
-    base_url: str
     image: BuiltImage
+
+
+@dataclass(frozen=True)
+class ContainerResponse:
+    status: int
+    content_type: str
+    body: bytes
 
 
 def _run(
@@ -96,8 +108,6 @@ def _inspect(kind: str, reference: str) -> dict | None:
     command = ["docker"]
     if kind == "image":
         command.extend(["image", "inspect"])
-    elif kind == "network":
-        command.extend(["network", "inspect"])
     else:
         command.append("inspect")
     result = _run([*command, reference])
@@ -139,38 +149,59 @@ def _remove_owned_image(reference: str) -> None:
     assert removed.returncode == 0, f"owned image cleanup failed: {removed.stderr}"
 
 
-def _remove_owned_network(reference: str) -> None:
-    document = _inspect("network", reference)
-    if document is None:
-        return
-    network_id = document["Id"]
-    assert _owned(document, network_id), f"refusing to remove unowned network: {reference}"
-    removed = _run(["docker", "network", "rm", network_id])
-    assert removed.returncode == 0, f"owned network cleanup failed: {removed.stderr}"
-
-
-def _http_json(url: str, *, data: dict | None = None) -> tuple[int, dict]:
-    body = None if data is None else json.dumps(data).encode("utf-8")
-    request = urllib.request.Request(
-        url,
-        data=body,
-        headers={"Content-Type": "application/json"} if body else {},
-        method="POST" if body else "GET",
+def _container_http(
+    container_id: str,
+    path: str,
+    *,
+    data: dict | None = None,
+) -> ContainerResponse:
+    assert path.startswith("/") and "://" not in path, f"invalid container path: {path!r}"
+    payload = "" if data is None else json.dumps(data, separators=(",", ":"))
+    result = _run(
+        [
+            "docker",
+            "exec",
+            container_id,
+            "python",
+            "-c",
+            _CONTAINER_HTTP_PROBE,
+            "GET" if data is None else "POST",
+            path,
+            payload,
+        ]
     )
-    with _DIRECT_HTTP.open(request, timeout=10) as response:
-        return response.status, json.loads(response.read().decode("utf-8"))
+    assert result.returncode == 0, (
+        f"container HTTP probe failed for {path}:\n"
+        f"stdout:\n{result.stdout[-2000:]}\nstderr:\n{result.stderr[-2000:]}"
+    )
+    document = json.loads(result.stdout)
+    return ContainerResponse(
+        status=int(document["status"]),
+        content_type=str(document["content_type"]),
+        body=base64.b64decode(document["body"], validate=True),
+    )
 
 
-def _wait_for_health(base_url: str, *, timeout: int = _START_TIMEOUT) -> dict:
+def _container_json(
+    container_id: str,
+    path: str,
+    *,
+    data: dict | None = None,
+) -> tuple[int, dict]:
+    response = _container_http(container_id, path, data=data)
+    return response.status, json.loads(response.body.decode("utf-8"))
+
+
+def _wait_for_health(container_id: str, *, timeout: int = _START_TIMEOUT) -> dict:
     deadline = time.monotonic() + timeout
     last_error = "service did not respond"
     while time.monotonic() < deadline:
         try:
-            status, payload = _http_json(f"{base_url}/api/health")
+            status, payload = _container_json(container_id, "/api/health")
             if status == 200 and payload.get("status") == "ok":
                 return payload
             last_error = f"HTTP {status}: {payload}"
-        except (OSError, ValueError, urllib.error.URLError) as error:
+        except (AssertionError, OSError, ValueError) as error:
             last_error = repr(error)
         time.sleep(1)
     raise AssertionError(f"container health timeout: {last_error}")
@@ -262,35 +293,8 @@ def docker_image(docker_daemon: None, request: pytest.FixtureRequest) -> BuiltIm
 
 
 @pytest.fixture(scope="module")
-def internal_network(
-    docker_daemon: None,
-    request: pytest.FixtureRequest,
-) -> str:
-    request.addfinalizer(lambda: _remove_owned_network(_NETWORK_NAME))
-    created = _run(
-        [
-            "docker",
-            "network",
-            "create",
-            "--internal",
-            "--label",
-            f"{_OWNER_LABEL}={_RUN_ID}",
-            _NETWORK_NAME,
-        ]
-    )
-    assert created.returncode == 0, created.stderr
-    network_id = created.stdout.strip()
-    assert network_id, "docker network create returned no network ID"
-    document = _inspect("network", _NETWORK_NAME)
-    assert _owned(document, network_id), "network is missing its unique ownership label"
-    assert document and document.get("Internal") is True
-    return _NETWORK_NAME
-
-
-@pytest.fixture(scope="module")
 def running_container(
     docker_image: BuiltImage,
-    internal_network: str,
     request: pytest.FixtureRequest,
 ) -> RunningContainer:
     request.addfinalizer(lambda: _remove_owned_container(_CONTAINER_NAME))
@@ -305,9 +309,7 @@ def running_container(
             "--label",
             f"{_OWNER_LABEL}={_RUN_ID}",
             "--network",
-            internal_network,
-            "--publish",
-            "127.0.0.1::8000/tcp",
+            "none",
             docker_image.tag,
         ]
     )
@@ -317,14 +319,11 @@ def running_container(
 
     document = _inspect("container", container_id)
     assert _owned(document, container_id), "container is missing its unique ownership label"
+    assert document and document["HostConfig"]["NetworkMode"] == "none"
 
-    port = _run(["docker", "port", container_id, "8000/tcp"])
-    assert port.returncode == 0, port.stderr
-    endpoint = port.stdout.strip().splitlines()[0]
-    host_port = int(endpoint.rsplit(":", 1)[1])
-    running = RunningContainer(container_id, f"http://127.0.0.1:{host_port}", docker_image)
+    running = RunningContainer(container_id, docker_image)
     try:
-        _wait_for_health(running.base_url)
+        _wait_for_health(running.container_id)
     except AssertionError as error:
         logs = _run(["docker", "logs", container_id])
         raise AssertionError(
@@ -392,7 +391,7 @@ def test_container_is_non_root_and_runs_installed_wheel(running_container: Runni
 
 
 def test_container_health_matches_candidate(running_container: RunningContainer) -> None:
-    payload = _wait_for_health(running_container.base_url)
+    payload = _wait_for_health(running_container.container_id)
     assert payload["product_version"] == running_container.image.product_version
     assert payload["git_sha"] == running_container.image.git_sha
     assert payload["mode"] == "offline"
@@ -423,9 +422,9 @@ def test_container_health_matches_candidate(running_container: RunningContainer)
 
 
 def test_container_serves_hashed_web_assets(running_container: RunningContainer) -> None:
-    with _DIRECT_HTTP.open(f"{running_container.base_url}/", timeout=10) as response:
-        assert response.status == 200
-        html = response.read().decode("utf-8")
+    root = _container_http(running_container.container_id, "/")
+    assert root.status == 200
+    html = root.body.decode("utf-8")
 
     assets = set(
         re.findall(
@@ -436,19 +435,15 @@ def test_container_serves_hashed_web_assets(running_container: RunningContainer)
     assert any(path.endswith(".js") for path in assets), html
     assert any(path.endswith(".css") for path in assets), html
     for path in assets:
-        parsed = urllib.parse.urlsplit(path)
-        assert parsed.scheme == parsed.netloc == ""
-        assert parsed.query == parsed.fragment == ""
-        asset_url = urllib.parse.urljoin(f"{running_container.base_url}/", path)
-        with _DIRECT_HTTP.open(asset_url, timeout=10) as response:
-            assert response.status == 200
-            content_type = response.headers.get_content_type()
-            if path.endswith(".js"):
-                assert content_type in {"text/javascript", "application/javascript"}
-            else:
-                assert content_type == "text/css"
-            body = response.read()
-            assert body and not body.lstrip().lower().startswith(b"<!doctype html"), path
+        response = _container_http(running_container.container_id, path)
+        assert response.status == 200
+        content_type = response.content_type.split(";", 1)[0]
+        if path.endswith(".js"):
+            assert content_type in {"text/javascript", "application/javascript"}
+        else:
+            assert content_type == "text/css"
+        assert response.body
+        assert not response.body.lstrip().lower().startswith(b"<!doctype html"), path
 
 
 def test_container_offline_api_report(running_container: RunningContainer) -> None:
@@ -460,23 +455,27 @@ def test_container_offline_api_report(running_container: RunningContainer) -> No
         "output_modality": "delta_expression",
         "task_type": "predict_delta_expression",
     }
-    status, job = _http_json(
-        f"{running_container.base_url}/api/jobs",
+    status, job = _container_json(
+        running_container.container_id,
+        "/api/jobs",
         data={"request": request, "mode": "offline"},
     )
     assert status == 200
     job_id = job["job_id"]
 
-    report_status, report = _http_json(f"{running_container.base_url}/api/reports/{job_id}")
+    report_status, report = _container_json(
+        running_container.container_id,
+        f"/api/reports/{job_id}",
+    )
     assert report_status == 200
     assert report["structured_report"]
     assert report["llm_used_for_prediction"] is False
 
-    with _DIRECT_HTTP.open(
-        f"{running_container.base_url}/api/reports/{job_id}/markdown",
-        timeout=10,
-    ) as response:
-        markdown = response.read().decode("utf-8")
-        assert response.status == 200
-        assert "text/markdown" in response.headers.get("content-type", "")
-        assert "# PRAXIS-VirtualCell Report" in markdown
+    response = _container_http(
+        running_container.container_id,
+        f"/api/reports/{job_id}/markdown",
+    )
+    markdown = response.body.decode("utf-8")
+    assert response.status == 200
+    assert "text/markdown" in response.content_type
+    assert "# PRAXIS-VirtualCell Report" in markdown
