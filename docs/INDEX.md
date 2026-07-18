@@ -61,7 +61,7 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 - The current publication ledger and bootstrap-through-v1.5 map are in [Three-Way Sync State](status/SYNC-STATE.md).
 - [v0.1.0 Release Notes](RELEASE-v0.1.0.md) and [v0.6–v0.8 Delivery Report](STATUS-2026-07-03-v0.6-v0.8-delivery.md) are historical release records.
 - Local `v0.9.0` through `v1.5.0` tags are local milestones on 2026-07-18; GitHub and `.53` were live-observed only through `v0.8.0`.
-- [CHANGELOG](../CHANGELOG.md) records the unreleased 1.5.1 candidate and publication boundary without rewriting old tags.
+- [CHANGELOG](../CHANGELOG.md) records the unreleased 1.6.0 candidate and publication boundary without rewriting old tags.
 
 ## Active plans
 
