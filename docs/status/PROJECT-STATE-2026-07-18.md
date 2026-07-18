@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 14:11 CST (+0800)
+> Captured: 2026-07-18 14:22 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — Phase C0 next`
+> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — Phase C1 next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -178,13 +178,24 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 - Result: core `912/40/9/0`; frontend typecheck/lint/build and 3 E2E pass; Ruff has 13 mapped items; Legacy is `1136/163/1` with the sole failure owned by remote operations.
 - External writes: none.
 
+## Phase C improvement progress
+
+`C0_COMPLETE`
+
+- Completion commit: `905d8d6141b18c8e1dac5d72da93b12e95cc1b11`
+- Ruff: the 13-item baseline was reproduced after the Phase B gate, then reduced to 0 without new excludes or `noqa` suppressions.
+- Change boundary: eight explicit Python files; six safe import/unused-import fixes plus seven behavior-preserving line wraps. Independent AST/assertion review found no executable, scientific, fail-closed, or assertion change.
+- Targeted regression: `85 passed / 0 failed`, with the already tracked Starlette/httpx warning.
+- Authoritative core regression: `912 passed / 40 skipped / 9 deselected / 0 failed`, with the same single warning.
+- Protected assets: four CSS files remained unstaged and retain patch SHA-256 `2c300a185c97f3821edc2e08d91a4d52f6ea1e00bcf52a55f1a1121173eaff7e`.
+
 ## Next authorized work
 
-Continue Phase C0 in this APFS clone:
+Continue Phase C1 in this APFS clone:
 
-1. Re-run the 13-item Ruff command to bind the reproduction to the post-gate commit.
-2. Apply the six safe import/unused-import fixes with human diff review, then manually wrap the seven `E501` lines without changing assertions or scientific behavior.
-3. Require `ruff check .` to reach 0, then run the complete authoritative core pytest scope.
-4. Commit only the explicit C0 source/test files; never stage or modify the four protected CSS files.
+1. Audit existing pytest markers and GitHub Actions jobs against the B5 scope table before editing configuration.
+2. Register and separate core, frontend, legacy/integration, LLM, and remote contracts without weakening tests.
+3. Make fixed private-IP checks explicit remote/operational gates rather than unconditional ordinary-CI blockers.
+4. Reproduce each proposed CI command locally, then run Ruff, core pytest, frontend checks, and the appropriate legacy selection before committing.
 
 No external synchronization is authorized before the Phase D approval gate.

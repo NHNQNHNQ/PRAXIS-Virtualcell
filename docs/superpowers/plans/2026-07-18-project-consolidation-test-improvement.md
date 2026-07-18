@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，C0 待执行
+> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，C1 待执行
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -183,9 +183,9 @@
 
 ### C0 — 恢复 lint 绿灯
 
-- [ ] 修复 B0 记录的 13 个 Ruff 错误；自动修复后必须人工审 diff。
-- [ ] 生产代码与测试代码都保持 `ruff check .` 0 error，不靠新增大范围 exclude/noqa 逃避。
-- [ ] 运行核心 pytest，确认 lint 整理没有行为回归。
+- [x] 修复 B0 记录的 13 个 Ruff 错误；自动修复后必须人工审 diff。
+- [x] 生产代码与测试代码都保持 `ruff check .` 0 error，不靠新增大范围 exclude/noqa 逃避。
+- [x] 运行核心 pytest，确认 lint 整理没有行为回归。
 
 ### C1 — 测试配置与 CI 分层
 
