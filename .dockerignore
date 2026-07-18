@@ -1,44 +1,67 @@
-# D.5 reviewer M0/M8 #6:防 docker build context 过大,避免拷无用文件
-# docker build context 默认 = repo root,故 .dockerignore 放 root
+# Version-control and local tooling state
+.git
+.github
+.claude
+.playwright-mcp
+.vscode
+.idea
 
-# Python 临时
+# Credentials and mutable runtime state must never reach a builder
+.env
+.env.*
+**/.env
+**/.env.*
+secrets
+**/secrets
+runs
+**/runs
+*.pem
+*.key
+*.log
+*.local
+**/*.pem
+**/*.key
+**/*.log
+**/*.local
+
+# Python build/test artifacts
 .venv
-.pytest_cache
-.ruff_cache
+venv
 __pycache__
 **/__pycache__
-**/*.pyc
+*.py[cod]
+.pytest_cache
+.ruff_cache
+.mypy_cache
 *.egg-info
 **/*.egg-info
+build
+dist
 
-# macOS / 编辑器
-**/._*
-.DS_Store
-**/.DS_Store
+# Frontend dependencies and generated/test artifacts
+**/node_modules
+praxis_vc_react/dist
+praxis_vc_react/test-results
+praxis_vc_react/playwright-report
+praxis_vc_react/.vite
 
-# Git / CI
-.git
-.gitignore
-.github
-
-# 前端(只 build backend,不要前端 artifacts)
-frontend/node_modules
-frontend/dist
-frontend/.vite
-
-# brains(prod 用 push_backend.sh rsync 单独同步,不入 docker context)
+# Root research data contains multi-GB ignored inputs and is not a release
+# dependency. Reviewed default resources live under praxis_virtualcell/data.
+data
+examples
 brains
 
-# 文档 / 测试(运行时不需要)
-tests
+# Source-only material not copied into the release stages
 docs
-*.md
-
-# config / 本地 / 日志
-*.example
-*.local
-*.log
+tests
+praxis_virtualcell/tests
+_audit
+reports
 deploy/hpc_submit_account.toml
-
-# 进度文档(临时)
 进度与下一步.md
+string.jpeg
+
+# OS metadata
+.DS_Store
+**/.DS_Store
+**/._*

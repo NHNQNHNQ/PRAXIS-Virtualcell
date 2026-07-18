@@ -55,6 +55,7 @@ async def _verify_api() -> dict[str, object]:
 def main() -> None:
     product_version = version("praxis-virtualcell")
     assert files("praxis_vc_web").joinpath("app.py").is_file()
+    assert not files("praxis_virtualcell").joinpath("tests").is_dir()
     request = files("praxis_virtualcell").joinpath("examples", "norman_mock_request.json")
 
     from praxis_virtualcell.cli import main as cli_main

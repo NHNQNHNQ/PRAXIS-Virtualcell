@@ -17,6 +17,9 @@ def test_packages_find_includes_virtualcell():
     assert any(p.startswith("praxis_virtualcell") for p in include), include
     assert any(p.startswith("praxis_vc_api") for p in include), include
     assert any(p.startswith("praxis_vc_web") for p in include), include
+    assert cfg["tool"]["setuptools"]["packages"]["find"]["exclude"] == [
+        "praxis_virtualcell.tests*"
+    ]
 
 
 def test_include_package_data_and_manifest():
@@ -25,6 +28,7 @@ def test_include_package_data_and_manifest():
     manifest = (_ROOT / "MANIFEST.in").read_text(encoding="utf-8")
     assert "recursive-include praxis_virtualcell" in manifest
     assert "*.md" in manifest
+    assert "prune praxis_virtualcell/tests" in manifest
 
 
 def test_default_gene_sets_are_licensed_package_resources():
@@ -58,9 +62,11 @@ def _locked_names(path: Path) -> set[str]:
 
 
 def test_python313_hash_locks_cover_ci_and_runtime_dependencies():
+    build = _locked_names(_ROOT / "requirements" / "build-py313.lock")
     runtime = _locked_names(_ROOT / "requirements" / "runtime-py313.lock")
     dev = _locked_names(_ROOT / "requirements" / "dev-py313.lock")
 
+    assert build == {"packaging", "setuptools", "wheel"}
     assert {"fastapi", "httpx", "mcp", "pydantic", "uvicorn"} <= runtime
     assert {"pytest", "ruff", "httpx2", "streamlit", "cobra"} <= dev
     assert runtime < dev
@@ -70,6 +76,59 @@ def test_python313_hash_locks_cover_ci_and_runtime_dependencies():
 def test_build_backend_is_exactly_pinned():
     cfg = tomllib.loads((_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert cfg["build-system"]["requires"] == ["setuptools==83.0.0", "wheel==0.47.0"]
+
+
+def test_release_container_uses_pinned_bases_and_locked_wheel_install():
+    dockerfile = (_ROOT / "deploy" / "vc" / "Dockerfile").read_text(encoding="utf-8")
+
+    assert re.search(r"node:24-alpine@sha256:[0-9a-f]{64}", dockerfile)
+    assert re.search(r"python:3\.13\.14-slim-bookworm@sha256:[0-9a-f]{64}", dockerfile)
+    assert "COPY --from=frontend /src/praxis_vc_react/dist" in dockerfile
+    assert "--requirement requirements/build-py313.lock" in dockerfile
+    assert "--requirement requirements/runtime-py313.lock" in dockerfile
+    assert "--only-binary=:all:" in dockerfile
+    assert "--no-build-isolation" in dockerfile
+    assert "--no-index" in dockerfile
+    assert "USER 10001:10001" in dockerfile
+    assert "HEALTHCHECK" in dockerfile
+    assert "org.opencontainers.image.revision=\"${GIT_SHA}\"" in dockerfile
+    assert "ARG GIT_SHA\n" in dockerfile and "GIT_SHA=unknown" not in dockerfile
+    assert "ARG SOURCE_DATE_EPOCH\n" in dockerfile and "SOURCE_DATE_EPOCH=315532800" not in dockerfile
+    assert "PRAXIS_VC_RUNS=/var/lib/praxis-vc/runs" in dockerfile
+
+
+def test_docker_context_excludes_local_data_and_credentials():
+    patterns = {
+        line.strip()
+        for line in (_ROOT / ".dockerignore").read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+
+    assert {".git", ".env", ".env.*", "data", "runs", "secrets", "**/node_modules"} <= patterns
+    assert {".claude", ".playwright-mcp", "praxis_vc_react/dist", "string.jpeg"} <= patterns
+    assert {"_audit", "reports", "praxis_virtualcell/tests", "**/*.pem", "**/*.key"} <= patterns
+
+
+def test_release_scripts_build_only_committed_candidates():
+    wheel_script = (_ROOT / "scripts" / "build_release_wheel.sh").read_text(encoding="utf-8")
+    container_script = (_ROOT / "scripts" / "build_release_container.sh").read_text(
+        encoding="utf-8"
+    )
+
+    assert "diff --quiet" in wheel_script and "diff --cached --quiet" in wheel_script
+    assert "archive --format=tar HEAD" in wheel_script
+    assert "--no-build-isolation" in wheel_script
+    assert "status --porcelain=v1 --untracked-files=normal" in container_script
+    assert "GIT_SHA=${PRAXIS_GIT_SHA}" in container_script
+    assert "SOURCE_DATE_EPOCH=${PRAXIS_SOURCE_EPOCH}" in container_script
+
+
+def test_ci_editable_installs_use_hash_locked_build_backend():
+    workflow = (_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+
+    assert workflow.count("requirements/build-py313.lock") >= 5
+    assert "pip install --no-deps -e ." not in workflow
+    assert workflow.count("pip install --no-build-isolation --no-deps -e .") == 4
 
 
 def test_web_command_uses_packaged_absolute_app_path(monkeypatch):

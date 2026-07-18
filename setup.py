@@ -24,7 +24,9 @@ class BuildPyWithReact(build_py):
             return
 
         target = Path(self.build_lib) / "praxis_vc_api" / "static"
-        shutil.copytree(source, target, dirs_exist_ok=True)
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.copytree(source, target)
 
 
 setup(cmdclass={"build_py": BuildPyWithReact})

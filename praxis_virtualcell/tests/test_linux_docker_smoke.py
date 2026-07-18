@@ -1,353 +1,482 @@
-"""Phase 8 · Task 8.10:Linux/Docker 发行 smoke(10 条,`@pytest.mark.integration`)。
+"""Opt-in smoke tests for the built Linux release image.
 
-设计约束:
-- 全部标 `@pytest.mark.integration`,CI 用 `pytest -m "not integration"` 天然跳过;
-- mac 本地(非 Linux 或无 docker)**必须全 skip** —— 用统一 `skipif` 判据,不真跑 docker;
-- 真跑落在 .53(Linux + Docker 齐);
-- 所有 subprocess 加 `timeout` 超时保护;docker 容器测试用固定 tag + 末尾 `docker rm -f` 清理。
+Run explicitly with::
 
-判据:`sys.platform != "linux"` 或 `shutil.which("docker") is None` → skip。
-这两条合并成一个 marker,保证 mac(darwin,通常也无 docker)10 条全 skip、0 failed。
+    PRAXIS_RUN_DOCKER_SMOKE=1 pytest \
+      praxis_virtualcell/tests/test_linux_docker_smoke.py \
+      --run-integration -o addopts='' -q -ra
+
+The host may be Linux or Docker Desktop; the artifact under test is always a
+Linux container. Every image/container name is unique, labelled, and cleaned
+only after its ownership and immutable ID have been verified.
 """
+
 from __future__ import annotations
 
 import json
+import os
+import re
 import shutil
 import subprocess
-import sys
 import time
+import tomllib
+import urllib.error
+import urllib.parse
+import urllib.request
+import uuid
+from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
 
-# ---- 仓库根(本文件在 praxis_virtualcell/tests/,上跳两级)----
 _REPO_ROOT = Path(__file__).resolve().parents[2]
+_ENABLED = os.environ.get("PRAXIS_RUN_DOCKER_SMOKE") == "1"
+_RUN_ID = uuid.uuid4().hex
+_OWNER_LABEL = "io.praxis-virtualcell.smoke-run"
+_IMAGE_TAG = f"praxis-vc-smoke:{_RUN_ID}"
+_CONTAINER_NAME = f"praxis-vc-smoke-{_RUN_ID}"
+_NETWORK_NAME = f"praxis-vc-smoke-{_RUN_ID}"
 
-# ---- 统一 skip 判据:非 Linux 或无 docker → 整组 skip(mac 必 skip)----
-_IS_LINUX = sys.platform == "linux"
-_HAS_DOCKER = shutil.which("docker") is not None
-_NO_LINUX_DOCKER = (not _IS_LINUX) or (not _HAS_DOCKER)
-_SKIP_REASON = (
-    "需 Linux + docker 的发行环境(mac/无 docker 自动 skip;真跑在 .53)"
+_QUICK_TIMEOUT = 60
+_BUILD_TIMEOUT = 1200
+_START_TIMEOUT = 90
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, file_pointer, code, message, headers, new_url):
+        return None
+
+
+_DIRECT_HTTP = urllib.request.build_opener(
+    urllib.request.ProxyHandler({}),
+    _NoRedirect(),
 )
-requires_linux_docker = pytest.mark.skipif(_NO_LINUX_DOCKER, reason=_SKIP_REASON)
 
-# ---- 固定 docker tag / 容器名(可复现 + 便于清理)----
-_IMAGE_TAG = "praxis-vc-smoke:test"
-_CONTAINER_NAME = "praxis-vc-smoke-test"
-
-# ---- 超时(秒)----
-_QUICK_TIMEOUT = 60          # CLI/demo 级
-_BUILD_TIMEOUT = 900         # docker build(装依赖,给足)
-_RUN_TIMEOUT = 60            # docker run 拉起
-_HTTP_TIMEOUT = 30           # 容器内 HTTP 探活
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.skipif(
+        not _ENABLED,
+        reason="set PRAXIS_RUN_DOCKER_SMOKE=1 to build and run the Linux release image",
+    ),
+]
 
 
-def _run(cmd, *, cwd=None, timeout=_QUICK_TIMEOUT, check=False):
-    """薄封装 subprocess.run:统一 text/capture/timeout。"""
+@dataclass(frozen=True)
+class BuiltImage:
+    tag: str
+    image_id: str
+    git_sha: str
+    product_version: str
+
+
+@dataclass(frozen=True)
+class RunningContainer:
+    container_id: str
+    base_url: str
+    image: BuiltImage
+
+
+def _run(
+    command: list[str],
+    *,
+    cwd: Path | None = None,
+    timeout: int = _QUICK_TIMEOUT,
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        cmd,
+        command,
         cwd=str(cwd) if cwd else None,
         capture_output=True,
         text=True,
         timeout=timeout,
-        check=check,
+        check=False,
     )
 
 
-def _docker_cleanup():
-    """强制清理固定 tag 的容器 + 镜像(幂等,失败不抛)。"""
-    try:
-        _run(["docker", "rm", "-f", _CONTAINER_NAME], timeout=_RUN_TIMEOUT)
-    except Exception:  # noqa: BLE001
-        pass
-    try:
-        _run(["docker", "rmi", "-f", _IMAGE_TAG], timeout=_RUN_TIMEOUT)
-    except Exception:  # noqa: BLE001
-        pass
+def _inspect(kind: str, reference: str) -> dict | None:
+    command = ["docker"]
+    if kind == "image":
+        command.extend(["image", "inspect"])
+    elif kind == "network":
+        command.extend(["network", "inspect"])
+    else:
+        command.append("inspect")
+    result = _run([*command, reference])
+    if result.returncode != 0:
+        diagnostic = f"{result.stdout}\n{result.stderr}".lower()
+        if "no such" in diagnostic or "not found" in diagnostic:
+            return None
+        raise AssertionError(f"docker {kind} inspect failed for {reference}: {result.stderr}")
+    documents = json.loads(result.stdout)
+    return documents[0] if documents else None
 
 
-@pytest.fixture()
-def demo_out(tmp_path):
-    """跑一次 offline demo,产出目录供多条用例断言(避免重复跑)。"""
-    out = tmp_path / "demo"
-    r = _run(
+def _owned(document: dict | None, immutable_id: str) -> bool:
+    if document is None or document.get("Id") != immutable_id:
+        return False
+    labels = document.get("Config", {}).get("Labels") or document.get("Labels") or {}
+    return labels.get(_OWNER_LABEL) == _RUN_ID
+
+
+def _remove_owned_container(reference: str) -> None:
+    document = _inspect("container", reference)
+    if document is None:
+        return
+    container_id = document["Id"]
+    assert _owned(document, container_id), (
+        f"refusing to remove unowned container reference: {reference}"
+    )
+    removed = _run(["docker", "rm", "--force", "--volumes", container_id])
+    assert removed.returncode == 0, f"owned container cleanup failed: {removed.stderr}"
+
+
+def _remove_owned_image(reference: str) -> None:
+    document = _inspect("image", reference)
+    if document is None:
+        return
+    image_id = document["Id"]
+    assert _owned(document, image_id), f"refusing to remove unowned image reference: {reference}"
+    removed = _run(["docker", "image", "rm", "--no-prune", image_id])
+    assert removed.returncode == 0, f"owned image cleanup failed: {removed.stderr}"
+
+
+def _remove_owned_network(reference: str) -> None:
+    document = _inspect("network", reference)
+    if document is None:
+        return
+    network_id = document["Id"]
+    assert _owned(document, network_id), f"refusing to remove unowned network: {reference}"
+    removed = _run(["docker", "network", "rm", network_id])
+    assert removed.returncode == 0, f"owned network cleanup failed: {removed.stderr}"
+
+
+def _http_json(url: str, *, data: dict | None = None) -> tuple[int, dict]:
+    body = None if data is None else json.dumps(data).encode("utf-8")
+    request = urllib.request.Request(
+        url,
+        data=body,
+        headers={"Content-Type": "application/json"} if body else {},
+        method="POST" if body else "GET",
+    )
+    with _DIRECT_HTTP.open(request, timeout=10) as response:
+        return response.status, json.loads(response.read().decode("utf-8"))
+
+
+def _wait_for_health(base_url: str, *, timeout: int = _START_TIMEOUT) -> dict:
+    deadline = time.monotonic() + timeout
+    last_error = "service did not respond"
+    while time.monotonic() < deadline:
+        try:
+            status, payload = _http_json(f"{base_url}/api/health")
+            if status == 200 and payload.get("status") == "ok":
+                return payload
+            last_error = f"HTTP {status}: {payload}"
+        except (OSError, ValueError, urllib.error.URLError) as error:
+            last_error = repr(error)
+        time.sleep(1)
+    raise AssertionError(f"container health timeout: {last_error}")
+
+
+@pytest.fixture(scope="module")
+def docker_daemon() -> None:
+    assert shutil.which("docker"), "PRAXIS_RUN_DOCKER_SMOKE=1 but docker CLI is unavailable"
+    configured_host = os.environ.get("DOCKER_HOST", "")
+    assert not configured_host or configured_host.startswith("unix://"), (
+        f"refusing to send the release build to non-local DOCKER_HOST={configured_host!r}"
+    )
+
+    context = _run(["docker", "context", "show"])
+    assert context.returncode == 0, context.stderr
+    context_name = context.stdout.strip()
+    inspected_context = _run(["docker", "context", "inspect", context_name])
+    assert inspected_context.returncode == 0, inspected_context.stderr
+    context_document = json.loads(inspected_context.stdout)[0]
+    endpoint = context_document["Endpoints"]["docker"]["Host"]
+    assert endpoint.startswith("unix://"), (
+        f"refusing to send the release build to non-local Docker endpoint={endpoint!r}"
+    )
+
+    result = _run(["docker", "info"], timeout=_QUICK_TIMEOUT)
+    assert result.returncode == 0, (
+        "PRAXIS_RUN_DOCKER_SMOKE=1 but Docker daemon is unavailable:\n"
+        f"{result.stderr[-4000:]}"
+    )
+
+
+@pytest.fixture(scope="module")
+def docker_image(docker_daemon: None, request: pytest.FixtureRequest) -> BuiltImage:
+    request.addfinalizer(lambda: _remove_owned_image(_IMAGE_TAG))
+
+    status = _run(
+        ["git", "status", "--porcelain=v1", "--untracked-files=normal"],
+        cwd=_REPO_ROOT,
+    )
+    assert status.returncode == 0, status.stderr
+    protected_untracked = {"?? .claude/", "?? string.jpeg"}
+    unexpected = [line for line in status.stdout.splitlines() if line not in protected_untracked]
+    assert not unexpected, (
+        "release image requires a committed worktree; unexpected status entries: "
+        f"{unexpected}"
+    )
+
+    git_sha_result = _run(["git", "rev-parse", "HEAD"], cwd=_REPO_ROOT)
+    assert git_sha_result.returncode == 0, git_sha_result.stderr
+    git_sha = git_sha_result.stdout.strip()
+
+    epoch_result = _run(["git", "show", "-s", "--format=%ct", "HEAD"], cwd=_REPO_ROOT)
+    assert epoch_result.returncode == 0, epoch_result.stderr
+    source_date_epoch = epoch_result.stdout.strip()
+
+    config = tomllib.loads((_REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    product_version = config["project"]["version"]
+
+    build = _run(
         [
-            "praxis-vc", "run",
-            "--request", str(_REPO_ROOT / "examples" / "ahr_k562.json"),
-            "--mode", "offline",
-            "--out", str(out),
+            "docker",
+            "build",
+            "--file",
+            "deploy/vc/Dockerfile",
+            "--tag",
+            _IMAGE_TAG,
+            "--label",
+            f"{_OWNER_LABEL}={_RUN_ID}",
+            "--build-arg",
+            f"GIT_SHA={git_sha}",
+            "--build-arg",
+            f"SOURCE_DATE_EPOCH={source_date_epoch}",
+            ".",
         ],
         cwd=_REPO_ROOT,
-        timeout=_QUICK_TIMEOUT,
-    )
-    assert r.returncode == 0, f"praxis-vc run 失败:{r.stderr}"
-    assert out.is_dir(), "demo 输出目录未生成"
-    return out
-
-
-@pytest.fixture(scope="module")
-def docker_image():
-    """构建固定 tag 镜像(module 级,复用);结束强制清理容器+镜像。"""
-    _docker_cleanup()
-    r = _run(
-        ["docker", "build", "-f", "deploy/vc/Dockerfile", "-t", _IMAGE_TAG, "."],
-        cwd=_REPO_ROOT,
         timeout=_BUILD_TIMEOUT,
     )
-    assert r.returncode == 0, f"docker build 失败:{r.stderr[-2000:]}"
-    yield _IMAGE_TAG
-    _docker_cleanup()
-
-
-def _resolve_host_port(container_name, *, container_port=8000):
-    """`docker run -p 0:8000` 后,用 `docker port` 解析 docker 实际分配的空闲 host 端口。
-
-    docker port 输出形如 `0.0.0.0:49153`(可能多行 IPv4/IPv6),取首行冒号后的端口。
-    因 host 8000 可能被长期服务占用,固定绑 8000 会 address already in use;
-    绑 `0:8000` 让 docker 自选空闲 host 端口,规避冲突。
-    """
-    r = _run(
-        ["docker", "port", container_name, f"{container_port}/tcp"],
-        timeout=_RUN_TIMEOUT,
+    assert build.returncode == 0, (
+        f"docker build failed (stdout):\n{build.stdout[-6000:]}\n"
+        f"docker build failed (stderr):\n{build.stderr[-6000:]}"
     )
-    assert r.returncode == 0, f"docker port 解析失败:{r.stderr}"
-    line = r.stdout.strip().splitlines()[0].strip()
-    host_port = int(line.rsplit(":", 1)[1])
-    assert host_port > 0, f"解析到非法 host 端口:{line}"
-    return host_port
+
+    document = _inspect("image", _IMAGE_TAG)
+    assert document is not None, "built image cannot be inspected"
+    image_id = document["Id"]
+    assert _owned(document, image_id), "built image is missing its unique ownership label"
+
+    return BuiltImage(_IMAGE_TAG, image_id, git_sha, product_version)
 
 
 @pytest.fixture(scope="module")
-def running_container(docker_image):
-    """module 级:用**动态空闲 host 端口**(`-p 0:8000`)起一次容器,供三条容器用例复用。
-
-    host 8000 可能被长期运行的服务占用,固定绑 8000 会 `address already in use`;
-    这里让 docker 自选空闲 host 端口,再用 `docker port` 解析实际端口。
-    yield 容器可访问的 base_url(如 `http://127.0.0.1:49xxx`);teardown `docker rm -f`。
-    绝不 kill host 上任何占用 8000 的进程。
-    """
-    _run(["docker", "rm", "-f", _CONTAINER_NAME], timeout=_RUN_TIMEOUT)
-    up = _run(
-        ["docker", "run", "-d", "--name", _CONTAINER_NAME,
-         "-p", "0:8000", docker_image],
-        timeout=_RUN_TIMEOUT,
+def internal_network(
+    docker_daemon: None,
+    request: pytest.FixtureRequest,
+) -> str:
+    request.addfinalizer(lambda: _remove_owned_network(_NETWORK_NAME))
+    created = _run(
+        [
+            "docker",
+            "network",
+            "create",
+            "--internal",
+            "--label",
+            f"{_OWNER_LABEL}={_RUN_ID}",
+            _NETWORK_NAME,
+        ]
     )
-    assert up.returncode == 0, f"docker run 失败:{up.stderr}"
-    assert up.stdout.strip(), "无容器 id"
+    assert created.returncode == 0, created.stderr
+    network_id = created.stdout.strip()
+    assert network_id, "docker network create returned no network ID"
+    document = _inspect("network", _NETWORK_NAME)
+    assert _owned(document, network_id), "network is missing its unique ownership label"
+    assert document and document.get("Internal") is True
+    return _NETWORK_NAME
+
+
+@pytest.fixture(scope="module")
+def running_container(
+    docker_image: BuiltImage,
+    internal_network: str,
+    request: pytest.FixtureRequest,
+) -> RunningContainer:
+    request.addfinalizer(lambda: _remove_owned_container(_CONTAINER_NAME))
+
+    started = _run(
+        [
+            "docker",
+            "run",
+            "--detach",
+            "--name",
+            _CONTAINER_NAME,
+            "--label",
+            f"{_OWNER_LABEL}={_RUN_ID}",
+            "--network",
+            internal_network,
+            "--publish",
+            "127.0.0.1::8000/tcp",
+            docker_image.tag,
+        ]
+    )
+    assert started.returncode == 0, started.stderr
+    container_id = started.stdout.strip()
+    assert container_id, "docker run returned no container ID"
+
+    document = _inspect("container", container_id)
+    assert _owned(document, container_id), "container is missing its unique ownership label"
+
+    port = _run(["docker", "port", container_id, "8000/tcp"])
+    assert port.returncode == 0, port.stderr
+    endpoint = port.stdout.strip().splitlines()[0]
+    host_port = int(endpoint.rsplit(":", 1)[1])
+    running = RunningContainer(container_id, f"http://127.0.0.1:{host_port}", docker_image)
     try:
-        host_port = _resolve_host_port(_CONTAINER_NAME)
-        yield f"http://127.0.0.1:{host_port}"
-    finally:
-        _run(["docker", "rm", "-f", _CONTAINER_NAME], timeout=_RUN_TIMEOUT)
+        _wait_for_health(running.base_url)
+    except AssertionError as error:
+        logs = _run(["docker", "logs", container_id])
+        raise AssertionError(
+            f"{error}\ncontainer stdout:\n{logs.stdout[-4000:]}\n"
+            f"container stderr:\n{logs.stderr[-4000:]}"
+        ) from error
+    return running
 
 
-# ============================================================
-# 1. python >= 3.11(发行最低版本线)
-# ============================================================
-@pytest.mark.integration
-@requires_linux_docker
-def test_python_version_ge_311():
-    r = _run(
-        [sys.executable, "-c",
-         "import sys; assert sys.version_info >= (3, 11); print('ok')"],
-        timeout=_QUICK_TIMEOUT,
+def test_image_metadata_and_runtime_contract(docker_image: BuiltImage) -> None:
+    document = _inspect("image", docker_image.image_id)
+    assert document is not None
+    config = document["Config"]
+    assert config["User"] == "10001:10001"
+    assert config["Labels"]["org.opencontainers.image.revision"] == docker_image.git_sha
+    assert config["Healthcheck"]["Test"][0] == "CMD"
+    assert config["Env"]
+    assert "PRAXIS_VC_RUNS=/var/lib/praxis-vc/runs" in config["Env"]
+
+
+def test_container_is_non_root_and_runs_installed_wheel(running_container: RunningContainer) -> None:
+    user = _run(["docker", "exec", running_container.container_id, "id", "-u"])
+    group = _run(["docker", "exec", running_container.container_id, "id", "-g"])
+    assert user.returncode == group.returncode == 0
+    assert user.stdout.strip() == group.stdout.strip() == "10001"
+
+    request_path = _run(
+        [
+            "docker",
+            "exec",
+            running_container.container_id,
+            "python",
+            "-c",
+            (
+                "from importlib.resources import files; "
+                "print(files('praxis_virtualcell').joinpath('examples', "
+                "'norman_mock_request.json'))"
+            ),
+        ]
     )
-    assert r.returncode == 0, r.stderr
-    assert "ok" in r.stdout
+    assert request_path.returncode == 0, request_path.stderr
 
-
-# ============================================================
-# 2. praxis-vc --help(CLI 可用)
-# ============================================================
-@pytest.mark.integration
-@requires_linux_docker
-def test_cli_help():
-    r = _run(["praxis-vc", "--help"], cwd=_REPO_ROOT, timeout=_QUICK_TIMEOUT)
-    assert r.returncode == 0, r.stderr
-    assert "praxis-vc" in (r.stdout + r.stderr)
-
-
-# ============================================================
-# 3. offline demo 产 report.md 且 >= 9 段
-# ============================================================
-@pytest.mark.integration
-@requires_linux_docker
-def test_offline_demo_report_has_ge_9_sections(demo_out):
-    report = demo_out / "report.md"
-    assert report.is_file(), "无 report.md"
-    text = report.read_text(encoding="utf-8")
-    n_sections = sum(1 for line in text.splitlines() if line.startswith("## "))
-    assert n_sections >= 9, f"report.md 仅 {n_sections} 段,应 >= 9"
-
-
-# ============================================================
-# 4. wheel 在全新 venv 安装(发行可装性)
-# ============================================================
-@pytest.mark.integration
-@requires_linux_docker
-def test_wheel_installs_in_fresh_venv(tmp_path):
-    # 4a. 构建 wheel
-    dist = tmp_path / "dist"
-    build = _run(
-        [sys.executable, "-m", "pip", "wheel", ".",
-         "--no-deps", "-w", str(dist)],
-        cwd=_REPO_ROOT,
-        timeout=_BUILD_TIMEOUT,
+    output_dir = "/var/lib/praxis-vc/runs/container-cli-smoke"
+    run = _run(
+        [
+            "docker",
+            "exec",
+            running_container.container_id,
+            "praxis-vc",
+            "run",
+            "--request",
+            request_path.stdout.strip(),
+            "--mode",
+            "offline",
+            "--out",
+            output_dir,
+        ]
     )
-    assert build.returncode == 0, f"pip wheel 失败:{build.stderr[-2000:]}"
-    wheels = list(dist.glob("*.whl"))
-    assert wheels, "未产出 wheel"
+    assert run.returncode == 0, run.stderr
+    for name in ("report.md", "report.json", "trace.json", "provenance.json"):
+        present = _run(
+            ["docker", "exec", running_container.container_id, "test", "-s", f"{output_dir}/{name}"]
+        )
+        assert present.returncode == 0, f"missing or empty installed-wheel output: {name}"
 
-    # 4b. 全新 venv 安装
-    venv_dir = tmp_path / "freshvenv"
-    mk = _run([sys.executable, "-m", "venv", str(venv_dir)], timeout=_QUICK_TIMEOUT)
-    assert mk.returncode == 0, mk.stderr
-    py = venv_dir / "bin" / "python"
-    inst = _run(
-        [str(py), "-m", "pip", "install", str(wheels[0])],
-        timeout=_BUILD_TIMEOUT,
+
+def test_container_health_matches_candidate(running_container: RunningContainer) -> None:
+    payload = _wait_for_health(running_container.base_url)
+    assert payload["product_version"] == running_container.image.product_version
+    assert payload["git_sha"] == running_container.image.git_sha
+    assert payload["mode"] == "offline"
+    assert payload["llm_enabled"] is False
+
+    health = _run(
+        [
+            "docker",
+            "inspect",
+            "--format",
+            "{{.State.Health.Status}}",
+            running_container.container_id,
+        ]
     )
-    assert inst.returncode == 0, f"fresh-venv 安装 wheel 失败:{inst.stderr[-2000:]}"
-    # 装完能 import
-    chk = _run(
-        [str(py), "-c", "import praxis_virtualcell; print('ok')"],
-        timeout=_QUICK_TIMEOUT,
+    deadline = time.monotonic() + _START_TIMEOUT
+    while health.stdout.strip() != "healthy" and time.monotonic() < deadline:
+        time.sleep(1)
+        health = _run(
+            [
+                "docker",
+                "inspect",
+                "--format",
+                "{{.State.Health.Status}}",
+                running_container.container_id,
+            ]
+        )
+    assert health.returncode == 0 and health.stdout.strip() == "healthy"
+
+
+def test_container_serves_hashed_web_assets(running_container: RunningContainer) -> None:
+    with _DIRECT_HTTP.open(f"{running_container.base_url}/", timeout=10) as response:
+        assert response.status == 200
+        html = response.read().decode("utf-8")
+
+    assets = set(
+        re.findall(
+            r'(?:src|href)="(/assets/[A-Za-z0-9_.-]+-[A-Za-z0-9_-]{8,}\.(?:js|css))"',
+            html,
+        )
     )
-    assert chk.returncode == 0 and "ok" in chk.stdout, chk.stderr
+    assert any(path.endswith(".js") for path in assets), html
+    assert any(path.endswith(".css") for path in assets), html
+    for path in assets:
+        parsed = urllib.parse.urlsplit(path)
+        assert parsed.scheme == parsed.netloc == ""
+        assert parsed.query == parsed.fragment == ""
+        asset_url = urllib.parse.urljoin(f"{running_container.base_url}/", path)
+        with _DIRECT_HTTP.open(asset_url, timeout=10) as response:
+            assert response.status == 200
+            content_type = response.headers.get_content_type()
+            if path.endswith(".js"):
+                assert content_type in {"text/javascript", "application/javascript"}
+            else:
+                assert content_type == "text/css"
+            body = response.read()
+            assert body and not body.lstrip().lower().startswith(b"<!doctype html"), path
 
 
-# ============================================================
-# 5. docker build -f deploy/vc/Dockerfile 成功
-# ============================================================
-@pytest.mark.integration
-@requires_linux_docker
-def test_docker_build(docker_image):
-    # docker_image fixture 已断言 build 成功;这里核验镜像确实存在
-    r = _run(
-        ["docker", "images", "-q", docker_image],
-        timeout=_RUN_TIMEOUT,
-    )
-    assert r.returncode == 0 and r.stdout.strip(), "构建后镜像不存在"
-
-
-# ============================================================
-# 6. docker run 容器起(offline 网页服务,动态空闲 host 端口)
-# ============================================================
-@pytest.mark.integration
-@requires_linux_docker
-def test_docker_run_container_up(running_container):
-    # running_container fixture 已用 `-p 0:8000` 起好容器;这里核验其处于 running。
-    time.sleep(3)
-    insp = _run(
-        ["docker", "inspect", "-f", "{{.State.Running}}", _CONTAINER_NAME],
-        timeout=_RUN_TIMEOUT,
-    )
-    assert insp.stdout.strip() == "true", (
-        f"容器未处于 running:{insp.stdout} / logs: "
-        f"{_run(['docker', 'logs', _CONTAINER_NAME], timeout=_RUN_TIMEOUT).stderr[-1000:]}"
-    )
-
-
-# ============================================================
-# 7. /api/health 返回 200(动态 host 端口)
-# ============================================================
-@pytest.mark.integration
-@requires_linux_docker
-def test_container_health_200(running_container):
-    code = _poll_http(f"{running_container}/api/health")
-    assert code == 200, f"/api/health 状态 {code}(期望 200)"
-
-
-# ============================================================
-# 8. /api/reports/{id}/markdown 可下载(容器内建 job → 取 markdown,动态 host 端口)
-# ============================================================
-@pytest.mark.integration
-@requires_linux_docker
-def test_container_report_markdown_download(running_container):
-    assert _poll_http(f"{running_container}/api/health") == 200, "服务未就绪"
-
-    import urllib.request
-
-    # 建一个 offline job
-    req = {
-        "species": "human", "perturbation_type": "gene",
-        "perturbation_targets": ["AHR"], "input_modality": "scRNA",
+def test_container_offline_api_report(running_container: RunningContainer) -> None:
+    request = {
+        "species": "human",
+        "perturbation_type": "gene",
+        "perturbation_targets": ["AHR"],
+        "input_modality": "scRNA",
         "output_modality": "delta_expression",
         "task_type": "predict_delta_expression",
     }
-    payload = json.dumps({"request": req, "mode": "offline"}).encode()
-    post = urllib.request.Request(
-        f"{running_container}/api/jobs", data=payload,
-        headers={"Content-Type": "application/json"}, method="POST",
+    status, job = _http_json(
+        f"{running_container.base_url}/api/jobs",
+        data={"request": request, "mode": "offline"},
     )
-    with urllib.request.urlopen(post, timeout=_HTTP_TIMEOUT) as resp:
-        assert resp.status == 200
-        jid = json.loads(resp.read().decode())["job_id"]
+    assert status == 200
+    job_id = job["job_id"]
 
-    # 下载 markdown
-    with urllib.request.urlopen(
-        f"{running_container}/api/reports/{jid}/markdown",
-        timeout=_HTTP_TIMEOUT,
-    ) as resp:
-        assert resp.status == 200
-        body = resp.read().decode("utf-8")
-        assert "text/markdown" in resp.headers.get("content-type", "")
-        assert "# PRAXIS-VirtualCell Report" in body
+    report_status, report = _http_json(f"{running_container.base_url}/api/reports/{job_id}")
+    assert report_status == 200
+    assert report["structured_report"]
+    assert report["llm_used_for_prediction"] is False
 
-
-# ============================================================
-# 9. 输出文件齐(report.md + report.json + trace.json + provenance.json)
-# ============================================================
-@pytest.mark.integration
-@requires_linux_docker
-def test_offline_demo_output_files_complete(demo_out):
-    for name in ("report.md", "report.json", "trace.json", "provenance.json"):
-        f = demo_out / name
-        assert f.is_file(), f"缺输出文件:{name}"
-        assert f.stat().st_size > 0, f"输出文件为空:{name}"
-    # report.json / trace.json / provenance.json 合法 JSON
-    json.loads((demo_out / "report.json").read_text(encoding="utf-8"))
-    json.loads((demo_out / "trace.json").read_text(encoding="utf-8"))
-    json.loads((demo_out / "provenance.json").read_text(encoding="utf-8"))
-
-
-# ============================================================
-# 10. offline demo 运行时间基线(< 60s)
-# ============================================================
-@pytest.mark.integration
-@requires_linux_docker
-def test_offline_demo_runtime_baseline(tmp_path):
-    out = tmp_path / "timed"
-    t0 = time.monotonic()
-    r = _run(
-        ["praxis-vc", "run",
-         "--request", str(_REPO_ROOT / "examples" / "ahr_k562.json"),
-         "--mode", "offline", "--out", str(out)],
-        cwd=_REPO_ROOT,
-        timeout=_QUICK_TIMEOUT,
-    )
-    elapsed = time.monotonic() - t0
-    assert r.returncode == 0, r.stderr
-    assert elapsed < 60, f"offline demo 耗时 {elapsed:.1f}s,超基线 60s"
-
-
-# ------------------------------------------------------------
-# 辅助:轮询 HTTP 直到就绪或超时,返回状态码(失败返回 -1)
-# ------------------------------------------------------------
-def _poll_http(url, *, timeout=_HTTP_TIMEOUT, interval=1.0):
-    import urllib.error
-    import urllib.request
-
-    deadline = time.monotonic() + timeout
-    last = -1
-    while time.monotonic() < deadline:
-        try:
-            with urllib.request.urlopen(url, timeout=5) as resp:
-                return resp.status
-        except urllib.error.HTTPError as e:  # 有响应但非 2xx
-            last = e.code
-            return last
-        except Exception:  # noqa: BLE001  连接未就绪,重试
-            time.sleep(interval)
-    return last
+    with _DIRECT_HTTP.open(
+        f"{running_container.base_url}/api/reports/{job_id}/markdown",
+        timeout=10,
+    ) as response:
+        markdown = response.read().decode("utf-8")
+        assert response.status == 200
+        assert "text/markdown" in response.headers.get("content-type", "")
+        assert "# PRAXIS-VirtualCell Report" in markdown

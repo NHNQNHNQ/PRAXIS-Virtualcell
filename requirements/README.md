@@ -3,6 +3,9 @@
 `pyproject.toml` defines the supported compatibility ranges. These generated
 files freeze the resolver result used by CI and release validation:
 
+- `build-py313.in` / `build-py313.lock`: exact setuptools, wheel, and their
+  build-time dependency. Release wheels install this hash lock and use
+  `--no-build-isolation`, preventing an implicit second PEP 517 resolution.
 - `runtime-py313.lock`: core plus the `api` extra used by the local API and
   production container.
 - `dev-py313.lock`: core plus `dev`, `api`, `web`, and `mechanistic`, used by
@@ -13,8 +16,10 @@ dependency resolution:
 
 ```bash
 python3.13 -m venv .venv
+.venv/bin/python -m pip install --only-binary=:all: \
+  --require-hashes -r requirements/build-py313.lock
 .venv/bin/python -m pip install --require-hashes -r requirements/dev-py313.lock
-.venv/bin/python -m pip install --no-deps -e .
+.venv/bin/python -m pip install --no-build-isolation --no-deps -e .
 ```
 
 Regenerate only with Python 3.13 and the pinned compiler version:
@@ -22,6 +27,9 @@ Regenerate only with Python 3.13 and the pinned compiler version:
 ```bash
 python3.13 -m venv /tmp/praxis-lock-tools
 /tmp/praxis-lock-tools/bin/python -m pip install pip-tools==7.5.3
+/tmp/praxis-lock-tools/bin/pip-compile requirements/build-py313.in \
+  --allow-unsafe --generate-hashes --strip-extras \
+  --output-file requirements/build-py313.lock
 /tmp/praxis-lock-tools/bin/pip-compile pyproject.toml \
   --extra api --generate-hashes --resolver backtracking --strip-extras \
   --output-file requirements/runtime-py313.lock
