@@ -25,7 +25,9 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [Project State](status/PROJECT-STATE-2026-07-18.md) | APFS migration, current branch/ref facts, protected assets, phase restart point |
 | [Phase A Completion Gate](status/PHASE-A-GATE-2026-07-18.md) | proof that migration/organization protections passed before baseline testing |
 | [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | Phase B commands, exact results, failure ownership, and `PHASE_B_COMPLETE` gate |
-| [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | current local dependency/bundle/wheel/API/Linux-container evidence and `C4_COMPLETE_LOCAL` boundary |
+| [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | current local scientific classification, Gate A seam evidence, explicit remote pending, and D0 handoff |
+| [Scientific Assets](status/SCIENTIFIC-ASSETS-2026-07-18.md) | wheel/container/source/private asset matrix, provenance, licence gaps, and permitted claims |
+| [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | frozen local dependency/bundle/wheel/API/Linux-container evidence and `C4_COMPLETE_LOCAL` boundary |
 | [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen local theme/full-E2E/request-boundary evidence, exact C3 counts, honest S10 skip, and `C3_COMPLETE_LOCAL` boundary |
 | [Three-Way Sync State](status/SYNC-STATE.md) | three-way ledger with explicit freshness labels and the Phase D synchronization protocol |
 | [Worktree Asset Classification](status/WORKTREE-ASSETS.md) | accepted theme disposition plus continuing protection of `.claude/`, Playwright MCP output, screenshot, and stash |
@@ -43,6 +45,7 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [User Guide](USER-GUIDE.md) | CLI, five-stage/six-tab UI, output, modes, packaged web entry, and same-origin React flow |
 | [Examples](EXAMPLES.md) | offline accept/caution/abstain examples and interpretation boundaries |
 | [LLM Interface Guide](USAGE-llm-interface.md) | v0.6-era optional LLM/API interface; deterministic-runtime red lines remain applicable |
+| [Remote Science Validation](runbooks/REMOTE-SCIENCE-VALIDATION.md) | approved-SHA `.53` W4B/Gate A procedure; currently `REMOTE_NOT_RUN` and not synchronization authorization |
 
 The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` files describe the older PRAXIS-2 classroom/deployment system, including `.40/.53` service topology. They are not VirtualCell current-user entry points.
 
@@ -55,6 +58,7 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Phase 10 Cases](../reports/phase10/PHASE10_CASES.md) | 16-case routing/governance evidence |
 | [Phase 10 Failures](../reports/phase10/PHASE10_FAILURES.md) | abstain and negative-case evidence |
 | [Phase 10 Trace Audit](../reports/phase10/PHASE10_TRACE_AUDIT.md) | trace/provenance evidence |
+| [Scientific Assets](status/SCIENTIFIC-ASSETS-2026-07-18.md) | packaged advisory assets versus source-only research data and non-distributable remote checkpoints |
 | [v0.8 Architecture Baseline](ARCHITECTURE-v0.8-baseline.md) | frozen historical baseline at `7fc4aa5`; not the current test count or full Phase 10 architecture |
 | [Provenance](../PROVENANCE.md) | repository derivation from PRAXIS-2 and bootstrap evidence |
 
@@ -80,9 +84,10 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 | Report | Scope |
 |---|---|
 | [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | current B0–B4 environment, static, core, frontend, wheel/CLI, legacy, and remote-boundary evidence |
-| [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | current local C4 gate: Python 3.13 core 957, Playwright 56+1, reproducible full wheel, and Linux-container smoke |
+| [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | current local C5 gate: Python 3.13 core 965, Gate A adapter seam, honest 2-test remote pending, asset/claim classification |
+| [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | frozen C4 gate: Python 3.13 core 957, Playwright 56+1, reproducible full wheel, and Linux-container smoke |
 | [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen C3 gate: core 947, Playwright 54+1, theme acceptance, mutation evidence, and then-remaining C4/C5 ownership |
-| [Testing Guide](TESTING.md) | post-C4 local commands and counts; distinguishes local reproduction from GitHub Actions |
+| [Testing Guide](TESTING.md) | post-C5 local commands and counts; distinguishes local reproduction from GitHub Actions and remote scientific validation |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | capability gate plus `.53` evidence and remaining remote backlog |
 | [Phase 10 Summary](../reports/phase10/PHASE10_SUMMARY.md) | `952 tests = 912 passed + 40 skipped` for the non-LLM package scope; 9 LLM tests are deselected in the `912/40/9` reporting style |
 | [Phase 10 UI E2E](../reports/phase10/PHASE10_UI_E2E.md) | three structural Playwright specs; explicitly excludes CSS/pixel and deep abstain assertions |
@@ -94,7 +99,7 @@ The post-consolidation baseline under `reports/quality/` is current as of `PHASE
 
 | Document area | Status |
 |---|---|
-| [NMI manuscript draft](paper/v0.8-NMI/manuscript.md) | latest manuscript draft; not a released paper and all claims remain subordinate to the Phase 10 gate |
+| [NMI manuscript draft](paper/v0.8-NMI/manuscript.md) | latest manuscript draft; not released, subordinate to Phase 10, and has five C5-recorded author-review gaps before submission |
 | [NMI review round 1](paper/v0.8-NMI/review-round1.md) | historical adversarial review of that draft |
 | [Consolidated v0.1–v0.5 results](paper/v0.4/RESULTS-CONSOLIDATED.md) | historical evidence synthesis with dated test numbers |
 | [Findings](findings/) | versioned experimental evidence, JSON/JSONL ledgers, and scientific anchors; preserve |

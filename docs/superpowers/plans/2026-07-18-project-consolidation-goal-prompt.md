@@ -4,15 +4,15 @@
 >
 > 权威计划：`docs/superpowers/plans/2026-07-18-project-consolidation-test-improvement.md`
 >
-> 当前重启点：`C4_COMPLETE_LOCAL`，证据 HEAD `8ce42fe`，下一任务 C5；以现场 Git 和权威计划为准。
+> 当前重启点：`C5_LOCAL_CLASSIFIED`，实现证据 HEAD `038e747`，下一任务 D0 只读三端对账；以现场 Git 和权威计划为准。
 
 ```text
 /goal 持续执行 docs/superpowers/plans/2026-07-18-project-consolidation-test-improvement.md，按“Phase A 迁入 APFS 并整理项目 → Phase B 建立测试基线 → Phase C 依据证据完善 → Phase D 同步 GitHub/本地/.53”的顺序推进，直到最终完成闸门通过或撞到硬门。
 
-启动时先完整阅读计划、docs/status/PHASE-C4-GATE-2026-07-18.md、docs/status/PHASE-C3-GATE-2026-07-18.md、reports/phase10/PHASE10_GATE.md、docs/superpowers/plans/2026-07-17-frontend-full-e2e-test-plan.md，以及当前 git status/log/branch/tag/stash；把整理起点 24475f2、C3 证据 4106403、C4 证据 8ce42fe 与现场状态对比。若状态有变化，先更新 PROJECT-STATE，不照抄旧数字。
+启动时先完整阅读计划、docs/status/PHASE-C5-GATE-2026-07-18.md、docs/status/PHASE-C4-GATE-2026-07-18.md、docs/status/SYNC-STATE.md、docs/runbooks/REMOTE-SCIENCE-VALIDATION.md、reports/phase10/PHASE10_GATE.md，以及当前 git status/log/branch/tag/stash；把整理起点 24475f2、C3 证据 4106403、C4 证据 8ce42fe、C5 实现证据 038e747 与现场状态对比。若状态有变化，先更新 PROJECT-STATE，不照抄旧数字。
 
 执行协议：
-1. 每轮只取权威计划中当前阶段第一个未勾选的任务；先复核范围与保护项，再做到验收完成。A0–C4 已有 gate 时不得重做；当前从 C5 继续。所有修改只在 APFS clone 进行，T7 原仓库只读留档。
+1. 每轮只取权威计划中当前阶段第一个未勾选的任务；先复核范围与保护项，再做到验收完成。A0–C5 已有 gate 时不得重做；当前从 D0 的 fresh read-only ledger 继续。所有修改只在 APFS clone 进行，T7 原仓库只读留档。
 2. 阶段不可穿越：A5 未写 PHASE_A_COMPLETE，不得跑全面基线或顺手修 bug；B5 未写 PHASE_B_COMPLETE，不得修 lint、CI、版本或功能。A 阶段只允许窄验证，B 阶段只测量和归因，C 阶段才修复。
 3. 每项开始前运行 git status --short；结束后检查 git diff、git diff --check、git diff --cached --name-only。只显式 git add 本任务文件，禁止 git add -A 和 git add .。
 4. A–C 每项完成后更新计划勾选、PROJECT-STATE、SYNC-STATE 或 BASELINE 报告，做一个边界清楚的本地提交；不 push、不打 tag、不创建 PR、不 amend 其他任务提交。D 阶段只有在展示 refs/SHA/回滚清单并得到用户明确同步授权后，才可按清单 push 和快进 `.53`。若任务尚未通过验收，不提交假完成。
@@ -52,5 +52,5 @@
 
 三端同步协议：本地 feature branch 完成本地闸门 → push GitHub branch → CI → 经批准合入 GitHub main → 本地 main 只做 fast-forward → .53 只从同一 GitHub origin fast-forward 到已批准 SHA → 同时记录 local main、git ls-remote origin/main、.53 deployed SHA 和 tag。工作分支 intentionally ahead 可以存在，但必须记入 SYNC-STATE；未记录的 main/deployed SHA 差异一律视为 drift。禁止直接在 .53 改代码；远端测试失败回到本地修复后重走 GitHub。
 
-撞硬门时不要继续试探性修改：更新计划/PROJECT-STATE/SYNC-STATE 为 BLOCKED，写清已完成项、原始命令与输出摘要、未改动的保护项、三端 SHA，以及需要用户拍板的唯一问题。正常完成时给出 Phase A/B/C/D 的提交列表、最终测试矩阵、GitHub/本地/.53 一致性证明和仍 pending 的科学项；只有全部本地 C4/C5 闸门完成后，若 D 未获授权才可写 READY_TO_SYNC，不能提前写或写成已同步。
+撞硬门时不要继续试探性修改：更新计划/PROJECT-STATE/SYNC-STATE 为 BLOCKED，写清已完成项、原始命令与输出摘要、未改动的保护项、三端 SHA，以及需要用户拍板的唯一问题。正常完成时给出 Phase A/B/C/D 的提交列表、最终测试矩阵、GitHub/本地/.53 一致性证明和仍 pending 的科学项；只有全部本地 C4/C5 闸门以及 D0 都完成——最终文档 SHA 已冻结、最终 release artifact 已绑定验证、三端 fresh 只读 ledger/ancestry/dirty/rollback 方案已向用户展示——而后续 D 尚未获授权时，才可写 READY_TO_SYNC，不能提前写或写成已同步。
 ```

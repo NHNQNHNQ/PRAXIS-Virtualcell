@@ -2,9 +2,9 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，`C1_COMPLETE`，`C2_COMPLETE`，`C3_COMPLETE_LOCAL`，`C4_COMPLETE_LOCAL`，C5 下一步
+> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，`C1_COMPLETE`，`C2_COMPLETE`，`C3_COMPLETE_LOCAL`，`C4_COMPLETE_LOCAL`，`C5_LOCAL_CLASSIFIED`，D0 只读对账下一步
 >
-> 整理起点：`24475f2`；C3 证据 HEAD：`4106403`；C4 证据 HEAD：`8ce42fe`
+> 整理起点：`24475f2`；C3 证据 HEAD：`4106403`；C4 证据 HEAD：`8ce42fe`；C5 实现证据 HEAD：`038e747`
 >
 > 配套执行提示词：`docs/superpowers/plans/2026-07-18-project-consolidation-goal-prompt.md`
 
@@ -225,11 +225,13 @@ C4 gate：`docs/status/PHASE-C4-GATE-2026-07-18.md`，状态 `C4_COMPLETE_LOCAL`
 
 ### C5 — 科学能力与远端 backlog
 
-- [ ] 优先关闭 MLBackedPredictor Gate A 不误伤真 ML 的端到端验证。
-- [ ] 定位 `W4B_CKPT_DIR`，完成 `test_ml_workflow_e2e`；没有 checkpoint 就保留 pending。
-- [ ] 建立 corpus 后再测单模块成功率、unsupported abstain rate；没有分母不得编百分比。
-- [ ] “独立结果冲突检测”和“LLM unsupported claim=0”目前仍 unsupported；只有新增真实能力与独立评估后才可改状态。
-- [ ] 论文/产品持续声明：真实引擎级覆盖仅 4 族，M1/M5/M8 advisory，M6/emt/fate limitation，非 SOTA 预测模型。
+- [x] 完成本地 ML adapter/runtime seam：三 predictor success 不触发 Gate A，缺版本精确 fail-closed；当前候选真 ML E2E 因本机无 torch/W4B 资产保持 remote pending。
+- [x] 登记历史 `W4B_CKPT_DIR` 路径与 2026-07-17 未重新定位事实；未访问 `.53`，fresh discovery 与 `2 passed / 0 skipped / 0 failed` 交由批准后的远端 runbook。
+- [x] 分类单模块成功率与 unsupported abstain rate：没有独立 corpus/分母，不编百分比，分别保持 `needs_new/narrowed`。
+- [x] “独立结果冲突检测”和“LLM unsupported claim=0”继续 `unsupported`；没有用内部一致性 gate 或窄 narrative check 冒充新能力。
+- [x] 固化产品科学边界与资产分发矩阵：真实引擎级覆盖仅 4 族，M1/M5/M8 advisory，M6/EMT/fate limitation，非 SOTA；论文逐行 gap 保持 author-review pending。
+
+C5 gate：`docs/status/PHASE-C5-GATE-2026-07-18.md`，状态 `C5_LOCAL_CLASSIFIED — REMOTE_VALIDATION_PENDING`，固定本地实现证据 HEAD `038e747`。Python 3.13.12 core `965/35/9/0`，legacy isolation `1136/59/105/0`，legacy broad non-LLM `1136/158/6/0`，Ruff 与 `pip check` 通过。本地 adapter seam/内容身份/哈希格式验证完成；显式 remote opt-in 在无 torch 的 Mac 上为 `2 skipped`，未冒充通过。科学资产矩阵和 `.53` runbook 已建立；未访问/修改 GitHub 或 `.53`。D0 可开始只读三端对账，任何 push、远端 checkout/fetch 或测试仍需同步授权。
 
 ## 6. Phase D — GitHub、本地与 `.53` 同步收口
 
@@ -237,9 +239,9 @@ C4 gate：`docs/status/PHASE-C4-GATE-2026-07-18.md`，状态 `C4_COMPLETE_LOCAL`
 
 ### D0 — 冻结候选与同步前对账
 
-- [ ] 选择唯一 release-candidate SHA、目标产品版本和目标 GitHub branch；把核心测试、前端测试、wheel/CLI smoke 与该 SHA 绑定。
+- [ ] 在 C5 文档提交后选择唯一 release-candidate SHA、目标产品版本和目标 GitHub branch；从该精确提交重建并复验最终 wheel/clean install，把核心测试、前端测试及其冻结证据边界与候选 SHA 一并登记。
 - [ ] 更新 `SYNC-STATE.md`：local APFS HEAD/main、GitHub live refs、`.53` live HEAD/branch/dirty、预期同步后的 SHA。
-- [ ] 确认本地工作树（不含明确保留的本地 WIP 分支）干净；`.53` 工作树干净且没有未回传提交；否则停止，不 reset/覆盖。
+- [ ] 确认本地工作树（不含明确保留的本地 WIP 分支）干净；`.53` 除台账已登记且已有明确批准 disposition 的非源码日志外不得有 dirty 状态或未回传提交。未知、源码重叠或未批准的 dirty 一律停止，不 reset/覆盖。
 - [ ] 对 GitHub divergence 做 ancestry/range-diff/cherry 检查；只允许可解释的 fast-forward 或经人工审查的正常 PR/merge，禁止 force push。
 - [ ] 提交“将要 push 哪些 refs/tags、`.53` 将切到哪个 SHA、如何回滚”的清单，请用户确认同步授权。
 
@@ -253,10 +255,9 @@ C4 gate：`docs/status/PHASE-C4-GATE-2026-07-18.md`，状态 `C4_COMPLETE_LOCAL`
 ### D2 — 同步 `.53`
 
 - [ ] 在 `.53` 再次确认仓库路径、remote、branch、HEAD、dirty、运行服务状态；生产服务在运行时先给出无扰动更新窗口方案。
-- [ ] `.53` 只从同一个 GitHub origin fetch；目标必须是 D1 已通过 CI 的精确 SHA。若 `.53` 当前提交不是目标祖先或工作树不干净，停止，禁止 reset --hard。
-- [ ] 正常情况使用显式 `git fetch --tags origin` + `git merge --ff-only <approved-ref>` 同步。若 `.53` 仍停在带独有 `b9abdbd` 的历史分支，且该提交不是目标祖先，则保留旧分支/commit，按批准清单新建一个跟踪 GitHub main 的 deployment branch 并切到目标 SHA；不把冗余提交盲 merge 进 main，也不 reset/删除旧分支。
+- [ ] `.53` 只从同一个 GitHub origin fetch；目标必须是 D1 已通过 CI 的精确 SHA。若当前提交是目标祖先且工作树符合台账，才允许显式 `git fetch --tags origin` + `git merge --ff-only <approved-ref>`。若是已知且已登记的 `b9abdbd` 非祖先历史线，则保留旧分支/commit，按批准清单新建跟踪 GitHub main 的 deployment branch 并切到目标 SHA；若出现任何其他未知非祖先、未批准 dirty 或无法解释的 ref，则停止。所有路径均禁止 `reset --hard`、盲 merge 或删除旧分支。
 - [ ] 不在 `.53` 修改源码或提交；部署分支的每个 commit 必须先存在于 GitHub。
-- [ ] 在目标 SHA 运行约定的 remote/Docker/API smoke，记录解释器/环境/模型 checkpoint 和结果；失败则 ledger 标 `SYNCED_BUT_NOT_VALIDATED` 或按事先回滚方案处理，不伪造健康。
+- [ ] 在目标 SHA 运行约定的 remote/Docker/API smoke，记录解释器/环境/模型 checkpoint 和结果；W4B 在 donor Git SHA/clean 状态与六文件可信 digest 集另行批准前不得 import/反序列化。失败则 ledger 标 `SYNCED_BUT_NOT_VALIDATED` 或按事先回滚方案处理，不伪造健康。
 
 ### D3 — 三端一致性证明
 
@@ -274,13 +275,13 @@ C4 gate：`docs/status/PHASE-C4-GATE-2026-07-18.md`，状态 `C4_COMPLETE_LOCAL`
 
 ## 7. 最终完成闸门
 
-- [ ] Phase A/B/C 状态均有锚定 commit 和报告；Phase D 已完成三端同步，或因尚未取得外部同步授权而明确停在 `READY_TO_SYNC`。
+- [ ] Phase A/B/C 状态均有锚定 commit 和报告；D0 已冻结最终文档 SHA、完成最终 release artifact 验证和 fresh 三端只读 ledger/ancestry/dirty/rollback 方案并展示给用户；此后 Phase D 已完成三端同步，或因尚未取得外部同步授权而明确停在 `READY_TO_SYNC`。
 - [ ] `git diff --check`、`ruff check .`、核心 pytest、前端 typecheck/lint/build/E2E 全部按各自口径通过。
 - [ ] wheel 版本与发行版本一致，CLI 在干净环境可用。
 - [ ] CI 分层与文档口径一致；legacy/remote/pending 不冒充核心失败或核心通过。
 - [ ] 用户原有 CSS、stash、未跟踪资产均有明确去向，没有静默丢失。
 - [ ] 活跃本地仓库已迁到 APFS；T7 原仓库只读留档。原盘污染未清理时继续列为运维风险，不得写“原仓库完全健康”。
-- [ ] 若用户授权 D 阶段同步：本地 main、GitHub main、`.53` deployed SHA 与 release tag 全部一致并有 ledger 证据；若未授权，则最终状态必须明确为 `READY_TO_SYNC`，不能写已同步。
+- [ ] 若用户授权 D 阶段同步：本地 main、GitHub main、`.53` deployed SHA 与 release tag 全部一致并有 ledger 证据；若 D0 已完成但外部写入未授权，则状态必须明确为 `READY_TO_SYNC`，不能写已同步；D0 未完成时仍是 `KNOWN_DIVERGENCE`。
 - [ ] 提交最终整理报告；任何新的 push/tag/deploy 仍须走 D 阶段清单与授权。
 
 ## 8. 提交建议

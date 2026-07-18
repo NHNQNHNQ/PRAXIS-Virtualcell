@@ -1,6 +1,6 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `IMPLEMENTED_C4 — 1.6.0_LOCAL_CANDIDATE_UNPUBLISHED`
+> Status: `IMPLEMENTED_C5 — 1.6.0_LOCAL_CANDIDATE_UNPUBLISHED`
 >
 > Audited: 2026-07-18; local branch `codex/project-consolidation`
 
@@ -11,7 +11,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | Namespace | Current value | Source | Meaning |
 |---|---|---|---|
 | local product milestone | annotated `v1.5.0 → 176019e` | Git tag/local `main` | latest local release checkpoint; not published on GitHub on 2026-07-18 |
-| GitHub published main/tag | `v0.8.0 → 7fc4aa5` | live `ls-remote` | current published truth |
+| GitHub published main/tag | `v0.8.0 → 7fc4aa5` | Phase A live `ls-remote`; last observed, D0 refresh pending | last-observed published truth, not a current live assertion |
 | local product candidate | `1.6.0` | `pyproject.toml` `[project].version` | accessible theme, workflow/UI, and supported-input expansion; local only, not a tag or publication |
 | Python distribution | `1.6.0` | installed `praxis-virtualcell` metadata | derived from the only manually edited product source |
 | inherited `praxis2.__version__` | `1.6.0` | compatibility alias | aliases `praxis_virtualcell.__version__`; no second literal |
@@ -29,6 +29,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | governance feature schema | `v0.3.0` | `governance/learned_reliability.py` and artifact JSON | frozen learned-governance feature contract |
 | governance models | `reliability_v0.3.0`, `abstain_v0.3.0` | `governance/artifacts/*.json` | immutable model revisions paired with content SHA-256 |
 | model registry revisions | heterogeneous model/dataset identifiers | `model_zoo/registry.yaml` | per-engine/checkpoint revisions, not product SemVer |
+| W4B donor call version | `donor_ml:<Class>@sha256:<content identity>` on `build_runtime_ml` | checkpoint `.json + .pt` bytes via `checkpoint_identity.py` | content identity for this call; not a checked-in integrity pin, product version, or proof of cross-device tensor hashing |
 
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
@@ -52,7 +53,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented through C4:
+Implemented through C5:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -63,6 +64,7 @@ Implemented through C4:
 7. `npm version 1.6.0 --no-git-tag-version` synchronized the private package and lock root as a generated mirror. Neither is manually authoritative.
 8. The full release wheel is built with hash-locked Python 3.13 build dependencies and contains the packaged React UI; clean-install verification reads the installed distribution metadata rather than the checkout.
 9. The release container installs that same wheel into `/opt/venv`, injects `GIT_SHA` into both its OCI revision label and health response, and never infers identity from an image tag or embedded `.git` directory.
+10. W4B donor adapters use a checkpoint-content identity as their per-call model version and validate the expected slot/class before loading weights. Other ML callers retain their existing explicit or class fallback, so this must not be generalized to every registry model.
 
 ## Release invariants
 

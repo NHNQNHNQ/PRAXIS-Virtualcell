@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 19:42 CST (+0800)
+> Captured: 2026-07-18 20:07 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — C1_COMPLETE — C2_COMPLETE — C3_COMPLETE_LOCAL — C4_COMPLETE_LOCAL — Phase C5 next`
+> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — C1_COMPLETE — C2_COMPLETE — C3_COMPLETE_LOCAL — C4_COMPLETE_LOCAL — C5_LOCAL_CLASSIFIED — Phase D0 read-only audit next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -25,7 +25,7 @@ The source volume is ExFAT and was 93% full. The active clone and recovery direc
 | Item | Observed value |
 |---|---|
 | Audit anchor / current branch base | `24475f2eb14c27c7cfbb82b016b881e88e98b17c` |
-| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream; C4 evidence HEAD `8ce42fe`, local candidate `1.6.0` |
+| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream; C4 evidence `8ce42fe`, C5 implementation evidence `038e747`, local candidate `1.6.0` |
 | Preserved former working branch | `feat/v0.9-phase0-module-core=24475f2` |
 | Local `main` | `176019ebd9c198f93a5a645f1ecefce9baaf0522` |
 | Annotated tag `v1.5.0` | tag object `df04e74`; peeled commit `176019e` |
@@ -35,18 +35,18 @@ The source volume is ExFAT and was 93% full. The active clone and recovery direc
 | GitHub origin URL | `git@github.com:NHNQNHNQ/PRAXIS-Virtualcell.git` |
 | Recovery remote URL | `/Users/mzy/Projects/PRAXIS-virtualcell-recovery-20260718/praxis-all.bundle` |
 
-Observed graph relationships at local C4 evidence checkpoint `8ce42fe`; remote refs are the last values fetched in Phase A:
+Observed graph relationships at local C5 implementation checkpoint `038e747`; remote refs are the last values fetched in Phase A:
 
 ```text
-HEAD...main                                     54 left / 0 right
-HEAD...origin/feat/v0.9-phase0-module-core     135 left / 1 right
+HEAD...main                                     56 left / 0 right
+HEAD...origin/feat/v0.9-phase0-module-core     137 left / 1 right
 main...origin/main                              342 left / 0 right
-HEAD...origin/main                              396 left / 0 right
+HEAD...origin/main                              398 left / 0 right
 ```
 
-The two `origin/*` values matched during Phase A's 2026-07-18 HTTPS `ls-remote` and HTTPS-backed `fetch --prune --tags`; they are now last-observed remote evidence and were not revalidated in C3 or C4. The persisted origin URL remains SSH. No pull, merge, rebase, push, PR, tag, or remote write has occurred.
+The two `origin/*` values matched during Phase A's 2026-07-18 HTTPS `ls-remote` and HTTPS-backed `fetch --prune --tags`; they are now last-observed remote evidence and were not revalidated in C3, C4, or C5. The persisted origin URL remains SSH. No pull, merge, rebase, push, PR, tag, or remote write has occurred.
 
-The `.53` host was initially checked read-only during Phase A at 2026-07-18 13:12 CST and re-read at 13:33 immediately before the Phase A gate. That last observation showed detached `b9abdbd`, `main=7fc4aa5`, tags through `v0.8.0`, and one untracked 32,504-byte `vc_api.log`; it also showed `.53`-only branch `remote-gears-l4-95dc764=95dc764`. C3 and C4 did not revalidate those remote values. No process or environment check was performed. See `docs/status/SYNC-STATE.md`.
+The `.53` host was initially checked read-only during Phase A at 2026-07-18 13:12 CST and re-read at 13:33 immediately before the Phase A gate. That last observation showed detached `b9abdbd`, `main=7fc4aa5`, tags through `v0.8.0`, and one untracked 32,504-byte `vc_api.log`; it also showed `.53`-only branch `remote-gears-l4-95dc764=95dc764`. C3–C5 did not revalidate those remote values. No process or environment check was performed. See `docs/status/SYNC-STATE.md`.
 
 ## Protected worktree state
 
@@ -123,7 +123,7 @@ Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engi
 
 ## Phase B baseline progress
 
-The B0–C3 entries in this chronology are frozen phase snapshots. Present-tense wording inside them describes the state at that gate; the header and latest completed-phase entry are the current authority.
+The B0–C4 entries in this chronology are frozen phase snapshots. Present-tense wording inside them describes the state at that gate; the header and latest completed-phase entry are the current authority.
 
 `B0_COMPLETE`
 
@@ -243,13 +243,25 @@ The B0–C3 entries in this chronology are frozen phase snapshots. Present-tense
 - Explicitly unclaimed: complete Streamlit server startup, clean-wheel `praxis-vc ask`, real LLM, `.53` GPU/checkpoints/services, publication, deployment, and any expansion of Phase 10 scientific claims.
 - Protected assets and publication boundary remain unchanged: `.claude/`, ignored `.playwright-mcp/`, `string.jpeg`, stash, recovery material, T7 archive, local tags, GitHub, and `.53` were not modified.
 
+`C5_LOCAL_CLASSIFIED — REMOTE_VALIDATION_PENDING`
+
+- Gate: `docs/status/PHASE-C5-GATE-2026-07-18.md`; fixed local implementation evidence HEAD `038e7476a2b8c05ef30722eb9947363b0cbca11d`.
+- Gate A seam: W4B slots/classes now have one shared mapping; the W4B builder derives a directory-location-independent `.json + .pt` content identity before loading weights; malformed per-call SHA-256 values fail Gate A; explicit empty ML versions fail instead of silently falling back.
+- Local proof: a no-torch three-agent adapter/runtime seam survives Gate A, and one erased version triggers exactly the expected fail-closed reason. This is adapter/governance evidence, not true donor inference.
+- Python 3.13.12 fresh hash-lock environment: `pip check` and Ruff passed; core `965 passed / 35 skipped / 9 deselected / 0 failed`; legacy isolation `1136/59/105/0`; legacy broad non-LLM `1136/158/6/0`.
+- Current-candidate real W4B execution remains pending. Explicit `--run-remote` on this Mac produced two honest no-torch skips; historical checkpoint presence at repo `390b67b` does not prove current `.53` availability.
+- Scientific classification: single-module success percentage remains `needs_new/narrowed`; unsupported abstain percentage remains `narrowed`; independent result conflict detection and LLM unsupported-claim count remain `unsupported`.
+- Asset boundary: three default gene sets are packaged advisory data; root research data are source-only and excluded from wheel/container; private checkpoints remain manual/non-distributable. The latest manuscript has five recorded claim-alignment gaps and remains author-review pending.
+- Remote procedure: `docs/runbooks/REMOTE-SCIENCE-VALIDATION.md` requires the approved candidate SHA, an independently approved clean donor Git SHA/remote, an independently approved digest set for three JSON sidecars plus three PT weights, manifest-matching Norman data, and exactly `2 passed / 0 skipped / 0 failed`. Because current PT loading uses `weights_only=False`, discovery alone never authorizes execution.
+- External/protected boundary unchanged: no GitHub or `.53` read/write occurred in C5; `.claude/`, ignored `.playwright-mcp/`, `string.jpeg`, stash, recovery material, T7, refs, and tags remain untouched.
+
 ## Next authorized work
 
-Continue Phase C5 in this APFS clone:
+Continue Phase D0 with read-only/local preparation only:
 
-1. Classify Gate A true-ML end-to-end evidence, W4B checkpoint availability, corpus/rate claims, independent conflict detection, and unsupported-claim detection as `met`, `narrowed`, `unsupported`, or `pending` without changing scientific conclusions.
-2. Add local status/asset/runbook documentation and any prerequisite/provenance assertions that can be proven without private checkpoints or remote mutation.
-3. Keep current-candidate W4B/GPU/checkpoint execution at its explicit remote gate. Historical paths conflict, so checkpoint presence requires a fresh authorized `.53` check.
-4. Complete the C5 local classification gate before preparing Phase D's read-only three-end audit and synchronization proposal.
+1. Freeze the exact release-candidate SHA after the C5 documentation commit and bind a final clean wheel/install verification to that SHA.
+2. Freshly re-read local refs/worktree, GitHub live refs, and `.53` refs/status by read-only commands; preserve unknown/dirty evidence rather than changing it.
+3. Compute ancestry/range differences and write the exact target feature ref, proposed main path, `.53` deployment branch, preserved refs/log disposition, validation order, and rollback plan.
+4. Present that ledger and proposal to the user. Stop before the first push, PR, tag, `.53` fetch/checkout, deployment, or remote test until explicit authorization is received.
 
-No external synchronization is authorized before the Phase D approval gate.
+No external synchronization or `.53` science execution is authorized before the Phase D approval gate.

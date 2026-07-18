@@ -20,6 +20,9 @@
 - 新增 Python 3.13 build/runtime/dev hash locks；完整 wheel 现在包含 React 静态资源、Streamlit 入口和已审查默认 gene-set 数据，并在源码目录外验证 CLI/API/同源页面。
 - 发布容器改为固定 digest 的四阶段构建，只从 hash-verified wheelhouse 安装同一 wheel；最终镜像以非 root 运行并暴露候选 Git SHA、健康检查和持久化 runs 契约。
 - `/api/jobs` 不再向调用方返回原始异常文本：已识别输入失败返回稳定 `invalid_request`，未知执行故障返回稳定 `job_execution_failed` 并只记服务端日志。
+- W4B 真 ML workflow 的 per-call 版本现在绑定三组 donor `.json + .pt` 内容身份，并在加载前校验 slot/class；Gate A 同时拒绝格式非法的输入/输出 SHA-256。该身份不是 checked-in 防篡改 pin。
+- 新增三 predictor adapter/runtime Gate A 本地 seam 和严格远端验收：本地 3 success 不误伤、缺版本 fail-closed 已通过；当前候选的 donor 代码与 checkpoint 信任门仍明确 remote pending，不以本机两条 skip 冒充通过。现有 CPU-loaded 门也不证明 GPU 推理。
+- 建立科学资产分发矩阵与 `.53` 远端科学验证手册；真实引擎仍仅 4 族，单模块/unsupported 百分比无 corpus 不报数，独立冲突检测与 LLM unsupported-claim 仍 unsupported。
 
 ## 1.5.0 — local milestone
 

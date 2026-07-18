@@ -2,7 +2,7 @@
 
 > 本地观测：2026-07-18，分支 `codex/project-consolidation`
 >
-> 状态：`C4_COMPLETE_LOCAL`，固定实现证据 HEAD `8ce42fe`。当前分支尚未 push，不能据此声称 GitHub Actions 已绿。
+> 状态：`C5_LOCAL_CLASSIFIED`，固定 C5 实现证据 HEAD `038e747`；C4 发行证据仍冻结在 `8ce42fe`。当前分支尚未 push，不能据此声称 GitHub Actions 已绿。
 
 ## 当前质量口径
 
@@ -10,11 +10,13 @@
 |---|---|---|
 | 依赖 | Python 3.13 hash locks → editable `--no-build-isolation --no-deps` → `python -m pip check` | PASS，0 broken requirements |
 | Python lint | Python 3.13 lock 环境内 `ruff check .` | PASS，0 diagnostics |
-| VirtualCell 核心 | `python -m pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` | `957 passed / 35 skipped / 9 deselected / 0 failed`；Python 3.13.12，无 C3 的 Starlette/httpx 弃用警告 |
+| VirtualCell 核心 | `python -m pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` | `965 passed / 35 skipped / 9 deselected / 0 failed`；Python 3.13.12；比冻结 C4 增加 8 条 Gate A/checkpoint identity 本地测试 |
 | Legacy unit | `python -m pytest tests -m "not (integration or llm or remote)" -o addopts='' -q -ra` | `1136 passed / 59 skipped / 105 deselected / 0 failed` |
 | Legacy broad non-LLM | `python -m pytest tests -m "not llm" -o addopts='' -q -ra` | `1136 passed / 158 skipped / 6 deselected / 0 failed`；广义本地口径，不替代 CI isolation |
+| C5 Gate A 本地 seam | provenance gate 定向测试 + W4B remote test module 在普通本地 marker gate 下被收集并跳过 | `38 passed / 2 remote skipped / 0 failed`；三 adapter success/no-gate 与缺版本 fail-closed 已证明，非真 donor 推理 |
+| C5 W4B remote | `test_ml_workflow_e2e.py --run-remote -m remote` | 本机无 torch：`2 skipped / 0 failed`，明确为 `REMOTE_VALIDATION_PENDING`；只有批准候选 SHA、clean donor SHA/remote 和可信六文件 digest 集上 `2 passed / 0 skipped / 0 failed` 可关闭 |
 | 前端 | `npm audit --audit-level=high` → typecheck → lint → build → `CI=1 npm run e2e` | 0 vulnerabilities；build/budget PASS；14 specs / 57 collected = `56 passed / 1 skipped / 0 failed` |
-| C4 完整 wheel | 固定 HEAD 的两个 clean archive 分别构建、`cmp`、Python 3.13 locked clean install、console entry、站外 verifier | 922,334 bytes；SHA-256 `78e5287a5dd61478b041fd1a28783732cb75a250de02eec306d3803b3128fd4f`；全部 PASS |
+| C4 完整 wheel（冻结） | 固定 `8ce42fe` 的两个 clean archive 分别构建、`cmp`、Python 3.13 locked clean install、console entry、站外 verifier | 922,334 bytes；SHA-256 `78e5287a5dd61478b041fd1a28783732cb75a250de02eec306d3803b3128fd4f`；全部 PASS；最终 C5 文档 SHA 仍须在 D0 重新绑定 release artifact |
 | C4 Linux container | Docker Desktop Linux/arm64，显式 Docker 双门，容器 `--network none` | `5 passed / 0 failed`；结束后无本次资源残留 |
 | C2 历史干净 wheel | 从提交 `73f3324` 的 `git archive` 构建；独立 Python 3.13 venv `--no-deps` 安装后验证 import、version、CLI | `praxis_virtualcell-1.5.1-py3-none-any.whl`，714,871 bytes，SHA-256 `b571ee71a42d028774221b068a5d0b5a613bcebb456ba655c1a3b4e1d1690580`；不是当前 `1.6.0` wheel 证据 |
 
@@ -53,7 +55,7 @@ npm run build
 CI=1 npm run e2e
 ```
 
-CI 配置固定 Python `3.13.14` 和 Node `24.18.0`。C4 后端、wheel 与 clean install 已在本机 Python `3.13.12` 复现；浏览器门使用本机 Node `26.4.0` / npm `11.17.0`，并额外对显式启动的 Python 3.13.12 API 重跑为 `56 passed / 1 skipped`；Docker 门使用 digest-pinned Linux Node 24/Python 3.13 构建链。只有远端 CI 对候选 SHA 跑完后，才能声称 GitHub 的 Python 3.13.14 / Node 24.18.0 口径通过。
+CI 配置固定 Python `3.13.14` 和 Node `24.18.0`。C5 后端已在新的本机 Python `3.13.12` hash-lock 环境复现；C4 wheel/clean install、浏览器和 Docker 证据仍按各自固定 commit 冻结。浏览器门使用本机 Node `26.4.0` / npm `11.17.0`，并额外对显式启动的 Python 3.13.12 API 重跑为 `56 passed / 1 skipped`；Docker 门使用 digest-pinned Linux Node 24/Python 3.13 构建链。只有远端 CI 对最终候选 SHA 跑完后，才能声称 GitHub 的 Python 3.13.14 / Node 24.18.0 口径通过。
 
 ## C4 发布复现
 
@@ -99,6 +101,17 @@ pytest 启用 strict markers，并静态注册：
 ```
 
 退出码 0 但全部为 skip 只表示前置条件缺失，不能写成 LLM、integration 或 remote 能力通过。
+
+W4B/Gate A 真 ML 验证必须在用户批准的同一候选 SHA、独立批准的 clean donor Git SHA/remote 和可信六文件 digest 集上，按 [Remote Science Validation](runbooks/REMOTE-SCIENCE-VALIDATION.md) 执行：
+
+```bash
+# 非独立入口：必须先在 linked runbook 的同一会话通过 donor 与 digest 信任门。
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_ml_workflow_e2e.py \
+  --run-remote -m remote -p no:cacheprovider -o addopts='' -q -ra
+```
+
+该门要求先只读发现 donor/code 与 checkpoint 元数据，再由可信负责人批准 donor Git 身份和三组 `.json/.pt` digest；当前 `weights_only=False` PT 在批准前禁止反序列化。批准后仍须满足正确 sidecar class、manifest-matching Norman 数据和可用 torch/donor 环境，且结果为 `2 passed / 0 skipped / 0 failed`。CUDA 只作现场环境盘点；当前实现以 `map_location="cpu"` 加载且未迁移 tensor 到 GPU，所以该门不证明 GPU 推理。普通 `run_query()` 不装载 W4B runtime；测试覆盖的是 `build_runtime_ml(...).run_workflow(...)`。
 
 ## 前端覆盖边界
 
