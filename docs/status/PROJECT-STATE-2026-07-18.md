@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 13:12 CST (+0800)
+> Captured: 2026-07-18 13:33 CST (+0800)
 >
-> Overall status: `PHASE_A_IN_PROGRESS — A0/A1/A2/A3/A4 complete`
+> Overall status: `PHASE_A_COMPLETE — Phase B0 next`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -25,7 +25,7 @@ The source volume is ExFAT and was 93% full. The active clone and recovery direc
 | Item | Observed value |
 |---|---|
 | Audit anchor / current branch base | `24475f2eb14c27c7cfbb82b016b881e88e98b17c` |
-| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream yet; pre-ledger checkpoint `620b4d5` |
+| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream yet; Phase A evidence parent `a55ee8b` |
 | Preserved former working branch | `feat/v0.9-phase0-module-core=24475f2` |
 | Local `main` | `176019ebd9c198f93a5a645f1ecefce9baaf0522` |
 | Annotated tag `v1.5.0` | tag object `df04e74`; peeled commit `176019e` |
@@ -110,13 +110,23 @@ These are historical audit anchors and must be re-run only after Phase A5:
 
 Scientific claims remain bounded by `reports/phase10/PHASE10_GATE.md`: real engine-level coverage is four families, and narrowed/unsupported items may not be upgraded without new reproducible evidence.
 
+## Phase A completion
+
+`PHASE_A_COMPLETE`
+
+- Gate report: `docs/status/PHASE-A-GATE-2026-07-18.md`
+- Evidence parent: `a55ee8be20e2383a541dc2dd87277dd3cb855e4f`
+- Completion commit: `PENDING_PHASE_A_GATE_COMMIT`
+- Result: all APFS, ref, WIP, asset, link, change-boundary, and three-way-ledger checks passed.
+- External writes: none.
+
 ## Next authorized work
 
-Continue Phase A5 in this APFS clone:
+Continue Phase B0 in this APFS clone:
 
-1. Run narrow documentation/link/diff/ref/APFS integrity checks.
-2. Prove protected CSS, `.claude/`, ignored `.playwright-mcp/`, `string.jpeg`, and stash remain present and unchanged.
-3. Confirm every consolidation commit contains only the explicitly classified documentation/configuration scope.
-4. Write `PHASE_A_COMPLETE` only if the synchronization ledger has no unexplained SHA and every protection condition passes.
+1. Create a fresh `.venv` on APFS and install the declared development/API/mechanistic dependencies; do not reuse the T7 environment.
+2. Recreate frontend dependencies with `npm ci`; do not copy the T7 `node_modules`.
+3. Record tool/dependency versions, `pip check`, `npm audit`, Ruff output, and connectivity-only fsck results without fixing anything.
+4. Keep all B0 measurements separate by command, exit code, and scope.
 
 No Phase B baseline test may start before `PHASE_A_COMPLETE` is written at A5. No external synchronization is authorized before the Phase D approval gate.

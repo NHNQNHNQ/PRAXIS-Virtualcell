@@ -23,6 +23,7 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | Document | Authority |
 |---|---|
 | [Project State](status/PROJECT-STATE-2026-07-18.md) | APFS migration, current branch/ref facts, protected assets, phase restart point |
+| [Phase A Completion Gate](status/PHASE-A-GATE-2026-07-18.md) | proof that migration/organization protections passed before baseline testing |
 | [Three-Way Sync State](status/SYNC-STATE.md) | live local/GitHub/`.53` ledger and Phase D synchronization protocol |
 | [Worktree Asset Classification](status/WORKTREE-ASSETS.md) | disposition of CSS WIP, `.claude/`, Playwright MCP output, screenshot, and stash |
 | [Versioning Contract](VERSIONING.md) | version namespaces and the planned single-source release contract; design only until C2 |

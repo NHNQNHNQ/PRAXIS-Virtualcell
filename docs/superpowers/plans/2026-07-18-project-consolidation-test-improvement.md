@@ -2,7 +2,7 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — A0/A1/A2/A3/A4 完成，A5 进行中
+> 状态：active — `PHASE_A_COMPLETE`，B0 待执行
 >
 > 审计锚点：`24475f2`（`v1.5.0` 后 1 个前端 E2E 计划提交）
 >
@@ -120,12 +120,12 @@
 
 ### A5 — 整理完成闸门
 
-- [ ] `git diff --check` 通过。
-- [ ] 新增 Markdown 文件链接可解析，计划中的绝对事实与 `git` 只读命令一致。
-- [ ] `git status --short` 中原有 4 CSS + 3 未跟踪资产保持不丢；整理提交只包含显式 docs/索引文件。
-- [ ] `main`、`v1.5.0`、stash 未改变；origin tracking refs 只能因已记录的 fetch 更新，不得被手工移动或改写。
-- [ ] 当前工作目录是已验证 APFS clone；T7 原仓库保持只读；`SYNC-STATE.md` 状态至少为 `KNOWN_DIVERGENCE`，不存在未经记录的 SHA 差异。
-- [ ] 在状态文档写入 `PHASE_A_COMPLETE` 和完成 commit；若任何保护项不满足，写 `BLOCKED`，不得进入 Phase B。
+- [x] `git diff --check` 通过。
+- [x] 新增 Markdown 文件链接逐一解析，计划中的绝对事实与本轮 Git/GitHub/`.53` 只读命令一致。
+- [x] 原有 4 CSS + `.claude/` + `string.jpeg` + 已分类忽略的 `.playwright-mcp/` 均保持不丢；整理提交只包含显式 README/`.gitignore`/docs 范围。
+- [x] `main`、`v1.5.0`、stash 未改变；origin tracking refs 仅由已记录的 GitHub fetch 核验，未被手工移动或改写。
+- [x] 当前工作目录是已验证 APFS clone；T7 原仓库保持只读；`SYNC-STATE.md` 为 `KNOWN_DIVERGENCE`，不存在未经记录的 SHA 差异。
+- [x] 状态文档与独立 gate 报告写入 `PHASE_A_COMPLETE`；完成 commit 在 gate 提交后回填，Phase B 只在该提交存在后开始。
 
 ## 4. Phase B — 建立真实测试基线
 

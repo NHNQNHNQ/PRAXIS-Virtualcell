@@ -1,6 +1,6 @@
 # PRAXIS-VirtualCell Three-Way Sync State
 
-> Observed: 2026-07-18 13:12 CST (+0800)
+> Observed: 2026-07-18 13:33 CST (+0800); live refs re-confirmed for the Phase A gate
 >
 > Status: `KNOWN_DIVERGENCE`
 >
@@ -29,7 +29,7 @@ Feature branches may be intentionally ahead locally or on GitHub, but every exce
 | Observation method | local Git commands | HTTPS `ls-remote`, then HTTPS-backed `fetch --prune --tags` with the configured SSH URL left unchanged | batch-mode read-only SSH; no fetch/pull/checkout |
 | Repository | `/Users/mzy/Projects/PRAXIS-virtualcell` | `https://github.com/NHNQNHNQ/PRAXIS-Virtualcell` | `/home/zkyd/data1/mzy/PRAXIS-virtualcell` |
 | Configured origin | `git@github.com:NHNQNHNQ/PRAXIS-Virtualcell.git` | same repository | `git@github.com:NHNQNHNQ/PRAXIS-Virtualcell.git` |
-| Checked-out state | `codex/project-consolidation`; checkpoint before this ledger `620b4d5` | no `codex/project-consolidation` branch | detached HEAD at `b9abdbd` |
+| Checked-out state | `codex/project-consolidation`; Phase A evidence parent `a55ee8b` | no `codex/project-consolidation` branch | detached HEAD at `b9abdbd` |
 | `main` | `176019e` | `7fc4aa5` | `7fc4aa5` |
 | former feature branch | `24475f2` | `b9abdbd` | local branch `b9abdbd` |
 | highest release tag present | local `v1.5.0 → 176019e` | `v0.8.0 → 7fc4aa5` | `v0.8.0 → 7fc4aa5` |
