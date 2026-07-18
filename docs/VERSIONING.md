@@ -1,10 +1,10 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `DESIGN_ONLY — IMPLEMENT_IN_C2`
+> Status: `IMPLEMENTED_C2 — 1.5.1_LOCAL_CANDIDATE_UNPUBLISHED`
 >
-> Audited: 2026-07-18 at local checkpoint `db477ac`
+> Audited: 2026-07-18; implementation commit `73f3324`
 
-The repository currently mixes product release tags, package metadata, API/runtime labels, message schemas, governance artifacts, and model revisions. This document separates those namespaces before any implementation changes.
+The repository historically mixed product release tags, package metadata, API/runtime labels, message schemas, governance artifacts, and model revisions. C2 implements the separation below; publication status remains governed independently by the three-way synchronization ledger.
 
 ## Current observed surfaces
 
@@ -12,13 +12,17 @@ The repository currently mixes product release tags, package metadata, API/runti
 |---|---|---|---|
 | local product milestone | annotated `v1.5.0 → 176019e` | Git tag/local `main` | latest local release checkpoint; not published on GitHub on 2026-07-18 |
 | GitHub published main/tag | `v0.8.0 → 7fc4aa5` | live `ls-remote` | current published truth |
-| Python distribution | `0.0.0` | `pyproject.toml` `[project].version` | incorrect placeholder relative to Git history |
-| inherited `praxis2.__version__` | `0.0.0` | `praxis2/__init__.py` | compatibility namespace, currently locked by a legacy smoke test |
-| main package export | absent | `praxis_virtualcell/__init__.py` | product version cannot currently be queried from the main namespace |
-| CLI | no `--version` | `praxis_virtualcell/cli.py` | console entry exists but exposes no release identity |
-| frontend private package | `0.0.0` | `praxis_vc_react/package.json` and lock root | build-package mirror placeholder; not a scientific/API protocol |
-| OpenAPI info version | `0.6` | `praxis_vc_api/main.py` | historical API feature label, not a defined URL/protocol contract |
-| runtime contract label | `v0.3` | `praxis_vc_api/services/runtime_service.py` | returned by `/api/health` and displayed by the UI |
+| local product candidate | `1.5.1` | `pyproject.toml` `[project].version` | cleanup/quality patch candidate; local only, not a tag or publication |
+| Python distribution | `1.5.1` | installed `praxis-virtualcell` metadata | derived from the only manually edited product source |
+| inherited `praxis2.__version__` | `1.5.1` | compatibility alias | aliases `praxis_virtualcell.__version__`; no second literal |
+| main package export | `1.5.1` | `praxis_virtualcell.__version__` | derived from installed distribution metadata |
+| CLI | `praxis-vc 1.5.1` | installed `praxis-vc --version` | derived from the main package export |
+| frontend private package | `1.5.1` | `package.json` plus lock root | generated npm mirror; not a scientific/API protocol or UI authority |
+| OpenAPI product version | `1.5.1` | `FastAPI(..., version=__version__)` | product identity, not protocol compatibility |
+| API protocol | `vc.api.v1` | `praxis_virtualcell.version` | HTTP request/response contract namespace |
+| runtime protocol | `vc.runtime.v1` | `praxis_virtualcell.version` | workflow/result semantics namespace |
+| legacy runtime label | `v0.3` | `/api/health.runtime_version` | temporarily preserved response field for compatibility |
+| build identity | injected SHA or `unknown` | `/api/health.git_sha` | reads `GIT_SHA`, `GITHUB_SHA`, then `SOURCE_VERSION`; never guesses from `.git` |
 | legacy PRAXIS-2 service | `v0.21.0` | `praxis2/auth/routes.py` | inherited `/api/info` line, separate from VirtualCell product/API |
 | agent message schema | `vc.msg.v1` | `praxis_virtualcell/core/message.py` | message serialization/validation contract |
 | memory frontmatter schema | `1` | `brains/_common/memory/rules/*.md` | inherited memory-content schema |
@@ -46,18 +50,17 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 ## Single product-version source
 
-`pyproject.toml` `[project].version` will be the only manually editable product-version source.
+`pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-During C2:
+Implemented in C2:
 
-1. Select the next version from actual completed scope. A cleanup-only release may be `1.5.1`; a release containing the planned E2E/theme/product changes may be `1.6.0`. Do not choose before Phase B/C evidence establishes scope.
-2. Read the installed value with `importlib.metadata.version("praxis-virtualcell")` and expose it as `praxis_virtualcell.__version__`.
-3. Make `praxis2.__version__` a compatibility alias rather than a second literal.
-4. Add `praxis-vc --version` from the same distribution metadata.
-5. Set FastAPI/OpenAPI's application version from `product_version`; separately expose `api_protocol_version` and `runtime_protocol_version`.
-6. Extend `/api/health` with `product_version`, protocol versions, and `git_sha`; temporarily preserve the existing `runtime_version` field for client compatibility.
-7. Make the UI display backend-provided `product_version` and build SHA. It must not invent product truth from a frontend constant.
-8. Update the private frontend package/lock version with the normal npm mechanism as a generated release mirror; never hand-edit only the lockfile.
+1. The evidence through C2 is compatible cleanup, lint, CI, documentation, and version-surface repair, so the local candidate is `1.5.1`. If C3 actually accepts and commits user-visible theme/UI expansion, the candidate must be reassessed as `1.6.0` before D0 rather than pretending that scope was already accepted.
+2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
+3. `praxis2.__version__` is a compatibility alias rather than a second literal.
+4. `praxis-vc --version`, FastAPI/OpenAPI, and health use the same installed product value.
+5. `/api/health` separately exposes product, API protocol, runtime protocol, and injected build SHA while retaining `runtime_version="v0.3"`.
+6. The UI consumes backend `product_version` and `git_sha`; an E2E mock with product `9.9.9` proves that it does not invent this truth from frontend metadata.
+7. `npm version 1.5.1 --no-git-tag-version` synchronized the private package and lock root as a generated mirror. Neither is manually authoritative.
 
 ## Release invariants
 
@@ -72,10 +75,10 @@ pyproject product version
 == OpenAPI application product version
 == /api/health product_version
 == frontend release-package mirror
-== annotated tag name without its leading "v"
+== annotated tag name without its leading "v" (only once an approved release tag exists)
 ```
 
-The UI must show the same backend product version. GitHub `main`, local `main`, and the `.53` deployed checkout must resolve to the tagged commit before synchronization can be marked complete.
+The UI must show the same backend product version. GitHub `main`, local `main`, and the `.53` deployed checkout must resolve to the tagged commit before synchronization can be marked complete. The current candidate has no approved tag, so tag equality is intentionally not asserted yet.
 
 The equality above deliberately excludes `vc.msg.v1`, runtime/API protocol identifiers, memory schema, `feature_schema_v0.3.0`, governance model versions, registry model revisions, and artifact hashes. CI should validate their format/integrity and compatibility, not force them to equal the product release.
 

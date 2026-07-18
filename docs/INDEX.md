@@ -27,7 +27,8 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | Phase B commands, exact results, failure ownership, and `PHASE_B_COMPLETE` gate |
 | [Three-Way Sync State](status/SYNC-STATE.md) | live local/GitHub/`.53` ledger and Phase D synchronization protocol |
 | [Worktree Asset Classification](status/WORKTREE-ASSETS.md) | disposition of CSS WIP, `.claude/`, Playwright MCP output, screenshot, and stash |
-| [Versioning Contract](VERSIONING.md) | version namespaces and the planned single-source release contract; design only until C2 |
+| [Versioning Contract](VERSIONING.md) | implemented product/protocol/schema/artifact version boundaries and release invariants |
+| [Testing Guide](TESTING.md) | current local commands, exact scopes, external gates, and GitHub-CI evidence boundary |
 | [Repository Layout](REPOSITORY-LAYOUT.md) | tracked-tree responsibilities and evidence-versus-generated policy |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | highest authority for met/narrowed/needs-new/unsupported scientific claims |
 
@@ -35,9 +36,9 @@ Plans describe intended work. A task is not complete merely because a plan says 
 
 | Document | Status |
 |---|---|
-| [README](../README.md) | current product overview and quick start; developer test count is stale pending Phase B/C2 |
-| [Installation Guide](INSTALL.md) | pip, Docker, and install-check workflow; wheel metadata must be revalidated in Phase B |
-| [User Guide](USER-GUIDE.md) | CLI and product behavior; UI section still describes the older three-stage/three-tab interface |
+| [README](../README.md) | current product overview, quick start, capability limits, tests, and synchronization flow |
+| [Installation Guide](INSTALL.md) | verified local pip/React flow plus explicit wheel/Docker gaps owned by C4 |
+| [User Guide](USER-GUIDE.md) | CLI, five-stage/six-tab UI, output, modes, and current wheel boundary |
 | [Examples](EXAMPLES.md) | offline accept/caution/abstain examples and interpretation boundaries |
 | [LLM Interface Guide](USAGE-llm-interface.md) | v0.6-era optional LLM/API interface; deterministic-runtime red lines remain applicable |
 
@@ -60,7 +61,7 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 - The current publication ledger and bootstrap-through-v1.5 map are in [Three-Way Sync State](status/SYNC-STATE.md).
 - [v0.1.0 Release Notes](RELEASE-v0.1.0.md) and [v0.6–v0.8 Delivery Report](STATUS-2026-07-03-v0.6-v0.8-delivery.md) are historical release records.
 - Local `v0.9.0` through `v1.5.0` tags are local milestones on 2026-07-18; GitHub and `.53` were live-observed only through `v0.8.0`.
-- The repository does not yet have a current `CHANGELOG.md` or v1.5 release note. C2 must add a release-facing history without rewriting old tags.
+- [CHANGELOG](../CHANGELOG.md) records the unreleased 1.5.1 candidate and publication boundary without rewriting old tags.
 
 ## Active plans
 
@@ -77,6 +78,7 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 | Report | Scope |
 |---|---|
 | [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | current B0–B4 environment, static, core, frontend, wheel/CLI, legacy, and remote-boundary evidence |
+| [Testing Guide](TESTING.md) | post-C2 local commands and counts; distinguishes local reproduction from GitHub Actions |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | capability gate plus `.53` evidence and remaining remote backlog |
 | [Phase 10 Summary](../reports/phase10/PHASE10_SUMMARY.md) | `952 tests = 912 passed + 40 skipped` for the non-LLM package scope; 9 LLM tests are deselected in the `912/40/9` reporting style |
 | [Phase 10 UI E2E](../reports/phase10/PHASE10_UI_E2E.md) | three structural Playwright specs; explicitly excludes CSS/pixel and deep abstain assertions |
@@ -105,12 +107,8 @@ The post-consolidation baseline under `reports/quality/` is current as of `PHASE
 
 | Location | Stale fact | Planned correction |
 |---|---|---|
-| `README.md` | says `277 passed` and “main is production”; live GitHub `main` is v0.8 while local `main` is v1.5 | refresh from Phase B numbers and current sync model in C2 |
-| `praxis_vc_react/README.md` | untouched React/Vite template | replace with project-specific frontend setup/test guide in C2 |
-| `docs/USER-GUIDE.md` | UI describes three stages/three tabs | update to five stages/six tabs after frontend baseline in C2/C3 |
 | `docs/PROJECT-SUMMARY.md` / `docs/ANALYSIS-SUMMARY.md` | old HEADs and `105+25` / `203+25` test counts | keep historical; do not patch numbers in place as if the old reports were rerun |
 | `docs/ARCHITECTURE-v0.8-baseline.md` | frozen `277+25` baseline | keep frozen and label through this index |
-| API/UI version surfaces | Python/frontend `0.0.0`, OpenAPI `0.6`, runtime `v0.3` | implement the contract in [Versioning](VERSIONING.md) during C2 |
 
 Do not bulk-move or rewrite old documents during consolidation. Update this index when a document's authority or lifecycle changes.
 
