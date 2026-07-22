@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Project State — 2026-07-18
 
-> Captured: 2026-07-18 20:43 CST (+0800)
+> Captured: 2026-07-18 20:43 CST (+0800); current-state update: 2026-07-22 14:21 CST (+0800)
 >
-> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0_COMPLETE — C1_COMPLETE — C2_COMPLETE — C3_COMPLETE_LOCAL — C4_COMPLETE_LOCAL — C5_LOCAL_CLASSIFIED — D0_READ_ONLY_AUDIT_COMPLETE — final D0 commit/artifact binding next`
+> Overall status: `PHASE_A_COMPLETE — PHASE_B_COMPLETE — C0–C5_LOCAL_COMPLETE — D0_COMPLETE — D1A_ATTEMPT_1_CI_FAILED — LOCAL_FIX_VERIFIED — RETRY_APPROVAL_PENDING`
 >
 > Migration gate: `PHASE_A0_COMPLETE`
 
@@ -15,8 +15,8 @@ This file is the restart authority for the consolidation goal. It records observ
 | Active local development truth | `/Users/mzy/Projects/PRAXIS-virtualcell` | All Phase A–D work happens here |
 | Read-only source archive | `/Volumes/T7/PRAXIS-virtualcell` | Do not stage, clean, reset, stash, gc, prune, or edit |
 | Recovery material | `/Users/mzy/Projects/PRAXIS-virtualcell-recovery-20260718` | Preserve through final synchronization and release verification |
-| Published truth | GitHub `NHNQNHNQ/PRAXIS-Virtualcell` | D0 fresh read-only observation: `main=7fc4aa5`, tags through `v0.8.0` |
-| Deployment/validation mirror | `.53` | D0 fresh read-only observation: detached at `b9abdbd`; details in `SYNC-STATE.md` |
+| Published truth | GitHub `NHNQNHNQ/PRAXIS-Virtualcell` | 2026-07-22 API refresh: `main=7fc4aa5`, candidate branch `6086e69`; tags last observed through `v0.8.0` in D0 |
+| Deployment/validation mirror | `.53` | D0 last-observed detached at `b9abdbd`; not re-read or changed in D1a; details in `SYNC-STATE.md` |
 
 The source volume is ExFAT and was 93% full. The active clone and recovery directory are on APFS with approximately 46 GiB available at migration time.
 
@@ -25,7 +25,9 @@ The source volume is ExFAT and was 93% full. The active clone and recovery direc
 | Item | Observed value |
 |---|---|
 | Consolidation start / branch creation point | `24475f2eb14c27c7cfbb82b016b881e88e98b17c` |
-| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream; C4 evidence `8ce42fe`, C5 implementation `038e747`, C5 docs `d39b4a9`, local candidate `1.6.0` |
+| Active branch | `codex/project-consolidation`, created locally at `24475f2`; intentionally no upstream; published attempt-1 candidate `6086e69`; local CI-fix implementation `d6011d8`; final report-containing tip is bound in the next approval handoff; product `1.6.0` |
+| GitHub candidate branch | `refs/heads/codex/project-consolidation=6086e6995b1c3c01ec31075ce1164a0165cb8d43` (2026-07-22 API refresh) |
+| D1a CI run | `29894971142`, completed `failure`, exact head `6086e6995b1c3c01ec31075ce1164a0165cb8d43` |
 | Preserved former working branch | `feat/v0.9-phase0-module-core=24475f2` |
 | Local `main` | `176019ebd9c198f93a5a645f1ecefce9baaf0522` |
 | Annotated tag `v1.5.0` | tag object `df04e74`; peeled commit `176019e` |
@@ -44,7 +46,7 @@ main...origin/main                              342 left / 0 right
 HEAD...origin/main                              399 left / 0 right
 ```
 
-Fresh D0 HTTPS `ls-remote --heads --tags` returned the same two GitHub heads and tags through `v0.8.0`; no candidate branch exists remotely. The persisted origin URL remains SSH, and D0 did not fetch or mutate local tracking refs. No pull, merge, rebase, push, PR, tag, or remote write has occurred.
+Fresh D0 HTTPS `ls-remote --heads --tags` returned the same two GitHub heads and tags through `v0.8.0`; no candidate branch existed at that time. Authorized D1a attempt 1 later created only `refs/heads/codex/project-consolidation` at exact SHA `6086e69`, with no upstream or local tracking ref. A 2026-07-22 GitHub API refresh confirms candidate `6086e69` and unchanged `main=7fc4aa5`. No pull, merge, rebase, PR, tag, local-main change, or `.53` mutation occurred.
 
 The `.53` host was freshly re-read in D0 using batch-mode SSH and `GIT_OPTIONAL_LOCKS=0`. It remains detached at `b9abdbd`, with `main=7fc4aa5`, tags through `v0.8.0`, one untracked 32,504-byte `vc_api.log`, and `.53`-only `remote-gears-l4-95dc764=95dc764`. The log contents, processes, services, secrets, donor code, checkpoints, and environment were not inspected or changed. See `docs/status/SYNC-STATE.md`.
 
@@ -266,11 +268,24 @@ The B0–C4 entries in this chronology are frozen phase snapshots. Present-tense
 - Exact candidate-ref, CI, main/tag, local-main, `.53` deployment-branch, protected-log, validation, and rollback steps are frozen in [the Phase D0 synchronization proposal](PHASE-D0-SYNC-PROPOSAL-2026-07-18.md).
 - No GitHub or `.53` mutation was performed. The recommended next authorization is D1a branch push only.
 
+## Phase D1a attempt 1 and local repair
+
+`D1A_ATTEMPT_1_RECORDED — CI_FAILED — LOCAL_FIX_VERIFIED — RETRY_APPROVAL_PENDING`
+
+- Report: [Phase D1a Candidate Publication and CI Attempt 1](PHASE-D1A-CI-2026-07-22.md).
+- Authorized exact branch push created GitHub candidate `6086e6995b1c3c01ec31075ce1164a0165cb8d43`; GitHub `main`, tags, local `main`, and `.53` were not changed.
+- GitHub run [29894971142](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29894971142) completed `1 passed / 4 failed jobs`. Release-wheel passed for the old SHA. Three Python jobs failed before tests because the macOS-compiled dev lock omitted Linux-marked dependencies. Frontend typecheck/lint/build passed, then Playwright finished `55 passed / 1 skipped / 1 failed` because its lean runtime environment omitted Cobra required by the real FBA positive.
+- Local fix `d6011d82d297bbfe14d940f9cb09cb4988715f53` explicitly closes the macOS arm64/Linux x86_64 dev-lock union with greenlet and watchdog, moves frontend integration to the full dev lock, and adds packaging regressions. Production runtime/release lock boundaries and scientific assertions are unchanged.
+- Fresh macOS Python 3.13.12 proof: hash install and `pip check`, Ruff, targeted `13/0`, core `965/35/9/0`, legacy CI `1136/59/105/0`, frontend build gates, and Playwright `56 passed / 1 skipped / 0 failed` all passed.
+- Linux/amd64 Python 3.13.14 emulation passed strict hash install, `pip check`, imports, Ruff, packaging `11/0`, and core `965/35/9/0`. Legacy was `1135/59/105/1`; the sole `/dev/zero` early-stop timing failure occurred under qemu and passed in the native macOS full suite, so native GitHub retry remains authoritative rather than being marked green locally.
+- The remote candidate remains `6086e69`; `d6011d8` is its verified direct descendant. The final documentation tip and release artifact still require post-commit binding before another authorization request.
+
 ## Next authorized work
 
-1. Commit the D0 ledger/proposal locally and record its self-identifying report-anchor SHA.
-2. Bind the current clean branch-tip 40-hex by rebuilding that exact post-commit candidate wheel twice and repeating hash-locked clean install/installed verifier.
-3. Present the exact candidate SHA, final artifact digest, live ledger, and proposal to the user.
-4. Stop before the first push, PR, tag, `.53` fetch/checkout, deployment, or remote test until explicit authorization is received.
+1. Commit the current D1a report and live-ledger updates locally.
+2. Bind that exact clean 40-hex by rebuilding twice, comparing wheels, repeating the hash-locked installed verifier, and running the release-container smoke.
+3. Present the new exact SHA and artifact digest with expected remote candidate `6086e6995b1c3c01ec31075ce1164a0165cb8d43` and proof that it is an ancestor of the new tip.
+4. Stop for a **fresh exact D1a retry authorization** before the next candidate-branch CAS push. The old authorization cannot cover a new commit.
+5. Require all five jobs green at the new exact SHA before requesting D1b. D1b, D1c, D2, tags, local main, `.53`, services, and remote science remain separate gates.
 
-No external synchronization or `.53` science execution is authorized before the Phase D approval gate.
+No further external write or `.53` science execution is authorized by the first D1a approval.

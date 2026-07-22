@@ -1,10 +1,10 @@
 # PRAXIS-VirtualCell Three-Way Sync State
 
-> Local, GitHub, and `.53` re-observed read-only: 2026-07-18 20:38–20:43 CST (+0800)
+> Local/GitHub candidate state updated: 2026-07-22 14:21 CST (+0800); `.53` remains D0 last-observed at 2026-07-18 20:38–20:43 CST (+0800)
 >
-> Status: `KNOWN_DIVERGENCE`
+> Status: `KNOWN_DIVERGENCE — D1A_ATTEMPT_1_CI_FAILED — RETRY_APPROVAL_PENDING`
 >
-> External writes: **none** — no push, PR, merge, tag, `.53` fetch/checkout/pull, deployment, or process action was performed.
+> External writes: **one approved candidate-ref creation only** — GitHub `refs/heads/codex/project-consolidation=6086e6995b1c3c01ec31075ce1164a0165cb8d43`. No GitHub `main`/tag/PR, local `main`/tag, `.53` fetch/checkout/pull, deployment, or process action was performed.
 
 ## Roles and invariant
 
@@ -26,27 +26,29 @@ Feature branches may be intentionally ahead locally or on GitHub, but every exce
 
 | Field | APFS local | GitHub | `.53` mirror |
 |---|---|---|---|
-| Observation method | local Git commands plus final-candidate rehearsal, freshly re-run in D0 | fresh D0 HTTPS `git ls-remote --heads --tags`; no fetch or write | fresh D0 batch-mode read-only SSH with `GIT_OPTIONAL_LOCKS=0`; no fetch/checkout/process action |
+| Observation method | local Git commands and D1a repair validation | 2026-07-22 GitHub API ref/run refresh after the approved exact-ref push | D0 batch-mode read-only SSH with `GIT_OPTIONAL_LOCKS=0`; **last observed**, not re-read in D1a |
 | Repository | `/Users/mzy/Projects/PRAXIS-virtualcell` | `https://github.com/NHNQNHNQ/PRAXIS-Virtualcell` | `/home/zkyd/data1/mzy/PRAXIS-virtualcell` |
 | Configured origin | `git@github.com:NHNQNHNQ/PRAXIS-Virtualcell.git` | same repository | `git@github.com:NHNQNHNQ/PRAXIS-Virtualcell.git` |
-| Checked-out state | `codex/project-consolidation`; audit anchor `d39b4a9`; the first commit adding the D0 proposal is its immutable report anchor; the approval handoff separately binds the current clean 40-hex tip; intentionally no upstream; product `1.6.0` | no `codex/project-consolidation` branch | detached HEAD at `b9abdbd` |
+| Checked-out state | `codex/project-consolidation`; published attempt-1 SHA `6086e69`; local fix implementation `d6011d8`; final report-containing tip is named only by the next handoff; intentionally no upstream; product `1.6.0` | candidate branch `6086e6995b1c3c01ec31075ce1164a0165cb8d43`; CI run `29894971142` failed `1/5` | detached HEAD at `b9abdbd` (D0 last-observed) |
 | `main` | `176019e` | `7fc4aa5` | `7fc4aa5` |
 | former feature branch | `24475f2` | `b9abdbd` | local branch `b9abdbd` |
 | highest release tag present | local `v1.5.0 → 176019e` | `v0.8.0 → 7fc4aa5` | `v0.8.0 → 7fc4aa5` |
-| worktree | tracked candidate line clean; protected `.claude/` and `string.jpeg` untracked; ignored `.playwright-mcp/` present | not applicable | fresh dirty observation: untracked `vc_api.log` only |
-| extra refs | recovery refs and stash preserved | none beyond observed `main`/feature/tags | `remote-gears-l4-95dc764 → 95dc764` |
+| worktree | implementation was clean before the current ledger/report edits; final handoff requires tracked clean with only protected `.claude/` and `string.jpeg` untracked; ignored `.playwright-mcp/` present | not applicable | D0 last-observed dirty exception: untracked `vc_api.log` only |
+| extra refs | recovery refs and stash preserved; no local remote-tracking candidate ref/upstream | candidate branch `6086e69`; no D1a tag | `remote-gears-l4-95dc764 → 95dc764` (D0 last-observed) |
 
-The `.53` log was freshly inspected by metadata only: `vc_api.log`, 32,504 bytes, mtime `2026-07-12 12:07:01 UTC`. Its contents were not read. No process state or environment secret was inspected.
+The `.53` log was inspected by metadata only during D0: `vc_api.log`, 32,504 bytes, mtime `2026-07-12 12:07:01 UTC`. Its contents were not read. No D1a `.53` access occurred, so these values remain explicitly **last observed**, not a 2026-07-22 fresh claim.
 
-GitHub and `.53` values above are fresh D0 observations. They happened to match Phase A's last-observed values exactly. C3–D0 performed no push, PR, merge, tag, fetch-to-`.53`, checkout, deployment, process, or other external mutation.
+The 2026-07-22 GitHub API refresh confirms candidate `6086e69`, unchanged `main=7fc4aa5`, and failed exact-head run `29894971142`. D1a's only write was the approved candidate-ref creation. `.53`, tags, both main refs, deployment, and process state were not changed.
 
 ## Divergence explanation
 
-### Local C5 candidate versus published/deployed truth
+### Local repaired candidate versus published/deployed truth
 
-At D0 audit anchor `d39b4a9`, local `codex/project-consolidation` is 57 commits ahead of local `main`, 399 commits ahead of fresh GitHub `main`, and has no upstream. Relative to the fresh GitHub former feature branch it is `138 left / 1 right`. The D0 close commit that first adds [the synchronization proposal](PHASE-D0-SYNC-PROPOSAL-2026-07-18.md) adds one more local commit; the approval handoff must recompute and state its exact graph. The single sibling divergence remains the documented `b9abdbd` versus local `4359602` case.
+At D0 audit anchor `d39b4a9`, local `codex/project-consolidation` was 57 commits ahead of local `main`, 399 commits ahead of GitHub `main`, and had no upstream. D1a later published `6086e69`. Local repair `d6011d8` is its direct one-commit descendant; the report-containing commit adds another local-only step and must be identified by the next exact handoff. The branch intentionally remains ahead of the remote candidate. The single sibling divergence remains the documented `b9abdbd` versus local `4359602` case.
 
-The local product metadata is `1.6.0`, but no `v1.6.0` tag exists and no candidate ref has been published. This is an intentionally local feature-branch state, not synchronization drift hidden as a release. D0 has refreshed the external ledger and written the exact proposal, but the containing commit still requires post-commit artifact binding and user authorization. The state remains `KNOWN_DIVERGENCE`, never “synchronized”.
+The local product metadata is `1.6.0`, but no `v1.6.0` tag exists. The candidate ref is published only at the failed attempt-1 SHA `6086e69`; the repaired tip is intentionally local until fresh artifact binding and D1a retry authorization. This is recorded divergence, not a release and never “synchronized”.
+
+Attempt-1 run [29894971142](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29894971142) passed only the reproducible release-wheel job. Three Python jobs stopped during dev hash-lock installation because Linux-marked greenlet was absent; frontend build gates passed but its lean runtime environment omitted Cobra, producing one honest FBA fail-closed E2E failure. Local repair also closes the subsequently exposed non-Darwin watchdog marker. Full diagnosis and validation are in [PHASE-D1A-CI-2026-07-22.md](PHASE-D1A-CI-2026-07-22.md).
 
 ### Local `main` versus GitHub `main`
 
@@ -90,14 +92,15 @@ Decision: treat this as a remote experimental/evidence ref, not deployed truth. 
 - Local tracking refs were not fetched in D0; their `7fc4aa5`/`b9abdbd` values already matched the fresh HTTPS heads.
 - The persisted local origin URL remains SSH; the recovery bundle remote remains unchanged.
 - No process, service, secret, donor code, checkpoint, or Norman data was inspected in this D0 ledger refresh.
+- 2026-07-22 GitHub API reads returned candidate `6086e6995b1c3c01ec31075ce1164a0165cb8d43`, `main=7fc4aa5b3bd03871358385f1d467a515be15aafe`, and run `29894971142` as completed/failure at exact head `6086e69`.
 
 ## Phase D synchronization protocol
 
-No step below is authorized yet. The exact refs, rollback anchors, dirty-file disposition, CI order, `.53` branch path, and stop conditions are in [Phase D0 Three-End Audit and Synchronization Proposal](PHASE-D0-SYNC-PROPOSAL-2026-07-18.md).
+The first D1a step was authorized and completed only for `6086e69`; its authorization is now spent and cannot cover a new commit. The exact refs, rollback anchors, dirty-file disposition, CI order, `.53` branch path, and stop conditions remain frozen in [Phase D0 Three-End Audit and Synchronization Proposal](PHASE-D0-SYNC-PROPOSAL-2026-07-18.md).
 
-1. Commit the D0 ledger/proposal locally, record its self-identifying report-anchor SHA, then bind the current clean branch-tip 40-hex to post-commit double-wheel/clean-install proof.
-2. Present that exact SHA/digest and request D1a authorization for the named candidate branch only.
-3. With D1a approval, push only that branch using the proposal's exact-ref compare-and-swap lease plus ancestry guard and `--no-follow-tags`, then observe all five CI jobs. The lease does not authorize a non-fast-forward update.
+1. Commit the D1a report/current ledgers, then bind the exact clean report-containing 40-hex to post-commit double-wheel, clean-install verifier, and release-container smoke proof.
+2. Present that exact SHA/digest and request a **fresh D1a retry authorization**. Expected remote candidate must be `6086e6995b1c3c01ec31075ce1164a0165cb8d43`, and `merge-base --is-ancestor 6086… <new>` must pass.
+3. With fresh D1a approval, update only that candidate branch using exact-ref compare-and-swap lease plus ancestry guard and `--no-follow-tags`, then require all five CI jobs green at the new exact SHA. The lease does not authorize a non-fast-forward update.
 4. With separate D1b approval and green CI, use the same exact old-ref CAS plus ancestry guard to non-force fast-forward GitHub `main`; after exact tag-conflict checks, create/push only `v1.6.0` at the same SHA with implicit tag following disabled.
 5. With separate D1c approval, fetch only the exact main ref and fast-forward local `main` from the now-authoritative GitHub `main`; D1b does not imply D1c.
 6. With separate D2 approval, preserve detached `b9abdbd`, `remote-gears-l4-95dc764`, and `vc_api.log`; fetch GitHub and create `codex/deploy-v1.6.0` at the exact approved SHA.

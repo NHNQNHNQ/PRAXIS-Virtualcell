@@ -2,9 +2,9 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0_COMPLETE`，`C1_COMPLETE`，`C2_COMPLETE`，`C3_COMPLETE_LOCAL`，`C4_COMPLETE_LOCAL`，`C5_LOCAL_CLASSIFIED`，`D0_READ_ONLY_AUDIT_COMPLETE`；包含 D0 报告的提交须在交接前完成 post-commit artifact binding
+> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0–C5_LOCAL_COMPLETE`，`D0_COMPLETE`，`D1A_ATTEMPT_1_CI_FAILED`，`LOCAL_FIX_VERIFIED`；最终文档提交、artifact binding 与 fresh D1a retry 授权待完成
 >
-> 整理起点：`24475f2`；C3 证据 HEAD：`4106403`；C4 证据 HEAD：`8ce42fe`；C5 实现证据 HEAD：`038e747`；C5 文档 HEAD：`d39b4a9`
+> 整理起点：`24475f2`；C3 证据 HEAD：`4106403`；C4 证据 HEAD：`8ce42fe`；C5 实现证据 HEAD：`038e747`；C5 文档 HEAD：`d39b4a9`；D1a attempt 1：`6086e69`；本地 CI 修复：`d6011d8`
 >
 > 配套执行提示词：`docs/superpowers/plans/2026-07-18-project-consolidation-goal-prompt.md`
 
@@ -249,8 +249,11 @@ D0 的 fresh 只读账本锚定 2026-07-18 20:38–20:43 CST。没有发生 GitH
 
 ### D1 — 同步 GitHub
 
-- [ ] 先机器核 `HEAD == local branch tip == artifact-bound approved 40-hex` 与 expected remote branch SHA，再以 exact `<approved_sha>:refs/heads/codex/project-consolidation` push；唯一允许的 `--force-with-lease=<exact-ref>:<exact-expected>` 只作原子 compare-and-swap，必须先证明 previous→candidate ancestry，不授权 non-FF/改写；同时显式 `--no-follow-tags`。不直接覆盖 main，live `ls-remote` 必须完全一致。
-- [ ] 等待/核对该 SHA 的 CI；没有可见 CI 证据时不得声称 GitHub 全绿。
+- [x] D1a attempt 1：经 exact `6086e6995b1c3c01ec31075ce1164a0165cb8d43` 授权，以 remote candidate `ABSENT`、exact-ref CAS lease 和 `--no-follow-tags` 只创建 GitHub `codex/project-consolidation`；GitHub main/tag、本地 main、`.53` 均未改变。
+- [x] 核对 exact-head run [29894971142](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29894971142)：`1/5` jobs 通过。release-wheel PASS；三项 Python job 因 dev lock 缺 Linux marker 依赖在测试前失败；frontend build gates PASS，Playwright `55 passed / 1 skipped / 1 failed`，根因是 runtime profile 无 Cobra。详见 [D1a report](../../status/PHASE-D1A-CI-2026-07-22.md)。
+- [x] 本地修复 `d6011d82d297bbfe14d940f9cb09cb4988715f53`：dev lock 显式闭合 macOS arm64/Linux x86_64 的 greenlet/watchdog union；frontend integration 改用 dev lock；packaging 回归固定契约。macOS fresh hash install、Ruff、target、core、legacy、frontend build/E2E 全绿；Linux/amd64 emulation 的 install/Ruff/packaging/core 通过，legacy 唯一 qemu 性能计时失败如实登记并交 native GitHub retry 裁决。
+- [ ] 提交最终 D1a 报告/ledger 后，对该 exact clean tip 重做双 wheel、clean installed verifier 和 release-container smoke；展示新 40-hex/digest，并以 expected remote `6086e6995b1c3c01ec31075ce1164a0165cb8d43` 请求 fresh D1a retry 授权。旧 `6086…` 授权不得继承。
+- [ ] 获 fresh D1a 授权后，机器核 `HEAD == local branch tip == artifact-bound approved 40-hex`、remote candidate 仍为 `6086…`、`merge-base --is-ancestor 6086… <new>`；以 exact-ref CAS lease 和 `--no-follow-tags` 快进 candidate branch，等待新 SHA 五项 CI 全绿。失败回本地新提交并重新绑定，不能进入 D1b。
 - [ ] 经独立 D1b 批准，机器核 live old-main、candidate branch/CI SHA、ancestry，以及 local/GitHub `v1.6.0` 均不存在；以绑定 exact old-main 的 CAS lease 和 exact SHA 执行非强制快进，再创建/推送唯一 annotated `v1.6.0`。lease 不得绕过 ancestry；所有 push 显式 `--no-follow-tags`。main 成功而 tag 失败时标 `MAIN_UPDATED_TAG_PENDING`，不倒退 main；禁止 `push --all`/`push --tags`。
 - [ ] 经独立 D1c 批准，本地 APFS clone 只 fetch exact main ref，再用 `merge --ff-only origin/main` 更新本地 main；验证 `local main == origin/main == approved SHA`。D1b 不隐含 D1c。
 

@@ -1,6 +1,6 @@
 # PRAXIS-VirtualCell Documentation Index
 
-> Audited: 2026-07-18
+> Audited: 2026-07-22
 >
 > Status: `CURRENT_DOCUMENT_MAP`
 
@@ -25,7 +25,8 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [Project State](status/PROJECT-STATE-2026-07-18.md) | APFS migration, current branch/ref facts, protected assets, phase restart point |
 | [Phase A Completion Gate](status/PHASE-A-GATE-2026-07-18.md) | proof that migration/organization protections passed before baseline testing |
 | [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | Phase B commands, exact results, failure ownership, and `PHASE_B_COMPLETE` gate |
-| [Phase D0 Sync Proposal](status/PHASE-D0-SYNC-PROPOSAL-2026-07-18.md) | fresh local/GitHub/`.53` ledger, ancestry, exact D1/D2 order, protected exceptions, and rollback plan; no external-write authorization |
+| [Phase D0 Sync Proposal](status/PHASE-D0-SYNC-PROPOSAL-2026-07-18.md) | frozen pre-publication ledger, exact D1/D2 protocol, protected exceptions, and rollback plan; not the current live sync ledger |
+| [Phase D1a CI Report](status/PHASE-D1A-CI-2026-07-22.md) | first exact candidate-branch publication, run `29894971142`, `1/5` diagnosis, local remediation evidence, and retry authorization boundary |
 | [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | current local scientific classification, Gate A seam evidence, explicit remote pending, and D0 handoff |
 | [Scientific Assets](status/SCIENTIFIC-ASSETS-2026-07-18.md) | wheel/container/source/private asset matrix, provenance, licence gaps, and permitted claims |
 | [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | frozen local dependency/bundle/wheel/API/Linux-container evidence and `C4_COMPLETE_LOCAL` boundary |
@@ -68,14 +69,15 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 - The current publication ledger and bootstrap-through-v1.5 map are in [Three-Way Sync State](status/SYNC-STATE.md).
 - [v0.1.0 Release Notes](RELEASE-v0.1.0.md) and [v0.6–v0.8 Delivery Report](STATUS-2026-07-03-v0.6-v0.8-delivery.md) are historical release records.
 - Local `v0.9.0` through `v1.5.0` tags are local milestones on 2026-07-18; fresh D0 read-only checks found GitHub and `.53` still only through `v0.8.0`.
+- GitHub candidate branch `codex/project-consolidation` was first published at exact SHA `6086e6995b1c3c01ec31075ce1164a0165cb8d43`; its CI failed and did not change GitHub `main` or release tags.
 - [CHANGELOG](../CHANGELOG.md) records the unreleased 1.6.0 candidate and publication boundary without rewriting old tags.
 
 ## Active plans
 
 | Plan | Status |
 |---|---|
-| [Project consolidation, test, and improvement plan](superpowers/plans/2026-07-18-project-consolidation-test-improvement.md) | the only active orchestration plan; D0 local close in progress, D1+ approval-gated |
-| [Consolidation goal prompt](superpowers/plans/2026-07-18-project-consolidation-goal-prompt.md) | restart/persistence protocol for the active plan and current external-write hard gate |
+| [Project consolidation, test, and improvement plan](superpowers/plans/2026-07-18-project-consolidation-test-improvement.md) | the only active orchestration plan; first D1a CI failed, local remediation is verified, and exact-SHA retry remains approval-gated |
+| [Consolidation goal prompt](superpowers/plans/2026-07-18-project-consolidation-goal-prompt.md) | restart/persistence protocol for final candidate binding and the fresh D1a retry hard gate |
 | [Full frontend E2E plan](superpowers/plans/2026-07-17-frontend-full-e2e-test-plan.md) | subordinate C3 design implemented locally for S1–S9/S11–S13; S10 real-LLM gate remains pending, and active-plan orchestration overrides its historical mechanics |
 
 Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*` documents are dated implementation history unless the active plan explicitly references them.
@@ -85,10 +87,11 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 | Report | Scope |
 |---|---|
 | [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | current B0–B4 environment, static, core, frontend, wheel/CLI, legacy, and remote-boundary evidence |
+| [Phase D1a CI Report](status/PHASE-D1A-CI-2026-07-22.md) | actual old-SHA GitHub run, job-by-job failure boundary, lock/frontend remediation, honest QEMU limitation, and retry gate |
 | [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | current local C5 gate: Python 3.13 core 965, Gate A adapter seam, honest 2-test remote pending, asset/claim classification |
 | [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | frozen C4 gate: Python 3.13 core 957, Playwright 56+1, reproducible full wheel, and Linux-container smoke |
 | [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen C3 gate: core 947, Playwright 54+1, theme acceptance, mutation evidence, and then-remaining C4/C5 ownership |
-| [Testing Guide](TESTING.md) | post-C5 local commands and counts; distinguishes local reproduction from GitHub Actions and remote scientific validation |
+| [Testing Guide](TESTING.md) | post-fix local commands and counts; distinguishes old-SHA failed GitHub CI, local/QEMU reproduction, and remote scientific validation |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | capability gate plus `.53` evidence and remaining remote backlog |
 | [Phase 10 Summary](../reports/phase10/PHASE10_SUMMARY.md) | `952 tests = 912 passed + 40 skipped` for the non-LLM package scope; 9 LLM tests are deselected in the `912/40/9` reporting style |
 | [Phase 10 UI E2E](../reports/phase10/PHASE10_UI_E2E.md) | three structural Playwright specs; explicitly excludes CSS/pixel and deep abstain assertions |

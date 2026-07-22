@@ -123,7 +123,7 @@ CI=1 npm run e2e
 
 唯一允许的流向是：本地 feature branch → GitHub branch/CI → 审批合入 GitHub `main` → 本地 `main` fast-forward → `.53` 从同一 GitHub SHA fast-forward → 三端 SHA 核对。不要在 `.53` 直接开发，也不要把本地 tag 当成已发布 tag。
 
-当前整理分支仍是本地候选；没有对应的 GitHub Actions 绿勾，也没有执行 push、merge、tag 或部署。任何外部同步都必须经过 Phase D 的显式清单与用户授权。
+整理分支已按首次 D1a 授权把精确 SHA `6086e6995b1c3c01ec31075ce1164a0165cb8d43` 发布到 GitHub `codex/project-consolidation`。对应的 [GitHub Actions run 29894971142](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29894971142) 未全绿：五项 job 中只有 reproducible release wheel 通过。修复提交 `d6011d82d297bbfe14d940f9cb09cb4988715f53` 已完成原生 macOS 分层验证；Linux/amd64 QEMU 的依赖、Ruff、packaging 和核心门通过，但 legacy 如实保留一个 `/dev/zero` 超时失败。最终文档提交、release artifact 绑定和新的 exact-SHA D1a retry 授权仍待完成；旧 SHA 的单项 CI 通过不能继承给新候选。GitHub `main`/tag、本地 `main` 和 `.53` 均未改变。
 
 ## 派生关系
 
