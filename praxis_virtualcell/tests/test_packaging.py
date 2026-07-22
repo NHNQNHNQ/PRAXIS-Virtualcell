@@ -69,10 +69,22 @@ def test_python313_hash_locks_cover_ci_and_runtime_dependencies():
     build = _locked_names(_ROOT / "requirements" / "build-py313.lock")
     runtime = _locked_names(_ROOT / "requirements" / "runtime-py313.lock")
     dev = _locked_names(_ROOT / "requirements" / "dev-py313.lock")
+    cfg = tomllib.loads((_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    dev_requirements = cfg["project"]["optional-dependencies"]["dev"]
 
     assert build == {"packaging", "setuptools", "wheel"}
     assert {"fastapi", "httpx", "mcp", "pydantic", "uvicorn"} <= runtime
-    assert {"pytest", "ruff", "httpx2", "streamlit", "cobra"} <= dev
+    assert {
+        "pytest",
+        "ruff",
+        "httpx2",
+        "streamlit",
+        "cobra",
+        "greenlet",
+        "watchdog",
+    } <= dev
+    assert any(requirement.startswith("greenlet>=") for requirement in dev_requirements)
+    assert any(requirement.startswith("watchdog>=") for requirement in dev_requirements)
     assert runtime < dev
     assert {"pytest", "ruff", "httpx2", "streamlit", "cobra"}.isdisjoint(runtime)
 
@@ -129,10 +141,13 @@ def test_release_scripts_build_only_committed_candidates():
 
 def test_ci_editable_installs_use_hash_locked_build_backend():
     workflow = (_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    frontend_job = workflow.split("  frontend:\n", 1)[1].split("  release-wheel:\n", 1)[0]
 
     assert workflow.count("requirements/build-py313.lock") >= 5
     assert "pip install --no-deps -e ." not in workflow
     assert workflow.count("pip install --no-build-isolation --no-deps -e .") == 4
+    assert "requirements/dev-py313.lock" in frontend_job
+    assert "requirements/runtime-py313.lock" not in frontend_job
 
 
 def test_web_command_uses_packaged_absolute_app_path(monkeypatch):

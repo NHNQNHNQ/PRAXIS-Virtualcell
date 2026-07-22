@@ -9,7 +9,12 @@ files freeze the resolver result used by CI and release validation:
 - `runtime-py313.lock`: core plus the `api` extra used by the local API and
   production container.
 - `dev-py313.lock`: core plus `dev`, `api`, `web`, and `mechanistic`, used by
-  the complete local/CI test environment.
+  the complete local/CI test environment. The `dev` extra explicitly includes
+  `greenlet` and `watchdog` so the shared macOS arm64/Linux x86_64 lock also
+  pins SQLAlchemy's architecture-marked and Streamlit's non-Darwin dependencies
+  instead of failing hash mode on GitHub runners.
+  If another OS or architecture is added, compile and validate a platform-specific
+  lock instead of assuming that this two-platform dependency closure is complete.
 
 Install the locked dependencies before installing the project itself without
 dependency resolution:

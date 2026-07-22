@@ -54,7 +54,7 @@ jobs:
           cache-dependency-path: |
             pyproject.toml
             requirements/build-py313.lock
-            requirements/runtime-py313.lock
+            requirements/dev-py313.lock
       - uses: actions/setup-node@v4
         with:
           node-version: "24.18.0"
@@ -64,7 +64,7 @@ jobs:
         run: |
           python -m venv .venv
           .venv/bin/python -m pip install --only-binary=:all: --require-hashes -r requirements/build-py313.lock
-          .venv/bin/python -m pip install --require-hashes -r requirements/runtime-py313.lock
+          .venv/bin/python -m pip install --require-hashes -r requirements/dev-py313.lock
           .venv/bin/python -m pip install --no-build-isolation --no-deps -e .
       - name: Install frontend dependencies
         working-directory: praxis_vc_react
