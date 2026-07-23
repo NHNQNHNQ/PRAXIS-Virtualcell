@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import functools
 import os
+import signal
 import subprocess
 import time
 from pathlib import Path
@@ -59,6 +60,26 @@ def _truncate(b: bytes, max_bytes: int) -> tuple[str, bool]:
         + f"\n…[截断:原 {len(b)} bytes 超 {max_bytes}]",
         True,
     )
+
+
+def _kill_process_group(proc: asyncio.subprocess.Process) -> None:
+    """Kill the spawned process group so ordinary shell children release pipes."""
+    if os.name == "posix":
+        try:
+            # Every command is started in a new session below, so its PID is also
+            # the process-group ID. Killing the group prevents a shell child from
+            # keeping stdout/stderr open after the direct process is gone.
+            os.killpg(proc.pid, signal.SIGKILL)
+            return
+        except ProcessLookupError:
+            return
+        except OSError:
+            pass  # Unexpected group-kill failure: still kill the direct process.
+    if proc.returncode is None:
+        try:
+            proc.kill()
+        except (OSError, ProcessLookupError):
+            pass
 
 
 @functools.lru_cache(maxsize=1)
@@ -286,6 +307,7 @@ class BashTool(Tool):
                     stderr=asyncio.subprocess.PIPE,
                     preexec_fn=preexec,
                     env=_sanitized_env(),
+                    start_new_session=(os.name == "posix"),
                 )
             else:
                 # 内层 inner 三情形:
@@ -322,6 +344,7 @@ class BashTool(Tool):
                     stderr=asyncio.subprocess.PIPE,
                     preexec_fn=preexec,
                     env=_sanitized_env(),
+                    start_new_session=(os.name == "posix"),
                 )
         except Exception as e:  # noqa: BLE001 — spawn 失败(如 preexec 异常)不冒泡
             return ToolResult(ok=False, error=f"命令 spawn 失败:{type(e).__name__}: {e}")
@@ -330,32 +353,53 @@ class BashTool(Tool):
         # 读够就 kill 进程,让另一 stream EOF(防进程阻塞写 → 另一 drain 卡读误判超时)。
         async def _drain(stream) -> bytes:
             buf = bytearray()
-            while len(buf) <= self._max_output:
-                chunk = await stream.read(65536)
-                if not chunk:
-                    break  # EOF:命令自然结束
-                buf.extend(chunk)
-            else:
-                # while 条件转假(读够 max_output)→ 输出超限,kill 防继续写阻塞
-                if proc.returncode is None:
-                    try:
-                        proc.kill()
-                    except (OSError, ProcessLookupError):
+            try:
+                while len(buf) <= self._max_output:
+                    chunk = await stream.read(65536)
+                    if not chunk:
+                        break  # EOF:命令自然结束
+                    buf.extend(chunk)
+                else:
+                    # while 条件转假(读够 max_output)→ 输出超限,kill 防继续写阻塞
+                    _kill_process_group(proc)
+                    # Discard any bytes already buffered by the pipe transport. This
+                    # keeps the captured buffer bounded while ensuring wait() cannot
+                    # be held open by a paused, unread subprocess pipe.
+                    while await stream.read(65536):
                         pass
+            except BaseException:
+                # If one pipe read fails, release the sibling drain immediately;
+                # gather(return_exceptions=True) can then report the original error.
+                _kill_process_group(proc)
+                raise
             return bytes(buf)
 
         out_task = asyncio.create_task(_drain(proc.stdout))
         err_task = asyncio.create_task(_drain(proc.stderr))
+        wait_task = asyncio.create_task(proc.wait())
         try:
             results = await asyncio.wait_for(
-                asyncio.gather(out_task, err_task, return_exceptions=True),
+                asyncio.gather(
+                    out_task, err_task, wait_task, return_exceptions=True
+                ),
                 timeout=timeout_s,
             )
+        except asyncio.CancelledError:
+            out_task.cancel()
+            err_task.cancel()
+            wait_task.cancel()
+            _kill_process_group(proc)
+            try:
+                await asyncio.shield(proc.wait())
+            except (OSError, ProcessLookupError):
+                pass
+            raise
         except TimeoutError:
             out_task.cancel()
             err_task.cancel()
+            wait_task.cancel()
             try:
-                proc.kill()
+                _kill_process_group(proc)
                 await proc.wait()
             except (OSError, ProcessLookupError):
                 pass
@@ -367,28 +411,27 @@ class BashTool(Tool):
 
         # return_exceptions=True:drain 内部异常变返回值(非超时,如管道损坏)。
         # 任一异常 → kill + wait 兜底 + 返回 ok=False(不裸冒泡致 chat-stream 500)。
-        stdout_r, stderr_r = results
+        stdout_r, stderr_r, wait_r = results
         drain_exc = next(
-            (r for r in results if isinstance(r, BaseException)), None
+            (r for r in (stdout_r, stderr_r) if isinstance(r, BaseException)), None
         )
         if drain_exc is not None:
-            if proc.returncode is None:
-                try:
-                    proc.kill()
-                    await proc.wait()
-                except (OSError, ProcessLookupError):
-                    pass
+            try:
+                _kill_process_group(proc)
+                await proc.wait()
+            except (OSError, ProcessLookupError):
+                pass
             return ToolResult(
                 ok=False,
                 error=f"读取命令输出失败:{type(drain_exc).__name__}: {drain_exc}",
             )
+        if isinstance(wait_r, BaseException):
+            _kill_process_group(proc)
+            return ToolResult(
+                ok=False,
+                error=f"等待命令退出失败:{type(wait_r).__name__}: {wait_r}",
+            )
         stdout_b, stderr_b = stdout_r, stderr_r
-
-        # 进程回收(读够已 kill / 或自然结束;wait 收 returncode 防僵尸)
-        try:
-            await proc.wait()
-        except (OSError, ProcessLookupError):
-            pass
 
         duration_ms = int((time.monotonic() - t0) * 1000)
         stdout, t1 = _truncate(stdout_b, self._max_output)
