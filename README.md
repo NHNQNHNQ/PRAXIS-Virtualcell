@@ -123,7 +123,7 @@ CI=1 npm run e2e
 
 唯一允许的流向是：本地 feature branch → GitHub branch/CI → 审批合入 GitHub `main` → 本地 `main` fast-forward → `.53` 从同一 GitHub SHA fast-forward → 三端 SHA 核对。不要在 `.53` 直接开发，也不要把本地 tag 当成已发布 tag。
 
-整理分支已按首次 D1a 授权把精确 SHA `6086e6995b1c3c01ec31075ce1164a0165cb8d43` 发布到 GitHub `codex/project-consolidation`。对应的 [GitHub Actions run 29894971142](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29894971142) 未全绿：五项 job 中只有 reproducible release wheel 通过。修复提交 `d6011d82d297bbfe14d940f9cb09cb4988715f53` 已完成原生 macOS 分层验证；Linux/amd64 QEMU 的依赖、Ruff、packaging 和核心门通过，但 legacy 如实保留一个 `/dev/zero` 超时失败。最终文档提交、release artifact 绑定和新的 exact-SHA D1a retry 授权仍待完成；旧 SHA 的单项 CI 通过不能继承给新候选。GitHub `main`/tag、本地 `main` 和 `.53` 均未改变。
+整理分支已按两次精确 D1a 授权把 GitHub `codex/project-consolidation` 快进到 `ee36d7948047f346f55a02d62ccaac84391e3c20`。对应的 [GitHub Actions run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 为 `4/5`：Python core、frontend/Playwright、reproducible wheel 和 Linux release container 通过，legacy 唯一失败是 Linux shell 子进程未随直接 shell 终止。修复提交 `6a8198771581d0897a13457e93e50cfec172d59a` 已把输出截断、timeout、pipe 异常和上层取消统一为进程组清理，并在 macOS/Python 3.13.12 与 Linux/Python 3.13.14 严格锁环境得到 legacy `1139 passed / 0 failed`。包含本段的最终文档提交必须由交接中的 post-commit release artifact 重新绑定，之后才能申请新的 exact-SHA D1a retry；GitHub `main`/tag、本地 `main` 和 `.53` 均未改变。
 
 ## 派生关系
 

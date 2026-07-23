@@ -2,9 +2,9 @@
 
 > 日期：2026-07-18
 >
-> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0–C5_LOCAL_COMPLETE`，`D0_COMPLETE`，`D1A_ATTEMPT_1_CI_FAILED`，`LOCAL_FIX_VERIFIED`；最终文档提交、artifact binding 与 fresh D1a retry 授权待完成
+> 状态：active — `PHASE_A_COMPLETE`，`PHASE_B_COMPLETE`，`C0–C5_LOCAL_COMPLETE`，`D0_COMPLETE`，`D1A_RETRY_1_CI_4_OF_5`，`LOCAL_FIX_VERIFIED`；最终文档提交、artifact binding 与 D1a retry-2 授权待完成
 >
-> 整理起点：`24475f2`；C3 证据 HEAD：`4106403`；C4 证据 HEAD：`8ce42fe`；C5 实现证据 HEAD：`038e747`；C5 文档 HEAD：`d39b4a9`；D1a attempt 1：`6086e69`；本地 CI 修复：`d6011d8`
+> 整理起点：`24475f2`；C3 证据 HEAD：`4106403`；C4 证据 HEAD：`8ce42fe`；C5 实现证据 HEAD：`038e747`；C5 文档 HEAD：`d39b4a9`；D1a attempt 1：`6086e69`；attempt 2：`ee36d79`；本地 process-group 修复：`6a81987`
 >
 > 配套执行提示词：`docs/superpowers/plans/2026-07-18-project-consolidation-goal-prompt.md`
 
@@ -252,8 +252,11 @@ D0 的 fresh 只读账本锚定 2026-07-18 20:38–20:43 CST。没有发生 GitH
 - [x] D1a attempt 1：经 exact `6086e6995b1c3c01ec31075ce1164a0165cb8d43` 授权，以 remote candidate `ABSENT`、exact-ref CAS lease 和 `--no-follow-tags` 只创建 GitHub `codex/project-consolidation`；GitHub main/tag、本地 main、`.53` 均未改变。
 - [x] 核对 exact-head run [29894971142](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29894971142)：`1/5` jobs 通过。release-wheel PASS；三项 Python job 因 dev lock 缺 Linux marker 依赖在测试前失败；frontend build gates PASS，Playwright `55 passed / 1 skipped / 1 failed`，根因是 runtime profile 无 Cobra。详见 [D1a report](../../status/PHASE-D1A-CI-2026-07-22.md)。
 - [x] 本地修复 `d6011d82d297bbfe14d940f9cb09cb4988715f53`：dev lock 显式闭合 macOS arm64/Linux x86_64 的 greenlet/watchdog union；frontend integration 改用 dev lock；packaging 回归固定契约。macOS fresh hash install、Ruff、target、core、legacy、frontend build/E2E 全绿；Linux/amd64 emulation 的 install/Ruff/packaging/core 通过，legacy 唯一 qemu 性能计时失败如实登记并交 native GitHub retry 裁决。
-- [ ] 提交最终 D1a 报告/ledger 后，对该 exact clean tip 重做双 wheel、clean installed verifier 和 release-container smoke；展示新 40-hex/digest，并以 expected remote `6086e6995b1c3c01ec31075ce1164a0165cb8d43` 请求 fresh D1a retry 授权。旧 `6086…` 授权不得继承。
-- [ ] 获 fresh D1a 授权后，机器核 `HEAD == local branch tip == artifact-bound approved 40-hex`、remote candidate 仍为 `6086…`、`merge-base --is-ancestor 6086… <new>`；以 exact-ref CAS lease 和 `--no-follow-tags` 快进 candidate branch，等待新 SHA 五项 CI 全绿。失败回本地新提交并重新绑定，不能进入 D1b。
+- [x] D1a retry 1：经 exact old/new 授权，以 CAS lease 和 `--no-follow-tags` 只把 candidate `6086e699…` 严格快进到 `ee36d794…`；GitHub main/tag、本地 main、`.53` 均未改变。
+- [x] 核对 exact-head run [29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980)：`4/5` jobs 通过。Python core、frontend/Playwright、release wheel、Linux release container PASS；legacy 唯一 `/dev/zero` 失败由 native Linux 证明为只 kill 直接 dash、后代继续持有 pipe。详见 [D1a retry report](../../status/PHASE-D1A-CI-RETRY-2026-07-23.md)。
+- [x] 本地修复 `6a8198771581d0897a13457e93e50cfec172d59a`：POSIX 独立 process group；output cap/timeout/drain error/caller cancellation 统一 kill+reap；drain 与 process wait 共用 deadline。fresh macOS Python 3.13.12 和 Docker Linux Python 3.13.14 strict-lock legacy 均为 `1139/59/105/0`，未弱化原断言或 marker。
+- [ ] 提交最终 D1a retry 报告/ledger 后，对该 exact clean tip 重做双 wheel、clean installed verifier 和 release-container smoke；展示新 40-hex/digest，并以 expected remote `ee36d7948047f346f55a02d62ccaac84391e3c20` 请求 fresh D1a retry-2 授权。先前授权不得继承。
+- [ ] 获 fresh D1a retry-2 授权后，机器核 `HEAD == local branch tip == artifact-bound approved 40-hex`、remote candidate 仍为 `ee36…`、`merge-base --is-ancestor ee36… <new>`；以 exact-ref CAS lease 和 `--no-follow-tags` 快进 candidate branch，等待新 SHA 五项 CI 全绿。失败回本地新提交并重新绑定，不能进入 D1b。
 - [ ] 经独立 D1b 批准，机器核 live old-main、candidate branch/CI SHA、ancestry，以及 local/GitHub `v1.6.0` 均不存在；以绑定 exact old-main 的 CAS lease 和 exact SHA 执行非强制快进，再创建/推送唯一 annotated `v1.6.0`。lease 不得绕过 ancestry；所有 push 显式 `--no-follow-tags`。main 成功而 tag 失败时标 `MAIN_UPDATED_TAG_PENDING`，不倒退 main；禁止 `push --all`/`push --tags`。
 - [ ] 经独立 D1c 批准，本地 APFS clone 只 fetch exact main ref，再用 `merge --ff-only origin/main` 更新本地 main；验证 `local main == origin/main == approved SHA`。D1b 不隐含 D1c。
 

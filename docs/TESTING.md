@@ -1,18 +1,18 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 本地观测：2026-07-22，分支 `codex/project-consolidation`，CI 修复提交 `d6011d82d297bbfe14d940f9cb09cb4988715f53`
+> 本地观测：2026-07-23，分支 `codex/project-consolidation`，BashTool 修复提交 `6a8198771581d0897a13457e93e50cfec172d59a`
 >
-> 状态：`D1A_ATTEMPT_1_RECORDED — CI_FAILED — LOCAL_FIX_VERIFIED — RETRY_APPROVAL_PENDING`。固定 C5 实现证据 HEAD `038e747`、C4 发行证据 `8ce42fe` 仍是历史冻结快照；首次发布 SHA `6086e6995b1c3c01ec31075ce1164a0165cb8d43` 的 CI 不是全绿，最终文档提交和 artifact binding 尚未形成新的 exact candidate。
+> 状态：`D1A_RETRY_1_RECORDED — CI_4_OF_5 — LOCAL_FIX_VERIFIED — RETRY_2_AUTHORIZATION_PENDING`。固定 C5 实现证据 HEAD `038e747`、C4 发行证据 `8ce42fe` 仍是历史冻结快照；远端候选 `ee36d7948047f346f55a02d62ccaac84391e3c20` 的 CI 不是全绿，包含本段的提交必须由交接中的 post-commit artifact 绑定精确命名。
 
 ## 当前质量口径
 
 | 层 | 命令 | 本地结果 |
 |---|---|---|
-| 依赖 | Python 3.13 hash locks → editable `--no-build-isolation --no-deps` → `python -m pip check` | macOS/arm64 Python 3.13.12 fresh hash install PASS；Linux/amd64 Python 3.13.14 QEMU strict hash install、`pip check` 和 import PASS |
-| Python lint | Python 3.13 lock 环境内 `ruff check .` | macOS/arm64 与 Linux/amd64 QEMU 均 PASS，0 diagnostics |
+| 依赖 | Python 3.13 hash locks → editable `--no-build-isolation --no-deps` → `python -m pip check` | macOS/arm64 Python 3.13.12 与 Docker Linux/arm64 Python 3.13.14 fresh strict hash install 均 PASS |
+| Python lint | Python 3.13 lock 环境内 `ruff check .` | macOS/arm64 与 Docker Linux/arm64 均 PASS，0 diagnostics |
 | FBA + packaging 定向回归 | 两条真实 FBA 正例，加 dev extra/lock 与 CI lock 角色测试 | macOS/arm64 `13 passed / 0 failed`；其中 packaging 单模块 `11 passed`，Linux/amd64 QEMU 同一 packaging 单模块 `11 passed / 0 failed` |
-| VirtualCell 核心 | `python -m pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` | macOS/arm64 与 Linux/amd64 QEMU 均为 `965 passed / 35 skipped / 9 deselected / 0 failed` |
-| Legacy unit | `python -m pytest tests -m "not (integration or llm or remote)" -o addopts='' -q -ra` | 原生 macOS `1136 passed / 59 skipped / 105 deselected / 0 failed`；Linux/amd64 QEMU `1135 passed / 59 skipped / 105 deselected / 1 failed`，唯一失败为既有 `test_huge_output_capped_not_ooming`，QEMU 下 `/dev/zero` 未在 10 秒内早停，不能写成 Linux legacy 全绿 |
+| VirtualCell 核心 | `python -m pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` | fresh macOS/arm64 Python 3.13.12 为 `965 passed / 35 skipped / 9 deselected / 0 failed`；GitHub attempt 2 的 native Linux core job PASS |
+| Legacy unit | `python -m pytest tests -m "not (integration or llm or remote)" -o addopts='' -q -ra` | fresh macOS/arm64 Python 3.13.12 与 Docker Linux/arm64 Python 3.13.14 均为 `1139 passed / 59 skipped / 105 deselected / 0 failed` |
 | Legacy broad non-LLM（C5 冻结） | `python -m pytest tests -m "not llm" -o addopts='' -q -ra` | C5 历史证据为 `1136 passed / 158 skipped / 6 deselected / 0 failed`；本轮未将其冒充为新候选 CI isolation |
 | C5 Gate A 本地 seam | provenance gate 定向测试 + W4B remote test module 在普通本地 marker gate 下被收集并跳过 | `38 passed / 2 remote skipped / 0 failed`；三 adapter success/no-gate 与缺版本 fail-closed 已证明，非真 donor 推理 |
 | C5 W4B remote | `test_ml_workflow_e2e.py --run-remote -m remote` | 本机无 torch：`2 skipped / 0 failed`，明确为 `REMOTE_VALIDATION_PENDING`；只有批准候选 SHA、clean donor SHA/remote 和可信六文件 digest 集上 `2 passed / 0 skipped / 0 failed` 可关闭 |
@@ -58,7 +58,7 @@ CI=1 npm run e2e
 
 CI 配置固定 Python `3.13.14` 和 Node `24.18.0`。完整本地/CI 测试环境使用 `requirements/dev-py313.lock`；frontend Playwright 的 API 也使用该 lock，确保真实 FBA 正例具备 mechanistic/Cobra。`requirements/runtime-py313.lock` 继续服务于精简发行安装和 clean-wheel verifier，不能替代完整测试环境。
 
-修复提交 `d6011d8` 已在本机 Python 3.13.12/macOS arm64 和 Python 3.13.14/Linux amd64 QEMU 上复现严格 hash install、Ruff、packaging 与核心测试；前端本地为 `56 passed / 1 skipped`。QEMU legacy 的单个超时失败不能被降格、skip 或描述成 Linux 全绿；同一用例在原生 macOS 的完整 legacy isolation 中通过，最终平台结论必须由新候选的 GitHub native runner retry 给出。C4 wheel/clean install 和 Docker 证据仍按各自固定 commit 冻结；最终文档提交完成后还必须重新绑定 exact candidate 的 release artifact。
+依赖/frontend 修复提交 `d6011d8` 已由 GitHub attempt 2 的四个通过 job 验证。唯一 legacy 失败在 native Linux 证明为 BashTool 只 kill 直接 shell、后代继续持有 pipe；提交 `6a81987` 用独立 process group、统一 deadline 和取消清理修复，并在 fresh macOS/Linux 严格锁环境得到 legacy `1139/59/105/0`。没有降格、skip 或放宽原失败断言；最终平台发布结论仍必须由下一候选的 GitHub native x86_64 retry 给出。C4 wheel/clean install 和 Docker 证据仍按固定 commit 冻结；最终文档提交完成后还必须重新绑定 exact candidate 的 release artifact。
 
 ## C4 发布复现
 
@@ -146,4 +146,6 @@ C4 的 build budget 实测 initial JavaScript aggregate 为 226,046 bytes（gzip
 
 三个 Python/Linux 失败首先暴露 macOS/arm64 编译的 dev lock 漏掉 Linux marker 依赖 `greenlet`，修复后 Linux 迭代又暴露 `watchdog`；hash mode 因此在环境创建阶段 fail-closed。frontend 使用 lean runtime lock 时没有 Cobra，真实 FBA 正例按设计返回 abstain，从而使旧断言失败。提交 `d6011d8` 通过显式 union `greenlet==3.5.3`、`watchdog==6.0.0`、重生成 dev lock、让 frontend CI 使用 dev lock 并增加 packaging 回归修复这两个环境问题，没有弱化科学断言。
 
-“存在 run”不等于 CI 全绿，也不证明这些 job 是 branch-protection required checks。GitHub `main`/tag、本地 `main` 和 `.53` 未改变。最终文档提交和 post-commit artifact binding 完成后，必须以远端 candidate 的 expected old SHA `6086e6995b1c3c01ec31075ce1164a0165cb8d43` 申请新的 exact-SHA D1a retry 授权；在新 SHA 的五项 CI 全部完成前不得进入 D1b。
+首次修复后的 candidate `ee36d7948047f346f55a02d62ccaac84391e3c20` 经精确授权快进发布。对应 [run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 的实际结果为 Python core、frontend/Playwright、reproducible wheel、Linux release container **PASS**；legacy **FAIL**，汇总 `1 failed / 1135 passed / 59 skipped / 105 deselected`。唯一失败 `test_huge_output_capped_not_ooming` 是 Linux dash 派生的 `cat` 在直接 shell 被 kill 后仍持有 pipe；详见 [D1a retry report](status/PHASE-D1A-CI-RETRY-2026-07-23.md)。本地修复 `6a81987` 还关闭了 pipe 提前关闭绕过 timeout 与上层取消遗留进程组两个同源缺口。
+
+“存在 run”不等于 CI 全绿，也不证明这些 job 是 branch-protection required checks。GitHub `main`/tag、本地 `main` 和 `.53` 未改变。最终文档提交和 post-commit artifact binding 完成后，必须以远端 candidate 的 expected old SHA `ee36d7948047f346f55a02d62ccaac84391e3c20` 申请新的 exact-SHA D1a retry 授权；在新 SHA 的五项 CI 全部完成前不得进入 D1b。
