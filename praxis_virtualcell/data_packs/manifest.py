@@ -86,8 +86,15 @@ class PackManifest(SchemaObject):
             "conditions",
             "perturbations",
         )
-        if version == "vc.pack.v0.1" and any(field in value for field in semantic_fields):
-            raise ValueError("vc.pack.v0.1 must not declare vc.pack.v0.2 semantic fields")
+        if version == "vc.pack.v0.1":
+            split = value.get("split")
+            has_v02_split_fields = isinstance(split, dict) and any(
+                field in split for field in ("name", "leakage_guard")
+            )
+            if any(field in value for field in semantic_fields) or has_v02_split_fields:
+                raise ValueError(
+                    "vc.pack.v0.1 must not declare vc.pack.v0.2 semantic fields"
+                )
         if version == "vc.pack.v0.2":
             if "condition" in value:
                 raise ValueError(

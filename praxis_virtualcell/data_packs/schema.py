@@ -111,6 +111,7 @@ class FeatureSemanticsSpec(SchemaObject):
 
 class LocalTermSpec(SchemaObject):
     id: str
+    role: Literal["identity", "state", "context"]
     label: str
     definition: str
 

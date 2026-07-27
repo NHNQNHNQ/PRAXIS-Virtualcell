@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import builtins
 import hashlib
 import socket
 from copy import deepcopy
@@ -15,7 +16,12 @@ import yaml
 from scipy import sparse
 
 from praxis_virtualcell.data_packs.anndata_adapter import load_anndata_view
-from praxis_virtualcell.data_packs.errors import OmicsDataError, PackManifestError
+from praxis_virtualcell.data_packs.errors import (
+    OmicsDataError,
+    OmicsDependencyError,
+    PackManifestError,
+)
+from praxis_virtualcell.data_packs.registry import PackRegistry
 from praxis_virtualcell.data_packs.validator import validate_pack
 
 _FIXTURES = Path(__file__).parent / "fixtures" / "pack_semantics"
@@ -133,6 +139,16 @@ def test_var_names_must_be_canonical_feature_ids(tmp_path):
         load_anndata_view(pack)
 
 
+def test_short_ensembl_like_ids_are_not_canonical(tmp_path):
+    source = _fixture("human")
+    source["fixture_features"][0]["id"] = "ENSG1"
+    source["perturbations"]["values"][1]["targets"] = ["ENSG1"]
+    pack = _write_pack(tmp_path / "pack", source)
+
+    with pytest.raises(OmicsDataError, match="canonical feature"):
+        load_anndata_view(pack)
+
+
 def test_perturbation_targets_are_exact_feature_foreign_keys_without_ortholog_projection(
     tmp_path,
 ):
@@ -182,7 +198,7 @@ def test_observation_condition_and_perturbation_values_are_foreign_keys(
         ),
         (
             lambda source: source["fixture_observations"][1].update(
-                cell_state_id="CL:0000540"
+                tissue_id="UBERON:0000955"
             ),
             "control context",
         ),
@@ -282,6 +298,15 @@ def test_p4_manifest_requires_named_split_guard_and_assembly_accession(
         validate_pack(pack)
 
 
+def test_local_cell_terms_require_an_explicit_semantic_role(tmp_path):
+    source = _fixture("human")
+    source["cell_semantics"]["local_terms"][0].pop("role")
+    pack = _write_pack(tmp_path / "pack", source)
+
+    with pytest.raises(PackManifestError, match="role"):
+        validate_pack(pack)
+
+
 def test_undefined_local_cell_curie_fails_closed(tmp_path):
     source = _fixture("bacteria")
     source["fixture_observations"][0]["cell_identity_id"] = "UNKNOWN:cell"
@@ -289,6 +314,134 @@ def test_undefined_local_cell_curie_fails_closed(tmp_path):
 
     with pytest.raises(OmicsDataError, match="undefined local CURIE"):
         load_anndata_view(pack)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("cell_identity_id", "UBERON:0000178"),
+        ("cell_state_id", "CL:0000540"),
+        ("tissue_id", "CVCL_0004"),
+    ],
+)
+def test_standard_cell_ids_are_bound_to_their_semantic_role(tmp_path, field, value):
+    source = _fixture("human")
+    for observation in source["fixture_observations"]:
+        observation[field] = value
+    pack = _write_pack(tmp_path / "pack", source)
+
+    with pytest.raises(OmicsDataError, match="semantic role"):
+        load_anndata_view(pack)
+
+
+def test_local_cell_terms_are_bound_to_their_declared_semantic_role(tmp_path):
+    source = _fixture("human")
+    for observation in source["fixture_observations"]:
+        observation["cell_identity_id"] = "VCSTATE:baseline"
+    pack = _write_pack(tmp_path / "pack", source)
+
+    with pytest.raises(OmicsDataError, match="semantic role"):
+        load_anndata_view(pack)
+
+
+def test_canonical_key_includes_cell_state_semantics(tmp_path):
+    first_source = _fixture("human")
+    second_source = _fixture("human")
+    second_source["cell_semantics"]["local_terms"][0]["id"] = "VCSTATE:alternate"
+    for observation in second_source["fixture_observations"]:
+        observation["cell_state_id"] = "VCSTATE:alternate"
+
+    first_pack = _write_pack(tmp_path / "first", first_source)
+    second_pack = _write_pack(tmp_path / "second", second_source)
+
+    with (
+        load_anndata_view(first_pack) as first,
+        load_anndata_view(second_pack) as second,
+    ):
+        assert first.cell_state_ids != second.cell_state_ids
+        assert first.canonical_key != second.canonical_key
+
+
+def test_canonical_key_includes_perturbation_target_mapping(tmp_path):
+    first_source = _fixture("human")
+    second_source = _fixture("human")
+    train_targets = second_source["perturbations"]["values"][1]["targets"]
+    test_targets = second_source["perturbations"]["values"][3]["targets"]
+    second_source["perturbations"]["values"][1]["targets"] = test_targets
+    second_source["perturbations"]["values"][3]["targets"] = train_targets
+
+    first_pack = _write_pack(tmp_path / "first", first_source)
+    second_pack = _write_pack(tmp_path / "second", second_source)
+
+    with (
+        load_anndata_view(first_pack) as first,
+        load_anndata_view(second_pack) as second,
+    ):
+        assert first.canonical_key != second.canonical_key
+
+
+def test_canonical_key_covers_all_p4_scientific_metadata(tmp_path):
+    pack = _write_pack(tmp_path / "pack", _fixture("human"))
+
+    with load_anndata_view(pack) as view:
+        assert view.canonical_key == (
+            view.taxonomy_id,
+            view.assembly_accession,
+            view.observation_ids,
+            view.feature_ids,
+            view.conditions,
+            view.splits,
+            view.cell_identity_ids,
+            view.cell_state_ids,
+            view.cell_context_ids,
+            view.perturbation_ids,
+            view.perturbation_kinds,
+            view.perturbation_targets,
+            view.matched_control_ids,
+            view.doses,
+            view.times,
+            view.split_name,
+            view.shape,
+            view.matrix_location,
+            view.matrix_format,
+        )
+
+
+def test_registry_rejects_v02_pack_with_invalid_h5ad_semantics(tmp_path):
+    source = _fixture("human")
+    source["fixture_observations"][1]["condition_id"] = "condition:not-declared"
+    pack = _write_pack(tmp_path / "pack", source)
+
+    with pytest.raises(OmicsDataError, match="unknown condition"):
+        PackRegistry().register(pack)
+
+
+def test_registry_registers_v02_only_after_semantic_validation(tmp_path):
+    pack = _write_pack(tmp_path / "pack", _fixture("human"))
+    registry = PackRegistry()
+
+    manifest = registry.register(pack)
+
+    assert manifest.schema_version == "vc.pack.v0.2"
+    assert registry.get(manifest.pack_id, manifest.pack_version) is manifest
+
+
+def test_registry_does_not_fallback_when_v02_omics_dependency_is_unavailable(
+    tmp_path,
+    monkeypatch,
+):
+    pack = _write_pack(tmp_path / "pack", _fixture("human"))
+    real_import = builtins.__import__
+
+    def import_without_anndata(name, *args, **kwargs):
+        if name == "anndata":
+            raise ImportError("blocked optional dependency")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", import_without_anndata)
+
+    with pytest.raises(OmicsDependencyError, match="omics"):
+        PackRegistry().register(pack)
 
 
 def test_semantic_validation_has_no_online_ontology_dependency(tmp_path, monkeypatch):

@@ -125,5 +125,7 @@ ID 均拒绝，不会静默重排、归一化矩阵、修改 ID 或生成 split�
 `var_names` canonical feature ID、独立的 cell identity/state/context、
 condition/perturbation/target 外键、control matching、显式 dose/time unit，以及
 named split leakage guard。Ontology 只按 manifest 中的标准 ID 或有定义 local
-CURIE 离线校验；安装与运行均不查询 ontology 服务，也不做 ortholog projection。
+CURIE 离线校验；标准 ID 与 local term 都绑定 identity/state/context 角色。
+v0.2 登记也必须完成该语义门，缺少 `omics` extra 时 fail-closed。安装与运行均不
+查询 ontology 服务，也不做 ortholog projection。
 旧 `vc.pack.v0.1` 的 manifest 与 fingerprint 语义保持不变。

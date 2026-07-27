@@ -16,7 +16,7 @@ P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P4 起始基线：`ac0f
 | LLM 外层 | `agents_llm/*`、`llm_orchestration/*` | N/A | 只能建议 | 不可裁决 | 只能解析/解释/critic/narrative；确定性 runtime wins |
 | 测试口径 | `praxis_virtualcell/tests/baseline`、golden/negative、`docs/TESTING.md` | N/A | route/dispatch/registry contract | validation evidence 需独立 runbook | core、legacy、remote、LLM 分口径；skip 不等于通过 |
 | Pack manifest v0.1 | `data_packs/manifest.py`、`validator.py` | strict schema + path/size/hash 后可为 valid | 不提供 | 不提供 | P2/P3 fingerprint 与 read-only H5AD 合同保持兼容 |
-| Pack semantic v0.2 | `data_packs/schema.py`、`anndata_adapter.py`、ADR-0002 | manifest、asset 与 P4 全部语义门通过后可为 valid | 不提供 | 不提供 | NCBITaxon/assembly、cell identity/state/context、canonical feature、FK/control/unit/split/leakage 均 fail-closed |
+| Pack semantic v0.2 | `data_packs/schema.py`、`anndata_adapter.py`、`registry.py`、ADR-0002 | manifest、asset 与 P4 全部语义门通过后可为 valid；registry 不授予较弱状态 | 不提供 | 不提供 | NCBITaxon/assembly、role-bound cell semantics、canonical feature、FK/control/unit/split/leakage 与 canonical metadata key 均 fail-closed；缺 omics 不降级 |
 | Ontology 与跨物种边界 | manifest 中的标准 CURIE 或有定义 local CURIE | 仅离线语法/声明验证 | 不推导 | 不推导 | 无在线 ontology runtime 依赖；无 symbol、ortholog 或同源转换 fallback |
 
 ## 现有模型/引擎状态摘要

@@ -15,9 +15,9 @@ cell_semantics:
   state: [cell_state_id]
   context: [medium_id]
   local_terms:
-    - {id: "PRAXISCELL:ecoli_k12", label: "E. coli K-12", definition: "E. coli K-12 cell identity for this fixture."}
-    - {id: "VCSTATE:exponential", label: exponential, definition: "Exponential growth state."}
-    - {id: "VCCONTEXT:glucose_minimal", label: glucose minimal, definition: "Defined glucose minimal medium context."}
+    - {id: "PRAXISCELL:ecoli_k12", role: identity, label: "E. coli K-12", definition: "E. coli K-12 cell identity for this fixture."}
+    - {id: "VCSTATE:exponential", role: state, label: exponential, definition: "Exponential growth state."}
+    - {id: "VCCONTEXT:glucose_minimal", role: context, label: glucose minimal, definition: "Defined glucose minimal medium context."}
 conditions:
   field: condition_id
   values: ["condition:bacteria-train-control", "condition:bacteria-train-perturbed", "condition:bacteria-test-control", "condition:bacteria-test-perturbed"]

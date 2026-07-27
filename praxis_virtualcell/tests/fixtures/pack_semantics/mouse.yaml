@@ -15,7 +15,7 @@ cell_semantics:
   state: [cell_state_id]
   context: [tissue_id]
   local_terms:
-    - {id: "VCSTATE:resting", label: resting, definition: "Resting state for the tiny mouse fixture."}
+    - {id: "VCSTATE:resting", role: state, label: resting, definition: "Resting state for the tiny mouse fixture."}
 conditions:
   field: condition_id
   values: ["condition:mouse-train-control", "condition:mouse-train-perturbed", "condition:mouse-test-control", "condition:mouse-test-perturbed"]

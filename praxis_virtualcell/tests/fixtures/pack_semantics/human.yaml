@@ -15,7 +15,7 @@ cell_semantics:
   state: [cell_state_id]
   context: [tissue_id]
   local_terms:
-    - {id: "VCSTATE:baseline", label: baseline, definition: "Untreated baseline state."}
+    - {id: "VCSTATE:baseline", role: state, label: baseline, definition: "Untreated baseline state."}
 conditions:
   field: condition_id
   values: ["condition:human-train-control", "condition:human-train-perturbed", "condition:human-test-control", "condition:human-test-perturbed"]

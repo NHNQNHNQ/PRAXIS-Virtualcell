@@ -18,14 +18,17 @@ from praxis_virtualcell.data_packs.validator import resolve_asset_path, validate
 
 _H5AD_MEDIA_TYPES = {"application/vnd.anndata+hdf5", "application/x-hdf5"}
 _CELL_CURIE = re.compile(r"^[A-Za-z][A-Za-z0-9._-]*:[A-Za-z0-9][A-Za-z0-9._-]*$")
-_STANDARD_CELL_IDS = (
-    re.compile(r"^CL:[0-9]+$"),
-    re.compile(r"^UBERON:[0-9]+$"),
-    re.compile(r"^cellosaurus:[A-Z0-9]{4}$"),
-    re.compile(r"^CVCL_[A-Z0-9]{4}$"),
-)
+_STANDARD_CELL_IDS = {
+    "identity": (
+        re.compile(r"^CL:[0-9]+$"),
+        re.compile(r"^cellosaurus:[A-Z0-9]{4}$"),
+        re.compile(r"^CVCL_[A-Z0-9]{4}$"),
+    ),
+    "state": (),
+    "context": (re.compile(r"^UBERON:[0-9]+$"),),
+}
 _FEATURE_IDS = {
-    "ensembl_gene": re.compile(r"^ENS[A-Z0-9]*G[0-9]+(?:\.[0-9]+)?$"),
+    "ensembl_gene": re.compile(r"^ENS[A-Z0-9]*G[0-9]{11}(?:\.[0-9]+)?$"),
     "ncbi_gene_curie": re.compile(r"^NCBIGene:[0-9]+$"),
 }
 _DOSE_UNITS = {"1", "M", "mM", "uM", "nM", "pM", "g/L", "mg/L", "ug/mL"}
@@ -83,15 +86,39 @@ def _numeric_values(frame, key: str, label: str) -> tuple[float, ...]:
     return tuple(values)
 
 
-def _semantic_matrix(frame, fields, local_ids: set[str]) -> tuple[tuple[str, ...], ...]:
-    columns = [_string_values(frame, key, f"cell semantic {key}", unique=False) for key in fields]
+def _semantic_matrix(
+    frame,
+    fields,
+    local_roles: dict[str, str],
+    role: Literal["identity", "state", "context"],
+) -> tuple[tuple[str, ...], ...]:
+    columns = [
+        _string_values(frame, key, f"cell semantic {key}", unique=False)
+        for key in fields
+    ]
     for values in columns:
         for value in values:
-            if any(pattern.fullmatch(value) for pattern in _STANDARD_CELL_IDS):
+            standard_role = next(
+                (
+                    candidate
+                    for candidate, patterns in _STANDARD_CELL_IDS.items()
+                    if any(pattern.fullmatch(value) for pattern in patterns)
+                ),
+                None,
+            )
+            if standard_role == role:
                 continue
-            if not _CELL_CURIE.fullmatch(value) or value not in local_ids:
+            if standard_role is not None:
+                raise OmicsDataError(
+                    f"cell semantic id {value!r} is not valid for the {role} semantic role"
+                )
+            if not _CELL_CURIE.fullmatch(value) or value not in local_roles:
                 raise OmicsDataError(
                     f"undefined local CURIE in cell semantics: {value!r}"
+                )
+            if local_roles[value] != role:
+                raise OmicsDataError(
+                    f"local cell term {value!r} is not valid for the {role} semantic role"
                 )
     return tuple(zip(*columns, strict=True))
 
@@ -104,6 +131,8 @@ class _SemanticColumns:
     cell_context_ids: tuple[tuple[str, ...], ...]
     condition_ids: tuple[str, ...]
     perturbation_ids: tuple[str, ...]
+    perturbation_kinds: tuple[str, ...]
+    perturbation_targets: tuple[tuple[str, ...], ...]
     matched_control_ids: tuple[str, ...]
     doses: tuple[tuple[float, str], ...]
     times: tuple[tuple[float, str], ...]
@@ -138,10 +167,20 @@ def _validate_p4_semantics(adata, manifest, feature_ids, splits) -> _SemanticCol
         )
     )
 
-    local_ids = {term.id for term in cell_semantics.local_terms}
-    identities = _semantic_matrix(adata.obs, (cell_semantics.identity,), local_ids)
-    states = _semantic_matrix(adata.obs, cell_semantics.state, local_ids)
-    contexts = _semantic_matrix(adata.obs, cell_semantics.context, local_ids)
+    local_roles = {term.id: term.role for term in cell_semantics.local_terms}
+    identities = _semantic_matrix(
+        adata.obs,
+        (cell_semantics.identity,),
+        local_roles,
+        "identity",
+    )
+    states = _semantic_matrix(adata.obs, cell_semantics.state, local_roles, "state")
+    contexts = _semantic_matrix(
+        adata.obs,
+        cell_semantics.context,
+        local_roles,
+        "context",
+    )
     identity_ids = tuple(value[0] for value in identities)
 
     condition_ids = _string_values(
@@ -295,6 +334,12 @@ def _validate_p4_semantics(adata, manifest, feature_ids, splits) -> _SemanticCol
         cell_context_ids=contexts,
         condition_ids=condition_ids,
         perturbation_ids=perturbation_ids,
+        perturbation_kinds=tuple(
+            perturbation_by_id[value].kind for value in perturbation_ids
+        ),
+        perturbation_targets=tuple(
+            perturbation_by_id[value].targets for value in perturbation_ids
+        ),
         matched_control_ids=matched_controls,
         doses=tuple(zip(dose_values, dose_units, strict=True)),
         times=tuple(zip(time_values, time_units, strict=True)),
@@ -337,6 +382,8 @@ class CanonicalOmicsView:
     cell_context_ids: tuple[tuple[str, ...], ...]
     condition_ids: tuple[str, ...]
     perturbation_ids: tuple[str, ...]
+    perturbation_kinds: tuple[str, ...]
+    perturbation_targets: tuple[tuple[str, ...], ...]
     matched_control_ids: tuple[str, ...]
     doses: tuple[tuple[float, str], ...]
     times: tuple[tuple[float, str], ...]
@@ -360,21 +407,25 @@ class CanonicalOmicsView:
     @property
     def canonical_key(
         self,
-    ) -> tuple[
-        tuple[str, ...],
-        tuple[str, ...],
-        tuple[str, ...],
-        tuple[str, ...],
-        tuple[int, int],
-        str,
-        str,
-    ]:
-        """Source-name-independent metadata identity; matrix values are separate."""
+    ) -> tuple[Any, ...]:
+        """Scientific metadata identity; display symbols and matrix values are separate."""
         return (
+            self.taxonomy_id,
+            self.assembly_accession,
             self.observation_ids,
             self.feature_ids,
             self.conditions,
             self.splits,
+            self.cell_identity_ids,
+            self.cell_state_ids,
+            self.cell_context_ids,
+            self.perturbation_ids,
+            self.perturbation_kinds,
+            self.perturbation_targets,
+            self.matched_control_ids,
+            self.doses,
+            self.times,
+            self.split_name,
             self.shape,
             self.matrix_location,
             self.matrix_format,
@@ -527,6 +578,20 @@ def load_anndata_view(
                 ()
                 if semantics is None
                 else tuple(semantics.perturbation_ids[index] for index in obs_positions)
+            ),
+            perturbation_kinds=(
+                ()
+                if semantics is None
+                else tuple(
+                    semantics.perturbation_kinds[index] for index in obs_positions
+                )
+            ),
+            perturbation_targets=(
+                ()
+                if semantics is None
+                else tuple(
+                    semantics.perturbation_targets[index] for index in obs_positions
+                )
             ),
             matched_control_ids=(
                 ()

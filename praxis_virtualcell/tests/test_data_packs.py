@@ -166,6 +166,21 @@ def test_manifest_never_randomizes_or_deduplicates_declared_groups(mutation):
         PackManifest.from_dict(raw)
 
 
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("name", None),
+        ("leakage_guard", []),
+    ],
+)
+def test_v01_rejects_v02_split_fields_even_when_empty(field, value):
+    raw = _raw_valid()
+    raw["split"][field] = value
+
+    with pytest.raises(PackManifestError, match="vc.pack.v0.2 semantic fields"):
+        PackManifest.from_dict(raw)
+
+
 def test_registry_only_registers_validated_packs_and_is_idempotent():
     registry = PackRegistry()
 

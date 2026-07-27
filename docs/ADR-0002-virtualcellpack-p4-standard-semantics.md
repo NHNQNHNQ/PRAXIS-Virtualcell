@@ -8,13 +8,13 @@
 
 ## 决策
 
-P4 新增 `vc.pack.v0.2`，保留 `vc.pack.v0.1` 的解析、序列化和 fingerprint 语义。两个版本不混用字段：v0.1 继续使用旧 `condition`；v0.2 必须使用 `feature_semantics`、`cell_semantics`、`conditions`、`perturbations` 和带名称及 leakage guard 的 `split`。未知字段与不完整版本仍 fail-closed。
+P4 新增 `vc.pack.v0.2`，保留 `vc.pack.v0.1` 的解析、序列化和 fingerprint 语义。两个版本不混用字段：v0.1 继续使用旧 `condition`，且即使值为 null/空数组也不得出现 v0.2 的 split 字段；v0.2 必须使用 `feature_semantics`、`cell_semantics`、`conditions`、`perturbations` 和带名称及 leakage guard 的 `split`。未知字段与不完整版本仍 fail-closed。
 
 ### 物种与特征
 
 - 物种必须使用 `NCBITaxon:<digits>`；v0.2 assembly 必须是带版本号的 `GCA_` 或 `GCF_` accession。
 - v0.2 的 `identity.feature_key` 和 `feature_semantics.id_source` 都固定为 `var_names`。
-- `var_names` 是模型和外键使用的 canonical feature ID。当前离线支持 `ensembl_gene` 与 `ncbi_gene_curie` 两种显式格式。
+- `var_names` 是模型和外键使用的 canonical feature ID。当前离线支持 11 位数字主体的 `ensembl_gene` stable ID（可带显式版本后缀）与 `ncbi_gene_curie` 两种格式。
 - `symbol_field` 只产生显示标签；symbol 可重复，不能替代、改写或补齐 feature ID。
 - perturbation target 必须逐字命中同一 Pack 的 `var_names`。不存在跨物种映射、symbol lookup 或 ortholog fallback。
 
@@ -26,7 +26,7 @@ P4 新增 `vc.pack.v0.2`，保留 `vc.pack.v0.1` 的解析、序列化和 finger
 - `state`：处理前生物状态；
 - `context`：组织、培养基或其他实验语境。
 
-列值必须是 `CL:`、`UBERON:` CURIE、Cellosaurus 的 `cellosaurus:XXXX` CURIE/`CVCL_XXXX` accession，或在 manifest `local_terms` 中以 `id`、`label`、`definition` 完整声明的本地 CURIE。Runtime 只做语法、前缀和本地定义校验，不访问网络，也不声称验证了外部 ontology 当前版本中的术语存在性。
+标准术语按角色离线绑定：identity 接受 `CL:` 与 Cellosaurus 的 `cellosaurus:XXXX` CURIE/`CVCL_XXXX` accession；context 接受 `UBERON:`；state 必须使用显式本地术语。manifest `local_terms` 必须以 `id`、`role`、`label`、`definition` 完整声明本地 CURIE，且只能用于声明的 identity/state/context 角色。Runtime 只做语法、前缀、角色和本地定义校验，不访问网络，也不声称验证了外部 ontology 当前版本中的术语存在性。
 
 ### conditions、perturbations 与 control
 
@@ -49,6 +49,12 @@ v0.2 split 必须是 `predefined`、有非空 `name`、列出全部 partition，
 4. canonical feature、cell semantics、condition/perturbation/target 外键；
 5. control matching、dose/time 与 leakage guard；
 6. 仅在全部通过后返回 `CanonicalOmicsView`。
+
+`CanonicalOmicsView.canonical_key` 包含 taxon、assembly、选中的 observation/feature、
+cell identity/state/context、condition、perturbation kind/target、matched control、
+dose/time、named split、shape 与 matrix mapping；display-only symbol 和 matrix 数值
+明确不属于该 key。`PackRegistry` 对 v0.2 必须走同一 H5AD 语义 loader，缺少
+`omics` 依赖时拒绝登记，不得降级成仅 manifest/hash 有效。
 
 该层只证明 `pack_valid` 的结构与语义部分，不推导 `model_compatible` 或 `scientifically_validated`。LLM 不参与任何验证或裁决。
 
