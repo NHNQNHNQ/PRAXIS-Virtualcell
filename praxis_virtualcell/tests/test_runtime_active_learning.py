@@ -45,6 +45,7 @@ def test_learning_queue_reads_evidence_level():
     q = report["provenance"]["learning_queue"]
     # 有 module_plan(Phase 4 已挂)→ 有候选
     assert isinstance(q["items"], list)
+    assert "genetic_hub@human:AHR" in {item["candidate"] for item in q["items"]}
 
 
 def test_abstain_request_evidence_e0_e1_no_accept():

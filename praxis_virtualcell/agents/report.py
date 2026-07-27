@@ -16,6 +16,7 @@ class ReportAgent(BaseAgent):
         rd = p.get("reliability_decision", {})
         reasons = rd.get("reasons", [])
         report = {
+            "request": p.get("request", {}),
             "request_id": p.get("request", {}).get("request_id"),
             "abstain": rd.get("abstain", False),
             "reliability": rd.get("reliability"),
