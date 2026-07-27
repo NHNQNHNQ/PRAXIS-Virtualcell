@@ -1,6 +1,6 @@
-# VirtualCellPack 能力矩阵（P0–P4.2）
+# VirtualCellPack 能力矩阵（P0–P5）
 
-P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P4 起始基线：`ac0fea48c6e8b0fdf27eff9c0852ee43035ff97a`；P4.2 起始基线：`04c0ad1146f1da6e9606d329e24e529e3f75e8c9`。本表是能力与证据边界，不是性能排名；`valid`、`conditional`、`unknown` 不得互换。
+P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P5 唯一起始基线：`a229699deac1e791252739df71f4e4202cc72bac`。本表是能力与证据边界，不是性能排名；`pack_valid`、`model_compatible`、`scientifically_validated` 不得互换。
 
 | 能力/组件 | 当前实现与真相源 | `pack_valid` | `model_compatible` | `scientifically_validated` | 结论与边界 |
 |---|---|---:|---:|---:|---|
@@ -17,6 +17,9 @@ P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P4 起始基线：`ac0f
 | 测试口径 | `praxis_virtualcell/tests/baseline`、golden/negative、`docs/TESTING.md` | N/A | route/dispatch/registry contract | validation evidence 需独立 runbook | core、legacy、remote、LLM 分口径；P0 报告字节 hash 由测试固定；skip 不等于通过 |
 | Pack manifest v0.1 | `data_packs/manifest.py`、`validator.py` | strict schema + root-bound manifest/path/size/hash 后可为 valid | 不提供 | 不提供 | P2/P3 fingerprint 与 read-only H5AD 合同保持兼容；YAML 错误保持 Pack 异常边界 |
 | Pack semantic v0.2 | `data_packs/schema.py`、`anndata_adapter.py`、`registry.py`、ADR-0002 | manifest、asset 与 P4 全部语义门通过后可为 valid；registry 保存语义 loader 的已验证快照，不授予较弱状态 | 不提供 | 不提供 | NCBITaxon/assembly、role-bound cell semantics、正式 `CVCL_XXXX`、canonical feature、FK/control/unit/split/leakage 与完整 manifest canonical key 均 fail-closed；缺 omics 不降级 |
+| Pack multiomics v0.3 | `data_packs/schema.py`、`manifest.py`、`mudata_adapter.py`、`registry.py`、ADR-0003 | manifest/path/size/hash、backed H5MU、modality 顺序/shape、paired/partially-paired membership、P4 科学语义全部通过后可为 valid | 不自动提供 | 不提供 | 全局 observation 是 modality observation 并集；选择时只保留真实行，不补零、不做跨 modality imputation；缺 MuData 不 fallback |
+| Model feature contract | `data_packs/feature_alignment.py::ModelFeatureContract` | 不改变 Pack 状态 | taxonomy、assembly、modality、namespace/version、ID format、feature set/order 全部满足后才可为 compatible | 不提供 | 合同与可选 mapping asset 的 version/hash 进入 fingerprint；非 canonical ID、非有限 fill、未知字段和重复项 fail-closed |
+| Explicit feature alignment | `align_features()`、`AlignmentReport`、P5 tiny RNA+protein fixture | 消费已验证 modality，不重新授予 Pack 状态 | strict default；仅显式 alias/aggregate/drop/fill/reorder 成功并产 provenance 时成立 | 不提供 | 不剥 version、不查 symbol、不自动 drop/fill/reorder/aggregate；无 ortholog 或 namespace fallback；成功对齐不等于模型运行 |
 | Ontology 与跨物种边界 | manifest 中的标准 CURIE 或有定义 local CURIE | 仅离线语法/声明验证 | 不推导 | 不推导 | 无在线 ontology runtime 依赖；无 symbol、ortholog 或同源转换 fallback |
 
 ## 现有模型/引擎状态摘要

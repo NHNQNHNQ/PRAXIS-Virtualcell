@@ -30,6 +30,10 @@ _STANDARD_CELL_IDS = {
 _FEATURE_IDS = {
     "ensembl_gene": re.compile(r"^ENS[A-Z0-9]*G[0-9]{11}(?:\.[0-9]+)?$"),
     "ncbi_gene_curie": re.compile(r"^NCBIGene:[0-9]+$"),
+    "uniprot_protein": re.compile(
+        r"^UniProtKB:(?:[OPQ][0-9][A-Z0-9]{3}[0-9]|"
+        r"[A-NR-Z][0-9](?:[A-Z][A-Z0-9]{2}[0-9]){1,2})$"
+    ),
 }
 _DOSE_UNITS = {"1", "M", "mM", "uM", "nM", "pM", "g/L", "mg/L", "ug/mL"}
 _TIME_UNITS = {"s", "min", "h", "d"}
@@ -184,8 +188,14 @@ def _manifest_semantics(manifest: PackManifest) -> tuple[Any, ...]:
     )
 
 
-def _validate_p4_semantics(adata, manifest, feature_ids, splits) -> _SemanticColumns:
-    feature_semantics = manifest.feature_semantics
+def _validate_semantics(
+    obs,
+    var,
+    manifest,
+    feature_ids,
+    splits,
+    feature_semantics,
+) -> _SemanticColumns:
     cell_semantics = manifest.cell_semantics
     conditions = manifest.conditions
     perturbations = manifest.perturbations
@@ -205,7 +215,7 @@ def _validate_p4_semantics(adata, manifest, feature_ids, splits) -> _SemanticCol
         None
         if feature_semantics.symbol_field is None
         else _string_values(
-            adata.var,
+            var,
             feature_semantics.symbol_field,
             "feature symbol",
             unique=False,
@@ -214,14 +224,14 @@ def _validate_p4_semantics(adata, manifest, feature_ids, splits) -> _SemanticCol
 
     local_roles = {term.id: term.role for term in cell_semantics.local_terms}
     identities = _semantic_matrix(
-        adata.obs,
+        obs,
         (cell_semantics.identity,),
         local_roles,
         "identity",
     )
-    states = _semantic_matrix(adata.obs, cell_semantics.state, local_roles, "state")
+    states = _semantic_matrix(obs, cell_semantics.state, local_roles, "state")
     contexts = _semantic_matrix(
-        adata.obs,
+        obs,
         cell_semantics.context,
         local_roles,
         "context",
@@ -229,7 +239,7 @@ def _validate_p4_semantics(adata, manifest, feature_ids, splits) -> _SemanticCol
     identity_ids = tuple(value[0] for value in identities)
 
     condition_ids = _string_values(
-        adata.obs,
+        obs,
         conditions.field,
         "condition",
         unique=False,
@@ -241,27 +251,27 @@ def _validate_p4_semantics(adata, manifest, feature_ids, splits) -> _SemanticCol
     if missing_conditions:
         raise OmicsDataError(f"declared conditions have no observations: {missing_conditions}")
     perturbation_ids = _string_values(
-        adata.obs,
+        obs,
         perturbations.field,
         "perturbation",
         unique=False,
     )
     matched_controls = _string_values(
-        adata.obs,
+        obs,
         conditions.matched_control_field,
         "matched control",
         unique=False,
     )
-    dose_values = _numeric_values(adata.obs, conditions.dose.value_field, "dose value")
+    dose_values = _numeric_values(obs, conditions.dose.value_field, "dose value")
     dose_units = _string_values(
-        adata.obs,
+        obs,
         conditions.dose.unit_field,
         "dose unit",
         unique=False,
     )
-    time_values = _numeric_values(adata.obs, conditions.time.value_field, "time value")
+    time_values = _numeric_values(obs, conditions.time.value_field, "time value")
     time_units = _string_values(
-        adata.obs,
+        obs,
         conditions.time.unit_field,
         "time unit",
         unique=False,
@@ -362,7 +372,7 @@ def _validate_p4_semantics(adata, manifest, feature_ids, splits) -> _SemanticCol
                             f"occurs in {previous!r} and {partition!r}"
                         )
             continue
-        values = _string_values(adata.obs, key, f"leakage guard {key}", unique=False)
+        values = _string_values(obs, key, f"leakage guard {key}", unique=False)
         partition_by_value: dict[str, str] = {}
         for value, partition in zip(values, splits, strict=True):
             previous = partition_by_value.setdefault(value, partition)
@@ -389,6 +399,17 @@ def _validate_p4_semantics(adata, manifest, feature_ids, splits) -> _SemanticCol
         doses=tuple(zip(dose_values, dose_units, strict=True)),
         times=tuple(zip(time_values, time_units, strict=True)),
         split_name=manifest.split.name,
+    )
+
+
+def _validate_p4_semantics(adata, manifest, feature_ids, splits) -> _SemanticColumns:
+    return _validate_semantics(
+        adata.obs,
+        adata.var,
+        manifest,
+        feature_ids,
+        splits,
+        manifest.feature_semantics,
     )
 
 

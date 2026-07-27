@@ -100,7 +100,7 @@ class FeatureNamespaceSpec(SchemaObject):
 
 class FeatureSemanticsSpec(SchemaObject):
     id_source: Literal["var_names"]
-    id_format: Literal["ensembl_gene", "ncbi_gene_curie"]
+    id_format: Literal["ensembl_gene", "ncbi_gene_curie", "uniprot_protein"]
     symbol_field: str | None = None
 
     @field_validator("symbol_field", mode="before")
@@ -215,6 +215,61 @@ class MatrixSpec(SchemaObject):
         return tuple(value)
 
 
+class MultiOmicsModalitySpec(SchemaObject):
+    key: str
+    modality: ModalitySpec
+    feature_namespace: FeatureNamespaceSpec
+    feature_semantics: FeatureSemanticsSpec
+    shape: tuple[int, int]
+
+    @field_validator("key", mode="before")
+    @classmethod
+    def _valid_key(cls, value):
+        return _text(value, "multiomics.modalities.key")
+
+    @field_validator("shape", mode="before")
+    @classmethod
+    def _valid_shape(cls, value):
+        if (
+            not isinstance(value, list)
+            or len(value) != 2
+            or any(
+                isinstance(item, bool) or not isinstance(item, int) or item <= 0
+                for item in value
+            )
+        ):
+            raise ValueError(
+                "multiomics modality shape must be "
+                "[positive observations, positive features]"
+            )
+        return tuple(value)
+
+
+class MultiOmicsSpec(SchemaObject):
+    asset: str
+    observation_pairing: Literal["paired", "partially_paired"]
+    modalities: tuple[MultiOmicsModalitySpec, ...]
+
+    @field_validator("asset", mode="before")
+    @classmethod
+    def _valid_asset(cls, value):
+        return _text(value, "multiomics.asset")
+
+    @field_validator("modalities", mode="before")
+    @classmethod
+    def _valid_modalities(cls, value):
+        if not isinstance(value, list) or len(value) < 2:
+            raise ValueError("multiomics.modalities must contain at least two modalities")
+        return value
+
+    @model_validator(mode="after")
+    def _unique_modalities(self):
+        keys = [value.key for value in self.modalities]
+        if len(set(keys)) != len(keys):
+            raise ValueError("multiomics modality keys must be unique")
+        return self
+
+
 class ConditionSpec(SchemaObject):
     field: str
     values: tuple[str, ...]
@@ -319,12 +374,13 @@ class PerturbationRecordSpec(SchemaObject):
 
 class PerturbationsSpec(SchemaObject):
     field: str
+    target_modality: str | None = None
     values: tuple[PerturbationRecordSpec, ...]
 
-    @field_validator("field", mode="before")
+    @field_validator("field", "target_modality", mode="before")
     @classmethod
     def _valid_field(cls, value):
-        return _text(value, "perturbations.field")
+        return _optional_text(value, "perturbations field")
 
     @field_validator("values", mode="before")
     @classmethod

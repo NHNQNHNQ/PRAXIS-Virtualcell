@@ -52,6 +52,7 @@ mechanistic = [
 ]
 omics = [
     "anndata>=0.12.10,<0.13",
+    "mudata>=0.3.10,<0.4",
 ]
 # v0.6:本地 API 服务(FastAPI)+ 本地网页(Streamlit)
 api = [

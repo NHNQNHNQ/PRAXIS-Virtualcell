@@ -7,6 +7,7 @@ from pathlib import Path
 from praxis_virtualcell.data_packs.anndata_adapter import load_anndata_view
 from praxis_virtualcell.data_packs.errors import PackRegistryError
 from praxis_virtualcell.data_packs.manifest import PackManifest
+from praxis_virtualcell.data_packs.mudata_adapter import load_mudata_view
 from praxis_virtualcell.data_packs.validator import validate_pack
 
 PackKey = tuple[str, str]
@@ -20,6 +21,9 @@ class PackRegistry:
         manifest = validate_pack(pack_root)
         if manifest.schema_version == "vc.pack.v0.2":
             with load_anndata_view(pack_root) as view:
+                manifest = view.manifest
+        elif manifest.schema_version == "vc.pack.v0.3":
+            with load_mudata_view(pack_root) as view:
                 manifest = view.manifest
         key = (manifest.pack_id, manifest.pack_version)
         current = self._packs.get(key)

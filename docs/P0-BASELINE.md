@@ -45,5 +45,6 @@ ruff check .
 `docs/TESTING.md` 中的 fresh-lock 目标数字（core `965/35/9`、legacy `1139/59/105`）保留为仓库质量契约；本次报告使用的是实际执行环境数字，不把环境差异冒充为绿勾。
 
 P0 表中的 MCP 失败是当时环境的冻结证据，不回写历史。P4.3 从
-`eaa9a4067518ab80591ffec7f033b248b43ed951` 另行测试先行关闭该问题；当前证据与
-边界见 `docs/HANDOFF-VIRTUALCELLPACK-P4-TO-P5.md`。
+`eaa9a4067518ab80591ffec7f033b248b43ed951` 另行测试先行关闭该问题。P5 又从
+`a229699deac1e791252739df71f4e4202cc72bac` 增加 H5MU 与显式特征对齐；当前证据
+和边界见 `docs/HANDOFF-VIRTUALCELLPACK-P5-TO-P6.md`，上述 P0 报告 hash 未变。

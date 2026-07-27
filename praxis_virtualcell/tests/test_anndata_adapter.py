@@ -406,7 +406,7 @@ def test_p2_optional_license_null_keeps_its_original_fingerprint_semantics():
     assert manifest.fingerprint() == expected
 
 
-def test_anndata_is_only_in_the_omics_extra_and_dev_lock():
+def test_omics_adapters_are_only_in_the_omics_extra_and_dev_lock():
     root = Path(__file__).resolve().parents[2]
     cfg = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
     extras = cfg["project"]["optional-dependencies"]
@@ -414,7 +414,10 @@ def test_anndata_is_only_in_the_omics_extra_and_dev_lock():
     runtime_lock = (root / "requirements" / "runtime-py313.lock").read_text(encoding="utf-8")
     lock_docs = (root / "requirements" / "README.md").read_text(encoding="utf-8")
 
-    assert extras["omics"] == ["anndata>=0.12.10,<0.13"]
+    assert extras["omics"] == [
+        "anndata>=0.12.10,<0.13",
+        "mudata>=0.3.10,<0.4",
+    ]
     assert not any(requirement.startswith("anndata") for requirement in cfg["project"]["dependencies"])
     assert "\nanndata==" in dev_lock
     assert "\nanndata==" not in runtime_lock

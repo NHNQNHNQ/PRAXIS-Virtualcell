@@ -74,6 +74,23 @@ praxis-vc ask \
 
 所有预测和治理终决由后端确定性 runtime 完成。LLM 只可参与自然语言解析、路由建议、critic 复核和报告润色，不能修改 prediction、hard rule、learned reliability、provenance 或最终 verdict。`llm_assisted` 需要 `DEEPSEEK_API_KEY`；缺少凭证或调用失败时回退到离线路径。
 
+## VirtualCellPack 与模型输入
+
+可选 `omics` extra 提供严格、只读的数据合同：`vc.pack.v0.1/v0.2` 使用 H5AD，
+`vc.pack.v0.3` 使用 H5MU，并显式区分完全配对和部分配对 observation。部分配对
+不会为缺失 modality 造行或补零。
+
+`vc.model-feature-contract.v1` 把模型要求的物种、assembly、modality、feature
+namespace/version 和有序 feature ID 固定下来。默认必须逐字匹配；alias、
+aggregate、drop、fill、reorder 只有被合同或 hash/version 绑定的 mapping asset
+明确授权时才能执行，并写入 `vc.alignment-report.v1`。不存在自动 symbol
+替换、Ensembl version 剥离、ortholog/同源转换或 mock fallback。
+
+这三层不能混用：Pack 完整验证只得到 `pack_valid`；成功显式对齐才得到指定模型
+的 `model_compatible`；两者都不能推出 `scientifically_validated`。架构和复现
+边界见 [ADR-0003](docs/ADR-0003-virtualcellpack-p5-multiomics-alignment.md) 与
+[多组学 runbook](docs/runbooks/VIRTUALCELLPACK-MULTIOMICS.md)。
+
 ## 能力边界
 
 PRAXIS-VirtualCell 是带可靠性治理的操作层，不是通用或 SOTA 预测模型。当前可复现证据只支持以下克制表述：

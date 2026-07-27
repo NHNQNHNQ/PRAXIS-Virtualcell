@@ -43,3 +43,7 @@ class OmicsMappingError(OmicsAdapterError):
 
 class OmicsDataError(OmicsAdapterError):
     """AnnData content violates the declared immutable data contract."""
+
+
+class FeatureAlignmentError(OmicsAdapterError):
+    """Feature alignment cannot satisfy an explicit model contract."""

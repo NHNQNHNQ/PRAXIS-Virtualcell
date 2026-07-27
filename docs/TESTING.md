@@ -50,6 +50,59 @@ ruff check . --no-cache：All checks passed
 完整 core/legacy 使用当前 Python 3.13 环境；锁版本 MCP 定向使用临时
 system-site venv 覆盖顶层 `mcp/anyio`，不冒充完整 fresh hash-lock 安装。
 
+### P5 VirtualCellPack multiomics / feature-alignment 收口
+
+P5 以 `a229699deac1e791252739df71f4e4202cc72bac` 为唯一起始基线，在
+`/Volumes/T7/PRAXIS-virtualcell-p0` 的 `codex/p5` 分支实施。测试先行证据分为：
+
+```text
+初始缺少 P5 error/API：collection error
+首轮完整 P5 红灯：20 failed / 5 passed
+canonical ModelFeatureContract + UniProt 边界红灯：5 failed / 0 passed
+超大 fill 整数异常边界红灯：1 failed / 0 passed
+mapping 必须为 Pack asset 红灯：1 failed / 0 passed
+base-only optional omics import 红灯：1 failed / 0 passed
+```
+
+最小实现后，在全新 `/private/tmp/praxis-p5-verify` Python 3.13.12 环境中严格
+hash-install `build-py313.lock` 与重生成的 `dev-py313.lock`，再以
+`--no-build-isolation --no-deps -e .` 安装候选，实际结果：
+
+```text
+python -m pip check：
+No broken requirements found.
+
+锁版本：
+anndata 0.12.19
+mudata 0.3.10
+scverse-misc 0.1.1
+
+P5 定向：
+32 passed / 0 failed
+
+P1–P5 Pack/request/baseline 定向：
+187 passed / 0 failed
+
+python -m ruff check . --no-cache：
+All checks passed
+
+VirtualCell core：
+1144 passed / 35 skipped / 9 deselected / 0 failed
+
+legacy：
+1146 passed / 59 skipped / 105 deselected / 0 failed
+```
+
+core 相对 P4.3 的总收集量精确增加 32 个 P5 case。完整 dev lock 还使 8 个既有
+environment-gated case 从 skip 转为 pass，故不能把 passed 数的全部变化归因于
+P5。legacy 总收集量不变；fresh lock 未包含非锁定的 `aiosmtpd`，1 个既有 email
+test 从 pass 变为明确 skip。MCP slow/good timeout 测试保持通过。
+
+P5 定向产生 2 条 MuData namespace 注册 API 的上游 DeprecationWarning；没有
+`pull_on_update` FutureWarning，生产 loader 与 fixture 均显式使用
+`pull_on_update=False`。本阶段没有 opt-in LLM、remote、Docker、前端或 `.53`
+执行，不能把普通 skip 写成这些能力通过。
+
 ## 本地复现
 
 ```bash

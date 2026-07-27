@@ -13,6 +13,9 @@ files freeze the resolver result used by CI and release validation:
   `greenlet` and `watchdog` so the shared macOS arm64/Linux x86_64 lock also
   pins SQLAlchemy's architecture-marked and Streamlit's non-Darwin dependencies
   instead of failing hash mode on GitHub runners.
+  The `omics` extra includes AnnData plus MuData 0.3.10; MuData's declared
+  compatibility range resolves `scverse-misc` to 0.1.1 in this lock. Neither
+  MuData nor scverse-misc is added to the lean runtime lock.
   If another OS or architecture is added, compile and validate a platform-specific
   lock instead of assuming that this two-platform dependency closure is complete.
 

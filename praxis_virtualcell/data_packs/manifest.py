@@ -25,6 +25,7 @@ from praxis_virtualcell.data_packs.schema import (
     LicenseSpec,
     MatrixSpec,
     ModalitySpec,
+    MultiOmicsSpec,
     PerturbationsSpec,
     ProvenanceSpec,
     SchemaObject,
@@ -62,16 +63,17 @@ class _UniqueKeyLoader(yaml.SafeLoader):
 
 
 class PackManifest(SchemaObject):
-    schema_version: Literal["vc.pack.v0.1", "vc.pack.v0.2"]
+    schema_version: Literal["vc.pack.v0.1", "vc.pack.v0.2", "vc.pack.v0.3"]
     pack_id: str
     pack_version: str
     taxon: TaxonSpec
     assembly: AssemblySpec
     identity: IdentitySpec
-    modality: ModalitySpec
-    feature_namespace: FeatureNamespaceSpec
+    modality: ModalitySpec | None = None
+    feature_namespace: FeatureNamespaceSpec | None = None
     assets: tuple[AssetSpec, ...]
     matrix: MatrixSpec | None = None
+    multiomics: MultiOmicsSpec | None = None
     condition: ConditionSpec | None = None
     feature_semantics: FeatureSemanticsSpec | None = None
     cell_semantics: CellSemanticsSpec | None = None
@@ -88,6 +90,9 @@ class PackManifest(SchemaObject):
             return value
         if "matrix" in value and value["matrix"] is None:
             raise ValueError("matrix must be omitted or an object")
+        for field in ("modality", "feature_namespace", "multiomics"):
+            if field in value and value[field] is None:
+                raise ValueError(f"{field} must be omitted or an object")
         version = value.get("schema_version")
         semantic_fields = (
             "feature_semantics",
@@ -100,14 +105,26 @@ class PackManifest(SchemaObject):
             has_v02_split_fields = isinstance(split, dict) and any(
                 field in split for field in ("name", "leakage_guard")
             )
-            if any(field in value for field in semantic_fields) or has_v02_split_fields:
+            if (
+                any(field in value for field in semantic_fields)
+                or "multiomics" in value
+                or has_v02_split_fields
+            ):
                 raise ValueError(
-                    "vc.pack.v0.1 must not declare vc.pack.v0.2 semantic fields"
+                    "vc.pack.v0.1 must not declare vc.pack.v0.2 semantic fields "
+                    "or vc.pack.v0.3 multiomics"
                 )
         if version == "vc.pack.v0.2":
+            if "multiomics" in value:
+                raise ValueError("vc.pack.v0.2 must not declare multiomics")
             if "condition" in value:
                 raise ValueError(
                     "vc.pack.v0.2 must not declare the legacy condition field"
+                )
+            perturbations = value.get("perturbations")
+            if isinstance(perturbations, dict) and "target_modality" in perturbations:
+                raise ValueError(
+                    "vc.pack.v0.2 perturbations must not declare target_modality"
                 )
             null_fields = [
                 field
@@ -118,6 +135,31 @@ class PackManifest(SchemaObject):
                 raise ValueError(
                     f"vc.pack.v0.2 semantic fields must be objects: {null_fields}"
                 )
+        if version == "vc.pack.v0.3":
+            forbidden = [
+                field
+                for field in (
+                    "condition",
+                    "matrix",
+                    "modality",
+                    "feature_namespace",
+                    "feature_semantics",
+                )
+                if field in value
+            ]
+            if forbidden:
+                raise ValueError(
+                    f"vc.pack.v0.3 must not declare single-modality fields: {forbidden}"
+                )
+            required = (
+                "multiomics",
+                "cell_semantics",
+                "conditions",
+                "perturbations",
+            )
+            missing = [field for field in required if field not in value]
+            if missing:
+                raise ValueError(f"vc.pack.v0.3 requires fields: {missing}")
         return value
 
     @field_validator("pack_id", "pack_version", mode="before")
@@ -144,6 +186,11 @@ class PackManifest(SchemaObject):
             raise ValueError("duplicate asset paths are not allowed")
         if self.matrix is not None and self.matrix.asset not in ids:
             raise ValueError(f"matrix.asset does not name a declared asset: {self.matrix.asset!r}")
+        if self.multiomics is not None and self.multiomics.asset not in ids:
+            raise ValueError(
+                "multiomics.asset does not name a declared asset: "
+                f"{self.multiomics.asset!r}"
+            )
         p4 = (
             self.feature_semantics,
             self.cell_semantics,
@@ -151,29 +198,32 @@ class PackManifest(SchemaObject):
             self.perturbations,
         )
         if self.schema_version == "vc.pack.v0.1":
-            if self.condition is None:
-                raise ValueError("vc.pack.v0.1 requires condition")
-            if any(value is not None for value in p4) or self.split.name or self.split.leakage_guard:
-                raise ValueError("vc.pack.v0.1 must not declare vc.pack.v0.2 semantic fields")
+            if (
+                self.condition is None
+                or self.modality is None
+                or self.feature_namespace is None
+            ):
+                raise ValueError(
+                    "vc.pack.v0.1 requires modality, feature_namespace, and condition"
+                )
+            if (
+                any(value is not None for value in p4)
+                or self.multiomics is not None
+                or self.split.name
+                or self.split.leakage_guard
+            ):
+                raise ValueError(
+                    "vc.pack.v0.1 must not declare vc.pack.v0.2 semantic fields "
+                    "or vc.pack.v0.3 multiomics"
+                )
             return self
         if self.condition is not None:
-            raise ValueError("vc.pack.v0.2 uses conditions and must not declare legacy condition")
-        if self.matrix is None:
-            raise ValueError("vc.pack.v0.2 requires matrix")
-        if any(value is None for value in p4):
             raise ValueError(
-                "vc.pack.v0.2 requires feature_semantics, cell_semantics, conditions, "
-                "and perturbations"
+                f"{self.schema_version} uses conditions and must not declare legacy condition"
             )
-        if self.identity.feature_key != "var_names":
-            raise ValueError("vc.pack.v0.2 identity.feature_key must be var_names")
-        expected_namespace = {
-            "ensembl_gene": "EnsemblGene",
-            "ncbi_gene_curie": "NCBIGene",
-        }[self.feature_semantics.id_format]
-        if self.feature_namespace.name != expected_namespace:
+        if any(value is None for value in (self.cell_semantics, self.conditions, self.perturbations)):
             raise ValueError(
-                "feature_namespace.name does not match feature_semantics.id_format"
+                f"{self.schema_version} requires cell_semantics, conditions, and perturbations"
             )
         if not _ASSEMBLY_ACCESSION.fullmatch(self.assembly.accession):
             raise ValueError(
@@ -182,7 +232,76 @@ class PackManifest(SchemaObject):
         if self.split.name is None:
             raise ValueError("vc.pack.v0.2 requires split.name")
         if not self.split.leakage_guard:
-            raise ValueError("vc.pack.v0.2 requires a non-empty split.leakage_guard")
+            raise ValueError(
+                f"{self.schema_version} requires a non-empty split.leakage_guard"
+            )
+        if self.schema_version == "vc.pack.v0.2":
+            if (
+                self.matrix is None
+                or self.modality is None
+                or self.feature_namespace is None
+                or self.feature_semantics is None
+            ):
+                raise ValueError(
+                    "vc.pack.v0.2 requires modality, feature_namespace, matrix, "
+                    "and feature_semantics"
+                )
+            if self.multiomics is not None:
+                raise ValueError("vc.pack.v0.2 must not declare multiomics")
+            if self.identity.feature_key != "var_names":
+                raise ValueError("vc.pack.v0.2 identity.feature_key must be var_names")
+            expected_namespace = {
+                "ensembl_gene": "EnsemblGene",
+                "ncbi_gene_curie": "NCBIGene",
+            }.get(self.feature_semantics.id_format)
+            if (
+                expected_namespace is None
+                or self.feature_namespace.name != expected_namespace
+            ):
+                raise ValueError(
+                    "feature_namespace.name does not match feature_semantics.id_format"
+                )
+            if self.perturbations.target_modality is not None:
+                raise ValueError(
+                    "vc.pack.v0.2 perturbations must not declare target_modality"
+                )
+            return self
+        if (
+            self.multiomics is None
+            or self.matrix is not None
+            or self.modality is not None
+            or self.feature_namespace is not None
+            or self.feature_semantics is not None
+        ):
+            raise ValueError(
+                "vc.pack.v0.3 requires multiomics and forbids single-modality mappings"
+            )
+        if (
+            self.identity.observation_key != "obs_names"
+            or self.identity.feature_key != "var_names"
+        ):
+            raise ValueError(
+                "vc.pack.v0.3 identity keys must be obs_names and var_names"
+            )
+        expected_namespaces = {
+            "ensembl_gene": "EnsemblGene",
+            "ncbi_gene_curie": "NCBIGene",
+            "uniprot_protein": "UniProtKB",
+        }
+        for modality in self.multiomics.modalities:
+            if (
+                modality.feature_namespace.name
+                != expected_namespaces[modality.feature_semantics.id_format]
+            ):
+                raise ValueError(
+                    "multiomics feature_namespace.name does not match "
+                    "feature_semantics.id_format"
+                )
+        keys = {value.key for value in self.multiomics.modalities}
+        if self.perturbations.target_modality not in keys:
+            raise ValueError(
+                "perturbations.target_modality must name a declared modality"
+            )
         return self
 
     @classmethod
@@ -197,7 +316,10 @@ class PackManifest(SchemaObject):
     def to_dict(self) -> dict[str, Any]:
         value = self.model_dump(mode="json")
         for field in (
+            "modality",
+            "feature_namespace",
             "matrix",
+            "multiomics",
             "condition",
             "feature_semantics",
             "cell_semantics",
@@ -209,6 +331,8 @@ class PackManifest(SchemaObject):
         if self.schema_version == "vc.pack.v0.1":
             value["split"].pop("name")
             value["split"].pop("leakage_guard")
+        if self.schema_version == "vc.pack.v0.2":
+            value["perturbations"].pop("target_modality")
         return value
 
     def fingerprint(self) -> str:

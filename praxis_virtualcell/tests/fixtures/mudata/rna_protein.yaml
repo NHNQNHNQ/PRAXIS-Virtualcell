@@ -1,0 +1,144 @@
+schema_version: vc.pack.v0.3
+pack_id: tiny-human-rna-protein
+pack_version: 0.1.0
+taxon:
+  ontology_id: NCBITaxon:9606
+  scientific_name: Homo sapiens
+assembly:
+  name: GRCh38
+  accession: GCF_000001405.40
+identity:
+  observation_key: obs_names
+  feature_key: var_names
+multiomics:
+  asset: multiomics
+  observation_pairing: partially_paired
+  modalities:
+    - key: rna
+      modality: {name: RNA, ontology_id: EFO:0008913}
+      feature_namespace: {name: EnsemblGene, version: GRCh38}
+      feature_semantics:
+        id_source: var_names
+        id_format: ensembl_gene
+        symbol_field: feature_symbol
+      shape: [3, 5]
+    - key: protein
+      modality: {name: protein, ontology_id: EFO:0007937}
+      feature_namespace: {name: UniProtKB, version: "2026_03"}
+      feature_semantics:
+        id_source: var_names
+        id_format: uniprot_protein
+        symbol_field: feature_symbol
+      shape: [3, 2]
+cell_semantics:
+  identity: cell_identity_id
+  state: [cell_state_id]
+  context: [tissue_id]
+  local_terms:
+    - id: VCSTATE:baseline
+      role: state
+      label: baseline
+      definition: Untreated baseline state for the tiny P5 fixture.
+conditions:
+  field: condition_id
+  values:
+    - condition:train-control
+    - condition:train-ahr
+    - condition:test-control
+    - condition:test-tp53
+  matched_control_field: matched_control_id
+  dose: {value_field: dose_value, unit_field: dose_unit}
+  time: {value_field: time_value, unit_field: time_unit}
+perturbations:
+  field: perturbation_id
+  target_modality: rna
+  values:
+    - id: perturbation:control
+      kind: control
+      targets: []
+    - id: perturbation:ahr
+      kind: genetic
+      targets: [ENSG00000106546.1]
+    - id: perturbation:tp53
+      kind: genetic
+      targets: [ENSG00000141510]
+split:
+  field: split
+  strategy: predefined
+  values: [train, test]
+  name: target-holdout-v1
+  leakage_guard: [donor_id, target_ids]
+provenance:
+  source: generated tiny RNA+protein fixture
+  created_by: pytest
+  citation: none
+license:
+  id: CC0-1.0
+  name: CC0
+fixture_observations:
+  - obs_name: cell-1
+    cell_identity_id: CVCL_0004
+    cell_state_id: VCSTATE:baseline
+    tissue_id: UBERON:0000178
+    condition_id: condition:train-control
+    perturbation_id: perturbation:control
+    matched_control_id: condition:train-control
+    dose_value: 0.0
+    dose_unit: "1"
+    time_value: 24.0
+    time_unit: h
+    split: train
+    donor_id: donor-train-control
+  - obs_name: cell-2
+    cell_identity_id: CVCL_0004
+    cell_state_id: VCSTATE:baseline
+    tissue_id: UBERON:0000178
+    condition_id: condition:train-ahr
+    perturbation_id: perturbation:ahr
+    matched_control_id: condition:train-control
+    dose_value: 1.0
+    dose_unit: "1"
+    time_value: 24.0
+    time_unit: h
+    split: train
+    donor_id: donor-train-perturbed
+  - obs_name: cell-3
+    cell_identity_id: CVCL_0004
+    cell_state_id: VCSTATE:baseline
+    tissue_id: UBERON:0000178
+    condition_id: condition:test-control
+    perturbation_id: perturbation:control
+    matched_control_id: condition:test-control
+    dose_value: 0.0
+    dose_unit: "1"
+    time_value: 24.0
+    time_unit: h
+    split: test
+    donor_id: donor-test-control
+  - obs_name: cell-4
+    cell_identity_id: CVCL_0004
+    cell_state_id: VCSTATE:baseline
+    tissue_id: UBERON:0000178
+    condition_id: condition:test-tp53
+    perturbation_id: perturbation:tp53
+    matched_control_id: condition:test-control
+    dose_value: 1.0
+    dose_unit: "1"
+    time_value: 24.0
+    time_unit: h
+    split: test
+    donor_id: donor-test-perturbed
+fixture_modalities:
+  rna:
+    observation_ids: [cell-1, cell-2, cell-3]
+    features:
+      - {id: ENSG00000106546.1, feature_symbol: AHR}
+      - {id: ENSG00000141510, feature_symbol: TP53}
+      - {id: ENSG00000146648, feature_symbol: EGFR}
+      - {id: ENSG00000157764, feature_symbol: BRAF}
+      - {id: ENSG00000171862, feature_symbol: PTEN}
+  protein:
+    observation_ids: [cell-2, cell-3, cell-4]
+    features:
+      - {id: "UniProtKB:P35869", feature_symbol: AHR}
+      - {id: "UniProtKB:P04637", feature_symbol: TP53}

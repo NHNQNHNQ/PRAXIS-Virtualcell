@@ -28,7 +28,10 @@ The repository historically mixed product release tags, package metadata, API/ru
 | VirtualCell request schema | `vc.request.v2` | `praxis_virtualcell/core/request_v2.py` | strict nested request contract; legacy `VirtualCellRequest` remains supported through explicit adapters |
 | VirtualCell domain schemas | `vc.species-ref.v1`, `vc.cell-context.v1`, `vc.modality.v1`, `vc.dataset-ref.v1`, `vc.perturbation.v1`, `vc.task.v1` | `praxis_virtualcell/core/request_v2.py` | independently versioned JSON domain objects; unknown fields fail closed and validated nested JSON is recursively immutable |
 | model I/O bundle schemas | `vc.model-input.v1`, `vc.prediction.v1` | `praxis_virtualcell/core/request_v2.py` | data references and named prediction vectors only; validated nested JSON is recursively immutable; no dataset loading, registry lookup, or model execution |
-| VirtualCellPack manifest schema | `vc.pack.v0.1`, `vc.pack.v0.2` | `praxis_virtualcell/data_packs/manifest.py` | v0.1 keeps its frozen fingerprint semantics and rejects v0.2 split keys even when empty; v0.2 adds role-bound offline species/cell/feature/condition/perturbation/control/named-split validation, official `CVCL_XXXX` Cellosaurus accessions, and complete canonical manifest semantics; neither version implies model compatibility or scientific validity |
+| VirtualCellPack manifest schema | `vc.pack.v0.1`, `vc.pack.v0.2`, `vc.pack.v0.3` | `praxis_virtualcell/data_packs/manifest.py` | v0.1 keeps its frozen fingerprint; v0.2 adds single-modality standard semantics; v0.3 adds strict H5MU modality declarations plus paired/partially-paired observation semantics without padding or imputation; no Pack version implies model compatibility or scientific validity |
+| model feature contract | `vc.model-feature-contract.v1` | `praxis_virtualcell/data_packs/feature_alignment.py` | exact model/taxon/assembly/modality/namespace/ordered-feature input contract plus explicit reorder/drop/fill and mapping-asset identity; its SHA-256 fingerprint is not a model weight or performance claim |
+| feature mapping asset | `vc.feature-mapping.v1` + mapping ID/version/SHA-256 | Pack-declared JSON asset consumed by `feature_alignment.py` | explicit alias and `sum`/`mean` aggregate rules only; bytes or version changes alter Pack and contract identity when their references are updated |
+| feature alignment report | `vc.alignment-report.v1` | `praxis_virtualcell/data_packs/feature_alignment.py` | records source/target order and every applied alias/aggregate/drop/fill/reorder; proves contract transformation only, not model execution or scientific validation |
 | memory frontmatter schema | `1` | `brains/_common/memory/rules/*.md` | inherited memory-content schema |
 | governance feature schema | `v0.3.0` | `governance/learned_reliability.py` and artifact JSON | frozen learned-governance feature contract |
 | governance models | `reliability_v0.3.0`, `abstain_v0.3.0` | `governance/artifacts/*.json` | immutable model revisions paired with content SHA-256 |
@@ -47,7 +50,10 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | `runtime_protocol_version` | explicit runtime/result contract identifier | incompatible workflow/result semantics change | product release cadence |
 | `message_schema_version` | existing `vc.msg.v1` style | serialized agent-message compatibility change with migration/validation | product release cadence |
 | request/domain/bundle schema version | explicit identifiers such as `vc.request.v2` and `vc.prediction.v1` | incompatible field, validation, or meaning change; compatible legacy projections stay explicit | product release cadence or scientific validity |
-| Pack manifest schema version | explicit identifier such as `vc.pack.v0.1` or `vc.pack.v0.2` | incompatible manifest, validation, or fingerprint semantics | asset availability, model compatibility, or scientific validity |
+| Pack manifest schema version | explicit identifier such as `vc.pack.v0.1`, `vc.pack.v0.2`, or `vc.pack.v0.3` | incompatible manifest, validation, or fingerprint semantics | asset availability, model compatibility, or scientific validity |
+| model feature contract schema + fingerprint | explicit `vc.model-feature-contract.v1` plus canonical JSON SHA-256 | incompatible model-input identity or explicitly allowed transformation changes | model availability, execution, accuracy, or scientific validity |
+| feature mapping schema + ID/version/hash | explicit `vc.feature-mapping.v1` and content identity | mapping rules or bytes change | ontology truth, orthology, or an implicit fallback |
+| alignment report schema | explicit `vc.alignment-report.v1` | incompatible provenance fields or operation semantics | a successful prediction or benchmark |
 | `memory_schema_version` | integer/content-schema identifier | memory frontmatter/content contract change | product release cadence |
 | `feature_schema_version` | existing SemVer-like artifact contract | retraining/migrating the feature vector contract | UI/package version |
 | governance `model_version` + SHA | immutable named revision plus content hash | genuinely regenerated/retrained artifact | product release cadence |
@@ -90,7 +96,12 @@ pyproject product version
 
 The UI must show the same backend product version. GitHub `main`, local `main`, and the `.53` deployed checkout must resolve to the tagged commit before synchronization can be marked complete. The current candidate has no approved tag, so tag equality is intentionally not asserted yet.
 
-The equality above deliberately excludes `vc.msg.v1`, `vc.request.v2`, `vc.pack.v0.1`, `vc.pack.v0.2`, the `vc.*.v1` domain/bundle schemas, runtime/API protocol identifiers, memory schema, `feature_schema_v0.3.0`, governance model versions, registry model revisions, and artifact hashes. CI should validate their format/integrity and compatibility, not force them to equal the product release.
+The equality above deliberately excludes `vc.msg.v1`, `vc.request.v2`, all
+`vc.pack.*` versions, `vc.model-feature-contract.v1`, `vc.feature-mapping.v1`,
+`vc.alignment-report.v1`, the other `vc.*.v1` domain/bundle schemas, runtime/API
+protocol identifiers, memory schema, `feature_schema_v0.3.0`, governance model
+versions, registry model revisions, and artifact hashes. CI should validate their
+format/integrity and compatibility, not force them to equal the product release.
 
 ## Change policy
 
