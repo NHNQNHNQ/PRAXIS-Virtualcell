@@ -102,3 +102,16 @@ bacteria/yeast 生长的真机制预测需 `cobra`(单独 extra;缺失时相关 
 ```bash
 pip install ".[mechanistic]"
 ```
+
+## 7. 可选:AnnData/H5AD
+
+VirtualCellPack 的 backed、只读 H5AD 适配器需要独立 `omics` extra；核心 runtime
+不安装或导入 AnnData：
+
+```bash
+pip install ".[omics]"
+```
+
+适配器只按 manifest 映射加载和选择，校验声明资产的 SHA-256、shape、obs/var ID、
+condition 与预定义 split；当前为保证 lazy/backed 语义只接受 `matrix.location: X`，
+不会归一化矩阵、修改 ID/feature 顺序或生成 split。

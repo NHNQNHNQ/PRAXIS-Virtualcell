@@ -145,9 +145,9 @@ def test_windows_absolute_asset_path_fails_closed():
     manifest = PackManifest.from_dict(raw)
 
     with pytest.raises(PackPathError):
-        from praxis_virtualcell.data_packs.validator import _asset_path
+        from praxis_virtualcell.data_packs.validator import resolve_asset_path
 
-        _asset_path(_VALID.resolve(), manifest.assets[0].path)
+        resolve_asset_path(_VALID.resolve(), manifest.assets[0].path)
 
 
 @pytest.mark.parametrize(
@@ -180,11 +180,16 @@ def test_registry_only_registers_validated_packs_and_is_idempotent():
         registry.get("missing", "0.1.0")
 
 
-def test_pack_modules_do_not_read_h5ad_or_connect_runtime():
+def test_base_pack_modules_do_not_read_h5ad_or_connect_runtime():
     package = Path(__file__).parents[1] / "data_packs"
     imports: set[str] = set()
     calls: set[str] = set()
-    for source in (path for path in package.glob("*.py") if not path.name.startswith("._")):
+    sources = (
+        path
+        for path in package.glob("*.py")
+        if not path.name.startswith("._") and path.name != "anndata_adapter.py"
+    )
+    for source in sources:
         tree = ast.parse(source.read_text(encoding="utf-8"))
         imports |= {
             alias.name

@@ -8,7 +8,7 @@ files freeze the resolver result used by CI and release validation:
   `--no-build-isolation`, preventing an implicit second PEP 517 resolution.
 - `runtime-py313.lock`: core plus the `api` extra used by the local API and
   production container.
-- `dev-py313.lock`: core plus `dev`, `api`, `web`, and `mechanistic`, used by
+- `dev-py313.lock`: core plus `dev`, `api`, `web`, `mechanistic`, and `omics`, used by
   the complete local/CI test environment. The `dev` extra explicitly includes
   `greenlet` and `watchdog` so the shared macOS arm64/Linux x86_64 lock also
   pins SQLAlchemy's architecture-marked and Streamlit's non-Darwin dependencies
@@ -39,7 +39,7 @@ python3.13 -m venv /tmp/praxis-lock-tools
   --extra api --generate-hashes --resolver backtracking --strip-extras \
   --output-file requirements/runtime-py313.lock
 /tmp/praxis-lock-tools/bin/pip-compile pyproject.toml \
-  --extra dev --extra api --extra web --extra mechanistic \
+  --extra dev --extra api --extra web --extra mechanistic --extra omics \
   --generate-hashes --resolver backtracking --strip-extras \
   --output-file requirements/dev-py313.lock
 ```

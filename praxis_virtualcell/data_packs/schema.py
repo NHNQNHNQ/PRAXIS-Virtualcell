@@ -126,6 +126,36 @@ class AssetSpec(SchemaObject):
         return value
 
 
+class MatrixSpec(SchemaObject):
+    asset: str
+    location: str
+    shape: tuple[int, int]
+
+    @field_validator("asset", mode="before")
+    @classmethod
+    def _valid_asset(cls, value):
+        return _text(value, "matrix.asset")
+
+    @field_validator("location", mode="before")
+    @classmethod
+    def _valid_location(cls, value):
+        value = _text(value, "matrix.location")
+        if value != "X" and not re.fullmatch(r"layers/[A-Za-z0-9._-]+", value):
+            raise ValueError("matrix.location must be X or layers/<name>")
+        return value
+
+    @field_validator("shape", mode="before")
+    @classmethod
+    def _valid_shape(cls, value):
+        if (
+            not isinstance(value, list)
+            or len(value) != 2
+            or any(isinstance(item, bool) or not isinstance(item, int) or item <= 0 for item in value)
+        ):
+            raise ValueError("matrix.shape must be [positive observations, positive features]")
+        return tuple(value)
+
+
 class ConditionSpec(SchemaObject):
     field: str
     values: tuple[str, ...]

@@ -87,7 +87,7 @@ PRAXIS-VirtualCell 是带可靠性治理的操作层，不是通用或 SOTA 预�
 ## 开发与测试
 
 ```bash
-python -m pip install -e ".[dev,api,mechanistic]"
+python -m pip install -e ".[dev,api,mechanistic,omics]"
 python -m pip check
 ruff check .
 

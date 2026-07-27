@@ -28,7 +28,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | VirtualCell request schema | `vc.request.v2` | `praxis_virtualcell/core/request_v2.py` | strict nested request contract; legacy `VirtualCellRequest` remains supported through explicit adapters |
 | VirtualCell domain schemas | `vc.species-ref.v1`, `vc.cell-context.v1`, `vc.modality.v1`, `vc.dataset-ref.v1`, `vc.perturbation.v1`, `vc.task.v1` | `praxis_virtualcell/core/request_v2.py` | independently versioned JSON domain objects; unknown fields fail closed |
 | model I/O bundle schemas | `vc.model-input.v1`, `vc.prediction.v1` | `praxis_virtualcell/core/request_v2.py` | data references and named prediction vectors only; no dataset loading, registry lookup, or model execution |
-| VirtualCellPack manifest schema | `vc.pack.v0.1` | `praxis_virtualcell/data_packs/manifest.py` | strict manifest, canonical fingerprint, relative asset path, size/hash, provenance, and license contract; no runtime or H5AD parsing |
+| VirtualCellPack manifest schema | `vc.pack.v0.1` | `praxis_virtualcell/data_packs/manifest.py` | strict manifest, canonical fingerprint, relative asset path, size/hash, provenance, license, and optional matrix mapping; the omics extra adds backed read-only H5AD adaptation without runtime integration |
 | memory frontmatter schema | `1` | `brains/_common/memory/rules/*.md` | inherited memory-content schema |
 | governance feature schema | `v0.3.0` | `governance/learned_reliability.py` and artifact JSON | frozen learned-governance feature contract |
 | governance models | `reliability_v0.3.0`, `abstain_v0.3.0` | `governance/artifacts/*.json` | immutable model revisions paired with content SHA-256 |

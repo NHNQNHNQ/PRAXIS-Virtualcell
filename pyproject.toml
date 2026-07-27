@@ -50,6 +50,9 @@ prod = [
 mechanistic = [
     "cobra>=0.29,<1",
 ]
+omics = [
+    "anndata>=0.12.10,<0.13",
+]
 # v0.6:本地 API 服务(FastAPI)+ 本地网页(Streamlit)
 api = [
     "fastapi>=0.110,<1",

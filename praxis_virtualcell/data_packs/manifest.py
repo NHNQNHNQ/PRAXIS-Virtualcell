@@ -19,6 +19,7 @@ from praxis_virtualcell.data_packs.schema import (
     FeatureNamespaceSpec,
     IdentitySpec,
     LicenseSpec,
+    MatrixSpec,
     ModalitySpec,
     ProvenanceSpec,
     SchemaObject,
@@ -54,6 +55,7 @@ class PackManifest(SchemaObject):
     modality: ModalitySpec
     feature_namespace: FeatureNamespaceSpec
     assets: tuple[AssetSpec, ...]
+    matrix: MatrixSpec | None = None
     condition: ConditionSpec
     split: SplitSpec
     provenance: ProvenanceSpec
@@ -81,6 +83,8 @@ class PackManifest(SchemaObject):
             raise ValueError("duplicate asset ids are not allowed")
         if len(set(paths)) != len(paths):
             raise ValueError("duplicate asset paths are not allowed")
+        if self.matrix is not None and self.matrix.asset not in ids:
+            raise ValueError(f"matrix.asset does not name a declared asset: {self.matrix.asset!r}")
         return self
 
     @classmethod
@@ -93,7 +97,10 @@ class PackManifest(SchemaObject):
             raise PackManifestError(f"invalid Pack manifest: {exc}") from exc
 
     def to_dict(self) -> dict[str, Any]:
-        return self.model_dump(mode="json")
+        value = self.model_dump(mode="json")
+        if self.matrix is None:
+            value.pop("matrix")
+        return value
 
     def fingerprint(self) -> str:
         canonical = json.dumps(

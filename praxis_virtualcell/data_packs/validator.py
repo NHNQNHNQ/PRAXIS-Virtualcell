@@ -15,7 +15,7 @@ from praxis_virtualcell.data_packs.errors import (
 from praxis_virtualcell.data_packs.manifest import PackManifest, load_manifest
 
 
-def _asset_path(root: Path, declared: str) -> Path:
+def resolve_asset_path(root: Path, declared: str) -> Path:
     relative = PurePosixPath(declared)
     if (
         "\\" in declared
@@ -57,7 +57,7 @@ def validate_pack(pack_root: str | Path) -> PackManifest:
 
     manifest = load_manifest(root / "manifest.yaml")
     for asset in manifest.assets:
-        path = _asset_path(root, asset.path)
+        path = resolve_asset_path(root, asset.path)
         actual_size = path.stat().st_size
         if actual_size != asset.size_bytes:
             raise PackAssetSizeMismatch(

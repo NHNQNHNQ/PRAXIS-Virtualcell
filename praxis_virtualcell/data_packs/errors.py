@@ -27,3 +27,19 @@ class PackAssetHashMismatch(VirtualCellPackError):
 
 class PackRegistryError(VirtualCellPackError):
     """A Pack cannot be registered or retrieved."""
+
+
+class OmicsAdapterError(VirtualCellPackError):
+    """Base error for optional omics adapter failures."""
+
+
+class OmicsDependencyError(OmicsAdapterError):
+    """The optional omics dependency is unavailable."""
+
+
+class OmicsMappingError(OmicsAdapterError):
+    """Manifest mappings do not identify required AnnData fields."""
+
+
+class OmicsDataError(OmicsAdapterError):
+    """AnnData content violates the declared immutable data contract."""
