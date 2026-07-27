@@ -1,0 +1,3 @@
+cell_id,gene_id,condition,split,value
+cell-1,ENSG000001,control,train,1
+cell-2,ENSG000001,AHR_KO,test,2
