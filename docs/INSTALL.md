@@ -120,3 +120,10 @@ fail-closed。
 `X` 在访问前保持只读 backed，CSR/CSC 选择后保持原稀疏格式；canonical metadata
 会物化为不可变 tuple。selection 必须按源 obs/feature 顺序给出，乱序、未知或重复
 ID 均拒绝，不会静默重排、归一化矩阵、修改 ID 或生成 split。
+
+`vc.pack.v0.2` 在同一 adapter 上增加标准语义门：versioned NCBI assembly、
+`var_names` canonical feature ID、独立的 cell identity/state/context、
+condition/perturbation/target 外键、control matching、显式 dose/time unit，以及
+named split leakage guard。Ontology 只按 manifest 中的标准 ID 或有定义 local
+CURIE 离线校验；安装与运行均不查询 ontology 服务，也不做 ortholog projection。
+旧 `vc.pack.v0.1` 的 manifest 与 fingerprint 语义保持不变。

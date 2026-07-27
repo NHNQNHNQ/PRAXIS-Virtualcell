@@ -1,8 +1,8 @@
-# VirtualCellPack P0 能力矩阵
+# VirtualCellPack 能力矩阵（P0–P4）
 
-基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`。本表是能力与证据边界，不是性能排名；`valid`、`conditional`、`unknown` 不得互换。
+P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P4 起始基线：`ac0fea48c6e8b0fdf27eff9c0852ee43035ff97a`。本表是能力与证据边界，不是性能排名；`valid`、`conditional`、`unknown` 不得互换。
 
-| 能力/组件 | 当前实现与真相源 | `pack_valid` | `model_compatible` | `scientifically_validated` | P0 结论与边界 |
+| 能力/组件 | 当前实现与真相源 | `pack_valid` | `model_compatible` | `scientifically_validated` | 结论与边界 |
 |---|---|---:|---:|---:|---|
 | 结构化 request | `core/request.py`、`agents/request_adapter.py`、`species_schema.py` | N/A | 输入前置 | N/A | 必填字段缺失由 schema fail-closed；不猜测 targets/output |
 | 确定性 runtime | `core/runtime.py`、`workflows/run_virtualcell_query.py`、MessageBus | 未加载 | 由 applicability/route/case gate 决定 | 不自动声称 | OFFLINE 零 LLM；trace、hash、governance 保持确定性 |
@@ -15,6 +15,9 @@
 | Governance | `governance/*`、runtime gates | N/A | fail-closed 边界 | 只检查契约/evidence | provenance、module、cell type、narrative/hash gate 不能被 LLM 绕过 |
 | LLM 外层 | `agents_llm/*`、`llm_orchestration/*` | N/A | 只能建议 | 不可裁决 | 只能解析/解释/critic/narrative；确定性 runtime wins |
 | 测试口径 | `praxis_virtualcell/tests/baseline`、golden/negative、`docs/TESTING.md` | N/A | route/dispatch/registry contract | validation evidence 需独立 runbook | core、legacy、remote、LLM 分口径；skip 不等于通过 |
+| Pack manifest v0.1 | `data_packs/manifest.py`、`validator.py` | strict schema + path/size/hash 后可为 valid | 不提供 | 不提供 | P2/P3 fingerprint 与 read-only H5AD 合同保持兼容 |
+| Pack semantic v0.2 | `data_packs/schema.py`、`anndata_adapter.py`、ADR-0002 | manifest、asset 与 P4 全部语义门通过后可为 valid | 不提供 | 不提供 | NCBITaxon/assembly、cell identity/state/context、canonical feature、FK/control/unit/split/leakage 均 fail-closed |
+| Ontology 与跨物种边界 | manifest 中的标准 CURIE 或有定义 local CURIE | 仅离线语法/声明验证 | 不推导 | 不推导 | 无在线 ontology runtime 依赖；无 symbol、ortholog 或同源转换 fallback |
 
 ## 现有模型/引擎状态摘要
 

@@ -1,0 +1,47 @@
+schema_version: vc.pack.v0.2
+pack_id: p4-human-tiny
+pack_version: 0.2.0
+taxon: {ontology_id: "NCBITaxon:9606", scientific_name: "Homo sapiens"}
+assembly: {name: GRCh38, accession: "GCF_000001405.40"}
+identity: {observation_key: observation_id, feature_key: var_names}
+modality: {name: scRNA, ontology_id: "EFO:0008913"}
+feature_namespace: {name: EnsemblGene, version: GRCh38}
+feature_semantics:
+  id_source: var_names
+  id_format: ensembl_gene
+  symbol_field: feature_symbol
+cell_semantics:
+  identity: cell_identity_id
+  state: [cell_state_id]
+  context: [tissue_id]
+  local_terms:
+    - {id: "VCSTATE:baseline", label: baseline, definition: "Untreated baseline state."}
+conditions:
+  field: condition_id
+  values: ["condition:human-train-control", "condition:human-train-perturbed", "condition:human-test-control", "condition:human-test-perturbed"]
+  matched_control_field: matched_control_id
+  dose: {value_field: dose_value, unit_field: dose_unit}
+  time: {value_field: time_value, unit_field: time_unit}
+perturbations:
+  field: perturbation_id
+  values:
+    - {id: "perturbation:human-train-control", kind: control, targets: []}
+    - {id: "perturbation:AHR-KO", kind: genetic, targets: ["ENSG00000106546"]}
+    - {id: "perturbation:human-test-control", kind: control, targets: []}
+    - {id: "perturbation:TP53-KO", kind: genetic, targets: ["ENSG00000141510"]}
+split:
+  name: target-holdout-v1
+  field: split
+  strategy: predefined
+  values: [train, test]
+  leakage_guard: [donor_id, condition_id, perturbation_id, target_ids]
+provenance: {source: "synthetic P4 human fixture", created_by: PRAXIS-VirtualCell, citation: none}
+license: {id: CC0-1.0, name: CC0}
+fixture_features:
+  - {id: "ENSG00000106546", feature_symbol: AHR}
+  - {id: "ENSG00000141510", feature_symbol: TP53}
+fixture_observations:
+  - {obs_name: human-1, observation_id: human-1, cell_identity_id: "CVCL_0004", cell_state_id: "VCSTATE:baseline", tissue_id: "UBERON:0000178", condition_id: "condition:human-train-control", perturbation_id: "perturbation:human-train-control", matched_control_id: "condition:human-train-control", dose_value: 0, dose_unit: "1", time_value: 24, time_unit: h, donor_id: human-train, split: train}
+  - {obs_name: human-2, observation_id: human-2, cell_identity_id: "CVCL_0004", cell_state_id: "VCSTATE:baseline", tissue_id: "UBERON:0000178", condition_id: "condition:human-train-perturbed", perturbation_id: "perturbation:AHR-KO", matched_control_id: "condition:human-train-control", dose_value: 1, dose_unit: "1", time_value: 24, time_unit: h, donor_id: human-train, split: train}
+  - {obs_name: human-3, observation_id: human-3, cell_identity_id: "CVCL_0004", cell_state_id: "VCSTATE:baseline", tissue_id: "UBERON:0000178", condition_id: "condition:human-test-control", perturbation_id: "perturbation:human-test-control", matched_control_id: "condition:human-test-control", dose_value: 0, dose_unit: "1", time_value: 24, time_unit: h, donor_id: human-test, split: test}
+  - {obs_name: human-4, observation_id: human-4, cell_identity_id: "CVCL_0004", cell_state_id: "VCSTATE:baseline", tissue_id: "UBERON:0000178", condition_id: "condition:human-test-perturbed", perturbation_id: "perturbation:TP53-KO", matched_control_id: "condition:human-test-control", dose_value: 1, dose_unit: "1", time_value: 24, time_unit: h, donor_id: human-test, split: test}

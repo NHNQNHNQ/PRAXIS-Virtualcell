@@ -1,9 +1,10 @@
-"""VirtualCellPack v0.1 manifest parsing and canonical fingerprinting."""
+"""Versioned VirtualCellPack manifest parsing and canonical fingerprinting."""
 
 from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any, Literal
 
@@ -15,17 +16,23 @@ from praxis_virtualcell.data_packs.errors import PackManifestError
 from praxis_virtualcell.data_packs.schema import (
     AssemblySpec,
     AssetSpec,
+    CellSemanticsSpec,
     ConditionSpec,
+    ConditionsSpec,
     FeatureNamespaceSpec,
+    FeatureSemanticsSpec,
     IdentitySpec,
     LicenseSpec,
     MatrixSpec,
     ModalitySpec,
+    PerturbationsSpec,
     ProvenanceSpec,
     SchemaObject,
     SplitSpec,
     TaxonSpec,
 )
+
+_ASSEMBLY_ACCESSION = re.compile(r"^(?:GCA|GCF)_[0-9]{9}\.[0-9]+$")
 
 
 class _UniqueKeyLoader(yaml.SafeLoader):
@@ -46,7 +53,7 @@ class _UniqueKeyLoader(yaml.SafeLoader):
 
 
 class PackManifest(SchemaObject):
-    schema_version: Literal["vc.pack.v0.1"]
+    schema_version: Literal["vc.pack.v0.1", "vc.pack.v0.2"]
     pack_id: str
     pack_version: str
     taxon: TaxonSpec
@@ -56,16 +63,45 @@ class PackManifest(SchemaObject):
     feature_namespace: FeatureNamespaceSpec
     assets: tuple[AssetSpec, ...]
     matrix: MatrixSpec | None = None
-    condition: ConditionSpec
+    condition: ConditionSpec | None = None
+    feature_semantics: FeatureSemanticsSpec | None = None
+    cell_semantics: CellSemanticsSpec | None = None
+    conditions: ConditionsSpec | None = None
+    perturbations: PerturbationsSpec | None = None
     split: SplitSpec
     provenance: ProvenanceSpec
     license: LicenseSpec
 
     @model_validator(mode="before")
     @classmethod
-    def _reject_null_matrix(cls, value):
-        if isinstance(value, dict) and "matrix" in value and value["matrix"] is None:
+    def _reject_ambiguous_version_fields(cls, value):
+        if not isinstance(value, dict):
+            return value
+        if "matrix" in value and value["matrix"] is None:
             raise ValueError("matrix must be omitted or an object")
+        version = value.get("schema_version")
+        semantic_fields = (
+            "feature_semantics",
+            "cell_semantics",
+            "conditions",
+            "perturbations",
+        )
+        if version == "vc.pack.v0.1" and any(field in value for field in semantic_fields):
+            raise ValueError("vc.pack.v0.1 must not declare vc.pack.v0.2 semantic fields")
+        if version == "vc.pack.v0.2":
+            if "condition" in value:
+                raise ValueError(
+                    "vc.pack.v0.2 must not declare the legacy condition field"
+                )
+            null_fields = [
+                field
+                for field in semantic_fields
+                if field in value and value[field] is None
+            ]
+            if null_fields:
+                raise ValueError(
+                    f"vc.pack.v0.2 semantic fields must be objects: {null_fields}"
+                )
         return value
 
     @field_validator("pack_id", "pack_version", mode="before")
@@ -83,7 +119,7 @@ class PackManifest(SchemaObject):
         return value
 
     @model_validator(mode="after")
-    def _unique_assets(self):
+    def _validate_contract(self):
         ids = [asset.id for asset in self.assets]
         paths = [asset.path for asset in self.assets]
         if len(set(ids)) != len(ids):
@@ -92,6 +128,45 @@ class PackManifest(SchemaObject):
             raise ValueError("duplicate asset paths are not allowed")
         if self.matrix is not None and self.matrix.asset not in ids:
             raise ValueError(f"matrix.asset does not name a declared asset: {self.matrix.asset!r}")
+        p4 = (
+            self.feature_semantics,
+            self.cell_semantics,
+            self.conditions,
+            self.perturbations,
+        )
+        if self.schema_version == "vc.pack.v0.1":
+            if self.condition is None:
+                raise ValueError("vc.pack.v0.1 requires condition")
+            if any(value is not None for value in p4) or self.split.name or self.split.leakage_guard:
+                raise ValueError("vc.pack.v0.1 must not declare vc.pack.v0.2 semantic fields")
+            return self
+        if self.condition is not None:
+            raise ValueError("vc.pack.v0.2 uses conditions and must not declare legacy condition")
+        if self.matrix is None:
+            raise ValueError("vc.pack.v0.2 requires matrix")
+        if any(value is None for value in p4):
+            raise ValueError(
+                "vc.pack.v0.2 requires feature_semantics, cell_semantics, conditions, "
+                "and perturbations"
+            )
+        if self.identity.feature_key != "var_names":
+            raise ValueError("vc.pack.v0.2 identity.feature_key must be var_names")
+        expected_namespace = {
+            "ensembl_gene": "EnsemblGene",
+            "ncbi_gene_curie": "NCBIGene",
+        }[self.feature_semantics.id_format]
+        if self.feature_namespace.name != expected_namespace:
+            raise ValueError(
+                "feature_namespace.name does not match feature_semantics.id_format"
+            )
+        if not _ASSEMBLY_ACCESSION.fullmatch(self.assembly.accession):
+            raise ValueError(
+                "assembly.accession must be a versioned GCA_ or GCF_ accession"
+            )
+        if self.split.name is None:
+            raise ValueError("vc.pack.v0.2 requires split.name")
+        if not self.split.leakage_guard:
+            raise ValueError("vc.pack.v0.2 requires a non-empty split.leakage_guard")
         return self
 
     @classmethod
@@ -105,8 +180,19 @@ class PackManifest(SchemaObject):
 
     def to_dict(self) -> dict[str, Any]:
         value = self.model_dump(mode="json")
-        if self.matrix is None:
-            value.pop("matrix")
+        for field in (
+            "matrix",
+            "condition",
+            "feature_semantics",
+            "cell_semantics",
+            "conditions",
+            "perturbations",
+        ):
+            if value[field] is None:
+                value.pop(field)
+        if self.schema_version == "vc.pack.v0.1":
+            value["split"].pop("name")
+            value["split"].pop("leakage_guard")
         return value
 
     def fingerprint(self) -> str:
