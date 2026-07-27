@@ -61,6 +61,13 @@ class PackManifest(SchemaObject):
     provenance: ProvenanceSpec
     license: LicenseSpec
 
+    @model_validator(mode="before")
+    @classmethod
+    def _reject_null_matrix(cls, value):
+        if isinstance(value, dict) and "matrix" in value and value["matrix"] is None:
+            raise ValueError("matrix must be omitted or an object")
+        return value
+
     @field_validator("pack_id", "pack_version", mode="before")
     @classmethod
     def _valid_identity(cls, value):

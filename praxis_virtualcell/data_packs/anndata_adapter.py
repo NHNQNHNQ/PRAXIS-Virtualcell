@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from praxis_virtualcell.data_packs.errors import (
     OmicsDataError,
@@ -16,27 +16,26 @@ from praxis_virtualcell.data_packs.validator import resolve_asset_path, validate
 _H5AD_MEDIA_TYPES = {"application/vnd.anndata+hdf5", "application/x-hdf5"}
 
 
-def _matrix(adata, location: str):
-    if location == "X":
-        matrix = adata.X
-    else:
-        layer = location.removeprefix("layers/")
-        if layer not in adata.layers:
-            raise OmicsMappingError(f"matrix location does not exist: {location!r}")
-        matrix = adata.layers[layer]
+def _matrix(adata):
+    matrix = adata.X
     if matrix is None or tuple(matrix.shape) != tuple(adata.shape):
         raise OmicsDataError(
-            f"matrix location {location!r} has shape {getattr(matrix, 'shape', None)}, "
+            f"matrix location 'X' has shape {getattr(matrix, 'shape', None)}, "
             f"expected {tuple(adata.shape)}"
         )
     return matrix
+
+
+def _matrix_format(matrix) -> Literal["csr", "csc", "dense"]:
+    value = getattr(matrix, "format", None)
+    return value if value in {"csr", "csc"} else "dense"
 
 
 def _string_values(frame, key: str, label: str, *, unique: bool) -> tuple[str, ...]:
     if key not in frame.columns:
         raise OmicsMappingError(f"{label} mapping does not exist: {key!r}")
     values = tuple(frame[key].tolist())
-    if any(not isinstance(value, str) or not value for value in values):
+    if any(not isinstance(value, str) or not value.strip() for value in values):
         raise OmicsDataError(f"{label} values must be non-empty strings")
     if unique and len(set(values)) != len(values):
         raise OmicsDataError(f"{label} ids must be unique")
@@ -55,17 +54,23 @@ def _positions(all_ids: tuple[str, ...], requested, label: str) -> list[int]:
     missing = set(requested).difference(all_ids)
     if missing:
         raise OmicsMappingError(f"unknown {label} selection ids: {sorted(missing)}")
-    selected = set(requested)
-    return [index for index, value in enumerate(all_ids) if value in selected]
+    positions_by_id = {value: index for index, value in enumerate(all_ids)}
+    positions = [positions_by_id[value] for value in requested]
+    if positions != sorted(positions):
+        raise OmicsMappingError(f"{label} selection must preserve source order")
+    return positions
 
 
 @dataclass(frozen=True, eq=False)
 class CanonicalOmicsView:
+    """Canonical metadata plus a separately accessed read-only matrix."""
+
     observation_ids: tuple[str, ...]
     feature_ids: tuple[str, ...]
     conditions: tuple[str, ...]
     splits: tuple[str, ...]
-    matrix_location: str
+    matrix_location: Literal["X"]
+    matrix_format: Literal["csr", "csc", "dense"]
     _adata: Any = field(repr=False, compare=False)
 
     @property
@@ -81,8 +86,34 @@ class CanonicalOmicsView:
         return bool(self._adata.is_view)
 
     @property
+    def canonical_key(
+        self,
+    ) -> tuple[
+        tuple[str, ...],
+        tuple[str, ...],
+        tuple[str, ...],
+        tuple[str, ...],
+        tuple[int, int],
+        str,
+        str,
+    ]:
+        """Source-name-independent metadata identity; matrix values are separate."""
+        return (
+            self.observation_ids,
+            self.feature_ids,
+            self.conditions,
+            self.splits,
+            self.shape,
+            self.matrix_location,
+            self.matrix_format,
+        )
+
+    @property
     def matrix(self):
-        return _matrix(self._adata, self.matrix_location)
+        matrix = _matrix(self._adata)
+        if self.matrix_format in {"csr", "csc"} and _matrix_format(matrix) != self.matrix_format:
+            raise OmicsDataError("sparse matrix format changed while selecting the backed view")
+        return matrix
 
     def close(self) -> None:
         self._adata.file.close()
@@ -110,8 +141,6 @@ def load_anndata_view(
     root = Path(pack_root).resolve(strict=True)
     if manifest.matrix is None:
         raise OmicsMappingError("AnnData Pack requires an explicit matrix mapping")
-    if manifest.matrix.location != "X":
-        raise OmicsMappingError("backed H5AD adapter only supports matrix location 'X'")
     assets = {asset.id: asset for asset in manifest.assets}
     asset = assets[manifest.matrix.asset]
     if asset.media_type not in _H5AD_MEDIA_TYPES:
@@ -134,7 +163,7 @@ def load_anndata_view(
                 f"AnnData shape {tuple(adata.shape)} does not match manifest shape "
                 f"{manifest.matrix.shape}"
             )
-        _matrix(adata, manifest.matrix.location)
+        matrix = _matrix(adata)
 
         all_observations = _string_values(
             adata.obs,
@@ -178,6 +207,7 @@ def load_anndata_view(
             conditions=tuple(all_conditions[index] for index in obs_positions),
             splits=tuple(all_splits[index] for index in obs_positions),
             matrix_location=manifest.matrix.location,
+            matrix_format=_matrix_format(matrix),
             _adata=selected,
         )
     except Exception:

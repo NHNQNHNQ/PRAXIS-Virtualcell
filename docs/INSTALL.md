@@ -112,6 +112,11 @@ VirtualCellPack 的 backed、只读 H5AD 适配器需要独立 `omics` extra；�
 pip install ".[omics]"
 ```
 
-适配器只按 manifest 映射加载和选择，校验声明资产的 SHA-256、shape、obs/var ID、
-condition 与预定义 split；当前为保证 lazy/backed 语义只接受 `matrix.location: X`，
-不会归一化矩阵、修改 ID/feature 顺序或生成 split。
+适配器只按 manifest 映射加载和选择，校验声明资产的流式 SHA-256、shape、obs/var
+名称及映射 ID 唯一性、condition 与预定义 split。`matrix` 可从旧 manifest 中省略，
+但 H5AD manifest 必须提供非 null 的 `matrix.location: X`；layer 会在 manifest 边界
+fail-closed。
+
+`X` 在访问前保持只读 backed，CSR/CSC 选择后保持原稀疏格式；canonical metadata
+会物化为不可变 tuple。selection 必须按源 obs/feature 顺序给出，乱序、未知或重复
+ID 均拒绝，不会静默重排、归一化矩阵、修改 ID 或生成 split。
