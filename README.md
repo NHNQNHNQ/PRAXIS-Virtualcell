@@ -87,9 +87,20 @@ aggregate、drop、fill、reorder 只有被合同或 hash/version 绑定的 mapp
 替换、Ensembl version 剥离、ortholog/同源转换或 mock fallback。
 
 这三层不能混用：Pack 完整验证只得到 `pack_valid`；成功显式对齐才得到指定模型
-的 `model_compatible`；两者都不能推出 `scientifically_validated`。架构和复现
-边界见 [ADR-0003](docs/ADR-0003-virtualcellpack-p5-multiomics-alignment.md) 与
-[多组学 runbook](docs/runbooks/VIRTUALCELLPACK-MULTIOMICS.md)。
+的 `model_compatible`；两者都不能推出 `scientifically_validated`。
+
+Pack-aware runtime 由严格 `vc.model-card.v1`、`CapabilityRegistry` 和
+`ModelBrokerAgent` 生成 `vc.compatibility-report.v1` 与确定性
+`vc.execution-plan.v1`。只有完整提供已注册的 `pack_id + pack_version` 才走该
+路径；无 Pack 调用保留显式 legacy adapter。缺资产、坏 hash、缺依赖/资源、
+越 scope 或缺 runtime task/output adapter 都会弃权，不会 fallback 到 mock。
+当前 plugin execution adapter 只实现 `predict_delta_expression →
+delta_expression`，模型卡可发现不等于可执行或科学有效。
+
+架构和复现边界见 [ADR-0003](docs/ADR-0003-virtualcellpack-p5-multiomics-alignment.md)、
+[ADR-0004](docs/ADR-0004-virtualcellpack-p6-capability-runtime.md)、
+[多组学 runbook](docs/runbooks/VIRTUALCELLPACK-MULTIOMICS.md) 与
+[能力 runtime runbook](docs/runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md)。
 
 ## 能力边界
 

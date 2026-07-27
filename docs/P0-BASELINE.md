@@ -48,3 +48,6 @@ P0 表中的 MCP 失败是当时环境的冻结证据，不回写历史。P4.3 �
 `eaa9a4067518ab80591ffec7f033b248b43ed951` 另行测试先行关闭该问题。P5 又从
 `a229699deac1e791252739df71f4e4202cc72bac` 增加 H5MU 与显式特征对齐；当前证据
 和边界见 `docs/HANDOFF-VIRTUALCELLPACK-P5-TO-P6.md`，上述 P0 报告 hash 未变。
+P6 又从 `e97cfa153281fb6c9ad33e39c916e2fed1225df9` 增加 strict model card、
+四因子 CompatibilityReport、execution plan 和显式 Pack-aware/legacy 分流；证据
+见 `docs/HANDOFF-VIRTUALCELLPACK-P6-TO-P7.md`，上述两个 P0 报告 hash 仍未变。

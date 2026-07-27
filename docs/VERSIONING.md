@@ -32,6 +32,10 @@ The repository historically mixed product release tags, package metadata, API/ru
 | model feature contract | `vc.model-feature-contract.v1` | `praxis_virtualcell/data_packs/feature_alignment.py` | exact model/taxon/assembly/modality/namespace/ordered-feature input contract plus explicit reorder/drop/fill and mapping-asset identity; its SHA-256 fingerprint is not a model weight or performance claim |
 | feature mapping asset | `vc.feature-mapping.v1` + mapping ID/version/SHA-256 | Pack-declared JSON asset consumed by `feature_alignment.py` | explicit alias and `sum`/`mean` aggregate rules only; bytes or version changes alter Pack and contract identity when their references are updated |
 | feature alignment report | `vc.alignment-report.v1` | `praxis_virtualcell/data_packs/feature_alignment.py` | records source/target order and every applied alias/aggregate/drop/fill/reorder; proves contract transformation only, not model execution or scientific validation |
+| strict model card | `vc.model-card.v1` + canonical JSON SHA-256 | `model_zoo/capability_registry.py`, `model_zoo/registry.yaml` | binds taxon/modality/assay/domain/perturbation/task/output/namespace/representation/assets/resources/uncertainty/OOD and wrapper revision; card presence is not execution or validation |
+| execution environment snapshot | `vc.environment.v1` + canonical JSON SHA-256 | `model_zoo/capability_registry.py` | records detected Python modules, declared resources, and implemented runtime task/output adapters; it is a local planning snapshot, not remote hardware attestation |
+| model compatibility report | `vc.compatibility-report.v1` + canonical JSON SHA-256 | `model_zoo/capability_registry.py` | binds full request, registered Pack, model card and environment identities while keeping `pack_valid`, `model_compatible`, execution readiness and `scientifically_validated=false` separate |
+| model execution plan | `vc.execution-plan.v1` + deterministic `plan_<sha-prefix>` | `model_zoo/capability_registry.py`, `agents/model_broker_agent.py` | ordered executable wrapper steps plus all compatibility reports; an executable plan is not a performance or scientific claim |
 | memory frontmatter schema | `1` | `brains/_common/memory/rules/*.md` | inherited memory-content schema |
 | governance feature schema | `v0.3.0` | `governance/learned_reliability.py` and artifact JSON | frozen learned-governance feature contract |
 | governance models | `reliability_v0.3.0`, `abstain_v0.3.0` | `governance/artifacts/*.json` | immutable model revisions paired with content SHA-256 |
@@ -54,6 +58,10 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | model feature contract schema + fingerprint | explicit `vc.model-feature-contract.v1` plus canonical JSON SHA-256 | incompatible model-input identity or explicitly allowed transformation changes | model availability, execution, accuracy, or scientific validity |
 | feature mapping schema + ID/version/hash | explicit `vc.feature-mapping.v1` and content identity | mapping rules or bytes change | ontology truth, orthology, or an implicit fallback |
 | alignment report schema | explicit `vc.alignment-report.v1` | incompatible provenance fields or operation semantics | a successful prediction or benchmark |
+| model card schema + fingerprint | explicit `vc.model-card.v1` plus canonical JSON SHA-256 | model capability, asset/resource, uncertainty/OOD or wrapper contract changes | asset availability, successful execution, benchmark quality, or scientific validity |
+| environment snapshot schema + fingerprint | explicit `vc.environment.v1` plus canonical JSON SHA-256 | dependency/resource/runtime-adapter declaration changes | a missing module/resource is available or remotely attested |
+| compatibility report schema + fingerprint | explicit `vc.compatibility-report.v1` plus canonical JSON SHA-256 | compatibility checks, reason semantics or bound identities change incompatibly | `pack_valid`, `model_compatible`, executable and scientifically validated are interchangeable |
+| execution plan schema + plan ID | explicit `vc.execution-plan.v1` and content-derived `plan_*` | step/report/identity semantics change incompatibly | plan creation proves prediction correctness or scientific validation |
 | `memory_schema_version` | integer/content-schema identifier | memory frontmatter/content contract change | product release cadence |
 | `feature_schema_version` | existing SemVer-like artifact contract | retraining/migrating the feature vector contract | UI/package version |
 | governance `model_version` + SHA | immutable named revision plus content hash | genuinely regenerated/retrained artifact | product release cadence |
@@ -98,10 +106,12 @@ The UI must show the same backend product version. GitHub `main`, local `main`, 
 
 The equality above deliberately excludes `vc.msg.v1`, `vc.request.v2`, all
 `vc.pack.*` versions, `vc.model-feature-contract.v1`, `vc.feature-mapping.v1`,
-`vc.alignment-report.v1`, the other `vc.*.v1` domain/bundle schemas, runtime/API
-protocol identifiers, memory schema, `feature_schema_v0.3.0`, governance model
-versions, registry model revisions, and artifact hashes. CI should validate their
-format/integrity and compatibility, not force them to equal the product release.
+`vc.alignment-report.v1`, `vc.model-card.v1`, `vc.environment.v1`,
+`vc.compatibility-report.v1`, `vc.execution-plan.v1`, the other `vc.*.v1`
+domain/bundle schemas, runtime/API protocol identifiers, memory schema,
+`feature_schema_v0.3.0`, governance model versions, registry model revisions, and
+artifact hashes. CI should validate their format/integrity and compatibility, not
+force them to equal the product release.
 
 ## Change policy
 

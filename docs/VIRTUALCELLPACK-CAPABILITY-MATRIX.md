@@ -1,15 +1,18 @@
-# VirtualCellPack 能力矩阵（P0–P5）
+# VirtualCellPack 能力矩阵（P0–P6）
 
-P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P5 唯一起始基线：`a229699deac1e791252739df71f4e4202cc72bac`。本表是能力与证据边界，不是性能排名；`pack_valid`、`model_compatible`、`scientifically_validated` 不得互换。
+P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P6 唯一起始基线：`e97cfa153281fb6c9ad33e39c916e2fed1225df9`。本表是能力与证据边界，不是性能排名；`pack_valid`、`model_compatible`、`scientifically_validated` 不得互换。
 
 | 能力/组件 | 当前实现与真相源 | `pack_valid` | `model_compatible` | `scientifically_validated` | 结论与边界 |
 |---|---|---:|---:|---:|---|
 | 结构化 request | `core/request.py`、`core/request_v2.py`、`agents/request_adapter.py`、`species_schema.py` | N/A | 输入前置 | N/A | 必填字段缺失由 schema fail-closed；v2/domain/bundle nested JSON 验证后递归不可变；不猜测 targets/output |
-| 确定性 runtime | `core/runtime.py`、`workflows/run_virtualcell_query.py`、MessageBus | 未加载 | 由 applicability/route/case gate 决定 | 不自动声称 | OFFLINE 零 LLM；trace、hash、governance 保持确定性 |
+| 确定性 runtime | `core/runtime.py`、`workflows/predict_delta_expression.py`、MessageBus | Pack-aware 路径只接受 registry 签发的 `RegisteredPack` | 完整 Pack identity 时由 execution plan 决定；无 Pack 时走显式 legacy adapter | 不自动声称 | OFFLINE 零 LLM；trace、hash、governance 保持确定性；只给半个 Pack identity 在执行前拒绝 |
 | SpeciesBrain | `agents/species_brain.py` + `brains/virtualcell/**` | N/A | 提供规则上下文，不裁决 | 不提供 | 只读 YAML、登记 rules_referenced；不产数值 |
-| route table | `agents/route_table.py` | N/A | 声明式条件性 | 不提供 | engine/disposition/reason 是能力图，不是性能结论 |
-| case dispatch | `predictors/case_dispatch.py`、`case_runner_agent.py` | N/A | `gem_fba`/state/embedding/pathway 条件性；GEARS 受 `.53` checkpoint+依赖窄门 | 仅可引用已有、口径匹配的 evidence | 不满足 runner/依赖/资产窄门即 reject/abstain；不新增 mock fallback |
-| Model Zoo registry | `model_zoo/registry.yaml`、`registry.py` | registry 不是 pack | `ecoli_gem=available`；GEARS/scGPT/mean/yeast deletion=`planned` | training card/provenance 不是验证结果本身 | registry 记录状态、依赖与 hash；不携带权重、不添加模型 |
+| route table | `agents/route_table.py` | N/A | 仅为无 Pack legacy adapter 的声明式条件 | 不提供 | engine/disposition/reason 是兼容能力图，不是 Pack-aware 模型事实源或性能结论 |
+| case dispatch | `predictors/case_dispatch.py`、`case_runner_agent.py` | N/A | 仅为无 Pack legacy adapter 保留；GEARS 仍受 `.53` checkpoint+依赖窄门 | 仅可引用已有、口径匹配的 evidence | Pack-aware plan 不调用 case dispatch，不满足计划条件也不 fallback 到 mock |
+| Strict Model Zoo | `model_zoo/registry.yaml`、`registry.py`、`capability_registry.py::ModelCard` | registry 不是 Pack | `vc.model-card.v1` 完整声明才进入 P6 planner；旧条目仅 legacy 可查询 | training card/provenance 不是验证结果本身 | taxon/modality/assay/domain/perturbation/task/output/namespace/representation/assets/resources/uncertainty/OOD 全部 strict；导出副本不能改 registry truth；未增加模型或权重 |
+| CapabilityRegistry | `model_zoo/capability_registry.py` | 只信 `RegisteredPack`，任意 manifest/path 均不能授予 valid | Request×Pack×Model 精确关系检查；缺任一维度即 false | 固定 false | full request/model/Pack/environment fingerprint；重复 requested outputs、跨 modality/namespace 交叉误配均拒绝 |
+| ModelBroker + ExecutionPlan | `agents/model_broker_agent.py`、`vc.execution-plan.v1` | 未注册 Pack 产空 plan | 只实例化 `executable=true` steps；import/constructor 失败会修订 plan | 固定 false | 稳定按模型名排序；动态 wrapper 无需模型专用 build/route/case 分支 |
+| Runtime environment/output gate | `EnvironmentSnapshot`、`ModelWrapper` | 不改变 Pack 状态 | 缺 dependency/resource/asset/wrapper/task/output adapter 或坏 plugin 输出均 fail-closed | 不提供 | 当前只执行 `predict_delta_expression → delta_expression`；delta 必须非空有限数值，uncertainty method 必须在 card 内 |
 | Report | `agents/report.py`、`io/report_markdown.py` | N/A | 只呈现确定性结果 | 只呈现已有 evidence | 报告保留完整 request；9 段 Markdown 保持确定性 |
 | ActiveLearning | `active_learning/active_learning_agent.py`、`acquisition.py` | N/A | 不负责兼容性 | 不负责验证 | 只生成 advisory queue；不改 prediction/verdict/abstain/provenance 真相 |
 | Governance | `governance/*`、runtime gates | N/A | fail-closed 边界 | 只检查契约/evidence | provenance、module、cell type、narrative/hash gate 不能被 LLM 绕过 |
@@ -20,13 +23,14 @@ P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P5 唯一起始基线�
 | Pack multiomics v0.3 | `data_packs/schema.py`、`manifest.py`、`mudata_adapter.py`、`registry.py`、ADR-0003 | manifest/path/size/hash、backed H5MU、modality 顺序/shape、paired/partially-paired membership、P4 科学语义全部通过后可为 valid | 不自动提供 | 不提供 | 全局 observation 是 modality observation 并集；选择时只保留真实行，不补零、不做跨 modality imputation；缺 MuData 不 fallback |
 | Model feature contract | `data_packs/feature_alignment.py::ModelFeatureContract` | 不改变 Pack 状态 | taxonomy、assembly、modality、namespace/version、ID format、feature set/order 全部满足后才可为 compatible | 不提供 | 合同与可选 mapping asset 的 version/hash 进入 fingerprint；非 canonical ID、非有限 fill、未知字段和重复项 fail-closed |
 | Explicit feature alignment | `align_features()`、`AlignmentReport`、P5 tiny RNA+protein fixture | 消费已验证 modality，不重新授予 Pack 状态 | strict default；仅显式 alias/aggregate/drop/fill/reorder 成功并产 provenance 时成立 | 不提供 | 不剥 version、不查 symbol、不自动 drop/fill/reorder/aggregate；无 ortholog 或 namespace fallback；成功对齐不等于模型运行 |
+| Capability report provenance | `vc.compatibility-report.v1`、report `provenance.execution_plan/compatibility_reports` | 独立布尔并带 Pack fingerprint | 独立布尔并带逐项 checks/reasons | P6 恒为 false | 资产可用、plan 可执行、predictor success 均不能提升科学状态 |
 | Ontology 与跨物种边界 | manifest 中的标准 CURIE 或有定义 local CURIE | 仅离线语法/声明验证 | 不推导 | 不推导 | 无在线 ontology runtime 依赖；无 symbol、ortholog 或同源转换 fallback |
 
 ## 现有模型/引擎状态摘要
 
 | registry/model 或 engine | 当前状态 | 可声称内容 | 不可声称内容 |
 |---|---|---|---|
-| `ecoli_gem` / `gem_fba` | available + Cobra 依赖 | 对声明的 bacteria GEM case 做机制 runner/治理测试 | 自动推广到 expression 或其他物种；不由 route 推导性能 |
+| `ecoli_gem` / `gem_fba` | card available + Cobra 依赖；P6 plugin runtime 无 growth adapter | 对声明的 legacy bacteria GEM case 做机制 runner/治理测试；card 可审计 | 不得经 P6 delta coordinator 假装执行 growth；不由 route/card 推导性能 |
 | `gears` / `donor_predictor` | planned；`.53` 有受门控资产与环境记录 | 在批准的远端证据中单独报告其可复现实验 | 本地无 checkpoint 时的 mock 路径不是真 GEARS；不与不可比指标混表 |
 | `scgpt` | planned；远端资产，不入 Git | 仅在批准的 checkpoint/evidence 上报告 | 不能从 registry 或 wrapper 存在推导 validation |
 | `norman_mean_baseline` | planned；远端资产 | 可作为明确标注的 naive baseline evidence | 不得当成训练模型或默认预测器 |

@@ -66,6 +66,19 @@ class PredictorAgent(BaseAgent):
         try:
             model_input = self.prepare_input(req, bc)
             out = self.run_prediction(model_input)
+            if not isinstance(out, dict):
+                raise TypeError("run_prediction must return a dict")
+            if not isinstance(out.get("prediction"), dict):
+                raise TypeError("run_prediction.prediction must be a dict")
+            for field in ("uncertainty", "provenance", "ood"):
+                if out.get(field) is not None and not isinstance(out[field], dict):
+                    raise TypeError(f"run_prediction.{field} must be a dict")
+            if out.get("evidence") is not None and not isinstance(
+                out["evidence"], list
+            ):
+                raise TypeError("run_prediction.evidence must be a list")
+            status, reject_reason = self._result_status(out)
+            version = self._call_version(out)
         except Exception as e:  # noqa: BLE001 — prepare_input/run_prediction 异常均归 failed(故障隔离)
             pc = compute_call_provenance(self.name, self.model_version, model_input, None, [])
             self._emit(bus, message, PredictorResultMessage(
@@ -73,8 +86,6 @@ class PredictorAgent(BaseAgent):
                 applicability_score=score, evidence=[], rejection_reason=None,
                 provenance={"error": str(e), "per_call": pc}))
             return
-        status, reject_reason = self._result_status(out)
-        version = self._call_version(out)
         if status != "success":
             pc = compute_call_provenance(self.name, version, model_input, None,
                                          out.get("evidence", []))

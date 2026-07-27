@@ -103,6 +103,59 @@ P5 定向产生 2 条 MuData namespace 注册 API 的上游 DeprecationWarning�
 `pull_on_update=False`。本阶段没有 opt-in LLM、remote、Docker、前端或 `.53`
 执行，不能把普通 skip 写成这些能力通过。
 
+### P6 capability-driven runtime
+
+P6 以 `e97cfa153281fb6c9ad33e39c916e2fed1225df9` 为唯一起始基线，在独立
+`/Volumes/T7/PRAXIS-virtualcell-p0` 的 `codex/p6` 分支实施。测试先行证据：
+
+```text
+初始缺 CapabilityRegistry API：collection error
+首轮契约实现后主链接线：5 failed / 32 passed
+request identity/严格类型/重复 output/nested dependency：5 failed
+request modality/namespace 与 Pack 关系约束：2 failed
+plugin 非 dict 输出：1 failed
+runtime task/output adapter 与错误 output shape：2 failed
+超大 predictor integer：1 failed
+提交前 fail-closed 对抗复审（Windows 路径、probe 异常、资产重验、
+嵌套非 JSON plugin 输出）：5 failed / 55 passed
+```
+
+当前 P6 定向：
+
+```text
+praxis_virtualcell/tests/test_capability_runtime.py：
+60 passed / 0 failed
+
+P0 offline baseline + runtime determinism 定向：
+29 passed / 0 failed
+
+Model Zoo/Broker/wrapper 兼容定向：
+58 passed / 0 failed
+```
+
+定向测试证明 strict model card、四因子 fingerprint、三层状态、资产/依赖/
+资源/scope/runtime adapter fail-closed、Broker 动态 dummy plugin、无 mock
+fallback、显式 legacy adapter 和 P0 报告基线。阶段末使用同一 P5 strict-lock
+环境实际结果：
+
+```text
+python -m pip check：
+No broken requirements found.
+
+ruff check . --no-cache：
+All checks passed!
+
+VirtualCell core：
+1204 passed / 35 skipped / 9 deselected / 0 failed
+
+legacy：
+1146 passed / 59 skipped / 105 deselected / 0 failed
+```
+
+core 相对 P5 的 `1144 passed` 精确增加 60 个 P6 case；legacy 结果与 P5 完全
+一致。core 仍有 MuData 上游 namespace 注册的 2 条 DeprecationWarning。没有
+运行真实 LLM、remote/GPU、Docker、前端或 `.53`；普通 skip 不能冒充这些门通过。
+
 ## 本地复现
 
 ```bash

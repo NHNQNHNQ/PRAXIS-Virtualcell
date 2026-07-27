@@ -11,6 +11,8 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Clock, IdGen, RuntimeConfig
 from praxis_virtualcell.core.exceptions import UnknownAgentError
 from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.core.request import VirtualCellRequest
+from praxis_virtualcell.core.request_v2 import legacy_request_to_v2
 from praxis_virtualcell.governance.cell_type_domain import check_cell_type_domain
 from praxis_virtualcell.governance.gate_util import apply_governance_gate
 from praxis_virtualcell.governance.module_consistency import check_module_plan
@@ -50,11 +52,33 @@ class AgentRuntime:
             raise RuntimeError(f"{message.receiver} 未产出 {expected_type}")
         return out
 
-    def run_workflow(self, request, *, trace_id: str | None = None,
-                     task_id: str | None = None) -> dict:
+    def run_workflow(
+        self,
+        request,
+        *,
+        trace_id: str | None = None,
+        task_id: str | None = None,
+        pack_id: str | None = None,
+        pack_version: str | None = None,
+    ) -> dict:
         """request: VirtualCellRequest。返回最终 report dict。全程经 bus。
         trace_id/task_id 默认 None → 用 request canonical-hash(现有行为完全不变);
         free-text 入口传入以全程复用同一 trace(P10.C3 修 P10.A 遗留观察)。"""
+        if (pack_id is None) != (pack_version is None):
+            raise ValueError("pack_id and pack_version must be provided together")
+        if pack_id is not None and (
+            not isinstance(pack_id, str)
+            or not pack_id
+            or pack_id.strip() != pack_id
+            or not isinstance(pack_version, str)
+            or not pack_version
+            or pack_version.strip() != pack_version
+        ):
+            raise ValueError(
+                "pack_id and pack_version must be non-empty strings "
+                "without surrounding whitespace"
+            )
+        capability_plan = None
         _req_dict = asdict(request)
         _h = hashlib.sha256(
             json.dumps(_req_dict, sort_keys=True, ensure_ascii=False).encode("utf-8")
@@ -69,8 +93,63 @@ class AgentRuntime:
         out = self._dispatch_collect(m, "object_normalized")
         m = self.mk_message(out.sender, "SpeciesBrain", "retrieve", out.payload, out.message_id)
         out = self._dispatch_collect(m, "brain_retrieved")
-        m = self.mk_message(out.sender, "ModelApplicability", "decide", out.payload, out.message_id)
-        app = self._dispatch_collect(m, "applicability_decided")
+        if pack_id is None:
+            m = self.mk_message(
+                out.sender,
+                "ModelApplicability",
+                "decide",
+                out.payload,
+                out.message_id,
+            )
+            app = self._dispatch_collect(m, "applicability_decided")
+        else:
+            m = self.mk_message(
+                out.sender,
+                "ModelBrokerAgent",
+                "execution_plan_request",
+                {
+                    "request": legacy_request_to_v2(
+                        VirtualCellRequest.from_dict(out.payload["request"])
+                    ).to_dict(),
+                    "pack_id": pack_id,
+                    "pack_version": pack_version,
+                },
+                out.message_id,
+            )
+            planned = self._dispatch_collect(m, "execution_plan_ready")
+            capability_plan = planned.payload["execution_plan"]
+            broker = self._agents["ModelBrokerAgent"]
+            take_prepared = getattr(broker, "take_prepared", None)
+            if not callable(take_prepared):
+                raise RuntimeError("registered ModelBrokerAgent cannot provide prepared models")
+            prepared = take_prepared(capability_plan["plan_id"])
+            for predictor in prepared:
+                self.register_agent(predictor)
+            brain_context = {
+                **out.payload["brain_context"],
+                "routing": {
+                    "cautions": {},
+                    "rejection_reasons": {},
+                    "rules_hit": [],
+                    "capability_plan_id": capability_plan["plan_id"],
+                    "legacy_adapter": False,
+                },
+            }
+            app = self.mk_message(
+                planned.sender,
+                "EnsembleCoordinator",
+                "applicability_decided",
+                {
+                    "request": out.payload["request"],
+                    "brain_context": brain_context,
+                    "applicable": [
+                        step["agent_name"] for step in capability_plan["steps"]
+                    ],
+                    "rejected_candidates": [],
+                },
+                planned.message_id,
+            )
+            self.bus.send(app)
         # Phase 4:module-aware 路由旁路挂载(SpeciesContext →[LLMModulePlanner?]→ ModuleRouter),
         # 产 module_plan 挂进 report.provenance.module_plan;不改下游 predictor fan-out 契约。
         # 旁路 gating:module_plan 只对"可路由"请求有意义(如同 predictor 只对 applicable 请求跑)。
@@ -87,19 +166,19 @@ class AgentRuntime:
                 llm_cross_module = self._dispatch_collect(xm, "llm_cross_module_notes").payload
         llm_route = None
         if "LLMRouter" in self._agents:
-            rmsg = self.mk_message("ModelApplicability", "LLMRouter", "route_suggest",
+            rmsg = self.mk_message(app.sender, "LLMRouter", "route_suggest",
                 {"request": app.payload["request"], "brain_context": app.payload["brain_context"],
                  "applicable": app.payload["applicable"],
                  "rejected_candidates": app.payload["rejected_candidates"]}, app.message_id)
             llm_route = self._dispatch_collect(rmsg, "llm_route_suggestion").payload
         results = []
         for pname in list(app.payload["applicable"]) + list(app.payload["rejected_candidates"]):
-            pm = self.mk_message("ModelApplicability", pname, "predict",
+            pm = self.mk_message(app.sender, pname, "predict",
                                 {"request": app.payload["request"],
                                  "brain_context": app.payload["brain_context"]}, app.message_id)
             r = self._dispatch_collect(pm, "predictor_result")
             results.append(r.payload)
-        m = self.mk_message("ModelApplicability", "EnsembleCoordinator", "ensemble",
+        m = self.mk_message(app.sender, "EnsembleCoordinator", "ensemble",
                             {"request": app.payload["request"],
                              "brain_context": app.payload["brain_context"], "results": results},
                             app.message_id)
@@ -117,6 +196,9 @@ class AgentRuntime:
         # reliability.py 的 not-abstain 守卫(避免 reliability 因其它原因 abstain 时 Gate C
         # 独立记一条 reliability 从未确认的 cell_type 越界 provenance)。
         reliability_abstained = report.get("abstain", False)
+        if capability_plan is not None:
+            report.setdefault("provenance", {})["execution_plan"] = capability_plan
+            report["provenance"]["compatibility_reports"] = capability_plan["reports"]
         if llm_route is not None:
             report.setdefault("provenance", {})["llm_route_suggestion"] = llm_route
         if module_plan is not None:

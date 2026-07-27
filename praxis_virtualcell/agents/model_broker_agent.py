@@ -9,12 +9,20 @@ available=False + reason,fail-closed,绝不 silent accept。gpu 无法静态检�
 """
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 
 from praxis_virtualcell.core.agent import BaseAgent
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
+from praxis_virtualcell.core.request_v2 import VirtualCellRequestV2
+from praxis_virtualcell.data_packs.errors import PackRegistryError
+from praxis_virtualcell.data_packs.registry import PackRegistry
 from praxis_virtualcell.model_zoo.cache import ModelCache
+from praxis_virtualcell.model_zoo.capability_registry import (
+    CapabilityRegistry,
+    EnvironmentSnapshot,
+)
 from praxis_virtualcell.model_zoo.downloader import resolve_source
 from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
 
@@ -33,11 +41,21 @@ class ModelBrokerAgent(BaseAgent):
     name = "ModelBrokerAgent"
 
     def __init__(self, registry: ModelZooRegistry | None = None,
-                 cache: ModelCache | None = None) -> None:
+                 cache: ModelCache | None = None,
+                 pack_registry: PackRegistry | None = None,
+                 environment: EnvironmentSnapshot | None = None) -> None:
         self._reg = registry or ModelZooRegistry()
         self._cache = cache or ModelCache()
+        self._packs = pack_registry or PackRegistry()
+        cards = tuple(self._reg.card(name) for name in self._reg.capability_names())
+        self._environment = environment or EnvironmentSnapshot.detect(cards)
+        self._capabilities = CapabilityRegistry(self._reg, self._cache)
+        self._prepared: dict[str, list] = {}
 
     def handle(self, message: AgentMessage, bus: MessageBus) -> None:
+        if message.message_type == "execution_plan_request":
+            self._handle_execution_plan(message, bus)
+            return
         model_name = message.payload.get("model_name")
         result = self._resolve(model_name)
         bus.send(AgentMessage(
@@ -45,6 +63,87 @@ class ModelBrokerAgent(BaseAgent):
             sender=self.name, receiver="EnsembleCoordinator",
             message_type="model_broker_result", payload=result,
             timestamp=message.timestamp, parent_message_id=message.message_id))
+
+    def _handle_execution_plan(
+        self,
+        message: AgentMessage,
+        bus: MessageBus,
+    ) -> None:
+        request = VirtualCellRequestV2.from_dict(message.payload.get("request"))
+        pack_id = message.payload.get("pack_id")
+        pack_version = message.payload.get("pack_version")
+        try:
+            pack = self._packs.record(pack_id, pack_version)
+        except PackRegistryError:
+            pack = None
+        plan = self._capabilities.plan(request, pack, self._environment)
+        reports = {report.model_name: report for report in plan.reports}
+        prepared = []
+        failed = set()
+        for step in plan.steps:
+            try:
+                prepared.append(
+                    self._capabilities.instantiate(step, reports[step.model_name])
+                )
+            except Exception:  # noqa: BLE001 - constructor/import failures are a broker gate
+                failed.add(step.model_name)
+        if failed:
+            revised_reports = []
+            for report in plan.reports:
+                if report.model_name not in failed:
+                    revised_reports.append(report)
+                    continue
+                checks = dict(report.checks)
+                checks["model.wrapper_initialization"] = False
+                revised = report.to_dict()
+                revised.update(
+                    {
+                        "wrapper_ready": False,
+                        "environment_compatible": False,
+                        "executable": False,
+                        "checks": checks,
+                        "reasons": list(report.reasons)
+                        + ["model.wrapper_initialization"],
+                    }
+                )
+                revised_reports.append(
+                    type(report).from_dict(revised)
+                )
+            steps = tuple(
+                step for step in plan.steps if step.model_name not in failed
+            )
+            identity = (
+                plan.plan_id
+                + "|"
+                + "|".join(sorted(failed))
+            ).encode("utf-8")
+            revised_plan = plan.to_dict()
+            revised_plan.update(
+                {
+                    "plan_id": f"plan_{hashlib.sha256(identity).hexdigest()[:24]}",
+                    "executable": bool(steps),
+                    "steps": [step.to_dict() for step in steps],
+                    "reports": [
+                        report.to_dict() for report in revised_reports
+                    ],
+                }
+            )
+            plan = type(plan).from_dict(revised_plan)
+        self._prepared[plan.plan_id] = prepared
+        bus.send(
+            AgentMessage(
+                message_id=message.message_id + ":plan",
+                sender=self.name,
+                receiver="EnsembleCoordinator",
+                message_type="execution_plan_ready",
+                payload={"execution_plan": plan.to_dict()},
+                timestamp=message.timestamp,
+                parent_message_id=message.message_id,
+            )
+        )
+
+    def take_prepared(self, plan_id: str) -> list:
+        return self._prepared.pop(plan_id, [])
 
     def _resolve(self, model_name: str | None) -> dict:
         base = {"model_name": model_name, "available": False, "status": "missing",

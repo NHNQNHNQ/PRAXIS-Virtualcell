@@ -6,7 +6,8 @@ from praxis_virtualcell.agents.critic import CriticAgent
 from praxis_virtualcell.agents.ensemble import EnsembleCoordinatorAgent
 from praxis_virtualcell.agents.evidence_level_agent import EvidenceLevelAgent
 from praxis_virtualcell.agents.input_interpreter import InputInterpreterAgent
-from praxis_virtualcell.agents.model_applicability import ModelApplicabilityAgent
+from praxis_virtualcell.agents.model_applicability import LegacyModelApplicabilityAdapter
+from praxis_virtualcell.agents.model_broker_agent import ModelBrokerAgent
 from praxis_virtualcell.agents.module_router_agent import ModuleRouterAgent
 from praxis_virtualcell.agents.object_normalizer import BioObjectNormalizerAgent
 from praxis_virtualcell.agents.provenance_agent import ProvenanceAgent
@@ -18,17 +19,35 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import Clock, IdGen, Mode, RuntimeConfig
 from praxis_virtualcell.core.request import VirtualCellRequest
 from praxis_virtualcell.core.runtime import AgentRuntime
+from praxis_virtualcell.data_packs.registry import PackRegistry
+from praxis_virtualcell.model_zoo.cache import ModelCache
+from praxis_virtualcell.model_zoo.capability_registry import EnvironmentSnapshot
+from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
 from praxis_virtualcell.predictors.case_runner_agent import CaseRunnerPredictorAgent
 from praxis_virtualcell.predictors.mock_cpa import MockCPAAgent
 from praxis_virtualcell.predictors.mock_gears import MockGEARSAgent
 from praxis_virtualcell.predictors.mock_linear import MockLinearAgent
 
 
-def build_runtime(config: RuntimeConfig | None = None) -> AgentRuntime:
+def build_runtime(
+    config: RuntimeConfig | None = None,
+    *,
+    model_registry: ModelZooRegistry | None = None,
+    model_cache: ModelCache | None = None,
+    pack_registry: PackRegistry | None = None,
+    environment: EnvironmentSnapshot | None = None,
+) -> AgentRuntime:
     cfg = config or RuntimeConfig()
     rt = AgentRuntime(cfg, bus=MessageBus(), clock=Clock(), idgen=IdGen())
     for a in (InputInterpreterAgent(), BioObjectNormalizerAgent(), SpeciesBrainAgent(cfg),
-              ModelApplicabilityAgent(), MockLinearAgent(), MockCPAAgent(), MockGEARSAgent(),
+              LegacyModelApplicabilityAdapter(),
+              ModelBrokerAgent(
+                  registry=model_registry,
+                  cache=model_cache,
+                  pack_registry=pack_registry,
+                  environment=environment,
+              ),
+              MockLinearAgent(), MockCPAAgent(), MockGEARSAgent(),
               CaseRunnerPredictorAgent(),
               EnsembleCoordinatorAgent(), ReliabilityAgent(mode=cfg.reliability_mode), CriticAgent(),
               ProvenanceAgent(), ReportAgent()):

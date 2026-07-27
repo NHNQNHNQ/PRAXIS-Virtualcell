@@ -3,11 +3,14 @@
 """
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
 import yaml
+from yaml.constructor import ConstructorError
 
 from praxis_virtualcell.biological_modules import modules as M
+from praxis_virtualcell.model_zoo.capability_registry import ModelCard
 
 LEGAL_TYPES = ("public_model", "self_trained")
 LEGAL_STATUS = ("available", "planned", "missing")
@@ -18,18 +21,66 @@ _REQUIRED_FIELDS = ("name", "type", "species", "module", "task", "source",
 _DEFAULT_REGISTRY = Path(__file__).parent / "registry.yaml"
 
 
+class _UniqueKeyLoader(yaml.SafeLoader):
+    def construct_mapping(self, node, deep=False):
+        self.flatten_mapping(node)
+        mapping = {}
+        for key_node, value_node in node.value:
+            key = self.construct_object(key_node, deep=deep)
+            try:
+                hash(key)
+            except TypeError as exc:
+                raise ConstructorError(
+                    "while constructing a mapping",
+                    node.start_mark,
+                    f"unhashable mapping key: {key!r}",
+                    key_node.start_mark,
+                ) from exc
+            if key in mapping:
+                raise ConstructorError(
+                    "while constructing a mapping",
+                    node.start_mark,
+                    f"duplicate key: {key!r}",
+                    key_node.start_mark,
+                )
+            mapping[key] = self.construct_object(value_node, deep=deep)
+        return mapping
+
+
 class ModelZooRegistry:
     def __init__(self, registry_path: str | None = None) -> None:
         self.path = Path(registry_path or _DEFAULT_REGISTRY)
         self._models: dict[str, dict] = {}
+        self._cards: dict[str, ModelCard] = {}
         self._load()
 
     def _load(self) -> None:
-        doc = yaml.safe_load(self.path.read_text(encoding="utf-8")) or {}
+        try:
+            doc = yaml.load(
+                self.path.read_text(encoding="utf-8"),
+                Loader=_UniqueKeyLoader,
+            ) or {}
+        except yaml.YAMLError as exc:
+            raise ValueError(f"invalid model_zoo YAML: {exc}") from exc
+        if not isinstance(doc, dict) or set(doc) != {"models"}:
+            raise ValueError("model_zoo root must contain only models")
         models = doc.get("models") or {}
+        if not isinstance(models, dict):
+            raise ValueError("model_zoo models must be an object")
         for name, entry in models.items():
-            self._validate(name, entry)
-            self._models[name] = entry
+            if not isinstance(entry, dict):
+                raise ValueError(f"model_zoo entry {name} must be an object")
+            if "schema_version" in entry:
+                card = ModelCard.from_dict(entry)
+                if card.name != name:
+                    raise ValueError(
+                        f"model_zoo 条目 key({name})与 name({card.name})不一致"
+                    )
+                self._cards[name] = card
+                self._models[name] = card.to_dict()
+            else:
+                self._validate(name, entry)
+                self._models[name] = entry
 
     @staticmethod
     def _validate(name: str, entry: dict) -> None:
@@ -80,10 +131,22 @@ class ModelZooRegistry:
     def names(self) -> list[str]:
         return list(self._models)
 
+    def capability_names(self) -> list[str]:
+        return sorted(self._cards)
+
+    def card(self, name: str) -> ModelCard:
+        if name not in self._models:
+            raise KeyError(f"未知模型: {name}(已注册: {sorted(self._models)})")
+        if name not in self._cards:
+            raise ValueError(
+                f"legacy model entry has no vc.model-card.v1 contract: {name}"
+            )
+        return self._cards[name]
+
     def get(self, name: str) -> dict:
         if name not in self._models:
             raise KeyError(f"未知模型: {name}(已注册: {sorted(self._models)})")
-        return self._models[name]
+        return deepcopy(self._models[name])
 
     def status(self, name: str) -> str:
         return self.get(name)["status"]
@@ -94,7 +157,15 @@ class ModelZooRegistry:
     def by_module(self, module_id: str) -> list[dict]:
         if module_id not in M.MODULES:
             raise KeyError(f"未知模块: {module_id}")
-        return [e for e in self._models.values() if e["module"] == module_id]
+        return [
+            deepcopy(entry)
+            for entry in self._models.values()
+            if entry["module"] == module_id
+        ]
 
     def by_species(self, species: str) -> list[dict]:
-        return [e for e in self._models.values() if species in e["species"]]
+        return [
+            deepcopy(entry)
+            for entry in self._models.values()
+            if species in entry["species"]
+        ]

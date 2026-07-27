@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 
 from praxis_virtualcell.data_packs.anndata_adapter import load_anndata_view
@@ -13,17 +14,28 @@ from praxis_virtualcell.data_packs.validator import validate_pack
 PackKey = tuple[str, str]
 
 
+@dataclass(frozen=True)
+class RegisteredPack:
+    """A Pack identity that can only be issued after full registry validation."""
+
+    manifest: PackManifest
+    root: Path
+    fingerprint: str
+
+
 class PackRegistry:
     def __init__(self) -> None:
         self._packs: dict[PackKey, PackManifest] = {}
+        self._roots: dict[PackKey, Path] = {}
 
     def register(self, pack_root: str | Path) -> PackManifest:
-        manifest = validate_pack(pack_root)
+        root = Path(pack_root).resolve()
+        manifest = validate_pack(root)
         if manifest.schema_version == "vc.pack.v0.2":
-            with load_anndata_view(pack_root) as view:
+            with load_anndata_view(root) as view:
                 manifest = view.manifest
         elif manifest.schema_version == "vc.pack.v0.3":
-            with load_mudata_view(pack_root) as view:
+            with load_mudata_view(root) as view:
                 manifest = view.manifest
         key = (manifest.pack_id, manifest.pack_version)
         current = self._packs.get(key)
@@ -32,6 +44,7 @@ class PackRegistry:
                 raise PackRegistryError(f"conflicting Pack identity: {key}")
             return current
         self._packs[key] = manifest
+        self._roots[key] = root
         return manifest
 
     def get(self, pack_id: str, pack_version: str) -> PackManifest:
@@ -46,3 +59,12 @@ class PackRegistry:
 
     def fingerprint(self, pack_id: str, pack_version: str) -> str:
         return self.get(pack_id, pack_version).fingerprint()
+
+    def record(self, pack_id: str, pack_version: str) -> RegisteredPack:
+        key = (pack_id, pack_version)
+        manifest = self.get(pack_id, pack_version)
+        return RegisteredPack(
+            manifest=manifest,
+            root=self._roots[key],
+            fingerprint=manifest.fingerprint(),
+        )

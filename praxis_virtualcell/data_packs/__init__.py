@@ -9,7 +9,7 @@ from praxis_virtualcell.data_packs.feature_alignment import (
 )
 from praxis_virtualcell.data_packs.manifest import PackManifest, load_manifest
 from praxis_virtualcell.data_packs.mudata_adapter import CanonicalMuDataView, load_mudata_view
-from praxis_virtualcell.data_packs.registry import PackRegistry
+from praxis_virtualcell.data_packs.registry import PackRegistry, RegisteredPack
 from praxis_virtualcell.data_packs.validator import validate_pack
 
 __all__ = [
@@ -20,6 +20,7 @@ __all__ = [
     "ModelFeatureContract",
     "PackManifest",
     "PackRegistry",
+    "RegisteredPack",
     "align_features",
     "load_anndata_view",
     "load_manifest",

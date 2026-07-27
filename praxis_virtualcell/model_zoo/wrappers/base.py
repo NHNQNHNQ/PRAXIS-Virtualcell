@@ -9,13 +9,75 @@ retrieve-before-predict 门),补两个显式治理方法:
 """
 from __future__ import annotations
 
+import math
 from abc import abstractmethod
 
+from praxis_virtualcell.core.request_v2 import _json_value
 from praxis_virtualcell.predictors.base import PredictorAgent
+
+
+def _finite_runtime_number(value) -> bool:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:
+        return False
 
 
 class ModelWrapper(PredictorAgent):
     name = "ModelWrapper"
+
+    @classmethod
+    def from_capability(cls, *, card, compatibility_report, asset_paths):
+        """Construct and bind a zero-argument plugin after broker validation."""
+        instance = cls()
+        instance.name = card.name
+        instance.model_version = card.version
+        instance._capability_card = card
+        instance._compatibility_report = compatibility_report
+        instance._capability_assets = dict(asset_paths)
+        return instance
+
+    @property
+    def capability_assets(self) -> dict[str, str]:
+        return dict(getattr(self, "_capability_assets", {}))
+
+    def assess_applicability(self, request: dict, brain_context: dict) -> tuple[float, str | None]:
+        report = getattr(self, "_compatibility_report", None)
+        if report is not None:
+            if report.executable:
+                return 1.0, None
+            return 0.0, "broker_compatibility_rejected"
+        return super().assess_applicability(request, brain_context)
+
+    def _result_status(self, out: dict) -> tuple[str, str | None]:
+        card = getattr(self, "_capability_card", None)
+        if card is None:
+            return super()._result_status(out)
+        _json_value(out, "$.plugin_output")
+        if (
+            card.task != "predict_delta_expression"
+            or "delta_expression" not in card.output
+        ):
+            return "rejected", "runtime_output_adapter_missing"
+        delta = out.get("prediction", {}).get("delta")
+        if (
+            not isinstance(delta, list)
+            or not delta
+            or any(not _finite_runtime_number(value) for value in delta)
+        ):
+            return "rejected", "prediction_contract_delta"
+        ood = out.get("ood") or {}
+        if ood.get("detected"):
+            dimensions = ood.get("dimensions") or []
+            return "rejected", f"ood:{dimensions}"
+        uncertainty = out.get("uncertainty")
+        if card.uncertainty.required and not isinstance(uncertainty, dict):
+            return "rejected", "uncertainty_contract_missing"
+        if isinstance(uncertainty, dict) and uncertainty.get("method") not in card.uncertainty.methods:
+            return "rejected", "uncertainty_contract_method"
+        return super()._result_status(out)
 
     @abstractmethod
     def declare_scope(self) -> dict:

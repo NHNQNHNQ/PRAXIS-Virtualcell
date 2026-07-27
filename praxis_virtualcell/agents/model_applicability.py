@@ -15,7 +15,7 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.predictors.case_dispatch import REAL_ENGINES, gears_available
 
-_CANDIDATES = ("MockLinear", "MockCPA", "MockGEARS")
+_LEGACY_CANDIDATES = ("MockLinear", "MockCPA", "MockGEARS")
 _DEFAULT_ORIGIN = "human"            # predictor 母种缺省(可被 model_applicability[name].native_host 覆盖)
 _GENE_PERTS = ("gene", "gene_combination")
 
@@ -61,7 +61,7 @@ class ModelApplicabilityAgent(BaseAgent):
         rejection_reasons: dict[str, dict] = {}   # §7.5 {predictor: {reason}}
         rules_hit: list[str] = []                 # 本次命中的具体规则名
 
-        for name in _CANDIDATES:
+        for name in _LEGACY_CANDIDATES:
             rules = appmap.get(name) or {}
             origin = rules.get("native_host", _DEFAULT_ORIGIN)
             nt_rule = next((nt.get("rule") for nt in neg_transfer
@@ -107,3 +107,7 @@ class ModelApplicabilityAgent(BaseAgent):
             "EnsembleCoordinator", "applicability_decided",
             {"request": req, "brain_context": bc2, "applicable": applicable,
              "rejected_candidates": rejected}, message.timestamp, message.message_id))
+
+
+class LegacyModelApplicabilityAdapter(ModelApplicabilityAgent):
+    """Explicit no-Pack adapter preserving the frozen P0 candidate/dispatch behavior."""

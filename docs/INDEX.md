@@ -37,6 +37,7 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [Versioning Contract](VERSIONING.md) | implemented product/protocol/schema/artifact version boundaries and release invariants |
 | [Testing Guide](TESTING.md) | current local commands, exact scopes, external gates, and GitHub-CI evidence boundary |
 | [VirtualCellPack P5 → P6 Handoff](HANDOFF-VIRTUALCELLPACK-P5-TO-P6.md) | local P5 implementation, exact strict-lock evidence, limitations and next exact-SHA authorization gate |
+| [VirtualCellPack P6 → P7 Handoff](HANDOFF-VIRTUALCELLPACK-P6-TO-P7.md) | local P6 capability-runtime implementation, exact tests, limitations and next exact-SHA authorization gate |
 | [Repository Layout](REPOSITORY-LAYOUT.md) | tracked-tree responsibilities and evidence-versus-generated policy |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | highest authority for met/narrowed/needs-new/unsupported scientific claims |
 
@@ -65,8 +66,10 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Scientific Assets](status/SCIENTIFIC-ASSETS-2026-07-18.md) | packaged advisory assets versus source-only research data and non-distributable remote checkpoints |
 | [v0.8 Architecture Baseline](ARCHITECTURE-v0.8-baseline.md) | frozen historical baseline at `7fc4aa5`; not the current test count or full Phase 10 architecture |
 | [VirtualCellPack P5 ADR](ADR-0003-virtualcellpack-p5-multiomics-alignment.md) | H5MU paired/partially-paired semantics, strict model feature contracts, explicit alignment and three-layer validity boundary |
-| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P5 implementation/status matrix; separates `pack_valid`, `model_compatible`, and `scientifically_validated` |
+| [VirtualCellPack P6 ADR](ADR-0004-virtualcellpack-p6-capability-runtime.md) | strict model cards, four-factor compatibility, deterministic execution plans, plugin runtime and explicit legacy boundary |
+| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P6 implementation/status matrix; separates `pack_valid`, `model_compatible`, executable and `scientifically_validated` |
 | [VirtualCellPack Multiomics Runbook](runbooks/VIRTUALCELLPACK-MULTIOMICS.md) | tiny RNA+protein fixture generation, hash binding, P5 tests and asset-update rules |
+| [VirtualCellPack Capability Runtime Runbook](runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md) | local model card/cache/Pack assembly, execution-plan audit and fail-closed reason handling |
 | [Provenance](../PROVENANCE.md) | repository derivation from PRAXIS-2 and bootstrap evidence |
 
 ## Release and version history
