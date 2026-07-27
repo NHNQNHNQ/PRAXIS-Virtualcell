@@ -1,8 +1,9 @@
 # ADR-0002：VirtualCellPack P4 标准语义层
 
-- 状态：Accepted（P4）
+- 状态：Accepted（P4；P4.2 兼容性收口）
 - 日期：2026-07-27
-- 唯一起始基线：`ac0fea48c6e8b0fdf27eff9c0852ee43035ff97a`
+- P4 唯一起始基线：`ac0fea48c6e8b0fdf27eff9c0852ee43035ff97a`
+- P4.2 唯一起始基线：`04c0ad1146f1da6e9606d329e24e529e3f75e8c9`
 - 范围：Pack 内物种、细胞、特征、条件、扰动和 named split 的离线确定性语义验证。
 - 明确不做：在线 ontology 查询、ontology 自动补全、ortholog projection、随机划分、数据归一、模型接入、权重或大数据入 Git、UI 修改。
 
@@ -26,7 +27,12 @@ P4 新增 `vc.pack.v0.2`，保留 `vc.pack.v0.1` 的解析、序列化和 finger
 - `state`：处理前生物状态；
 - `context`：组织、培养基或其他实验语境。
 
-标准术语按角色离线绑定：identity 接受 `CL:` 与 Cellosaurus 的 `cellosaurus:XXXX` CURIE/`CVCL_XXXX` accession；context 接受 `UBERON:`；state 必须使用显式本地术语。manifest `local_terms` 必须以 `id`、`role`、`label`、`definition` 完整声明本地 CURIE，且只能用于声明的 identity/state/context 角色。Runtime 只做语法、前缀、角色和本地定义校验，不访问网络，也不声称验证了外部 ontology 当前版本中的术语存在性。
+标准术语按角色离线绑定：identity 接受 `CL:` 与 Cellosaurus 的正式
+`CVCL_XXXX` accession，不接受自造的 `cellosaurus:XXXX` CURIE；context 接受
+`UBERON:`；state 必须使用显式本地术语。manifest `local_terms` 必须以 `id`、
+`role`、`label`、`definition` 完整声明本地 CURIE，且只能用于声明的
+identity/state/context 角色。Runtime 只做语法、前缀、角色和本地定义校验，
+不访问网络，也不声称验证了外部 ontology 当前版本中的术语存在性。
 
 ### conditions、perturbations 与 control
 
@@ -50,13 +56,33 @@ v0.2 split 必须是 `predefined`、有非空 `name`、列出全部 partition，
 5. control matching、dose/time 与 leakage guard；
 6. 仅在全部通过后返回 `CanonicalOmicsView`。
 
-`CanonicalOmicsView.canonical_key` 包含 taxon、assembly、选中的 observation/feature、
-cell identity/state/context、condition、perturbation kind/target、matched control、
-dose/time、named split、shape 与 matrix mapping；display-only symbol 和 matrix 数值
-明确不属于该 key。`PackRegistry` 对 v0.2 必须走同一 H5AD 语义 loader，缺少
-`omics` 依赖时拒绝登记，不得降级成仅 manifest/hash 有效。
+`CanonicalOmicsView.canonical_key` 包含 schema、taxon、assembly、modality、
+feature namespace/version、feature ID 语义、完整本地术语定义、condition 与
+perturbation catalog、split 策略/声明 partition/leakage guard，以及选中的
+observation/feature、cell identity/state/context、condition、perturbation
+kind/target、matched control、dose/time、named split、shape 与 matrix mapping。
+source column 名、display-only symbol 和 matrix 数值明确不属于该 key；它们不是
+Pack 声明的科学身份。上述值保持 manifest 声明顺序，不静默排序、去重或归一。
+
+`PackRegistry` 对 v0.2 必须走同一 H5AD 语义 loader，缺少 `omics` 依赖时拒绝
+登记，不得降级成仅 manifest/hash 有效。registry 只能保存该 loader 实际验证并
+返回的 manifest 快照，不能先按一个版本分支、再登记另一次读取所得的较弱或未验证
+对象。
 
 该层只证明 `pack_valid` 的结构与语义部分，不推导 `model_compatible` 或 `scientifically_validated`。LLM 不参与任何验证或裁决。
+
+## P4.2 兼容性收口
+
+P4.2 不新增能力，只封闭审计发现的既有契约缝隙：
+
+- v0.2 registry 的版本分支和登记对象绑定到已验证快照；
+- manifest 本身必须解析在 Pack root 内，symlink 不得逃逸；
+- YAML 不可哈希 mapping key 转换为稳定的 `PackManifestError` 边界；
+- P1 versioned request/domain/bundle 的 JSON mapping 在验证后递归不可变；
+- P0 两个代表性离线报告 SHA-256 由可执行测试固定。
+
+这些修复不改变 `vc.pack.v0.1` fingerprint、不生成 Pack、不加载模型，也不扩展
+Phase 5 的 target namespace/kind 映射。
 
 ## 验证 fixture
 

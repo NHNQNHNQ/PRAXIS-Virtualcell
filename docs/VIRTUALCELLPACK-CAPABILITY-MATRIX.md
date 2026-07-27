@@ -1,10 +1,10 @@
-# VirtualCellPack 能力矩阵（P0–P4）
+# VirtualCellPack 能力矩阵（P0–P4.2）
 
-P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P4 起始基线：`ac0fea48c6e8b0fdf27eff9c0852ee43035ff97a`。本表是能力与证据边界，不是性能排名；`valid`、`conditional`、`unknown` 不得互换。
+P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P4 起始基线：`ac0fea48c6e8b0fdf27eff9c0852ee43035ff97a`；P4.2 起始基线：`04c0ad1146f1da6e9606d329e24e529e3f75e8c9`。本表是能力与证据边界，不是性能排名；`valid`、`conditional`、`unknown` 不得互换。
 
 | 能力/组件 | 当前实现与真相源 | `pack_valid` | `model_compatible` | `scientifically_validated` | 结论与边界 |
 |---|---|---:|---:|---:|---|
-| 结构化 request | `core/request.py`、`agents/request_adapter.py`、`species_schema.py` | N/A | 输入前置 | N/A | 必填字段缺失由 schema fail-closed；不猜测 targets/output |
+| 结构化 request | `core/request.py`、`core/request_v2.py`、`agents/request_adapter.py`、`species_schema.py` | N/A | 输入前置 | N/A | 必填字段缺失由 schema fail-closed；v2/domain/bundle nested JSON 验证后递归不可变；不猜测 targets/output |
 | 确定性 runtime | `core/runtime.py`、`workflows/run_virtualcell_query.py`、MessageBus | 未加载 | 由 applicability/route/case gate 决定 | 不自动声称 | OFFLINE 零 LLM；trace、hash、governance 保持确定性 |
 | SpeciesBrain | `agents/species_brain.py` + `brains/virtualcell/**` | N/A | 提供规则上下文，不裁决 | 不提供 | 只读 YAML、登记 rules_referenced；不产数值 |
 | route table | `agents/route_table.py` | N/A | 声明式条件性 | 不提供 | engine/disposition/reason 是能力图，不是性能结论 |
@@ -14,9 +14,9 @@ P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P4 起始基线：`ac0f
 | ActiveLearning | `active_learning/active_learning_agent.py`、`acquisition.py` | N/A | 不负责兼容性 | 不负责验证 | 只生成 advisory queue；不改 prediction/verdict/abstain/provenance 真相 |
 | Governance | `governance/*`、runtime gates | N/A | fail-closed 边界 | 只检查契约/evidence | provenance、module、cell type、narrative/hash gate 不能被 LLM 绕过 |
 | LLM 外层 | `agents_llm/*`、`llm_orchestration/*` | N/A | 只能建议 | 不可裁决 | 只能解析/解释/critic/narrative；确定性 runtime wins |
-| 测试口径 | `praxis_virtualcell/tests/baseline`、golden/negative、`docs/TESTING.md` | N/A | route/dispatch/registry contract | validation evidence 需独立 runbook | core、legacy、remote、LLM 分口径；skip 不等于通过 |
-| Pack manifest v0.1 | `data_packs/manifest.py`、`validator.py` | strict schema + path/size/hash 后可为 valid | 不提供 | 不提供 | P2/P3 fingerprint 与 read-only H5AD 合同保持兼容 |
-| Pack semantic v0.2 | `data_packs/schema.py`、`anndata_adapter.py`、`registry.py`、ADR-0002 | manifest、asset 与 P4 全部语义门通过后可为 valid；registry 不授予较弱状态 | 不提供 | 不提供 | NCBITaxon/assembly、role-bound cell semantics、canonical feature、FK/control/unit/split/leakage 与 canonical metadata key 均 fail-closed；缺 omics 不降级 |
+| 测试口径 | `praxis_virtualcell/tests/baseline`、golden/negative、`docs/TESTING.md` | N/A | route/dispatch/registry contract | validation evidence 需独立 runbook | core、legacy、remote、LLM 分口径；P0 报告字节 hash 由测试固定；skip 不等于通过 |
+| Pack manifest v0.1 | `data_packs/manifest.py`、`validator.py` | strict schema + root-bound manifest/path/size/hash 后可为 valid | 不提供 | 不提供 | P2/P3 fingerprint 与 read-only H5AD 合同保持兼容；YAML 错误保持 Pack 异常边界 |
+| Pack semantic v0.2 | `data_packs/schema.py`、`anndata_adapter.py`、`registry.py`、ADR-0002 | manifest、asset 与 P4 全部语义门通过后可为 valid；registry 保存语义 loader 的已验证快照，不授予较弱状态 | 不提供 | 不提供 | NCBITaxon/assembly、role-bound cell semantics、正式 `CVCL_XXXX`、canonical feature、FK/control/unit/split/leakage 与完整 manifest canonical key 均 fail-closed；缺 omics 不降级 |
 | Ontology 与跨物种边界 | manifest 中的标准 CURIE 或有定义 local CURIE | 仅离线语法/声明验证 | 不推导 | 不推导 | 无在线 ontology runtime 依赖；无 symbol、ortholog 或同源转换 fallback |
 
 ## 现有模型/引擎状态摘要

@@ -239,6 +239,32 @@ def test_non_json_request_fields_fail_closed(field, value):
         VirtualCellRequestV2.from_dict({**REQUEST_V2, field: value})
 
 
+def test_validated_domain_objects_are_deeply_immutable():
+    payload = json.loads(json.dumps(REQUEST_V2))
+    payload["metadata"] = {"nested": {"items": ["original"]}}
+    request = VirtualCellRequestV2.from_dict(payload)
+    model_input = ModelInputBundle.from_dict(MODEL_INPUT)
+    prediction = PredictionBundle.from_dict(PREDICTION)
+
+    mappings = (
+        request.cell_context.attributes,
+        request.baseline_context,
+        request.metadata,
+        request.constraints,
+        model_input.metadata,
+        prediction.provenance,
+    )
+    for mapping in mappings:
+        with pytest.raises(TypeError):
+            mapping["post_validation_mutation"] = True
+    with pytest.raises(TypeError):
+        request.metadata["nested"]["added"] = True
+    with pytest.raises(TypeError):
+        request.metadata["nested"]["items"][0] = "changed"
+
+    assert request.to_dict() == payload
+
+
 def test_dataset_reference_requires_content_hash():
     without_hash = {key: value for key, value in DATASET.items() if key != "sha256"}
 

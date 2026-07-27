@@ -1,5 +1,6 @@
 """Phase 0 基线特征化:pin v0.8 离线行为,升级过程若改变则红灯。
 只读断言现有行为;若与期望不符=升级引入的真实回归,停下排查,不改此测试迁就。"""
+import hashlib
 import json
 from pathlib import Path
 
@@ -44,3 +45,30 @@ def test_offline_report_md_has_nine_sections():
     # 9 段:段落编号 1..9 全在
     for n in range(1, 10):
         assert f"## {n}." in md, f"报告缺第 {n} 段"
+
+
+def test_offline_report_bytes_match_frozen_p0_hashes():
+    req, out = _offline_result()
+    structured = json.dumps(
+        out["structured_report"],
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
+    markdown = render_report_md(
+        {
+            "report": out["structured_report"],
+            "request": req,
+            "provenance": out["provenance"],
+            "mode": out["mode"],
+            "llm_enabled": out["llm_enabled"],
+        }
+    ).encode("utf-8")
+
+    assert hashlib.sha256(structured).hexdigest() == (
+        "27a16eef2493bf953c4e572f3480d9c80e4013b5f92ebca4b8bfe0f59722228b"
+    )
+    assert hashlib.sha256(markdown).hexdigest() == (
+        "ed4b03d12e9618a7685a19106609f2ec0b0461ccf533c6beec20e7318ec7898a"
+    )

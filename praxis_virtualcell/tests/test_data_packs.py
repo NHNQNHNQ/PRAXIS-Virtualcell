@@ -139,6 +139,25 @@ def test_duplicate_yaml_keys_fail_closed(tmp_path):
         load_manifest(manifest_path)
 
 
+def test_unhashable_yaml_mapping_key_uses_pack_error_boundary(tmp_path):
+    manifest_path = tmp_path / "manifest.yaml"
+    manifest_path.write_text("? [a, b]\n: value\n", encoding="utf-8")
+
+    with pytest.raises(PackManifestError, match="unhashable"):
+        load_manifest(manifest_path)
+
+
+def test_manifest_symlink_must_not_escape_pack_root(tmp_path):
+    pack = tmp_path / "pack"
+    shutil.copytree(_VALID, pack)
+    outside = tmp_path / "outside-manifest.yaml"
+    (pack / "manifest.yaml").replace(outside)
+    (pack / "manifest.yaml").symlink_to(outside)
+
+    with pytest.raises(PackManifestError, match="manifest.*root"):
+        validate_pack(pack)
+
+
 def test_windows_absolute_asset_path_fails_closed():
     raw = _raw_valid()
     raw["assets"][0]["path"] = "C:/data/counts.csv"

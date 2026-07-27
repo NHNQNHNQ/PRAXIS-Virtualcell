@@ -14,6 +14,9 @@
 - 9 段 Markdown SHA-256：`ed4b03d12e9618a7685a19106609f2ec0b0461ccf533c6beec20e7318ec7898a`
 - 报告包含完整 `request`；首个 ActiveLearning candidate：`genetic_hub@human:AHR`
 - 该哈希是在 P0 request seam 修复后冻结；后续阶段若改变报告字节，必须更新版本化基线并说明原因。
+- P4.2 起，上述两个 SHA-256 也由
+  `praxis_virtualcell/tests/baseline/test_baseline_offline_report.py` 直接断言，文档值与
+  可执行基线不得分离。
 
 ## 测试冻结口径
 

@@ -14,6 +14,7 @@ from praxis_virtualcell.data_packs.errors import (
     OmicsDependencyError,
     OmicsMappingError,
 )
+from praxis_virtualcell.data_packs.manifest import PackManifest
 from praxis_virtualcell.data_packs.validator import resolve_asset_path, validate_pack
 
 _H5AD_MEDIA_TYPES = {"application/vnd.anndata+hdf5", "application/x-hdf5"}
@@ -21,7 +22,6 @@ _CELL_CURIE = re.compile(r"^[A-Za-z][A-Za-z0-9._-]*:[A-Za-z0-9][A-Za-z0-9._-]*$"
 _STANDARD_CELL_IDS = {
     "identity": (
         re.compile(r"^CL:[0-9]+$"),
-        re.compile(r"^cellosaurus:[A-Z0-9]{4}$"),
         re.compile(r"^CVCL_[A-Z0-9]{4}$"),
     ),
     "state": (),
@@ -137,6 +137,51 @@ class _SemanticColumns:
     doses: tuple[tuple[float, str], ...]
     times: tuple[tuple[float, str], ...]
     split_name: str
+
+
+def _manifest_semantics(manifest: PackManifest) -> tuple[Any, ...]:
+    feature_semantics = manifest.feature_semantics
+    cell_semantics = manifest.cell_semantics
+    conditions = manifest.conditions
+    perturbations = manifest.perturbations
+    return (
+        manifest.schema_version,
+        (manifest.taxon.ontology_id, manifest.taxon.scientific_name),
+        (manifest.assembly.name, manifest.assembly.accession),
+        (manifest.modality.name, manifest.modality.ontology_id),
+        (manifest.feature_namespace.name, manifest.feature_namespace.version),
+        (
+            None
+            if feature_semantics is None
+            else (feature_semantics.id_source, feature_semantics.id_format)
+        ),
+        (
+            ()
+            if cell_semantics is None
+            else tuple(
+                (term.id, term.role, term.label, term.definition)
+                for term in cell_semantics.local_terms
+            )
+        ),
+        (
+            (manifest.condition.values, manifest.condition.control)
+            if manifest.condition is not None
+            else (conditions.values, None)
+        ),
+        (
+            ()
+            if perturbations is None
+            else tuple(
+                (value.id, value.kind, value.targets) for value in perturbations.values
+            )
+        ),
+        (
+            manifest.split.strategy,
+            manifest.split.values,
+            manifest.split.name,
+            manifest.split.leakage_guard,
+        ),
+    )
 
 
 def _validate_p4_semantics(adata, manifest, feature_ids, splits) -> _SemanticColumns:
@@ -390,6 +435,8 @@ class CanonicalOmicsView:
     split_name: str | None
     matrix_location: Literal["X"]
     matrix_format: Literal["csr", "csc", "dense"]
+    manifest_semantics: tuple[Any, ...]
+    manifest: PackManifest = field(repr=False, compare=False)
     _adata: Any = field(repr=False, compare=False)
 
     @property
@@ -429,6 +476,7 @@ class CanonicalOmicsView:
             self.shape,
             self.matrix_location,
             self.matrix_format,
+            self.manifest_semantics,
         )
 
     @property
@@ -611,6 +659,8 @@ def load_anndata_view(
             split_name=None if semantics is None else semantics.split_name,
             matrix_location=manifest.matrix.location,
             matrix_format=_matrix_format(matrix),
+            manifest_semantics=_manifest_semantics(manifest),
+            manifest=manifest,
             _adata=selected,
         )
     except Exception:

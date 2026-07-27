@@ -55,7 +55,11 @@ def validate_pack(pack_root: str | Path) -> PackManifest:
     if not root.is_dir():
         raise PackManifestError(f"Pack root is not a directory: {root_path}")
 
-    manifest = load_manifest(root / "manifest.yaml")
+    try:
+        manifest_path = resolve_asset_path(root, "manifest.yaml")
+    except (PackAssetMissing, PackPathError) as exc:
+        raise PackManifestError(f"Pack manifest must remain inside Pack root: {exc}") from exc
+    manifest = load_manifest(manifest_path)
     for asset in manifest.assets:
         path = resolve_asset_path(root, asset.path)
         actual_size = path.stat().st_size

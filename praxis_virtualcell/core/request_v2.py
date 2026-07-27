@@ -106,8 +106,39 @@ def _json_value(value: Any, path: str = "$") -> Any:
     raise ValueError(f"{path} contains non-JSON type {type(value).__name__}")
 
 
+class _FrozenDict(dict):
+    @staticmethod
+    def _immutable(*args, **kwargs):
+        raise TypeError("validated domain JSON is immutable")
+
+    __setitem__ = _immutable
+    __delitem__ = _immutable
+    clear = _immutable
+    pop = _immutable
+    popitem = _immutable
+    setdefault = _immutable
+    update = _immutable
+    __ior__ = _immutable
+
+    def __deepcopy__(self, memo):
+        return self
+
+
+def _freeze_json(value: Any) -> Any:
+    if isinstance(value, dict):
+        return _FrozenDict({key: _freeze_json(item) for key, item in value.items()})
+    if isinstance(value, list):
+        return tuple(_freeze_json(item) for item in value)
+    return value
+
+
 class _VersionedDomainObject(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
+
+    def model_post_init(self, __context: Any) -> None:
+        for name, value in self.__dict__.items():
+            if isinstance(value, dict):
+                object.__setattr__(self, name, _freeze_json(value))
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]):
@@ -529,7 +560,8 @@ def v2_request_to_legacy(request: VirtualCellRequestV2):
     ):
         raise InputValidationError("v2-only context cannot be silently discarded by the legacy adapter")
 
-    metadata = deepcopy(request.metadata)
+    serialized = request.to_dict()
+    metadata = serialized["metadata"]
     requested_outputs = list(request.task.requested_outputs)
     existing_outputs = metadata.get("requested_outputs")
     if existing_outputs is not None and existing_outputs != requested_outputs:
@@ -550,8 +582,8 @@ def v2_request_to_legacy(request: VirtualCellRequestV2):
             "tissue": request.cell_context.tissue_name,
             "perturbation_dose": request.perturbation.dose_value,
             "perturbation_time": request.perturbation.timepoint,
-            "baseline_context": deepcopy(request.baseline_context),
+            "baseline_context": serialized["baseline_context"],
             "metadata": metadata,
-            "constraints": deepcopy(request.constraints),
+            "constraints": serialized["constraints"],
         }
     )

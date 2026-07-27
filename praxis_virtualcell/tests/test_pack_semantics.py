@@ -15,6 +15,7 @@ import pytest
 import yaml
 from scipy import sparse
 
+from praxis_virtualcell.data_packs import registry as registry_module
 from praxis_virtualcell.data_packs.anndata_adapter import load_anndata_view
 from praxis_virtualcell.data_packs.errors import (
     OmicsDataError,
@@ -334,6 +335,16 @@ def test_standard_cell_ids_are_bound_to_their_semantic_role(tmp_path, field, val
         load_anndata_view(pack)
 
 
+def test_nonstandard_cellosaurus_curie_fails_closed(tmp_path):
+    source = _fixture("human")
+    for observation in source["fixture_observations"]:
+        observation["cell_identity_id"] = "cellosaurus:0004"
+    pack = _write_pack(tmp_path / "pack", source)
+
+    with pytest.raises(OmicsDataError, match="undefined local CURIE"):
+        load_anndata_view(pack)
+
+
 def test_local_cell_terms_are_bound_to_their_declared_semantic_role(tmp_path):
     source = _fixture("human")
     for observation in source["fixture_observations"]:
@@ -380,6 +391,48 @@ def test_canonical_key_includes_perturbation_target_mapping(tmp_path):
         assert first.canonical_key != second.canonical_key
 
 
+@pytest.mark.parametrize(
+    "difference",
+    [
+        "modality",
+        "feature_namespace_version",
+        "local_term_definition",
+        "leakage_guard",
+        "unused_perturbation",
+    ],
+)
+def test_canonical_key_includes_pack_level_scientific_semantics(tmp_path, difference):
+    first_source = _fixture("human")
+    second_source = _fixture("human")
+    if difference == "modality":
+        second_source["modality"] = {"name": "ATAC", "ontology_id": "EFO:0007045"}
+    elif difference == "feature_namespace_version":
+        second_source["feature_namespace"]["version"] = "Ensembl-999"
+    elif difference == "local_term_definition":
+        second_source["cell_semantics"]["local_terms"][0][
+            "definition"
+        ] = "A scientifically different state definition."
+    elif difference == "leakage_guard":
+        second_source["split"]["leakage_guard"].remove("donor_id")
+    else:
+        second_source["perturbations"]["values"].append(
+            {
+                "id": "perturbation:unused",
+                "kind": "genetic",
+                "targets": ["ENSG00000106546"],
+            }
+        )
+
+    first_pack = _write_pack(tmp_path / "first", first_source)
+    second_pack = _write_pack(tmp_path / "second", second_source)
+
+    with (
+        load_anndata_view(first_pack) as first,
+        load_anndata_view(second_pack) as second,
+    ):
+        assert first.canonical_key != second.canonical_key
+
+
 def test_canonical_key_covers_all_p4_scientific_metadata(tmp_path):
     pack = _write_pack(tmp_path / "pack", _fixture("human"))
 
@@ -404,6 +457,7 @@ def test_canonical_key_covers_all_p4_scientific_metadata(tmp_path):
             view.shape,
             view.matrix_location,
             view.matrix_format,
+            view.manifest_semantics,
         )
 
 
@@ -424,6 +478,48 @@ def test_registry_registers_v02_only_after_semantic_validation(tmp_path):
 
     assert manifest.schema_version == "vc.pack.v0.2"
     assert registry.get(manifest.pack_id, manifest.pack_version) is manifest
+
+
+def test_registry_cannot_switch_v01_candidate_to_invalid_v02(tmp_path, monkeypatch):
+    source = _fixture("human")
+    source["fixture_observations"][1]["condition_id"] = "condition:not-declared"
+    pack = _write_pack(tmp_path / "pack", source)
+    manifest_path = pack / "manifest.yaml"
+    invalid_v02 = manifest_path.read_text(encoding="utf-8")
+
+    v01_candidate = yaml.safe_load(invalid_v02)
+    v01_candidate["schema_version"] = "vc.pack.v0.1"
+    for field in (
+        "feature_semantics",
+        "cell_semantics",
+        "conditions",
+        "perturbations",
+    ):
+        v01_candidate.pop(field)
+    v01_candidate["condition"] = {
+        "field": "condition_id",
+        "values": ["placeholder"],
+        "control": "placeholder",
+    }
+    v01_candidate["split"].pop("name")
+    v01_candidate["split"].pop("leakage_guard")
+    manifest_path.write_text(
+        yaml.safe_dump(v01_candidate, sort_keys=False),
+        encoding="utf-8",
+    )
+
+    real_validate = registry_module.validate_pack
+
+    def switch_to_v02(pack_root):
+        manifest_path.write_text(invalid_v02, encoding="utf-8")
+        return real_validate(pack_root)
+
+    monkeypatch.setattr(registry_module, "validate_pack", switch_to_v02)
+    registry = PackRegistry()
+
+    with pytest.raises(OmicsDataError, match="unknown condition"):
+        registry.register(pack)
+    assert registry.keys() == []
 
 
 def test_registry_does_not_fallback_when_v02_omics_dependency_is_unavailable(

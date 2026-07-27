@@ -41,6 +41,15 @@ class _UniqueKeyLoader(yaml.SafeLoader):
         mapping = {}
         for key_node, value_node in node.value:
             key = self.construct_object(key_node, deep=deep)
+            try:
+                hash(key)
+            except TypeError as exc:
+                raise ConstructorError(
+                    "while constructing a mapping",
+                    node.start_mark,
+                    f"unhashable mapping key: {key!r}",
+                    key_node.start_mark,
+                ) from exc
             if key in mapping:
                 raise ConstructorError(
                     "while constructing a mapping",
