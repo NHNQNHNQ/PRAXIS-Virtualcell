@@ -43,3 +43,7 @@ ruff check .
 | legacy unit | `1139 passed / 58 skipped / 105 deselected / 1 failed` | 唯一失败为继承 `tests/test_mcp_pool.py::test_pool_slow_server_startup_timeout_skipped`：slow 与 good MCP server 均握手超时；未改继承模块 |
 
 `docs/TESTING.md` 中的 fresh-lock 目标数字（core `965/35/9`、legacy `1139/59/105`）保留为仓库质量契约；本次报告使用的是实际执行环境数字，不把环境差异冒充为绿勾。
+
+P0 表中的 MCP 失败是当时环境的冻结证据，不回写历史。P4.3 从
+`eaa9a4067518ab80591ffec7f033b248b43ed951` 另行测试先行关闭该问题；当前证据与
+边界见 `docs/HANDOFF-VIRTUALCELLPACK-P4-TO-P5.md`。

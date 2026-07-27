@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass, field
 
 
@@ -13,6 +14,23 @@ class MCPServerSpec:
     command: str         # 可执行(注意:必须指向有 mcp lib 的解释器)
     args: list[str] = field(default_factory=list)
     env: dict[str, str] = field(default_factory=dict)
+    startup_timeout_s: float | None = None  # None=pool 默认；可按 server 覆盖
+
+    def __post_init__(self) -> None:
+        timeout = self.startup_timeout_s
+        if timeout is None:
+            return
+        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)):
+            raise ValueError("startup_timeout_s must be a finite positive number")
+        try:
+            timeout = float(timeout)
+        except OverflowError as exc:
+            raise ValueError(
+                "startup_timeout_s must be a finite positive number"
+            ) from exc
+        if not math.isfinite(timeout) or timeout <= 0:
+            raise ValueError("startup_timeout_s must be a finite positive number")
+        self.startup_timeout_s = timeout
 
 
 def parse_mcp_servers(json_str: str) -> list[MCPServerSpec]:
@@ -59,5 +77,6 @@ def parse_mcp_servers(json_str: str) -> list[MCPServerSpec]:
             command=str(command),
             args=list(raw_args),
             env=dict(raw_env),
+            startup_timeout_s=item.get("startup_timeout_s"),
         ))
     return specs

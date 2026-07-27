@@ -23,6 +23,33 @@
 
 核心结果与根 `tests/` 不能相加成一个“总通过数”。前者是 VirtualCell 发布权威口径；后者是继承的 PRAXIS-2 unit 范围。Phase 10 的 `912/40/9` 是新增产品版本契约测试之前的冻结证据，不应在原报告中回写成新数字。
 
+### P4.3 legacy/MCP 本地收口
+
+P4.3 以 `eaa9a4067518ab80591ffec7f033b248b43ed951` 为唯一起始基线。旧
+`test_pool_slow_server_startup_timeout_skipped` 把 1 秒 pool 预算同时施加给 slow
+fixture 和正常 FastMCP 冷启动；当前本机正常启动实测约 `3.15–3.34s`，因此两者
+都被误判超时。
+
+修复后 `PRAXIS_MCP_SERVERS_JSON` 的每个条目可声明可选
+`startup_timeout_s`。未声明时沿用 pool 默认 10 秒；声明值必须是有限正数，否则
+启动配置 fail-fast。slow fixture 仍使用 1 秒，good fixture 使用 10 秒，没有
+skip 或放宽 slow 断言。
+
+当前实际结果：
+
+```text
+MCP 红灯：7 failed / 12 passed
+超大整数异常边界红灯：1 failed / 18 passed
+MCP 收口：20 passed / 0 failed
+锁文件目标顶层版本 mcp 1.28.1 / anyio 4.14.2 定向：37 passed / 0 failed
+VirtualCell core：1104 passed / 43 skipped / 9 deselected / 0 failed
+legacy：1147 passed / 58 skipped / 105 deselected / 0 failed
+ruff check . --no-cache：All checks passed
+```
+
+完整 core/legacy 使用当前 Python 3.13 环境；锁版本 MCP 定向使用临时
+system-site venv 覆盖顶层 `mcp/anyio`，不冒充完整 fresh hash-lock 安装。
+
 ## 本地复现
 
 ```bash

@@ -1,21 +1,44 @@
-# VirtualCellPack Phase 4.2 → Phase 5 交接
+# VirtualCellPack Phase 4.3 → Phase 5 交接
 
 - 收口日期：2026-07-27（Asia/Shanghai）
-- P4.2 唯一起始基线：`04c0ad1146f1da6e9606d329e24e529e3f75e8c9`
-- 分支：`codex/p4.2`
-- 状态：`P4_2_COMPLETE_LOCAL_CANDIDATE — PHASE5_AUTHORIZATION_PENDING`
+- P4.3 唯一起始基线：`eaa9a4067518ab80591ffec7f033b248b43ed951`
+- 分支：`codex/p4.3`
+- 状态：`P4_3_COMPLETE_LOCAL_CANDIDATE — PHASE5_AUTHORIZATION_PENDING`
 - 完成提交：由提交后的阶段报告给出；Git commit 不能可靠地自嵌其 SHA。
 
 ## 1. 结论
 
-P4.1 审查发现的 B1、B2、H1、M1、M2，以及随后复核发现的七项 P5 前契约缺陷，
-均已按“先失败测试、后最小实现”收口。没有实施 Phase 5，没有新增模型、Pack
-loader、UI、在线 ontology 依赖或跨物种转换。
+P4.3 已关闭 P4.2 唯一 legacy 失败：坏 MCP server 仍可使用 1 秒 fail-closed
+握手预算，正常 FastMCP server 不再被同一测试阈值误杀。此前 P4.1/P4.2 的收口
+保持不变。没有实施 Phase 5，没有新增模型、Pack loader、UI、在线 ontology
+依赖或跨物种转换。
 
-Phase 5 应在新任务中进行，并且只能使用阶段报告给出的 P4.2 完成 SHA 作为唯一
-起始基线。不得继续使用 P4 SHA `f983518a...` 或 P4.1 SHA `04c0ad...`。
+Phase 5 应在新任务中进行，并且只能使用阶段报告给出的 P4.3 完成 SHA 作为唯一
+起始基线。不得继续使用 P4.2 SHA `eaa9a406...`。
 
-## 2. P4.2 收口内容
+## 2. P4.3 legacy/MCP 收口
+
+### 根因
+
+旧测试把 pool 级 `startup_timeout_s=1.0` 同时施加给不讲 MCP 协议的 slow
+server 和正常 FastMCP echo server。当前本机正常 server 冷启动实测约
+`3.15–3.34s`，因此 good 也进入 `TimeoutError` audit；这不是 slow server
+fail-closed 本身失效。
+
+### 最小修复
+
+- `MCPServerSpec` 新增可选 `startup_timeout_s`；
+- `PRAXIS_MCP_SERVERS_JSON` 可为每个 server 声明独立启动预算；
+- 未声明时继续使用 pool 原有 10 秒默认值；
+- 布尔值、字符串、非正数、非有限值和无法转换为有限 float 的超大整数均
+  fail-closed 为 `ValueError`；
+- initialize 与 list-tools 使用同一个 per-server 预算；
+- slow fixture 保持 1 秒，good fixture 使用 10 秒；测试中的 pool fallback
+  故意设为 0.01 秒，证明代码确实读取了 server 预算，而非仅让测试碰巧变绿。
+
+没有引入并发启动、后台重连或新的生命周期抽象。
+
+## 3. P4.2 历史收口内容
 
 ### C1：registry 版本分支与验证快照一致
 
@@ -59,7 +82,7 @@ Pydantic 验证后递归冻结，嵌套 mapping/list 不能原位修改。显式
 P0 structured report 与 9-section Markdown 的两个 SHA-256 现在由 baseline test
 直接断言，不再只存在于文档。
 
-## 3. P4.1 历史收口内容
+## 4. P4.1 历史收口内容
 
 ### B1：identity/state/context 角色边界
 
@@ -108,19 +131,35 @@ v0.1 manifest 只要出现 `split.name` 或 `split.leakage_guard` 就拒绝，�
 `ENSG1` 等宽松 Ensembl-like 值不再通过。仍不做 symbol lookup、在线存在性查询、
 taxon/assembly 自动推断或 ortholog projection。
 
-## 4. 测试证据
+## 5. 测试证据
 
-P4.2 红灯阶段，在 `04c0ad...` 的旧实现上执行新增契约：
+P4.3 在 `eaa9a406...` 上先稳定复现原失败：
 
 ```text
-11 failed / 114 passed
+tests/test_mcp_pool.py::test_pool_slow_server_startup_timeout_skipped
+1 failed
 ```
 
-最小实现后的同一集合与扩展 Pack/P1/P4 回归：
+新增 per-server 配置契约在旧实现上的红灯：
 
 ```text
-125 passed / 0 failed
-148 passed / 0 failed
+7 failed / 12 passed
+```
+
+超大整数异常边界单独先得到：
+
+```text
+1 failed / 18 passed
+```
+
+最小实现后：
+
+```text
+MCP 配置 + slow/good 定向：
+20 passed / 0 failed
+
+锁文件目标顶层版本 mcp 1.28.1 / anyio 4.14.2 的 MCP 定向：
+37 passed / 0 failed
 
 python3.13 -m ruff check . --no-cache：
 All checks passed
@@ -132,7 +171,7 @@ python3.13 -m pytest praxis_virtualcell/tests \
 python3.13 -m pytest tests \
   -m "not (integration or llm or remote)" \
   -o addopts='' -p no:cacheprovider -q -ra
-1139 passed / 58 skipped / 105 deselected / 1 failed
+1147 passed / 58 skipped / 105 deselected / 0 failed
 ```
 
 P0 代表性报告哈希保持不变：
@@ -145,45 +184,31 @@ structured_report:
 ed4b03d12e9618a7685a19106609f2ec0b0461ccf533c6beec20e7318ec7898a
 ```
 
-legacy 唯一失败仍为继承测试：
+P4.2 的 `1139 passed / 1 failed` 是历史证据；P4.3 未删除、skip 或放宽该断言，
+而是保留 slow 的 1 秒预算并使完整 legacy 口径全绿。
 
-```text
-tests/test_mcp_pool.py::test_pool_slow_server_startup_timeout_skipped
-```
-
-日志仍显示 1 秒窗口内 slow/good MCP server 均握手超时。P4.2 没有修改
-`praxis2/mcp/**` 或该测试，因此不能把它报告成 P4.2 回归，也不能报告 legacy 全绿。
-
-## 5. 文件范围
+## 6. 文件范围
 
 实现：
 
-- `praxis_virtualcell/core/request_v2.py`
-- `praxis_virtualcell/data_packs/manifest.py`
-- `praxis_virtualcell/data_packs/validator.py`
-- `praxis_virtualcell/data_packs/anndata_adapter.py`
-- `praxis_virtualcell/data_packs/registry.py`
+- `praxis2/mcp/config.py`
+- `praxis2/mcp/pool.py`
 
 测试：
 
-- `praxis_virtualcell/tests/test_request_v2.py`
-- `praxis_virtualcell/tests/test_pack_semantics.py`
-- `praxis_virtualcell/tests/test_data_packs.py`
-- `praxis_virtualcell/tests/baseline/test_baseline_offline_report.py`
+- `tests/test_mcp_config.py`
+- `tests/test_mcp_pool.py`
 
 文档：
 
-- `docs/ADR-0002-virtualcellpack-p4-standard-semantics.md`
-- `docs/VIRTUALCELLPACK-CAPABILITY-MATRIX.md`
-- `docs/INSTALL.md`
-- `docs/VERSIONING.md`
+- `docs/TESTING.md`
 - `docs/P0-BASELINE.md`
 - 本交接文件
 
-未修改 runtime、governance、Report、ActiveLearning、model zoo、模型、权重、UI、
-P0 报告字节/hash 值、main/tag 或 `.53`。
+未修改 VirtualCell 确定性 runtime、governance、Report、ActiveLearning、model
+zoo、模型、权重、UI、P0 报告字节/hash 值、main/tag 或 `.53`。
 
-## 6. 已知限制
+## 7. 已知限制
 
 - 标准 ontology 仍只做离线前缀/格式/角色检查，不证明术语在线存在或 ontology 版本；
 - Ensembl 校验冻结格式，不证明 feature 与 taxon/assembly 的数据库对应关系；
@@ -191,31 +216,35 @@ P0 报告字节/hash 值、main/tag 或 `.53`。
 - source mapping column 名、display symbol 与 matrix 数值不属于 canonical metadata key；
 - registry 保存已验证内存快照，但不提供跨进程文件系统事务或 Pack 签名；
 - target namespace/kind 到模型输入的映射仍是 Phase 5 设计，不在本次兼容修复中；
+- MCP servers 仍按配置顺序启动；本阶段只隔离每个 server 的超时预算，不实现并发启动；
+- 真实第三方 MCP、远端服务和运行中崩溃恢复仍属于显式 integration/remote 门；
+- 锁版本 MCP 定向使用临时 system-site venv 覆盖顶层 `mcp/anyio`，不是完整 fresh
+  hash-lock 环境；完整当前环境 legacy 与 core 已分别执行；
 - 本地 Git 仍有既存 AppleDouble pack-index 警告；未授权修改 `.git`；
-- legacy MCP startup timeout 是继承缺陷，未纳入 P4.2 范围。
+- 既有 cross-task `close_all()` cancel-scope 降级边界未在本阶段重构。
 
-## 7. 三端边界
+## 8. 三端边界
 
-P4.2 开始时：
+P4.3 开始时：
 
-- 本地 P4.2 基线：`04c0ad1146f1da6e9606d329e24e529e3f75e8c9`；
+- 本地 P4.3 基线：`eaa9a4067518ab80591ffec7f033b248b43ed951`；
 - GitHub `HEAD/main`：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；
 - `.53` `codex/deploy-v1.6.0`：同为 `8e0d063...`，既存 untracked `vc_api.log`；
 - 旧 T7 dirty 工作树：`24475f2eb14c27c7cfbb82b016b881e88e98b17c`。
 
 本阶段没有 push，没有修改 main/tag，没有同步或写入 `.53`，没有修改旧 T7 用户文件。
 
-## 8. Phase 5 授权模板
+## 9. Phase 5 授权模板
 
 提交后的阶段报告会把下列占位符替换为精确 SHA：
 
 ```text
-授权以 <P4.2 完成 SHA> 作为 Phase 5 唯一起始基线，开始实施 Phase 5。
+授权以 <P4.3 完成 SHA> 作为 Phase 5 唯一起始基线，开始实施 Phase 5。
 ```
 
 精确迁移关系：
 
 ```text
-expected_old_sha=04c0ad1146f1da6e9606d329e24e529e3f75e8c9
-→ new_sha=<P4.2 完成提交 SHA>
+expected_old_sha=eaa9a4067518ab80591ffec7f033b248b43ed951
+→ new_sha=<P4.3 完成提交 SHA>
 ```

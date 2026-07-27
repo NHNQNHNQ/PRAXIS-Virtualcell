@@ -27,6 +27,23 @@ def test_parse_with_env():
     assert specs[0].env == {"KEY": "v"}
 
 
+def test_parse_per_server_startup_timeout():
+    specs = parse_mcp_servers(
+        '[{"name":"slow","command":"python","startup_timeout_s":1.0}]'
+    )
+    assert specs[0].startup_timeout_s == 1.0
+
+
+@pytest.mark.parametrize(
+    "value", ["true", "0", "-1", '"1"', "1e309", "1" + "0" * 400]
+)
+def test_parse_invalid_startup_timeout_fails_closed(value):
+    with pytest.raises(ValueError, match="startup_timeout_s"):
+        parse_mcp_servers(
+            f'[{{"name":"x","command":"python","startup_timeout_s":{value}}}]'
+        )
+
+
 def test_parse_multiple_servers():
     specs = parse_mcp_servers(
         '[{"name":"a","command":"python","args":[]},'

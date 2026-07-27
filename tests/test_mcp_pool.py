@@ -88,10 +88,17 @@ async def test_pool_slow_server_startup_timeout_skipped():
     slow = MCPServerSpec(
         name="slow", command=sys.executable,
         args=["-c", "import time; time.sleep(60)"], env={},
+        startup_timeout_s=1.0,
+    )
+    good = MCPServerSpec(
+        name="good", command=sys.executable,
+        args=["-m", "praxis2.mcp.echo_server"], env={},
+        startup_timeout_s=10.0,
     )
     pool = MCPConnectionPool(
-        [slow, _echo_spec(name="good")],
-        retry=0, startup_timeout_s=1.0,  # 短超时,测试快
+        [slow, good],
+        retry=0,
+        startup_timeout_s=0.01,  # 两个 server 都必须使用自己的预算
     )
     await pool.start_all()
     try:
