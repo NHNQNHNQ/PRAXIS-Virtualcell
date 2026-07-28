@@ -156,6 +156,56 @@ core 相对 P5 的 `1144 passed` 精确增加 60 个 P6 case；legacy 结果与 
 一致。core 仍有 MuData 上游 namespace 注册的 2 条 DeprecationWarning。没有
 运行真实 LLM、remote/GPU、Docker、前端或 `.53`；普通 skip 不能冒充这些门通过。
 
+### P7 species data portal / controlled exchange
+
+P7 以 `bcc812eed8a9b1cd162361f8c12fb9e325cdb17c` 为唯一起始基线，在独立
+`/Volumes/T7/PRAXIS-virtualcell-p0` 的 `codex/p7` 分支实施。测试先行证据：
+
+```text
+初始 backend catalog/download/upload 合同：16 failed
+初始 frontend data-library E2E：2 failed
+hash 不可读 + upload symlink 逃逸：2 failed
+声明 body 预解析上限：1 failed
+chunked body 预落盘上限：1 failed
+最终 frontend dependency audit：1 high（transitive postcss 8.5.16）
+```
+
+最小实现与安全复核后：
+
+```text
+python -m pip check：
+No broken requirements found.
+
+P7 定向：
+20 passed / 0 failed
+
+ruff 定向：
+All checks passed!
+
+VirtualCell core：
+1224 passed / 35 skipped / 9 deselected / 0 failed
+
+legacy：
+1146 passed / 59 skipped / 105 deselected / 0 failed
+
+frontend：
+npm audit 0 vulnerabilities
+typecheck PASS
+lint PASS
+build + bundle budget PASS
+Playwright 58 passed / 1 skipped / 0 failed（59 collected）
+```
+
+core 相对 P6 精确增加 20 个 P7 case；legacy 与 P6 完全一致。Playwright 新增
+2 个 P7 case，唯一 skip 仍是需明确授权的真实 LLM 流程。完整 core 的 35 skip
+仍是 remote/Docker 外部门；本轮没有运行真实 LLM、GPU、Docker 或远端科学模型。
+MuData 的 2 条上游 DeprecationWarning 保持不变。
+
+`.53` 只执行了本阶段明确授权的数据操作：在
+`/home/zkyd/data1/mzy/praxis-virtualcell-data/public` 下载并逐文件核验 5 个
+清单资产，总计 `27,823,623` bytes。远端代码 HEAD/branch/status 和现有
+PRAXIS-2 进程保持不变；这不是部署或远端 runtime 测试。
+
 ## 本地复现
 
 ```bash

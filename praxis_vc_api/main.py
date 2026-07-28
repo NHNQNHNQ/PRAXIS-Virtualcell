@@ -8,18 +8,70 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from praxis_vc_api.models.api_schema import HealthOut, JobIn, JobOut, ParseIn, ParseOut
+from praxis_vc_api.services import data_portal_service as data_portal
 from praxis_vc_api.services import runtime_service as svc
 from praxis_virtualcell import __version__
 from praxis_virtualcell.core.exceptions import InputValidationError
 
 logger = logging.getLogger(__name__)
+
+
+class _UploadBodyTooLarge(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(status_code=413, detail="upload_too_large")
+
+
+class UploadBodyLimitMiddleware:
+    """Bound chunked upload bodies before multipart parsing can spool them."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(
+        self,
+        scope: Scope,
+        receive: Receive,
+        send: Send,
+    ) -> None:
+        if (
+            scope["type"] != "http"
+            or scope["method"] != "POST"
+            or scope["path"] != "/api/data-uploads"
+        ):
+            await self.app(scope, receive, send)
+            return
+
+        received = 0
+        max_body_bytes = data_portal.upload_body_limit()
+
+        async def limited_receive() -> Message:
+            nonlocal received
+            message = await receive()
+            if message["type"] == "http.request":
+                received += len(message.get("body", b""))
+                if received > max_body_bytes:
+                    raise _UploadBodyTooLarge()
+            return message
+
+        try:
+            await self.app(scope, limited_receive, send)
+        except _UploadBodyTooLarge:
+            response = JSONResponse(
+                status_code=413,
+                content={"detail": "upload_too_large"},
+                headers={"Connection": "close"},
+            )
+            await response(scope, receive, send)
+
 
 app = FastAPI(title="PRAXIS-VirtualCell Local API", version=__version__)
 
@@ -33,6 +85,24 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+app.add_middleware(UploadBodyLimitMiddleware)
+
+
+@app.middleware("http")
+async def protect_data_upload(request: Request, call_next):
+    """Reject disabled/unauthorized uploads before multipart body parsing."""
+    if request.method == "POST" and request.url.path == "/api/data-uploads":
+        try:
+            data_portal.authorize_upload(request.headers.get("authorization"))
+            data_portal.validate_upload_content_length(
+                request.headers.get("content-length")
+            )
+        except data_portal.UploadRejected as exc:
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={"detail": exc.detail},
+            )
+    return await call_next(request)
 
 
 @app.get("/api/health", response_model=HealthOut)
@@ -56,6 +126,68 @@ def options():
 def modules():
     """八模块目录(只读):M1–M8 的 id/code/display_name/engines/pillars。单一真相源 modules.py。"""
     return svc.modules()
+
+
+@app.get("/api/data-catalog")
+def data_catalog(species: str | None = None):
+    """Strict public omics metadata; source files remain download-only."""
+    try:
+        return data_portal.catalog_payload(species)
+    except data_portal.UnsupportedSpecies as exc:
+        raise HTTPException(status_code=400, detail="unsupported_species") from exc
+    except data_portal.DataPortalConfigError as exc:
+        raise HTTPException(status_code=503, detail="data_catalog_invalid") from exc
+
+
+@app.get("/api/data-catalog/{dataset_id}/files/{file_id}/download")
+def download_dataset_file(dataset_id: str, file_id: str):
+    """Serve only a catalog-declared file after path, size, and hash checks."""
+    try:
+        path, catalog_file = data_portal.resolve_download(dataset_id, file_id)
+    except data_portal.DatasetNotFound as exc:
+        raise HTTPException(status_code=404, detail="dataset_not_found") from exc
+    except data_portal.DatasetFileNotFound as exc:
+        raise HTTPException(
+            status_code=404, detail="dataset_file_not_found"
+        ) from exc
+    except data_portal.DatasetFileUnavailable as exc:
+        raise HTTPException(
+            status_code=404, detail="dataset_file_unavailable"
+        ) from exc
+    except data_portal.DatasetIntegrityError as exc:
+        raise HTTPException(
+            status_code=409, detail="dataset_integrity_failed"
+        ) from exc
+    except data_portal.DataPortalConfigError as exc:
+        raise HTTPException(
+            status_code=503, detail="data_catalog_invalid"
+        ) from exc
+    return FileResponse(
+        path,
+        media_type=catalog_file.media_type,
+        filename=catalog_file.filename,
+    )
+
+
+@app.post("/api/data-uploads", status_code=201)
+def upload_data_file(
+    species: Annotated[str, Form()],
+    file: Annotated[UploadFile, File()],
+):
+    """Store exact user bytes in quarantine; never unpack or register here."""
+    try:
+        return data_portal.store_upload(
+            filename=file.filename or "",
+            species=species,
+            content_type=file.content_type,
+            stream=file.file,
+        )
+    except data_portal.UploadRejected as exc:
+        raise HTTPException(
+            status_code=exc.status_code, detail=exc.detail
+        ) from exc
+    except data_portal.DataPortalConfigError as exc:
+        raise HTTPException(status_code=503, detail="uploads_disabled") from exc
 
 
 @app.post("/api/jobs", response_model=JobOut)

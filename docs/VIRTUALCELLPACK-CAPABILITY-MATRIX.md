@@ -1,6 +1,6 @@
-# VirtualCellPack 能力矩阵（P0–P6）
+# VirtualCellPack 能力矩阵（P0–P7）
 
-P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P6 唯一起始基线：`e97cfa153281fb6c9ad33e39c916e2fed1225df9`。本表是能力与证据边界，不是性能排名；`pack_valid`、`model_compatible`、`scientifically_validated` 不得互换。
+P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P7 唯一起始基线：`bcc812eed8a9b1cd162361f8c12fb9e325cdb17c`。本表是能力与证据边界，不是性能排名；`pack_valid`、`model_compatible`、`scientifically_validated` 不得互换。
 
 | 能力/组件 | 当前实现与真相源 | `pack_valid` | `model_compatible` | `scientifically_validated` | 结论与边界 |
 |---|---|---:|---:|---:|---|
@@ -13,6 +13,10 @@ P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P6 唯一起始基线�
 | CapabilityRegistry | `model_zoo/capability_registry.py` | 只信 `RegisteredPack`，任意 manifest/path 均不能授予 valid | Request×Pack×Model 精确关系检查；缺任一维度即 false | 固定 false | full request/model/Pack/environment fingerprint；重复 requested outputs、跨 modality/namespace 交叉误配均拒绝 |
 | ModelBroker + ExecutionPlan | `agents/model_broker_agent.py`、`vc.execution-plan.v1` | 未注册 Pack 产空 plan | 只实例化 `executable=true` steps；import/constructor 失败会修订 plan | 固定 false | 稳定按模型名排序；动态 wrapper 无需模型专用 build/route/case 分支 |
 | Runtime environment/output gate | `EnvironmentSnapshot`、`ModelWrapper` | 不改变 Pack 状态 | 缺 dependency/resource/asset/wrapper/task/output adapter 或坏 plugin 输出均 fail-closed | 不提供 | 当前只执行 `predict_delta_expression → delta_expression`；delta 必须非空有限数值，uncertainty method 必须在 card 内 |
+| P7 public data catalog | `catalogs/data_catalog.yaml`、`data_portal_service.py`、`vc.data-catalog.v1` | 不提供；catalog valid/file available 都不是 Pack 注册 | 不提供 | 固定不提升 | strict metadata、source/terms/path/size/hash；四物种五文件；无大数据入 Git |
+| P7 allowlisted download | `/api/data-catalog/**/download` | 不提供；每次只证明当前外置文件匹配清单 | 不提供 | 不提供 | containment、普通文件、size、SHA-256 每次重验；缺失/篡改/hash 不可读/逃逸 fail-closed；Range 不绕过校验 |
+| P7 quarantined upload | `/api/data-uploads`、`vc.upload-receipt.v1` | 不提供；receipt 不是 Pack | 不提供 | 不提供 | bearer 前置、body/文件/quota 限制、原字节/hash/原子 receipt；不解包、去重、归一化、补零、mapping、注册或预测 |
+| P7 data UI | `DataLibrary.tsx` | 只显示后端资源状态 | 不判断 | 不裁决 | 精确物种筛选、可用下载、内存 token 和隔离上传；未就绪文件禁用；LLM 不参与 |
 | Report | `agents/report.py`、`io/report_markdown.py` | N/A | 只呈现确定性结果 | 只呈现已有 evidence | 报告保留完整 request；9 段 Markdown 保持确定性 |
 | ActiveLearning | `active_learning/active_learning_agent.py`、`acquisition.py` | N/A | 不负责兼容性 | 不负责验证 | 只生成 advisory queue；不改 prediction/verdict/abstain/provenance 真相 |
 | Governance | `governance/*`、runtime gates | N/A | fail-closed 边界 | 只检查契约/evidence | provenance、module、cell type、narrative/hash gate 不能被 LLM 绕过 |

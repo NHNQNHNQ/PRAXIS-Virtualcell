@@ -9,6 +9,7 @@ import {
   type RunStatus,
   type Stage,
 } from "../../api";
+import DataLibrary from "../data/DataLibrary";
 import LazyResultsStage from "../stages/LazyResultsStage";
 import JobSidebar from "./JobSidebar";
 import TopBar, { type Theme } from "./TopBar";
@@ -41,6 +42,7 @@ export default function AppShell() {
   const [mode, setMode] = useState<Mode>("offline");
   const modeRef = useRef<Mode>(mode);
   const [stage, setStage] = useState<Stage>("ask");
+  const [view, setView] = useState<"workspace" | "data">("workspace");
   const [queryEpoch, setQueryEpoch] = useState(0);
   const queryEpochRef = useRef(0);
   // null 表示当前 Ask 尚未上报草稿；空字符串则是用户确实清空了输入。
@@ -83,6 +85,7 @@ export default function AppShell() {
     askQueryRef.current = null;
     setJob(emptyJob);
     setStage("ask");
+    setView("workspace");
     setOpenedJobId(null);
   }
 
@@ -148,7 +151,7 @@ export default function AppShell() {
   // layout effect 在浏览器绘制新阶段前归零，避免标题短暂出现在视口上方。
   useLayoutEffect(() => {
     mainScrollRef.current?.scrollTo({ top: 0, left: 0 });
-  }, [effectiveStage, openedJobId]);
+  }, [effectiveStage, openedJobId, view]);
 
   // StepperRail 的 jump:已完成阶段回退 / 紧邻可达阶段前进(rail 内部已做逐步不跳过约束,
   // 此处再以 canEnter 兜底,非法 target 忽略)。回退只改 stage,不清 JobState 字段(不丢数据)。
@@ -159,7 +162,10 @@ export default function AppShell() {
   }
 
   // 主区当前展示的 job（供侧栏高亮）：历史 job 优先;否则 results 阶段展示当前 job。
-  const activeJobId = openedJobId ?? (stage === "results" ? job.jobId : null);
+  const activeJobId =
+    view === "data"
+      ? null
+      : openedJobId ?? (stage === "results" ? job.jobId : null);
 
   return (
     <div className="app-shell">
@@ -167,12 +173,18 @@ export default function AppShell() {
       <JobSidebar
         jobs={jobs}
         activeJobId={activeJobId}
+        dataActive={view === "data"}
         onNewQuery={newQuery}
+        onOpenData={() => {
+          setView("data");
+          setOpenedJobId(null);
+        }}
         onOpenJob={(id) => {
           const nextEpoch = queryEpochRef.current + 1;
           queryEpochRef.current = nextEpoch;
           setQueryEpoch(nextEpoch);
           askQueryRef.current = null;
+          setView("workspace");
           setOpenedJobId(id);
         }}
         health={h}
@@ -195,7 +207,9 @@ export default function AppShell() {
           <div className="main-inner">
             {/* 右:Workspace(工作区,内含左侧 StepperRail)。
                 历史 job 模式:直接进 results,以该 job_id 渲 ResultsStage 6 tab 外壳(等价旧 openedJobId 分支)。 */}
-            {openedJobId ? (
+            {view === "data" ? (
+              <DataLibrary />
+            ) : openedJobId ? (
               <LazyResultsStage
                 key={openedJobId}
                 jobId={openedJobId}

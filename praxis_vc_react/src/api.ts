@@ -129,6 +129,75 @@ export interface ModulePlan {
   notes: string[];
 }
 
+export interface DataSpecies {
+  id: string;
+  taxon_id: string;
+  scientific_name: string;
+}
+
+export interface DataCatalogFile {
+  id: string;
+  filename: string;
+  media_type: string;
+  size_bytes: number;
+  sha256: string;
+  source_url: string;
+  available: boolean;
+  download_url: string;
+}
+
+export interface DataCatalogDataset {
+  id: string;
+  version: string;
+  title: string;
+  species: {
+    runtime_id: string;
+    taxon_id: string;
+    scientific_name: string;
+  };
+  modality: string;
+  value_semantics: string;
+  observations: number;
+  features: number;
+  source: {
+    landing_page: string;
+    citation: string;
+  };
+  terms: {
+    id: string;
+    name: string;
+    url: string;
+  };
+  usage_status: "download_only";
+  scientifically_validated: false;
+  files: DataCatalogFile[];
+}
+
+export interface DataCatalog {
+  schema_version: "vc.data-catalog.v1";
+  species: DataSpecies[];
+  datasets: DataCatalogDataset[];
+  upload: {
+    enabled: boolean;
+    quarantine_only: true;
+    max_file_bytes: number;
+    total_quota_bytes: number;
+    accepted_extensions: string[];
+  };
+}
+
+export interface UploadReceipt {
+  schema_version: "vc.upload-receipt.v1";
+  upload_id: string;
+  status: "quarantined";
+  species: string;
+  filename: string;
+  size_bytes: number;
+  sha256: string;
+  declared_content_type: string | null;
+  created_at: string;
+}
+
 // ---- 内部 fetch 助手 ----
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -194,6 +263,37 @@ export function getOptions(): Promise<Options> {
 
 export function getModules(): Promise<{ modules: ModuleInfo[] }> {
   return req<{ modules: ModuleInfo[] }>("/api/modules");
+}
+
+export function getDataCatalog(species?: string): Promise<DataCatalog> {
+  const query = species ? `?species=${encodeURIComponent(species)}` : "";
+  return req<DataCatalog>(`/api/data-catalog${query}`);
+}
+
+export async function uploadData(
+  species: string,
+  file: File,
+  token: string,
+): Promise<UploadReceipt> {
+  const body = new FormData();
+  body.append("species", species);
+  body.append("file", file, file.name);
+  const res = await fetch(`${API_BASE}/api/data-uploads`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body,
+  });
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const payload = (await res.json()) as { detail?: string };
+      detail = payload.detail ?? detail;
+    } catch {
+      // Keep the HTTP status text when an upstream proxy did not return JSON.
+    }
+    throw new Error(`API ${res.status}: ${detail}`);
+  }
+  return (await res.json()) as UploadReceipt;
 }
 
 // 该 job 的实际模块路由结果(只读)。不可路由 job 返回空 module_plan。

@@ -97,10 +97,27 @@ Pack-aware runtime 由严格 `vc.model-card.v1`、`CapabilityRegistry` 和
 当前 plugin execution adapter 只实现 `predict_delta_expression →
 delta_expression`，模型卡可发现不等于可执行或科学有效。
 
+P7 的“数据资源”页面提供独立的公开下载和隔离上传通道。公开目录使用 strict
+`vc.data-catalog.v1`，只对外置数据根中 path、size、SHA-256 全部匹配的文件开放
+下载；缺失或篡改文件保持不可用。上传需部署者配置至少 32 字符 bearer token，
+成功后只生成 `vc.upload-receipt.v1` 并原样保存在 quarantine：
+
+```bash
+export PRAXIS_VC_DATA_ROOT=/absolute/path/praxis-virtualcell-data
+export PRAXIS_VC_UPLOAD_TOKEN='<at-least-32-random-characters>'
+praxis-vc serve
+```
+
+目录有效、文件可下载或上传成功都不等于 `pack_valid`、`model_compatible` 或
+`scientifically_validated`。上传不会自动解包、归一化、补零、转换 feature、
+注册 Pack 或参与预测；大数据仍不进入 Git。
+
 架构和复现边界见 [ADR-0003](docs/ADR-0003-virtualcellpack-p5-multiomics-alignment.md)、
 [ADR-0004](docs/ADR-0004-virtualcellpack-p6-capability-runtime.md)、
+[ADR-0005](docs/ADR-0005-virtualcellpack-p7-data-portal.md)、
 [多组学 runbook](docs/runbooks/VIRTUALCELLPACK-MULTIOMICS.md) 与
-[能力 runtime runbook](docs/runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md)。
+[能力 runtime runbook](docs/runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md)、
+[数据资源库 runbook](docs/runbooks/VIRTUALCELLPACK-DATA-PORTAL.md)。
 
 ## 能力边界
 

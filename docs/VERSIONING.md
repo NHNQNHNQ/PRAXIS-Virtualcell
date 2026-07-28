@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `IMPLEMENTED_C5 — 1.6.0_LOCAL_CANDIDATE_UNPUBLISHED`
+> Status: `IMPLEMENTED_P7 — 1.6.0_LOCAL_CANDIDATE_UNPUBLISHED`
 >
-> Audited: 2026-07-18; local branch `codex/project-consolidation`
+> Audited: 2026-07-28; local Phase branch `codex/p7`
 
 The repository historically mixed product release tags, package metadata, API/runtime labels, message schemas, governance artifacts, and model revisions. C2 implements the separation below; publication status remains governed independently by the three-way synchronization ledger.
 
@@ -36,6 +36,8 @@ The repository historically mixed product release tags, package metadata, API/ru
 | execution environment snapshot | `vc.environment.v1` + canonical JSON SHA-256 | `model_zoo/capability_registry.py` | records detected Python modules, declared resources, and implemented runtime task/output adapters; it is a local planning snapshot, not remote hardware attestation |
 | model compatibility report | `vc.compatibility-report.v1` + canonical JSON SHA-256 | `model_zoo/capability_registry.py` | binds full request, registered Pack, model card and environment identities while keeping `pack_valid`, `model_compatible`, execution readiness and `scientifically_validated=false` separate |
 | model execution plan | `vc.execution-plan.v1` + deterministic `plan_<sha-prefix>` | `model_zoo/capability_registry.py`, `agents/model_broker_agent.py` | ordered executable wrapper steps plus all compatibility reports; an executable plan is not a performance or scientific claim |
+| public data catalog | `vc.data-catalog.v1` | `praxis_virtualcell/catalogs/data_catalog.yaml`, `praxis_vc_api/services/data_portal_service.py` | strict public metadata plus source terms and external-file size/hash allowlist; catalog/file availability does not imply Pack/model/scientific status |
+| quarantined upload receipt | `vc.upload-receipt.v1` | `praxis_vc_api/services/data_portal_service.py` | one byte-preserving quarantine write identity; not content validation, Pack registration, user identity, or prediction evidence |
 | memory frontmatter schema | `1` | `brains/_common/memory/rules/*.md` | inherited memory-content schema |
 | governance feature schema | `v0.3.0` | `governance/learned_reliability.py` and artifact JSON | frozen learned-governance feature contract |
 | governance models | `reliability_v0.3.0`, `abstain_v0.3.0` | `governance/artifacts/*.json` | immutable model revisions paired with content SHA-256 |
@@ -62,6 +64,8 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | environment snapshot schema + fingerprint | explicit `vc.environment.v1` plus canonical JSON SHA-256 | dependency/resource/runtime-adapter declaration changes | a missing module/resource is available or remotely attested |
 | compatibility report schema + fingerprint | explicit `vc.compatibility-report.v1` plus canonical JSON SHA-256 | compatibility checks, reason semantics or bound identities change incompatibly | `pack_valid`, `model_compatible`, executable and scientifically validated are interchangeable |
 | execution plan schema + plan ID | explicit `vc.execution-plan.v1` and content-derived `plan_*` | step/report/identity semantics change incompatibly | plan creation proves prediction correctness or scientific validation |
+| public data catalog schema | explicit `vc.data-catalog.v1` | incompatible metadata, source/terms, identity or file-verification semantics | file availability, Pack validity, model compatibility or scientific validity |
+| upload receipt schema | explicit `vc.upload-receipt.v1` | incompatible quarantine identity/provenance semantics | internal file safety/quality, user authentication identity, Pack registration or model use |
 | `memory_schema_version` | integer/content-schema identifier | memory frontmatter/content contract change | product release cadence |
 | `feature_schema_version` | existing SemVer-like artifact contract | retraining/migrating the feature vector contract | UI/package version |
 | governance `model_version` + SHA | immutable named revision plus content hash | genuinely regenerated/retrained artifact | product release cadence |
@@ -85,6 +89,7 @@ Implemented through C5:
 8. The full release wheel is built with hash-locked Python 3.13 build dependencies and contains the packaged React UI; clean-install verification reads the installed distribution metadata rather than the checkout.
 9. The release container installs that same wheel into `/opt/venv`, injects `GIT_SHA` into both its OCI revision label and health response, and never infers identity from an image tag or embedded `.git` directory.
 10. W4B donor adapters use a checkpoint-content identity as their per-call model version and validate the expected slot/class before loading weights. Other ML callers retain their existing explicit or class fallback, so this must not be generalized to every registry model.
+11. P7 adds backward-compatible `vc.api.v1` endpoints and a user-visible data-resource page inside the still-unpublished `1.6.0` minor candidate. It adds independent `vc.data-catalog.v1` and `vc.upload-receipt.v1` contracts; no product tag or API/runtime protocol bump is inferred.
 
 ## Release invariants
 
@@ -108,7 +113,8 @@ The equality above deliberately excludes `vc.msg.v1`, `vc.request.v2`, all
 `vc.pack.*` versions, `vc.model-feature-contract.v1`, `vc.feature-mapping.v1`,
 `vc.alignment-report.v1`, `vc.model-card.v1`, `vc.environment.v1`,
 `vc.compatibility-report.v1`, `vc.execution-plan.v1`, the other `vc.*.v1`
-domain/bundle schemas, runtime/API protocol identifiers, memory schema,
+domain/bundle schemas, `vc.data-catalog.v1`, `vc.upload-receipt.v1`,
+runtime/API protocol identifiers, memory schema,
 `feature_schema_v0.3.0`, governance model versions, registry model revisions, and
 artifact hashes. CI should validate their format/integrity and compatibility, not
 force them to equal the product release.

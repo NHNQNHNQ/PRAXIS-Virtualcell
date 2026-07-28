@@ -9,7 +9,9 @@ import { type Health, type JobSummary, type Mode } from "../../api";
 export default function JobSidebar({
   jobs,
   activeJobId,
+  dataActive,
   onNewQuery,
+  onOpenData,
   onOpenJob,
   health,
   healthErr,
@@ -17,7 +19,9 @@ export default function JobSidebar({
 }: {
   jobs: JobSummary[] | null;
   activeJobId: string | null;
+  dataActive: boolean;
   onNewQuery: () => void;
+  onOpenData: () => void;
   onOpenJob: (jobId: string) => void;
   health: Health | null;
   healthErr: string | null;
@@ -36,6 +40,15 @@ export default function JobSidebar({
 
       <button type="button" className="js-new-btn" onClick={onNewQuery}>
         <span className="js-plus">＋</span> 新建查询
+      </button>
+
+      <button
+        type="button"
+        className={dataActive ? "js-new-btn js-data-active" : "js-new-btn"}
+        onClick={onOpenData}
+        aria-pressed={dataActive}
+      >
+        数据资源
       </button>
 
       {/* —— 历史 Jobs（已运行任务，点击回看结果）—— */}

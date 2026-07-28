@@ -1,6 +1,6 @@
 # PRAXIS-VirtualCell Documentation Index
 
-> Audited: 2026-07-23
+> Audited: 2026-07-28
 >
 > Status: `CURRENT_DOCUMENT_MAP`
 
@@ -38,6 +38,7 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [Testing Guide](TESTING.md) | current local commands, exact scopes, external gates, and GitHub-CI evidence boundary |
 | [VirtualCellPack P5 → P6 Handoff](HANDOFF-VIRTUALCELLPACK-P5-TO-P6.md) | local P5 implementation, exact strict-lock evidence, limitations and next exact-SHA authorization gate |
 | [VirtualCellPack P6 → P7 Handoff](HANDOFF-VIRTUALCELLPACK-P6-TO-P7.md) | local P6 capability-runtime implementation, exact tests, limitations and next exact-SHA authorization gate |
+| [VirtualCellPack P7 → P8 Handoff](HANDOFF-VIRTUALCELLPACK-P7-TO-P8.md) | local P7 strict data catalog, verified external files, controlled quarantine upload, exact tests and next exact-SHA authorization gate |
 | [Repository Layout](REPOSITORY-LAYOUT.md) | tracked-tree responsibilities and evidence-versus-generated policy |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | highest authority for met/narrowed/needs-new/unsupported scientific claims |
 
@@ -51,6 +52,7 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [Examples](EXAMPLES.md) | offline accept/caution/abstain examples and interpretation boundaries |
 | [LLM Interface Guide](USAGE-llm-interface.md) | v0.6-era optional LLM/API interface; deterministic-runtime red lines remain applicable |
 | [Remote Science Validation](runbooks/REMOTE-SCIENCE-VALIDATION.md) | approved-SHA `.53` W4B/Gate A procedure; currently `REMOTE_NOT_RUN` and not synchronization authorization |
+| [VirtualCellPack Data Portal](runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) | P7 external data-root layout, fixed inventory, upload quarantine, verification and update procedure |
 
 The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` files describe the older PRAXIS-2 classroom/deployment system, including `.40/.53` service topology. They are not VirtualCell current-user entry points.
 
@@ -67,9 +69,11 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [v0.8 Architecture Baseline](ARCHITECTURE-v0.8-baseline.md) | frozen historical baseline at `7fc4aa5`; not the current test count or full Phase 10 architecture |
 | [VirtualCellPack P5 ADR](ADR-0003-virtualcellpack-p5-multiomics-alignment.md) | H5MU paired/partially-paired semantics, strict model feature contracts, explicit alignment and three-layer validity boundary |
 | [VirtualCellPack P6 ADR](ADR-0004-virtualcellpack-p6-capability-runtime.md) | strict model cards, four-factor compatibility, deterministic execution plans, plugin runtime and explicit legacy boundary |
-| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P6 implementation/status matrix; separates `pack_valid`, `model_compatible`, executable and `scientifically_validated` |
+| [VirtualCellPack P7 ADR](ADR-0005-virtualcellpack-p7-data-portal.md) | strict public data catalog, allowlisted hash-verified download, byte-preserving quarantine and three-layer non-escalation |
+| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P7 implementation/status matrix; separates resource availability, `pack_valid`, `model_compatible`, executable and `scientifically_validated` |
 | [VirtualCellPack Multiomics Runbook](runbooks/VIRTUALCELLPACK-MULTIOMICS.md) | tiny RNA+protein fixture generation, hash binding, P5 tests and asset-update rules |
 | [VirtualCellPack Capability Runtime Runbook](runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md) | local model card/cache/Pack assembly, execution-plan audit and fail-closed reason handling |
+| [VirtualCellPack Data Portal Runbook](runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) | external public-file inventory, service configuration, upload quarantine and operator review boundary |
 | [Provenance](../PROVENANCE.md) | repository derivation from PRAXIS-2 and bootstrap evidence |
 
 ## Release and version history

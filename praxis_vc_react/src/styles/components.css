@@ -351,6 +351,11 @@ select:focus {
   background: color-mix(in srgb, var(--primary) 6%, var(--surface));
   border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
 }
+.js-data-active {
+  background: color-mix(in srgb, var(--primary) 9%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+  color: var(--primary);
+}
 .js-new-btn .js-plus {
   font-size: 17px;
   line-height: 1;
@@ -561,6 +566,197 @@ select:focus {
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 46vw;
+  }
+}
+
+/* ---------- Phase 7:物种数据资源库与受控隔离上传 ---------- */
+.data-library {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.data-heading,
+.data-section-head,
+.data-card-title,
+.data-file {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.data-heading h1 {
+  font-size: 27px;
+}
+.data-heading p,
+.data-section-head p,
+.data-card-title p,
+.data-citation,
+.data-message,
+.data-upload-limit {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.data-heading p {
+  margin-top: var(--space-2);
+}
+.data-boundary {
+  margin: 0;
+}
+.data-section {
+  margin-bottom: 0;
+}
+.data-section-head {
+  align-items: flex-end;
+  margin-bottom: var(--space-4);
+}
+.data-section-head h2 {
+  font-size: 18px;
+}
+.data-section-head p {
+  margin-top: var(--space-1);
+}
+.data-filter {
+  width: min(280px, 100%);
+}
+.data-filter > span,
+.data-upload-form label > span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+.data-grid {
+  display: grid;
+  gap: var(--space-3);
+}
+.data-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+.data-card-title h3 {
+  font-size: 16px;
+}
+.data-card-title p {
+  margin-top: var(--space-1);
+}
+.data-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: var(--space-4) 0;
+}
+.data-facts div {
+  min-width: 0;
+}
+.data-facts dt {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.data-facts dd {
+  margin: 2px 0 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.data-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 var(--space-3);
+  font-size: 12px;
+}
+.data-links a {
+  color: var(--primary);
+}
+.data-files {
+  border-top: 1px solid var(--border);
+}
+.data-file {
+  align-items: center;
+  padding: var(--space-3) 0 0;
+}
+.data-file > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+.data-file strong,
+.data-file span {
+  overflow-wrap: anywhere;
+}
+.data-file strong {
+  font-size: 13px;
+}
+.data-file span {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.data-file code {
+  width: fit-content;
+  margin-top: 2px;
+  font-size: 10px;
+}
+.data-upload-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.data-upload-form input[type="password"],
+.data-upload-form input[type="file"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+.data-file-picker,
+.data-upload-limit,
+.data-upload-form > .btn {
+  grid-column: 1 / -1;
+}
+.data-upload-limit {
+  margin: 0;
+}
+.data-upload-form > .btn {
+  justify-self: start;
+}
+.data-upload-success {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  font-size: 13px;
+}
+.data-upload-success code {
+  width: fit-content;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .data-heading,
+  .data-section-head,
+  .data-card-title,
+  .data-file {
+    flex-direction: column;
+  }
+  .data-facts,
+  .data-upload-form {
+    grid-template-columns: 1fr;
+  }
+  .data-file-picker,
+  .data-upload-limit,
+  .data-upload-form > .btn {
+    grid-column: auto;
   }
 }
 
