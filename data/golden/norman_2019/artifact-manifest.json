@@ -1,0 +1,107 @@
+{
+  "schema_version": "vc.golden-artifact-manifest.v1",
+  "benchmark_id": "norman-2019-k562-golden",
+  "pack_version": "1.0.0",
+  "remote_root": "/home/zkyd/data1/mzy/praxis-virtualcell-data/golden/norman-2019",
+  "contract": {
+    "canonical_sha256": "f34afa761239abc97033c78bb9d0c29a1c36a4c7d1a106a9cbbaa805a5196ff5",
+    "checked_in_yaml": {
+      "path": "contract.yaml",
+      "sha256": "6bfc46e23e55e05a2c87dcdac9bd48da6c1f6bd2240742dc18f73ec963cf0d76",
+      "size_bytes": 4749
+    }
+  },
+  "pack": {
+    "fingerprint": "42165e430bab3474cdc9e607770ff5e204608c4243f84e492c08e2c6442c55ee",
+    "checked_in_manifest": {
+      "path": "pack.manifest.yaml",
+      "sha256": "704b81da74fd96907b7e6012757b2c12104fcf3a2a3ae56af52c76d7f2c163a6",
+      "size_bytes": 30074
+    }
+  },
+  "remote_files": {
+    "source/NormanWeissman2019_filtered.h5ad.zip": {
+      "sha256": "64af382a6af9d129042577a651691d0bdbbdeef2ad973bef77f012b4b209c41f",
+      "size_bytes": 166988031
+    },
+    "source/Norman2019_simulation_cpa.h5ad": {
+      "sha256": "de50bb456ea344ae934878def8339e8b7050baf934a69bda2c7196bcb3a0e6cd",
+      "size_bytes": 2235954082
+    },
+    "pack/golden_contract.json": {
+      "sha256": "456242651b50a87f507c6e9787999d4fd325beec82106363c7261cbdaa744521",
+      "size_bytes": 4663
+    },
+    "pack/manifest.yaml": {
+      "sha256": "704b81da74fd96907b7e6012757b2c12104fcf3a2a3ae56af52c76d7f2c163a6",
+      "size_bytes": 30074
+    },
+    "pack/norman_k562_golden.h5ad": {
+      "sha256": "43da7aeeaca2a3ceb00ec6e9ee983b9b708b01f85922cc7afee229225a66792a",
+      "size_bytes": 2285816806
+    },
+    "model_cache/norman_no_change/baseline.json": {
+      "sha256": "38182a3fdb24666b8d76d9b118d2de4fd8cfd998ae025a54d7fecc42e09f7b5e",
+      "size_bytes": 95312
+    },
+    "model_cache/norman_global_mean/baseline.json": {
+      "sha256": "2b757d3e2d4e657f9bdc3aa890ee6d84ae5096661246ff4f881045676bb98d3a",
+      "size_bytes": 95504
+    },
+    "model_cache/norman_global_mean/global_mean_delta.npy": {
+      "sha256": "a049de62a4d8f2f6345cf56a63444d7ff511a449d5f95521d52e2e6766826792",
+      "size_bytes": 40488
+    },
+    "model_cache/norman_additive_linear/baseline.json": {
+      "sha256": "b82dc7ab26c6f6fdef4414f6b05c51edb32b2a35e4c00f45824cc839ab9cf1a9",
+      "size_bytes": 95682
+    },
+    "model_cache/norman_additive_linear/linear_coefficients.npy": {
+      "sha256": "241210fb33b0abb86f923478870f9d19711c31e4a721fc5d60888d61900b86c4",
+      "size_bytes": 4237928
+    },
+    "model_cache/norman_additive_linear/linear_intercept.npy": {
+      "sha256": "6a870efd9f97b599769069aec95bcf2f920acedf43aa1d24740a7e5b40e7fac2",
+      "size_bytes": 40488
+    },
+    "registries/no_change.yaml": {
+      "sha256": "f186aaa3b79cfbfa21bafbf4fe93e6321709e860fc489968ea0e08b7e14bb16c",
+      "size_bytes": 2229
+    },
+    "registries/global_mean.yaml": {
+      "sha256": "9b038f1f9cd65c763662c92d936bc89421c56327bfd2a90dc02080c671f760f5",
+      "size_bytes": 2513
+    },
+    "registries/additive_linear.yaml": {
+      "sha256": "28a0df07959d0eac6fc2ccf21e2724ff8bb303456d8e1028fb5d04cd319b875d",
+      "size_bytes": 2777
+    },
+    "evaluation/evaluation.json": {
+      "sha256": "1cc1110a75183f1b271a8caf34db9998046f93bd42abda278f725879d38eb79c",
+      "size_bytes": 243236
+    }
+  },
+  "primary_test_scores": {
+    "no_change": {
+      "mse": 0.006206092317116851,
+      "ci95": [0.0052718065130143875, 0.007179895287520753]
+    },
+    "global_mean": {
+      "mse": 0.0045820474227155905,
+      "ci95": [0.0038500612710327124, 0.005356276113731283]
+    },
+    "additive_linear": {
+      "mse": 0.0032570634320908554,
+      "ci95": [0.0027929521401756927, 0.0037390136902566485]
+    }
+  },
+  "states": {
+    "pack_valid": true,
+    "model_compatible": true,
+    "scientifically_validated": false
+  },
+  "gears": {
+    "run": false,
+    "assets_accessed": false
+  }
+}

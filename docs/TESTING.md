@@ -206,6 +206,69 @@ MuData 的 2 条上游 DeprecationWarning 保持不变。
 清单资产，总计 `27,823,623` bytes。远端代码 HEAD/branch/status 和现有
 PRAXIS-2 进程保持不变；这不是部署或远端 runtime 测试。
 
+### P8 Golden Norman/K562 Pack 与简单 baseline
+
+P8 以 `09fb1bb3d02adfceed504cbccd7cf36c54a61b69` 为唯一起始基线，在独立
+`/Volumes/T7/PRAXIS-virtualcell-p0` 的 `codex/p8-golden-norman` 分支实施。
+测试先行证据：
+
+```text
+初始 Golden Norman 模块缺失：collection error
+正式 evaluation API 缺失：collection error
+真实 source/derived hash mismatch 调试：fail-closed，未产出错误 Pack
+篡改 Pack 在 baseline 拟合前未校验：1 failed
+冻结 control-assignment hash 未执行：1 failed
+metric/baseline 标签可与固定数学不一致：5 failed
+```
+
+最小实现后，在全新 `/private/tmp/praxis-p8-verify` Python 3.13 strict-lock
+环境中 hash-install `build-py313.lock`、`dev-py313.lock`，再以
+`--no-build-isolation --no-deps -e .` 安装候选：
+
+```text
+python -m pip check：
+No broken requirements found.
+
+锁版本：
+anndata 0.12.19
+numpy 2.5.1
+scipy 1.18.0
+mcp 1.28.1
+
+P8 定向：
+21 passed / 0 failed
+
+P6 capability + Pack/adapter + P8 合并定向：
+172 passed / 0 failed
+
+python -m ruff check . --no-cache：
+All checks passed!
+
+VirtualCell core：
+1245 passed / 35 skipped / 9 deselected / 0 failed
+
+legacy：
+1146 passed / 59 skipped / 105 deselected / 0 failed
+```
+
+core 相对 P7 的 `1224 passed` 精确增加 21 个 P8 case；legacy 与 P7 完全一致。
+core 的 35 skip 仍是 remote/Docker 外部门，2 条 warning 仍来自 MuData 上游
+namespace decorator deprecation。没有运行真实 LLM、GEARS、GPU/checkpoint、
+Docker 或 UI/E2E，不能把普通 skip 写成这些能力通过。
+
+真实数据操作另有独立证据：
+
+- Dataverse ZIP 与 H5AD 的 size/hash 全部匹配 frozen contract；
+- source 和 derived Pack 的 CSR X/counts dataset hash 精确一致；
+- 30 validation + 116 test condition × 3 baseline，共 438 次预测逐个经过正式
+  Pack-aware broker/governance/Report；
+- `.53` Golden 根 15 个文件逐项重算 size/SHA-256，与 Git
+  `artifact-manifest.json` 一致，总计 `4,693,649,813` bytes；
+- GEARS `run=false`、`assets_accessed=false`。
+
+这类外置数据/评估成功不等于代码已部署，也不提升
+`scientifically_validated=false`。
+
 ## 本地复现
 
 ```bash

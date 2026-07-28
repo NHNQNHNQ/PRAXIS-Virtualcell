@@ -39,6 +39,7 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [VirtualCellPack P5 → P6 Handoff](HANDOFF-VIRTUALCELLPACK-P5-TO-P6.md) | local P5 implementation, exact strict-lock evidence, limitations and next exact-SHA authorization gate |
 | [VirtualCellPack P6 → P7 Handoff](HANDOFF-VIRTUALCELLPACK-P6-TO-P7.md) | local P6 capability-runtime implementation, exact tests, limitations and next exact-SHA authorization gate |
 | [VirtualCellPack P7 → P8 Handoff](HANDOFF-VIRTUALCELLPACK-P7-TO-P8.md) | local P7 strict data catalog, verified external files, controlled quarantine upload, exact tests and next exact-SHA authorization gate |
+| [VirtualCellPack P8 → P9 Handoff](HANDOFF-VIRTUALCELLPACK-P8-TO-P9.md) | Golden Norman/K562 Pack, fixed baseline results, `.53` artifact hashes, limitations and next exact-SHA authorization gate |
 | [Repository Layout](REPOSITORY-LAYOUT.md) | tracked-tree responsibilities and evidence-versus-generated policy |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | highest authority for met/narrowed/needs-new/unsupported scientific claims |
 
@@ -53,6 +54,7 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [LLM Interface Guide](USAGE-llm-interface.md) | v0.6-era optional LLM/API interface; deterministic-runtime red lines remain applicable |
 | [Remote Science Validation](runbooks/REMOTE-SCIENCE-VALIDATION.md) | approved-SHA `.53` W4B/Gate A procedure; currently `REMOTE_NOT_RUN` and not synchronization authorization |
 | [VirtualCellPack Data Portal](runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) | P7 external data-root layout, fixed inventory, upload quarantine, verification and update procedure |
+| [Golden Norman/K562](runbooks/VIRTUALCELLPACK-GOLDEN-NORMAN.md) | P8 source verification, deterministic Pack derivation, simple baseline build, formal evaluation and remote hash audit |
 
 The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` files describe the older PRAXIS-2 classroom/deployment system, including `.40/.53` service topology. They are not VirtualCell current-user entry points.
 
@@ -70,10 +72,12 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [VirtualCellPack P5 ADR](ADR-0003-virtualcellpack-p5-multiomics-alignment.md) | H5MU paired/partially-paired semantics, strict model feature contracts, explicit alignment and three-layer validity boundary |
 | [VirtualCellPack P6 ADR](ADR-0004-virtualcellpack-p6-capability-runtime.md) | strict model cards, four-factor compatibility, deterministic execution plans, plugin runtime and explicit legacy boundary |
 | [VirtualCellPack P7 ADR](ADR-0005-virtualcellpack-p7-data-portal.md) | strict public data catalog, allowlisted hash-verified download, byte-preserving quarantine and three-layer non-escalation |
-| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P7 implementation/status matrix; separates resource availability, `pack_valid`, `model_compatible`, executable and `scientifically_validated` |
+| [VirtualCellPack P8 ADR](ADR-0006-virtualcellpack-p8-golden-norman.md) | frozen Norman/K562 data/split/metric/bootstrap, three simple baselines, formal runtime path and scientific claim boundary |
+| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P8 implementation/status matrix; separates resource availability, `pack_valid`, `model_compatible`, executable and `scientifically_validated` |
 | [VirtualCellPack Multiomics Runbook](runbooks/VIRTUALCELLPACK-MULTIOMICS.md) | tiny RNA+protein fixture generation, hash binding, P5 tests and asset-update rules |
 | [VirtualCellPack Capability Runtime Runbook](runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md) | local model card/cache/Pack assembly, execution-plan audit and fail-closed reason handling |
 | [VirtualCellPack Data Portal Runbook](runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) | external public-file inventory, service configuration, upload quarantine and operator review boundary |
+| [Golden Norman Runbook](runbooks/VIRTUALCELLPACK-GOLDEN-NORMAN.md) | exact source/Pack/baseline/evaluation hashes and fail-closed reproduction procedure |
 | [Provenance](../PROVENANCE.md) | repository derivation from PRAXIS-2 and bootstrap evidence |
 
 ## Release and version history

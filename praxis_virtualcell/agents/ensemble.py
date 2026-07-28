@@ -48,6 +48,17 @@ class EnsembleCoordinatorAgent(BaseAgent):
         if vecs:
             n = max((len(v) for v in vecs), default=0)
             ensemble = {"delta": [sum(v[i] for v in vecs) / len(vecs) for i in range(n)]} if n else None
+            if ensemble is not None and len(vecs) == 1:
+                prediction = next(r["prediction"] for r in ok if r.get("prediction"))
+                for key in (
+                    "baseline",
+                    "feature_ids_sha256",
+                    "n_features",
+                    "value_type",
+                    "unseen_train_targets",
+                ):
+                    if key in prediction:
+                        ensemble[key] = prediction[key]
         disagreement = _disagreement(vecs) if vecs else {
             "score": None, "metric": "pairwise_cosine_distance", "n_models": 0, "reason": "no_models"}
         # per-predictor caution(如机制模型 disposition=caution/abstain 的 caution_flags)表面化,

@@ -1,6 +1,6 @@
-# VirtualCellPack 能力矩阵（P0–P7）
+# VirtualCellPack 能力矩阵（P0–P8）
 
-P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P7 唯一起始基线：`bcc812eed8a9b1cd162361f8c12fb9e325cdb17c`。本表是能力与证据边界，不是性能排名；`pack_valid`、`model_compatible`、`scientifically_validated` 不得互换。
+P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P8 唯一起始基线：`09fb1bb3d02adfceed504cbccd7cf36c54a61b69`。本表是能力与证据边界，不是性能排名；`pack_valid`、`model_compatible`、`scientifically_validated` 不得互换。
 
 | 能力/组件 | 当前实现与真相源 | `pack_valid` | `model_compatible` | `scientifically_validated` | 结论与边界 |
 |---|---|---:|---:|---:|---|
@@ -17,6 +17,10 @@ P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P7 唯一起始基线�
 | P7 allowlisted download | `/api/data-catalog/**/download` | 不提供；每次只证明当前外置文件匹配清单 | 不提供 | 不提供 | containment、普通文件、size、SHA-256 每次重验；缺失/篡改/hash 不可读/逃逸 fail-closed；Range 不绕过校验 |
 | P7 quarantined upload | `/api/data-uploads`、`vc.upload-receipt.v1` | 不提供；receipt 不是 Pack | 不提供 | 不提供 | bearer 前置、body/文件/quota 限制、原字节/hash/原子 receipt；不解包、去重、归一化、补零、mapping、注册或预测 |
 | P7 data UI | `DataLibrary.tsx` | 只显示后端资源状态 | 不判断 | 不裁决 | 精确物种筛选、可用下载、内存 token 和隔离上传；未就绪文件禁用；LLM 不参与 |
+| P8 Golden Norman contract | `data/golden/norman_2019/contract.yaml`、ADR-0006 | 不直接授予；先锁 source/obs/var/X/counts/split/metric | 不直接授予 | 固定不提升 | K562 `CVCL_0004` 与原样保留 source `A549` 字段分开；无随机 split、归一化、补零、去重、symbol/ortholog 转换或结果后调参 |
+| P8 Golden Pack | 外置 `pack/`、checked-in `pack.manifest.yaml`、`PackRegistry` | 完整 v0.2 schema/asset/semantic/leakage/hash 验证后为 true | 不自动提供 | false | `91,205×5,045`；派生只替换 obs，X/counts raw dataset hash 与 source 一致；大数据不入 Git |
+| P8 simple baseline cards | 三个一卡 registry、`GoldenBaselineWrapper` | 消费已注册 Golden Pack | 对精确 request/Pack/card/environment/asset 关系为 true | false | no-change、condition-equal global mean、alpha=1 additive ridge；canonical Ensembl target only；缺失/篡改资产直接 abstain、无 mock fallback |
+| P8 Golden evaluation | `vc.golden-evaluation.v1`、`evaluation.json` hash | 记录 true，不重新授予 | 记录每次正式 runtime true | 固定 false | 30 validation + 116 test condition 逐个走 broker/governance/report；full-feature condition-macro MSE 与 condition paired bootstrap；未运行 GEARS |
 | Report | `agents/report.py`、`io/report_markdown.py` | N/A | 只呈现确定性结果 | 只呈现已有 evidence | 报告保留完整 request；9 段 Markdown 保持确定性 |
 | ActiveLearning | `active_learning/active_learning_agent.py`、`acquisition.py` | N/A | 不负责兼容性 | 不负责验证 | 只生成 advisory queue；不改 prediction/verdict/abstain/provenance 真相 |
 | Governance | `governance/*`、runtime gates | N/A | fail-closed 边界 | 只检查契约/evidence | provenance、module、cell type、narrative/hash gate 不能被 LLM 绕过 |
@@ -38,5 +42,6 @@ P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P7 唯一起始基线�
 | `gears` / `donor_predictor` | planned；`.53` 有受门控资产与环境记录 | 在批准的远端证据中单独报告其可复现实验 | 本地无 checkpoint 时的 mock 路径不是真 GEARS；不与不可比指标混表 |
 | `scgpt` | planned；远端资产，不入 Git | 仅在批准的 checkpoint/evidence 上报告 | 不能从 registry 或 wrapper 存在推导 validation |
 | `norman_mean_baseline` | planned；远端资产 | 可作为明确标注的 naive baseline evidence | 不得当成训练模型或默认预测器 |
+| `norman_no_change` / `norman_global_mean` / `norman_additive_linear` | P8 外置 hash-locked artifact + 各自 strict one-card registry；不加入默认 zoo | 只可复现冻结 Norman/K562 split 上的 baseline delta、MSE 和治理报告 | 不能泛化为其他 cell/data/split；不能因分数或 runtime success 声称 scientifically validated |
 | `yeast_deletion_fitness` | planned；无权重 | 仅登记未来数据缺口 | 不得生成 deletion-fitness 数值 |
 | `pathway_scoring` / `embedding` / `state_scoring` | 按窄 case runner 条件性接入 | 仅对应数据集/对象/物种的现有 case | 不得把 marker/signature/状态刻画扩大成任意扰动预测 |

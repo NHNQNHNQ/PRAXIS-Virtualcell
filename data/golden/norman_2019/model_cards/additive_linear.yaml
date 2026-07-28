@@ -1,0 +1,91 @@
+models:
+  norman_additive_linear:
+    schema_version: vc.model-card.v1
+    name: norman_additive_linear
+    type: self_trained
+    species:
+    - human
+    taxon:
+    - NCBITaxon:9606
+    module: genetic_hub
+    modality:
+    - name: scRNA
+      ontology_id: EFO:0008913
+    assay:
+    - EFO:0008913
+    cell_domain:
+      cell_type_ids:
+      - CVCL_0004
+      cell_type_names:
+      - K562
+      tissue_ids: []
+      tissue_names: []
+      allow_unspecified: false
+    perturbation:
+    - gene
+    task: predict_delta_expression
+    output:
+    - delta_expression
+    feature_namespace:
+    - name: EnsemblGene
+      version: Ensembl 84
+      id_format: ensembl_gene
+    representation:
+    - matrix:X
+    source: cache:golden-norman
+    license: CC0-1.0
+    status: available
+    wrapper: praxis_virtualcell.model_zoo.wrappers.golden_baseline_wrapper.GoldenBaselineWrapper
+    version: 1.0.0
+    requires: []
+    assets:
+    - filename: baseline.json
+      sha256: b82dc7ab26c6f6fdef4414f6b05c51edb32b2a35e4c00f45824cc839ab9cf1a9
+      media_type: application/json
+      source_note: Deterministically derived from the hash-locked Golden Norman training
+        partition.
+    - filename: linear_coefficients.npy
+      sha256: 241210fb33b0abb86f923478870f9d19711c31e4a721fc5d60888d61900b86c4
+      media_type: application/x-npy
+      source_note: Deterministically derived from the hash-locked Golden Norman training
+        partition.
+    - filename: linear_intercept.npy
+      sha256: 6a870efd9f97b599769069aec95bcf2f920acedf43aa1d24740a7e5b40e7fac2
+      media_type: application/x-npy
+      source_note: Deterministically derived from the hash-locked Golden Norman training
+        partition.
+    resources:
+      python_dependencies: []
+      required:
+      - cpu
+    uncertainty:
+      required: true
+      methods:
+      - point_estimate
+      calibrated: false
+    ood:
+      action: abstain
+      dimensions:
+      - taxon
+      - modality
+      - assay
+      - cell_domain
+      - perturbation
+      - task
+      - output
+      - feature_namespace
+      - representation
+    reliability_policy: benchmark_baseline_not_scientifically_validated
+    training_card:
+      training_data: norman-2019-k562-golden@1.0.0 train
+      split: norman-condition-holdout-v1
+      baseline: condition-level additive ridge
+      metrics:
+        primary: condition_macro_full_feature_delta_mse
+        result_location: external Golden evaluation artifact
+      provenance: Golden contract and all assets are SHA-256 locked
+    provenance:
+      pack_fingerprint: 42165e430bab3474cdc9e607770ff5e204608c4243f84e492c08e2c6442c55ee
+      contract_sha256: f34afa761239abc97033c78bb9d0c29a1c36a4c7d1a106a9cbbaa805a5196ff5
+      scientifically_validated: false
+      distributable: true

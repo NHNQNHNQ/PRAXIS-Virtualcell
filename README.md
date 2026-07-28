@@ -112,12 +112,24 @@ praxis-vc serve
 `scientifically_validated`。上传不会自动解包、归一化、补零、转换 feature、
 注册 Pack 或参与预测；大数据仍不进入 Git。
 
+P8 的 Norman/K562 Golden Pack 把一个公开真实数据集固定为可审计参考：source
+H5AD、上游预处理 X/counts、有序 feature、三个 control guide、预定义
+train/validation/test、condition-macro MSE、condition 级 bootstrap 和三个简单
+baseline 全部 hash/版本绑定。每个 baseline 使用独立的一卡 registry 走正式
+Pack→broker→governance→Report，不经 mock shortcut；未知/重复 canonical target
+或篡改资产均 fail-closed。当前 test MSE 是 no-change `0.00620609`、global mean
+`0.00458205`、additive ridge `0.00325706`，只适用于该冻结 benchmark。
+`pack_valid=true` 与 `model_compatible=true` 仍保持
+`scientifically_validated=false`；本阶段没有运行或访问 GEARS。
+
 架构和复现边界见 [ADR-0003](docs/ADR-0003-virtualcellpack-p5-multiomics-alignment.md)、
 [ADR-0004](docs/ADR-0004-virtualcellpack-p6-capability-runtime.md)、
 [ADR-0005](docs/ADR-0005-virtualcellpack-p7-data-portal.md)、
+[ADR-0006](docs/ADR-0006-virtualcellpack-p8-golden-norman.md)、
 [多组学 runbook](docs/runbooks/VIRTUALCELLPACK-MULTIOMICS.md) 与
 [能力 runtime runbook](docs/runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md)、
-[数据资源库 runbook](docs/runbooks/VIRTUALCELLPACK-DATA-PORTAL.md)。
+[数据资源库 runbook](docs/runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) 和
+[Golden Norman runbook](docs/runbooks/VIRTUALCELLPACK-GOLDEN-NORMAN.md)。
 
 ## 能力边界
 
