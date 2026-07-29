@@ -76,6 +76,7 @@ async function openAsk(page: Page): Promise<void> {
   );
 
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   const [healthResponse, jobsResponse] = await Promise.all([
     healthResponsePromise,
     jobsResponsePromise,

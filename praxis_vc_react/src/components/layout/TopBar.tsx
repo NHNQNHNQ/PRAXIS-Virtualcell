@@ -10,7 +10,8 @@ export type Theme = "light" | "dark";
 // 【文案 · spec §3.5】LLM 提示不照抄旧「⚠ LLM 未参与预测/治理决策」(工程黑话),
 // 按 §3.5 改写对照表用自然科学家说法。mode 切换按钮同理避免工程旁白。
 
-const LLM_NOTICE = "结果由确定性模型给出,未经语言模型改写";
+const LLM_NOTICE =
+  "语言模型仅用于解析与解释，不参与数值预测或最终裁决";
 
 const MODE_LABEL: Record<Mode, string> = {
   offline: "本地模式",

@@ -10,8 +10,9 @@ import {
   type Stage,
 } from "../../api";
 import DataLibrary from "../data/DataLibrary";
+import PlatformPage from "../platform/PlatformPage";
 import LazyResultsStage from "../stages/LazyResultsStage";
-import JobSidebar from "./JobSidebar";
+import JobSidebar, { type PlatformView } from "./JobSidebar";
 import TopBar, { type Theme } from "./TopBar";
 import Workspace from "./Workspace";
 
@@ -42,7 +43,7 @@ export default function AppShell() {
   const [mode, setMode] = useState<Mode>("offline");
   const modeRef = useRef<Mode>(mode);
   const [stage, setStage] = useState<Stage>("ask");
-  const [view, setView] = useState<"workspace" | "data">("workspace");
+  const [view, setView] = useState<PlatformView>("dashboard");
   const [queryEpoch, setQueryEpoch] = useState(0);
   const queryEpochRef = useRef(0);
   // null 表示当前 Ask 尚未上报草稿；空字符串则是用户确实清空了输入。
@@ -51,6 +52,7 @@ export default function AppShell() {
   const [job, setJob] = useState<JobState>(emptyJob);
   const [openedJobId, setOpenedJobId] = useState<string | null>(null); // 侧栏载入的历史 job
   const [jobs, setJobs] = useState<JobSummary[] | null>(null);
+  const [jobsErr, setJobsErr] = useState<string | null>(null);
   const [h, setH] = useState<Health | null>(null);
   const [healthErr, setHealthErr] = useState<string | null>(null);
   // 主题(light/dark):TopBar 切换,副作用写到 <html data-theme>,themes.css 据此覆盖 token。
@@ -60,9 +62,11 @@ export default function AppShell() {
   modeRef.current = mode;
 
   const loadJobs = useCallback(() => {
+    setJobs(null);
+    setJobsErr(null);
     listJobs()
       .then((d) => setJobs(d.jobs))
-      .catch(() => setJobs([]));
+      .catch((e: unknown) => setJobsErr(String(e)));
   }, []);
 
   useEffect(() => {
@@ -85,7 +89,7 @@ export default function AppShell() {
     askQueryRef.current = null;
     setJob(emptyJob);
     setStage("ask");
-    setView("workspace");
+    setView("agent-runs");
     setOpenedJobId(null);
   }
 
@@ -163,7 +167,7 @@ export default function AppShell() {
 
   // 主区当前展示的 job（供侧栏高亮）：历史 job 优先;否则 results 阶段展示当前 job。
   const activeJobId =
-    view === "data"
+    view !== "agent-runs"
       ? null
       : openedJobId ?? (stage === "results" ? job.jobId : null);
 
@@ -172,19 +176,20 @@ export default function AppShell() {
       {/* 左:独立 Job Sidebar(历史 job / 收藏;不与阶段轨混,spec §1) */}
       <JobSidebar
         jobs={jobs}
+        jobsErr={jobsErr}
         activeJobId={activeJobId}
-        dataActive={view === "data"}
+        view={view}
         onNewQuery={newQuery}
-        onOpenData={() => {
-          setView("data");
-          setOpenedJobId(null);
+        onNavigate={(nextView) => {
+          setView(nextView);
+          if (nextView !== "agent-runs") setOpenedJobId(null);
         }}
         onOpenJob={(id) => {
           const nextEpoch = queryEpochRef.current + 1;
           queryEpochRef.current = nextEpoch;
           setQueryEpoch(nextEpoch);
           askQueryRef.current = null;
-          setView("workspace");
+          setView("agent-runs");
           setOpenedJobId(id);
         }}
         health={h}
@@ -206,129 +211,160 @@ export default function AppShell() {
         <main ref={mainScrollRef} className="main-scroll">
           <div className="main-inner">
             {/* 右:Workspace(工作区,内含左侧 StepperRail)。
-                历史 job 模式:直接进 results,以该 job_id 渲 ResultsStage 6 tab 外壳(等价旧 openedJobId 分支)。 */}
-            {view === "data" ? (
-              <DataLibrary />
-            ) : openedJobId ? (
-              <LazyResultsStage
-                key={openedJobId}
-                jobId={openedJobId}
-                onReset={newQuery}
+                历史 job 模式:直接进 results,以该 job_id 渲 ResultsStage 7 tab 外壳(等价旧 openedJobId 分支)。 */}
+            {view === "datasets" ? (
+              <DataLibrary section="datasets" />
+            ) : view === "packs" ? (
+              <DataLibrary section="packs" />
+            ) : view !== "agent-runs" ? (
+              <PlatformPage
+                page={view}
+                jobsCount={jobs?.length ?? null}
+                jobsError={jobsErr}
+                onNavigate={setView}
               />
             ) : (
-              <Workspace
-                key={queryEpoch}
-                stage={effectiveStage}
-                job={job}
-                mode={mode}
-                canEnter={canEnter}
-                onJump={jumpTo}
-                onMode={changeMode}
-                onAskDraftChanged={(draft, composedQuery) => {
-                  askQueryRef.current = composedQuery;
-                  setJob((prev) => {
-                    const matchesLastParse =
-                      prev.parsedIntent != null &&
-                      prev.query === composedQuery &&
-                      prev.parsedMode === modeRef.current;
-                    return {
-                      ...prev,
-                      askDraft: draft,
-                      ...(!matchesLastParse && {
-                        parsedIntent: null,
-                        reviewDraft: null,
+              <section className="agent-workspace" aria-label="Agent Workspace">
+                <header className="agent-context-header">
+                  <div>
+                    <span className="platform-eyebrow">Agent Workspace</span>
+                    <h1>围绕已声明的细胞上下文运行任务</h1>
+                    <p>
+                      {openedJobId
+                        ? "当前正在审计历史 Agent Run；Pack、模型与数据身份以后端保存的 execution identity 为准。"
+                        : "当前尚未绑定持久化虚拟细胞实例；该入口保留既有请求流程，并在结果中明确记录执行身份。"}
+                    </p>
+                  </div>
+                  <span className="badge badge-inferred">
+                    {openedJobId
+                      ? "执行身份 · 后端记录"
+                      : "Legacy · 未绑定 VirtualCellPack"}
+                  </span>
+                </header>
+                {openedJobId ? (
+                  <LazyResultsStage
+                    key={openedJobId}
+                    jobId={openedJobId}
+                    onReset={newQuery}
+                  />
+                ) : (
+                  <Workspace
+                    key={queryEpoch}
+                    stage={effectiveStage}
+                    job={job}
+                    mode={mode}
+                    canEnter={canEnter}
+                    onJump={jumpTo}
+                    onMode={changeMode}
+                    onAskDraftChanged={(draft, composedQuery) => {
+                      askQueryRef.current = composedQuery;
+                      setJob((prev) => {
+                        const matchesLastParse =
+                          prev.parsedIntent != null &&
+                          prev.query === composedQuery &&
+                          prev.parsedMode === modeRef.current;
+                        return {
+                          ...prev,
+                          askDraft: draft,
+                          ...(!matchesLastParse && {
+                            parsedIntent: null,
+                            reviewDraft: null,
+                            confirmedRequest: null,
+                            modulePlan: null,
+                            runStatus: "idle" as const,
+                            jobId: null,
+                          }),
+                        };
+                      });
+                    }}
+                    onParsed={(r, query, draft, parsedMode) => {
+                      if (
+                        queryEpoch !== queryEpochRef.current ||
+                        parsedMode !== modeRef.current ||
+                        (askQueryRef.current !== null &&
+                          askQueryRef.current !== query)
+                      ) {
+                        return;
+                      }
+                      askQueryRef.current = query;
+                      setJob((prev) => ({
+                        ...prev,
+                        query,
+                        askDraft: draft,
+                        parsedMode,
+                        parsedIntent: r,
+                        reviewDraft:
+                          prev.query === query &&
+                          prev.parsedMode === parsedMode
+                            ? prev.reviewDraft
+                            : null,
                         confirmedRequest: null,
                         modulePlan: null,
-                        runStatus: "idle" as const,
+                        runStatus: "idle",
                         jobId: null,
-                      }),
-                    };
-                  });
-                }}
-                onParsed={(r, query, draft, parsedMode) => {
-                  // 新建查询/历史切换或模式变化后迟到的解析响应一律丢弃。
-                  if (
-                    queryEpoch !== queryEpochRef.current ||
-                    parsedMode !== modeRef.current ||
-                    (askQueryRef.current !== null && askQueryRef.current !== query)
-                  ) {
-                    return;
-                  }
-                  askQueryRef.current = query;
-                  // 每次重新解析都使确认后的整条链失效；仅同 query+mode 可保留
-                  // 尚未确认的 Review 草稿，避免新解析复用旧结果。
-                  setJob((prev) => ({
-                    ...prev,
-                    query,
-                    askDraft: draft,
-                    parsedMode,
-                    parsedIntent: r,
-                    reviewDraft:
-                      prev.query === query && prev.parsedMode === parsedMode
-                        ? prev.reviewDraft
-                        : null,
-                    confirmedRequest: null,
-                    modulePlan: null,
-                    runStatus: "idle",
-                    jobId: null,
-                  }));
-                  setStage("review");
-                }}
-                onReviewBack={(draft) => {
-                  patchJob({
-                    reviewDraft: draft,
-                    confirmedRequest: null,
-                    modulePlan: null,
-                    runStatus: "idle",
-                    jobId: null,
-                  });
-                  setStage("ask");
-                }}
-                onReviewEdited={(draft) => {
-                  patchJob({
-                    reviewDraft: draft,
-                    confirmedRequest: null,
-                    modulePlan: null,
-                    runStatus: "idle",
-                    jobId: null,
-                  });
-                }}
-                onConfirmed={(req) => {
-                  patchJob({
-                    confirmedRequest: req,
-                    reviewDraft: req,
-                    modulePlan: null,
-                    runStatus: "idle",
-                    jobId: null,
-                  });
-                  setStage("route");
-                }}
-                onRouteBack={() => setStage("review")}
-                onRouteNext={(plan) => {
-                  // RouteStage 派生的静态预期 modulePlan 经此传入(overall_verdict="expected"),
-                  // 满足 route→run 的 canEnter;真实路由在 Results 的模块路由 tab。
-                  patchJob({ modulePlan: plan, runStatus: "idle", jobId: null });
-                  setStage("run");
-                }}
-                onRunBack={() => {
-                  if (job.runStatus !== "running") setStage("route");
-                }}
-                onRunStatus={(s: RunStatus) => {
-                  if (queryEpoch !== queryEpochRef.current) return;
-                  patchJob({
-                    runStatus: s,
-                    ...((s === "running" || s === "failed") && { jobId: null }),
-                  });
-                }}
-                onRan={(id) => {
-                  if (queryEpoch !== queryEpochRef.current) return;
-                  // 实际 abstain/failed 由结果页回填;此处先置 succeeded 满足 run→results。
-                  patchJob({ jobId: id, runStatus: "succeeded" });
-                  setStage("results");
-                  loadJobs();
-                }}
-                onReset={newQuery}
-              />
+                      }));
+                      setStage("review");
+                    }}
+                    onReviewBack={(draft) => {
+                      patchJob({
+                        reviewDraft: draft,
+                        confirmedRequest: null,
+                        modulePlan: null,
+                        runStatus: "idle",
+                        jobId: null,
+                      });
+                      setStage("ask");
+                    }}
+                    onReviewEdited={(draft) => {
+                      patchJob({
+                        reviewDraft: draft,
+                        confirmedRequest: null,
+                        modulePlan: null,
+                        runStatus: "idle",
+                        jobId: null,
+                      });
+                    }}
+                    onConfirmed={(req) => {
+                      patchJob({
+                        confirmedRequest: req,
+                        reviewDraft: req,
+                        modulePlan: null,
+                        runStatus: "idle",
+                        jobId: null,
+                      });
+                      setStage("route");
+                    }}
+                    onRouteBack={() => setStage("review")}
+                    onRouteNext={(plan) => {
+                      patchJob({
+                        modulePlan: plan,
+                        runStatus: "idle",
+                        jobId: null,
+                      });
+                      setStage("run");
+                    }}
+                    onRunBack={() => {
+                      if (job.runStatus !== "running") setStage("route");
+                    }}
+                    onRunStatus={(s: RunStatus) => {
+                      if (queryEpoch !== queryEpochRef.current) return;
+                      patchJob({
+                        runStatus: s,
+                        ...((s === "running" || s === "failed") && {
+                          jobId: null,
+                        }),
+                      });
+                    }}
+                    onRan={(id) => {
+                      if (queryEpoch !== queryEpochRef.current) return;
+                      patchJob({ jobId: id, runStatus: "succeeded" });
+                      setStage("results");
+                      loadJobs();
+                    }}
+                    onReset={newQuery}
+                  />
+                )}
+              </section>
             )}
           </div>
         </main>

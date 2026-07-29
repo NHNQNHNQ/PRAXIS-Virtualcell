@@ -36,6 +36,7 @@ function expectNoBrowserFailures(failures: BrowserFailures): void {
 
 async function openAdvancedInput(page: Page): Promise<void> {
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "描述一次扰动实验" }),
   ).toBeVisible();

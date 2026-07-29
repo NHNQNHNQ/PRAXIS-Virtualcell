@@ -132,7 +132,8 @@
 }
 .main-scroll { flex: 1; overflow-y: auto; }
 .main-inner {
-  max-width: 760px;
+  width: 100%;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 32px 24px 80px;
 }

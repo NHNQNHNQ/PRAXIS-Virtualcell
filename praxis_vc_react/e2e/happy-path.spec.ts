@@ -39,6 +39,7 @@ test.afterEach(async ({ page }) => {
 // 选择器全走 role/text/label(抗前端 WIP CSS);API 调用是阶段推进的硬证据(waitForResponse)。
 test("5 阶段 happy path 五跳到达 Results", async ({ page }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
 
   // ── 阶段 1:Ask ──(heading + 预填输入 + 点解读任务 → POST /api/parse)
   await expect(page.getByRole("heading", { name: "描述一次扰动实验" })).toBeVisible();
@@ -74,6 +75,7 @@ test("5 阶段 happy path 五跳到达 Results", async ({ page }) => {
 
 test("Review 切换到 Route 时主内容从顶部开始", async ({ page }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await page.getByLabel("研究问题").fill("在 human 细胞敲 AHR");
   await page.getByRole("button", { name: "解读任务 →" }).click();
   await expect(page.getByRole("heading", { name: "核对任务解读" })).toBeVisible();
@@ -100,6 +102,7 @@ test("Review 切换到 Route 时主内容从顶部开始", async ({ page }) => {
 test("Review 返回 Ask 后保留问题与尚未确认的编辑", async ({ page }) => {
   const query = "在 mouse 细胞敲 GATA1";
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await page.getByLabel("研究问题").fill(query);
   await page.getByRole("button", { name: "解读任务 →" }).click();
   await expect(page.getByRole("heading", { name: "核对任务解读" })).toBeVisible();
@@ -138,6 +141,7 @@ test("Review 返回 Ask 后保留问题与尚未确认的编辑", async ({ page 
 
 test("Route 与 Run 返回后保留已确认的请求", async ({ page }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await page.getByLabel("研究问题").fill("在 human 细胞敲 TP53");
   await page.getByRole("button", { name: "解读任务 →" }).click();
   await expect(page.getByRole("heading", { name: "核对任务解读" })).toBeVisible();
@@ -175,6 +179,7 @@ test("高级输入返回 Ask 后按字段恢复且不会重复拼接", async ({ 
   const composed = `${question}\n物种:mouse\n结构化描述:${structuredDescription}`;
 
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await page.getByLabel("研究问题").fill(question);
   await page.getByText("高级输入(可选)", { exact: true }).click();
   await page.getByLabel("物种(可留空)").selectOption("mouse");
@@ -225,6 +230,7 @@ test("Ask 中新建查询重置表单且迟到解析不会恢复旧任务", asyn
   });
 
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await page.getByLabel("研究问题").fill("在 mouse 细胞敲 GATA1");
   const parseRequest = page.waitForRequest(
     (request) =>
@@ -259,6 +265,7 @@ test("Ask 中新建查询重置表单且迟到解析不会恢复旧任务", asyn
 
 test("已完成任务在 Review 编辑后必须重新路由与运行", async ({ page }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await page.getByLabel("研究问题").fill("在 human 细胞敲 AHR");
   await page.getByRole("button", { name: "解读任务 →" }).click();
   await page.getByRole("button", { name: "确认并继续 →" }).click();
@@ -325,6 +332,7 @@ test("Ask 草稿变更后旧解析与下游阶段立即失效", async ({ page })
   });
 
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await page.getByLabel("研究问题").fill("请运行结构化请求");
   await page.getByText("高级输入(可选)", { exact: true }).click();
   await page.getByLabel("结构化描述(可留空)").fill(firstStructured);
@@ -359,6 +367,7 @@ test("Ask 草稿变更后旧解析与下游阶段立即失效", async ({ page })
 
 test("解析后切换模式会回到 Ask 并使旧解析链失效", async ({ page }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await page.getByLabel("研究问题").fill("在 human 细胞敲 AHR");
   await page.getByRole("button", { name: "解读任务 →" }).click();
   await expect(page.getByRole("heading", { name: "核对任务解读" })).toBeVisible();
@@ -382,6 +391,7 @@ test("pending 解析期间清空问题后迟到成功响应不会进入 Review",
   });
 
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   const parseRequest = page.waitForRequest(
     (request) =>
       request.url().endsWith("/api/parse") && request.method() === "POST",
@@ -420,6 +430,7 @@ for (const invalidate of ["草稿", "模式"] as const) {
     });
 
     await page.goto("/");
+    await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
     const parseRequest = page.waitForRequest(
       (request) =>
         request.url().endsWith("/api/parse") && request.method() === "POST",
@@ -457,6 +468,7 @@ test("pending Run 期间阶段轨锁定以防重复提交", async ({ page }) => 
   });
 
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await page.getByLabel("研究问题").fill("在 human 细胞敲 AHR");
   await page.getByRole("button", { name: "解读任务 →" }).click();
   await page.getByRole("button", { name: "确认并继续 →" }).click();
@@ -498,6 +510,7 @@ test("离开 pending Run 后迟到响应不会打开旧任务结果", async ({ p
   });
 
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await page.getByLabel("研究问题").fill("在 human 细胞敲 AHR");
   await page.getByRole("button", { name: "解读任务 →" }).click();
   await page.getByRole("button", { name: "确认并继续 →" }).click();

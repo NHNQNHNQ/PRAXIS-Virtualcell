@@ -19,6 +19,7 @@ const RESULT_PANELS: Array<[tab: string, heading: string]> = [
   ["证据", "证据与审计"],
   ["运行轨迹", "运行轨迹"],
   ["溯源", "运行标识"],
+  ["数据与执行身份", "数据与执行身份"],
 ];
 
 function isJobsPost(request: Request): boolean {
@@ -62,6 +63,7 @@ function expectNoBrowserFailures(failures: BrowserFailures): void {
 
 async function reachRun(page: Page): Promise<void> {
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "描述一次扰动实验" }),
   ).toBeVisible();
@@ -86,7 +88,7 @@ async function reachRun(page: Page): Promise<void> {
   await expect(page.getByRole("heading", { name: "运行前确认" })).toBeVisible();
 }
 
-test("Results 六面板反复切换并滚动真实轨迹与溯源时保持稳定", async ({
+test("Results 七面板反复切换并滚动真实轨迹与溯源时保持稳定", async ({
   page,
 }) => {
   const failures = collectBrowserFailures(page);
@@ -159,7 +161,7 @@ test("Results 六面板反复切换并滚动真实轨迹与溯源时保持稳定
   const result = page.getByRole("region", { name: /^结果 · job/ });
   await expect(result).toHaveCount(1);
   await expect(result).toBeVisible();
-  await expect(result.getByRole("tab")).toHaveCount(6);
+  await expect(result.getByRole("tab")).toHaveCount(7);
 
   for (let pass = 0; pass < 3; pass += 1) {
     for (const [tabName, headingName] of RESULT_PANELS) {

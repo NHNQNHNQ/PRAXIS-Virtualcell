@@ -21,22 +21,23 @@ import ModuleRoutingTab from "../result/ModuleRoutingTab";
 import EvidenceTab from "../result/EvidenceTab";
 import TraceTab from "../result/TraceTab";
 import ProvenanceTab from "../result/ProvenanceTab";
+import ExecutionIdentityTab from "../result/ExecutionIdentityTab";
 
-// Stage 5 · Results(spec §2 Stage5)—— 结果证据页外壳:顶部 job 头 + 报告下载/复制工具条 + 6 tab 容器。
+// Stage 5 · Results(spec §2 Stage5)—— 结果证据页外壳:顶部 job 头 + 报告下载/复制工具条 + 7 tab 容器。
 // 并发拉取 report/trace/provenance 主链(迁 ResultView 逻辑)。
-// 6 tab 全部由 components/result/* 真实实现:Report(9.18)/Predictions(9.19)/ModuleRouting(9.20)/
-// Evidence(9.21)/Trace(9.22)/Provenance(9.23,审计分区页 + 下载/复制,替换旧内联裸 pre)。
+// tabs 全部由 components/result/* 真实实现并只读展示后端载荷。
 // module_plan 与主报告一并并发拉取(失败静默降级为空 {}),喂给 ModuleRoutingTab。
 // provenance 下载/复制随 ProvenanceTab 迁入该 tab(不在此工具条重复),工具条只留 report 相关下载/复制。
 //
 // 铁律:前端只读展示,不做预测/治理裁决;llm_used_for_prediction 如实显示 +「结果由确定性模型给出,
 // 未经语言模型改写」语义(§3.5)。api.ts 请求方法复用,不新增/改端点。
 
-// 6 tab id(受控切换,与 ui/Tabs 复用)。
+// 7 tab id(受控切换,与 ui/Tabs 复用)。
 type Tab =
   | "report"
   | "predictions"
   | "routing"
+  | "identity"
   | "evidence"
   | "trace"
   | "provenance";
@@ -50,6 +51,7 @@ const TAB_ITEMS: TabItem[] = [
   { id: "report", label: "报告" },
   { id: "predictions", label: "预测" },
   { id: "routing", label: "模块路由" },
+  { id: "identity", label: "数据与执行身份" },
   { id: "evidence", label: "证据" },
   { id: "trace", label: "运行轨迹" },
   { id: "provenance", label: "溯源" },
@@ -201,6 +203,7 @@ export default function ResultsStage({
           {tab === "predictions" &&
             (report ? <PredictionsTab report={report} /> : <Skeleton lines={6} />)}
           {tab === "routing" && <ModuleRoutingTab plan={modulePlan} />}
+          {tab === "identity" && <ExecutionIdentityTab prov={prov} />}
           {/* Evidence tab:report 未到显 Skeleton,到达后渲 EvidenceTab(Task 9.21)。 */}
           {tab === "evidence" &&
             (report ? <EvidenceTab report={report} /> : <Skeleton lines={6} />)}

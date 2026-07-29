@@ -362,6 +362,34 @@ select:focus {
   color: var(--primary);
 }
 
+.js-platform-nav {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border);
+}
+.js-nav-btn {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.js-nav-btn:hover {
+  background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+  color: var(--text);
+}
+.js-nav-btn.active {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 9%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 24%, transparent);
+}
+
 .js-label {
   font-size: 11px;
   font-weight: 600;
@@ -566,6 +594,44 @@ select:focus {
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 46vw;
+  }
+}
+
+/* ---------- Phase 11A:Agent Workspace 数据上下文边界 ---------- */
+.agent-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.agent-context-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+.agent-context-header h1 {
+  margin-top: var(--space-1);
+  font-size: 24px;
+}
+.agent-context-header p {
+  max-width: 70ch;
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.platform-eyebrow {
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 720px) {
+  .agent-context-header {
+    flex-direction: column;
   }
 }
 

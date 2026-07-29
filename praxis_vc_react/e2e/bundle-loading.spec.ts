@@ -51,6 +51,7 @@ test("Results 代码只在进入结果时加载并提供可访问等待状态", 
   });
 
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "描述一次扰动实验" }),
   ).toBeVisible();
@@ -112,6 +113,7 @@ test("全新页面从历史记录进入 Results 时也走延迟加载边界", as
   });
 
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   expect(resultsChunkRequests).toBe(0);
   const historyEntry = page.getByRole("button", { name: new RegExp(jobId) });
   await expect(historyEntry).toBeVisible();

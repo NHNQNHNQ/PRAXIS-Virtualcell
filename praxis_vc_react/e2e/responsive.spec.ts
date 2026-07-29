@@ -72,6 +72,7 @@ async function runResponsiveJourney(page: Page): Promise<void> {
   );
   await page.goto("/");
   await expectOk(healthResponsePromise);
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
 
   // Ask:标题、主操作和解析相关 API 在窄视口仍可达。
   await expect(
@@ -177,7 +178,7 @@ async function runResponsiveJourney(page: Page): Promise<void> {
     ).toBeVisible();
   }
 
-  await expect(result.getByRole("tab")).toHaveCount(6);
+  await expect(result.getByRole("tab")).toHaveCount(7);
   await expect(
     result.getByRole("heading", { name: "概要", exact: true }),
   ).toBeVisible();
@@ -188,6 +189,21 @@ async function runResponsiveJourney(page: Page): Promise<void> {
   await result.getByRole("tab", { name: "模块路由", exact: true }).click();
   await expect(
     result.getByRole("heading", { name: "路由摘要", exact: true }),
+  ).toBeVisible();
+  await result
+    .getByRole("tab", { name: "数据与执行身份", exact: true })
+    .click();
+  await expect(
+    result.getByRole("heading", {
+      name: "数据与执行身份",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    result.getByText("未绑定 VirtualCellPack", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    result.getByText("未记录 dataset identity", { exact: true }),
   ).toBeVisible();
 
   expectNoBrowserFailures(failures);

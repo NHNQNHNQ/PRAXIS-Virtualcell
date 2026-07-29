@@ -11,6 +11,11 @@ type ResultsTruth = {
   report: {
     llm_used_for_prediction: boolean;
   };
+  executionIdentity: {
+    schema_version?: string;
+    legacy_adapter?: boolean;
+    fingerprint?: string;
+  };
 };
 
 function collectBrowserFailures(page: Page): BrowserFailures {
@@ -41,9 +46,10 @@ function expectNoBrowserFailures(failures: BrowserFailures): void {
   expect(failures.http500).toEqual([]);
 }
 
-// 先走完 5 阶段到 Results,再逐个点 6 tab 断面板 h2(切 tab 纯前端不发请求)。
+// 从 Agent Runs 走完 5 阶段到 Results,再逐个点 7 tab 断面板 h2。
 async function reachResults(page: Page): Promise<ResultsTruth> {
   await page.goto("/");
+  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
   await page.getByLabel("研究问题").fill("在 human 细胞敲 AHR");
   await page.getByRole("button", { name: "解读任务 →" }).click();
   await page.getByRole("button", { name: "确认并继续 →" }).click();
@@ -95,8 +101,15 @@ async function reachResults(page: Page): Promise<ResultsTruth> {
   expect(modulePlanResponse.status()).toBe(200);
   const body = (await jobResponse.json()) as { job_id: string };
   const report = (await reportResponse.json()) as ResultsTruth["report"];
+  const provenance = (await provenanceResponse.json()) as {
+    execution_identity?: ResultsTruth["executionIdentity"];
+  };
   await expect(page.getByRole("heading", { name: /^结果 · job/ })).toBeVisible();
-  return { jobId: body.job_id, report };
+  return {
+    jobId: body.job_id,
+    report,
+    executionIdentity: provenance.execution_identity ?? {},
+  };
 }
 
 async function downloadedBytes(download: Download): Promise<number> {
@@ -112,12 +125,13 @@ const TABS: Array<[string, string]> = [
   ["报告", "概要"],
   ["预测", "结果可靠性"],
   ["模块路由", "路由摘要"],
+  ["数据与执行身份", "数据与执行身份"],
   ["证据", "证据与审计"],
   ["运行轨迹", "运行轨迹"],
   ["溯源", "运行标识"],
 ];
 
-test("Results 6 tab 逐个可达 + 面板 h2 出现", async ({ page }) => {
+test("Results 7 tab 逐个可达 + 面板 h2 出现", async ({ page }) => {
   const failures = collectBrowserFailures(page);
   await reachResults(page);
   for (const [tab, h2] of TABS) {
@@ -129,7 +143,7 @@ test("Results 6 tab 逐个可达 + 面板 h2 出现", async ({ page }) => {
 
 test("Results 关键结论、路由、证据与溯源均可审计", async ({ page }) => {
   const failures = collectBrowserFailures(page);
-  const { jobId, report } = await reachResults(page);
+  const { jobId, report, executionIdentity } = await reachResults(page);
   const result = page.getByRole("region", { name: `结果 · job ${jobId}` });
 
   expect(report.llm_used_for_prediction).toBe(false);
@@ -158,6 +172,25 @@ test("Results 关键结论、路由、证据与溯源均可审计", async ({ pag
     result.getByRole("row", { name: "genetic_hub primary accept —" }),
   ).toBeVisible();
 
+  await result.getByRole("tab", { name: "数据与执行身份" }).click();
+  expect(executionIdentity.schema_version).toBe(
+    "vc.job-execution-identity.v1",
+  );
+  expect(executionIdentity.legacy_adapter).toBe(true);
+  expect(executionIdentity.fingerprint).toMatch(/^[a-f0-9]{64}$/);
+  await expect(
+    result.getByText("vc.job-execution-identity.v1", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    result.getByText(executionIdentity.fingerprint!, { exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    result.getByText("未绑定 VirtualCellPack", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    result.getByText("未记录 dataset identity", { exact: true }),
+  ).toBeVisible();
+
   await result.getByRole("tab", { name: "证据" }).click();
   await expect(
     result.getByRole("row", {
@@ -171,6 +204,75 @@ test("Results 关键结论、路由、证据与溯源均可审计", async ({ pag
   ).toBeVisible();
   await expect(result.getByText("完整 provenance JSON", { exact: true })).toBeVisible();
   expectNoBrowserFailures(failures);
+});
+
+test("Pack-aware 历史任务展示后端锁定的 Pack execution identity", async ({
+  page,
+}) => {
+  const jobResponse = await page.request.post("/api/jobs", {
+    data: {
+      request: {
+        request_id: "p11-pack-aware-ui",
+        species: "human",
+        cell_type: "K562",
+        perturbation_type: "gene",
+        perturbation_targets: ["AHR"],
+        input_modality: "scRNA",
+        output_modality: "delta_expression",
+        task_type: "predict_delta_expression",
+      },
+      mode: "offline",
+      enable_llm_report: false,
+      pack_id: "p8-human-tiny",
+      pack_version: "1.0.0",
+    },
+  });
+  expect(jobResponse.status()).toBe(200);
+  const { job_id: jobId } = (await jobResponse.json()) as { job_id: string };
+
+  const provenanceResponse = await page.request.get(
+    `/api/reports/${encodeURIComponent(jobId)}/provenance`,
+  );
+  expect(provenanceResponse.status()).toBe(200);
+  const provenance = (await provenanceResponse.json()) as {
+    execution_identity: {
+      legacy_adapter: boolean;
+      pack: {
+        pack_id: string;
+        pack_version: string;
+        fingerprint: string;
+      };
+    };
+  };
+  expect(provenance.execution_identity.legacy_adapter).toBe(false);
+  expect(provenance.execution_identity.pack.pack_id).toBe("p8-human-tiny");
+  expect(provenance.execution_identity.pack.fingerprint).toMatch(
+    /^[a-f0-9]{64}$/,
+  );
+
+  await page.goto("/");
+  await page.getByRole("button", { name: new RegExp(jobId) }).click();
+  const result = page.getByRole("region", { name: `结果 · job ${jobId}` });
+  await expect(result).toBeVisible();
+  await expect(
+    page.getByText("执行身份 · 后端记录", { exact: true }),
+  ).toBeVisible();
+
+  await result
+    .getByRole("tab", { name: "数据与执行身份", exact: true })
+    .click();
+  await expect(
+    result.getByText("p8-human-tiny", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(result.getByText("1.0.0", { exact: true }).first()).toBeVisible();
+  await expect(
+    result
+      .getByText(provenance.execution_identity.pack.fingerprint, {
+        exact: true,
+      })
+      .first(),
+  ).toBeVisible();
+  await expect(result.getByText(/均不推导科学验证/)).toBeVisible();
 });
 
 test("Results 下载、离线禁用与复制操作保持诚实", async ({ page, context }) => {

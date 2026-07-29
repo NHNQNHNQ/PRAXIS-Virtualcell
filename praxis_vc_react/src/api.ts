@@ -71,9 +71,33 @@ export interface TraceResult {
   trace: TraceStep[];
 }
 
+export interface ExecutionPackIdentity {
+  pack_id: string;
+  pack_version: string;
+  fingerprint: string;
+}
+
+export interface ExecutionModelIdentity {
+  name: string;
+  version: string;
+  fingerprint: string;
+  compatibility_fingerprint: string;
+  executable: boolean;
+}
+
+export interface ExecutionIdentity {
+  schema_version?: string;
+  legacy_adapter?: boolean;
+  pack?: ExecutionPackIdentity | null;
+  models?: ExecutionModelIdentity[];
+  fingerprint?: string;
+  [key: string]: unknown;
+}
+
 export interface ProvenanceResult {
   provenance: Record<string, unknown>;
   llm_meta: Record<string, unknown>;
+  execution_identity: ExecutionIdentity;
 }
 
 export interface CellPreset {

@@ -13,7 +13,11 @@ function formatBytes(size: number): string {
   return `${new Intl.NumberFormat("zh-CN").format(size)} bytes`;
 }
 
-export default function DataLibrary() {
+export default function DataLibrary({
+  section,
+}: {
+  section: "datasets" | "packs";
+}) {
   const fileInput = useRef<HTMLInputElement>(null);
   const [filter, setFilter] = useState("");
   const [catalog, setCatalog] = useState<DataCatalog | null>(null);
@@ -91,22 +95,31 @@ export default function DataLibrary() {
     <section className="data-library">
       <header className="data-heading">
         <div>
-          <h1>物种组学数据资源</h1>
+          <h1>
+            {section === "packs" ? "VirtualCellPacks" : "物种组学数据资源"}
+          </h1>
           <p>
-            下载清单锁定的公开数据，或将自己的原始文件原样上传到隔离区。
+            {section === "packs"
+              ? "查看后端逐次重验的数据合同与模型能力声明。"
+              : "下载清单锁定的公开数据，或将自己的原始文件原样上传到隔离区。"}
           </p>
         </div>
-        <span className="badge">仅资源交换</span>
+        <span className="badge">
+          {section === "packs" ? "只读能力面" : "仅资源交换"}
+        </span>
       </header>
 
       <div className="data-boundary note">
-        资源入库不代表科学验证、Pack 有效或模型兼容；上传文件不会自动解包、转换、归一化或参与预测。
+        {section === "packs"
+          ? "Pack 校验通过不代表模型兼容、可执行或科学验证；具体关系必须绑定请求由后端评估。"
+          : "资源入库不代表科学验证、Pack 有效或模型兼容；上传文件不会自动解包、转换、归一化或参与预测。"}
       </div>
 
-      <section
-        className="card data-section"
-        aria-labelledby="pack-catalog-title"
-      >
+      {section === "packs" && (
+        <section
+          className="card data-section"
+          aria-labelledby="pack-catalog-title"
+        >
         <div className="data-section-head">
           <div>
             <h2 id="pack-catalog-title">VirtualCellPack 能力与验证</h2>
@@ -219,9 +232,12 @@ export default function DataLibrary() {
             )}
           </div>
         </div>
-      </section>
+        </section>
+      )}
 
-      <section className="card data-section" aria-labelledby="catalog-title">
+      {section === "datasets" && (
+        <>
+          <section className="card data-section" aria-labelledby="catalog-title">
         <div className="data-section-head">
           <div>
             <h2 id="catalog-title">公开数据目录</h2>
@@ -329,9 +345,9 @@ export default function DataLibrary() {
             </article>
           ))}
         </div>
-      </section>
+          </section>
 
-      <section className="card data-section" aria-labelledby="upload-title">
+          <section className="card data-section" aria-labelledby="upload-title">
         <div className="data-section-head">
           <div>
             <h2 id="upload-title">上传自己的组学数据</h2>
@@ -413,7 +429,9 @@ export default function DataLibrary() {
             <p>该文件不会自动参与预测；后续须经过独立审查与显式注册。</p>
           </div>
         )}
-      </section>
+          </section>
+        </>
+      )}
     </section>
   );
 }
