@@ -78,7 +78,8 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [VirtualCellPack P8 ADR](ADR-0006-virtualcellpack-p8-golden-norman.md) | frozen Norman/K562 data/split/metric/bootstrap, three simple baselines, formal runtime path and scientific claim boundary |
 | [VirtualCellPack P8 Product ADR](ADR-0007-virtualcellpack-p8-product-surfaces.md) | three tiny Packs, product index/CLI/API/UI, fail-closed acceptance and immutable historical execution identity |
 | [VirtualCellPack P9 ADR](ADR-0008-virtualcellpack-p9-ood-validation.md) | eight-axis OOD contract, biological-group leakage boundary, external validation, selective metrics and baseline promotion gate |
-| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P9 implementation/status matrix; separates resource availability, `pack_valid`, `model_compatible`, executable and `scientifically_validated` |
+| [Community Readiness Checklist](COMMUNITY-READINESS-CHECKLIST.md) | P10 model-free CommunityPack gates, two tiny microbial Packs, fail-closed planning and explicitly missing experimental validation |
+| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P10 implementation/status matrix; separates resource availability, `pack_valid`, `model_compatible`, executable and `scientifically_validated` |
 | [VirtualCellPack Multiomics Runbook](runbooks/VIRTUALCELLPACK-MULTIOMICS.md) | tiny RNA+protein fixture generation, hash binding, P5 tests and asset-update rules |
 | [VirtualCellPack Capability Runtime Runbook](runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md) | local model card/cache/Pack assembly, execution-plan audit and fail-closed reason handling |
 | [VirtualCellPack Data Portal Runbook](runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) | external public-file inventory, service configuration, upload quarantine and operator review boundary |

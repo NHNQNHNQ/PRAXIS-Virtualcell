@@ -156,6 +156,15 @@ dataset/platform、species、dose/time 八类 OOD 分组合同，并要求 biolo
 因此 `available=false` 且 `scientifically_validated=false`。该失败结论是 P9
 fail-closed 验收结果，不是待隐藏的异常。
 
+P10 增加独立、无模型的 `vc.community-pack.v1` 前置接口：成员只按已经完整验证的
+VirtualCellPack ID/version/fingerprint 引用，abundance、medium、compartment、
+time、`well_mixed` space、共享代谢物 namespace 和 interaction evidence 全部显式
+声明。E. coli 与合成 S. cerevisiae tiny Pack 只验证引用和合同可插拔性；toy
+exchange 只做精确质量收支检查。当前没有真实 `CommunityModelAdapter`，因此
+community plan 固定不可执行，run 只能 `prediction=null` 并诚实 abstain；不存在
+单位/ID 转换、自动丰度归一或 mock fallback。完成项与尚缺实验验证见
+[Community readiness checklist](docs/COMMUNITY-READINESS-CHECKLIST.md)。
+
 架构和复现边界见 [ADR-0003](docs/ADR-0003-virtualcellpack-p5-multiomics-alignment.md)、
 [ADR-0004](docs/ADR-0004-virtualcellpack-p6-capability-runtime.md)、
 [ADR-0005](docs/ADR-0005-virtualcellpack-p7-data-portal.md)、
@@ -167,7 +176,8 @@ fail-closed 验收结果，不是待隐藏的异常。
 [数据资源库 runbook](docs/runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) 和
 [Golden Norman runbook](docs/runbooks/VIRTUALCELLPACK-GOLDEN-NORMAN.md)、
 [Pack 产品面 runbook](docs/runbooks/VIRTUALCELLPACK-PRODUCT-SURFACES.md)、
-[P9 OOD 验证 runbook](docs/runbooks/VIRTUALCELLPACK-P9-OOD-VALIDATION.md)。
+[P9 OOD 验证 runbook](docs/runbooks/VIRTUALCELLPACK-P9-OOD-VALIDATION.md) 和
+[Community readiness checklist](docs/COMMUNITY-READINESS-CHECKLIST.md)。
 
 ## 能力边界
 

@@ -1,8 +1,9 @@
-"""Build the three tiny P8 product fixtures from explicit P4 semantic records."""
+"""Build tiny product fixtures from explicit semantic records."""
 
 from __future__ import annotations
 
 import hashlib
+import sys
 from copy import deepcopy
 from pathlib import Path
 
@@ -26,16 +27,15 @@ def sha256(path: Path) -> str:
 
 
 def build(species: str) -> None:
-    source = yaml.safe_load(
-        (SOURCES / f"{species}.yaml").read_text(encoding="utf-8")
-    )
+    source = yaml.safe_load((SOURCES / f"{species}.yaml").read_text(encoding="utf-8"))
     manifest = deepcopy(source)
     observations = manifest.pop("fixture_observations")
     features = manifest.pop("fixture_features")
-    manifest["pack_id"] = f"p8-{species}-tiny"
+    phase = "p10" if species == "yeast" else "p8"
+    manifest["pack_id"] = f"{phase}-{species}-tiny"
     manifest["pack_version"] = "1.0.0"
     manifest["provenance"] = {
-        "source": "synthetic P8 product fixture; no P7 data",
+        "source": f"synthetic {phase.upper()} product fixture; no P7 data",
         "created_by": "PRAXIS-VirtualCell",
         "citation": "none",
     }
@@ -77,5 +77,5 @@ def build(species: str) -> None:
 
 
 if __name__ == "__main__":
-    for name in ("human", "mouse", "bacteria"):
+    for name in tuple(sys.argv[1:]) or ("human", "mouse", "bacteria", "yeast"):
         build(name)

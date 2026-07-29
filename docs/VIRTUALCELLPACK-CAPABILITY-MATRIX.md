@@ -1,6 +1,6 @@
-# VirtualCellPack 能力矩阵（P0–P9）
+# VirtualCellPack 能力矩阵（P0–P10）
 
-P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P8 Golden 起始基线：`09fb1bb3d02adfceed504cbccd7cf36c54a61b69`；P8 产品化收口起始基线：`b6cf226382cb841fb50e70875c82d1804ae5681e`；P9 起始基线：`480706fbf58343565532debeca70c4de093b045f`。本表是能力与证据边界，不是性能排名；`pack_valid`、`model_compatible`、`scientifically_validated` 不得互换。
+P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P8 Golden 起始基线：`09fb1bb3d02adfceed504cbccd7cf36c54a61b69`；P8 产品化收口起始基线：`b6cf226382cb841fb50e70875c82d1804ae5681e`；P9 起始基线：`480706fbf58343565532debeca70c4de093b045f`；P10 起始基线：`b0064fab936f06d09a88eea5292e934410302145`。本表是能力与证据边界，不是性能排名；`pack_valid`、`model_compatible`、`scientifically_validated` 不得互换。
 
 | 能力/组件 | 当前实现与真相源 | `pack_valid` | `model_compatible` | `scientifically_validated` | 结论与边界 |
 |---|---|---:|---:|---:|---|
@@ -28,6 +28,9 @@ P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P8 Golden 起始基线�
 | P9 无适配外部验证 | `GSE67402 → GSE94117:glycerol_time_course`、`external-validation.json` | 不授予 Pack valid | 候选是离线 benchmark，不进入 model zoo | false | 4,484 exact-intersection IDs；external adaptation=0；排除同源风险 glucose cohort；不做 ID/ortholog 转换或补零 |
 | P9 abstention / risk-coverage | validation-only 阈值、condition-level selective metrics | N/A | 不提升 | 不提升 | external coverage 0.625、wrong accept 0.75、unnecessary abstain 0.5；test/external label 不参与阈值选择 |
 | P9 baseline promotion gate | candidate MSE 1.0603835779；no-change 1.0533347059；paired CI 跨 0 | N/A | `available=false` | `scientifically_validated=false` | 主指标未胜简单 baseline 且 CI 上界不小于 0；MAE 略好、Pearson 有限或 runtime 成功都不能覆盖失败 |
+| P10 CommunityPack 前置接口 | `community_packs/contracts.py`、`vc.community-pack.v1`、`COMMUNITY-READINESS-CHECKLIST.md` | 每个成员仍须由既有 `PackRegistry` 当前字节重验；CommunityPack 不另授予成员 Pack 状态 | 无真实 adapter，community plan 固定 `executable=false` | 固定 false | 精确绑定成员 fingerprint、丰度、medium、compartment、time/well-mixed space、共享 metabolite namespace 与 evidence；不实现世界模型 |
+| P10 tiny microbial members | `example_packs/{bacteria,yeast}` | E. coli 与 S. cerevisiae 均通过同一 v0.2 Pack 全门后成立 | 不自动提供 | false | 约 44 KB 合成 H5AD；yeast 不复制 P7 GEO 数据，也不加入 P8 三物种产品 catalog |
+| P10 toy exchange / no-model gate | `vc.community-exchange-ledger.v1`、`vc.community-execution-plan.v1`、`vc.community-run-result.v1` | 不改变 | 无模型时不兼容、无 step | false | 精确有理数质量收支，无 tolerance/补零/单位换算；run 只能 `prediction=null` 且 `community_model_unavailable` abstain |
 | P8 Golden Norman contract | `data/golden/norman_2019/contract.yaml`、ADR-0006 | 不直接授予；先锁 source/obs/var/X/counts/split/metric | 不直接授予 | 固定不提升 | K562 `CVCL_0004` 与原样保留 source `A549` 字段分开；无随机 split、归一化、补零、去重、symbol/ortholog 转换或结果后调参 |
 | P8 Golden Pack | 外置 `pack/`、checked-in `pack.manifest.yaml`、`PackRegistry` | 完整 v0.2 schema/asset/semantic/leakage/hash 验证后为 true | 不自动提供 | false | `91,205×5,045`；派生只替换 obs，X/counts raw dataset hash 与 source 一致；大数据不入 Git |
 | P8 simple baseline cards | 三个一卡 registry、`GoldenBaselineWrapper` | 消费已注册 Golden Pack | 对精确 request/Pack/card/environment/asset 关系为 true | false | no-change、condition-equal global mean、alpha=1 additive ridge；canonical Ensembl target only；缺失/篡改资产直接 abstain、无 mock fallback |

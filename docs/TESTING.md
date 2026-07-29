@@ -399,6 +399,57 @@ P9 release-closure 只修测试入口、AppleDouble bundle 审计和治理文档
 runtime、模型或科学 artifact；其最终 commit、wheel hash 和隔离预览证据仍由
 阶段结束报告绑定，因为 Git commit 无法自嵌其最终 SHA。
 
+### P10 CommunityPack 前置接口
+
+P10 以 `b0064fab936f06d09a88eea5292e934410302145` 为唯一起始基线，在独立
+APFS 分支 `codex/p10-community-readiness` 实施。测试先行证据：
+
+```text
+初始 CommunityPack 模块缺失：
+collection error / ModuleNotFoundError
+
+namespace/member-current-bytes/exchange-contract 对抗补测：
+4 failed / 27 passed
+
+no-model plan/result 可伪造 execution content 补测：
+4 failed / 34 passed
+```
+
+最小实现后，在 `/private/tmp/praxis-p10-verify-20260729` Python 3.13.12
+严格环境中 hash-install `build-py313.lock` 与 `dev-py313.lock`，再以
+`--no-build-isolation --no-deps -e .` 安装当前 checkout：
+
+```text
+python -m pip check：
+No broken requirements found.
+
+P10 定向：
+38 passed / 0 failed
+
+Pack/capability/packaging/P10 合并定向：
+192 passed / 0 failed
+
+python -m ruff check . --no-cache：
+All checks passed!
+
+VirtualCell core：
+1310 passed / 35 skipped / 9 deselected / 0 failed
+
+legacy：
+1146 passed / 59 skipped / 105 deselected / 0 failed
+```
+
+第一次完整 core 诊断误用了旧 T7 venv；其 distribution metadata 是 `0.0.0`，
+因此唯一失败是版本合同要求的 `1.6.0`，其余 `1305 passed`。该运行不作为候选
+证据，也没有放宽断言；上面的正式结果来自重新安装当前 checkout 的严格环境。
+
+E. coli 复用 P8 tiny Pack；新增 S. cerevisiae H5AD 为 43,848 bytes，两次生成的
+SHA-256 均为
+`c675ddee3d96aef9000e48ca7480cd0169eb10d3d4eced0fb08891178c7c46fc`。
+P10 不增加真实 community model、权重、API、CLI 或 UI；未运行 frontend、真实
+LLM、remote/GPU、Docker 或 `.53` 服务测试。toy exchange 通过只证明精确声明量
+守恒，不是实验、通量、热力学或科学有效性证据。
+
 ## 本地复现
 
 ```bash
