@@ -641,6 +641,12 @@ select:focus {
 .data-card-title p {
   margin-top: var(--space-1);
 }
+.pack-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-1);
+}
 .data-facts {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -659,6 +665,67 @@ select:focus {
   font-family: var(--font-mono);
   font-size: 12px;
   overflow-wrap: anywhere;
+}
+.pack-namespaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.pack-fingerprint {
+  display: block;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pack-reasons {
+  margin: var(--space-3) 0 0;
+  padding-left: var(--space-4);
+  color: var(--danger);
+  font-size: 12px;
+}
+.model-capabilities {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+.model-capabilities h3 {
+  font-size: 15px;
+}
+.model-capabilities > div > p,
+.model-capability span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.model-capabilities > div > p {
+  margin-top: var(--space-1);
+}
+.model-capability-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.model-capability {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.model-capability strong,
+.model-capability code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.model-capability code {
+  width: fit-content;
+  margin-top: var(--space-1);
+  font-size: 10px;
 }
 .data-links {
   display: flex;
@@ -748,6 +815,9 @@ select:focus {
   .data-card-title,
   .data-file {
     flex-direction: column;
+  }
+  .pack-statuses {
+    justify-content: flex-start;
   }
   .data-facts,
   .data-upload-form {

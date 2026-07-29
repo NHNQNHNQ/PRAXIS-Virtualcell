@@ -97,6 +97,30 @@ Pack-aware runtime 由严格 `vc.model-card.v1`、`CapabilityRegistry` 和
 当前 plugin execution adapter 只实现 `predict_delta_expression →
 delta_expression`，模型卡可发现不等于可执行或科学有效。
 
+P8 产品化收口随发行物提供三个合成、微型、可审计 Pack：
+`p8-human-tiny`、`p8-mouse-tiny`、`p8-bacteria-tiny`。它们覆盖
+`EnsemblGene` 与 `NCBIGene` 两种 feature namespace，均通过同一个既有
+`PackRegistry` 完整验证；没有复制或转换 P7 大数据，也没有新增生产模型。
+
+```bash
+praxis-vc pack inspect /absolute/path/to/pack
+praxis-vc pack validate /absolute/path/to/pack
+praxis-vc pack register /absolute/path/to/pack
+praxis-vc pack list
+praxis-vc pack compatibility \
+  --request request.json --pack-id p8-human-tiny --pack-version 1.0.0
+praxis-vc pack run \
+  --request request.json --pack-id p8-human-tiny --pack-version 1.0.0 \
+  --mode offline --out runs/p8-example
+```
+
+`inspect` 明确返回未校验状态；`validate/register/list/compatibility/run` 均按当前
+bytes 重验。只读 API 位于 `/api/packs`、`/api/packs/{id}/{version}`、
+`/validate` 和 `/api/packs/compatibility`；服务器不提供 Pack register API。
+React“数据资源”页只显示这些后端验证/capability 字段，不复制科学路由。Pack-aware
+历史 job 另存 `vc.job-execution-identity.v1`，锁定 Pack 与 model card
+fingerprint；同名 job 不能覆盖。
+
 P7 的“数据资源”页面提供独立的公开下载和隔离上传通道。公开目录使用 strict
 `vc.data-catalog.v1`，只对外置数据根中 path、size、SHA-256 全部匹配的文件开放
 下载；缺失或篡改文件保持不可用。上传需部署者配置至少 32 字符 bearer token，
@@ -126,10 +150,12 @@ Pack→broker→governance→Report，不经 mock shortcut；未知/重复 canon
 [ADR-0004](docs/ADR-0004-virtualcellpack-p6-capability-runtime.md)、
 [ADR-0005](docs/ADR-0005-virtualcellpack-p7-data-portal.md)、
 [ADR-0006](docs/ADR-0006-virtualcellpack-p8-golden-norman.md)、
+[ADR-0007](docs/ADR-0007-virtualcellpack-p8-product-surfaces.md)、
 [多组学 runbook](docs/runbooks/VIRTUALCELLPACK-MULTIOMICS.md) 与
 [能力 runtime runbook](docs/runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md)、
 [数据资源库 runbook](docs/runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) 和
-[Golden Norman runbook](docs/runbooks/VIRTUALCELLPACK-GOLDEN-NORMAN.md)。
+[Golden Norman runbook](docs/runbooks/VIRTUALCELLPACK-GOLDEN-NORMAN.md)、
+[Pack 产品面 runbook](docs/runbooks/VIRTUALCELLPACK-PRODUCT-SURFACES.md)。
 
 ## 能力边界
 

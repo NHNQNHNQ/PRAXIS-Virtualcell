@@ -84,6 +84,95 @@ def _cmd_web(a) -> int:
                             str(app_path), "--server.address", a.host, "--server.port", str(a.port)])
 
 
+def _json_file(path: str) -> dict:
+    with open(path, encoding="utf-8") as stream:
+        value = json.load(stream)
+    if not isinstance(value, dict):
+        raise ValueError("JSON input must be an object")
+    return value
+
+
+def _print_json(value: dict) -> None:
+    print(json.dumps(value, ensure_ascii=False, indent=2))
+
+
+def _cmd_pack_inspect(a) -> int:
+    from praxis_virtualcell.pack_product import inspect_pack
+
+    _print_json(inspect_pack(a.pack_root))
+    return 0
+
+
+def _cmd_pack_validate(a) -> int:
+    from praxis_virtualcell.pack_product import validate_pack_summary
+
+    result = validate_pack_summary(a.pack_root)
+    _print_json(result)
+    return 0 if result["pack_valid"] else 2
+
+
+def _cmd_pack_register(a) -> int:
+    from praxis_virtualcell.pack_product import PackIndex
+
+    _print_json(PackIndex().register(a.pack_root))
+    return 0
+
+
+def _cmd_pack_list(a) -> int:
+    from praxis_virtualcell.pack_product import pack_catalog_payload
+
+    _print_json(pack_catalog_payload())
+    return 0
+
+
+def _cmd_pack_compatibility(a) -> int:
+    from praxis_virtualcell.pack_product import compatibility_payload
+
+    _print_json(
+        compatibility_payload(
+            _json_file(a.request),
+            pack_id=a.pack_id,
+            pack_version=a.pack_version,
+        )
+    )
+    return 0
+
+
+def _cmd_pack_run(a) -> int:
+    from praxis_virtualcell.io.job_store import JobStore
+    from praxis_virtualcell.pack_product import run_pack_query
+
+    request = _json_file(a.request)
+    result = run_pack_query(
+        request,
+        pack_id=a.pack_id,
+        pack_version=a.pack_version,
+        config=_config(a.mode),
+        enable_llm_report=a.llm_report,
+    )
+    if a.out:
+        JobStore(os.path.dirname(a.out) or "runs").save(
+            os.path.basename(a.out),
+            request=request,
+            result=result,
+        )
+    _print_json(
+        {
+            "reliability_decision": result["reliability_decision"],
+            "llm_used_for_prediction": result["llm_used_for_prediction"],
+            "mode": result["mode"],
+            "pack_id": a.pack_id,
+            "pack_version": a.pack_version,
+        }
+    )
+    return 0
+
+
+def _pack_identity_arguments(parser) -> None:
+    parser.add_argument("--pack-id", required=True)
+    parser.add_argument("--pack-version", required=True)
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="praxis-vc", description="PRAXIS-VirtualCell 本地科学家界面")
     p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
@@ -110,6 +199,52 @@ def main(argv=None) -> int:
     w.add_argument("--host", default="127.0.0.1")
     w.add_argument("--port", type=int, default=8501)
     w.set_defaults(fn=_cmd_web)
+    pack = sub.add_parser("pack", help="检查、注册和运行 VirtualCellPack")
+    pack_sub = pack.add_subparsers(dest="pack_cmd", required=True)
+    inspect_cmd = pack_sub.add_parser(
+        "inspect",
+        help="解析 manifest；不读取资产，不声明 Pack 有效",
+    )
+    inspect_cmd.add_argument("pack_root")
+    inspect_cmd.set_defaults(fn=_cmd_pack_inspect)
+    validate_cmd = pack_sub.add_parser(
+        "validate",
+        help="重验 manifest、资产和数据语义",
+    )
+    validate_cmd.add_argument("pack_root")
+    validate_cmd.set_defaults(fn=_cmd_pack_validate)
+    register_cmd = pack_sub.add_parser(
+        "register",
+        help="验证后把本地 Pack 路径写入索引",
+    )
+    register_cmd.add_argument("pack_root")
+    register_cmd.set_defaults(fn=_cmd_pack_register)
+    list_cmd = pack_sub.add_parser(
+        "list",
+        help="列出内置和已注册 Pack，并逐项重验",
+    )
+    list_cmd.set_defaults(fn=_cmd_pack_list)
+    compatibility_cmd = pack_sub.add_parser(
+        "compatibility",
+        help="计算请求、Pack、模型和环境兼容性；不执行模型",
+    )
+    compatibility_cmd.add_argument("--request", required=True)
+    _pack_identity_arguments(compatibility_cmd)
+    compatibility_cmd.set_defaults(fn=_cmd_pack_compatibility)
+    pack_run_cmd = pack_sub.add_parser(
+        "run",
+        help="按 Pack identity 执行；无可执行模型时诚实弃权",
+    )
+    pack_run_cmd.add_argument("--request", required=True)
+    _pack_identity_arguments(pack_run_cmd)
+    pack_run_cmd.add_argument("--mode", default="offline")
+    pack_run_cmd.add_argument("--out", default=None)
+    pack_run_cmd.add_argument(
+        "--llm-report",
+        action="store_true",
+        dest="llm_report",
+    )
+    pack_run_cmd.set_defaults(fn=_cmd_pack_run)
     a = p.parse_args(argv)
     return a.fn(a)
 

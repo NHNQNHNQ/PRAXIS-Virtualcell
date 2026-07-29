@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `IMPLEMENTED_P8 — 1.6.0_LOCAL_CANDIDATE_UNPUBLISHED`
+> Status: `IMPLEMENTED_P8_PRODUCT_CLOSURE — 1.6.0_LOCAL_CANDIDATE_UNPUBLISHED`
 >
-> Audited: 2026-07-28; local Phase branch `codex/p8-golden-norman`
+> Audited: 2026-07-29; local Phase branch `codex/p8-product-closure`
 
 The repository historically mixed product release tags, package metadata, API/runtime labels, message schemas, governance artifacts, and model revisions. C2 implements the separation below; publication status remains governed independently by the three-way synchronization ledger.
 
@@ -36,6 +36,10 @@ The repository historically mixed product release tags, package metadata, API/ru
 | execution environment snapshot | `vc.environment.v1` + canonical JSON SHA-256 | `model_zoo/capability_registry.py` | records detected Python modules, declared resources, and implemented runtime task/output adapters; it is a local planning snapshot, not remote hardware attestation |
 | model compatibility report | `vc.compatibility-report.v1` + canonical JSON SHA-256 | `model_zoo/capability_registry.py` | binds full request, registered Pack, model card and environment identities while keeping `pack_valid`, `model_compatible`, execution readiness and `scientifically_validated=false` separate |
 | model execution plan | `vc.execution-plan.v1` + deterministic `plan_<sha-prefix>` | `model_zoo/capability_registry.py`, `agents/model_broker_agent.py` | ordered executable wrapper steps plus all compatibility reports; an executable plan is not a performance or scientific claim |
+| Pack product record/catalog | `vc.pack-record.v1`, `vc.pack-catalog.v1` | `pack_product.py`, `/api/packs` | path-redacted, currently revalidated Pack metadata plus declared model capabilities; catalog presence is not per-request compatibility |
+| local Pack index | `vc.pack-index.v1` + Pack fingerprint | `pack_product.py`, `PRAXIS_VC_PACK_INDEX` | binds a local canonical root to one Pack ID/version/fingerprint; every use revalidates bytes and semantics |
+| Pack compatibility surface | `vc.pack-compatibility-surface.v1` | `pack_product.py`, `/api/packs/compatibility` | public path-redacted projection of the existing execution plan; planning is read-only and is not execution evidence |
+| job execution identity | `vc.job-execution-identity.v1` + canonical JSON SHA-256 | `io/job_store.py` | locks the selected Pack and all planned model/card/compatibility fingerprints for one immutable job directory |
 | public data catalog | `vc.data-catalog.v1` | `praxis_virtualcell/catalogs/data_catalog.yaml`, `praxis_vc_api/services/data_portal_service.py` | strict public metadata plus source terms and external-file size/hash allowlist; catalog/file availability does not imply Pack/model/scientific status |
 | quarantined upload receipt | `vc.upload-receipt.v1` | `praxis_vc_api/services/data_portal_service.py` | one byte-preserving quarantine write identity; not content validation, Pack registration, user identity, or prediction evidence |
 | Golden Norman contract | `vc.golden-norman.v1` + canonical JSON SHA-256 | `data/golden/norman_2019/contract.yaml`, `benchmarks/golden_norman.py` | binds one exact public source, source/derived semantics, predefined control/split, metric/bootstrap and simple-baseline definitions; changing any item requires a new identity |
@@ -68,6 +72,9 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | environment snapshot schema + fingerprint | explicit `vc.environment.v1` plus canonical JSON SHA-256 | dependency/resource/runtime-adapter declaration changes | a missing module/resource is available or remotely attested |
 | compatibility report schema + fingerprint | explicit `vc.compatibility-report.v1` plus canonical JSON SHA-256 | compatibility checks, reason semantics or bound identities change incompatibly | `pack_valid`, `model_compatible`, executable and scientifically validated are interchangeable |
 | execution plan schema + plan ID | explicit `vc.execution-plan.v1` and content-derived `plan_*` | step/report/identity semantics change incompatibly | plan creation proves prediction correctness or scientific validation |
+| Pack product record/catalog/index schemas | explicit `vc.pack-record.v1`, `vc.pack-catalog.v1`, `vc.pack-index.v1` | incompatible public metadata, index-field or identity-binding semantics | discovery/registration proves model compatibility or scientific validity |
+| Pack compatibility surface schema | explicit `vc.pack-compatibility-surface.v1` | incompatible path-redaction or public execution-plan projection | a compatibility response proves successful execution |
+| job execution identity schema + fingerprint | explicit `vc.job-execution-identity.v1` and content identity | incompatible Pack/model identity-lock semantics | immutable provenance proves model quality or scientific validity |
 | public data catalog schema | explicit `vc.data-catalog.v1` | incompatible metadata, source/terms, identity or file-verification semantics | file availability, Pack validity, model compatibility or scientific validity |
 | upload receipt schema | explicit `vc.upload-receipt.v1` | incompatible quarantine identity/provenance semantics | internal file safety/quality, user authentication identity, Pack registration or model use |
 | Golden benchmark contract + canonical hash | explicit `vc.golden-norman.v1` and content identity | source, semantic field, feature order, control/split, truth, metric/bootstrap or baseline definition changes | one successful run validates another dataset/model or creates scientific truth |
@@ -97,6 +104,7 @@ Implemented through C5:
 10. W4B donor adapters use a checkpoint-content identity as their per-call model version and validate the expected slot/class before loading weights. Other ML callers retain their existing explicit or class fallback, so this must not be generalized to every registry model.
 11. P7 adds backward-compatible `vc.api.v1` endpoints and a user-visible data-resource page inside the still-unpublished `1.6.0` minor candidate. It adds independent `vc.data-catalog.v1` and `vc.upload-receipt.v1` contracts; no product tag or API/runtime protocol bump is inferred.
 12. P8 adds an offline benchmark-specific Pack derivation, three simple one-card baseline wrappers and external artifact schemas inside the same unpublished candidate. It does not change the public API/runtime protocol, default model zoo, UI or product version, and does not infer a release tag.
+13. P8 product closure adds backward-compatible Pack CLI/API/UI discovery, three tiny built-in Pack fixtures, a local index and immutable job execution identity inside the same unpublished minor candidate. It does not add a production model, change the core runtime protocol, transform P7 data or infer a tag/publication.
 
 ## Release invariants
 
@@ -120,7 +128,9 @@ The equality above deliberately excludes `vc.msg.v1`, `vc.request.v2`, all
 `vc.pack.*` versions, `vc.model-feature-contract.v1`, `vc.feature-mapping.v1`,
 `vc.alignment-report.v1`, `vc.model-card.v1`, `vc.environment.v1`,
 `vc.compatibility-report.v1`, `vc.execution-plan.v1`, the other `vc.*.v1`
-domain/bundle schemas, `vc.data-catalog.v1`, `vc.upload-receipt.v1`,
+domain/bundle schemas, `vc.pack-record.v1`, `vc.pack-catalog.v1`,
+`vc.pack-index.v1`, `vc.pack-compatibility-surface.v1`,
+`vc.job-execution-identity.v1`, `vc.data-catalog.v1`, `vc.upload-receipt.v1`,
 `vc.golden-norman.v1`, `vc.golden-baseline.v1`,
 `vc.golden-evaluation.v1`, `vc.golden-artifact-manifest.v1`,
 runtime/API protocol identifiers, memory schema,

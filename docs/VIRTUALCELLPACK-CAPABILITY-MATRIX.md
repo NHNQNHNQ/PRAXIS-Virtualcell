@@ -1,6 +1,6 @@
 # VirtualCellPack 能力矩阵（P0–P8）
 
-P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P8 唯一起始基线：`09fb1bb3d02adfceed504cbccd7cf36c54a61b69`。本表是能力与证据边界，不是性能排名；`pack_valid`、`model_compatible`、`scientifically_validated` 不得互换。
+P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P8 Golden 起始基线：`09fb1bb3d02adfceed504cbccd7cf36c54a61b69`；P8 产品化收口起始基线：`b6cf226382cb841fb50e70875c82d1804ae5681e`。本表是能力与证据边界，不是性能排名；`pack_valid`、`model_compatible`、`scientifically_validated` 不得互换。
 
 | 能力/组件 | 当前实现与真相源 | `pack_valid` | `model_compatible` | `scientifically_validated` | 结论与边界 |
 |---|---|---:|---:|---:|---|
@@ -17,6 +17,12 @@ P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P8 唯一起始基线�
 | P7 allowlisted download | `/api/data-catalog/**/download` | 不提供；每次只证明当前外置文件匹配清单 | 不提供 | 不提供 | containment、普通文件、size、SHA-256 每次重验；缺失/篡改/hash 不可读/逃逸 fail-closed；Range 不绕过校验 |
 | P7 quarantined upload | `/api/data-uploads`、`vc.upload-receipt.v1` | 不提供；receipt 不是 Pack | 不提供 | 不提供 | bearer 前置、body/文件/quota 限制、原字节/hash/原子 receipt；不解包、去重、归一化、补零、mapping、注册或预测 |
 | P7 data UI | `DataLibrary.tsx` | 只显示后端资源状态 | 不判断 | 不裁决 | 精确物种筛选、可用下载、内存 token 和隔离上传；未就绪文件禁用；LLM 不参与 |
+| P8 三物种微型 Pack | `example_packs/{human,mouse,bacteria}`、`vc.pack.v0.2` | 每个 manifest、约 44 KB H5AD、asset hash 和完整语义门通过后为 true | 不自动提供 | 固定 false | human/mouse 使用 `EnsemblGene`，E. coli 使用 `NCBIGene`；同一现有 registry 加载，不复制/转换 P7 数据，不改核心 runtime |
+| P8 Pack product index/CLI | `pack_product.py`、`praxis-vc pack *`、`vc.pack-index.v1` | inspect 明确为 null；validate/register/list 每次重验 | compatibility/run 只消费现有 capability planner | 固定 false | register 使用本地锁和原子索引；冲突、篡改、缺依赖均 fail-closed；基础 `data_packs` 层不依赖 model zoo/runtime |
+| P8 Pack read-only API | `/api/packs*`、`vc.pack-catalog.v1`、`vc.pack-compatibility-surface.v1` | 返回后端当前重验状态 | 只有绑定具体 request 的 compatibility 才能给出 | 固定 false | 无 HTTP register；不暴露 Pack root、model cache/asset path；只给半个 Pack identity 返回 422 |
+| P8 Pack capability UI | `DataLibrary.tsx` | 只显示后端 `pack_valid`/validation status | 未绑定请求时明确显示“未按请求评估” | 只显示 false | 浏览器只 GET catalog，不调用 compatibility 预判，不复制 checks 或科学路由 |
+| P8 历史 job execution identity | `JobStore`、`vc.job-execution-identity.v1` | 锁定运行时 Pack ID/version/fingerprint | 锁定 plan 中 model/card/compatibility fingerprints | 不提升 | 同名 job 拒绝覆盖；legacy job 显式记录无 Pack/model，不补造旧身份 |
+| P8 fail-closed 产品验收 | `test_pack_product.py`、Playwright data-library spec | Pack bytes 被改即 invalid | 无模型、错误 modality/cell domain/taxon 均空 plan/弃权 | 固定 false | 有匹配测试模型时正式 plugin 执行；所有负例 prediction 为 null，且不得 fallback 到 Mock |
 | P8 Golden Norman contract | `data/golden/norman_2019/contract.yaml`、ADR-0006 | 不直接授予；先锁 source/obs/var/X/counts/split/metric | 不直接授予 | 固定不提升 | K562 `CVCL_0004` 与原样保留 source `A549` 字段分开；无随机 split、归一化、补零、去重、symbol/ortholog 转换或结果后调参 |
 | P8 Golden Pack | 外置 `pack/`、checked-in `pack.manifest.yaml`、`PackRegistry` | 完整 v0.2 schema/asset/semantic/leakage/hash 验证后为 true | 不自动提供 | false | `91,205×5,045`；派生只替换 obs，X/counts raw dataset hash 与 source 一致；大数据不入 Git |
 | P8 simple baseline cards | 三个一卡 registry、`GoldenBaselineWrapper` | 消费已注册 Golden Pack | 对精确 request/Pack/card/environment/asset 关系为 true | false | no-change、condition-equal global mean、alpha=1 additive ridge；canonical Ensembl target only；缺失/篡改资产直接 abstain、无 mock fallback |

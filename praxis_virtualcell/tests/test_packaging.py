@@ -32,7 +32,11 @@ def test_include_package_data_and_manifest():
     manifest = (_ROOT / "MANIFEST.in").read_text(encoding="utf-8")
     assert "recursive-include praxis_virtualcell" in manifest
     assert "*.md" in manifest
+    assert "*.h5ad" in manifest
     assert "prune praxis_virtualcell/tests" in manifest
+    assert "**/*.h5ad" in cfg["tool"]["setuptools"]["package-data"][
+        "praxis_virtualcell"
+    ]
 
 
 def test_default_gene_sets_are_licensed_package_resources():

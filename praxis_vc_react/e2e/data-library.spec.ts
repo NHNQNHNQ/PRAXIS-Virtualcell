@@ -46,3 +46,39 @@ test("data library keeps unavailable public files fail-closed", async ({
   const unavailable = page.getByRole("button", { name: "服务器文件未就绪" });
   await expect(unavailable.first()).toBeDisabled();
 });
+
+test("data library renders backend Pack validation and capability records", async ({
+  page,
+}) => {
+  const compatibilityCalls: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().includes("/api/packs/compatibility")) {
+      compatibilityCalls.push(request.url());
+    }
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "数据资源" }).click();
+
+  const packs = page.getByRole("region", {
+    name: "VirtualCellPack 能力与验证",
+  });
+  await expect(packs).toBeVisible();
+  await expect(packs.getByText("p8-human-tiny", { exact: true })).toBeVisible();
+  await expect(packs.getByText("p8-mouse-tiny", { exact: true })).toBeVisible();
+  await expect(
+    packs.getByText("p8-bacteria-tiny", { exact: true }),
+  ).toBeVisible();
+  await expect(packs.getByText("EnsemblGene", { exact: true }).first()).toBeVisible();
+  await expect(packs.getByText("NCBIGene", { exact: true })).toBeVisible();
+  await expect(
+    packs.getByText("Pack 校验通过", { exact: true }),
+  ).toHaveCount(3);
+  await expect(
+    packs.getByText("模型兼容：未按请求评估", { exact: true }),
+  ).toHaveCount(3);
+  await expect(
+    packs.getByRole("heading", { name: "模型能力（后端声明）" }),
+  ).toBeVisible();
+  expect(compatibilityCalls).toEqual([]);
+});

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, model_validator
 
 
 class ParseIn(BaseModel):
@@ -25,9 +25,37 @@ class ParseOut(BaseModel):
 
 
 class JobIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     request: dict[str, Any]
     mode: str = "offline"
     enable_llm_report: bool = False
+    pack_id: str | None = None
+    pack_version: str | None = None
+
+    @model_validator(mode="after")
+    def _complete_pack_identity(self):
+        if (self.pack_id is None) != (self.pack_version is None):
+            raise ValueError("pack_id and pack_version must be provided together")
+        for value in (self.pack_id, self.pack_version):
+            if value is not None and (not value or value.strip() != value):
+                raise ValueError("Pack identity must be a non-empty trimmed string")
+        return self
+
+
+class PackCompatibilityIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    request: dict[str, Any]
+    pack_id: str
+    pack_version: str
+
+    @model_validator(mode="after")
+    def _valid_pack_identity(self):
+        for value in (self.pack_id, self.pack_version):
+            if not value or value.strip() != value:
+                raise ValueError("Pack identity must be a non-empty trimmed string")
+        return self
 
 
 class JobOut(BaseModel):

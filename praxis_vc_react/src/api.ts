@@ -198,6 +198,67 @@ export interface UploadReceipt {
   created_at: string;
 }
 
+export interface PackRecord {
+  schema_version: "vc.pack-record.v1";
+  pack_id: string;
+  pack_version: string;
+  pack_fingerprint: string;
+  manifest_schema_version: string | null;
+  taxon: {
+    ontology_id: string;
+    scientific_name: string;
+  } | null;
+  assembly: {
+    name: string;
+    accession: string;
+  } | null;
+  modalities: {
+    name: string;
+    ontology_id: string;
+  }[];
+  feature_namespaces: {
+    name: string;
+    version: string;
+    id_format: string;
+  }[];
+  asset_count: number | null;
+  source: "builtin" | "registered";
+  validation_status: "valid" | "invalid" | "unchecked";
+  pack_valid: boolean | null;
+  model_compatible: boolean | null;
+  scientifically_validated: false;
+  reasons: string[];
+}
+
+export interface ModelCapability {
+  name: string;
+  version: string;
+  fingerprint: string;
+  status: string;
+  species: string[];
+  taxon: string[];
+  modalities: {
+    name: string;
+    ontology_id: string;
+  }[];
+  cell_domain: Record<string, unknown>;
+  task: string;
+  outputs: string[];
+  feature_namespaces: {
+    name: string;
+    version: string;
+    id_format: string;
+  }[];
+  scientifically_validated: false;
+}
+
+export interface PackCatalog {
+  schema_version: "vc.pack-catalog.v1";
+  packs: PackRecord[];
+  model_capabilities: ModelCapability[];
+  scientifically_validated: false;
+}
+
 // ---- 内部 fetch 助手 ----
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -268,6 +329,10 @@ export function getModules(): Promise<{ modules: ModuleInfo[] }> {
 export function getDataCatalog(species?: string): Promise<DataCatalog> {
   const query = species ? `?species=${encodeURIComponent(species)}` : "";
   return req<DataCatalog>(`/api/data-catalog${query}`);
+}
+
+export function getPackCatalog(): Promise<PackCatalog> {
+  return req<PackCatalog>("/api/packs");
 }
 
 export async function uploadData(

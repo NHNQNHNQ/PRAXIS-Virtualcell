@@ -491,18 +491,38 @@ def parse_query(text: str, *, config: RuntimeConfig | None = None) -> dict:
     return result if _is_json_response_safe(result) else _safe_parse_failure()
 
 
-def run_query(request_dict: dict, *, config: RuntimeConfig | None = None,
-              enable_llm_report: bool = False) -> dict:
+def run_query(
+    request_dict: dict,
+    *,
+    config: RuntimeConfig | None = None,
+    enable_llm_report: bool = False,
+    pack_id: str | None = None,
+    pack_version: str | None = None,
+    pack_registry=None,
+    model_registry=None,
+    model_cache=None,
+    environment=None,
+) -> dict:
     """已确认的 request → 离线 runtime 执行 → structured report + trace + provenance + narrative。"""
     cfg = config or RuntimeConfig.from_env()
     assert_llm_boundaries(cfg)               # 铁律守卫
     from praxis_virtualcell.workflows.predict_delta_expression import build_runtime
 
-    rt = build_runtime(cfg)
+    rt = build_runtime(
+        cfg,
+        model_registry=model_registry,
+        model_cache=model_cache,
+        pack_registry=pack_registry,
+        environment=environment,
+    )
     req = dict(request_dict)
     if not req.get("request_id"):
         req["request_id"] = "vc-" + _hash(json.dumps(req, sort_keys=True, ensure_ascii=False))
-    report = rt.run_workflow(VirtualCellRequest.from_dict(req))
+    report = rt.run_workflow(
+        VirtualCellRequest.from_dict(req),
+        pack_id=pack_id,
+        pack_version=pack_version,
+    )
     _tr = getattr(rt.bus, "trace", None)
     _msgs = _tr() if callable(_tr) else (_tr if isinstance(_tr, list) else getattr(rt.bus, "_trace", []))
     trace = [{"message_id": m.message_id, "sender": m.sender, "receiver": m.receiver,

@@ -2,7 +2,9 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 import {
   API_BASE,
   getDataCatalog,
+  getPackCatalog,
   type DataCatalog,
+  type PackCatalog,
   type UploadReceipt,
   uploadData,
 } from "../../api";
@@ -17,6 +19,9 @@ export default function DataLibrary() {
   const [catalog, setCatalog] = useState<DataCatalog | null>(null);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [packCatalog, setPackCatalog] = useState<PackCatalog | null>(null);
+  const [packError, setPackError] = useState<string | null>(null);
+  const [packsLoading, setPacksLoading] = useState(true);
   const [uploadSpecies, setUploadSpecies] = useState("");
   const [token, setToken] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -46,6 +51,23 @@ export default function DataLibrary() {
       current = false;
     };
   }, [filter]);
+
+  useEffect(() => {
+    let current = true;
+    getPackCatalog()
+      .then((next) => {
+        if (current) setPackCatalog(next);
+      })
+      .catch((error: unknown) => {
+        if (current) setPackError(String(error));
+      })
+      .finally(() => {
+        if (current) setPacksLoading(false);
+      });
+    return () => {
+      current = false;
+    };
+  }, []);
 
   async function submitUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,6 +102,124 @@ export default function DataLibrary() {
       <div className="data-boundary note">
         资源入库不代表科学验证、Pack 有效或模型兼容；上传文件不会自动解包、转换、归一化或参与预测。
       </div>
+
+      <section
+        className="card data-section"
+        aria-labelledby="pack-catalog-title"
+      >
+        <div className="data-section-head">
+          <div>
+            <h2 id="pack-catalog-title">VirtualCellPack 能力与验证</h2>
+            <p>
+              原样展示后端 Pack 校验与模型卡声明；具体请求的兼容性仍由后端裁决。
+            </p>
+          </div>
+          <span className="badge">不在浏览器内科学路由</span>
+        </div>
+
+        {packsLoading && <p className="data-message">读取 Pack 能力…</p>}
+        {packError && (
+          <p className="err" role="alert">
+            Pack 能力不可用：{packError}
+          </p>
+        )}
+        <div className="data-grid">
+          {packCatalog?.packs.map((pack) => (
+            <article className="data-card" key={`${pack.pack_id}:${pack.pack_version}`}>
+              <div className="data-card-title">
+                <div>
+                  <h3>{pack.pack_id}</h3>
+                  <p>
+                    v{pack.pack_version} · {pack.taxon?.scientific_name ?? "身份不可用"}
+                  </p>
+                </div>
+                <div className="pack-statuses">
+                  <span
+                    className={`badge ${
+                      pack.pack_valid ? "badge-ok" : "badge-inferred"
+                    }`}
+                  >
+                    {pack.pack_valid === true
+                      ? "Pack 校验通过"
+                      : pack.pack_valid === false
+                        ? "Pack 校验失败"
+                        : "Pack 尚未校验"}
+                  </span>
+                  <span className="badge">
+                    {pack.model_compatible === true
+                      ? "模型兼容：通过"
+                      : pack.model_compatible === false
+                        ? "模型兼容：不兼容"
+                        : "模型兼容：未按请求评估"}
+                  </span>
+                  <span className="badge badge-inferred">未科学验证</span>
+                </div>
+              </div>
+              <dl className="data-facts">
+                <div>
+                  <dt>物种</dt>
+                  <dd>{pack.taxon?.ontology_id ?? "不可用"}</dd>
+                </div>
+                <div>
+                  <dt>模态</dt>
+                  <dd>{pack.modalities.map((item) => item.name).join(", ") || "不可用"}</dd>
+                </div>
+                <div>
+                  <dt>Feature namespace</dt>
+                  <dd className="pack-namespaces">
+                    {pack.feature_namespaces.map((item) => (
+                      <span key={`${item.name}:${item.version}`}>{item.name}</span>
+                    ))}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Manifest</dt>
+                  <dd>{pack.manifest_schema_version ?? "不可用"}</dd>
+                </div>
+              </dl>
+              <code
+                className="pack-fingerprint"
+                title={`Pack fingerprint ${pack.pack_fingerprint}`}
+              >
+                fingerprint {pack.pack_fingerprint}
+              </code>
+              {pack.reasons.length > 0 && (
+                <ul className="pack-reasons">
+                  {pack.reasons.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              )}
+            </article>
+          ))}
+        </div>
+
+        <div className="model-capabilities">
+          <div>
+            <h3>模型能力（后端声明）</h3>
+            <p>
+              声明不等于可执行或科学验证；资产、环境和请求范围由 compatibility/run
+              在后端逐次校验。
+            </p>
+          </div>
+          <div className="model-capability-grid">
+            {packCatalog?.model_capabilities.map((model) => (
+              <article className="model-capability" key={`${model.name}:${model.version}`}>
+                <strong>{model.name}</strong>
+                <span>v{model.version} · {model.status}</span>
+                <span>{model.taxon.join(", ") || "未声明物种"}</span>
+                <span>{model.modalities.map((item) => item.name).join(", ")}</span>
+                <code title={`Model fingerprint ${model.fingerprint}`}>
+                  {model.fingerprint.slice(0, 12)}…
+                </code>
+              </article>
+            ))}
+            {!packsLoading && packCatalog?.model_capabilities.length === 0 && (
+              <p className="data-message">后端未声明模型能力。</p>
+            )}
+          </div>
+        </div>
+      </section>
 
       <section className="card data-section" aria-labelledby="catalog-title">
         <div className="data-section-head">

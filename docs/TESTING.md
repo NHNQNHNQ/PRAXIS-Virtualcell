@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 本地观测：2026-07-23，分支 `codex/project-consolidation`，BashTool 修复提交 `6a8198771581d0897a13457e93e50cfec172d59a`
+> 本地观测：2026-07-29，分支 `codex/p8-product-closure`，唯一起始基线 `b6cf226382cb841fb50e70875c82d1804ae5681e`
 >
-> 状态：`D1A_RETRY_1_RECORDED — CI_4_OF_5 — LOCAL_FIX_VERIFIED — RETRY_2_AUTHORIZATION_PENDING`。固定 C5 实现证据 HEAD `038e747`、C4 发行证据 `8ce42fe` 仍是历史冻结快照；远端候选 `ee36d7948047f346f55a02d62ccaac84391e3c20` 的 CI 不是全绿，包含本段的提交必须由交接中的 post-commit artifact 绑定精确命名。
+> 状态：`P8_PRODUCT_CLOSURE_LOCAL_VERIFIED — PHASE9_AUTHORIZATION_PENDING`。固定 C5 实现证据、C4 发行证据和 D1a `4/5` CI 仍是历史冻结快照；本地 P8 结果不是新的 GitHub、Docker、`.53` 或发布证据。
 
 ## 当前质量口径
 
@@ -11,12 +11,12 @@
 | 依赖 | Python 3.13 hash locks → editable `--no-build-isolation --no-deps` → `python -m pip check` | macOS/arm64 Python 3.13.12 与 Docker Linux/arm64 Python 3.13.14 fresh strict hash install 均 PASS |
 | Python lint | Python 3.13 lock 环境内 `ruff check .` | macOS/arm64 与 Docker Linux/arm64 均 PASS，0 diagnostics |
 | FBA + packaging 定向回归 | 两条真实 FBA 正例，加 dev extra/lock 与 CI lock 角色测试 | macOS/arm64 `13 passed / 0 failed`；其中 packaging 单模块 `11 passed`，Linux/amd64 QEMU 同一 packaging 单模块 `11 passed / 0 failed` |
-| VirtualCell 核心 | `python -m pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` | fresh macOS/arm64 Python 3.13.12 为 `965 passed / 35 skipped / 9 deselected / 0 failed`；GitHub attempt 2 的 native Linux core job PASS |
-| Legacy unit | `python -m pytest tests -m "not (integration or llm or remote)" -o addopts='' -q -ra` | fresh macOS/arm64 Python 3.13.12 与 Docker Linux/arm64 Python 3.13.14 均为 `1139 passed / 59 skipped / 105 deselected / 0 failed` |
+| VirtualCell 核心 | `python -m pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` | P8 product fresh macOS/arm64 Python 3.13.12：`1258 passed / 35 skipped / 9 deselected / 0 failed`；此前 GitHub attempt 2 native Linux core PASS 是旧候选证据 |
+| Legacy unit | `python -m pytest tests -m "not (integration or llm or remote)" -o addopts='' -q -ra` | P8 product fresh macOS/arm64 Python 3.13.12：`1146 passed / 59 skipped / 105 deselected / 0 failed`；Docker Linux 数字仍是旧候选冻结证据 |
 | Legacy broad non-LLM（C5 冻结） | `python -m pytest tests -m "not llm" -o addopts='' -q -ra` | C5 历史证据为 `1136 passed / 158 skipped / 6 deselected / 0 failed`；本轮未将其冒充为新候选 CI isolation |
 | C5 Gate A 本地 seam | provenance gate 定向测试 + W4B remote test module 在普通本地 marker gate 下被收集并跳过 | `38 passed / 2 remote skipped / 0 failed`；三 adapter success/no-gate 与缺版本 fail-closed 已证明，非真 donor 推理 |
 | C5 W4B remote | `test_ml_workflow_e2e.py --run-remote -m remote` | 本机无 torch：`2 skipped / 0 failed`，明确为 `REMOTE_VALIDATION_PENDING`；只有批准候选 SHA、clean donor SHA/remote 和可信六文件 digest 集上 `2 passed / 0 skipped / 0 failed` 可关闭 |
-| 前端 | `npm ci` → typecheck → lint → build → 对显式启动的 fresh dev-lock API 执行 `npm run e2e` | 本地 PASS；14 specs / 57 collected = `56 passed / 1 skipped / 0 failed`；测试 API 使用包含 mechanistic/Cobra 的 dev lock；另有 `CI=1` 目标失败用例窄回归 `1 passed` |
+| 前端 | typecheck → lint → build → 对显式启动的 fresh dev-lock API 执行 `npm run e2e` | P8 product 本地 PASS；14 specs / 60 collected = `59 passed / 1 skipped / 0 failed`；唯一 skip 是需明确授权的真实 LLM |
 | C4 完整 wheel（冻结） | 固定 `8ce42fe` 的两个 clean archive 分别构建、`cmp`、Python 3.13 locked clean install、console entry、站外 verifier | 922,334 bytes；SHA-256 `78e5287a5dd61478b041fd1a28783732cb75a250de02eec306d3803b3128fd4f`；全部 PASS；仅是 C4 历史证据，不能继承为尚未形成的新候选 artifact |
 | C4 Linux container | Docker Desktop Linux/arm64，显式 Docker 双门，容器 `--network none` | `5 passed / 0 failed`；结束后无本次资源残留 |
 | C2 历史干净 wheel | 从提交 `73f3324` 的 `git archive` 构建；独立 Python 3.13 venv `--no-deps` 安装后验证 import、version、CLI | `praxis_virtualcell-1.5.1-py3-none-any.whl`，714,871 bytes，SHA-256 `b571ee71a42d028774221b068a5d0b5a613bcebb456ba655c1a3b4e1d1690580`；不是当前 `1.6.0` wheel 证据 |
@@ -268,6 +268,67 @@ Docker 或 UI/E2E，不能把普通 skip 写成这些能力通过。
 
 这类外置数据/评估成功不等于代码已部署，也不提升
 `scientifically_validated=false`。
+
+### P8 产品化收口：三物种 Pack、CLI/API/UI 与历史身份
+
+产品化收口以 Golden 完成提交
+`b6cf226382cb841fb50e70875c82d1804ae5681e` 为唯一起始基线，在
+`codex/p8-product-closure` 分支实施。测试先行证据：
+
+```text
+产品模块尚不存在：
+collection error / ModuleNotFoundError
+
+React 尚未展示 Pack capability：
+1 failed（找不到 “VirtualCellPack 能力与验证” region）
+
+产品编排误放入 data_packs 基础层：
+1 failed / 189 passed
+既有架构守卫确认 model-zoo/runtime 反向依赖，模块上移后恢复
+```
+
+最小实现后的本地证据：
+
+```text
+P8 product 定向：
+13 passed / 0 failed
+
+API + Pack manifest/adapter/semantics + P6 capability + P8 product：
+191 passed / 0 failed
+
+python -m pip check：
+No broken requirements found.
+
+python -m ruff check . --no-cache：
+All checks passed!
+
+VirtualCell core：
+1258 passed / 35 skipped / 9 deselected / 0 failed
+
+legacy：
+1146 passed / 59 skipped / 105 deselected / 0 failed
+
+frontend：
+typecheck PASS
+lint PASS
+build + bundle budget PASS
+Playwright 59 passed / 1 skipped / 0 failed（60 collected）
+```
+
+core 相对 Golden P8 的 `1245 passed` 精确增加 13 个产品契约 case；legacy
+计数不变。唯一 Playwright skip 仍是真实 LLM 显式门。三个约 44 KB 的 H5AD
+fixture 连续生成两次得到完全相同 SHA-256；测试用正向 model 是 pytest 内部 dummy，
+没有加入生产 model zoo。
+
+从当前源码复制到 `/private/tmp` 的无 AppleDouble 临时源后，wheel content smoke
+PASS：三个 manifest/H5AD 全部存在，`praxis_virtualcell/tests` 不在 wheel 中。
+该 wheel 来自未提交候选，只证明 package-data 内容，不是可发布或可复现 release
+artifact。直接在外置盘构建会被文件系统自动生成的 `._*.dist-info` 污染并由 pip
+拒绝；正式 release script 仍须在提交后从 `git archive` 的临时源构建。
+
+普通验收没有访问 `.53`、P7 大数据或 Golden 外置资产，没有运行 GEARS、GPU、
+真实 LLM、Docker 或远端服务。35 个 core skip 仍是 remote/Docker 外部门，不能
+冒充这些能力通过。
 
 ## 本地复现
 

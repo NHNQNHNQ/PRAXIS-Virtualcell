@@ -16,11 +16,23 @@ from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from praxis_vc_api.models.api_schema import HealthOut, JobIn, JobOut, ParseIn, ParseOut
+from praxis_vc_api.models.api_schema import (
+    HealthOut,
+    JobIn,
+    JobOut,
+    PackCompatibilityIn,
+    ParseIn,
+    ParseOut,
+)
 from praxis_vc_api.services import data_portal_service as data_portal
 from praxis_vc_api.services import runtime_service as svc
 from praxis_virtualcell import __version__
 from praxis_virtualcell.core.exceptions import InputValidationError
+from praxis_virtualcell.pack_product import (
+    PackIndexError,
+    PackNotFound,
+    PackUnavailable,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -128,6 +140,56 @@ def modules():
     return svc.modules()
 
 
+@app.get("/api/packs")
+def packs():
+    """Return revalidated Pack records and declared model capabilities."""
+    try:
+        return svc.packs()
+    except PackIndexError as exc:
+        raise HTTPException(status_code=503, detail="pack_index_invalid") from exc
+
+
+@app.post("/api/packs/compatibility")
+def pack_compatibility(body: PackCompatibilityIn):
+    """Read-only request/Pack/model compatibility planning; never execute."""
+    try:
+        return svc.pack_compatibility(
+            body.request,
+            body.pack_id,
+            body.pack_version,
+        )
+    except InputValidationError as exc:
+        raise HTTPException(status_code=400, detail="invalid_request") from exc
+    except PackNotFound as exc:
+        raise HTTPException(status_code=404, detail="pack_not_found") from exc
+    except PackUnavailable as exc:
+        raise HTTPException(status_code=409, detail="pack_unavailable") from exc
+    except PackIndexError as exc:
+        raise HTTPException(status_code=503, detail="pack_index_invalid") from exc
+
+
+@app.get("/api/packs/{pack_id}/{pack_version}")
+def pack(pack_id: str, pack_version: str):
+    """Return one revalidated Pack record from the read-only product index."""
+    try:
+        return svc.pack(pack_id, pack_version)
+    except PackNotFound as exc:
+        raise HTTPException(status_code=404, detail="pack_not_found") from exc
+    except PackIndexError as exc:
+        raise HTTPException(status_code=503, detail="pack_index_invalid") from exc
+
+
+@app.get("/api/packs/{pack_id}/{pack_version}/validate")
+def validate_pack(pack_id: str, pack_version: str):
+    """Re-run full asset/data validation for a registered Pack."""
+    try:
+        return svc.validate_registered_pack(pack_id, pack_version)
+    except PackNotFound as exc:
+        raise HTTPException(status_code=404, detail="pack_not_found") from exc
+    except PackIndexError as exc:
+        raise HTTPException(status_code=503, detail="pack_index_invalid") from exc
+
+
 @app.get("/api/data-catalog")
 def data_catalog(species: str | None = None):
     """Strict public omics metadata; source files remain download-only."""
@@ -194,9 +256,23 @@ def upload_data_file(
 def create_job(body: JobIn):
     """已确认的 request → 离线 runtime 执行 → 落盘 job。"""
     try:
-        return svc.run_job(body.request, body.mode, body.enable_llm_report)
+        return svc.run_job(
+            body.request,
+            body.mode,
+            body.enable_llm_report,
+            body.pack_id,
+            body.pack_version,
+        )
     except InputValidationError as e:
         raise HTTPException(status_code=400, detail="invalid_request") from e
+    except PackNotFound as e:
+        raise HTTPException(status_code=404, detail="pack_not_found") from e
+    except PackUnavailable as e:
+        raise HTTPException(status_code=409, detail="pack_unavailable") from e
+    except PackIndexError as e:
+        raise HTTPException(status_code=503, detail="pack_index_invalid") from e
+    except FileExistsError as e:
+        raise HTTPException(status_code=409, detail="job_already_exists") from e
     except Exception as e:  # noqa: BLE001
         logger.exception("job execution failed")
         raise HTTPException(status_code=500, detail="job_execution_failed") from e
@@ -241,8 +317,12 @@ def trace(job_id: str):
 @app.get("/api/reports/{job_id}/provenance")
 def provenance(job_id: str):
     try:
-        return {"provenance": svc.get_job(job_id).get("provenance", {}),
-                "llm_meta": svc.get_job(job_id).get("llm_meta", {})}
+        job = svc.get_job(job_id)
+        return {
+            "provenance": job.get("provenance", {}),
+            "llm_meta": job.get("llm_meta", {}),
+            "execution_identity": job.get("execution_identity", {}),
+        }
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail="job not found") from e
 

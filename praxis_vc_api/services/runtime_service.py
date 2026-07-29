@@ -8,6 +8,12 @@ import os
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.exceptions import InputValidationError
 from praxis_virtualcell.io.job_store import JobStore
+from praxis_virtualcell.pack_product import (
+    PackIndex,
+    compatibility_payload,
+    pack_catalog_payload,
+    run_pack_query,
+)
 from praxis_virtualcell.version import (
     API_PROTOCOL_VERSION,
     LEGACY_RUNTIME_VERSION,
@@ -86,13 +92,30 @@ def modules() -> dict:
     ]}
 
 
-def _job_id(request: dict) -> str:
-    h = hashlib.sha256(json.dumps(request, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:8]
+def _job_id(
+    request: dict,
+    pack_id: str | None = None,
+    pack_version: str | None = None,
+) -> str:
+    identity = {
+        "request": request,
+        "pack_id": pack_id,
+        "pack_version": pack_version,
+    }
+    h = hashlib.sha256(
+        json.dumps(identity, sort_keys=True, ensure_ascii=False).encode()
+    ).hexdigest()[:8]
     store = JobStore(RUNS_DIR)
     return f"vc_{len(store.list_jobs()) + 1:04d}_{h}"
 
 
-def run_job(request: dict, mode: str, enable_llm_report: bool) -> dict:
+def run_job(
+    request: dict,
+    mode: str,
+    enable_llm_report: bool,
+    pack_id: str | None = None,
+    pack_version: str | None = None,
+) -> dict:
     cfg = config_for(mode)
     validation = validate_candidate(request)
     if not validation["schema_valid"]:
@@ -104,10 +127,47 @@ def run_job(request: dict, mode: str, enable_llm_report: bool) -> dict:
     # API 运行与落盘只消费 validator normalized 的顶层请求；metadata 响应安全扩展 key
     # 可保留，但 requested_outputs/assumptions 等控制字段已清洗，且不把原始请求混回去。
     validated_request = dict(normalized)
-    out = run_query(validated_request, config=cfg, enable_llm_report=enable_llm_report)
-    job_id = _job_id(validated_request)
+    if pack_id is None:
+        out = run_query(
+            validated_request,
+            config=cfg,
+            enable_llm_report=enable_llm_report,
+        )
+    else:
+        out = run_pack_query(
+            validated_request,
+            pack_id=pack_id,
+            pack_version=pack_version,
+            config=cfg,
+            enable_llm_report=enable_llm_report,
+        )
+    job_id = _job_id(validated_request, pack_id, pack_version)
     JobStore(RUNS_DIR).save(job_id, request=validated_request, result=out)
     return {"job_id": job_id, "status": "done"}
+
+
+def packs() -> dict:
+    return pack_catalog_payload()
+
+
+def pack(pack_id: str, pack_version: str) -> dict:
+    return PackIndex().get_record(pack_id, pack_version)
+
+
+def validate_registered_pack(pack_id: str, pack_version: str) -> dict:
+    return PackIndex().get_record(pack_id, pack_version)
+
+
+def pack_compatibility(
+    request: dict,
+    pack_id: str,
+    pack_version: str,
+) -> dict:
+    return compatibility_payload(
+        request,
+        pack_id=pack_id,
+        pack_version=pack_version,
+    )
 
 
 def get_job(job_id: str) -> dict:
@@ -125,6 +185,8 @@ def list_jobs() -> list[dict]:
             continue
         req = j.get("request", {}) or {}
         rep = j.get("report", {}) or {}
+        execution_identity = j.get("execution_identity") or {}
+        pack_identity = execution_identity.get("pack") or {}
         out.append({
             "job_id": jid,
             "status": j.get("status", "unknown"),
@@ -132,6 +194,9 @@ def list_jobs() -> list[dict]:
             "perturbation_targets": req.get("perturbation_targets", []),
             "abstain": rep.get("abstain"),
             "reliability": rep.get("reliability"),
+            "pack_id": pack_identity.get("pack_id"),
+            "pack_version": pack_identity.get("pack_version"),
+            "pack_fingerprint": pack_identity.get("fingerprint"),
         })
     return out
 
