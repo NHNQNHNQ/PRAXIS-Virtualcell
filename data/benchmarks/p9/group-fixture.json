@@ -1,0 +1,146 @@
+[
+  {
+    "axis_id": "iid",
+    "partition": "train",
+    "biological_unit_id": "iid:block-a",
+    "replicate_id": "iid:replicate-a"
+  },
+  {
+    "axis_id": "iid",
+    "partition": "validation",
+    "biological_unit_id": "iid:block-b",
+    "replicate_id": "iid:replicate-b"
+  },
+  {
+    "axis_id": "iid",
+    "partition": "test",
+    "biological_unit_id": "iid:block-c",
+    "replicate_id": "iid:replicate-c"
+  },
+  {
+    "axis_id": "perturbation",
+    "partition": "train",
+    "biological_unit_id": "perturbation:single-a",
+    "replicate_id": "perturbation:replicate-a"
+  },
+  {
+    "axis_id": "perturbation",
+    "partition": "validation",
+    "biological_unit_id": "perturbation:single-b",
+    "replicate_id": "perturbation:replicate-b"
+  },
+  {
+    "axis_id": "perturbation",
+    "partition": "test",
+    "biological_unit_id": "perturbation:single-c",
+    "replicate_id": "perturbation:replicate-c"
+  },
+  {
+    "axis_id": "combination",
+    "partition": "train",
+    "biological_unit_id": "combination:a+b",
+    "replicate_id": "combination:replicate-a"
+  },
+  {
+    "axis_id": "combination",
+    "partition": "validation",
+    "biological_unit_id": "combination:a+c",
+    "replicate_id": "combination:replicate-b"
+  },
+  {
+    "axis_id": "combination",
+    "partition": "test",
+    "biological_unit_id": "combination:b+c",
+    "replicate_id": "combination:replicate-c"
+  },
+  {
+    "axis_id": "cell_type",
+    "partition": "train",
+    "biological_unit_id": "cell-type:CVCL_0004",
+    "replicate_id": "cell-type:replicate-a"
+  },
+  {
+    "axis_id": "cell_type",
+    "partition": "validation",
+    "biological_unit_id": "cell-type:CVCL_0030",
+    "replicate_id": "cell-type:replicate-b"
+  },
+  {
+    "axis_id": "cell_type",
+    "partition": "test",
+    "biological_unit_id": "cell-type:CVCL_0063",
+    "replicate_id": "cell-type:replicate-c"
+  },
+  {
+    "axis_id": "donor",
+    "partition": "train",
+    "biological_unit_id": "donor:d1",
+    "replicate_id": "donor:replicate-a"
+  },
+  {
+    "axis_id": "donor",
+    "partition": "validation",
+    "biological_unit_id": "donor:d2",
+    "replicate_id": "donor:replicate-b"
+  },
+  {
+    "axis_id": "donor",
+    "partition": "test",
+    "biological_unit_id": "donor:d3",
+    "replicate_id": "donor:replicate-c"
+  },
+  {
+    "axis_id": "dataset_platform",
+    "partition": "train",
+    "biological_unit_id": "dataset-platform:GSE67402:GPL14548",
+    "replicate_id": "dataset-platform:replicate-a"
+  },
+  {
+    "axis_id": "dataset_platform",
+    "partition": "validation",
+    "biological_unit_id": "dataset-platform:fixture-validation:platform-b",
+    "replicate_id": "dataset-platform:replicate-b"
+  },
+  {
+    "axis_id": "dataset_platform",
+    "partition": "test",
+    "biological_unit_id": "dataset-platform:GSE94117:GPL22993",
+    "replicate_id": "dataset-platform:replicate-c"
+  },
+  {
+    "axis_id": "species",
+    "partition": "train",
+    "biological_unit_id": "species:NCBITaxon_9606",
+    "replicate_id": "species:replicate-a"
+  },
+  {
+    "axis_id": "species",
+    "partition": "validation",
+    "biological_unit_id": "species:NCBITaxon_10090",
+    "replicate_id": "species:replicate-b"
+  },
+  {
+    "axis_id": "species",
+    "partition": "test",
+    "biological_unit_id": "species:NCBITaxon_511145",
+    "replicate_id": "species:replicate-c"
+  },
+  {
+    "axis_id": "dose_time",
+    "partition": "train",
+    "biological_unit_id": "dose-time:1uM:6h",
+    "replicate_id": "dose-time:replicate-a"
+  },
+  {
+    "axis_id": "dose_time",
+    "partition": "validation",
+    "biological_unit_id": "dose-time:1uM:24h",
+    "replicate_id": "dose-time:replicate-b"
+  },
+  {
+    "axis_id": "dose_time",
+    "partition": "test",
+    "biological_unit_id": "dose-time:1uM:168h",
+    "replicate_id": "dose-time:replicate-c"
+  }
+]

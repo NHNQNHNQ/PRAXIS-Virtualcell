@@ -1,6 +1,6 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `IMPLEMENTED_P8_PRODUCT_CLOSURE — 1.6.0_LOCAL_CANDIDATE_UNPUBLISHED`
+> Status: `IMPLEMENTED_P9_OOD_VALIDATION — 1.6.0_LOCAL_CANDIDATE_UNPUBLISHED`
 >
 > Audited: 2026-07-29; local Phase branch `codex/p8-product-closure`
 
@@ -46,6 +46,8 @@ The repository historically mixed product release tags, package metadata, API/ru
 | Golden baseline artifact | `vc.golden-baseline.v1` + per-file SHA-256 | external `model_cache/norman_*`, checked-in one-card registries | binds Pack fingerprint, ordered feature/target IDs, train conditions and fixed baseline arrays; not a general model revision or scientific validation |
 | Golden evaluation artifact | `vc.golden-evaluation.v1` + file SHA-256 | external `evaluation/evaluation.json` | records all held-out formal-runtime calls, condition losses, paired bootstrap and three separate states; scores do not promote `scientifically_validated` |
 | Golden artifact inventory | `vc.golden-artifact-manifest.v1` | `data/golden/norman_2019/artifact-manifest.json` | records exact external path/size/hash and compact scores; it is not the large data or model content |
+| P9 OOD manifest | `vc.ood-manifest.v1` + canonical JSON SHA-256 | `data/benchmarks/p9/ood-manifest.json`, `benchmarks/ood_validation.py` | freezes eight ordered OOD axes, biological groups, data roles, metrics/CI/seeds, validation-only threshold and promotion gate; fixture groups are not scientific performance |
+| P9 external result | `vc.ood-result.v1` + file SHA-256 | `data/benchmarks/p9/external-validation.json` | binds four public input hashes, exact shared features, predefined grouped split, adaptation-free condition results, selective metrics and fail-closed status; not a model-zoo registration or general validation |
 | memory frontmatter schema | `1` | `brains/_common/memory/rules/*.md` | inherited memory-content schema |
 | governance feature schema | `v0.3.0` | `governance/learned_reliability.py` and artifact JSON | frozen learned-governance feature contract |
 | governance models | `reliability_v0.3.0`, `abstain_v0.3.0` | `governance/artifacts/*.json` | immutable model revisions paired with content SHA-256 |
@@ -105,6 +107,7 @@ Implemented through C5:
 11. P7 adds backward-compatible `vc.api.v1` endpoints and a user-visible data-resource page inside the still-unpublished `1.6.0` minor candidate. It adds independent `vc.data-catalog.v1` and `vc.upload-receipt.v1` contracts; no product tag or API/runtime protocol bump is inferred.
 12. P8 adds an offline benchmark-specific Pack derivation, three simple one-card baseline wrappers and external artifact schemas inside the same unpublished candidate. It does not change the public API/runtime protocol, default model zoo, UI or product version, and does not infer a release tag.
 13. P8 product closure adds backward-compatible Pack CLI/API/UI discovery, three tiny built-in Pack fixtures, a local index and immutable job execution identity inside the same unpublished minor candidate. It does not add a production model, change the core runtime protocol, transform P7 data or infer a tag/publication.
+14. P9 adds offline OOD/result artifact contracts and one adaptation-free public external validation inside the same unpublished candidate. It does not change API/runtime/UI protocols, register the rejected candidate model, access `.53`, or infer a tag/publication.
 
 ## Release invariants
 

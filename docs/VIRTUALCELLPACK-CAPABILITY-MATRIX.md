@@ -1,6 +1,6 @@
-# VirtualCellPack 能力矩阵（P0–P8）
+# VirtualCellPack 能力矩阵（P0–P9）
 
-P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P8 Golden 起始基线：`09fb1bb3d02adfceed504cbccd7cf36c54a61b69`；P8 产品化收口起始基线：`b6cf226382cb841fb50e70875c82d1804ae5681e`。本表是能力与证据边界，不是性能排名；`pack_valid`、`model_compatible`、`scientifically_validated` 不得互换。
+P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P8 Golden 起始基线：`09fb1bb3d02adfceed504cbccd7cf36c54a61b69`；P8 产品化收口起始基线：`b6cf226382cb841fb50e70875c82d1804ae5681e`；P9 起始基线：`480706fbf58343565532debeca70c4de093b045f`。本表是能力与证据边界，不是性能排名；`pack_valid`、`model_compatible`、`scientifically_validated` 不得互换。
 
 | 能力/组件 | 当前实现与真相源 | `pack_valid` | `model_compatible` | `scientifically_validated` | 结论与边界 |
 |---|---|---:|---:|---:|---|
@@ -23,6 +23,11 @@ P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P8 Golden 起始基线�
 | P8 Pack capability UI | `DataLibrary.tsx` | 只显示后端 `pack_valid`/validation status | 未绑定请求时明确显示“未按请求评估” | 只显示 false | 浏览器只 GET catalog，不调用 compatibility 预判，不复制 checks 或科学路由 |
 | P8 历史 job execution identity | `JobStore`、`vc.job-execution-identity.v1` | 锁定运行时 Pack ID/version/fingerprint | 锁定 plan 中 model/card/compatibility fingerprints | 不提升 | 同名 job 拒绝覆盖；legacy job 显式记录无 Pack/model，不补造旧身份 |
 | P8 fail-closed 产品验收 | `test_pack_product.py`、Playwright data-library spec | Pack bytes 被改即 invalid | 无模型、错误 modality/cell domain/taxon 均空 plan/弃权 | 固定 false | 有匹配测试模型时正式 plugin 执行；所有负例 prediction 为 null，且不得 fallback 到 Mock |
+| P9 八轴 OOD manifest | `data/benchmarks/p9/ood-manifest.json`、`group-fixture.json`、ADR-0008 | 不改变 Pack 状态 | 不提供运行兼容性 | fixture 固定不提供 | 固定 IID、perturbation、combination、cell type、donor、dataset/platform、species、dose/time 的 train/validation/test biological groups；fixture 只证明 strict contract 和泄漏拒绝，不是假装八轴性能 |
+| P9 grouped leakage audit | `benchmarks/ood_validation.py::audit_leakage` | 不改变 | 不改变 | 仅作为验证前置门 | biological-unit 与 replicate identity 任一跨 partition 即拒绝；feature/label 字段分离；无随机 split |
+| P9 无适配外部验证 | `GSE67402 → GSE94117:glycerol_time_course`、`external-validation.json` | 不授予 Pack valid | 候选是离线 benchmark，不进入 model zoo | false | 4,484 exact-intersection IDs；external adaptation=0；排除同源风险 glucose cohort；不做 ID/ortholog 转换或补零 |
+| P9 abstention / risk-coverage | validation-only 阈值、condition-level selective metrics | N/A | 不提升 | 不提升 | external coverage 0.625、wrong accept 0.75、unnecessary abstain 0.5；test/external label 不参与阈值选择 |
+| P9 baseline promotion gate | candidate MSE 1.0603835779；no-change 1.0533347059；paired CI 跨 0 | N/A | `available=false` | `scientifically_validated=false` | 主指标未胜简单 baseline 且 CI 上界不小于 0；MAE 略好、Pearson 有限或 runtime 成功都不能覆盖失败 |
 | P8 Golden Norman contract | `data/golden/norman_2019/contract.yaml`、ADR-0006 | 不直接授予；先锁 source/obs/var/X/counts/split/metric | 不直接授予 | 固定不提升 | K562 `CVCL_0004` 与原样保留 source `A549` 字段分开；无随机 split、归一化、补零、去重、symbol/ortholog 转换或结果后调参 |
 | P8 Golden Pack | 外置 `pack/`、checked-in `pack.manifest.yaml`、`PackRegistry` | 完整 v0.2 schema/asset/semantic/leakage/hash 验证后为 true | 不自动提供 | false | `91,205×5,045`；派生只替换 obs，X/counts raw dataset hash 与 source 一致；大数据不入 Git |
 | P8 simple baseline cards | 三个一卡 registry、`GoldenBaselineWrapper` | 消费已注册 Golden Pack | 对精确 request/Pack/card/environment/asset 关系为 true | false | no-change、condition-equal global mean、alpha=1 additive ridge；canonical Ensembl target only；缺失/篡改资产直接 abstain、无 mock fallback |
@@ -49,5 +54,6 @@ P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P8 Golden 起始基线�
 | `scgpt` | planned；远端资产，不入 Git | 仅在批准的 checkpoint/evidence 上报告 | 不能从 registry 或 wrapper 存在推导 validation |
 | `norman_mean_baseline` | planned；远端资产 | 可作为明确标注的 naive baseline evidence | 不得当成训练模型或默认预测器 |
 | `norman_no_change` / `norman_global_mean` / `norman_additive_linear` | P8 外置 hash-locked artifact + 各自 strict one-card registry；不加入默认 zoo | 只可复现冻结 Norman/K562 split 上的 baseline delta、MSE 和治理报告 | 不能泛化为其他 cell/data/split；不能因分数或 runtime success 声称 scientifically validated |
+| `source-log-time-feature-trend-v1` | P9 离线、hash-only 参数；不加入 model zoo | 只可复现冻结 GSE67402→GSE94117 glycerol 无适配 benchmark | 主 MSE 未胜 no-change 且 CI 跨 0，因此 `available=false`、`scientifically_validated=false`；不得用于产品预测 |
 | `yeast_deletion_fitness` | planned；无权重 | 仅登记未来数据缺口 | 不得生成 deletion-fitness 数值 |
 | `pathway_scoring` / `embedding` / `state_scoring` | 按窄 case runner 条件性接入 | 仅对应数据集/对象/物种的现有 case | 不得把 marker/signature/状态刻画扩大成任意扰动预测 |

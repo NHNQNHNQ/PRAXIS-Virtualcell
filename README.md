@@ -146,16 +146,28 @@ Pack→broker→governance→Report，不经 mock shortcut；未知/重复 canon
 `pack_valid=true` 与 `model_compatible=true` 仍保持
 `scientifically_validated=false`；本阶段没有运行或访问 GEARS。
 
+P9 进一步冻结 IID、perturbation、combination、cell type、donor、
+dataset/platform、species、dose/time 八类 OOD 分组合同，并要求 biological unit
+和 replicate 在评估前通过泄漏审计。随仓库提交的八轴 fixture 只证明合同，不是
+八轴性能证据。真实的无适配外部验证固定为
+`GSE67402 → GSE94117:glycerol_time_course`：4,484 个 feature 仅取原始 ID
+精确交集，不补零、不做 symbol/ortholog 转换；阈值只在 source validation 选择。
+候选主 MSE `1.06038358` 未胜 no-change `1.05333471`，paired 95% CI 跨 0，
+因此 `available=false` 且 `scientifically_validated=false`。该失败结论是 P9
+fail-closed 验收结果，不是待隐藏的异常。
+
 架构和复现边界见 [ADR-0003](docs/ADR-0003-virtualcellpack-p5-multiomics-alignment.md)、
 [ADR-0004](docs/ADR-0004-virtualcellpack-p6-capability-runtime.md)、
 [ADR-0005](docs/ADR-0005-virtualcellpack-p7-data-portal.md)、
 [ADR-0006](docs/ADR-0006-virtualcellpack-p8-golden-norman.md)、
 [ADR-0007](docs/ADR-0007-virtualcellpack-p8-product-surfaces.md)、
+[ADR-0008](docs/ADR-0008-virtualcellpack-p9-ood-validation.md)、
 [多组学 runbook](docs/runbooks/VIRTUALCELLPACK-MULTIOMICS.md) 与
 [能力 runtime runbook](docs/runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md)、
 [数据资源库 runbook](docs/runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) 和
 [Golden Norman runbook](docs/runbooks/VIRTUALCELLPACK-GOLDEN-NORMAN.md)、
-[Pack 产品面 runbook](docs/runbooks/VIRTUALCELLPACK-PRODUCT-SURFACES.md)。
+[Pack 产品面 runbook](docs/runbooks/VIRTUALCELLPACK-PRODUCT-SURFACES.md)、
+[P9 OOD 验证 runbook](docs/runbooks/VIRTUALCELLPACK-P9-OOD-VALIDATION.md)。
 
 ## 能力边界
 

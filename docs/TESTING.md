@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 本地观测：2026-07-29，分支 `codex/p8-product-closure`，唯一起始基线 `b6cf226382cb841fb50e70875c82d1804ae5681e`
+> 本地观测：2026-07-29，分支 `codex/p9-ood-validation`，唯一起始基线 `480706fbf58343565532debeca70c4de093b045f`
 >
-> 状态：`P8_PRODUCT_CLOSURE_LOCAL_VERIFIED — PHASE9_AUTHORIZATION_PENDING`。固定 C5 实现证据、C4 发行证据和 D1a `4/5` CI 仍是历史冻结快照；本地 P8 结果不是新的 GitHub、Docker、`.53` 或发布证据。
+> 状态：`P9_OOD_VALIDATION_LOCAL_IMPLEMENTED — GITHUB_FIVE_JOB_CI_REQUIRES_SEPARATE_AUTHORIZATION`。固定 C5 实现证据、C4 发行证据和 D1a `4/5` CI 仍是历史冻结快照；本地 P9 结果不是新的 GitHub、`.53`、原生 Linux/x86_64 或发布证据。
 
 ## 当前质量口径
 
@@ -11,12 +11,12 @@
 | 依赖 | Python 3.13 hash locks → editable `--no-build-isolation --no-deps` → `python -m pip check` | macOS/arm64 Python 3.13.12 与 Docker Linux/arm64 Python 3.13.14 fresh strict hash install 均 PASS |
 | Python lint | Python 3.13 lock 环境内 `ruff check .` | macOS/arm64 与 Docker Linux/arm64 均 PASS，0 diagnostics |
 | FBA + packaging 定向回归 | 两条真实 FBA 正例，加 dev extra/lock 与 CI lock 角色测试 | macOS/arm64 `13 passed / 0 failed`；其中 packaging 单模块 `11 passed`，Linux/amd64 QEMU 同一 packaging 单模块 `11 passed / 0 failed` |
-| VirtualCell 核心 | `python -m pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` | P8 product fresh macOS/arm64 Python 3.13.12：`1258 passed / 35 skipped / 9 deselected / 0 failed`；此前 GitHub attempt 2 native Linux core PASS 是旧候选证据 |
-| Legacy unit | `python -m pytest tests -m "not (integration or llm or remote)" -o addopts='' -q -ra` | P8 product fresh macOS/arm64 Python 3.13.12：`1146 passed / 59 skipped / 105 deselected / 0 failed`；Docker Linux 数字仍是旧候选冻结证据 |
+| VirtualCell 核心 | `python -m pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` | P9 macOS/arm64 Python 3.13.12：`1270 passed / 35 skipped / 9 deselected / 0 failed`；此前 GitHub attempt 2 native Linux core PASS 是旧候选证据 |
+| Legacy unit | `python -m pytest tests -m "not (integration or llm or remote)" -o addopts='' -q -ra` | P9 macOS/arm64 Python 3.13.12：`1146 passed / 59 skipped / 105 deselected / 0 failed`；Docker Linux 数字仍是旧候选冻结证据 |
 | Legacy broad non-LLM（C5 冻结） | `python -m pytest tests -m "not llm" -o addopts='' -q -ra` | C5 历史证据为 `1136 passed / 158 skipped / 6 deselected / 0 failed`；本轮未将其冒充为新候选 CI isolation |
 | C5 Gate A 本地 seam | provenance gate 定向测试 + W4B remote test module 在普通本地 marker gate 下被收集并跳过 | `38 passed / 2 remote skipped / 0 failed`；三 adapter success/no-gate 与缺版本 fail-closed 已证明，非真 donor 推理 |
 | C5 W4B remote | `test_ml_workflow_e2e.py --run-remote -m remote` | 本机无 torch：`2 skipped / 0 failed`，明确为 `REMOTE_VALIDATION_PENDING`；只有批准候选 SHA、clean donor SHA/remote 和可信六文件 digest 集上 `2 passed / 0 skipped / 0 failed` 可关闭 |
-| 前端 | typecheck → lint → build → 对显式启动的 fresh dev-lock API 执行 `npm run e2e` | P8 product 本地 PASS；14 specs / 60 collected = `59 passed / 1 skipped / 0 failed`；唯一 skip 是需明确授权的真实 LLM |
+| 前端 | typecheck → lint → build → 对显式启动的 fresh dev-lock API 执行 `npm run e2e` | P9 本地 PASS；14 specs / 60 collected = `59 passed / 1 skipped / 0 failed`；唯一 skip 是需明确授权的真实 LLM |
 | C4 完整 wheel（冻结） | 固定 `8ce42fe` 的两个 clean archive 分别构建、`cmp`、Python 3.13 locked clean install、console entry、站外 verifier | 922,334 bytes；SHA-256 `78e5287a5dd61478b041fd1a28783732cb75a250de02eec306d3803b3128fd4f`；全部 PASS；仅是 C4 历史证据，不能继承为尚未形成的新候选 artifact |
 | C4 Linux container | Docker Desktop Linux/arm64，显式 Docker 双门，容器 `--network none` | `5 passed / 0 failed`；结束后无本次资源残留 |
 | C2 历史干净 wheel | 从提交 `73f3324` 的 `git archive` 构建；独立 Python 3.13 venv `--no-deps` 安装后验证 import、version、CLI | `praxis_virtualcell-1.5.1-py3-none-any.whl`，714,871 bytes，SHA-256 `b571ee71a42d028774221b068a5d0b5a613bcebb456ba655c1a3b4e1d1690580`；不是当前 `1.6.0` wheel 证据 |
@@ -329,6 +329,64 @@ artifact。直接在外置盘构建会被文件系统自动生成的 `._*.dist-i
 普通验收没有访问 `.53`、P7 大数据或 Golden 外置资产，没有运行 GEARS、GPU、
 真实 LLM、Docker 或远端服务。35 个 core skip 仍是 remote/Docker 外部门，不能
 冒充这些能力通过。
+
+### P9 多轴 OOD、弃权与无适配外部验证
+
+P9 以 `480706fbf58343565532debeca70c4de093b045f` 为唯一起始基线，在
+`codex/p9-ood-validation` 分支实施。测试先行证据：
+
+```text
+初始 P9 模块缺失：
+collection error / ModuleNotFoundError
+
+来源 hash 与 selective 防篡改补强：
+2 failed / 10 passed
+
+feature contract / external metadata 防篡改补强：
+1 failed / 11 passed
+```
+
+最小实现后的本地证据：
+
+```text
+P9 定向：
+12 passed / 0 failed
+
+python -m pip check：
+No broken requirements found.
+
+ruff check . --no-cache：
+All checks passed!
+
+VirtualCell core：
+1270 passed / 35 skipped / 9 deselected / 0 failed
+
+legacy：
+1146 passed / 59 skipped / 105 deselected / 0 failed
+
+frontend：
+npm audit 0 vulnerabilities
+typecheck PASS
+lint PASS
+build + bundle budget PASS
+Playwright 59 passed / 1 skipped / 0 failed（60 collected）
+```
+
+core 相对 P8 product 的 `1258 passed` 精确增加 12 个 P9 合同 case；legacy 与
+前端计数不变。首次 Playwright 命令因本轮严格 Python 环境位于 `/private/tmp`
+而未找到 checkout `.venv/bin/python`，在测试收集前退出；随后按本指南显式启动
+同一 fresh API 环境并复用，60 个 case 得到上述正式结果，没有修改配置或断言。
+本机 Node 是 `26.4.0`，不替代 CI 固定的 `24.18.0` 平台证据。
+
+公开输入在 Git 外临时目录重放，生成的
+`external-validation.json` 与 checked-in artifact 逐字节一致。主 MSE
+candidate `1.0603835779`、no-change `1.0533347059`，paired difference 95% CI
+`[-0.9076414928, 0.9749711895]`；因此 `available=false`、
+`scientifically_validated=false`。没有运行 GEARS、GPU、真实 LLM、remote
+service 或 `.53`。
+
+committed-HEAD 双 wheel、clean-install verifier 和 Docker smoke 必须在本节已提交
+后运行，精确 SHA 与结果由阶段结束报告绑定；Git commit 无法自嵌其最终 SHA。
 
 ## 本地复现
 
