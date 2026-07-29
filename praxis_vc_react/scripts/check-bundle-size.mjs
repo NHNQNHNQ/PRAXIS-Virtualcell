@@ -27,7 +27,9 @@ if (initialChunks.size === 0) {
   throw new Error("bundle budget: dist/index.html has no module entry script");
 }
 
-const files = (await readdir(ASSETS)).filter((name) => name.endsWith(".js"));
+const files = (await readdir(ASSETS)).filter(
+  (name) => !name.startsWith("._") && name.endsWith(".js"),
+);
 if (files.length === 0) {
   throw new Error("bundle budget: dist/assets has no JavaScript chunks");
 }
@@ -62,7 +64,9 @@ if (resultsChunks.length !== 1 || resultsChunks[0].initial) {
   throw new Error("bundle budget: ResultsStage must remain one non-initial lazy chunk");
 }
 
-const fontFiles = (await readdir(ASSETS)).filter((name) => /\.woff2?$/.test(name));
+const fontFiles = (await readdir(ASSETS)).filter(
+  (name) => !name.startsWith("._") && /\.woff2?$/.test(name),
+);
 const fontsRaw = (
   await Promise.all(fontFiles.map((name) => stat(path.join(ASSETS, name))))
 ).reduce((total, info) => total + info.size, 0);

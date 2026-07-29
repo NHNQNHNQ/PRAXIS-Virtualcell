@@ -2,7 +2,9 @@
 
 > Status: `IMPLEMENTED_P9_OOD_VALIDATION — 1.6.0_LOCAL_CANDIDATE_UNPUBLISHED`
 >
-> Audited: 2026-07-29; local Phase branch `codex/p8-product-closure`
+> Audited: 2026-07-29 12:12 CST; local closure branch
+> `codex/p9-release-closure`, based on P9 implementation anchor
+> `6de2ec1543aada7f4e7b265280a784ce0528c9dc`
 
 The repository historically mixed product release tags, package metadata, API/runtime labels, message schemas, governance artifacts, and model revisions. C2 implements the separation below; publication status remains governed independently by the three-way synchronization ledger.
 
@@ -10,8 +12,9 @@ The repository historically mixed product release tags, package metadata, API/ru
 
 | Namespace | Current value | Source | Meaning |
 |---|---|---|---|
-| local product milestone | annotated `v1.5.0 → 176019e` | Git tag/local `main` | latest local release checkpoint; not published on GitHub on 2026-07-18 |
-| GitHub published main/tag | `v0.8.0 → 7fc4aa5` | fresh D0 HTTPS `ls-remote`, 2026-07-18 20:38 CST | current observed published truth; still unchanged by this local candidate |
+| local Phase candidate | P9 anchor `6de2ec1543aada7f4e7b265280a784ce0528c9dc` | fresh local `git rev-parse`, 2026-07-29 12:12 CST | implemented P0–P9 line; closure branch remains local and unpublished |
+| GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | fresh HTTPS `ls-remote`, 2026-07-29 12:12 CST | published truth; none of P0–P9 is on `main` |
+| `.53` code mirror | `8e0d06348ebdf22e076037e6d661094ae877c5d1` on `codex/deploy-v1.6.0` | fresh read-only SSH, 2026-07-29 12:12 CST | data is present separately, but P0–P9 code is not deployed |
 | local product candidate | `1.6.0` | `pyproject.toml` `[project].version` | accessible theme, workflow/UI, and supported-input expansion; local only, not a tag or publication |
 | Python distribution | `1.6.0` | installed `praxis-virtualcell` metadata | derived from the only manually edited product source |
 | inherited `praxis2.__version__` | `1.6.0` | compatibility alias | aliases `praxis_virtualcell.__version__`; no second literal |

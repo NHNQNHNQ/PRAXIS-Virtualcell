@@ -40,6 +40,7 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [VirtualCellPack P6 → P7 Handoff](HANDOFF-VIRTUALCELLPACK-P6-TO-P7.md) | local P6 capability-runtime implementation, exact tests, limitations and next exact-SHA authorization gate |
 | [VirtualCellPack P7 → P8 Handoff](HANDOFF-VIRTUALCELLPACK-P7-TO-P8.md) | local P7 strict data catalog, verified external files, controlled quarantine upload, exact tests and next exact-SHA authorization gate |
 | [VirtualCellPack P8 → P9 Handoff](HANDOFF-VIRTUALCELLPACK-P8-TO-P9.md) | Golden Norman evidence plus P8 product surfaces, three tiny Packs, fail-closed matrix, exact tests and next exact-SHA authorization gate |
+| [VirtualCellPack P9 → P10 Handoff](HANDOFF-VIRTUALCELLPACK-P9-TO-P10.md) | local P0–P9 closure, negative scientific gate, preview boundary, exact evidence and remaining publication gate |
 | [Repository Layout](REPOSITORY-LAYOUT.md) | tracked-tree responsibilities and evidence-versus-generated policy |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | highest authority for met/narrowed/needs-new/unsupported scientific claims |
 

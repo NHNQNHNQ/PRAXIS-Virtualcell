@@ -19,7 +19,7 @@ export default defineConfig({
   webServer: {
     // cwd 默认 = 本 config 所在目录(praxis_vc_react/);先 build,再回 repo root 启 uvicorn
     command:
-      'npm run build && cd .. && P7_DATA_ROOT="$(mktemp -d)" && PRAXIS_VC_RUNS="$(mktemp -d)" PRAXIS_VC_DATA_ROOT="$P7_DATA_ROOT" PRAXIS_VC_UPLOAD_TOKEN="p7-playwright-upload-token-is-at-least-32-bytes" PYTHONPATH="$PWD" .venv/bin/python -m uvicorn praxis_vc_api.main:app --host 127.0.0.1 --port 8000',
+      'npm run build && cd .. && P7_DATA_ROOT="$(mktemp -d)" && PRAXIS_VC_RUNS="$(mktemp -d)" PRAXIS_VC_DATA_ROOT="$P7_DATA_ROOT" PRAXIS_VC_UPLOAD_TOKEN="p7-playwright-upload-token-is-at-least-32-bytes" PYTHONPATH="$PWD" "${PRAXIS_VC_TEST_PYTHON:-.venv/bin/python}" -m uvicorn praxis_vc_api.main:app --host 127.0.0.1 --port 8000',
     url: "http://127.0.0.1:8000/api/health",
     reuseExistingServer: !process.env.CI,
     timeout: 180000,

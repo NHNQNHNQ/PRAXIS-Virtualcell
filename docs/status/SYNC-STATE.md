@@ -1,17 +1,20 @@
 # PRAXIS-VirtualCell Three-Way Sync State
 
-> Local/GitHub candidate state updated: 2026-07-23 09:55 CST (+0800); `.53` remains D0 last-observed at 2026-07-18 20:38–20:43 CST (+0800)
+> Fresh three-way read-only audit: 2026-07-29 12:12 CST (+0800)
 >
-> Status: `KNOWN_DIVERGENCE — D1A_RETRY_1_CI_4_OF_5 — RETRY_2_AUTHORIZATION_PENDING`
+> Status: `P9_LOCAL_CANDIDATE — NOT_PUBLISHED — NOT_DEPLOYED`
 >
-> External writes: **two approved candidate-ref operations only** — creation at `6086e6995b1c3c01ec31075ce1164a0165cb8d43`, then strict fast-forward to `ee36d7948047f346f55a02d62ccaac84391e3c20`. No GitHub `main`/tag/PR, local `main`/tag, `.53` fetch/checkout/pull, deployment, or process action was performed.
+> Current closure does not authorize GitHub writes, `main`/tag changes, `.53` repository
+> changes or PRAXIS-2 changes. The user separately requested an isolated P9 website preview;
+> that preview uses `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p9` and port `18080`
+> without changing the protected `.53` checkout.
 
 ## Roles and invariant
 
 | Endpoint | Role | Authority rule |
 |---|---|---|
 | GitHub `NHNQNHNQ/PRAXIS-Virtualcell` | published truth | A commit is not published until it exists on the approved GitHub branch/tag |
-| APFS clone `/Users/mzy/Projects/PRAXIS-virtualcell` | development truth | all code, tests, and release preparation happen here |
+| local worktree `/Volumes/T7/PRAXIS-virtualcell-p0` | P0–P9 candidate truth | all current phase code, tests, and release preparation happen here |
 | `.53:/home/zkyd/data1/mzy/PRAXIS-virtualcell` | deployment/validation mirror | never develop directly here; only deploy an approved GitHub SHA |
 
 Release synchronization invariant:
@@ -26,21 +29,25 @@ Feature branches may be intentionally ahead locally or on GitHub, but every exce
 
 | Field | APFS local | GitHub | `.53` mirror |
 |---|---|---|---|
-| Observation method | local Git commands and D1a retry repair validation | 2026-07-23 GitHub API ref/run refresh after the approved exact-ref fast-forward | D0 batch-mode read-only SSH with `GIT_OPTIONAL_LOCKS=0`; **last observed**, not re-read in D1a |
-| Repository | `/Users/mzy/Projects/PRAXIS-virtualcell` | `https://github.com/NHNQNHNQ/PRAXIS-Virtualcell` | `/home/zkyd/data1/mzy/PRAXIS-virtualcell` |
+| Observation method | fresh local Git commands | fresh HTTPS `git ls-remote` | fresh batch-mode read-only SSH |
+| Repository | `/Volumes/T7/PRAXIS-virtualcell-p0` | `https://github.com/NHNQNHNQ/PRAXIS-Virtualcell` | `/home/zkyd/data1/mzy/PRAXIS-virtualcell` |
 | Configured origin | `git@github.com:NHNQNHNQ/PRAXIS-Virtualcell.git` | same repository | `git@github.com:NHNQNHNQ/PRAXIS-Virtualcell.git` |
-| Checked-out state | `codex/project-consolidation`; published attempt-2 SHA `ee36d79`; local process-group fix `6a81987`; final report-containing tip is named only by the next handoff; intentionally no upstream; product `1.6.0` | candidate branch `ee36d7948047f346f55a02d62ccaac84391e3c20`; CI run `29971566980` failed `4/5` | detached HEAD at `b9abdbd` (D0 last-observed) |
-| `main` | `176019e` | `7fc4aa5` | `7fc4aa5` |
-| former feature branch | `24475f2` | `b9abdbd` | local branch `b9abdbd` |
-| highest release tag present | local `v1.5.0 → 176019e` | `v0.8.0 → 7fc4aa5` | `v0.8.0 → 7fc4aa5` |
-| worktree | implementation was clean before the current ledger/report edits; final handoff requires tracked clean with only protected `.claude/` and `string.jpeg` untracked; ignored `.playwright-mcp/` present | not applicable | D0 last-observed dirty exception: untracked `vc_api.log` only |
-| extra refs | recovery refs and stash preserved; `origin/codex/project-consolidation=ee36d79`; current branch still has no upstream | candidate branch `ee36d79`; no D1a tag | `remote-gears-l4-95dc764 → 95dc764` (D0 last-observed) |
+| Checked-out state | `codex/p9-release-closure`, based on P9 implementation anchor `6de2ec1543aada7f4e7b265280a784ce0528c9dc`; final closure SHA is reported after commit | `main=8e0d06348ebdf22e076037e6d661094ae877c5d1` | `codex/deploy-v1.6.0` at `8e0d06348ebdf22e076037e6d661094ae877c5d1` |
+| P0–P9 publication | local only | absent from `main` | absent from protected code mirror |
+| product version | `1.6.0` local candidate | unchanged published baseline | unchanged deployed baseline |
+| worktree | clean at closure branch creation; closure edits must be committed and rechecked | not applicable | existing untracked `vc_api.log` only |
+| data state | Git contains manifests/small fixtures only | not applicable | P7 public inventory and P8 Golden Norman assets exist outside the code checkout and passed hash audit |
 
-The `.53` log was inspected by metadata only during D0: `vc_api.log`, 32,504 bytes, mtime `2026-07-12 12:07:01 UTC`. Its contents were not read. No D1a `.53` access occurred, so these values remain explicitly **last observed**, not a 2026-07-23 fresh claim.
+The protected old dirty T7 worktree `/Volumes/T7/PRAXIS-virtualcell` remains outside this
+candidate and was not modified. `.53` ports 8000, 7788 and 8501 had no VirtualCell listener
+during the audit. Data presence is not a code deployment.
 
-The 2026-07-23 GitHub API refresh confirms candidate `ee36d79`, unchanged `main=7fc4aa5`, and failed exact-head run `29971566980` at `4/5`. D1a writes were limited to the approved candidate creation and approved strict fast-forward. `.53`, tags, both main refs, deployment, and process state were not changed.
+## Historical D1a record
 
-## Divergence explanation
+The remaining sections preserve the July 18–23 D1a history. They are historical evidence,
+not the current three-way state; the table above is authoritative for P9 closure.
+
+## Divergence explanation (historical)
 
 ### Local repaired candidate versus published/deployed truth
 

@@ -154,6 +154,24 @@ def test_ci_editable_installs_use_hash_locked_build_backend():
     assert "requirements/runtime-py313.lock" not in frontend_job
 
 
+def test_playwright_python_can_be_overridden_without_editing_config():
+    config = (_ROOT / "praxis_vc_react" / "playwright.config.ts").read_text(
+        encoding="utf-8"
+    )
+    readme = (_ROOT / "praxis_vc_react" / "README.md").read_text(encoding="utf-8")
+
+    assert '"${PRAXIS_VC_TEST_PYTHON:-.venv/bin/python}"' in config
+    assert "PRAXIS_VC_TEST_PYTHON" in readme
+
+
+def test_bundle_budget_ignores_appledouble_sidecars():
+    script = (
+        _ROOT / "praxis_vc_react" / "scripts" / "check-bundle-size.mjs"
+    ).read_text(encoding="utf-8")
+
+    assert script.count('!name.startsWith("._")') >= 2
+
+
 def test_web_command_uses_packaged_absolute_app_path(monkeypatch):
     from praxis_virtualcell.cli import _cmd_web
 

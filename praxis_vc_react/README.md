@@ -60,4 +60,4 @@ CI=1 npm run e2e
 
 当前 Playwright 套件覆盖五阶段 happy path、六个结果 tab、首屏结构和后端版本真值。它尚不代表 CSS/像素视觉验收、深层 abstain/failed 值、真实 LLM 或远端模型已经通过；这些范围必须分别报告。
 
-Playwright 会在仓库根目录使用 `.venv/bin/python` 启动 Uvicorn，因此运行 E2E 前需要安装 `.[api]`，并保证 8000 端口没有属于其他进程的服务。不要通过杀死未知进程来“腾端口”。
+Playwright 默认在仓库根目录使用 `.venv/bin/python` 启动 Uvicorn；严格环境位于其他目录时设置 `PRAXIS_VC_TEST_PYTHON=/absolute/path/to/python`。运行 E2E 前需要安装 `.[api]`，并保证 8000 端口没有属于其他进程的服务。不要通过杀死未知进程来“腾端口”。

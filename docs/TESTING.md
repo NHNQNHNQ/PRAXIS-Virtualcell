@@ -385,8 +385,19 @@ candidate `1.0603835779`、no-change `1.0533347059`，paired difference 95% CI
 `scientifically_validated=false`。没有运行 GEARS、GPU、真实 LLM、remote
 service 或 `.53`。
 
-committed-HEAD 双 wheel、clean-install verifier 和 Docker smoke 必须在本节已提交
-后运行，精确 SHA 与结果由阶段结束报告绑定；Git commit 无法自嵌其最终 SHA。
+P9 implementation anchor
+`6de2ec1543aada7f4e7b265280a784ce0528c9dc` 的 post-commit 发行证据已完成：
+
+```text
+双 clean archive wheel 可复现
+wheel SHA-256 97a71283005ec462cd3b91f60efe2bcd95a8d5b2f63b44bd7c7160b5d34149ad
+clean-install verifier PASS
+Docker exact-HEAD smoke 5 passed / 0 failed
+```
+
+P9 release-closure 只修测试入口、AppleDouble bundle 审计和治理文档，不改变
+runtime、模型或科学 artifact；其最终 commit、wheel hash 和隔离预览证据仍由
+阶段结束报告绑定，因为 Git commit 无法自嵌其最终 SHA。
 
 ## 本地复现
 
