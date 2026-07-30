@@ -2026,6 +2026,50 @@ select:focus {
   color: var(--warn);
 }
 
+.prompt-examples {
+  margin-left: 46px;
+}
+
+.prompt-examples > span {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.prompt-examples > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.prompt-examples button {
+  padding: 9px 12px;
+  border: 1px solid #d8d8d8;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.prompt-examples button:hover,
+.prompt-examples button:focus-visible {
+  border-color: #202124;
+  background: #f7f7f8;
+}
+
+.prompt-examples small {
+  display: block;
+  margin-top: 9px;
+  color: var(--text-muted);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
 .assistant-parse-meta {
   display: block;
   margin-top: 9px;
@@ -2319,6 +2363,10 @@ select:focus {
 
   .user-message {
     max-width: 88%;
+  }
+
+  .prompt-examples {
+    margin-left: 0;
   }
 
   .interpretation-grid {

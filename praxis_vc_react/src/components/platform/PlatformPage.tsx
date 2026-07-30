@@ -37,6 +37,12 @@ type ChatTurn = {
   fallbackUsed?: boolean;
 };
 
+type PromptExample = {
+  text: string;
+  perturbationType: string;
+  targets: string[];
+};
+
 type PlatformPageProps = {
   page: PlatformView;
   chatEpoch: number;
@@ -58,11 +64,68 @@ const COMMON_CELL_IDS = new Set([
   "ecoli_iml1515",
 ]);
 
-function composeCellQuery(query: string, cell: CellPreset): string {
+function composeCellQuery(
+  query: string,
+  cell: CellPreset,
+  example?: PromptExample,
+): string {
   return `${query}\n结构化描述:${JSON.stringify({
     species: cell.species,
     cell_type: cell.cell_type,
+    ...(example
+      ? {
+          perturbation_type: example.perturbationType,
+          perturbation_targets: example.targets,
+        }
+      : {}),
   })}`;
+}
+
+function cellPromptExamples(
+  presets: CellPreset[],
+  cell: CellPreset,
+): PromptExample[] {
+  const examples: PromptExample[] = [];
+  const add = (
+    text: string,
+    perturbationType: string,
+    targets: string[],
+  ) => {
+    if (!examples.some((example) => example.text === text)) {
+      examples.push({ text, perturbationType, targets });
+    }
+  };
+
+  for (const preset of presets.filter(
+    (item) =>
+      item.species === cell.species && item.cell_type === cell.cell_type,
+  )) {
+    const type = preset.example_perturbation_type;
+    const targets = preset.example_targets ?? [];
+    if (!type) continue;
+
+    if (type === "gene") {
+      for (const target of targets) {
+        add(`敲低 ${target} 后表达如何变化？`, type, [target]);
+      }
+      if (targets.length > 1) {
+        add(`同时扰动 ${targets.join(" 和 ")} 后表达如何变化？`, type, targets);
+      } else if (targets[0]) {
+        add(`扰动 ${targets[0]} 后，哪些表达响应最明显？`, type, targets);
+      }
+    } else if (type === "drug" && targets[0]) {
+      add(`${targets[0]} 药物处理后表达如何变化？`, type, targets);
+      add(`比较 ${targets[0]} 处理前后的表达响应`, type, targets);
+    } else if (type === "medium") {
+      add(`${cell.cell_type} 在培养基变化后表达如何变化？`, type, []);
+      add(`改变培养条件后，${cell.cell_type} 的表达响应是什么？`, type, []);
+    } else if (targets[0]) {
+      add(`${targets.join(" 和 ")} 扰动后表达如何变化？`, type, targets);
+      add(`比较 ${targets.join(" 和 ")} 扰动前后的表达响应`, type, targets);
+    }
+  }
+
+  return examples.slice(0, 3);
 }
 
 function unresolvedParseMessage(parsed: ParseResult): string | null {
@@ -153,6 +216,7 @@ export default function PlatformPage({
   const turnIdRef = useRef(0);
   const inFlightRef = useRef(false);
   const latestTurnRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     requestEpochRef.current += 1;
@@ -221,6 +285,13 @@ export default function PlatformPage({
       return matchesSpecies && matchesSearch;
     });
   }, [allCells, search, speciesFilter]);
+  const promptExamples = useMemo(
+    () =>
+      selectedCell
+        ? cellPromptExamples(options?.cell_presets ?? [selectedCell], selectedCell)
+        : [],
+    [options, selectedCell],
+  );
 
   function updateTurn(id: number, patch: Partial<ChatTurn>) {
     setTurns((current) =>
@@ -282,7 +353,11 @@ export default function PlatformPage({
     ]);
 
     try {
-      const parsed = await parse(composeCellQuery(text, cell), "llm_assisted");
+      const example = promptExamples.find((item) => item.text === text);
+      const parsed = await parse(
+        composeCellQuery(text, cell, example),
+        "llm_assisted",
+      );
       if (!isCurrent()) return;
       const parseMetadata = {
         parser: parsed.parser,
@@ -526,6 +601,29 @@ export default function PlatformPage({
           </div>
         </div>
 
+        {turns.length === 0 && promptExamples.length > 0 && (
+          <div className="prompt-examples" aria-label="Example questions">
+            <span>Try an example</span>
+            <div>
+              {promptExamples.map((example) => (
+                <button
+                  key={example.text}
+                  type="button"
+                  onClick={() => {
+                    setQuery(example.text);
+                    composerRef.current?.focus();
+                  }}
+                >
+                  {example.text}
+                </button>
+              ))}
+            </div>
+            <small>
+              示例来自所选 backend preset；点击只会填入问题，不代表已有兼容或验证模型。
+            </small>
+          </div>
+        )}
+
         {turns.map((turn, index) => (
           <div
             className="conversation-turn"
@@ -638,6 +736,7 @@ export default function PlatformPage({
       <form className="chat-composer" onSubmit={submit}>
         <label htmlFor="chat-query">Message PRAXIS</label>
         <textarea
+          ref={composerRef}
           id="chat-query"
           rows={3}
           value={query}
