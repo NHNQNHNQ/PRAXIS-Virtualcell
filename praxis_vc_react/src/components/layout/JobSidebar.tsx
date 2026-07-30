@@ -1,183 +1,141 @@
-import { type Health, type JobSummary, type Mode } from "../../api";
+import {
+  type CellPreset,
+  type Health,
+  type JobSummary,
+} from "../../api";
 
-export type PlatformView =
-  | "home"
-  | "data-center"
-  | "reports"
-  | "my-cells"
-  | "settings"
-  | "organisms"
-  | "datasets"
-  | "packs"
-  | "virtual-cells"
-  | "agent-workspace";
+export type PlatformView = "chat" | "data-center";
 
-const NAV_ITEMS: {
-  key: PlatformView;
-  label: string;
-  shortLabel: string;
-  icon: string;
-}[] = [
-  {
-    key: "virtual-cells",
-    label: "Virtual Cells",
-    shortLabel: "Cells",
-    icon: "◉",
-  },
-  {
-    key: "agent-workspace",
-    label: "Agent Workspace",
-    shortLabel: "Workspace",
-    icon: "↗",
-  },
-  { key: "reports", label: "Reports", shortLabel: "Reports", icon: "▤" },
-  { key: "data-center", label: "Data Center", shortLabel: "Data", icon: "⌘" },
-  { key: "my-cells", label: "My Cells", shortLabel: "My Cells", icon: "◇" },
-  { key: "settings", label: "Settings", shortLabel: "Settings", icon: "⚙" },
-];
+function HistoryItems({
+  jobs,
+  jobsError,
+  activeJobId,
+  onOpenJob,
+}: {
+  jobs: JobSummary[] | null;
+  jobsError: string | null;
+  activeJobId: string | null;
+  onOpenJob: (jobId: string) => void;
+}) {
+  if (jobsError) return <p role="alert">报告目录不可用</p>;
+  if (jobs == null) return <p>加载中…</p>;
+  if (jobs.length === 0) return <p>还没有报告</p>;
 
-const DATA_CENTER_VIEWS = new Set<PlatformView>([
-  "data-center",
-  "organisms",
-  "datasets",
-  "packs",
-]);
-
-function activeNavigation(view: PlatformView): PlatformView | null {
-  return DATA_CENTER_VIEWS.has(view)
-    ? "data-center"
-    : view === "home"
-      ? null
-      : view;
-}
-
-function contextTitle(view: PlatformView): string {
-  if (DATA_CENTER_VIEWS.has(view)) return "Data Center";
-  return NAV_ITEMS.find((item) => item.key === view)?.label ?? "Research Home";
+  return jobs.map((job) => (
+    <button
+      key={job.job_id}
+      type="button"
+      className={
+        job.job_id === activeJobId
+          ? "chat-history-item active"
+          : "chat-history-item"
+      }
+      onClick={() => onOpenJob(job.job_id)}
+    >
+      <strong>
+        {job.species ?? "未指定物种"} ·{" "}
+        {job.perturbation_targets.join("、") || "无扰动靶点"}
+      </strong>
+      <small>{job.abstain ? "Abstained" : "Saved report"}</small>
+    </button>
+  ));
 }
 
 export default function JobSidebar({
   jobs,
-  jobsErr,
+  jobsError,
   activeJobId,
   view,
-  onNewQuery,
+  selectedCell,
+  health,
+  healthError,
+  onNewChat,
   onNavigate,
   onOpenJob,
-  health,
-  healthErr,
-  mode,
 }: {
   jobs: JobSummary[] | null;
-  jobsErr: string | null;
+  jobsError: string | null;
   activeJobId: string | null;
   view: PlatformView;
-  onNewQuery: () => void;
+  selectedCell: CellPreset | null;
+  health: Health | null;
+  healthError: string | null;
+  onNewChat: () => void;
   onNavigate: (view: PlatformView) => void;
   onOpenJob: (jobId: string) => void;
-  health: Health | null;
-  healthErr: string | null;
-  mode: Mode;
 }) {
-  const buildSha =
-    health?.git_sha === "unknown" ? "unknown" : health?.git_sha.slice(0, 7);
-  const activeNav = activeNavigation(view);
-
   return (
-    <aside className="js-sidebar">
-      <div className="js-global-rail">
-        <button
-          type="button"
-          className="js-brand-mark"
-          onClick={() => onNavigate("home")}
-          aria-label="PRAXIS 首页"
-          title="PRAXIS 首页"
-        >
-          P
-        </button>
+    <aside className="chat-sidebar">
+      <button
+        type="button"
+        className="chat-brand"
+        onClick={onNewChat}
+        aria-label="PRAXIS 新建对话"
+      >
+        <span>P</span>
+        <strong>PRAXIS VirtualCell</strong>
+      </button>
 
-        <nav className="js-platform-nav" aria-label="主导航">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              className={
-                item.key === activeNav ? "js-nav-btn active" : "js-nav-btn"
-              }
-              onClick={() => onNavigate(item.key)}
-              aria-current={item.key === activeNav ? "page" : undefined}
-              aria-label={item.label}
-              title={item.label}
-            >
-              <span className="js-nav-icon" aria-hidden="true">
-                {item.icon}
-              </span>
-              <span className="js-nav-label">{item.shortLabel}</span>
-            </button>
-          ))}
-        </nav>
+      <button type="button" className="chat-new-button" onClick={onNewChat}>
+        <span aria-hidden="true">＋</span>
+        New chat
+      </button>
+
+      <button
+        type="button"
+        className={view === "data-center" ? "chat-nav active" : "chat-nav"}
+        onClick={() => onNavigate("data-center")}
+        aria-current={view === "data-center" ? "page" : undefined}
+      >
+        <span aria-hidden="true">◎</span>
+        Data Center
+      </button>
+
+      <div className="chat-selected-context">
+        <span>Selected cell</span>
+        <strong>{selectedCell?.cell_type ?? "Not selected"}</strong>
+        <small>
+          {selectedCell
+            ? `${selectedCell.species} · catalog preset`
+            : "Choose a cell before asking"}
+        </small>
       </div>
 
-      <div className="js-context-panel">
-        <div className="js-brand">
-          <span className="js-brand-sub">PRAXIS · VIRTUAL CELL</span>
-          <span className="js-brand-name">{contextTitle(view)}</span>
-        </div>
-
-        <button type="button" className="js-new-btn" onClick={onNewQuery}>
-          <span className="js-plus">＋</span> New analysis
-        </button>
-
-        <div className="js-label">Recent runs</div>
-        <div className="js-joblist">
-          {jobsErr ? (
-            <div className="js-empty" role="alert">
-              Agent Run 目录不可用
-            </div>
-          ) : jobs === null ? (
-            <div className="js-empty">加载中…</div>
-          ) : jobs.length === 0 ? (
-            <div className="js-empty">还没有运行记录</div>
-          ) : (
-            jobs.map((j) => (
-              <button
-                key={j.job_id}
-                type="button"
-                className={
-                  j.job_id === activeJobId ? "js-job active" : "js-job"
-                }
-                onClick={() => onOpenJob(j.job_id)}
-              >
-                <div className="js-job-title">
-                  {(j.species ?? "未指定物种")} ·{" "}
-                  {j.perturbation_targets.join("、") || "无扰动靶点"}
-                </div>
-                <div className="js-job-meta">
-                  {j.job_id} · {j.reliability ?? "可靠度未知"}
-                  {j.abstain ? " · abstained" : ""}
-                </div>
-              </button>
-            ))
-          )}
-        </div>
-
-        <div className="js-foot">
-          <div className="js-foot-status">
-            <span className={health ? "js-dot ok" : "js-dot off"} />
-            {health
-              ? `后端 ${health.status} · 产品 ${health.product_version}`
-              : healthErr
-                ? "后端未连通"
-                : "连接中…"}
-          </div>
-          <div className="js-foot-note">
-            {mode === "offline" ? "本地模式" : "语言模型辅助"}
-            {health
-              ? ` · ${health.runtime_protocol_version} · build ${buildSha}`
-              : " · 同源 · 不保存密钥"}
-          </div>
-        </div>
+      <div className="chat-history-label">Recent reports</div>
+      <div className="chat-history">
+        <HistoryItems
+          jobs={jobs}
+          jobsError={jobsError}
+          activeJobId={activeJobId}
+          onOpenJob={onOpenJob}
+        />
       </div>
+
+      <details className="chat-mobile-history">
+        <summary>Reports</summary>
+        <div>
+          <HistoryItems
+            jobs={jobs}
+            jobsError={jobsError}
+            activeJobId={activeJobId}
+            onOpenJob={onOpenJob}
+          />
+        </div>
+      </details>
+
+      <footer className="chat-sidebar-footer">
+        <span className={health ? "chat-status-dot ok" : "chat-status-dot"} />
+        <div>
+          <strong>
+            {health
+              ? `Backend ${health.status} · v${health.product_version}`
+              : healthError
+                ? "Backend unavailable"
+                : "Connecting…"}
+          </strong>
+          <small>语言模型仅解析与解释，不参与模拟或最终裁决</small>
+        </div>
+      </footer>
     </aside>
   );
 }

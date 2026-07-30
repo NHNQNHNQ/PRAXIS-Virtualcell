@@ -253,7 +253,7 @@ export default function ReportTab({
         ) : (
           <EmptyState
             title="未生成文字解读"
-            hint="可在运行前确认时勾选“生成文字解读（可选）”。"
+            hint="当前运行未生成文字解读。"
           />
         )}
       </Card>

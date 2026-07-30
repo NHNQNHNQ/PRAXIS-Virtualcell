@@ -1,562 +1,674 @@
-import { type FormEvent, useEffect, useState } from "react";
 import {
+  type FormEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  createJob,
   getDataCatalog,
   getPackCatalog,
+  parse,
+  type CellPreset,
   type DataCatalog,
   type Health,
-  type JobSummary,
+  type Options,
   type PackCatalog,
+  type ParseResult,
 } from "../../api";
-import { Badge, Button, Card, EmptyState } from "../ui";
 import LazyResultsStage from "../stages/LazyResultsStage";
+import type { PlatformView } from "../layout/JobSidebar";
 
-export type PlatformPageKind =
-  | "home"
-  | "virtual-cells"
-  | "reports"
-  | "data-center"
-  | "my-cells"
-  | "settings"
-  | "organisms";
-
-export type PlatformNavigationTarget =
-  | PlatformPageKind
-  | "datasets"
-  | "packs"
-  | "agent-workspace";
-
-type PlatformPageProps = {
-  page: PlatformPageKind;
-  jobs: JobSummary[] | null;
-  jobsError: string | null;
-  health: Health | null;
-  healthError: string | null;
-  openedJobId: string | null;
-  onNavigate: (target: PlatformNavigationTarget) => void;
-  onOpenJob: (jobId: string) => void;
-  onCloseReport: () => void;
-  onNewQuery: () => void;
-  onStartQuery: (query: string) => void;
+type ChatTurn = {
+  id: number;
+  query: string;
+  status:
+    | "pending"
+    | "interpretation"
+    | "clarification"
+    | "report"
+    | "error";
+  message?: string;
+  jobId?: string;
+  request?: Record<string, unknown>;
+  parser?: string;
+  llmUsed?: boolean;
+  fallbackUsed?: boolean;
 };
 
-const CATALOG_PAGES = new Set<PlatformPageKind>([
-  "home",
-  "virtual-cells",
-  "data-center",
-  "organisms",
+type PlatformPageProps = {
+  page: PlatformView;
+  chatEpoch: number;
+  selectedCell: CellPreset | null;
+  options: Options | null;
+  optionsError: string | null;
+  openedJobId: string | null;
+  health: Health | null;
+  onSelectCell: (cell: CellPreset) => void;
+  onBrowseCells: () => void;
+  onNewChat: () => void;
+  onJobCreated: (jobId: string) => void;
+};
+
+const COMMON_CELL_IDS = new Set([
+  "human_k562",
+  "human_pbmc",
+  "mouse_tcell",
+  "ecoli_iml1515",
 ]);
+
+function composeCellQuery(query: string, cell: CellPreset): string {
+  return `${query}\n结构化描述:${JSON.stringify({
+    species: cell.species,
+    cell_type: cell.cell_type,
+  })}`;
+}
+
+function unresolvedParseMessage(parsed: ParseResult): string | null {
+  if (
+    parsed.schema_valid &&
+    !parsed.clarification_required &&
+    parsed.missing_fields.length === 0 &&
+    parsed.errors.length === 0
+  ) {
+    return null;
+  }
+
+  const details = [
+    parsed.missing_fields.length
+      ? `缺少：${parsed.missing_fields.join("、")}`
+      : "",
+    parsed.errors.length ? `错误：${parsed.errors.join("、")}` : "",
+  ].filter(Boolean);
+  return `还需要更明确的实验描述。${details.join("；") || "请说明扰动类型和对象。"} 未创建模拟任务。`;
+}
+
+function requestValue(value: unknown): string {
+  if (Array.isArray(value)) {
+    return value.map(String).join("、") || "—";
+  }
+  if (typeof value === "string" && value.trim()) return value;
+  return value == null ? "—" : String(value);
+}
+
+function parseLabel(turn: ChatTurn): string | null {
+  if (turn.llmUsed) return "Language parsing: LLM-assisted";
+  if (turn.fallbackUsed) {
+    return turn.status === "interpretation"
+      ? "Language parsing: deterministic fallback · awaiting confirmation"
+      : "Language parsing: deterministic fallback · confirmed";
+  }
+  return turn.parser ? `Language parsing: ${turn.parser}` : null;
+}
+
+function CellCard({
+  cell,
+  resourceSummary,
+  onSelect,
+}: {
+  cell: CellPreset;
+  resourceSummary?: string;
+  onSelect: (cell: CellPreset) => void;
+}) {
+  return (
+    <article className="cell-choice-card">
+      <div className="cell-choice-topline">
+        <span>{cell.species}</span>
+        <small>Context preset</small>
+      </div>
+      <h2>{cell.cell_type}</h2>
+      <p>{cell.label}</p>
+      {resourceSummary && <small className="cell-resource-summary">{resourceSummary}</small>}
+      <button type="button" onClick={() => onSelect(cell)}>
+        Select cell
+        <span aria-hidden="true">→</span>
+      </button>
+    </article>
+  );
+}
 
 export default function PlatformPage({
   page,
-  jobs,
-  jobsError,
-  health,
-  healthError,
+  chatEpoch,
+  selectedCell,
+  options,
+  optionsError,
   openedJobId,
-  onNavigate,
-  onOpenJob,
-  onCloseReport,
-  onNewQuery,
-  onStartQuery,
+  health,
+  onSelectCell,
+  onBrowseCells,
+  onNewChat,
+  onJobCreated,
 }: PlatformPageProps) {
+  const [query, setQuery] = useState("");
+  const [turns, setTurns] = useState<ChatTurn[]>([]);
+  const [busy, setBusy] = useState(false);
   const [catalog, setCatalog] = useState<DataCatalog | null>(null);
   const [packCatalog, setPackCatalog] = useState<PackCatalog | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [homeQuery, setHomeQuery] = useState("");
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [speciesFilter, setSpeciesFilter] = useState("all");
+  const requestEpochRef = useRef(0);
+  const turnIdRef = useRef(0);
+  const inFlightRef = useRef(false);
+  const latestTurnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!CATALOG_PAGES.has(page)) return;
+    requestEpochRef.current += 1;
+    inFlightRef.current = false;
+    setQuery("");
+    setTurns([]);
+    setBusy(false);
+  }, [chatEpoch]);
+
+  useEffect(() => {
+    requestEpochRef.current += 1;
+    inFlightRef.current = false;
+    setBusy(false);
+  }, [page]);
+
+  useEffect(() => {
+    if (page !== "data-center") return;
     let current = true;
     setCatalog(null);
     setPackCatalog(null);
-    setError(null);
+    setCatalogError(null);
     Promise.all([getDataCatalog(), getPackCatalog()])
-      .then(([nextCatalog, nextPackCatalog]) => {
+      .then(([nextCatalog, nextPacks]) => {
         if (!current) return;
         setCatalog(nextCatalog);
-        setPackCatalog(nextPackCatalog);
+        setPackCatalog(nextPacks);
       })
       .catch((reason: unknown) => {
-        if (current) setError(String(reason));
+        if (current) setCatalogError(String(reason));
       });
     return () => {
       current = false;
     };
   }, [page]);
 
-  const loading =
-    CATALOG_PAGES.has(page) &&
-    catalog == null &&
-    packCatalog == null &&
-    error == null;
-  const fileCount =
-    catalog?.datasets.reduce(
-      (total, dataset) => total + dataset.files.length,
-      0,
-    ) ?? 0;
-
-  if (page === "home") {
-    function submitHomeQuery(event: FormEvent<HTMLFormElement>) {
-      event.preventDefault();
-      if (homeQuery.trim()) onStartQuery(homeQuery.trim());
+  useEffect(() => {
+    if (turns.length) {
+      latestTurnRef.current?.scrollIntoView({
+        block: "start",
+      });
     }
+  }, [turns]);
 
-    return (
-      <section className="research-home" aria-labelledby="home-title">
-        <header className="research-hero">
-          <span className="platform-eyebrow">PRAXIS · VIRTUAL CELL</span>
-          <h1 id="home-title">A trustworthy foundation for virtual-cell research.</h1>
-          <p>
-            当前部署尚无持久化 Virtual Cell registry。你可以检查真实数据与 Pack
-            合同，或启动明确标注为 unbound 的受控任务；缺少兼容模型时系统必须 abstain。
-          </p>
-        </header>
+  const allCells = useMemo(() => {
+    const unique = new Map<string, CellPreset>();
+    for (const cell of options?.cell_presets ?? []) {
+      const key = `${cell.species}\u0000${cell.cell_type}`;
+      if (!unique.has(key)) unique.set(key, cell);
+    }
+    return [...unique.values()];
+  }, [options]);
+  const commonCells = useMemo(() => {
+    const preferred = allCells.filter((cell) => COMMON_CELL_IDS.has(cell.id));
+    return preferred.length ? preferred : allCells.slice(0, 4);
+  }, [allCells]);
+  const visibleCells = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return allCells.filter((cell) => {
+      const matchesSpecies =
+        speciesFilter === "all" || cell.species === speciesFilter;
+      const matchesSearch =
+        !needle ||
+        `${cell.label} ${cell.cell_type} ${cell.species}`
+          .toLowerCase()
+          .includes(needle);
+      return matchesSpecies && matchesSearch;
+    });
+  }, [allCells, search, speciesFilter]);
 
-        <form className="home-query-card" onSubmit={submitHomeQuery}>
-          <div className="home-cell-context">
-            <div>
-              <span>Current virtual cell</span>
-              <strong>尚未绑定持久化实例</strong>
-            </div>
-            <Badge tone="neutral">Registry unavailable</Badge>
-          </div>
-          <label htmlFor="home-query">Describe a scientific task</label>
-          <textarea
-            id="home-query"
-            rows={4}
-            value={homeQuery}
-            onChange={(event) => setHomeQuery(event.target.value)}
-            placeholder="例如：在 human 细胞敲低 AHR 后，哪些表达模块可能发生变化？"
-          />
-          <div className="home-query-actions">
-            <p>
-              当前问题将进入未绑定 Virtual Cell 的既有五阶段工作区；执行身份以后端结果为准。
-            </p>
-            <Button type="submit" disabled={!homeQuery.trim()}>
-              Open unbound Agent Workspace
-            </Button>
-          </div>
-        </form>
-
-        <section className="home-explore" aria-labelledby="explore-title">
-          <div className="section-heading">
-            <div>
-              <span className="platform-eyebrow">EXPLORE THE FOUNDATION</span>
-              <h2 id="explore-title">从真实资源开始</h2>
-            </div>
-            <Button
-              variant="ghost"
-              onClick={() => onNavigate("virtual-cells")}
-            >
-              Browse Virtual Cells
-            </Button>
-          </div>
-
-          {loading && <p className="data-message">读取平台资源…</p>}
-          {error && (
-            <p className="err" role="alert">
-              平台资源不可用：{error}
-            </p>
-          )}
-          <div className="home-foundation-grid">
-            <button
-              type="button"
-              className="home-foundation-card"
-              onClick={() => onNavigate("virtual-cells")}
-            >
-              <span>VIRTUAL CELL LIBRARY</span>
-              <strong>实例目录尚未提供</strong>
-              <p>Pack 或数据集不会被前端自动冒充为 Virtual Cell。</p>
-              <em>View honest state →</em>
-            </button>
-            <button
-              type="button"
-              className="home-foundation-card"
-              onClick={() => onNavigate("data-center")}
-            >
-              <span>DATA FOUNDATION</span>
-              <strong>
-                {catalog
-                  ? `${catalog.datasets.length} datasets · ${fileCount} files`
-                  : "目录状态待读取"}
-              </strong>
-              <p>公开数据、隔离上传和版本身份均来自现有后端目录。</p>
-              <em>Open Data Center →</em>
-            </button>
-            <button
-              type="button"
-              className="home-foundation-card"
-              onClick={() => onNavigate("reports")}
-            >
-              <span>RESULTS & PROVENANCE</span>
-              <strong>
-                {jobsError
-                  ? "运行目录不可用"
-                  : jobs == null
-                    ? "运行目录读取中"
-                    : `${jobs.length} recorded runs`}
-              </strong>
-              <p>预测、abstention、trace 与 execution identity 保持可审计。</p>
-              <em>Browse reports →</em>
-            </button>
-          </div>
-        </section>
-      </section>
+  function updateTurn(id: number, patch: Partial<ChatTurn>) {
+    setTurns((current) =>
+      current.map((turn) => (turn.id === id ? { ...turn, ...patch } : turn)),
     );
   }
 
-  if (page === "virtual-cells") {
-    return (
-      <section className="cell-hub" aria-labelledby="virtual-cells-title">
-        <header className="hub-heading">
-          <div>
-            <span className="platform-eyebrow">VIRTUAL CELL HUB</span>
-            <h1 id="virtual-cells-title">Virtual Cells</h1>
-            <p>
-              发现具有显式物种、细胞上下文、数据身份、能力边界和版本指纹的虚拟细胞。
-            </p>
-          </div>
-          <Badge tone="neutral">Registry unavailable</Badge>
-        </header>
+  async function confirmInterpretation(turn: ChatTurn) {
+    if (!turn.request || busy || inFlightRef.current) return;
 
-        {error && (
-          <p className="err" role="alert">
-            支撑资源不可用：{error}
-          </p>
-        )}
-        <Card>
-          <EmptyState
-            title="此部署尚未提供 Virtual Cell registry"
-            hint="当前后端只有数据目录和 VirtualCellPack 目录；它们不会自动生成可查询的细胞实例，也不代表模型可执行或已经科学验证。"
-          />
-          <div className="row">
-            <Button variant="ghost" onClick={() => onNavigate("data-center")}>
-              Inspect foundation resources
-            </Button>
-            <Button onClick={() => onNavigate("agent-workspace")}>
-              Open unbound workspace
-            </Button>
-          </div>
-        </Card>
+    const requestEpoch = requestEpochRef.current + 1;
+    requestEpochRef.current = requestEpoch;
+    inFlightRef.current = true;
+    const isCurrent = () => requestEpochRef.current === requestEpoch;
 
-        <section className="cell-contract-preview">
-          <span className="platform-eyebrow">A REGISTERED CELL MUST DECLARE</span>
-          <div>
-            <article>
-              <strong>Biological identity</strong>
-              <p>Taxon、cell context、state、condition 与 ontology CURIE。</p>
-            </article>
-            <article>
-              <strong>Data & Pack identity</strong>
-              <p>不可变版本、SHA-256、feature contract 与来源。</p>
-            </article>
-            <article>
-              <strong>Task-bound capability</strong>
-              <p>模型兼容和环境可执行必须针对具体请求重新检查。</p>
-            </article>
-            <article>
-              <strong>Scientific boundary</strong>
-              <p>验证状态、适用范围、限制和明确 abstention 原因。</p>
-            </article>
-          </div>
-        </section>
-      </section>
-    );
+    setBusy(true);
+    updateTurn(turn.id, { status: "pending" });
+
+    try {
+      const job = await createJob(turn.request, "llm_assisted", true);
+      onJobCreated(job.job_id);
+      if (!isCurrent()) return;
+      updateTurn(turn.id, { status: "report", jobId: job.job_id });
+    } catch (reason: unknown) {
+      if (!isCurrent()) return;
+      updateTurn(turn.id, {
+        status: "error",
+        message:
+          reason instanceof Error
+            ? reason.message
+            : "运行服务暂时不可用，请稍后重试。",
+      });
+    } finally {
+      if (isCurrent()) {
+        inFlightRef.current = false;
+        setBusy(false);
+      }
+    }
   }
 
-  if (page === "reports") {
-    if (openedJobId) {
-      return (
-        <section className="reports-page" aria-label="Report detail">
-          <header className="hub-heading">
-            <div>
-              <span className="platform-eyebrow">REPORTS / SAVED RUN</span>
-              <h1>Report</h1>
-              <p>结果、abstention 和 execution identity 均来自后端保存记录。</p>
-            </div>
-            <Button variant="ghost" onClick={onCloseReport}>
-              Back to Reports
-            </Button>
-          </header>
-          <LazyResultsStage
-            key={openedJobId}
-            jobId={openedJobId}
-            onReset={onNewQuery}
-          />
-        </section>
-      );
-    }
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const text = query.trim();
+    if (!selectedCell || !text || busy || inFlightRef.current) return;
 
-    return (
-      <section className="reports-page" aria-labelledby="reports-title">
-        <header className="hub-heading">
-          <div>
-            <span className="platform-eyebrow">RESULTS & PROVENANCE</span>
-            <h1 id="reports-title">Reports</h1>
-            <p>查看后端保存的预测、abstention、trace 与 execution identity。</p>
-          </div>
-          <Badge tone="neutral">Read-only run index</Badge>
-        </header>
-        {jobsError ? (
-          <p className="err" role="alert">
-            Agent Run 目录不可用：{jobsError}
-          </p>
-        ) : jobs == null ? (
-          <p className="data-message">读取 Agent Run 目录…</p>
-        ) : jobs.length === 0 ? (
-          <Card>
-            <EmptyState
-              title="还没有可审计的运行记录"
-              hint="完成一次 Agent Workspace 任务后，后端保存的结果会出现在这里。"
-            />
-          </Card>
-        ) : (
-          <div className="report-list">
-            {jobs.map((job) => (
-              <article className="report-row" key={job.job_id}>
-                <div>
-                  <span className="report-id">{job.job_id}</span>
-                  <h2>
-                    {job.species ?? "未指定物种"} ·{" "}
-                    {job.perturbation_targets.join("、") || "无扰动靶点"}
-                  </h2>
-                  <p>
-                    status {job.status} · reliability{" "}
-                    {job.reliability ?? "未记录"}
-                  </p>
-                </div>
-                <div className="report-actions">
-                  <Badge tone={job.abstain ? "inferred" : "neutral"}>
-                    {job.abstain === true
-                      ? "Abstained"
-                      : job.abstain === false
-                        ? "Result recorded"
-                        : "Outcome unavailable"}
-                  </Badge>
-                  <Button variant="ghost" onClick={() => onOpenJob(job.job_id)}>
-                    Open report
-                  </Button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-    );
+    const requestEpoch = requestEpochRef.current + 1;
+    requestEpochRef.current = requestEpoch;
+    inFlightRef.current = true;
+    const turnId = turnIdRef.current + 1;
+    turnIdRef.current = turnId;
+    const cell = selectedCell;
+    const isCurrent = () => requestEpochRef.current === requestEpoch;
+
+    setQuery("");
+    setBusy(true);
+    setTurns((current) => [
+      ...current,
+      { id: turnId, query: text, status: "pending" },
+    ]);
+
+    try {
+      const parsed = await parse(composeCellQuery(text, cell), "llm_assisted");
+      if (!isCurrent()) return;
+      const parseMetadata = {
+        parser: parsed.parser,
+        llmUsed: parsed.llm_used,
+        fallbackUsed: parsed.fallback_used,
+      };
+
+      const clarification = unresolvedParseMessage(parsed);
+      if (clarification) {
+        updateTurn(turnId, {
+          status: "clarification",
+          message: clarification,
+          ...parseMetadata,
+        });
+        return;
+      }
+
+      const candidate = parsed.candidate_request;
+      if (
+        candidate.species !== cell.species ||
+        candidate.cell_type !== cell.cell_type
+      ) {
+        updateTurn(turnId, {
+          status: "error",
+          message: "所选细胞上下文未通过请求验证，因此没有创建模拟任务。",
+          ...parseMetadata,
+        });
+        return;
+      }
+
+      if (parsed.fallback_used && !parsed.llm_used) {
+        updateTurn(turnId, {
+          status: "interpretation",
+          request: candidate,
+          ...parseMetadata,
+        });
+        return;
+      }
+
+      const job = await createJob(candidate, "llm_assisted", true);
+      onJobCreated(job.job_id);
+      if (!isCurrent()) return;
+      updateTurn(turnId, {
+        status: "report",
+        jobId: job.job_id,
+        request: candidate,
+        ...parseMetadata,
+      });
+    } catch (reason: unknown) {
+      if (!isCurrent()) return;
+      updateTurn(turnId, {
+        status: "error",
+        message:
+          reason instanceof Error
+            ? reason.message
+            : "运行服务暂时不可用，请稍后重试。",
+      });
+    } finally {
+      if (isCurrent()) {
+        inFlightRef.current = false;
+        setBusy(false);
+      }
+    }
   }
 
   if (page === "data-center") {
+    const species = ["all", ...(options?.species ?? [])];
     return (
-      <section className="data-center-page" aria-labelledby="data-center-title">
-        <header className="hub-heading">
-          <div>
-            <span className="platform-eyebrow">ADVANCED FOUNDATION</span>
-            <h1 id="data-center-title">Data Center</h1>
-            <p>检查真实数据资源、物种汇总和 VirtualCellPack 合同。</p>
-          </div>
-          <Badge tone="neutral">No automatic build or install</Badge>
+      <section className="cell-data-center" aria-labelledby="data-center-title">
+        <header>
+          <span>PRAXIS DATA CENTER</span>
+          <h1 id="data-center-title">Choose a cell</h1>
+          <p>
+            浏览后端声明的 biological context presets。选择只会固定物种和细胞背景；
+            这些资源不与本次选择绑定，实际执行身份以报告为准。
+          </p>
         </header>
-        <div className="note data-boundary">
-          下载、上传回执或 Pack 校验均不代表 Virtual Cell 已构建、模型可执行或已经科学验证。
+
+        <div className="cell-search-row">
+          <label>
+            <span>Search cells</span>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="K562, fibroblast, yeast…"
+            />
+          </label>
+          <div className="cell-species-filter" aria-label="Species filter">
+            {species.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={speciesFilter === item ? "active" : ""}
+                onClick={() => setSpeciesFilter(item)}
+                aria-pressed={speciesFilter === item}
+              >
+                {item === "all" ? "All" : item}
+              </button>
+            ))}
+          </div>
         </div>
-        {loading && <p className="data-message">读取数据底座…</p>}
-        {error && (
-          <p className="err" role="alert">
-            数据底座不可用：{error}
+
+        {optionsError && (
+          <p className="chat-error" role="alert">
+            细胞目录不可用：{optionsError}
           </p>
         )}
-        <div className="data-center-grid">
-          <button
-            type="button"
-            className="data-center-card"
-            onClick={() => onNavigate("organisms")}
-          >
-            <span>ORGANISMS</span>
-            <strong>
-              {catalog ? `${catalog.species.length} catalogued taxa` : "状态待读取"}
-            </strong>
-            <p>仅汇总目录中的 taxonomy、数据集、文件和 Pack。</p>
-            <em>Inspect organisms →</em>
-          </button>
-          <button
-            type="button"
-            className="data-center-card"
-            onClick={() => onNavigate("datasets")}
-          >
-            <span>DATA CATALOG & UPLOADS</span>
-            <strong>
-              {catalog
-                ? `${catalog.datasets.length} datasets · ${fileCount} files`
-                : "状态待读取"}
-            </strong>
-            <p>公开下载与 byte-preserving quarantine upload。</p>
-            <em>Open data catalog →</em>
-          </button>
-          <button
-            type="button"
-            className="data-center-card"
-            onClick={() => onNavigate("packs")}
-          >
-            <span>VIRTUALCELLPACKS</span>
-            <strong>
-              {packCatalog
-                ? `${packCatalog.packs.length} Pack records`
-                : "状态待读取"}
-            </strong>
-            <p>查看验证、fingerprint 和模型卡声明，不推导 readiness。</p>
-            <em>Inspect Pack contracts →</em>
-          </button>
+        {options == null && !optionsError && (
+          <p className="chat-loading">Loading cell catalog…</p>
+        )}
+        {catalogError && (
+          <p className="cell-resource-note">
+            同物种数据与 Pack 计数当前不可用；细胞 preset 仍以后端 options 为准。
+          </p>
+        )}
+
+        <div className="cell-choice-grid">
+          {visibleCells.map((cell) => {
+            const dataCount =
+              catalog?.datasets.filter(
+                (dataset) => dataset.species.runtime_id === cell.species,
+              ).length ?? 0;
+            const taxonId = catalog?.species.find(
+              (item) => item.id === cell.species,
+            )?.taxon_id;
+            const packCount =
+              packCatalog?.packs.filter(
+                (pack) => pack.taxon?.ontology_id === taxonId,
+              ).length ?? 0;
+            const summary =
+              catalog && packCatalog
+                ? `${dataCount} same-species dataset${dataCount === 1 ? "" : "s"} · ${packCount} Pack record${packCount === 1 ? "" : "s"} · not bound`
+                : undefined;
+            return (
+              <CellCard
+                key={cell.id}
+                cell={cell}
+                resourceSummary={summary}
+                onSelect={onSelectCell}
+              />
+            );
+          })}
         </div>
+
+        {options && visibleCells.length === 0 && (
+          <p className="chat-empty">No matching cell presets.</p>
+        )}
+        <p className="cell-data-boundary">
+          这些是可审阅的上下文 preset，不是已注册 Virtual Cell。Same-species
+          Dataset 或 Pack 计数不表示绑定、兼容、可执行或科学验证。
+        </p>
       </section>
     );
   }
 
-  if (page === "my-cells") {
+  if (openedJobId) {
     return (
-      <section className="cell-hub" aria-labelledby="my-cells-title">
-        <header className="hub-heading">
+      <section className="chat-report-view" aria-label="Saved report">
+        <header className="chat-report-header">
           <div>
-            <span className="platform-eyebrow">PRIVATE WORKSPACE</span>
-            <h1 id="my-cells-title">My Cells</h1>
-            <p>这里将承载有明确所有权、版本和审计记录的私有 Virtual Cell。</p>
+            <span>SAVED REPORT</span>
+            <h1>Run report</h1>
+            <p>结果、abstention 与 execution identity 均来自后端保存记录。</p>
           </div>
-          <Badge tone="neutral">Ownership contract unavailable</Badge>
+          <button type="button" onClick={onNewChat}>
+            New chat
+          </button>
         </header>
-        <Card>
-          <EmptyState
-            title="此部署尚未提供用户级 Virtual Cell 存储"
-            hint="隔离区上传不会自动出现在 My Cells；当前也没有 clone、share、delete 或 query 的持久化合同。"
-          />
-          <Button variant="ghost" onClick={() => onNavigate("data-center")}>
-            Inspect quarantine boundary
-          </Button>
-        </Card>
+        <LazyResultsStage jobId={openedJobId} onReset={onNewChat} />
       </section>
     );
   }
 
-  if (page === "settings") {
+  if (!selectedCell) {
     return (
-      <section className="settings-page" aria-labelledby="settings-title">
-        <header className="hub-heading">
-          <div>
-            <span className="platform-eyebrow">RUNTIME CONTEXT</span>
-            <h1 id="settings-title">Settings</h1>
-            <p>当前只展示后端公开身份；本页不会保存密钥或伪造服务器设置。</p>
-          </div>
-          <Badge tone="neutral">Read-only</Badge>
-        </header>
-        {healthError && (
-          <p className="err" role="alert">
-            后端状态不可用：{healthError}
+      <section className="cell-first-home" aria-labelledby="cell-first-title">
+        <div className="cell-first-hero">
+          <span>PRAXIS · VIRTUAL CELL</span>
+          <h1 id="cell-first-title">Choose a cell to begin.</h1>
+          <p>
+            先固定生物背景，再用自然语言描述实验。后端会根据请求自动路由现有执行路径并
+            直接返回报告；报告会明确显示预测或 abstain。
+          </p>
+        </div>
+
+        {optionsError && (
+          <p className="chat-error" role="alert">
+            细胞目录不可用：{optionsError}
           </p>
         )}
-        <Card title="Deployment identity">
-          {health ? (
-            <dl className="settings-facts">
-              <div>
-                <dt>Status</dt>
-                <dd>{health.status}</dd>
-              </div>
-              <div>
-                <dt>Product version</dt>
-                <dd>{health.product_version}</dd>
-              </div>
-              <div>
-                <dt>Runtime protocol</dt>
-                <dd>{health.runtime_protocol_version}</dd>
-              </div>
-              <div>
-                <dt>Git SHA</dt>
-                <dd>{health.git_sha}</dd>
-              </div>
-            </dl>
-          ) : !healthError ? (
-            <p className="data-message">读取部署身份…</p>
-          ) : null}
-        </Card>
-        <div className="note data-boundary">
-          语言模型仅用于解析与解释，不参与数据真相、数值预测、兼容性裁决或最终结论。
+        {options == null && !optionsError && (
+          <p className="chat-loading">Loading common cells…</p>
+        )}
+        <div className="cell-choice-grid common">
+          {commonCells.map((cell) => (
+            <CellCard key={cell.id} cell={cell} onSelect={onSelectCell} />
+          ))}
         </div>
+        <button
+          type="button"
+          className="browse-all-cells"
+          onClick={onBrowseCells}
+          disabled={options == null}
+        >
+          Browse all cells in Data Center
+          <span aria-hidden="true">→</span>
+        </button>
+        <p className="cell-data-boundary">
+          Cell choices come from the backend context catalog. They do not create
+          a persistent Virtual Cell or pre-bind a model.
+        </p>
       </section>
     );
   }
 
   return (
-    <section className="data-library" aria-labelledby="organisms-title">
-      <header className="data-heading">
+    <section className="cell-conversation" aria-labelledby="conversation-title">
+      <header className="conversation-header">
         <div>
-          <span className="platform-eyebrow">DATA CENTER / ORGANISMS</span>
-          <h1 id="organisms-title">Organisms</h1>
-          <p>按后端数据目录中的 taxonomy 身份汇总数据集、文件与 Pack。</p>
+          <span>SELECTED CELL</span>
+          <h1 id="conversation-title">{selectedCell.cell_type}</h1>
+          <p>
+            {selectedCell.label} · {selectedCell.species}
+          </p>
         </div>
-        <Badge tone="neutral">Read-only catalog</Badge>
+        <button type="button" onClick={onBrowseCells}>
+          Change cell
+        </button>
       </header>
-      <div className="note data-boundary">
-        以下数字仅是目录计数，不推导 Virtual Cell readiness、模型兼容性或科学有效性。
-      </div>
-      {loading && <p className="data-message">读取物种目录…</p>}
-      {error && (
-        <p className="err" role="alert">
-          物种目录不可用：{error}
-        </p>
-      )}
-      <div className="data-grid">
-        {catalog?.species.map((species) => {
-          const datasets = catalog.datasets.filter(
-            (dataset) => dataset.species.taxon_id === species.taxon_id,
-          );
-          const speciesFiles = datasets.reduce(
-            (total, dataset) => total + dataset.files.length,
-            0,
-          );
-          const packs =
-            packCatalog?.packs.filter(
-              (pack) => pack.taxon?.ontology_id === species.taxon_id,
-            ).length ?? 0;
-          return (
-            <article className="data-card" key={species.id}>
-              <div className="data-card-title">
+
+      <div className="conversation-stream">
+        <div className="assistant-message">
+          <span className="assistant-avatar">P</span>
+          <div>
+            <strong>What would you like to investigate?</strong>
+            <p>
+              描述扰动、处理或条件即可。我会将任务提交给现有运行后端并直接返回报告；
+              实际模型、执行身份与 abstain 以报告为准。
+            </p>
+          </div>
+        </div>
+
+        {turns.map((turn, index) => (
+          <div
+            className="conversation-turn"
+            key={turn.id}
+            ref={index === turns.length - 1 ? latestTurnRef : undefined}
+          >
+            <div className="user-message">
+              <p>{turn.query}</p>
+            </div>
+            {turn.status === "pending" && (
+              <div className="assistant-message running" role="status">
+                <span className="assistant-avatar">P</span>
                 <div>
-                  <h2>
-                    <i>{species.scientific_name}</i>
-                  </h2>
-                  <p>{species.id}</p>
+                  <strong>Preparing the report…</strong>
+                  <p>
+                    正在解析任务并提交现有运行后端；所选 cell preset 不绑定
+                    Dataset、Pack 或模型。
+                  </p>
                 </div>
-                <Badge tone="neutral">{species.taxon_id}</Badge>
               </div>
-              <dl className="data-facts">
+            )}
+            {turn.status === "interpretation" && turn.request && (
+              <div className="assistant-message interpretation">
+                <span className="assistant-avatar">P</span>
                 <div>
-                  <dt>Datasets</dt>
-                  <dd>{datasets.length}</dd>
+                  <strong>Please confirm this interpretation.</strong>
+                  <p>
+                    当前服务未连接语言模型。为避免确定性后备误解实验语义，请确认以下结构化请求。
+                  </p>
+                  <dl className="interpretation-grid">
+                    <div>
+                      <dt>Species</dt>
+                      <dd>{requestValue(turn.request.species)}</dd>
+                    </div>
+                    <div>
+                      <dt>Cell</dt>
+                      <dd>{requestValue(turn.request.cell_type)}</dd>
+                    </div>
+                    <div>
+                      <dt>Perturbation</dt>
+                      <dd>{requestValue(turn.request.perturbation_type)}</dd>
+                    </div>
+                    <div>
+                      <dt>Targets</dt>
+                      <dd>{requestValue(turn.request.perturbation_targets)}</dd>
+                    </div>
+                    <div>
+                      <dt>Task</dt>
+                      <dd>{requestValue(turn.request.task_type)}</dd>
+                    </div>
+                  </dl>
+                  {parseLabel(turn) && (
+                    <small className="assistant-parse-meta">
+                      {parseLabel(turn)}
+                    </small>
+                  )}
+                  <button
+                    type="button"
+                    className="confirm-interpretation"
+                    disabled={busy}
+                    onClick={() => void confirmInterpretation(turn)}
+                  >
+                    Confirm interpretation and generate report
+                  </button>
                 </div>
+              </div>
+            )}
+            {(turn.status === "clarification" || turn.status === "error") && (
+              <div
+                className={
+                  turn.status === "error"
+                    ? "assistant-message error"
+                    : "assistant-message clarification"
+                }
+                role="alert"
+              >
+                <span className="assistant-avatar">P</span>
                 <div>
-                  <dt>Files</dt>
-                  <dd>{speciesFiles}</dd>
+                  <strong>
+                    {turn.status === "error"
+                      ? "The report could not be created."
+                      : "I need one more detail."}
+                  </strong>
+                  <p>{turn.message}</p>
+                  {parseLabel(turn) && (
+                    <small className="assistant-parse-meta">
+                      {parseLabel(turn)}
+                    </small>
+                  )}
                 </div>
-                <div>
-                  <dt>VirtualCellPacks</dt>
-                  <dd>{packs}</dd>
-                </div>
-              </dl>
-            </article>
-          );
-        })}
+              </div>
+            )}
+            {turn.status === "report" && turn.jobId && (
+              <div className="assistant-report">
+                <p className="assistant-report-status" role="status">
+                  Report generated. Prediction or abstention is shown below.
+                  {parseLabel(turn) ? ` ${parseLabel(turn)}.` : ""}
+                </p>
+                <p className="assistant-report-boundary">
+                  所选 cell preset 只提供请求上下文，并未绑定 Dataset、Pack
+                  或模型。报告不代表该细胞已具备经过科学验证的预测器。
+                </p>
+                <LazyResultsStage jobId={turn.jobId} onReset={onNewChat} />
+              </div>
+            )}
+          </div>
+        ))}
       </div>
-      {!loading && !error && catalog?.species.length === 0 && (
-        <EmptyState title="后端目录未声明物种" />
-      )}
-      <div className="row">
-        <Button variant="ghost" onClick={() => onNavigate("data-center")}>
-          Back to Data Center
-        </Button>
-        <Button variant="ghost" onClick={() => onNavigate("datasets")}>
-          View datasets
-        </Button>
-        <Button variant="ghost" onClick={() => onNavigate("packs")}>
-          View VirtualCellPacks
-        </Button>
-      </div>
+
+      <form className="chat-composer" onSubmit={submit}>
+        <label htmlFor="chat-query">Message PRAXIS</label>
+        <textarea
+          id="chat-query"
+          rows={3}
+          value={query}
+          disabled={busy}
+          onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (
+              event.key === "Enter" &&
+              !event.shiftKey &&
+              !event.nativeEvent.isComposing
+            ) {
+              event.preventDefault();
+              event.currentTarget.form?.requestSubmit();
+            }
+          }}
+          placeholder={`Ask about ${selectedCell.cell_type}…`}
+        />
+        <button
+          type="submit"
+          aria-label="Send message"
+          disabled={busy || !query.trim()}
+        >
+          {busy ? "…" : "↑"}
+        </button>
+        <small>
+          语言辅助只解析与解释文字；数据、模拟、数值与最终裁决由确定性后端完成。
+          {health?.llm_enabled === false
+            ? " 当前服务未连接语言模型，确定性解析需要你确认后才会运行。"
+            : ""}
+        </small>
+      </form>
     </section>
   );
 }

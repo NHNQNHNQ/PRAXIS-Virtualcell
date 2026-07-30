@@ -4,7 +4,7 @@
    light 为默认;dark 覆盖见 themes.css([data-theme="dark"] 或 prefers-color-scheme)。 */
 :root {
   /* —— 配色 —— */
-  --bg: #FAFAF8;                 /* 页面背景(暖白) */
+  --bg: #FFFFFF;                 /* 页面背景(纯白) */
   --surface: #FFF;               /* 主面板 */
   --text: #202124;              /* 主文字(暖近黑) */
   --text-muted: #666861;        /* 次级文字(暖灰) */
