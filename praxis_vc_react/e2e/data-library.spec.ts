@@ -1,11 +1,21 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+async function openDataCatalog(page: Page) {
+  await page.getByRole("button", { name: "Data Center", exact: true }).click();
+  await page.getByRole("button", { name: /Open data catalog/ }).click();
+}
+
+async function openPackCatalog(page: Page) {
+  await page.getByRole("button", { name: "Data Center", exact: true }).click();
+  await page.getByRole("button", { name: /Inspect Pack contracts/ }).click();
+}
 
 test("species data library filters datasets and quarantines an upload", async ({
   page,
 }) => {
   await page.goto("/");
 
-  await page.getByRole("button", { name: "Datasets", exact: true }).click();
+  await openDataCatalog(page);
   await expect(
     page.getByRole("heading", { name: "物种组学数据资源" }),
   ).toBeVisible();
@@ -41,7 +51,7 @@ test("data library keeps unavailable public files fail-closed", async ({
   page,
 }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Datasets", exact: true }).click();
+  await openDataCatalog(page);
 
   const unavailable = page.getByRole("button", { name: "服务器文件未就绪" });
   await expect(unavailable.first()).toBeDisabled();
@@ -58,9 +68,7 @@ test("data library renders backend Pack validation and capability records", asyn
   });
 
   await page.goto("/");
-  await page
-    .getByRole("button", { name: "VirtualCellPacks", exact: true })
-    .click();
+  await openPackCatalog(page);
 
   const packs = page.getByRole("region", {
     name: "VirtualCellPack 能力与验证",

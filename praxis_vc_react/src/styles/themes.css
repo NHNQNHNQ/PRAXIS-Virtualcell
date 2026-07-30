@@ -13,6 +13,8 @@
   --on-primary: #202124;
   --accent: #A8C7FA;            /* 强调:更亮的暗色蓝 */
   --on-accent: #202124;
+  --signal: #DCE775;
+  --on-signal: #202124;
   --warn: #FDD663;              /* 警告(琥珀) */
   --danger: #F28B82;            /* 危险(浅红) */
   --on-danger: #202124;
@@ -34,6 +36,8 @@
     --on-primary: #202124;
     --accent: #A8C7FA;
     --on-accent: #202124;
+    --signal: #DCE775;
+    --on-signal: #202124;
     --warn: #FDD663;
     --danger: #F28B82;
     --on-danger: #202124;

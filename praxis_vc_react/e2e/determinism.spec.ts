@@ -116,7 +116,7 @@ function stableTruth(captured: CapturedTruth): StableTruth {
 
 async function runFromAskToResults(page: Page): Promise<CapturedTruth> {
   await page.goto("/");
-  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
+  await page.getByRole("button", { name: "Agent Workspace", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "描述一次扰动实验" }),
   ).toBeVisible();

@@ -39,11 +39,11 @@ const emptyJob: JobState = {
 };
 
 export default function AppShell() {
-  const mainScrollRef = useRef<HTMLDivElement>(null);
+  const mainScrollRef = useRef<HTMLElement>(null);
   const [mode, setMode] = useState<Mode>("offline");
   const modeRef = useRef<Mode>(mode);
   const [stage, setStage] = useState<Stage>("ask");
-  const [view, setView] = useState<PlatformView>("dashboard");
+  const [view, setView] = useState<PlatformView>("home");
   const [queryEpoch, setQueryEpoch] = useState(0);
   const queryEpochRef = useRef(0);
   // null 表示当前 Ask 尚未上报草稿；空字符串则是用户确实清空了输入。
@@ -89,7 +89,21 @@ export default function AppShell() {
     askQueryRef.current = null;
     setJob(emptyJob);
     setStage("ask");
-    setView("agent-runs");
+    setView("agent-workspace");
+    setOpenedJobId(null);
+  }
+
+  function startQuery(query: string) {
+    const nextEpoch = queryEpochRef.current + 1;
+    queryEpochRef.current = nextEpoch;
+    setQueryEpoch(nextEpoch);
+    askQueryRef.current = null;
+    setJob({
+      ...emptyJob,
+      askDraft: { text: query, species: "", structuredDescription: "" },
+    });
+    setStage("ask");
+    setView("agent-workspace");
     setOpenedJobId(null);
   }
 
@@ -152,9 +166,12 @@ export default function AppShell() {
   const effectiveStage: Stage = stageReady ? stage : "ask";
 
   // 每个阶段都是独立页面；阶段切换后应从新页面顶部开始，而不是继承上一阶段的滚动位置。
-  // layout effect 在浏览器绘制新阶段前归零，避免标题短暂出现在视口上方。
+  // layout effect 在浏览器绘制新阶段前归零并把焦点移入新主区，让键盘和读屏用户
+  // 都能感知 state-driven 的页面变化。
   useLayoutEffect(() => {
-    mainScrollRef.current?.scrollTo({ top: 0, left: 0 });
+    const main = mainScrollRef.current;
+    main?.scrollTo({ top: 0, left: 0 });
+    main?.focus({ preventScroll: true });
   }, [effectiveStage, openedJobId, view]);
 
   // StepperRail 的 jump:已完成阶段回退 / 紧邻可达阶段前进(rail 内部已做逐步不跳过约束,
@@ -167,9 +184,9 @@ export default function AppShell() {
 
   // 主区当前展示的 job（供侧栏高亮）：历史 job 优先;否则 results 阶段展示当前 job。
   const activeJobId =
-    view !== "agent-runs"
-      ? null
-      : openedJobId ?? (stage === "results" ? job.jobId : null);
+    view === "agent-workspace" || view === "reports"
+      ? openedJobId ?? (view === "agent-workspace" && stage === "results" ? job.jobId : null)
+      : null;
 
   return (
     <div className="app-shell">
@@ -182,14 +199,14 @@ export default function AppShell() {
         onNewQuery={newQuery}
         onNavigate={(nextView) => {
           setView(nextView);
-          if (nextView !== "agent-runs") setOpenedJobId(null);
+          if (nextView !== "agent-workspace") setOpenedJobId(null);
         }}
         onOpenJob={(id) => {
           const nextEpoch = queryEpochRef.current + 1;
           queryEpochRef.current = nextEpoch;
           setQueryEpoch(nextEpoch);
           askQueryRef.current = null;
-          setView("agent-runs");
+          setView("agent-workspace");
           setOpenedJobId(id);
         }}
         health={h}
@@ -208,7 +225,7 @@ export default function AppShell() {
           }
         />
 
-        <main ref={mainScrollRef} className="main-scroll">
+        <main ref={mainScrollRef} className="main-scroll" tabIndex={-1}>
           <div className="main-inner">
             {/* 右:Workspace(工作区,内含左侧 StepperRail)。
                 历史 job 模式:直接进 results,以该 job_id 渲 ResultsStage 7 tab 外壳(等价旧 openedJobId 分支)。 */}
@@ -216,29 +233,48 @@ export default function AppShell() {
               <DataLibrary section="datasets" />
             ) : view === "packs" ? (
               <DataLibrary section="packs" />
-            ) : view !== "agent-runs" ? (
+            ) : view !== "agent-workspace" ? (
               <PlatformPage
                 page={view}
-                jobsCount={jobs?.length ?? null}
+                jobs={jobs}
                 jobsError={jobsErr}
+                health={h}
+                healthError={healthErr}
+                openedJobId={view === "reports" ? openedJobId : null}
                 onNavigate={setView}
+                onOpenJob={(id) => {
+                  const nextEpoch = queryEpochRef.current + 1;
+                  queryEpochRef.current = nextEpoch;
+                  setQueryEpoch(nextEpoch);
+                  askQueryRef.current = null;
+                  setView("reports");
+                  setOpenedJobId(id);
+                }}
+                onCloseReport={() => setOpenedJobId(null)}
+                onNewQuery={newQuery}
+                onStartQuery={startQuery}
               />
             ) : (
               <section className="agent-workspace" aria-label="Agent Workspace">
                 <header className="agent-context-header">
                   <div>
-                    <span className="platform-eyebrow">Agent Workspace</span>
-                    <h1>围绕已声明的细胞上下文运行任务</h1>
+                    <span className="platform-eyebrow">
+                      AGENT WORKSPACE · GOVERNED RUN
+                    </span>
+                    <h1>Ask a supported scientific question.</h1>
                     <p>
                       {openedJobId
-                        ? "当前正在审计历史 Agent Run；Pack、模型与数据身份以后端保存的 execution identity 为准。"
-                        : "当前尚未绑定持久化虚拟细胞实例；该入口保留既有请求流程，并在结果中明确记录执行身份。"}
+                        ? "当前正在审计历史运行；Pack、模型与数据身份以后端保存的 execution identity 为准。"
+                        : "当前部署尚无持久化 Virtual Cell registry；该请求以 unbound 模式进入既有五阶段治理流程。"}
                     </p>
                   </div>
-                  <span className="badge badge-inferred">
-                    {openedJobId
-                      ? "执行身份 · 后端记录"
-                      : "Legacy · 未绑定 VirtualCellPack"}
+                  <span className="agent-cell-chip">
+                    <span>Current virtual cell</span>
+                    <strong>
+                      {openedJobId
+                        ? "See saved execution identity"
+                        : "Not bound"}
+                    </strong>
                   </span>
                 </header>
                 {openedJobId ? (

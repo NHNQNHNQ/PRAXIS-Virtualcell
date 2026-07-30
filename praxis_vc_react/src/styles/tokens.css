@@ -1,30 +1,33 @@
-/* 设计 token —— 中性科研控制台视觉系统。
-   深蓝主色 + 纯白/冷白面板 + 暖近黑文字 + 中性灰边框 + 几何无衬线。
+/* 设计 token —— 温暖、克制的科研工作区。
+   深靛蓝结构色 + 暖白画布 + 黄绿色稀疏强调 + 编辑感衬线标题。
    前端只读展示,不参与预测/治理决策。配色集中于此,改这里即全站生效。
    light 为默认;dark 覆盖见 themes.css([data-theme="dark"] 或 prefers-color-scheme)。 */
 :root {
   /* —— 配色 —— */
-  --bg: #F8FAFD;                 /* 页面背景(冷白) */
-  --surface: #FFFFFF;            /* 主面板(纯白) */
+  --bg: #FAFAF8;                 /* 页面背景(暖白) */
+  --surface: #FFF;               /* 主面板 */
   --text: #202124;              /* 主文字(暖近黑) */
-  --text-muted: #5F6368;        /* 次级文字(中性灰) */
-  --primary: #0B57D0;           /* 主色(按钮/主结构) */
+  --text-muted: #666861;        /* 次级文字(暖灰) */
+  --primary: #1E3A5F;           /* 主色(深靛蓝结构) */
   --on-primary: #FFFFFF;        /* 主色底上的文字/图标 */
-  --accent: #185ABC;            /* 强调色(positive/active/peak) */
+  --accent: #667C14;            /* 可读的黄绿状态文字 */
   --on-accent: #FFFFFF;         /* 强调色底上的文字/图标 */
+  --signal: #DCE775;            /* 稀疏高亮底色 */
+  --on-signal: #202124;
   --warn: #8A5A00;              /* 警告文字/状态 */
   --danger: #B3261E;            /* 危险文字/状态 */
   --on-danger: #FFFFFF;         /* 危险色底上的文字/图标 */
-  --border: #DADCE0;            /* 装饰分隔边框 */
-  --control-border: #80868B;    /* 表单/按钮等可交互控件边界 */
-  --code-bg: #F1F3F4;           /* 代码背景 */
+  --border: #D9D8D1;            /* 装饰分隔边框 */
+  --control-border: #777972;    /* 表单/按钮等可交互控件边界 */
+  --code-bg: #F2F1EC;           /* 代码背景 */
 
   /* —— 卡片规范(spec §3) —— */
-  --radius-card: 16px;
-  --card-shadow: 0 1px 2px rgba(20, 20, 20, 0.04);
+  --radius-card: 18px;
+  --card-shadow: none;
 
   /* —— 字体(spec §3;self-host,见 fonts.css) —— */
-  --font-display: "Inter", system-ui, sans-serif;          /* 大标题 */
+  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua",
+    Georgia, serif;                                         /* 大标题 */
   --font-sans: "Inter", system-ui, sans-serif;             /* 正文/表单/按钮 */
   --font-mono: "JetBrains Mono", ui-monospace, monospace;  /* json/trace/schema */
 

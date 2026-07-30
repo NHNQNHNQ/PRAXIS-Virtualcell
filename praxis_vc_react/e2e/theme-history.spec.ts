@@ -133,7 +133,7 @@ test.describe("S7 主题切换", () => {
   }) => {
     const failures = collectBrowserFailures(page);
     await page.goto("/");
-    await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
+    await page.getByRole("button", { name: "Agent Workspace", exact: true }).click();
 
     // 应用显式以浅色主题启动；系统深色偏好上下文仍须保留完整语义结构。
     await expect(
@@ -187,12 +187,12 @@ test.describe("S7 主题切换", () => {
   });
 });
 
-test("S8 两个不同请求可按唯一 job_id 从历史回看，收藏保持占位", async ({
+test("S8 两个不同请求可按唯一 job_id 从历史回看", async ({
   page,
 }) => {
   const failures = collectBrowserFailures(page);
   await page.goto("/");
-  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
+  await page.getByRole("button", { name: "Agent Workspace", exact: true }).click();
 
   const firstJobId = await runQueryFromAsk(page, "在 human 细胞敲 AHR");
   const firstEntry = historyEntry(page, firstJobId);
@@ -209,16 +209,13 @@ test("S8 两个不同请求可按唯一 job_id 从历史回看，收藏保持占
   await openHistoryJob(page, firstJobId);
   await openHistoryJob(page, secondJobId);
 
-  await expect(page.getByText("收藏", { exact: true })).toBeVisible();
-  await expect(page.getByText("暂无收藏", { exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: /收藏/ })).toHaveCount(0);
   expectNoBrowserFailures(failures);
 });
 
 test("S8 快速切换历史任务时迟到的旧响应不会覆盖当前结果", async ({ page }) => {
   const failures = collectBrowserFailures(page);
   await page.goto("/");
-  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
+  await page.getByRole("button", { name: "Agent Workspace", exact: true }).click();
   const firstJobId = await runQueryFromAsk(page, "在 human 细胞敲 AHR");
   await startNewQuery(page);
   const secondJobId = await runQueryFromAsk(page, "在 human 细胞敲 FASN");

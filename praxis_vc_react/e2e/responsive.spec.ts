@@ -13,6 +13,7 @@ type ResponsiveCase = {
 
 const RESPONSIVE_CASES: ResponsiveCase[] = [
   { name: "mobile 375×812", viewport: { width: 375, height: 812 } },
+  { name: "landscape 667×375", viewport: { width: 667, height: 375 } },
   { name: "tablet 768×1024", viewport: { width: 768, height: 1024 } },
 ];
 
@@ -72,7 +73,13 @@ async function runResponsiveJourney(page: Page): Promise<void> {
   );
   await page.goto("/");
   await expectOk(healthResponsePromise);
-  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
+  await expect(
+    page.getByText(
+      "语言模型仅用于解析与解释，不参与数值预测或最终裁决",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Agent Workspace", exact: true }).click();
 
   // Ask:标题、主操作和解析相关 API 在窄视口仍可达。
   await expect(

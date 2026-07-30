@@ -63,7 +63,7 @@ function expectNoBrowserFailures(failures: BrowserFailures): void {
 
 async function reachRun(page: Page): Promise<void> {
   await page.goto("/");
-  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
+  await page.getByRole("button", { name: "Agent Workspace", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "描述一次扰动实验" }),
   ).toBeVisible();

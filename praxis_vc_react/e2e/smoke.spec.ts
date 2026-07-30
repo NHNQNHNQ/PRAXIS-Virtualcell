@@ -16,7 +16,7 @@ function expectNoFailures(failures: ReturnType<typeof collectFailures>) {
   expect(failures).toEqual({ pageErrors: [], consoleErrors: [], http500: [] });
 }
 
-test("从首页进入 Agent Runs 后到达 Ask 阶段", async ({ page }) => {
+test("从首页进入 Agent Workspace 后到达 Ask 阶段", async ({ page }) => {
   const failures = collectFailures(page);
   const healthResponse = page.waitForResponse(
     (response) => response.url().endsWith("/api/health"),
@@ -25,7 +25,7 @@ test("从首页进入 Agent Runs 后到达 Ask 阶段", async ({ page }) => {
     (response) => response.url().endsWith("/api/jobs"),
   );
   await page.goto("/");
-  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
+  await page.getByRole("button", { name: "Agent Workspace", exact: true }).click();
   expect((await healthResponse).status()).toBe(200);
   expect((await jobsResponse).status()).toBe(200);
   await expect(page.getByRole("heading", { name: "描述一次扰动实验" })).toBeVisible();
@@ -60,7 +60,7 @@ test("侧栏版本来自后端 health", async ({ page }) => {
     (response) => response.url().endsWith("/api/jobs"),
   );
   await page.goto("/");
-  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
+  await page.getByRole("button", { name: "Agent Workspace", exact: true }).click();
   expect((await healthResponse).status()).toBe(200);
   expect((await jobsResponse).status()).toBe(200);
   await expect(page.getByText("后端 ok · 产品 9.9.9")).toBeVisible();

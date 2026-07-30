@@ -46,10 +46,10 @@ function expectNoBrowserFailures(failures: BrowserFailures): void {
   expect(failures.http500).toEqual([]);
 }
 
-// 从 Agent Runs 走完 5 阶段到 Results,再逐个点 7 tab 断面板 h2。
+// 从 Agent Workspace 走完 5 阶段到 Results,再逐个点 7 tab 断面板 h2。
 async function reachResults(page: Page): Promise<ResultsTruth> {
   await page.goto("/");
-  await page.getByRole("button", { name: "Agent Runs", exact: true }).click();
+  await page.getByRole("button", { name: "Agent Workspace", exact: true }).click();
   await page.getByLabel("研究问题").fill("在 human 细胞敲 AHR");
   await page.getByRole("button", { name: "解读任务 →" }).click();
   await page.getByRole("button", { name: "确认并继续 →" }).click();
@@ -255,7 +255,7 @@ test("Pack-aware 历史任务展示后端锁定的 Pack execution identity", asy
   const result = page.getByRole("region", { name: `结果 · job ${jobId}` });
   await expect(result).toBeVisible();
   await expect(
-    page.getByText("执行身份 · 后端记录", { exact: true }),
+    page.getByText("See saved execution identity", { exact: true }),
   ).toBeVisible();
 
   await result

@@ -133,16 +133,16 @@
 .main-scroll { flex: 1; overflow-y: auto; }
 .main-inner {
   width: 100%;
-  max-width: 1180px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 32px 24px 80px;
+  padding: 44px 34px 80px;
 }
 
 /* ---------- 卡片 / 段 ---------- */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   padding: 22px 24px;
   margin-bottom: 16px;
   box-shadow: var(--shadow-sm);
@@ -385,5 +385,5 @@ code.sha { font-size: 0.68em; }
 /* ---------- 响应式:窄屏 ---------- */
 @media (max-width: 720px) {
   .sidebar { width: 210px; }
-  .main-inner { padding: 24px 16px 60px; }
+  .main-inner { padding: 28px 16px 60px; }
 }
