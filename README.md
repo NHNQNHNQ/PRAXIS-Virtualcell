@@ -4,6 +4,17 @@
 
 用户描述物种、细胞场景和扰动任务后，系统把请求路由到适用的预测器或规则模块，产出包含治理裁决、证据边界和复现信息的 Markdown 报告。默认 `offline`，不需要 API key。
 
+当前阶段事实：Phase 11B Cell-first 产品入口已完成，产品代码锚点为
+`bf44aac25b993e49d0146ccd52dddad5c2fa14de`；Phase 12 Virtual Cell Model Zoo v2
+尚未开始。DOCS-CLOSURE 以
+`b02d21985bcde50cf0758d339b05b13bb3e200a2` 为 parent，其完成身份必须由现场
+`git rev-parse HEAD`、exact allowlisted diff 和完成报告共同核对，不能在提交自身
+中预写未来 SHA。
+
+准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
+存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
+abstain。
+
 当前安装包版本来自 `pyproject.toml`，可用 `praxis-vc --version` 查询。GitHub、当前本地候选和 `.53` 的发布状态并不由版本字符串推断，请以 [三端同步台账](docs/status/SYNC-STATE.md) 为准。
 
 ## 安装与本地页面
@@ -74,6 +85,10 @@ praxis-vc ask \
 
 所有预测和治理终决由后端确定性 runtime 完成。LLM 只可参与自然语言解析、路由建议、critic 复核和报告润色，不能修改 prediction、hard rule、learned reliability、provenance 或最终 verdict。`llm_assisted` 需要 `DEEPSEEK_API_KEY`；缺少凭证或调用失败时回退到离线路径。
 
+上述 `accept/caution/downgrade/abstain` 是现有 runtime verdict，不等于
+`production_promoted`。P12 才计划补齐独立 adapter、evidence 和 product-policy
+identity；在 P12 完成以前不得假装这些新门已经存在。
+
 ## VirtualCellPack 与模型输入
 
 可选 `omics` extra 提供严格、只读的数据合同：`vc.pack.v0.1/v0.2` 使用 H5AD，
@@ -86,8 +101,18 @@ aggregate、drop、fill、reorder 只有被合同或 hash/version 绑定的 mapp
 明确授权时才能执行，并写入 `vc.alignment-report.v1`。不存在自动 symbol
 替换、Ensembl version 剥离、ortholog/同源转换或 mock fallback。
 
-这三层不能混用：Pack 完整验证只得到 `pack_valid`；成功显式对齐才得到指定模型
-的 `model_compatible`；两者都不能推出 `scientifically_validated`。
+以下五层不能混用，也不是自动递进状态链：
+
+- Pack：`pack_valid`；
+- Registry：`cataloged / artifact_ready / revoked / superseded`；
+- 每次请求计算：`model_compatible / environment_compatible / executable`；
+- Scientific evidence：`benchmark_passed / scientifically_validated /
+  promotion_eligible`；
+- Product policy：`production_promoted`。
+
+当前实现已有的 Pack、feature、model-card、environment 和 execution-plan 身份不等于
+P12 计划新增的独立 adapter/evidence/policy fingerprint。任何现有状态都不能预先
+推出 P12 已完成或模型已获产品批准。
 
 Pack-aware runtime 由严格 `vc.model-card.v1`、`CapabilityRegistry` 和
 `ModelBrokerAgent` 生成 `vc.compatibility-report.v1` 与确定性
@@ -181,11 +206,14 @@ community plan 固定不可执行，run 只能 `prediction=null` 并诚实 absta
 
 ## 能力边界
 
-PRAXIS-VirtualCell 是带可靠性治理的操作层，不是通用或 SOTA 预测模型。当前可复现证据只支持以下克制表述：
+PRAXIS-VirtualCell 是带可靠性治理的操作层，不是通用或 SOTA 预测模型。历史
+Phase 10 Gate 的可复现证据只支持以下克制表述；它不构成 P12 evidence/policy：
 
-- 真实引擎级覆盖为四类：M2（真实 donor 证据来自 `.53` 历史亲验）、M3、M4 和 M7。
+- 当时记录的引擎级覆盖为四类：M2（真实 donor 证据来自 `.53` 历史亲验）、M3、M4
+  和 M7。
 - M1、M5、M8 属于 rule-based advisory；M6 以及 EMT、fate、spatial、communication 等路径存在明确 limitation。
-- 本地 offline 流程会使用 mock 或当前可用 predictor 验证完整治理链，不能把它描述成所有远端模型都已运行。
+- 历史本地 offline 流程中的 mock 只用于测试或演示 conformance，不构成生产预测、
+  科学 evidence 或 product policy。
 - 多模块结果表示路由计划中的多个 entry 与 advisory，不表示多个预测器已经完成证据融合。
 - 更完整的 met / narrowed / unsupported / pending 边界以 [Phase 10 Gate](reports/phase10/PHASE10_GATE.md) 为准。
 
@@ -216,17 +244,28 @@ CI=1 npm run e2e
 
 | 文档 | 内容 |
 |---|---|
-| [文档地图](docs/INDEX.md) | 当前权威、历史材料和计划的边界 |
-| [项目状态](docs/status/PROJECT-STATE-2026-07-18.md) | 当前阶段、验证结果、受保护资产和下一步 |
-| [三端同步台账](docs/status/SYNC-STATE.md) | 本地、GitHub、`.53` 的 SHA 与授权边界 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11/P12 边界和跨项目集成 |
+| [P12–P30 顺序总提示词](docs/PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md) | 当前状态机、动态 work-unit 选择和授权纪律 |
+| [P12–P30 执行路线](docs/PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) | 详细 scope、硬门和条件式授权模板 |
+| [P12–P30 完成清单](docs/PHASE12-30-DETAILED-COMPLETION-CHECKLIST.md) | 工程、科学和 policy 分离的验收台账 |
+| [P12–P30 协调提示词](docs/PHASE12-30-MASTER-PROMPT.md) | 长期协调边界；不得替代现场 Git 证据 |
+| [P11A 设计](docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md) | P11A 历史实现说明；现行产品以 P11B 为准 |
+| [文档地图](docs/INDEX.md) | 历史材料索引；日期早于 DOCS-CLOSURE 的“当前”描述只作快照 |
+| [2026-07-18 项目状态](docs/status/PROJECT-STATE-2026-07-18.md) | 历史快照，不是当前阶段台账 |
+| [三端同步台账](docs/status/SYNC-STATE.md) | 历史远程观测；使用前必须在获准窗口现场刷新 |
 | [安装指南](docs/INSTALL.md) | pip、前端、Docker 现状和可选依赖 |
-| [用户指南](docs/USER-GUIDE.md) | CLI、五阶段界面、输出与模式 |
+| [用户指南](docs/USER-GUIDE.md) | 历史 CLI/五阶段界面说明；Cell-first 现状以上述集成指南为准 |
 | [版本契约](docs/VERSIONING.md) | 产品、协议、schema、artifact 和模型版本边界 |
 | [Phase 10 Gate](reports/phase10/PHASE10_GATE.md) | 科学能力与远端证据边界 |
 
 ## 版本与同步流程
 
 唯一允许的流向是：本地 feature branch → GitHub branch/CI → 审批合入 GitHub `main` → 本地 `main` fast-forward → `.53` 从同一 GitHub SHA fast-forward → 三端 SHA 核对。不要在 `.53` 直接开发，也不要把本地 tag 当成已发布 tag。
+
+本次 DOCS-CLOSURE 未刷新 GitHub 或 `.53`。规范工作树是
+`/Volumes/T7/PRAXIS-virtualcell`，Git metadata 是
+`/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`；任何远程数字只有带日期和 exact
+identity 的只读记录意义。
 
 整理分支已按两次精确 D1a 授权把 GitHub `codex/project-consolidation` 快进到 `ee36d7948047f346f55a02d62ccaac84391e3c20`。对应的 [GitHub Actions run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 为 `4/5`：Python core、frontend/Playwright、reproducible wheel 和 Linux release container 通过，legacy 唯一失败是 Linux shell 子进程未随直接 shell 终止。修复提交 `6a8198771581d0897a13457e93e50cfec172d59a` 已把输出截断、timeout、pipe 异常和上层取消统一为进程组清理，并在 macOS/Python 3.13.12 与 Linux/Python 3.13.14 严格锁环境得到 legacy `1139 passed / 0 failed`。包含本段的最终文档提交必须由交接中的 post-commit release artifact 重新绑定，之后才能申请新的 exact-SHA D1a retry；GitHub `main`/tag、本地 `main` 和 `.53` 均未改变。
 

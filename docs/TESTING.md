@@ -1,27 +1,38 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 本地观测：2026-07-29，分支 `codex/p9-ood-validation`，唯一起始基线 `480706fbf58343565532debeca70c4de093b045f`
+> 当前文档基线：分支 `codex/p11-data-centric-ui`；P11B 产品代码锚点
+> `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；DOCS-CLOSURE parent
+> `b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
-> 状态：`P9_OOD_VALIDATION_LOCAL_IMPLEMENTED — GITHUB_FIVE_JOB_CI_REQUIRES_SEPARATE_AUTHORIZATION`。固定 C5 实现证据、C4 发行证据和 D1a `4/5` CI 仍是历史冻结快照；本地 P9 结果不是新的 GitHub、`.53`、原生 Linux/x86_64 或发布证据。
+> 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
+> `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
+>
+> 状态：`P11B_COMPLETE — P12_NOT_STARTED`。下述 P4.3–P10 和 CI 数字都是绑定各自
+> exact SHA/日期的历史冻结证据；本轮 docs-only 收口只运行文档一致性、链接和 Git
+> 差异检查，不重跑 core、legacy、frontend、LLM、GPU、remote、external 或 science。
 
-## 当前质量口径
+## 最近记录的 P11B / `b02d219...` 本地重建证据
 
-| 层 | 命令 | 本地结果 |
+这些结果记录自 DOCS-CLOSURE parent，不自动继承为 docs-only completion commit 的
+代码、发行或科学证据：
+
+| 层 | 记录结果 |
 |---|---|---|
-| 依赖 | Python 3.13 hash locks → editable `--no-build-isolation --no-deps` → `python -m pip check` | macOS/arm64 Python 3.13.12 与 Docker Linux/arm64 Python 3.13.14 fresh strict hash install 均 PASS |
-| Python lint | Python 3.13 lock 环境内 `ruff check .` | macOS/arm64 与 Docker Linux/arm64 均 PASS，0 diagnostics |
-| FBA + packaging 定向回归 | 两条真实 FBA 正例，加 dev extra/lock 与 CI lock 角色测试 | macOS/arm64 `13 passed / 0 failed`；其中 packaging 单模块 `11 passed`，Linux/amd64 QEMU 同一 packaging 单模块 `11 passed / 0 failed` |
-| VirtualCell 核心 | `python -m pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra` | P9 macOS/arm64 Python 3.13.12：`1270 passed / 35 skipped / 9 deselected / 0 failed`；此前 GitHub attempt 2 native Linux core PASS 是旧候选证据 |
-| Legacy unit | `python -m pytest tests -m "not (integration or llm or remote)" -o addopts='' -q -ra` | P9 macOS/arm64 Python 3.13.12：`1146 passed / 59 skipped / 105 deselected / 0 failed`；Docker Linux 数字仍是旧候选冻结证据 |
-| Legacy broad non-LLM（C5 冻结） | `python -m pytest tests -m "not llm" -o addopts='' -q -ra` | C5 历史证据为 `1136 passed / 158 skipped / 6 deselected / 0 failed`；本轮未将其冒充为新候选 CI isolation |
-| C5 Gate A 本地 seam | provenance gate 定向测试 + W4B remote test module 在普通本地 marker gate 下被收集并跳过 | `38 passed / 2 remote skipped / 0 failed`；三 adapter success/no-gate 与缺版本 fail-closed 已证明，非真 donor 推理 |
-| C5 W4B remote | `test_ml_workflow_e2e.py --run-remote -m remote` | 本机无 torch：`2 skipped / 0 failed`，明确为 `REMOTE_VALIDATION_PENDING`；只有批准候选 SHA、clean donor SHA/remote 和可信六文件 digest 集上 `2 passed / 0 skipped / 0 failed` 可关闭 |
-| 前端 | typecheck → lint → build → 对显式启动的 fresh dev-lock API 执行 `npm run e2e` | P9 本地 PASS；14 specs / 60 collected = `59 passed / 1 skipped / 0 failed`；唯一 skip 是需明确授权的真实 LLM |
-| C4 完整 wheel（冻结） | 固定 `8ce42fe` 的两个 clean archive 分别构建、`cmp`、Python 3.13 locked clean install、console entry、站外 verifier | 922,334 bytes；SHA-256 `78e5287a5dd61478b041fd1a28783732cb75a250de02eec306d3803b3128fd4f`；全部 PASS；仅是 C4 历史证据，不能继承为尚未形成的新候选 artifact |
-| C4 Linux container | Docker Desktop Linux/arm64，显式 Docker 双门，容器 `--network none` | `5 passed / 0 failed`；结束后无本次资源残留 |
-| C2 历史干净 wheel | 从提交 `73f3324` 的 `git archive` 构建；独立 Python 3.13 venv `--no-deps` 安装后验证 import、version、CLI | `praxis_virtualcell-1.5.1-py3-none-any.whl`，714,871 bytes，SHA-256 `b571ee71a42d028774221b068a5d0b5a613bcebb456ba655c1a3b4e1d1690580`；不是当前 `1.6.0` wheel 证据 |
+| dependency install / `pip check` / Ruff | PASS |
+| VirtualCell core | `1309 passed / 35 skipped / 9 deselected / 1 failed` |
+| 唯一 core 失败 | `test_playwright_python_can_be_overridden_without_editing_config`；packaging/text-contract 回归，未修复前不能声称全绿 |
+| Legacy unit | `1146 passed / 59 skipped / 105 deselected` |
+| frontend typecheck / lint / build / bundle budget | PASS |
+| Cell-first Playwright | `12/12 passed` |
+| release wheel / offline CLI / API health/root | PASS |
+| wheel identity | 1,043,145 bytes；SHA-256 `0a31bbb4bfc2f5773cda459e6790b6ccd6ff11dab8d386c026ad37bd0c42aa96`；仅标识该次本地构建 |
 
 核心结果与根 `tests/` 不能相加成一个“总通过数”。前者是 VirtualCell 发布权威口径；后者是继承的 PRAXIS-2 unit 范围。Phase 10 的 `912/40/9` 是新增产品版本契约测试之前的冻结证据，不应在原报告中回写成新数字。
+
+P11A/P11B 的 UI 测试只证明产品交互和已有后端接线，不构成模型科学验证、
+`production_promoted`、P12 实现或发布证据。P11A 锚点为
+`10f629b...`，P11B 完整代码锚点为
+`bf44aac25b993e49d0146ccd52dddad5c2fa14de`。
 
 ### P4.3 legacy/MCP 本地收口
 
@@ -545,7 +556,12 @@ PYTHONDONTWRITEBYTECODE=1 python -m pytest \
 
 ## 前端覆盖边界
 
-14 个 Playwright spec 共收集 57 个 case，覆盖本地 S1–S9 与 S11–S13：五阶段/返回/重置、abstain、敌对输入、扰动矩阵、高级字段、预设、六个结果 tab 与审计产物、主题/历史、离线重复性、响应式语义可达和稳定性，以及两个 Results lazy-loading 路径。S10 是真实 LLM 外部门的 1 条显式 skip；没有运行，不能写成通过。
+历史 C4 候选的 14 个 Playwright spec 共收集 57 个 case，覆盖本地 S1–S9 与
+S11–S13：五阶段/返回/重置、abstain、敌对输入、扰动矩阵、高级字段、预设、六个
+结果 tab 与审计产物、主题/历史、离线重复性、响应式语义可达和稳定性，以及两个
+Results lazy-loading 路径。S10 是真实 LLM 外部门的 1 条显式 skip；没有运行，不能
+写成通过。现行 P11B Cell-first 重建证据是上方单列的 `12/12`，两种 UI scope 不得
+混算。
 
 视觉/几何边界：C3 已完成人工浅色/深色验收并自动验证实际 `data-theme`。Results 工具栏在 1280×720 使用 `.card-actions` 与 `getBoundingClientRect()` 做一条窄几何回归，因为它保护已复现的标题/按钮挤压 bug；mobile/tablet 只证明语义可达，不声称逐像素等价。
 
@@ -575,4 +591,7 @@ C4 的 build budget 实测 initial JavaScript aggregate 为 226,046 bytes（gzip
 
 首次修复后的 candidate `ee36d7948047f346f55a02d62ccaac84391e3c20` 经精确授权快进发布。对应 [run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 的实际结果为 Python core、frontend/Playwright、reproducible wheel、Linux release container **PASS**；legacy **FAIL**，汇总 `1 failed / 1135 passed / 59 skipped / 105 deselected`。唯一失败 `test_huge_output_capped_not_ooming` 是 Linux dash 派生的 `cat` 在直接 shell 被 kill 后仍持有 pipe；详见 [D1a retry report](status/PHASE-D1A-CI-RETRY-2026-07-23.md)。本地修复 `6a81987` 还关闭了 pipe 提前关闭绕过 timeout 与上层取消遗留进程组两个同源缺口。
 
-“存在 run”不等于 CI 全绿，也不证明这些 job 是 branch-protection required checks。GitHub `main`/tag、本地 `main` 和 `.53` 未改变。最终文档提交和 post-commit artifact binding 完成后，必须以远端 candidate 的 expected old SHA `ee36d7948047f346f55a02d62ccaac84391e3c20` 申请新的 exact-SHA D1a retry 授权；在新 SHA 的五项 CI 全部完成前不得进入 D1b。
+“存在 run”不等于 CI 全绿，也不证明这些 job 是 branch-protection required checks。
+以上 D1a 指令和 SHA 只属于当时的发布窗口，已不构成当前行动授权。本次
+DOCS-CLOSURE 未读取或修改 GitHub `main`/tag、`.53` 或任何远程状态；未来 CI、
+push、发布和部署仍须以届时现场 HEAD 获得独立精确授权。

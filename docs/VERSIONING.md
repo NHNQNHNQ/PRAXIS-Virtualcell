@@ -1,10 +1,13 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `IMPLEMENTED_P9_OOD_VALIDATION — 1.6.0_LOCAL_CANDIDATE_UNPUBLISHED`
+> Status: `P11B_COMPLETE — DOCS_CLOSURE — LOCAL_BYTES_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
-> Audited: 2026-07-29 12:12 CST; local closure branch
-> `codex/p9-release-closure`, based on P9 implementation anchor
-> `6de2ec1543aada7f4e7b265280a784ce0528c9dc`
+> Local baseline: branch `codex/p11-data-centric-ui`; P11B product anchor
+> `bf44aac25b993e49d0146ccd52dddad5c2fa14de`; DOCS-CLOSURE parent
+> `b02d21985bcde50cf0758d339b05b13bb3e200a2`
+>
+> Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
+> `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 
 The repository historically mixed product release tags, package metadata, API/runtime labels, message schemas, governance artifacts, and model revisions. C2 implements the separation below; publication status remains governed independently by the three-way synchronization ledger.
 
@@ -12,10 +15,11 @@ The repository historically mixed product release tags, package metadata, API/ru
 
 | Namespace | Current value | Source | Meaning |
 |---|---|---|---|
-| local Phase candidate | P9 anchor `6de2ec1543aada7f4e7b265280a784ce0528c9dc` | fresh local `git rev-parse`, 2026-07-29 12:12 CST | implemented P0–P9 line; closure branch remains local and unpublished |
-| GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | fresh HTTPS `ls-remote`, 2026-07-29 12:12 CST | published truth; none of P0–P9 is on `main` |
-| `.53` code mirror | `8e0d06348ebdf22e076037e6d661094ae877c5d1` on `codex/deploy-v1.6.0` | fresh read-only SSH, 2026-07-29 12:12 CST | data is present separately, but P0–P9 code is not deployed |
-| local product candidate | `1.6.0` | `pyproject.toml` `[project].version` | accessible theme, workflow/UI, and supported-input expansion; local only, not a tag or publication |
+| local product code | P11B anchor `bf44aac25b993e49d0146ccd52dddad5c2fa14de` | immutable local Git history | Cell-first product code; not P12 and not a release identity |
+| local docs closure | parent `b02d21985bcde50cf0758d339b05b13bb3e200a2` | completion is the live commit containing these exact bytes | docs-only identity; verify with live Git and completion report, never self-embed a future SHA |
+| GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
+| `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
+| local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
 | Python distribution | `1.6.0` | installed `praxis-virtualcell` metadata | derived from the only manually edited product source |
 | inherited `praxis2.__version__` | `1.6.0` | compatibility alias | aliases `praxis_virtualcell.__version__`; no second literal |
 | main package export | `1.6.0` | `praxis_virtualcell.__version__` | derived from installed distribution metadata |
@@ -59,6 +63,11 @@ The repository historically mixed product release tags, package metadata, API/ru
 | governance models | `reliability_v0.3.0`, `abstain_v0.3.0` | `governance/artifacts/*.json` | immutable model revisions paired with content SHA-256 |
 | model registry revisions | heterogeneous model/dataset identifiers | `model_zoo/registry.yaml` | per-engine/checkpoint revisions, not product SemVer |
 | W4B donor call version | `donor_ml:<Class>@sha256:<content identity>` on `build_runtime_ml` | checkpoint `.json + .pt` bytes via `checkpoint_identity.py` | content identity for this call; not a checked-in integrity pin, product version, or proof of cross-device tensor hashing |
+
+The current P6-era model/environment/plan identities do not provide the independent adapter,
+evidence, operator-policy records or full request×Pack×model×environment×adapter×evidence×policy
+gate planned for P12. Their names and fingerprints must not be used to claim that P12 schemas,
+scientific validation or `production_promoted` already exist.
 
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
@@ -117,6 +126,10 @@ Implemented through C5:
 13. P8 product closure adds backward-compatible Pack CLI/API/UI discovery, three tiny built-in Pack fixtures, a local index and immutable job execution identity inside the same unpublished minor candidate. It does not add a production model, change the core runtime protocol, transform P7 data or infer a tag/publication.
 14. P9 adds offline OOD/result artifact contracts and one adaptation-free public external validation inside the same unpublished candidate. It does not change API/runtime/UI protocols, register the rejected candidate model, access `.53`, or infer a tag/publication.
 15. P10 adds a model-free CommunityPack pre-interface, one synthetic yeast member Pack, exact toy exchange validation and deterministic no-model abstention. It does not change API/runtime/UI protocols, add a model/weight, modify the P8 catalog, or infer a release/tag.
+16. P11A/P11B add the Data Center and Cell-first UI on the local branch without changing the
+    API/runtime protocol or creating a new model, scientific validation, product policy or release.
+17. DOCS-CLOSURE changes documentation only. P12 remains not started and therefore adds no
+    adapter/evidence/policy schema or runtime capability.
 
 ## Release invariants
 
@@ -134,7 +147,10 @@ pyproject product version
 == annotated tag name without its leading "v" (only once an approved release tag exists)
 ```
 
-The UI must show the same backend product version. GitHub `main`, local `main`, and the `.53` deployed checkout must resolve to the tagged commit before synchronization can be marked complete. The current candidate has no approved tag, so tag equality is intentionally not asserted yet.
+The UI must show the same backend product version. GitHub `main`, local `main`, and the `.53`
+deployed checkout must resolve to the tagged commit before synchronization can be marked complete.
+The current local bytes differ from the historical annotated `v1.6.0` tag; that tag must never be
+moved or reused. A future release needs a new SemVer and separately authorized release windows.
 
 The equality above deliberately excludes `vc.msg.v1`, `vc.request.v2`, all
 `vc.pack.*` versions, `vc.model-feature-contract.v1`, `vc.feature-mapping.v1`,
@@ -157,7 +173,9 @@ force them to equal the product release.
 - Minor: backward-compatible user-visible capability, workflow, UI, or supported-case expansion.
 - Major: intentionally incompatible public CLI/API/report/runtime behavior requiring a migration.
 - Protocol/schema/artifact breaking changes require their own migration note and compatibility tests regardless of product SemVer.
-- Scientific claims are not versioned into truth by bumping a number; they change only with reproducible evidence and an updated Phase gate.
+- Scientific evidence is not versioned into truth by bumping a number; it changes only with
+  reproducible exact-scope evidence. Operator product policy is separate and cannot be created by
+  either a version bump or scientific evidence alone.
 
 ## Required candidate verification
 

@@ -1,22 +1,26 @@
-# PRAXIS-VirtualCell Phase 13–30 总控提示词
+# PRAXIS-VirtualCell Phase 12–30 总控提示词
 
 > 文档状态：`MASTER COORDINATION PROMPT — NOT A BLANKET IMPLEMENTATION AUTHORIZATION`
 >
-> 当前路线图收口提交：`dc81b4d837c926664f894716af71655f71fa2f31`
+> DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
-> 当前产品代码恢复基线：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
+> 当前 Phase 11 产品代码基线：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
-> 文档日期：2026-07-30
+> 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
+>
+> DOCS-CLOSURE 日期：2026-07-31
+>
+> DOCS-CLOSURE completion：以包含本文 exact bytes 的现场 Git commit 和完成报告为准
 
 ## 使用方法
 
 将下面整个文本块复制到新的 Codex 对话，用它恢复长期目标、当前事实和执行纪律。
-总提示词只负责总控，不授权一次性实施 P13–P30。每个 Phase 仍必须使用
+总提示词只负责总控，不授权一次性实施 P12–P30。每个 Phase 仍必须使用
 `docs/PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md` 中对应的精确授权提示词，并填入当时
 真实 SHA、asset identity 和操作边界。
 
 ```text
-请接手 PRAXIS-VirtualCell Phase 13–30 后续工作。
+请接手 PRAXIS-VirtualCell Phase 12–30 后续工作。
 
 你是这个项目的长期总控工程与科学治理 Agent。你的任务不是尽快堆出“世界模型”
 演示，而是按证据和依赖顺序，把现有可信基础设施逐步升级为：
@@ -29,13 +33,13 @@ and biological systems.
 
 长期目标是：
 
-从“可插拔虚拟细胞基础设施”升级为“由科研智能体驱动的多物种虚拟细胞世界模型
-平台”。
+An agentic foundation platform for programmable virtual cells across species
+and biological systems.
 
 最终系统应做到：
 
 1. 符合显式合同的数据无需修改核心 runtime 即可接入；
-2. Pack、数据、feature contract、mapping、模型、adapter、环境和 evidence 都有
+2. Pack、数据、feature contract、mapping、模型、adapter、环境、evidence 和 policy 都有
    version/hash/fingerprint；
 3. 只有 exact request×Pack×model×environment×adapter×evidence×policy 全部满足时
    执行预测；
@@ -58,36 +62,45 @@ and biological systems.
 
 只在以下仓库工作：
 
-/Users/mzy/Projects/PRAXIS-virtualcell-p9
+/Volumes/T7/PRAXIS-virtualcell
 
-本总提示词加入前的路线图收口基线：
+该 ExFAT 工作树使用外置 APFS Git metadata：
+
+/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir
+
+DOCS-CLOSURE 的 parent identity：
 
 branch  codex/p11-data-centric-ui
-SHA     dc81b4d837c926664f894716af71655f71fa2f31
+parent  b02d21985bcde50cf0758d339b05b13bb3e200a2
 
-本总提示词保存后的预期状态：
+当前 Phase 11 Cell-first 产品代码恢复点：
 
-- 当前 branch 仍为 codex/p11-data-centric-ui；
-- 当前 HEAD 是 dc81b4d... 的单个 docs-only 后继；
-- 该提交相对 dc81b4d... 只新增
-  docs/PHASE13-30-MASTER-PROMPT.md；
-- 必须用 git rev-parse、git show 和 git diff 现场验证 exact HEAD，不能在提示词中
-  预先猜测自引用 commit SHA。
-
-当前 Cell-first UI 产品代码恢复点：
-
-branch  codex/p12-cell-first-baseline
 SHA     bf44aac25b993e49d0146ccd52dddad5c2fa14de
 
-两者含义必须分开：
+历史 ref `codex/p12-cell-first-baseline` 是创建时的误命名恢复 ref。不得移动或删除，
+但 branch 名不能再作为“P12 已完成”的证据。当前阶段定义为：
 
-- bf44aac... 是当前网页产品代码恢复身份；
-- dc81b4d... 是同一产品代码加 Phase 12–30 路线图后的文档收口身份；
-- 本总提示词 docs-only 提交后，P13 起始 SHA 必须使用现场验证的当前 HEAD，且它
-  必须满足“parent=dc81b4d...、只新增本文件”；不能继续沿用 dc81b4d...；
-- 本总提示词本身不构成 P13 授权。
+P11A  数据中心化前端骨架
+P11B  Cell-first 白色聊天入口、Data Center、示例问题和直接报告
+P12   Virtual Cell Model Zoo v2；尚未开始、尚未授权
 
-当前 `.53` preview 身份：
+编号纠正规则是：旧路线 P13–P19 顺延为当前 P12–P18；旧 P20 拆为当前 P19 Pack
+Factory 与 P20 Training Pipeline；P21–P30 保持不变。历史 artifact、SHA、branch 和
+报告不重命名或改写。
+
+dc81b4d... 和 b02d219... 保存的是旧编号路线历史或 DOCS-CLOSURE parent，不能作为
+“P12 已完成”证据。DOCS-CLOSURE completion identity 只由包含这些 exact bytes 的
+现场 Git commit、parent、exact allowlisted diff、clean post-commit status 和完成
+报告证明；不得在本文件中猜测或自嵌未来 commit SHA。只有现场核对该 closure
+identity 后，那个 HEAD 才能作为 P12 授权的 starting SHA；本文不构成 P12 授权。
+
+以下 APFS 目录是迁移安全副本，不是当前开发根；不得覆盖、清理、reset 或同步：
+
+/Users/mzy/Projects/PRAXIS-virtualcell-p9
+/Users/mzy/Projects/PRAXIS-virtualcell
+/Users/mzy/Projects/PRAXIS-virtualcell-recovery-20260718
+
+以下是已记录的 `.53` 部署锚点，必须用现场只读证据重新核对；它不是服务操作授权：
 
 URL          http://10.102.106.53:18080
 preview      /home/zkyd/data1/mzy/praxis-virtualcell-preview/p11
@@ -122,9 +135,9 @@ bf44aac... 继续暴露 1.6.0，但它不是已发布 v1.6.0 tag 的内容。这
 
 三、永久保护对象
 
-不要在旧 dirty T7 工作树开发、清理、reset、stash、stage、commit 或覆盖：
-
-/Volumes/T7/PRAXIS-virtualcell
+当前规范工作树就是 `/Volumes/T7/PRAXIS-virtualcell`。不要把它误判为旧 dirty
+工作树。历史工作树和恢复资产已位于 `old/`，不得构建、批量清理、reset、stash、
+stage、commit、覆盖或作为当前代码运行。
 
 不要修改：
 
@@ -132,18 +145,15 @@ bf44aac... 继续暴露 1.6.0，但它不是已发布 v1.6.0 tag 的内容。这
 - `.53` 的现有 preview、历史 refs、vc_api.log、服务或端口，除非对应部署子阶段
   获得独立精确授权；
 - /home/zkyd/data1/mzy/PRAXIS-2 和现有 gunicorn；
-- 旧 dirty T7；
+- `/Volumes/T7/PRAXIS-virtualcell/old/**`；
+- 上述三个 APFS 迁移安全副本；
 - 未获授权的外置 Golden/公开数据、模型、权重或 checkpoint；
 - 未列明的远程主机、服务、对象存储、消息、设备或实验系统。
 
-截至当前文档收口，下面三份用户文件必须保持未暂存、未提交、未覆盖：
-
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md
-
-每次开始工作必须重新执行 git status --short；保护名单必须按现场状态更新，不能假设
-工作树干净。
+每次开始工作必须重新执行 `git status --short`，动态生成
+staged/modified/deleted/untracked 清单。除当前授权 exact allowlist 外，所有用户
+文件都受保护，不得 stage、commit、覆盖或格式化。授权中的现场保护路径必须逐项
+填写；无保护路径时也必须明确写 `none`，不能假设工作树干净。
 
 四、权威文档
 
@@ -157,7 +167,11 @@ docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md
 6. docs/COMMUNITY-READINESS-CHECKLIST.md
 7. docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md
 8. docs/PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md
-9. 与当前唯一授权阶段直接相关的 ADR、runbook、contracts、代码和测试
+9. docs/PHASE12-30-DETAILED-COMPLETION-CHECKLIST.md
+10. docs/PHASE12-30-MASTER-PROMPT.md
+11. docs/PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md
+12. docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md
+13. 与当前唯一授权阶段直接相关的 ADR、runbook、contracts、代码和测试
 
 不要只依赖本总提示词实施。本总提示词负责恢复方向；仓库内容和 exact artifacts
 负责事实；Phase 路线文档负责详细 scope 和授权模板。
@@ -198,31 +212,36 @@ Product policy:
 - revoke/supersede 只影响未来运行，不改写历史 job；
 - 失败和负结果必须 append-only 保留。
 
-六、Phase 13–30 唯一顺序
+六、Phase 12–30 唯一顺序
 
-P13  Virtual Cell Model Zoo v2
+P12  Virtual Cell Model Zoo v2
      建模型 artifact/environment/evidence/policy identity；不下载或运行新权重。
 
-P14  Virtual Cell Model Adapter SDK
+P13  Virtual Cell Model Adapter SDK
      建多 task/output adapter 合同；复用现有 feature/alignment；adapter 不裁决科学。
 
-P15  E. coli K-12 Virtual Cell
+P14  E. coli K-12 Virtual Cell
      只做明确 strain/GEM/medium/condition 下 knockout→growth/growth-ratio。
 
-P16  Yeast Virtual Cell
+P15  Yeast Virtual Cell
      只做明确 strain/condition 下 gene deletion→deletion fitness。
 
-P17  Human/K562 Virtual Cell
+P16  Human/K562 Virtual Cell
      只做 Golden Norman exact scope 的 perturbation→delta_expression。
 
-P18  PRAXIS Virtual Cell Brain
+P17  PRAXIS Virtual Cell Brain
      把问题编译为确定性、可审计 Virtual Experiment DAG。
 
-P19  Multi-omics Virtual Cell
+P18  Multi-omics Virtual Cell
      建真实联合输入、observation join/missingness 和窄任务证据。
 
-P20  Pack Factory 与 Training Contract
-     只做 upload→reviewed Pack、training job/result 合同和 tiny dry-run。
+P19  受控 Pack Factory
+     只做 receipt→candidate→metadata/mapping review→validate→operator register；
+     不训练。
+
+P20  Virtual Cell Training Pipeline
+     只做 training job/result、checkpoint/model identity 和 tiny dry-run；
+     不运行真实候选。
 
 P21  Virtual Cell Benchmark System
      P21A 建系统；P21B 单候选 evidence run；P21C 独立 operator policy decision。
@@ -275,12 +294,14 @@ P30  Foundation Platform 发布
 
 特殊门：
 
-- P15 的 flux 只能是 solver trace，不能作为未验证产品输出；
-- P17 additive ridge 是 primary comparator；single-gene 与 combination 分开过门；
-- P17 external gate 必须是语义兼容的独立 K562 dataset/platform；
-- P18 真实多模型验收前至少需要两个 P15B/P16B/P17B
+- P14 的 flux 只能是 solver trace，不能作为未验证产品输出；
+- P16 additive ridge 是 primary comparator；single-gene 与 combination 分开过门；
+- P16 external gate 必须是语义兼容的独立 K562 dataset/platform；
+- P17 真实多模型验收前至少需要两个 P14B/P15B/P16B
   production_promoted decisions；
-- P20 不运行真实训练；
+- P19 只把显式确认的数据制作成 RegisteredPack，不创建 checkpoint 或模型 evidence；
+- P20 只做合同和 tiny deterministic dry-run，不运行真实候选、不读真实
+  test/external；
 - P21B 只生成 evidence，P21C 只做独立 operator decision；
 - P23A 不输出 receiver response 或因果结论；
 - P24 不得修改 vc.community-exchange-ledger.v1、
@@ -355,6 +376,21 @@ resource、capability 和 safety gate。LLM 关闭、超时、恶意注入时，
 
 本总提示词不是实施授权。
 
+规范状态机与动态 work-unit 选择算法以
+`docs/PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md` 为准：
+
+READ_ONLY_HANDOFF
+→ AUTHORIZATION_REQUIRED
+→ AUTHORIZED
+→ IN_PROGRESS
+→ VALIDATING
+→ COMPLETE 或 SOFTWARE_COMPLETE_NEGATIVE_SCIENCE
+→ STOP_AND_PROPOSE_NEXT
+
+每次必须从 completion SHA、immutable result/evidence 和 operator decision 重建
+工程/科学/policy 三本账，选择依赖已满足的最早 mandatory work unit。branch/ref
+名称、文件存在或未来预期 SHA 都不是完成证据；当前 unit 未完成时不得跳到后续 Phase。
+
 每个 Phase 开始前，用户必须发送一条独立授权，至少包含：
 
 1. 唯一 40 位 starting SHA；
@@ -362,13 +398,15 @@ resource、capability 和 safety gate。LLM 关闭、超时、恶意注入时，
 3. 允许修改的文件/模块范围；
 4. 当前 Phase 的唯一目标；
 5. 明确禁止的后续 Phase；
-6. 是否允许外置数据/权重，以及 exact asset manifest；
-7. 是否允许本地 commit；
-8. 是否允许 push；
-9. 是否允许 GitHub main/tag；
-10. 是否允许 `.53` 或其他 remote 操作；
-11. 是否允许 PRAXIS-2 或旧 T7；
-12. 当前所有受保护 dirty/untracked 文件的 exact path。
+6. 是否允许外置数据/权重；若允许，逐项 exact path、size、SHA-256、license、
+   source 和 usage；
+7. source root 只读与全新 write-new output root；
+8. network、training、tuning、GPU/compute 边界；
+9. 是否允许本地 commit；
+10. 是否允许 push；
+11. 是否允许 GitHub main/tag、`.53`、其他 remote、service 或 deploy；
+12. 是否允许 PRAXIS-2、`old/**` 历史工作树或 APFS 安全副本；
+13. 当前所有受保护 staged/modified/deleted/untracked 文件的 exact path。
 
 收到授权后只完成当前阶段。不得根据“总体目标”“继续做”“完成路线图”推导后续
 阶段、push、部署、main/tag 或外部动作权限。
@@ -399,11 +437,15 @@ path write-new。代码阶段必须先写失败测试，再做最小实现。
 十二、阶段完成报告必须包含
 
 Phase:
+Work unit:
+Status:
+Outcome: completed_positive | completed_negative | blocked
 Starting SHA:
-Completion SHA:
+Completion SHA or unchanged code SHA:
 Branch:
 
 Authorized scope:
+Explicit non-goals:
 Changed files:
 Protected files/state:
 
@@ -411,56 +453,63 @@ Schemas/contracts:
 Data/Pack fingerprints:
 Model/adapter/environment fingerprints:
 Benchmark/result fingerprints:
+Operator policy fingerprint:
 
 Tests:
-- red tests:
+- red/fail-closed:
 - directional:
 - core:
 - legacy:
 - frontend:
 - Ruff/pip check:
-- wheel/container:
-- remote/LLM/GPU explicitly not run:
+- packaging:
+- remote/LLM/GPU/external explicitly not run:
 
 Scientific result:
-- task/scope:
+- exact task/scope:
 - baseline:
-- primary metric and CI:
+- primary metric/direction/CI:
 - external/OOD:
 - benchmark_passed:
-- promotion_eligible:
 - scientifically_validated:
-- production_promoted operator decision:
+- promotion_eligible:
+- production_promoted:
 - abstain behavior:
 
-Known limitations:
 Negative results retained:
+Known limitations:
 GitHub/push/main/tag state:
-.53 state:
+.53/remote state:
+Go condition satisfied:
+Next eligible work unit:
 Next exact authorization sentence:
 
 skip/deselect 不能写成 LLM、GPU、remote、external validation 或 scientific validation
 通过。
 
-十三、当前下一步
+十三、当前停止点与动态下一步
 
-当前只允许做只读接手检查，除非用户另发 Phase 13 精确授权。
+先验证 DOCS-CLOSURE completion identity。验证成立时，下一 eligible work unit 是
+尚未授权的 P12；若不成立，下一 mandatory work unit 仍是 DOCS-CLOSURE。任何后续
+现场更新都必须重新按顺序总提示词的算法选择，不能永久硬编码 P12。
 
 你收到本总提示词后的第一条工作回复必须：
 
 1. 确认已经读取本总提示词；
-2. 说明总提示词不是 P13–P30 blanket authorization；
-3. 进入 /Users/mzy/Projects/PRAXIS-virtualcell-p9；
-4. 只读核对 branch、HEAD、status 和 codex/p12-cell-first-baseline；
+2. 说明总提示词不是 P12–P30 blanket authorization；
+3. 进入 /Volumes/T7/PRAXIS-virtualcell，并核对 `.git` 指向外置 APFS Git metadata；
+4. 只读核对 branch、HEAD、status、P11 产品代码 SHA，以及历史误命名恢复 ref
+   codex/p12-cell-first-baseline；不得用 ref 名称推导阶段；
 5. 完整读取上述权威文档；
-6. 明确三份受保护未跟踪文档；
+6. 从现场 status 逐项列出所有 staged/modified/deleted/untracked 保护路径；
 7. 不修改、stage、commit、push、部署或操作 `.53`；
 8. 用简短事实报告当前状态；
-9. 告诉用户下一可授权阶段只有 P13；
-10. 从 docs/PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md 取出 P13 模板，把 starting SHA
-    填为现场验证出的当前 exact HEAD，前提是其 parent=dc81b4d... 且相对 parent
-    只新增本总提示词；供用户确认，不得猜测或写回本文件形成自引用 SHA；
-11. 在获得用户发出的精确 P13 授权前停止。
+9. 报告按现场 evidence 计算出的 Next eligible work unit 和 Next numbered Phase；
+10. 从 docs/PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md 取出 P12 模板，把 starting SHA
+    填为现场验证的最新 docs-only 收口 exact HEAD；若 closure identity 不成立，
+    则报告缺少唯一 starting baseline，不得使用 b02d219... 或 bf44aac... 冒充收口
+    SHA，也不得猜测或写回本文件形成自引用 SHA；
+11. 在获得用户发出的精确 P12 授权前停止。
 
 如果现场 HEAD、分支、GitHub、`.53` 或文件状态与本提示词不同，以现场只读证据为准，
 报告差异并停止任何写操作，不得自行 reset、stash、同步或“修复”状态。

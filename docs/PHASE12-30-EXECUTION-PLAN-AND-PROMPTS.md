@@ -2,42 +2,54 @@
 
 > 文档状态：`PLANNING_ONLY — NOT AN IMPLEMENTATION AUTHORIZATION`
 >
-> 当前产品代码基线：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
+> 当前 Phase 11 产品代码基线：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
-> 本地冻结分支：`codex/p12-cell-first-baseline`
+> DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
-> 当前部署：`http://10.102.106.53:18080`
+> 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 文档日期：2026-07-30
+> 历史误命名恢复 ref：`codex/p12-cell-first-baseline`（名称不再代表 Phase 12 状态）
+>
+> 已记录部署锚点：`http://10.102.106.53:18080`
+>
+> DOCS-CLOSURE 日期：2026-07-31
+>
+> DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`；completion
+> identity 以包含本文 exact bytes 的现场 Git commit 和完成报告为准
 
-本文把“由科研智能体驱动的多物种虚拟细胞世界模型平台”愿景，转换为可逐阶段
-授权、实施、验证和停止的路线图。本文不授权 P13 或任何后续实现，不授权下载数据/
+本文把 “An agentic foundation platform for programmable virtual cells across
+species and biological systems.” 愿景转换为可逐阶段
+授权、实施、验证和停止的路线图。本文不授权 P12 或任何后续实现，不授权下载数据/
 权重、push、GitHub main/tag、`.53` 写入或服务操作。
 
 ## 1. 最终目标与准确产品承诺
 
 长期目标是：
 
-> 从可插拔虚拟细胞基础设施，升级为由科研智能体驱动、覆盖多物种和多尺度生物系统
-> 的虚拟细胞世界模型平台。
+> An agentic foundation platform for programmable virtual cells across species
+> and biological systems.
 
 在到达足够证据之前，对外承诺必须保持为：
 
 > 任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有存在匹配、可执行且
-> 经过验证的模型时才产生预测，否则明确 abstain。
+> 经过验证并获 product policy 批准的模型时才产生预测，否则明确 abstain。
 
-“world model”“foundation model”“任意细胞预测器”在 P29 科学门通过以前都只能是
-研究方向，不能成为当前产品事实。Phase 编号是路线标签，不是产品版本、API 协议、
-schema 或模型版本。
+“foundation model”“任意细胞预测器”不是当前产品事实；P29 只允许形成有限、
+exact-scope 的 Biological World Model research capability。Phase 编号是路线标签，
+不是产品版本、API 协议、schema 或模型版本。
 
-## 2. Phase 12 当前基线身份已经锚定
+## 2. Phase 11 当前产品基线与 Phase 12 起点
 
-### 2.1 恢复身份
+### 2.1 当前身份
 
 | 对象 | 精确身份 |
 |---|---|
+| 规范工作树 | `/Volumes/T7/PRAXIS-virtualcell` |
+| 外置 Git metadata | `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir` |
+| DOCS-CLOSURE parent | `b02d21985bcde50cf0758d339b05b13bb3e200a2` |
+| DOCS-CLOSURE completion | 现场包含本文 exact bytes 的 commit；以 `git rev-parse HEAD` 和完成报告核对，不在文档中自引用未来 SHA |
 | 产品代码提交 | `bf44aac25b993e49d0146ccd52dddad5c2fa14de` |
-| 本地恢复分支 | `codex/p12-cell-first-baseline`（普通可移动 Git ref；恢复依据仍是下列 exact SHA） |
+| 历史恢复 ref | `codex/p12-cell-first-baseline`（创建时误把 Cell-first 收口称为 P12；不得移动或删除，但不再定义阶段编号） |
 | 当前开发分支 | `codex/p11-data-centric-ui` |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -50,12 +62,22 @@ schema 或模型版本。
 
 没有创建 Git tag。根据 `docs/VERSIONING.md`，tag 只能在独立发布授权中创建，不能用
 本地 tag 冒充 GitHub 已发布版本。当前代码/部署身份已由 exact SHA、wheel 和 recovery
-bundle 锚定，但恢复分支本身不是不可移动 release；本路线文档的提交也需要单独收口。
-当前 SHA 尚未 push；`.53` preview 也不等于 GitHub main/tag 发布。`bf44aac...`
+bundle 锚定，但恢复分支本身不是不可移动 release。DOCS-CLOSURE 是否成立必须由现场
+Git identity 和完成报告验证；`.53` preview 也不等于 GitHub main/tag 发布。`bf44aac...`
 继续暴露 `1.6.0` 构成版本漂移，下一次稳定候选必须使用新的 SemVer，绝不能移动或
 复用已有 `v1.6.0` tag。
 
-### 2.2 Phase 12 实际完成内容
+当前阶段重新定义为：
+
+```text
+P11A  数据中心化前端骨架
+P11B  Cell-first 白色聊天入口、Data Center、示例问题和直接报告
+P12   下一阶段：Virtual Cell Model Zoo v2（尚未开始、尚未授权）
+```
+
+Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
+
+### 2.2 Phase 11 实际完成内容
 
 - 白色、cell-first 首页；
 - 首页常用 context preset：K562、PBMC、mouse T cell、E. coli；
@@ -71,7 +93,7 @@ bundle 锚定，但恢复分支本身不是不可移动 release；本路线文�
 - `.53` health/root/assets、12 个 cell preset、4 个 dataset、3 个 Pack 和一次
   offline job 已验证。
 
-### 2.3 Phase 12 没有完成的内容
+### 2.3 Phase 11 没有完成的内容
 
 - cell preset 不是持久化或经过验证的 Virtual Cell；
 - Data Center 只显示 context preset 和同物种资源计数，没有把 dataset/Pack/model
@@ -83,22 +105,45 @@ bundle 锚定，但恢复分支本身不是不可移动 release；本路线文�
 - `.53` 当前 `mode=offline`、`llm_enabled=false`；
 - 目录、Pack、模型卡或示例问题存在，都不能推出可执行或科学有效。
 
-因此，Phase 12 的准确结论是：
+因此，当前准确结论是：
 
-> 已完成可信的 cell-first 产品入口；尚未完成 cell 与数据/Pack/模型的可执行绑定。
+> Phase 11 已完成可信的 Cell-first 产品入口；Phase 12 尚未开始。cell 与数据、
+> Pack、模型和科学证据的可执行绑定仍未完成。
+
+### 2.4 本次编号纠正
+
+为避免历史文档、branch 名和新授权互相污染，采用以下映射：
+
+| 旧路线标签 | 当前正式标签 |
+|---|---|
+| 旧 P12 Cell-first | P11B Cell-first 产品收口 |
+| 旧 P13 Model Zoo v2 | P12 Model Zoo v2 |
+| 旧 P14 Adapter SDK | P13 Adapter SDK |
+| 旧 P15 E. coli | P14 E. coli |
+| 旧 P16 Yeast | P15 Yeast |
+| 旧 P17 Human/K562 | P16 Human/K562 |
+| 旧 P18 Brain | P17 Brain |
+| 旧 P19 Multi-omics | P18 Multi-omics |
+| 旧 P20 Pack Factory 部分 | P19 受控 Pack Factory |
+| 旧 P20 Training 部分 | P20 Training Pipeline |
+| P21–P30 | 编号保持不变 |
+
+历史 commit、artifact、branch 和报告不重命名、不改写；新授权和新完成报告只使用当前
+正式标签。Phase 编号变化不改变任何旧 SHA、fingerprint 或科学结论。
 
 ## 3. 为什么必须按下面顺序执行
 
 ```mermaid
 flowchart TD
-    P12["P12 Cell-first 产品入口"] --> P13["P13 模型身份与证据注册"]
-    P13 --> P14["P14 Adapter SDK 与多输出合同"]
-    P14 --> P15["P15 E. coli 窄任务闭环"]
-    P15 --> P16["P16 Yeast 窄任务闭环"]
-    P16 --> P17["P17 Human/K562 窄任务闭环"]
-    P17 --> P18["P18 PRAXIS Virtual Cell Brain"]
-    P18 --> P19["P19 Multi-omics 状态"]
-    P19 --> P20["P20 Pack Factory + Training Contract"]
+    P11["P11 Cell-first 产品入口"] --> P12["P12 模型身份与证据注册"]
+    P12 --> P13["P13 Adapter SDK 与多输出合同"]
+    P13 --> P14["P14 E. coli 窄任务闭环"]
+    P14 --> P15["P15 Yeast 窄任务闭环"]
+    P15 --> P16["P16 Human/K562 窄任务闭环"]
+    P16 --> P17["P17 PRAXIS Virtual Cell Brain"]
+    P17 --> P18["P18 Multi-omics 状态"]
+    P18 --> P19["P19 受控 Pack Factory"]
+    P19 --> P20["P20 Training Pipeline"]
     P20 --> P21["P21 Benchmark System + candidate-run 窗口"]
     P21 --> P22["P22 Virtual Cell Registry"]
     P22 --> P23["P23 Cell Interaction"]
@@ -107,23 +152,26 @@ flowchart TD
     P25 --> P26["P26 Host–Microbiome"]
     P26 --> P27["P27 Agentic Experiment Design"]
     P27 --> P28["P28 Multi-Agent Virtual Biology"]
-    P28 --> P29["P29 Biological World Model"]
+    P28 --> P29["P29 Limited Biological World Model"]
     P29 --> P30["P30 Foundation Platform 发布"]
 ```
 
 关键依赖：
 
-1. P13 先拆开 catalog、资产、环境、adapter、执行与科学晋级身份；
-2. P14 才能消除当前只支持 `delta_expression` 的执行硬编码；
-3. P15–P17 每个物种只先完成一个窄任务，科学结论互不继承；
-4. P18 只有在至少两个真实能力可由 Broker 调用后，才有多模型编排意义；
-5. P20 必须先补 Pack Factory 和 training contract；上传 receipt 不能直接训练；
-6. P21 建统一 benchmark/evidence 平台，真实训练与评估只能在 protocol 冻结后用
+1. P12 先拆开 catalog、资产、环境、adapter、执行与科学晋级身份；
+2. P13 才能消除当前只支持 `delta_expression` 的执行硬编码；
+3. P14–P16 每个物种只先完成一个窄任务，科学结论互不继承；
+4. P17 只有在至少两个真实能力可由 Broker 调用后，才有多模型编排意义；
+5. P18 才建立真实、typed multi-omics 模型输入；
+6. P19 先把 upload receipt 变成经过显式 metadata/mapping review、strict validate
+   和 operator approval 的 RegisteredPack；receipt 不能直接训练；
+7. P20 再建立 training job/result、checkpoint、环境和重放合同，但不运行真实候选；
+8. P21 建统一 benchmark/evidence 平台，真实训练与评估只能在 protocol 冻结后用
    独立 P21B 授权执行；
-7. P22 只登记已经有不可变身份和证据的 Virtual Cell release；
-8. P23–P26 从单细胞到相互作用、群落和宿主接口逐层增加合同；
-9. P27–P29 是研究能力，负结果或未晋级不阻止软件平台继续诚实发布；
-10. P30 将软件 GA 与科学能力晋级分开裁决。
+9. P22 只登记已经有不可变身份和证据的 Virtual Cell release；
+10. P23–P26 从单细胞到相互作用、群落和宿主接口逐层增加合同；
+11. P27–P29 是研究能力，负结果或未晋级不阻止软件平台继续诚实发布；
+12. P30 将软件 GA 与科学能力晋级分开裁决。
 
 ## 4. 所有阶段共同的不变量
 
@@ -162,7 +210,7 @@ product policy:
 
 `production_promoted` 不得先于所要求的 validation evidence，也不能反向把
 `scientifically_validated=false` 改成 true。撤销只改变未来产品策略，不删除负结果
-或改写历史 execution identity。P13/P21 ADR 必须先冻结这些新语义和 v1 兼容迁移。
+或改写历史 execution identity。P12/P21 ADR 必须先冻结这些新语义和 v1 兼容迁移。
 
 ### 4.2 数据与 feature
 
@@ -214,25 +262,24 @@ checkpoint 或 remote 运行必须由单独授权替换为：
 - 是否允许训练/调参；未明确时只允许固定 artifact 的验证；
 - secret、个人数据、受限人源数据的访问和导出边界。
 
-所有阶段开始时必须重新执行 `git status --short`。截至本文收口，必须逐个保护且
-不得暂存/提交：
-
-- `docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md`
-- `docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md`
-- `docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md`
+所有阶段开始时必须重新执行 `git status --short`，动态生成
+staged/modified/deleted/untracked 清单。除当前授权 exact allowlist 外，所有用户
+文件都受保护，不得 stage、commit、覆盖或格式化。授权草案中的
+`<现场 exact 保护路径>` 未逐项填写即无效；现场无保护路径时也必须明确写 `none`。
 
 ## 5. 阶段总览与 Go/No-Go
 
 | Phase | 最小可交付结果 | 进入下一阶段的 Go 条件 | No-Go 时的诚实结果 |
 |---|---|---|---|
-| 13 | 模型身份、资产、环境、adapter、evidence 分层 | v1 兼容，状态不再混用 | 保持旧 zoo，只提供迁移报告 |
-| 14 | 版本化 Adapter SDK 和 conformance harness | delta reference adapter 回归通过 | 未注册 task/output 继续空 plan |
-| 15 | E. coli K-12 growth 窄闭环 | 主指标、CI 与独立 cohort 门通过 | 不产生 production promotion，继续 abstain |
-| 16 | yeast deletion fitness 窄闭环 | 独立 condition/platform 门通过 | 不产生 production promotion，继续 abstain |
-| 17 | K562 perturbation delta-expression 窄闭环 | 同口径胜 baseline + external gate | candidate 保持未晋级 |
-| 18 | 可审计多模型 Virtual Experiment DAG | 缺模型、冲突和 LLM 注入均 fail-closed | 只执行单模型或 abstain |
-| 19 | 一份真实多组学状态与模型证据 | 胜单组学 baseline 或诚实负结果 | 只保留数据合同 |
-| 20 | Pack Factory、training contract 和 tiny dry-run | upload→Pack 与合同级 training replay 可重放 | 不允许真实训练或 promotion |
+| 12 | 模型身份、资产、环境、adapter、evidence 分层 | v1 兼容，状态不再混用 | 保持旧 zoo，只提供迁移报告 |
+| 13 | 版本化 Adapter SDK 和 conformance harness | delta reference adapter 回归通过 | 未注册 task/output 继续空 plan |
+| 14 | E. coli K-12 growth 窄闭环 | 主指标、CI 与独立 cohort 门通过 | 不产生 production promotion，继续 abstain |
+| 15 | yeast deletion fitness 窄闭环 | 独立 condition/platform 门通过 | 不产生 production promotion，继续 abstain |
+| 16 | K562 perturbation delta-expression 窄闭环 | 同口径胜 baseline + external gate | candidate 保持未晋级 |
+| 17 | 可审计多模型 Virtual Experiment DAG | 缺模型、冲突和 LLM 注入均 fail-closed | 只执行单模型或 abstain |
+| 18 | 一份真实多组学状态与模型证据 | 胜单组学 baseline 或诚实负结果 | 只保留数据合同 |
+| 19 | 受控 upload receipt → RegisteredPack 闭环 | metadata/mapping/operator review 可重放 | receipt 保持 quarantine，不注册 |
+| 20 | training job/result、checkpoint 和 tiny deterministic dry-run | 合同级训练重放和失败原子性通过 | 不运行真实候选、不生成 evidence |
 | 21 | 统一 benchmark/evidence ledger + 独立 candidate-run 窗口 | protocol/result/负结果可复现 | 保留分散 benchmark；candidate 不晋级 |
 | 22 | 可版本化 Virtual Cell Registry | job 精确绑定 release identity | 只读 catalog，不允许执行 |
 | 23 | 一个窄 cell-cell interaction 模型 | held-out pair/context 过门 | 只显示 evidence，不预测 |
@@ -244,17 +291,18 @@ checkpoint 或 remote 运行必须由单独授权替换为：
 | 29 | 有限 typed biological subgraph candidate | 外部数据胜 baseline 且 OOD abstain | 标记 research/disabled |
 | 30 | Software GA；科学能力另发 qualification badge | exact-SHA 发布、部署和回滚全门 | 只发布 RC 或继续 preview |
 
-## 6. Phase 13：Virtual Cell Model Zoo v2
+## 6. Phase 12：Virtual Cell Model Zoo v2
 
 ### 目标
 
-把当前 `ModelCard + CapabilityRegistry + ModelBroker` 扩展成不可变的模型身份和证据
-注册层，但本阶段不新增、下载或运行真实权重。
+把当前 `ModelCard + CapabilityRegistry + ModelBroker` 扩展成不可变的模型、
+artifact、environment、adapter、evidence 和 operator-policy record 身份层，但本
+阶段不新增、下载或运行真实权重，也不作新的 operator promotion decision。
 
 ### 当前缺口
 
 - P6 已把 model-card registry、computed compatibility、environment compatibility、
-  executable plan 和 `scientifically_validated=false` 分开；P13 不得否认或合并这些
+  executable plan 和 `scientifically_validated=false` 分开；P12 不得否认或合并这些
   已有边界；
 - model card 虽已包含 asset/resource/uncertainty/OOD，但没有不可变 artifact/
   validation evidence registry 和独立 product-promotion policy；
@@ -275,10 +323,13 @@ checkpoint 或 remote 运行必须由单独授权替换为：
 6. registry 只保存 `cataloged/artifact_ready/revoked/superseded`；`compatible` 与
    `executable` 每次按 request×Pack×model×environment×adapter 重新计算；
 7. evidence 保存 `benchmark_passed/scientifically_validated/promotion_eligible`；
-   `production_promoted` 是引用 exact evidence 的独立 operator policy decision；
+   定义 versioned/fingerprinted operator-policy record schema，要求
+   `production_promoted` 引用 exact evidence；迁移 fixture 固定 no-promotion，
+   本阶段不作新的 operator decision；
 8. 增加撤销/supersede 记录，不原地改旧 identity；
 9. API/CLI 只读投影不得暴露本地 asset path；
-10. 用现有 5 张卡和 P8/P9 evidence 做迁移 fixture，不升级任何科学结论。
+10. 用现有 5 张卡和 P8/P9 evidence 做 legacy/incomplete/no-promotion 迁移 fixture，
+    不升级任何科学或产品结论。
 
 ### 验收门
 
@@ -297,22 +348,33 @@ checkpoint 或 remote 运行必须由单独授权替换为：
 ### 可复制授权提示词
 
 ```text
-授权以 `<本路线文档收口完成 SHA>` 作为 Phase 13（Virtual Cell Model Zoo v2）
-唯一起始基线，创建 `codex/p13-model-registry-v2`，仅实现模型卡、外置 artifact、
-environment、adapter identity 和 validation evidence 的分层注册合同、v1 兼容迁移、
-只读 CLI/API 投影、ADR、runbook 和前后端相关测试。先写失败测试再做最小实现。
-不得下载、读取或运行任何新模型/权重，不得把现有 planned/available/card/asset 状态
-升级为 executable、benchmark_passed、scientifically_validated 或
-production_promoted，不实施 Phase 14 Adapter SDK、
-E. coli/yeast/human 模型、训练、Marketplace 或 world model。允许本地功能提交；
-不 push，不修改 GitHub main/tag，不写入或操作 .53，不修改 PRAXIS-2 或旧 dirty T7，
-不得暂存/提交 docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束必须报告 exact HEAD、schema/fingerprint、
-测试、负例、已知限制和下一阶段精确授权句。
+授权以 `<现场验证的 DOCS-CLOSURE exact 40 位 completion SHA>` 作为 Phase 12
+（Virtual Cell Model Zoo v2）唯一起始 SHA，创建
+`codex/p12-model-registry-v2`。
+
+允许修改：`<逐项 exact 文件或模块 allowlist>`。
+唯一目标：实现模型卡、artifact、environment、adapter、validation evidence 和
+operator-policy record 的分层 identity，保持 v1 兼容迁移，增加 append-only
+revoke/supersede、路径脱敏的只读 CLI/API、ADR、runbook 和直接相关测试；不作任何
+新的 operator promotion decision。
+
+明确禁止：Phase 13 Adapter SDK、E. coli/yeast/human 模型、训练、Marketplace、
+world model、新模型/权重下载或运行，以及把 planned/available/card/asset 状态升级
+为 executable、benchmark_passed、scientifically_validated 或 production_promoted。
+
+external assets=no；source root/output root=N/A；network=no；
+training/tuning/GPU=no；local commit=`<yes/no>`；push=no；GitHub main/tag=no；
+.53/remote/service/deploy=no；destructive actions=no。
+现场 protected staged/modified/deleted/untracked：`<逐项 exact 路径；若无写 none>`。
+
+先写失败测试再做最小实现。不得修改 PRAXIS-2、
+`/Volumes/T7/PRAXIS-virtualcell/old/**` 或三个 APFS 安全副本；不得 stage/commit
+任何不在 exact allowlist 内的文件。阶段结束必须报告 exact HEAD、
+schema/fingerprint、测试、负例、已知限制和下一阶段精确授权句。
+任一占位符未替换时，本模板均为 NOT ACTIVE。
 ```
 
-## 7. Phase 14：Virtual Cell Model Adapter SDK
+## 7. Phase 13：Virtual Cell Model Adapter SDK
 
 ### 目标
 
@@ -354,23 +416,20 @@ Marketplace。
 ### 可复制授权提示词
 
 ```text
-授权以 `<Phase 13 完成 SHA>` 作为 Phase 14（Virtual Cell Model Adapter SDK）
-唯一起始基线，创建 `codex/p14-model-adapter-sdk`，仅实现版本化 input/output adapter
+授权以 `<Phase 12 完成 SHA>` 作为 Phase 13（Virtual Cell Model Adapter SDK）
+唯一起始基线，创建 `codex/p13-model-adapter-sdk`，仅实现版本化 input/output adapter
 合同、adapter registry、delta-expression reference adapter、Broker/ExecutionPlan/
 job identity 接线、conformance harness、ADR、runbook 和测试；允许用测试内 dummy
 adapter 验证 delta_expression、growth、fitness 的严格 envelope，但不得加入生产
 模型或 mock fallback。必须拒绝未注册 task/output、错 feature order、未声明 mapping、
 错单位/shape、未知字段、NaN/Inf 和不匹配 uncertainty/OOD；不得在核心 runtime、
-route table 或 case dispatch 增加模型/物种专用分支。不得实施 Phase 15 或以后阶段，
-不得下载/运行数据或权重。允许本地功能提交；不 push，不修改 GitHub main/tag，
-不写入或操作 .53，不修改 PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束报告 exact HEAD、adapter
+route table 或 case dispatch 增加模型/物种专用分支。不得实施 Phase 14 或以后阶段，
+不得下载/运行数据或权重。本地 commit 仅在本阶段精确授权明确为 yes 时允许；不 push，不修改 GitHub main/tag，
+不写入或操作 .53，不修改 PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact HEAD、adapter
 schema/fingerprint、回归证据和下一条授权句。
 ```
 
-## 8. Phase 15：第一个真实 Virtual Cell — E. coli K-12
+## 8. Phase 14：第一个真实 Virtual Cell — E. coli K-12
 
 ### 最小科学目标
 
@@ -381,8 +440,8 @@ E. coli K-12 + 明确 medium/condition + gene knockout
 → growth / growth ratio
 ```
 
-gene expression 和 resistance phenotype 不作为 P15 通过条件；没有独立模型和证据时
-继续 abstain。内部 flux 可以作为 solver trace 和约束审计，不是 P15 产品预测输出，
+gene expression 和 resistance phenotype 不作为 P14 通过条件；没有独立模型和证据时
+继续 abstain。内部 flux 可以作为 solver trace 和约束审计，不是 P14 产品预测输出，
 除非以后另有独立验证和授权。
 
 ### 依次实施
@@ -390,7 +449,7 @@ gene expression 和 resistance phenotype 不作为 P15 通过条件；没有独�
 1. 冻结 strain、assembly、GEM、medium、gene namespace、output unit 和任务边界；
 2. 选择许可清晰的真实 GEM 与 growth/essentiality evidence；只有符合 §4.6 的精确
    授权后才可放入 Git 外只读 source 和独立 write-new output roots；
-3. 用 P13 artifact identity 绑定 SBML/GEM 模型资产，另建真实 growth/condition
+3. 用 P12 artifact identity 绑定 SBML/GEM 模型资产，另建真实 growth/condition
    data Pack；不能把模型资产塞进不兼容的 H5AD Pack，也不能把
    `p8-bacteria-tiny` synthetic scRNA 当 GEM；
 4. 实现 growth input/output adapter；
@@ -422,8 +481,8 @@ deterministic 不等于正确；P9 的转录组负结果不验证本 GEM。
 ### 可复制授权提示词
 
 ```text
-授权以 `<Phase 14 完成 SHA>` 作为 Phase 15（E. coli K-12 Virtual Cell v1）
-唯一起始基线，创建 `codex/p15-ecoli-growth`，仅实现一个窄任务：
+授权以 `<Phase 13 完成 SHA>` 作为 Phase 14（E. coli K-12 Virtual Cell v1）
+唯一起始基线，创建 `codex/p14-ecoli-growth`，仅实现一个窄任务：
 “批准的 E. coli K-12 strain/GEM/medium/condition 下 gene knockout → growth/growth
 ratio”。仅在另行授权用 exact 绝对路径、逐文件 size/SHA-256/license/source 列出
 输入，并指定只读 source root、全新 write-new output root、禁止覆盖和网络策略后，
@@ -434,31 +493,26 @@ Git 只提交合同、小 fixture、hash、代码、测试、ADR 和 runbook，�
 promotion gate，并在独立 dataset/platform 或实验批次零适配验证。若任一门失败，
 阶段仍收口，但不得生成 production promotion，prediction 继续 abstain。不得实施
 yeast、human、gene-expression、resistance、community 或
-训练平台。允许本地功能提交；除非另发精确资产/remote 授权，不访问或写 .53；
-不 push，不修改 GitHub main/tag、PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束报告 exact HEAD、所有
-asset/result hash、科学结论，并生成 P15B operator-decision 授权句。
+训练平台。本地 commit 仅在本阶段精确授权明确为 yes 时允许；除非另发精确资产/remote 授权，不访问或写 .53；
+不 push，不修改 GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact HEAD、所有
+asset/result hash、科学结论，并生成 P14B operator-decision 授权句。
 ```
 
-### P15B 可复制授权提示词：独立 product-policy decision
+### P14B 可复制授权提示词：独立 product-policy decision
 
 ```text
-授权具名 operator `<姓名/角色>` 以 `<P15 完成 SHA>`、`<exact capability evidence
+授权具名 operator `<姓名/角色>` 以 `<P14 完成 SHA>`、`<exact capability evidence
 fingerprint>` 和 `<exact validation/result fingerprints>` 为唯一只读输入，审查
 E. coli growth exact scope 的全部预声明硬门。禁止重跑、调参、替换 evidence、
 修改代码或 Git；只允许在 `<必须填写的 exact absolute policy output path>` write-new
 一份 immutable operator decision，不得覆盖。只有 benchmark、paired CI、independent
 external、OOD、license 和 scope 门全部通过时才可写
 `production_promoted=true`；否则写明 declined/reason，不能修改
-`scientifically_validated`。不得 push、操作 .53、main/tag、PRAXIS-2 或旧 dirty T7；
-不得暂存/提交 docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
+`scientifically_validated`。不得 push、操作 .53、main/tag、PRAXIS-2 或 `old/**` 历史工作树；
+不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。
 ```
 
-## 9. Phase 16：Yeast Virtual Cell
+## 9. Phase 15：Yeast Virtual Cell
 
 ### 最小科学目标
 
@@ -494,8 +548,8 @@ S. cerevisiae gene deletion
 ### 可复制授权提示词
 
 ```text
-授权以 `<Phase 15 完成 SHA>` 作为 Phase 16（S. cerevisiae Virtual Cell v1）
-唯一起始基线，创建 `codex/p16-yeast-fitness`，仅实现一个预先冻结的
+授权以 `<Phase 14 完成 SHA>` 作为 Phase 15（S. cerevisiae Virtual Cell v1）
+唯一起始基线，创建 `codex/p15-yeast-fitness`，仅实现一个预先冻结的
 S. cerevisiae strain/condition 下 gene deletion → deletion fitness 任务。
 仅在另行授权用 exact 绝对路径、逐文件 size/SHA-256/license/source 列出输入，并
 指定只读 source root、全新 write-new output root、禁止覆盖和网络策略后，才允许
@@ -505,18 +559,18 @@ fixture。必须使用 exact assembly/SGD systematic IDs、显式 condition/cont
 biological-group split、validation-only tuning、预声明 baseline/主指标/CI/OOD；
 未胜 baseline 或 external gate 时不得生成 product promotion，并保持 abstain。
 不得实施 human、
-multi-omics、training pipeline、community 或 world model。允许本地功能提交；
-无另行授权不访问或写 .53，不 push，不修改 GitHub main/tag、PRAXIS-2 或旧 dirty
-T7；不得暂存/提交 docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束报告 exact HEAD、
-asset/result hash、负结果，并生成 P16B operator-decision 授权句。
+multi-omics、training pipeline、community 或 world model。本地 commit 仅在本阶段精确授权明确为 yes 时允许；
+无另行授权不访问或写 .53，不 push，不修改 GitHub main/tag、PRAXIS-2 或
+`/Volumes/T7/PRAXIS-virtualcell/old/**`；不得暂存/提交任何不在本阶段 exact
+allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护
+路径（若无则写 none）。阶段结束报告 exact HEAD、
+asset/result hash、负结果，并生成 P15B operator-decision 授权句。
 ```
 
-### P16B 可复制授权提示词：独立 product-policy decision
+### P15B 可复制授权提示词：独立 product-policy decision
 
 ```text
-授权具名 operator `<姓名/角色>` 以 `<P16 完成 SHA>`、`<exact capability evidence
+授权具名 operator `<姓名/角色>` 以 `<P15 完成 SHA>`、`<exact capability evidence
 fingerprint>` 和 `<exact validation/result fingerprints>` 为唯一只读输入，审查
 S. cerevisiae deletion-fitness exact scope 的全部预声明硬门。禁止重跑、调参、
 替换 evidence、修改代码或 Git；只允许在
@@ -524,12 +578,10 @@ S. cerevisiae deletion-fitness exact scope 的全部预声明硬门。禁止重�
 decision，不得覆盖。只有 benchmark、paired CI、independent external、OOD、license
 和 scope 门全部通过时才可写 `production_promoted=true`；否则写明 declined/reason，
 不能修改 `scientifically_validated`。不得 push、操作 .53、main/tag、PRAXIS-2 或
-旧 dirty T7；不得暂存/提交 docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
+`old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。
 ```
 
-## 10. Phase 17：Human/K562 Virtual Cell
+## 10. Phase 16：Human/K562 Virtual Cell
 
 ### 最小科学目标
 
@@ -590,8 +642,8 @@ delta-expression MSE 不可混表。
 ### 可复制授权提示词
 
 ```text
-授权以 `<Phase 16 完成 SHA>` 作为 Phase 17（Human/K562 Virtual Cell v1）
-唯一起始基线，创建 `codex/p17-k562-perturbation`，仅实现 Golden Norman/K562
+授权以 `<Phase 15 完成 SHA>` 作为 Phase 16（Human/K562 Virtual Cell v1）
+唯一起始基线，创建 `codex/p16-k562-perturbation`，仅实现 Golden Norman/K562
 精确域内的 gene/gene-combination → 5,045-feature delta_expression 任务。
 仅在另行授权用 exact 绝对路径、逐文件 size/SHA-256/license/source 列出 Golden
 Pack、候选 checkpoint/环境和 external dataset，并指定 source 只读、全新 write-new
@@ -605,19 +657,16 @@ primary comparator，candidate-minus-additive 的 paired condition bootstrap 95%
 或其他 cell context 只能作为 OOD evidence。single-gene 与 combination 分开晋级。
 任何主门失败都不得生成 product promotion。不得宣称任意 human cell、primary cell
 或 donor，
-不得实施 P18 Brain、multi-omics、training 或 Marketplace。允许本地功能提交；
+不得实施 P17 Brain、multi-omics、training 或 Marketplace。本地 commit 仅在本阶段精确授权明确为 yes 时允许；
 无另行精确 remote/asset 授权不操作 .53，不 push，不修改 GitHub main/tag、
-PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束报告 exact HEAD、模型/环境/
-result hash、科学结论，并生成 P17B operator-decision 授权句。
+PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact HEAD、模型/环境/
+result hash、科学结论，并生成 P16B operator-decision 授权句。
 ```
 
-### P17B 可复制授权提示词：独立 product-policy decision
+### P16B 可复制授权提示词：独立 product-policy decision
 
 ```text
-授权具名 operator `<姓名/角色>` 以 `<P17 完成 SHA>`、`<single-gene/combination
+授权具名 operator `<姓名/角色>` 以 `<P16 完成 SHA>`、`<single-gene/combination
 分别列明的 exact capability evidence fingerprints>` 和 `<exact validation/result
 fingerprints>` 为唯一只读输入，分别审查 K562 single-gene 与 combination scope。
 禁止重跑、调参、替换 evidence、修改代码或 Git；只允许在
@@ -626,13 +675,10 @@ decision，不得覆盖。每个 scope 只有在 additive-ridge superiority、pa
 contamination audit、independent K562 external、OOD、license 全过时才可分别写
 `production_promoted=true`；失败 scope 必须 declined/abstain，不能借另一 scope
 过门，也不能修改 `scientifically_validated`。不得 push、操作 .53、main/tag、
-PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
+PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。
 ```
 
-## 11. Phase 18：PRAXIS Virtual Cell Brain
+## 11. Phase 17：PRAXIS Virtual Cell Brain
 
 ### 目标
 
@@ -672,17 +718,17 @@ Scientific Question
 - LLM 关闭、超时、恶意注入或提出越 scope step 时，确定性结果不变；
 - 单 step 失败不会被其他 Agent 的叙述掩盖；
 - 多模型只表示真实执行的多个 step，不能把 rule/advisory 冒充预测器；
-- 至少两个 P15–P17 exact-scope、production-promoted 能力完成一项确有必要的组合
-  任务，否则 P18 只能收口合同。
+- 至少两个 P14–P16 exact-scope、production-promoted 能力完成一项确有必要的组合
+  任务，否则 P17 只能收口合同。
 
 ### 可复制授权提示词
 
 ```text
-授权以 `<Phase 17 完成代码 SHA>` 作为 Phase 18（PRAXIS Virtual Cell Brain）
-唯一起始代码基线，并逐项列出至少两个 exact-scope P15B/P16B/P17B
+授权以 `<Phase 16 完成代码 SHA>` 作为 Phase 17（PRAXIS Virtual Cell Brain）
+唯一起始代码基线，并逐项列出至少两个 exact-scope P14B/P15B/P16B
 `production_promoted` decision 的 read-only path/size/SHA-256/fingerprint 及其
 underlying evidence identities；少于两个时只授权合同收口，不得验收
-真实多模型组合。创建 `codex/p18-virtual-cell-brain`，仅实现 direct-v2 Pack-aware
+真实多模型组合。创建 `codex/p17-virtual-cell-brain`，仅实现 direct-v2 Pack-aware
 入口、不可变 Brain/Virtual Experiment context、确定性 task DAG、现有 Capability
 Registry/ModelBroker/ExecutionPlan 复用、step 级 execution identity、冲突/部分失败/
 abstain 治理、报告接线、ADR、runbook 和测试。LLM 只能提出候选分解和解释，所有
@@ -692,15 +738,12 @@ step 必须经确定性 schema/scope/permission/resource/capability gate；不�
 允许测试在临时目录生成一个第五 taxon tiny fixture 证明无需核心物种分支；不得
 把它登记为生产数据。无匹配模型必须空 plan/abstain。不得实施 multi-omics、
 training、Marketplace、cell interaction 或
-community。允许本地功能提交；不新增外置权重，无另行授权不操作 .53，不 push，
-不修改 GitHub main/tag、PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
+community。本地 commit 仅在本阶段精确授权明确为 yes 时允许；不新增外置权重，无另行授权不操作 .53，不 push，
+不修改 GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。
 阶段结束报告 exact HEAD、DAG/Brain identity、LLM 数值不变性和下一授权句。
 ```
 
-## 12. Phase 19：Multi-omics Virtual Cell
+## 12. Phase 18：Multi-omics Virtual Cell
 
 ### 目标
 
@@ -736,8 +779,8 @@ Multi-Omics Cell State Representation。
 ### 可复制授权提示词
 
 ```text
-授权以 `<Phase 18 完成 SHA>` 作为 Phase 19（Multi-omics Virtual Cell）
-唯一起始基线，创建 `codex/p19-multiomics-cell-state`，仅在保持 P5
+授权以 `<Phase 17 完成 SHA>` 作为 Phase 18（Multi-omics Virtual Cell）
+唯一起始基线，创建 `codex/p18-multiomics-cell-state`，仅在保持 P5
 `vc.pack.v0.3` 兼容的前提下实现联合模型输入合同、有序 required/optional modality
 slots、逐层 feature alignment、observation join/missingness policy、typed bundle、
 adapter/Broker identity、paired/partially-paired conformance tests、ADR 和 runbook。
@@ -746,98 +789,152 @@ adapter/Broker identity、paired/partially-paired conformance tests、ADR 和 ru
 逐文件 size/SHA-256/license/source/usage、固定候选模型、全新 write-new output
 root、禁止覆盖和网络策略后，才可用一份真实 multi-omics dataset 做一个窄任务；
 必须在结果前冻结单组学 baseline、ablation、主指标、CI、external 和 OOD，本阶段
-不得训练/调参；未过门不得生成 promotion。不得实施 Phase 20 training、Marketplace、
-cell interaction 或 community。允许本地功能提交；大数据/权重不入 Git，无另行
-授权不操作 .53，不 push，不修改 GitHub main/tag、PRAXIS-2 或旧 dirty T7；不得
-暂存/提交 docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束报告 exact HEAD、所有合同/hash、
+不得训练/调参；未过门不得生成 promotion。不得实施 Phase 19 Pack Factory、
+Phase 20 training、Marketplace、cell interaction 或 community。本地 commit 仅在本阶段精确授权明确为 yes 时允许；
+大数据/权重不入 Git，无另行
+授权不操作 .53，不 push，不修改 GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact HEAD、所有合同/hash、
 负结果和下一授权句。
 ```
 
-## 13. Phase 20：Pack Factory 与 Training Contract
+## 13. Phase 19：受控 Pack Factory
 
 ### 目标
 
-建立受控的：
+只建立数据接入到 RegisteredPack 的受控闭环：
 
 ```text
 upload receipt
 → candidate Pack authoring
+→ explicit metadata/mapping review
 → strict validation
-→ operator approval/register
-→ frozen training job/result contract
-→ tiny deterministic contract dry-run
+→ operator approval
+→ register
 ```
 
-P20 只完成 Pack Factory、training contract 和 tiny dry-run。本阶段不运行任何真实
-候选训练、不看真实 test 结果、不 benchmark、不 promotion。真实候选只能在 P21
-protocol 冻结后，通过独立的 P21B candidate-run 授权执行。
+P19 不训练模型，不创建 checkpoint，不读取 test/external 结果，不生成 benchmark、
+scientific evidence 或 product promotion。它只证明新数据能在不修改核心 runtime 的
+前提下，经人确认后成为严格 Pack。
 
-### P20A：受控 Pack Factory
+### 依次实施
 
 1. receipt 只作为不可变原始字节身份；
 2. 用户/操作员显式确认 taxon、assembly、cell identity、modality、feature namespace、
    value semantics、condition/control、unit、split 和 leakage group；
-3. 系统只生成 candidate manifest/mapping，不静默推断；
-4. strict validate 后显示完整 validation report；
-5. 只有 operator-approved candidate 才可 register；
-6. 原始 upload、candidate、approved Pack 和 supersede identity 分开。
-
-### P20B：Training Job/Result 合同
-
-1. `vc.training-job.v1` 绑定 RegisteredPack、feature/alignment、split/leakage audit、
-   trainer revision、代码 SHA、环境、seed 和 hyperparameters；
-2. 先实现同步 CLI/library runner，不先做分布式 scheduler/GPU 队列；
-3. trainer 只能读 allowlisted Pack/labels，不能运行用户上传的任意代码；
-4. 所有输出先写新临时目录，完成 hash/manifest 后原子发布；
-5. `vc.training-result.v1` 绑定 checkpoint size/hash、安全格式、日志摘要、指标和
-   training job fingerprint；
-6. 失败、取消或残缺 job 不留下可注册 candidate；
-7. checkpoint 只是 contract candidate artifact，不自动生成 model card、evidence
-   或 product policy。
-
-### P20C：tiny dry-run
-
-- 用仓库内 tiny fixture 和确定性 trainer 证明身份、取消、失败和重放；
-- tiny 成绩不是科学 evidence；
-- 真实 candidate 必须等待 P21 protocol 和单独 P21B 授权。
+3. 系统只能提出 candidate manifest/mapping，任何 inferred 字段都必须标为候选并由人
+   确认，不得静默成为数据真相；
+4. feature mapping 必须显式、版本化、hash-bound，并记录未映射、重复和顺序；
+5. strict validate 后显示完整 validation report，不把 warning 隐藏成 pass；
+6. 只有具名 operator 对 exact candidate fingerprint 作出 approve 决定后才可 register；
+7. 原始 upload、candidate、validation report、operator decision、RegisteredPack 和
+   supersede identity 分开；
+8. 管理写操作第一版只做本地 operator CLI/library；公共 API 保持只读；
+9. 用一个获准的 Git 外 tiny fixture 证明新增物种或 cell dataset 无需修改核心 runtime；
+10. candidate 或 validation 失败时保留 receipt/报告，绝不自动进入模型。
 
 ### 验收门
 
 - upload→candidate→review→register 不修改核心 runtime；
-- schema/metadata 未确认时不能训练；
-- leakage audit 在 trainer 读取 label 前通过；
-- Pack/split/feature/code/env/seed/hyperparameter/checkpoint 任一变化改变 identity；
-- 同输入/seed 的 deterministic fixture 可复现；
-- dry-run 不产生 benchmark/scientific evidence 或 promotion；
-- 无任意代码执行、路径逃逸、secret 泄露或 checkpoint 覆盖。
+- metadata、mapping、unit、control、split/leakage group 任一未确认时不能 register；
+- 原始上传字节保持不变，candidate/Pack 派生关系可追溯；
+- 同一输入与确认内容产生相同 candidate/Pack fingerprint；
+- 任一源字节、metadata、mapping 或 operator decision 改变产生新 identity；
+- traversal、symlink escape、坏 hash、错 taxon/assembly、未知字段和重复 key 拒绝；
+- fixture 只证明 authoring/validation 插件性，不构成真实 dataset 或科学能力；
+- receipt、candidate、RegisteredPack、model-compatible 和 executable 在 UI/API 中分开。
 
 ### 可复制授权提示词
 
 ```text
-授权以 `<Phase 19 完成 SHA>` 作为 Phase 20（受控 Pack Factory 与 Training
-Contract）唯一起始基线，创建 `codex/p20-pack-training-contract`，仅实现
+授权以 `<Phase 18 完成 SHA>` 作为 Phase 19（受控 Pack Factory）唯一起始基线，
+创建 `codex/p19-pack-factory`，仅实现
 upload receipt → candidate manifest/mapping → 显式 metadata 确认 → strict validate
-→ operator-approved register，以及版本化 training job/result、同步 CLI/library
-runner、Git 外 checkpoint artifact、失败/取消/原子发布和 tiny deterministic dry-run。
-训练任务必须绑定 RegisteredPack、feature/alignment、预声明 biological split、
-leakage audit、trainer/code/environment/seed/hyperparameters；上传内容不得作为任意
-代码执行，不得自动归一化、补零、去重、同源转换、真实训练、benchmark 或
-promotion。只允许在 `<必须填写的 exact absolute tiny dry-run output root>`
-write-new tiny fixture
-candidate，不读取外置真实数据/权重、不覆盖已有 artifact、不访问网络。真实候选
-必须等待冻结的 P21 protocol 和独立 P21B 授权；本阶段 tiny 指标不构成科学验证。
-不得实施分布式调度、自动调参、Marketplace、
-community 或 world model。允许本地功能提交；无另行授权不操作 .53，不 push，
-不修改 GitHub main/tag、PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
-阶段结束报告 exact HEAD、Pack/training identity、安全负例和下一授权句。
+→ 具名 operator-approved register 的本地 CLI/library 最小闭环，以及 candidate/
+validation/operator-decision/RegisteredPack 的版本化 identity、只读产品投影、ADR、
+runbook 和测试。不得让 inferred metadata/mapping 静默成为真相，不得自动归一化、
+补零、去重、重排、随机 split 或同源转换。只允许在另行逐项填写
+`<exact read-only tiny fixture path + size + SHA-256 + license/source/usage>` 和
+`<exact new write-only Pack Factory output root>` 后，用一个 Git 外 tiny fixture
+证明接入无需修改核心 runtime；不得覆盖、不得联网、不得把 fixture 当科学证据。
+本阶段不得训练、创建 checkpoint、生成 model card、benchmark/scientific evidence
+或 production promotion，不实施 Phase 20 Training Pipeline、Marketplace、community
+或 world model。本地 commit 仅在本阶段精确授权明确为 yes 时允许；无另行授权不操作 .53，不 push，
+不修改 GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在
+本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项
+填写现场保护路径（若无则写 none）。
+阶段结束报告 exact HEAD、receipt/candidate/Pack/operator-decision fingerprints、
+安全负例和 Phase 20 精确授权句。
 ```
 
-## 14. Phase 21：Virtual Cell Benchmark System
+## 14. Phase 20：Virtual Cell Training Pipeline
+
+### 目标
+
+在只消费 P19 RegisteredPack 的前提下建立：
+
+```text
+RegisteredPack
+→ frozen training job
+→ deterministic/sandboxed trainer execution
+→ candidate checkpoint
+→ training result
+→ candidate model identity
+```
+
+P20 只实现 training/fine-tuning 合同、同步 runner 和 tiny deterministic dry-run。
+它不运行真实候选训练，不读取真实 test/external 结果，不产生 benchmark、
+`scientifically_validated`、`promotion_eligible` 或 `production_promoted`。真实候选
+只能在 P21A 冻结 protocol 后，通过独立 P21B run-only 授权执行。
+
+### 依次实施
+
+1. `vc.training-job.v1` 绑定 RegisteredPack、feature/alignment、split/leakage audit、
+   trainer revision、代码 SHA、环境、seed、hyperparameters 和 resource limits；
+2. leakage audit 必须在 trainer 读取 label 前完成；
+3. 先实现同步 CLI/library runner，不先做分布式 scheduler、GPU 队列或自动调参；
+4. trainer 只能读取 allowlisted Pack/labels，不能执行用户上传的任意代码；
+5. checkpoint 使用允许的安全格式，输出先进入新临时目录，完成 hash/manifest 后原子
+   发布；
+6. `vc.training-result.v1` 绑定 checkpoint size/hash、日志摘要、资源、指标和
+   training-job fingerprint；
+7. candidate ModelCard/ModelArtifact identity 必须双向绑定 Pack、checkpoint、
+   trainer 和 environment，但保持 candidate/cataloged，不自动进入生产 registry；
+8. 失败、取消、超时或残缺 job 不留下可注册 candidate；
+9. 用仓库 tiny fixture 和确定性 trainer 证明身份、取消、失败、重放和原子性；
+10. tiny 指标明确标为 contract-only，不进入 evidence ledger。
+
+### 验收门
+
+- 只有 P19 RegisteredPack 可进入 runner；
+- Pack/split/feature/code/env/seed/hyperparameter/checkpoint 任一变化改变 identity；
+- 同输入/seed 的 deterministic fixture 可重放；
+- label leakage、路径逃逸、任意代码、secret 泄露、checkpoint 覆盖全部拒绝；
+- 失败/取消/超时不会发布部分 checkpoint 或 candidate card；
+- dry-run 不产生 benchmark/scientific evidence 或 product policy；
+- P21B 之前没有真实训练、test/external 读取或 candidate promotion。
+
+### 可复制授权提示词
+
+```text
+授权以 `<Phase 19 完成 SHA>` 作为 Phase 20（Virtual Cell Training Pipeline）
+唯一起始基线，创建 `codex/p20-training-pipeline`，仅实现版本化 training job/result、
+RegisteredPack/feature/alignment/split/leakage/trainer/code/environment/seed/
+hyperparameter/checkpoint/model-card 双向身份、同步 CLI/library runner、安全 checkpoint、
+失败/取消/超时、临时目录到原子发布、tiny deterministic dry-run、ADR、runbook 和测试。
+trainer 只能读 allowlisted RegisteredPack/labels，leakage audit 必须在读取 label 前
+通过，上传内容不得作为任意代码执行。只允许在
+`<必须填写的 exact absolute tiny dry-run output root>` write-new tiny fixture
+candidate，不读取外置真实数据/权重、不覆盖已有 artifact、不访问网络。不得运行
+真实候选、读取真实 test/external、benchmark、自动调参、分布式/GPU scheduler，
+不得生成 scientifically_validated、promotion_eligible 或 production_promoted；
+真实 candidate 必须等待 P21A 冻结 protocol 和独立 P21B run-only 授权。本阶段不得
+实施 Phase 21 Benchmark、Marketplace、community 或 world model。本地 commit 仅在本阶段精确授权明确为 yes 时允许；
+无另行授权不操作 .53，不 push，不修改 GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树；
+不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。
+阶段结束报告 exact HEAD、training/checkpoint/model identities、安全负例和
+Phase 21A 精确授权句。
+```
+
+## 15. Phase 21：Virtual Cell Benchmark System
 
 ### 目标
 
@@ -903,11 +1000,8 @@ runner 不得创建 product promotion。默认输出多维 capability profile，
 `<必须填写的 exact absolute P8/P9 replay output root>` write-new 兼容重放 result，
 不读取新外置真实数据/权重、不运行真实 candidate；
 不得覆盖已有 artifact，不访问网络。大数据/权重不入 Git。不得实施 Marketplace、
-cell interaction、community 或 world model。允许本地功能提交；无另行授权不操作
-.53，不 push，不修改 GitHub main/tag、PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束报告 exact HEAD、protocol/result
+cell interaction、community 或 world model。本地 commit 仅在本阶段精确授权明确为 yes 时允许；无另行授权不操作
+.53，不 push，不修改 GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact HEAD、protocol/result
 hash、成功与负结果，并生成填入 exact asset manifest 的 P21B 授权句。
 ```
 
@@ -927,17 +1021,14 @@ leakage、baseline、CI、external、OOD、hash 或 scope 门失败都保留负�
 production plan abstain。本窗口是 run-only：禁止修改代码、Git、branch 或 tracked/
 untracked workspace file，只允许上述 Git 外 output root write-new。不得实施
 Phase 21C/22 或其他 candidate，不 push，不修改 GitHub main/tag，不操作 .53、
-PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。结束时报告未变的 code SHA、完整
+PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。结束时报告未变的 code SHA、完整
 training/evaluation/evidence identity 和科学结论，并生成 P21C 授权句。
 ```
 
 ### P21C 可复制授权提示词：通用独立 operator policy decision
 
 ```text
-授权具名 operator `<姓名/角色>` 以 `<当前 code SHA>`、`<P15/P16/P17/P21B/P24/P25
+授权具名 operator `<姓名/角色>` 以 `<当前 code SHA>`、`<P14/P15/P16/P21B/P24/P25
 等阶段生成的 exact protocol/run/result/scientific/promotion_eligible fingerprints>`、
 `<逐项 exact read-only artifact path + size + SHA-256>` 和
 `<exact capability scope>` 为唯一只读输入。
@@ -947,15 +1038,12 @@ operator decision，不得覆盖、不得联网。只有冻结 protocol 要求�
 external、CI、calibration/OOD、license 和 scope 门全部通过时才可写
 `production_promoted=true`；否则必须 declined/abstain。operator decision 不得创建
 或修改 `scientifically_validated`。不得实施 Phase 22，不 push，不修改 main/tag，
-不操作 .53、PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。结束时报告未变的 code SHA、underlying
+不操作 .53、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。结束时报告未变的 code SHA、underlying
 evidence fingerprints 和 exact operator-decision fingerprint。该模板可在 P24/P25
 产生合格 evidence 后复用；每次只决定一个 exact scope。
 ```
 
-## 15. Phase 22：Virtual Cell Marketplace / Registry
+## 16. Phase 22：Curated Virtual Cell Registry
 
 ### 目标
 
@@ -1002,8 +1090,8 @@ evidence fingerprints 和 exact operator-decision fingerprint。该模板可在 
 
 ```text
 授权以 `<P21A benchmark-system code SHA>` 作为 Phase 22（Curated Virtual Cell
-Registry）唯一起始代码基线，并以 `<逐项列明的 P15/P16/P17 capability/scientific
-evidence fingerprints + 对应 P15B/P16B/P17B policy fingerprints，或 P21B
+Registry）唯一起始代码基线，并以 `<逐项列明的 P14/P15/P16 capability/scientific
+evidence fingerprints + 对应 P14B/P15B/P16B policy fingerprints，或 P21B
 evidence fingerprints + 对应 P21C policy fingerprints>` 及其 exact read-only
 path/size/SHA-256 作为只读导入身份，创建
 `codex/p22-virtual-cell-registry`，仅实现 content-addressed
@@ -1016,17 +1104,14 @@ evidence 和 operator policy decision，不得自行创建/提升科学验证或
 production promotion。必须分列显示 registry approval、asset installed、
 compatible、executable、benchmark passed、scientifically validated 和 production
 promoted，
-revoked/quarantined release 不得进入 plan，历史 job identity 不得重写。允许本地
-功能提交；不新增外置数据/权重，无另行授权不操作 .53，不 push，不修改 GitHub
-main/tag、PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。不得实施 P23
+revoked/quarantined release 不得进入 plan，历史 job identity 不得重写。本地
+commit 仅在本阶段精确授权明确为 yes 时允许；不新增外置数据/权重，无另行授权不操作 .53，不 push，不修改 GitHub
+main/tag、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。不得实施 P23
 interaction、community 或 world model。阶段结束报告 exact HEAD、registry/
 release fingerprint、权限负例、E2E 和下一授权句。
 ```
 
-## 16. Phase 23：Cell Interaction Model
+## 17. Phase 23：Cell Interaction Model
 
 ### P23A 最小科学目标
 
@@ -1046,7 +1131,7 @@ assumption contract 后才可研究。
 1. 定义 sender/receiver Virtual Cell release/Pack/context identity；
 2. 显式绑定同实验 donor/sample/well、condition、dose/time 和 role；
 3. 冻结 ligand/receptor/evidence namespace 和 mapping asset；
-4. 复用 P19 role-aware modality 和 P14 adapter，不建平行模型系统；
+4. 复用 P18 role-aware modality 和 P13 adapter，不建平行模型系统；
 5. 接入至少一份真实同实验 co-culture、spatial 或 sender/receiver evidence 数据；
 6. 禁止把无关数据集中的 sender/receiver 静默配对；
 7. 比较 no-interaction、receiver-only 和简单 ligand-receptor coexpression baseline；
@@ -1083,11 +1168,8 @@ P20/P21 流程，本阶段不训练或调参。必须比较
 no-interaction、receiver-only 和 LR-coexpression baseline，并做 held-out
 sender/receiver/ligand/donor/dataset/dose-time OOD、CI 和 abstain。不得把现有
 legacy 共表达 proxy 冒充真实模型，不实施 P24 community、microbiome 或 world
-model。允许本地功能提交；无另行授权不操作 .53，不 push，不修改 GitHub main/tag、
-PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束报告 exact HEAD、paired
+model。本地 commit 仅在本阶段精确授权明确为 yes 时允许；无另行授权不操作 .53，不 push，不修改 GitHub main/tag、
+PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact HEAD、paired
 evidence/result hash、科学边界和下一授权句。
 ```
 
@@ -1098,7 +1180,8 @@ evidence/result hash、科学边界和下一授权句。
 `<exact P21B candidate/evidence identity>` 作为 Phase 23B 唯一输入，创建
 `codex/p23b-receiver-response`，只为一个预声明
 sender intervention → receiver_response_delta 任务实现严格 interaction contract/
-adapter/Broker/report 接线、直接相关测试、ADR 和 runbook，并允许本地功能提交；
+adapter/Broker/report 接线、直接相关测试、ADR 和 runbook；本地 commit 仅在本阶段
+精确授权明确为 yes 时允许；
 不得修改无关核心 runtime 或其他物种/任务。必须在结果前冻结
 estimand、intervention、control、dose/time、receiver feature/output、identification
 assumptions、confounder policy、baseline、主指标/CI、external gate 和 causal
@@ -1109,13 +1192,10 @@ language policy；必须使用同实验干预与 receiver measurement。输入�
 candidate 并执行冻结评估。无干预证据、assumption 不满足或任一 gate 失败时只能保留
 P23A evidence score，prediction=null/abstain，绝不写因果；product promotion 仍需
 独立 P21C/operator decision。不得实施 P24 或以后
-阶段，不 push，不修改 main/tag，不操作 .53、PRAXIS-2 或旧 dirty T7；不得暂存/
-提交 docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
+阶段，不 push，不修改 main/tag，不操作 .53、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。
 ```
 
-## 17. Phase 24：First Real Community Adapter
+## 18. Phase 24：First Real Community Adapter
 
 ### 最小科学目标
 
@@ -1182,16 +1262,13 @@ no-interaction 与 independent/sum-of-monocultures baseline，主指标和 paire
 独立 co-culture gate 均通过才可生成 promotion-eligible evidence；否则继续
 `prediction=null`/
 `community_model_unavailable`。不得把 toy mass balance 当生物验证，不实施
-microbiome、host、spatial 或 world model。允许本地功能提交；无另行授权不操作
-.53，不 push，不修改 GitHub main/tag、PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束报告 exact HEAD、
+microbiome、host、spatial 或 world model。本地 commit 仅在本阶段精确授权明确为 yes 时允许；无另行授权不操作
+.53，不 push，不修改 GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact HEAD、
 member/mapping/model/result hash、
 质量/单位门；若 evidence 合格，生成逐项填好的 P21C operator-decision 授权句。
 ```
 
-## 18. Phase 25：Virtual Microbiome Prototype
+## 19. Phase 25：Virtual Microbiome Prototype
 
 ### 最小科学目标
 
@@ -1258,16 +1335,13 @@ condition 零适配验证；primary/CI 未过门则不得生成 promotion 并保
 secondary 不能救门；通过只生成 promotion-eligible evidence，product policy 必须
 另用 P21C 独立决定。不得称人类
 microbiome、空间或通用 community world model，不实施 host–microbiome、experiment
-design 或 world model。允许本地功能提交；无另行授权不操作 .53，不 push，不修改
-GitHub main/tag、PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束报告 exact HEAD、
+design 或 world model。本地 commit 仅在本阶段精确授权明确为 yes 时允许；无另行授权不操作 .53，不 push，不修改
+GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact HEAD、
 community/data/model/result hash、科学边界；若 evidence 合格，生成逐项填好的
 P21C operator-decision 授权句。
 ```
 
-## 19. Phase 26：Host–Microbiome Virtual Cell
+## 20. Phase 26：Host–Microbiome Virtual Cell
 
 ### 最小科学目标
 
@@ -1321,15 +1395,12 @@ donor/batch/experiment 防泄漏，
 比较 host-only、microbiome-only、简单加和与 interaction baseline，记录 co-simulation
 time-scale/convergence，并做 held-out donor/batch 或独立数据零适配验证。无干预
 证据不得写因果，任何主门失败都 partial/abstain。不得称器官/全身 digital twin、
-临床疗效或通用 host–microbiome model，不实施 P27–P29。允许本地功能提交；无另行
-授权不操作 .53，不 push，不修改 GitHub main/tag、PRAXIS-2 或旧 dirty T7，不暂存/
-提交 docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束报告 exact HEAD、
+临床疗效或通用 host–microbiome model，不实施 P27–P29。本地 commit 仅在本阶段精确授权明确为 yes 时允许；无另行
+授权不操作 .53，不 push，不修改 GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树，不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact HEAD、
 privacy/evidence/model/result identity、科学边界和下一授权句。
 ```
 
-## 20. Phase 27：Agentic Experiment Design
+## 21. Phase 27：Agentic Experiment Design
 
 ### 目标
 
@@ -1379,11 +1450,9 @@ control/feasibility 扩展、确定性单位/约束/安全验证、offline repla
 test outcome 选实验。必须比较 random、uncertainty-only、diversity 和专家规则，
 只完成历史 replay；shadow/expert review 和 prospective pilot 分别需要 P27B/P27C
 授权。本阶段不得发送消息、控制设备、采购、操作实验室或宣称 autonomous
-scientist，不实施 multi-agent/world model。允许本地功能提交；不新增外置权重，
-无另行授权不操作 .53，不 push，不修改 GitHub main/tag、PRAXIS-2 或旧 dirty T7，
-不得暂存/提交 docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束报告 exact HEAD、design/replay
+scientist，不实施 multi-agent/world model。本地 commit 仅在本阶段精确授权明确为 yes 时允许；不新增外置权重，
+无另行授权不操作 .53，不 push，不修改 GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树，
+不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact HEAD、design/replay
 identity、安全负例和 P27B 授权句。
 ```
 
@@ -1399,9 +1468,7 @@ identity、安全负例和 P27B 授权句。
 Git、branch 或 workspace file，只允许上述 Git 外 output root write-new。
 未过门时停在 P27A；过门也只获得 shadow-reviewed 状态，不得称 prospective 或
 autonomous。不得实施 P27C/P28，不 push，不修改 main/tag，不操作 .53、PRAXIS-2
-或旧 dirty T7；不得暂存/提交 docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
+或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。
 ```
 
 ### P27C 可复制授权提示词：prospective pilot
@@ -1419,13 +1486,10 @@ rollback、`<必须填写的 exact absolute pilot output root>` 和禁止动作�
 evidence，不推广为 autonomous scientist。本窗口禁止修改代码、Git、branch 或
 workspace file，只允许预注册的外部动作和 Git 外 pilot output write-new。不得实施
 P28，不 push/发布/部署，除非
-另有独立授权；不得触碰 main/tag、.53、PRAXIS-2、旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
+另有独立授权；不得触碰 main/tag、.53、PRAXIS-2、`old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。
 ```
 
-## 21. Phase 28：Multi-Agent Virtual Biology
+## 22. Phase 28：Multi-Agent Virtual Biology
 
 ### 目标
 
@@ -1483,15 +1547,12 @@ prompt injection 的 fail-closed 测试。
 只能消费已达到等级的 P27 artifact；不得把 replay 写成 expert-reviewed，或把
 shadow 写成 prospective。
 不得宣称 agent 数量或共识等于科学正确，不实施 P29 world model、外部实验设备或
-自治研究。允许本地功能提交；不新增外置数据/权重，无另行授权不操作 .53，不 push，
-不修改 GitHub main/tag、PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
+自治研究。本地 commit 仅在本阶段精确授权明确为 yes 时允许；不新增外置数据/权重，无另行授权不操作 .53，不 push，
+不修改 GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。
 阶段结束报告 exact HEAD、role/DAG/trace identity、对照/ablation 和下一授权句。
 ```
 
-## 22. Phase 29：Biological World Model
+## 23. Phase 29：Limited Biological World Model
 
 ### 目标
 
@@ -1526,12 +1587,12 @@ docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
 ### 可复制授权提示词
 
 ```text
-授权以 `<Phase 28 完成 SHA>` 作为 Phase 29（有限生物域 Biological World Model
+授权以 `<Phase 28 完成 SHA>` 作为 Phase 29（Limited Biological World Model
 Candidate）唯一起始基线，创建 `codex/p29-biological-world-model-candidate`，
 仅为一个预先指定的有限场景冻结 state/action/observation/time 和实际存在的最小
 connected typed subgraph、namespace/unit/time-scale/conservation；不得为了完整
 molecule→organism 图补造无模型的层或 edge，
-优先组合 P13–P28 已验证模型并实现一个可重放 candidate。使用任何 Git 外 P29
+优先组合 P12–P28 已验证模型并实现一个可重放 candidate。使用任何 Git 外 P29
 数据/权重/算力前，必须另行列出 exact 只读绝对路径、逐文件
 size/SHA-256/license/source/usage、固定环境/算力身份、全新 write-new output root、
 禁止覆盖和网络策略。训练/调参只能走 P20/P21 授权流程。architecture、baseline、
@@ -1540,15 +1601,12 @@ rollout、calibration、OOD、conservation、counterfactual 和 CI 必须在 tes
 结果前冻结。必须比较 persistence/linear/additive/mechanistic/modular baseline，
 外部数据未胜或任一硬门失败即 research/disabled/abstain。无干预数据不得称因果，
 无 organism model 不得补造 organism prediction；不得称通用生命/基础模型、机制
-真理或任意细胞预测器。允许本地功能提交；无另行授权不操作 .53，不 push，不修改
-GitHub main/tag、PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束报告 exact HEAD、完整
+真理或任意细胞预测器。本地 commit 仅在本阶段精确授权明确为 yes 时允许；无另行授权不操作 .53，不 push，不修改
+GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact HEAD、完整
 data/model/environment/result identity、负结果和 P30 授权句。
 ```
 
-## 23. Phase 30：PRAXIS-VirtualCell Foundation Platform 发布
+## 24. Phase 30：PRAXIS-VirtualCell Foundation Platform 发布
 
 P30 把 Software GA 和 Science-qualified capability badge 分开。软件平台可以在严格
 合同、可重放、provenance 和 abstain 门通过后 GA；“至少三个真实物种”和“真实
@@ -1560,7 +1618,7 @@ community capability”只决定科学资格徽章，不能被平台名称自动
 
 ### P30A：本地 RC 收口
 
-1. 审计 P13–P29 evidence ledger 和 operator product-policy ledger；
+1. 审计 P12–P29 evidence ledger 和 operator product-policy ledger；
 2. production、preview、experimental、unsupported 四类能力分开；
 3. 未科学晋级模块默认 disabled/experimental；
 4. 决定一个新的 SemVer；`bf44aac...` 与已发布 `v1.6.0` 内容不同，绝不能复用或
@@ -1627,7 +1685,7 @@ community capability”只决定科学资格徽章，不能被平台名称自动
 5. 不确定、OOD、缺模型或冲突时自动 abstain；
 6. 全程 provenance 和 immutable execution identity；
 7. 多物种/新 Pack 的合同扩展不修改核心 runtime；
-8. 未通过的 P15–P29 能力默认关闭，不阻断软件平台 GA。
+8. 未通过的 P14–P29 能力默认关闭，不阻断软件平台 GA。
 
 ### Science-qualified capability badge 验收
 
@@ -1641,19 +1699,16 @@ community capability”只决定科学资格徽章，不能被平台名称自动
 
 ```text
 授权以 `<Phase 29 完成 SHA>` 作为 Phase 30A（Foundation Platform 本地 Release
-Candidate 收口）唯一起始基线，创建 `codex/p30-foundation-rc`，仅完成 P13–P29
+Candidate 收口）唯一起始基线，创建 `codex/p30-foundation-rc`，仅完成 P12–P29
 evidence/operator-policy ledger 审计、production/preview/experimental/unsupported
 分级、新 SemVer 决策（绝不复用/移动 v1.6.0）、VERSIONING/TESTING/capability/
 release/install/user 文档、Python 支持矩阵、exact-SHA 五门测试、两次 byte-identical
 wheel，以及固定 builder/base/config 的 OCI manifest/config/layer digest 验证、
 SHA256SUMS、SBOM、license/dependency audit、签名/attestation 候选、社区治理文件和
 staging/monitoring/backup/rollback runbook。Software GA 与 Science-qualified badge
-分开；未科学晋级模块必须 disabled/experimental。允许本地 RC 提交和本地 artifact
-构建；不得 push、更新 GitHub main、创建/移动 tag、发布 artifact、写入或操作 .53、
-修改 PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。阶段结束报告 exact RC SHA、全部 artifact
+分开；未科学晋级模块必须 disabled/experimental。本地 RC commit 和 artifact
+构建仅在 P30A 精确授权明确为 yes 时允许；不得 push、更新 GitHub main、创建/移动 tag、发布 artifact、写入或操作 .53、
+修改 PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact RC SHA、全部 artifact
 digest、测试/skip 口径和 blockers，并分别生成 B1–B4 exact 授权句。
 ```
 
@@ -1664,10 +1719,7 @@ digest、测试/skip 口径和 blockers，并分别生成 B1–B4 exact 授权�
 `codex/p30-foundation-rc`，不得 push 其他 ref。等待并核对该 exact SHA 的五项
 GitHub CI，报告每个 job 名称、head SHA、workflow revision、结论和 URL。任一 job
 非 success 或 head SHA 不一致即停止；不得更新 main、创建/移动 tag、发布 artifact、
-操作 .53、PRAXIS-2 或旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
+操作 .53、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。
 ```
 
 ### 可复制 P30B2 授权提示词
@@ -1682,10 +1734,7 @@ Phase 30B2 唯一输入。先只读核对 remote URL、main/RC/tag；只有 curr
 main 分叉、remote 不符或 tag 已存在，立即停止并要求新 RC/授权。main 更新后创建
 新的 annotated tag，
 发布 exact artifact/release notes，并核对 main、peeled tag、source 和全部 digest。
-不得移动旧 tag，不得部署或操作 .53、PRAXIS-2、旧 dirty T7；不得暂存/提交
-docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
+不得移动旧 tag，不得部署或操作 .53、PRAXIS-2、`old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。
 ```
 
 ### 可复制 P30B3 授权提示词
@@ -1700,9 +1749,7 @@ docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
 `codex/deploy-v1.6.0`，不得覆盖 p9/p11、历史 refs、vc_api.log、PRAXIS-2 或现有服务。
 核对 manifest、artifact digest、health git_sha，并验证 health/root/API/CLI/UI、
 权限、监控、日志和备份。不得切 production；任一门失败即停止并报告恢复状态。
-不得暂存/提交 docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
+不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。
 ```
 
 ### 可复制 P30B4 授权提示词
@@ -1714,14 +1761,12 @@ docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
 先记录旧/新 PID、端口、artifact digest 和恢复点，再执行最小可逆 production 切流；
 完成外部 smoke、错误率/延迟/资源/日志检查后执行一次真实 rollback，并按
 `<批准的最终保持版本>` 保持旧版或重新切回新版。不得触碰 PRAXIS-2、vc_api.log、
-历史 refs、旧 dirty T7 或未列明服务。任一 identity、health、monitoring、backup
+历史 refs、`old/**` 历史工作树或未列明服务。任一 identity、health、monitoring、backup
 或 rollback 门失败即停止并保留/恢复旧服务，不声称发布完成。
-不得暂存/提交 docs/HANDOFF-P10-TO-NEXT-CONVERSATION.md、
-docs/PHASE0-10-SUMMARY-AND-REMAINING-WORK.md 或
-docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
+不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。
 ```
 
-## 24. 每个阶段的标准执行顺序
+## 25. 每个阶段的标准执行顺序
 
 收到对应精确授权后，每一阶段都按以下顺序执行：
 
@@ -1736,20 +1781,24 @@ docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md。
 9. 生成不可变 artifact/result hash；
 10. 做对抗审查：坏 hash、错 scope、缺 adapter、OOD、泄漏、LLM 注入、历史身份；
 11. 只 stage 当前阶段明确文件；
-12. 本地功能提交；
+12. 仅在精确授权允许时本地提交；
 13. post-commit 重跑要求的测试和发行物验证；
 14. 写完成报告，准确区分成功能力、负结果、pending 外部门和 skip；
 15. 输出下一阶段精确授权句；没有授权不自动继续。
 
-## 25. 每阶段完成报告模板
+## 26. 每阶段完成报告模板
 
 ```text
 Phase:
+Work unit:
+Status:
+Outcome: completed_positive | completed_negative | blocked
 Starting SHA:
-Completion SHA:
+Completion SHA or unchanged code SHA:
 Branch:
 
 Authorized scope:
+Explicit non-goals:
 Changed files:
 Protected files/state:
 
@@ -1757,40 +1806,43 @@ Schemas/contracts:
 Data/Pack fingerprints:
 Model/adapter/environment fingerprints:
 Benchmark/result fingerprints:
+Operator policy fingerprint:
 
 Tests:
-- red tests:
+- red/fail-closed:
 - directional:
 - core:
 - legacy:
 - frontend:
 - Ruff/pip check:
-- wheel/container:
-- remote/LLM/GPU explicitly not run:
+- packaging:
+- remote/LLM/GPU/external explicitly not run:
 
 Scientific result:
-- task/scope:
+- exact task/scope:
 - baseline:
-- primary metric and CI:
+- primary metric/direction/CI:
 - external/OOD:
 - benchmark_passed:
-- promotion_eligible:
 - scientifically_validated:
-- production_promoted operator decision:
+- promotion_eligible:
+- production_promoted:
 - abstain behavior:
 
-Known limitations:
 Negative results retained:
+Known limitations:
 GitHub/push/main/tag state:
-.53 state:
+.53/remote state:
+Go condition satisfied:
+Next eligible work unit:
 Next exact authorization sentence:
 ```
 
-## 26. 下一步
+## 27. 下一步
 
-本路线文档收口后，只有 Phase 13 可进入授权准备。Phase 14–30 中的
+本路线文档收口后，只有 Phase 12 可进入授权准备。Phase 13–30 中的
 `<Phase N 完成 SHA>` 必须在对应前一阶段真正完成后替换为实际 40 位 SHA，不能提前
 猜测或沿用旧 SHA。
 
-Phase 13 的第一项工作是身份和证据层，不是下载 GEARS/scGPT，也不是开始训练
+Phase 12 的第一项工作是身份和证据层，不是下载 GEARS/scGPT，也不是开始训练
 world model。这是后续所有真实模型、训练、Marketplace 和多 Agent 能力可信的前提。
