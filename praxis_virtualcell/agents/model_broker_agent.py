@@ -22,6 +22,7 @@ from praxis_virtualcell.model_zoo.cache import ModelCache
 from praxis_virtualcell.model_zoo.capability_registry import (
     CapabilityRegistry,
     EnvironmentSnapshot,
+    ExecutionPlanV2,
 )
 from praxis_virtualcell.model_zoo.downloader import resolve_source
 from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
@@ -112,23 +113,29 @@ class ModelBrokerAgent(BaseAgent):
             steps = tuple(
                 step for step in plan.steps if step.model_name not in failed
             )
-            identity = (
-                plan.plan_id
-                + "|"
-                + "|".join(sorted(failed))
-            ).encode("utf-8")
-            revised_plan = plan.to_dict()
-            revised_plan.update(
-                {
-                    "plan_id": f"plan_{hashlib.sha256(identity).hexdigest()[:24]}",
-                    "executable": bool(steps),
-                    "steps": [step.to_dict() for step in steps],
-                    "reports": [
-                        report.to_dict() for report in revised_reports
-                    ],
-                }
-            )
-            plan = type(plan).from_dict(revised_plan)
+            if isinstance(plan, ExecutionPlanV2):
+                plan = plan.rebuild(
+                    reports=tuple(revised_reports),
+                    steps=steps,
+                )
+            else:
+                identity = (
+                    plan.plan_id
+                    + "|"
+                    + "|".join(sorted(failed))
+                ).encode("utf-8")
+                revised_plan = plan.to_dict()
+                revised_plan.update(
+                    {
+                        "plan_id": f"plan_{hashlib.sha256(identity).hexdigest()[:24]}",
+                        "executable": bool(steps),
+                        "steps": [step.to_dict() for step in steps],
+                        "reports": [
+                            report.to_dict() for report in revised_reports
+                        ],
+                    }
+                )
+                plan = type(plan).from_dict(revised_plan)
         self._prepared[plan.plan_id] = prepared
         bus.send(
             AgentMessage(

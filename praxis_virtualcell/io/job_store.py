@@ -12,6 +12,405 @@ import shutil
 from pathlib import Path
 
 _JOB_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
+
+
+def _canonical_fingerprint(value: dict) -> str:
+    encoded = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _valid_execution_identity(value: dict) -> bool:
+    """Validate stored identity bytes before projecting them to public fields."""
+
+    def text(item) -> bool:
+        return isinstance(item, str) and bool(item) and item.strip() == item
+
+    def fingerprint(item) -> bool:
+        return isinstance(item, str) and _SHA256.fullmatch(item) is not None
+
+    def optional_fingerprint(item) -> bool:
+        return item is None or fingerprint(item)
+
+    def fingerprints(items) -> bool:
+        return (
+            isinstance(items, list)
+            and all(fingerprint(item) for item in items)
+            and len(items) == len(set(items))
+        )
+
+    def pack(item) -> bool:
+        return item is None or (
+            isinstance(item, dict)
+            and set(item) == {"pack_id", "pack_version", "fingerprint"}
+            and text(item["pack_id"])
+            and text(item["pack_version"])
+            and fingerprint(item["fingerprint"])
+        )
+
+    schema = value.get("schema_version")
+    common_keys = {
+        "schema_version",
+        "legacy_adapter",
+        "pack",
+        "models",
+        "fingerprint",
+    }
+    expected_keys = common_keys
+    if schema == "vc.job-execution-identity.v2":
+        expected_keys = common_keys | {
+            "plan_id",
+            "submitted_request_fingerprint",
+            "request_fingerprint",
+            "environment_snapshot_fingerprint",
+            "execution_step_fingerprints",
+            "structured_report_fingerprint",
+            "outcome",
+        }
+    if set(value) != expected_keys:
+        return False
+
+    stored_fingerprint = value["fingerprint"]
+    unsigned = dict(value)
+    unsigned.pop("fingerprint")
+    try:
+        signature_valid = fingerprint(stored_fingerprint) and (
+            _canonical_fingerprint(unsigned) == stored_fingerprint
+        )
+    except (TypeError, ValueError, OverflowError):
+        return False
+    if not signature_valid or not isinstance(value["legacy_adapter"], bool):
+        return False
+    if not pack(value["pack"]) or not isinstance(value["models"], list):
+        return False
+
+    v1_model_keys = {
+        "name",
+        "version",
+        "fingerprint",
+        "compatibility_fingerprint",
+        "executable",
+    }
+    v2_model_keys = v1_model_keys | {
+        "release_fingerprint",
+        "capability_fingerprint",
+        "artifact_fingerprints",
+        "environment_fingerprint",
+        "adapter_fingerprints",
+        "evidence_fingerprints",
+        "policy_fingerprint",
+        "cataloged",
+        "artifact_ready",
+        "revoked",
+        "superseded_by",
+        "benchmark_passed",
+        "scientifically_validated",
+        "promotion_eligible",
+        "policy_present",
+        "production_promoted",
+    }
+    for model in value["models"]:
+        if not isinstance(model, dict) or set(model) != (
+            v2_model_keys if schema == "vc.job-execution-identity.v2" else v1_model_keys
+        ):
+            return False
+        if not (
+            text(model["name"])
+            and (text(model["version"]) if schema.endswith(".v1") else (
+                model["version"] is None or text(model["version"])
+            ))
+            and fingerprint(model["fingerprint"])
+            and fingerprint(model["compatibility_fingerprint"])
+            and isinstance(model["executable"], bool)
+        ):
+            return False
+        if schema.endswith(".v1"):
+            continue
+        if not (
+            optional_fingerprint(model["release_fingerprint"])
+            and optional_fingerprint(model["capability_fingerprint"])
+            and fingerprints(model["artifact_fingerprints"])
+            and optional_fingerprint(model["environment_fingerprint"])
+            and fingerprints(model["adapter_fingerprints"])
+            and fingerprints(model["evidence_fingerprints"])
+            and optional_fingerprint(model["policy_fingerprint"])
+            and optional_fingerprint(model["superseded_by"])
+            and all(
+                isinstance(model[name], bool)
+                for name in (
+                    "cataloged",
+                    "artifact_ready",
+                    "revoked",
+                    "policy_present",
+                    "production_promoted",
+                )
+            )
+            and all(
+                model[name] is None or isinstance(model[name], bool)
+                for name in (
+                    "benchmark_passed",
+                    "scientifically_validated",
+                    "promotion_eligible",
+                )
+            )
+        ):
+            return False
+        release_fields = (
+            model["release_fingerprint"],
+            model["capability_fingerprint"],
+        )
+        release_present = all(item is not None for item in release_fields)
+        if any(item is not None for item in release_fields) != release_present:
+            return False
+        if not release_present and (
+            model["environment_fingerprint"] is not None
+            or model["artifact_fingerprints"]
+            or model["adapter_fingerprints"]
+            or model["evidence_fingerprints"]
+            or model["policy_fingerprint"] is not None
+            or model["cataloged"]
+            or model["artifact_ready"]
+            or model["revoked"]
+            or model["superseded_by"] is not None
+        ):
+            return False
+        evidence = (
+            model["benchmark_passed"],
+            model["scientifically_validated"],
+            model["promotion_eligible"],
+        )
+        if any(item is None for item in evidence) != all(
+            item is None for item in evidence
+        ):
+            return False
+        if model["scientifically_validated"] and not model["benchmark_passed"]:
+            return False
+        if model["promotion_eligible"] and not (
+            model["benchmark_passed"] and model["scientifically_validated"]
+        ):
+            return False
+        if model["policy_present"] != (model["policy_fingerprint"] is not None):
+            return False
+        if model["production_promoted"] and not model["policy_present"]:
+            return False
+        if model["production_promoted"] and not (
+            model["evidence_fingerprints"]
+            and model["benchmark_passed"] is True
+            and model["scientifically_validated"] is True
+            and model["promotion_eligible"] is True
+        ):
+            return False
+        if model["executable"] and not (
+            release_present
+            and model["version"] is not None
+            and model["artifact_fingerprints"]
+            and model["environment_fingerprint"] is not None
+            and model["adapter_fingerprints"]
+            and model["evidence_fingerprints"]
+            and model["cataloged"]
+            and model["artifact_ready"]
+            and not model["revoked"]
+            and model["superseded_by"] is None
+            and all(evidence)
+            and model["policy_present"]
+            and model["production_promoted"]
+        ):
+            return False
+
+    if schema == "vc.job-execution-identity.v1":
+        return not value["legacy_adapter"] or (
+            value["pack"] is None and value["models"] == []
+        )
+
+    if value["legacy_adapter"] or not re.fullmatch(r"plan_[0-9a-f]{24}", value["plan_id"]):
+        return False
+    if not (
+        fingerprint(value["submitted_request_fingerprint"])
+        and fingerprint(value["request_fingerprint"])
+        and fingerprint(value["environment_snapshot_fingerprint"])
+        and fingerprints(value["execution_step_fingerprints"])
+        and fingerprint(value["structured_report_fingerprint"])
+    ):
+        return False
+    outcome = value["outcome"]
+    if not (
+        isinstance(outcome, dict)
+        and set(outcome) == {"abstain", "models_used", "prediction_present"}
+        and isinstance(outcome["abstain"], bool)
+        and isinstance(outcome["prediction_present"], bool)
+        and isinstance(outcome["models_used"], list)
+        and all(text(name) for name in outcome["models_used"])
+        and len(outcome["models_used"]) == len(set(outcome["models_used"]))
+    ):
+        return False
+    executable_models = {
+        model["name"] for model in value["models"] if model["executable"]
+    }
+    model_names = [model["name"] for model in value["models"]]
+    return (
+        len(model_names) == len(set(model_names))
+        and len(value["execution_step_fingerprints"]) == len(executable_models)
+        and set(outcome["models_used"]).issubset(executable_models)
+        and outcome["prediction_present"] == (not outcome["abstain"])
+        and (not outcome["prediction_present"] or bool(outcome["models_used"]))
+        and (not executable_models or value["pack"] is not None)
+    )
+
+
+def _public_execution_identity(value: object) -> dict:
+    from praxis_virtualcell.model_zoo.registry_v2 import public_model_version
+
+    if not isinstance(value, dict) or value.get("schema_version") not in {
+        "vc.job-execution-identity.v1",
+        "vc.job-execution-identity.v2",
+    } or not _valid_execution_identity(value):
+        return {
+            "schema_version": None,
+            "available": False,
+            "reason": "unsupported_or_invalid_execution_identity",
+        }
+
+    def fingerprint(item):
+        return item if isinstance(item, str) and _SHA256.fullmatch(item) else None
+
+    def fingerprints(items):
+        if not isinstance(items, list):
+            return []
+        return [item for item in items if fingerprint(item) is not None]
+
+    raw_pack = value.get("pack")
+    pack = None
+    if isinstance(raw_pack, dict):
+        pack = {
+            "pack_id": public_model_version(raw_pack.get("pack_id")),
+            "pack_version": public_model_version(raw_pack.get("pack_version")),
+            "fingerprint": fingerprint(raw_pack.get("fingerprint")),
+        }
+
+    models = []
+    for raw in value.get("models", []):
+        if not isinstance(raw, dict):
+            continue
+        model = {
+            "name": public_model_version(raw.get("name")),
+            "version": public_model_version(raw.get("version")),
+            "fingerprint": fingerprint(raw.get("fingerprint")),
+            "compatibility_fingerprint": fingerprint(
+                raw.get("compatibility_fingerprint")
+            ),
+            "executable": raw.get("executable")
+            if isinstance(raw.get("executable"), bool)
+            else False,
+        }
+        if value["schema_version"] == "vc.job-execution-identity.v2":
+            model.update(
+                {
+                    "release_fingerprint": fingerprint(
+                        raw.get("release_fingerprint")
+                    ),
+                    "capability_fingerprint": fingerprint(
+                        raw.get("capability_fingerprint")
+                    ),
+                    "artifact_fingerprints": fingerprints(
+                        raw.get("artifact_fingerprints")
+                    ),
+                    "environment_fingerprint": fingerprint(
+                        raw.get("environment_fingerprint")
+                    ),
+                    "adapter_fingerprints": fingerprints(
+                        raw.get("adapter_fingerprints")
+                    ),
+                    "evidence_fingerprints": fingerprints(
+                        raw.get("evidence_fingerprints")
+                    ),
+                    "policy_fingerprint": fingerprint(
+                        raw.get("policy_fingerprint")
+                    ),
+                    "cataloged": raw.get("cataloged")
+                    if isinstance(raw.get("cataloged"), bool)
+                    else False,
+                    "artifact_ready": raw.get("artifact_ready")
+                    if isinstance(raw.get("artifact_ready"), bool)
+                    else False,
+                    "revoked": raw.get("revoked")
+                    if isinstance(raw.get("revoked"), bool)
+                    else False,
+                    "superseded_by": fingerprint(raw.get("superseded_by")),
+                    "benchmark_passed": raw.get("benchmark_passed")
+                    if isinstance(raw.get("benchmark_passed"), bool)
+                    else None,
+                    "scientifically_validated": raw.get(
+                        "scientifically_validated"
+                    )
+                    if isinstance(raw.get("scientifically_validated"), bool)
+                    else None,
+                    "promotion_eligible": raw.get("promotion_eligible")
+                    if isinstance(raw.get("promotion_eligible"), bool)
+                    else None,
+                    "policy_present": raw.get("policy_present")
+                    if isinstance(raw.get("policy_present"), bool)
+                    else False,
+                    "production_promoted": raw.get("production_promoted")
+                    if isinstance(raw.get("production_promoted"), bool)
+                    else False,
+                }
+            )
+        models.append(model)
+
+    public = {
+        "schema_version": value["schema_version"],
+        "legacy_adapter": value.get("legacy_adapter")
+        if isinstance(value.get("legacy_adapter"), bool)
+        else True,
+        "pack": pack,
+        "models": models,
+        "fingerprint": fingerprint(value.get("fingerprint")),
+    }
+    if value["schema_version"] == "vc.job-execution-identity.v2":
+        raw_outcome = value.get("outcome")
+        outcome = None
+        if isinstance(raw_outcome, dict):
+            outcome = {
+                "abstain": raw_outcome.get("abstain")
+                if isinstance(raw_outcome.get("abstain"), bool)
+                else None,
+                "models_used": [
+                    name
+                    for name in raw_outcome.get("models_used", [])
+                    if public_model_version(name) is not None
+                ]
+                if isinstance(raw_outcome.get("models_used"), list)
+                else [],
+                "prediction_present": raw_outcome.get("prediction_present")
+                if isinstance(raw_outcome.get("prediction_present"), bool)
+                else None,
+            }
+        public.update(
+            {
+                "plan_id": public_model_version(value.get("plan_id")),
+                "submitted_request_fingerprint": fingerprint(
+                    value.get("submitted_request_fingerprint")
+                ),
+                "request_fingerprint": fingerprint(value.get("request_fingerprint")),
+                "environment_snapshot_fingerprint": fingerprint(
+                    value.get("environment_snapshot_fingerprint")
+                ),
+                "execution_step_fingerprints": fingerprints(
+                    value.get("execution_step_fingerprints")
+                ),
+                "structured_report_fingerprint": fingerprint(
+                    value.get("structured_report_fingerprint")
+                ),
+                "outcome": outcome,
+            }
+        )
+    return public
 
 
 class JobStore:
@@ -39,8 +438,11 @@ class JobStore:
             (d / f"{name}.json").write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
     @staticmethod
-    def _execution_identity(result: dict) -> dict:
-        from praxis_virtualcell.model_zoo.capability_registry import ExecutionPlan
+    def _execution_identity(result: dict, *, request: dict | None = None) -> dict:
+        from praxis_virtualcell.model_zoo.capability_registry import (
+            ExecutionPlan,
+            ExecutionPlanV2,
+        )
 
         provenance = result.get("provenance") or {}
         raw_plan = provenance.get("execution_plan")
@@ -52,7 +454,13 @@ class JobStore:
                 "models": [],
             }
         else:
-            plan = ExecutionPlan.from_dict(raw_plan)
+            schema = raw_plan.get("schema_version") if isinstance(raw_plan, dict) else None
+            if schema == "vc.execution-plan.v1":
+                plan = ExecutionPlan.from_dict(raw_plan)
+            elif schema == "vc.execution-plan.v2":
+                plan = ExecutionPlanV2.from_dict(raw_plan)
+            else:
+                raise ValueError("unsupported execution plan schema in job provenance")
             pack = (
                 {
                     "pack_id": plan.pack_id,
@@ -62,33 +470,156 @@ class JobStore:
                 if plan.pack_id is not None
                 else None
             )
-            value = {
-                "schema_version": "vc.job-execution-identity.v1",
-                "legacy_adapter": False,
-                "pack": pack,
-                "models": [
-                    {
-                        "name": report.model_name,
-                        "version": report.model_version,
-                        "fingerprint": report.model_fingerprint,
-                        "compatibility_fingerprint": report.fingerprint(),
-                        "executable": report.executable,
-                    }
-                    for report in plan.reports
-                ],
-            }
-        encoded = json.dumps(
-            value,
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=False,
-            allow_nan=False,
-        ).encode("utf-8")
-        value["fingerprint"] = hashlib.sha256(encoded).hexdigest()
+            if isinstance(plan, ExecutionPlan):
+                value = {
+                    "schema_version": "vc.job-execution-identity.v1",
+                    "legacy_adapter": False,
+                    "pack": pack,
+                    "models": [
+                        {
+                            "name": report.model_name,
+                            "version": report.model_version,
+                            "fingerprint": report.model_fingerprint,
+                            "compatibility_fingerprint": report.fingerprint(),
+                            "executable": report.executable,
+                        }
+                        for report in plan.reports
+                    ],
+                }
+            else:
+                if request is None:
+                    raise ValueError("v2 execution identity requires the submitted request")
+                from praxis_virtualcell.model_zoo.registry_v2 import (
+                    public_model_version,
+                )
+                from praxis_virtualcell.pack_product import (
+                    _public_provenance,
+                    _runtime_request_v2,
+                )
+
+                submitted_request_fingerprint = _canonical_fingerprint(request)
+                normalized_request_fingerprint = _canonical_fingerprint(
+                    _runtime_request_v2(request).to_dict()
+                )
+                if normalized_request_fingerprint != plan.request_fingerprint:
+                    raise ValueError("submitted request does not match execution plan")
+                structured_report = result.get("structured_report")
+                if not isinstance(structured_report, dict):
+                    raise ValueError("v2 execution identity requires a structured report")
+                report_plan = (
+                    (structured_report.get("provenance") or {}).get("execution_plan")
+                    if isinstance(structured_report.get("provenance") or {}, dict)
+                    else None
+                )
+                if report_plan != raw_plan:
+                    raise ValueError("structured report and provenance execution plans differ")
+                model_names = {step.model_name for step in plan.steps}
+                models_used = structured_report.get("models_used")
+                if not isinstance(models_used, list) or any(
+                    not isinstance(name, str) for name in models_used
+                ):
+                    raise ValueError("structured report models_used must be an array of names")
+                if len(set(models_used)) != len(models_used):
+                    raise ValueError("structured report models_used must be unique")
+                if not set(models_used).issubset(model_names):
+                    raise ValueError("structured report used a model outside the execution plan")
+                abstain = structured_report.get("abstain")
+                prediction = structured_report.get("prediction")
+                if not isinstance(abstain, bool):
+                    raise ValueError("structured report abstain must be boolean")
+                if prediction is not None and (abstain or not models_used):
+                    raise ValueError(
+                        "structured report prediction requires a non-abstained used model"
+                    )
+                if not abstain and prediction is None:
+                    raise ValueError("non-abstained structured report requires a prediction")
+                public_report = json.loads(json.dumps(structured_report))
+                public_report["provenance"] = _public_provenance(
+                    structured_report.get("provenance") or {}
+                )
+                value = {
+                    "schema_version": "vc.job-execution-identity.v2",
+                    "legacy_adapter": False,
+                    "plan_id": plan.plan_id,
+                    "submitted_request_fingerprint": (
+                        submitted_request_fingerprint
+                    ),
+                    "request_fingerprint": plan.request_fingerprint,
+                    "pack": pack,
+                    "environment_snapshot_fingerprint": (
+                        plan.environment_snapshot_fingerprint
+                    ),
+                    "execution_step_fingerprints": [
+                        step.fingerprint() for step in plan.steps
+                    ],
+                    "structured_report_fingerprint": _canonical_fingerprint(
+                        public_report
+                    ),
+                    "outcome": {
+                        "abstain": abstain,
+                        "models_used": models_used,
+                        "prediction_present": prediction is not None,
+                    },
+                    "models": [
+                        {
+                            "name": report.model_name,
+                            "version": public_model_version(report.model_version),
+                            "fingerprint": report.model_fingerprint,
+                            "release_fingerprint": report.release_fingerprint,
+                            "capability_fingerprint": report.capability_fingerprint,
+                            "artifact_fingerprints": list(
+                                report.artifact_fingerprints
+                            ),
+                            "environment_fingerprint": (
+                                report.environment_fingerprint
+                            ),
+                            "adapter_fingerprints": list(
+                                report.adapter_fingerprints
+                            ),
+                            "evidence_fingerprints": list(
+                                report.evidence_fingerprints
+                            ),
+                            "policy_fingerprint": report.policy_fingerprint,
+                            "compatibility_fingerprint": report.fingerprint(),
+                            "cataloged": report.cataloged,
+                            "artifact_ready": report.artifact_ready,
+                            "revoked": report.revoked,
+                            "superseded_by": report.superseded_by,
+                            "benchmark_passed": report.benchmark_passed,
+                            "scientifically_validated": (
+                                report.scientifically_validated
+                            ),
+                            "promotion_eligible": report.promotion_eligible,
+                            "policy_present": report.policy_present,
+                            "production_promoted": report.production_promoted,
+                            "executable": report.executable,
+                        }
+                        for report in plan.reports
+                    ],
+                }
+        value["fingerprint"] = _canonical_fingerprint(value)
         return value
 
     def save(self, job_id: str, *, candidate=None, request=None, result=None) -> str:
         """落盘一次 job;result 为 run_query 的返回。返回 job 目录。"""
+        if self._path(job_id).exists():
+            raise FileExistsError(f"job already exists: {job_id}")
+        execution_identity = (
+            self._execution_identity(result, request=request)
+            if result is not None
+            else None
+        )
+        public_provenance = None
+        public_report = None
+        if result is not None:
+            from praxis_virtualcell.pack_product import _public_provenance
+
+            public_provenance = _public_provenance(result.get("provenance") or {})
+            public_report = json.loads(
+                json.dumps(result.get("structured_report", {}))
+            )
+            if isinstance(public_report, dict):
+                public_report["provenance"] = public_provenance
         d = self._new_dir(job_id)
         try:
             if candidate is not None:
@@ -96,23 +627,23 @@ class JobStore:
             if request is not None:
                 self._w(d, "request", request)
             if result is not None:
-                self._w(d, "report", result.get("structured_report", {}))
+                self._w(d, "report", public_report)
                 self._w(d, "trace", result.get("trace", []))
-                self._w(d, "provenance", result.get("provenance", {}))
+                self._w(d, "provenance", public_provenance)
                 self._w(
                     d,
                     "execution_identity",
-                    self._execution_identity(result),
+                    execution_identity,
                 )
                 if result.get("narrative"):
                     self._w(d, "narrative_report.md", result["narrative"])
                 # 确定性 Markdown 报告:每次都写(含 offline),与 LLM narrative 正交
                 from praxis_virtualcell.io.report_markdown import render_report_md
                 job_like = {
-                    "report": result.get("structured_report", {}),
+                    "report": public_report,
                     "request": request, "candidate_request": candidate,
                     "trace": result.get("trace", []),
-                    "provenance": result.get("provenance", {}),
+                    "provenance": public_provenance,
                     "mode": result.get("mode"), "llm_enabled": result.get("llm_enabled"),
                 }
                 self._w(d, "report.md", render_report_md(job_like))
@@ -149,6 +680,19 @@ class JobStore:
         rf = d / "report.md"
         if rf.is_file():
             out["report_md"] = rf.read_text(encoding="utf-8")
+        from praxis_virtualcell.pack_product import _public_provenance
+
+        if isinstance(out.get("provenance"), dict):
+            out["provenance"] = _public_provenance(out["provenance"])
+        if isinstance(out.get("report"), dict):
+            report = json.loads(json.dumps(out["report"]))
+            if isinstance(report.get("provenance"), dict):
+                report["provenance"] = _public_provenance(report["provenance"])
+            out["report"] = report
+        if "execution_identity" in out:
+            out["execution_identity"] = _public_execution_identity(
+                out["execution_identity"]
+            )
         return out
 
     def list_jobs(self) -> list[str]:

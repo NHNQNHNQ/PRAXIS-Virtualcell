@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import fcntl
+import hashlib
 import json
 import os
 import tempfile
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+from praxis_virtualcell.core.config import RuntimeConfig
 from praxis_virtualcell.core.exceptions import InputValidationError
 from praxis_virtualcell.core.request import VirtualCellRequest
 from praxis_virtualcell.core.request_v2 import (
@@ -27,6 +30,7 @@ from praxis_virtualcell.model_zoo.capability_registry import (
     EnvironmentSnapshot,
 )
 from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
+from praxis_virtualcell.model_zoo.registry_v2 import public_model_version
 from praxis_virtualcell.workflows.run_virtualcell_query import (
     run_query,
     validate_candidate,
@@ -459,6 +463,29 @@ def _request_v2(request: dict[str, Any]) -> VirtualCellRequestV2:
     )
 
 
+def _runtime_request_v2(request: dict[str, Any]) -> VirtualCellRequestV2:
+    """Reconstruct the exact deterministic request bytes used by pack-aware runtime."""
+    if request.get("schema_version") == "vc.request.v2":
+        return VirtualCellRequestV2.from_dict(request)
+    runtime_request = dict(request)
+    if not runtime_request.get("request_id"):
+        digest = hashlib.sha256(
+            json.dumps(
+                runtime_request,
+                sort_keys=True,
+                ensure_ascii=False,
+            ).encode("utf-8")
+        ).hexdigest()[:16]
+        runtime_request["request_id"] = f"vc-{digest}"
+    normalized = asdict(VirtualCellRequest.from_dict(runtime_request))
+    if normalized.get("perturbation_type") in ("gene", "gene_combination"):
+        normalized["perturbation_targets"] = [
+            str(target).strip().upper()
+            for target in normalized.get("perturbation_targets", [])
+        ]
+    return legacy_request_to_v2(VirtualCellRequest.from_dict(normalized))
+
+
 def _model_stack(
     model_registry_path: str | Path | None,
     model_cache_root: str | Path | None,
@@ -474,7 +501,8 @@ def _model_stack(
             str(configured_registry)
             if configured_registry is not None
             else None
-        )
+        ),
+        enable_v2=True,
     )
     cache = ModelCache(
         root=str(configured_cache) if configured_cache is not None else None
@@ -484,30 +512,181 @@ def _model_stack(
 
 
 def _public_plan(plan: dict[str, Any]) -> dict[str, Any]:
-    public = json.loads(json.dumps(plan))
-    for step in public["steps"]:
-        step.pop("asset_paths", None)
-    for report in public["reports"]:
-        report.pop("asset_paths", None)
+    plan_keys = {
+        "vc.execution-plan.v1": (
+            "schema_version",
+            "plan_id",
+            "request_id",
+            "request_fingerprint",
+            "pack_id",
+            "pack_version",
+            "pack_fingerprint",
+            "environment_fingerprint",
+            "executable",
+            "legacy_adapter",
+        ),
+        "vc.execution-plan.v2": (
+            "schema_version",
+            "plan_id",
+            "request_id",
+            "request_fingerprint",
+            "pack_id",
+            "pack_version",
+            "pack_fingerprint",
+            "environment_snapshot_fingerprint",
+            "executable",
+            "legacy_adapter",
+        ),
+    }
+    step_keys = {
+        "vc.execution-plan.v1": (
+            "model_name",
+            "model_version",
+            "model_fingerprint",
+            "compatibility_fingerprint",
+            "wrapper",
+            "agent_name",
+        ),
+        "vc.execution-plan.v2": (
+            "schema_version",
+            "model_name",
+            "model_version",
+            "model_fingerprint",
+            "release_fingerprint",
+            "capability_fingerprint",
+            "artifact_fingerprints",
+            "environment_fingerprint",
+            "adapter_fingerprints",
+            "evidence_fingerprints",
+            "policy_fingerprint",
+            "compatibility_fingerprint",
+            "wrapper",
+            "agent_name",
+        ),
+    }
+    report_keys = {
+        "vc.execution-plan.v1": (
+            "schema_version",
+            "request_id",
+            "request_fingerprint",
+            "model_name",
+            "model_version",
+            "model_fingerprint",
+            "pack_id",
+            "pack_version",
+            "pack_fingerprint",
+            "environment_fingerprint",
+            "pack_valid",
+            "model_compatible",
+            "environment_compatible",
+            "assets_ready",
+            "wrapper_ready",
+            "executable",
+            "scientifically_validated",
+            "checks",
+            "reasons",
+        ),
+        "vc.execution-plan.v2": (
+            "schema_version",
+            "request_id",
+            "request_fingerprint",
+            "model_name",
+            "model_version",
+            "model_fingerprint",
+            "release_fingerprint",
+            "capability_fingerprint",
+            "pack_id",
+            "pack_version",
+            "pack_fingerprint",
+            "environment_fingerprint",
+            "environment_snapshot_fingerprint",
+            "artifact_fingerprints",
+            "adapter_fingerprints",
+            "evidence_fingerprints",
+            "policy_fingerprint",
+            "cataloged",
+            "artifact_ready",
+            "revoked",
+            "superseded_by",
+            "pack_valid",
+            "model_compatible",
+            "environment_compatible",
+            "adapter_compatible",
+            "assets_ready",
+            "wrapper_ready",
+            "benchmark_passed",
+            "scientifically_validated",
+            "promotion_eligible",
+            "policy_present",
+            "production_promoted",
+            "executable",
+            "checks",
+            "reasons",
+        ),
+    }
+    schema = plan.get("schema_version")
+    if schema not in plan_keys:
+        raise ValueError("unsupported execution plan schema for public projection")
+    public = {key: plan[key] for key in plan_keys[schema]}
+    public["steps"] = [
+        {key: step[key] for key in step_keys[schema]}
+        for step in plan.get("steps", [])
+    ]
+    public["reports"] = [
+        {key: report[key] for key in report_keys[schema]}
+        for report in plan.get("reports", [])
+    ]
+    for item in (*public["steps"], *public["reports"]):
+        item["model_version"] = public_model_version(item["model_version"])
+    return json.loads(json.dumps(public))
+
+
+def _public_provenance(provenance: dict[str, Any]) -> dict[str, Any]:
+    public = json.loads(json.dumps(provenance))
+    raw_plan = public.get("execution_plan")
+    if raw_plan is not None:
+        try:
+            projected = _public_plan(raw_plan)
+        except (KeyError, TypeError, ValueError):
+            public["execution_plan"] = {
+                "schema_version": None,
+                "available": False,
+                "reason": "unsupported_or_invalid_execution_plan",
+            }
+            public["compatibility_reports"] = []
+        else:
+            public["execution_plan"] = projected
+            if "compatibility_reports" in public:
+                public["compatibility_reports"] = projected["reports"]
+    elif "compatibility_reports" in public:
+        public["compatibility_reports"] = []
     return public
 
 
-def model_capabilities(
-    model_registry_path: str | Path | None = None,
+def _public_run_result(result: dict[str, Any]) -> dict[str, Any]:
+    public = json.loads(json.dumps(result))
+    provenance = _public_provenance(public.get("provenance") or {})
+    public["provenance"] = provenance
+    report = public.get("structured_report")
+    if isinstance(report, dict):
+        report["provenance"] = provenance
+    return public
+
+
+def _model_capabilities(
+    zoo: ModelZooRegistry,
+    registry_catalog: dict[str, Any],
 ) -> list[dict[str, Any]]:
-    configured = model_registry_path or os.environ.get(
-        "PRAXIS_VC_MODEL_REGISTRY"
-    )
-    zoo = ModelZooRegistry(
-        registry_path=str(configured) if configured is not None else None
-    )
+    releases_by_model: dict[str, list[dict[str, Any]]] = {}
+    for release in registry_catalog["releases"]:
+        releases_by_model.setdefault(release["model_name"], []).append(release)
     capabilities = []
     for name in zoo.capability_names():
         card = zoo.card(name)
         capabilities.append(
             {
                 "name": card.name,
-                "version": card.version,
+                "version": public_model_version(card.version),
                 "fingerprint": card.fingerprint(),
                 "status": card.status,
                 "species": list(card.species),
@@ -526,9 +705,24 @@ def model_capabilities(
                     item.to_dict() for item in card.feature_namespace
                 ],
                 "scientifically_validated": False,
+                "registry_releases": releases_by_model.get(card.name, []),
             }
         )
     return capabilities
+
+
+def model_capabilities(
+    model_registry_path: str | Path | None = None,
+) -> list[dict[str, Any]]:
+    configured = model_registry_path or os.environ.get(
+        "PRAXIS_VC_MODEL_REGISTRY"
+    )
+    zoo = ModelZooRegistry(
+        registry_path=str(configured) if configured is not None else None,
+        enable_v2=True,
+    )
+    assert zoo.registry_v2 is not None
+    return _model_capabilities(zoo, zoo.registry_v2.public_catalog())
 
 
 def pack_catalog_payload(
@@ -537,10 +731,20 @@ def pack_catalog_payload(
     model_registry_path: str | Path | None = None,
 ) -> dict[str, Any]:
     product_index = index or PackIndex()
+    configured = model_registry_path or os.environ.get(
+        "PRAXIS_VC_MODEL_REGISTRY"
+    )
+    zoo = ModelZooRegistry(
+        registry_path=str(configured) if configured is not None else None,
+        enable_v2=True,
+    )
+    assert zoo.registry_v2 is not None
+    registry_catalog = zoo.registry_v2.public_catalog()
     return {
         "schema_version": "vc.pack-catalog.v1",
         "packs": product_index.list_records(),
-        "model_capabilities": model_capabilities(model_registry_path),
+        "model_capabilities": _model_capabilities(zoo, registry_catalog),
+        "model_registry": registry_catalog,
         "scientifically_validated": False,
     }
 
@@ -583,6 +787,12 @@ def run_pack_query(
     config=None,
     enable_llm_report: bool = False,
 ) -> dict[str, Any]:
+    runtime_config = config or RuntimeConfig.from_env()
+    if runtime_config.llm_enabled:
+        raise PackUnavailable(
+            "pack-aware LLM reporting is unavailable until model paths are "
+            "projected before every outbound prompt"
+        )
     product_index = index or PackIndex()
     registry = product_index.registry_for(pack_id, pack_version)
     zoo, cache, environment = _model_stack(
@@ -590,9 +800,9 @@ def run_pack_query(
         model_cache_root,
     )
     try:
-        return run_query(
+        result = run_query(
             request,
-            config=config,
+            config=runtime_config,
             enable_llm_report=enable_llm_report,
             pack_id=pack_id,
             pack_version=pack_version,
@@ -601,5 +811,6 @@ def run_pack_query(
             model_cache=cache,
             environment=environment,
         )
+        return _public_run_result(result)
     except PackRegistryError as exc:
         raise PackUnavailable(str(exc)) from exc

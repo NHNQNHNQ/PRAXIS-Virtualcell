@@ -24,13 +24,26 @@
 ```text
 P11B product code  bf44aac25b993e49d0146ccd52dddad5c2fa14de
 DOCS-CLOSURE parent b02d21985bcde50cf0758d339b05b13bb3e200a2
-next numbered phase P12 Virtual Cell Model Zoo v2
+DOCS-CLOSURE       b19c896202bea56f894d0ad540501331af42a40c
+P12 starting SHA   b19c896202bea56f894d0ad540501331af42a40c
+P12 branch         codex/p12-model-registry-v2
+P12 state          VALIDATING
 ```
 
-DOCS-CLOSURE completion SHA 不写入会被该 SHA 自身改变的文档。接手时必须用现场
-`git rev-parse HEAD`、parent、exact allowlisted diff、post-commit status 和完成报告
-共同验证。P12 尚未实施；只有该 closure identity 成立且用户另发精确 P12 授权时
-才能开始。
+`b19c896202bea56f894d0ad540501331af42a40c` 是已经形成的 docs-only closure
+identity，也是当前 P12 精确授权的唯一起始 SHA。P12 已在
+`codex/p12-model-registry-v2` 实施，当前只可继续完成一致性、定向/受影响回归、
+Ruff、pip check、packaging、`git diff --check` 和 post-commit 核验；在完成报告与
+真实 completion SHA 形成以前不得写成 `COMPLETE`，也不得开始 P13。
+
+P12 当前建立的合同边界是：model、artifact、environment、adapter、validation
+evidence 和 operator-policy record 各有独立 version/fingerprint；
+`vc.model-card.v1` 迁移只产生 legacy/incomplete records，P8/P9 不能精确绑定的结果
+保留为 `unbound` receipt，不创建 evidence、policy 或 promotion；registry lifecycle
+通过 append-only `cataloged/artifact_ready/revoked/superseded` event 表达。现有
+`praxis-vc pack list` 与 `GET /api/packs` 只返回白名单、路径脱敏的只读投影，不新增
+管理写接口。P12 没有读取真实模型/权重，没有真实科学验证，也没有新的 operator
+decision。
 
 准确产品承诺是：
 
@@ -60,4 +73,6 @@ DOCS-CLOSURE completion SHA 不写入会被该 SHA 自身改变的文档。接�
 
 每轮必须从 `git status --short` 动态生成 staged/modified/deleted/untracked
 保护清单。除当前授权 exact allowlist 外，所有用户文件都不得 stage、commit、覆盖
-或格式化；远程状态未在当前窗口现场只读刷新时只能称历史记录。
+或格式化；不得把本文中的任何旧清单当作现场保护清单。远程状态未在当前窗口现场
+只读刷新时只能称历史记录。P13 只是 P12 完成后的条件式候选；任何 P13 模板均为
+`NOT ACTIVE`，必须等待 P12 completion identity 和新的精确授权。

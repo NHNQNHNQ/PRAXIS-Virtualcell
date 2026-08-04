@@ -4,18 +4,25 @@
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
+> DOCS-CLOSURE completion / P12 starting SHA：
+> `b19c896202bea56f894d0ad540501331af42a40c`
+>
+> 当前 work unit：P12 on `codex/p12-model-registry-v2`，状态 `VALIDATING`
+>
 > 当前 Phase 11 产品代码基线：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> DOCS-CLOSURE 日期：2026-07-31
+> 当前状态核对日期：2026-08-02
 >
-> DOCS-CLOSURE completion：以包含本文 exact bytes 的现场 Git commit 和完成报告为准
+> P12 completion：尚未形成；必须由最终 allowlisted bytes、验证、获准本地 commit、
+> post-commit 状态和完成报告证明
 
 ## 使用方法
 
 将下面整个文本块复制到新的 Codex 对话，用它恢复长期目标、当前事实和执行纪律。
-总提示词只负责总控，不授权一次性实施 P12–P30。每个 Phase 仍必须使用
+总提示词只负责总控，不授权一次性实施 P12–P30。P12 已由用户另发 exact allowlist
+授权且正在验证；这份文档本身不重发或扩大该授权。每个后续 Phase 仍必须使用
 `docs/PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md` 中对应的精确授权提示词，并填入当时
 真实 SHA、asset identity 和操作边界。
 
@@ -68,10 +75,13 @@ and biological systems.
 
 /Users/mzy/Projects/.PRAXIS-virtualcell-gitdir
 
-DOCS-CLOSURE 的 parent identity：
+DOCS-CLOSURE 与当前 P12 identity：
 
-branch  codex/p11-data-centric-ui
-parent  b02d21985bcde50cf0758d339b05b13bb3e200a2
+docs parent    b02d21985bcde50cf0758d339b05b13bb3e200a2
+docs closure   b19c896202bea56f894d0ad540501331af42a40c
+P12 start      b19c896202bea56f894d0ad540501331af42a40c
+P12 branch     codex/p12-model-registry-v2
+P12 state      VALIDATING
 
 当前 Phase 11 Cell-first 产品代码恢复点：
 
@@ -82,17 +92,19 @@ SHA     bf44aac25b993e49d0146ccd52dddad5c2fa14de
 
 P11A  数据中心化前端骨架
 P11B  Cell-first 白色聊天入口、Data Center、示例问题和直接报告
-P12   Virtual Cell Model Zoo v2；尚未开始、尚未授权
+P12   Virtual Cell Model Zoo v2；当前正在验证，completion SHA 尚未形成
+P13   Model Adapter SDK；仅为条件式下一候选，NOT ACTIVE、未授权
 
 编号纠正规则是：旧路线 P13–P19 顺延为当前 P12–P18；旧 P20 拆为当前 P19 Pack
 Factory 与 P20 Training Pipeline；P21–P30 保持不变。历史 artifact、SHA、branch 和
 报告不重命名或改写。
 
 dc81b4d... 和 b02d219... 保存的是旧编号路线历史或 DOCS-CLOSURE parent，不能作为
-“P12 已完成”证据。DOCS-CLOSURE completion identity 只由包含这些 exact bytes 的
-现场 Git commit、parent、exact allowlisted diff、clean post-commit status 和完成
-报告证明；不得在本文件中猜测或自嵌未来 commit SHA。只有现场核对该 closure
-identity 后，那个 HEAD 才能作为 P12 授权的 starting SHA；本文不构成 P12 授权。
+“P12 已完成”证据。DOCS-CLOSURE completion 是
+`b19c896202bea56f894d0ad540501331af42a40c`，并已被当前 P12 精确授权作为 starting
+SHA。P12 completion 只能由当前 allowlisted bytes、完整验证、一次获准本地 commit、
+post-commit status 和完成报告证明；不得在本文件中猜测或自嵌未来 completion SHA。
+本文也不构成 P13 授权。
 
 以下 APFS 目录是迁移安全副本，不是当前开发根；不得覆盖、清理、reset 或同步：
 
@@ -277,6 +289,20 @@ P30  Foundation Platform 发布
 
 不得跳过前置门。某个科学阶段得到负结果时，可以诚实收口软件和负证据，但不能把
 失败模型晋级；也不能为了继续路线图而伪造正向结论。
+
+当前 P12 验证快照：实现候选已经把 model、artifact、environment、adapter、
+validation evidence 和 operator-policy record 拆为独立、可 fingerprint 的合同；
+Pack-aware compatibility/plan/job identity 只在 exact evidence 与 policy 全部满足时
+执行。`vc.model-card.v1` 迁移保持 legacy/incomplete/no-promotion，不能精确绑定
+model identity 的 P8/P9 历史结果保持 `unbound` receipt，P9 `available=false` 不变。
+Registry lifecycle 通过 append-only `cataloged/artifact_ready/revoked/superseded`
+event 表达。`praxis-vc pack list` 和 `GET /api/packs` 只复用既有调用链返回白名单、
+路径脱敏投影，不新增管理写接口。Native package 的 PEP 503 distribution identity
+与 legacy runtime import-module name 分层；unsafe legacy `model_version` 只保留内部
+identity，公开为 `null`。v2 job identity 绑定 submitted/normalized request、canonical
+plan 和 step fingerprints；report/provenance 必须引用同一 plan，并使用同一字段
+白名单/路径脱敏 plan 投影。本阶段没有外置资产、真实科学运行或新的 operator
+decision；P13 明确禁止。
 
 七、关键科学硬门
 
@@ -489,9 +515,13 @@ skip/deselect 不能写成 LLM、GPU、remote、external validation 或 scientif
 
 十三、当前停止点与动态下一步
 
-先验证 DOCS-CLOSURE completion identity。验证成立时，下一 eligible work unit 是
-尚未授权的 P12；若不成立，下一 mandatory work unit 仍是 DOCS-CLOSURE。任何后续
-现场更新都必须重新按顺序总提示词的算法选择，不能永久硬编码 P12。
+本文记录的现场停止点是 P12 `VALIDATING`：starting SHA
+`b19c896202bea56f894d0ad540501331af42a40c`，branch
+`codex/p12-model-registry-v2`，completion SHA 尚未形成。若现场尚无 P12 完成报告，
+只有完整 exact P12 授权上下文仍成立时才可继续该阶段的验证/收口；本文自身不补发
+allowlist 授权。若现场已经形成真实 P12 completion SHA 和完成报告，则不得再写 P12，
+只能输出 `NOT ACTIVE` 的 P13 条件式授权草案并停止。任何后续现场更新都必须按顺序
+总提示词重新选择，不能仅凭本文快照判断完成。
 
 你收到本总提示词后的第一条工作回复必须：
 
@@ -502,14 +532,15 @@ skip/deselect 不能写成 LLM、GPU、remote、external validation 或 scientif
    codex/p12-cell-first-baseline；不得用 ref 名称推导阶段；
 5. 完整读取上述权威文档；
 6. 从现场 status 逐项列出所有 staged/modified/deleted/untracked 保护路径；
-7. 不修改、stage、commit、push、部署或操作 `.53`；
+7. 在核对当前 exact 授权前不修改、stage 或 commit；任何情况下都不由本文授权 push、
+   部署或操作 `.53`；
 8. 用简短事实报告当前状态；
 9. 报告按现场 evidence 计算出的 Next eligible work unit 和 Next numbered Phase；
-10. 从 docs/PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md 取出 P12 模板，把 starting SHA
-    填为现场验证的最新 docs-only 收口 exact HEAD；若 closure identity 不成立，
-    则报告缺少唯一 starting baseline，不得使用 b02d219... 或 bf44aac... 冒充收口
-    SHA，也不得猜测或写回本文件形成自引用 SHA；
-11. 在获得用户发出的精确 P12 授权前停止。
+10. P12 未完成且当前会话保有完整 exact 授权时，只继续 P12；缺授权字段时只报告
+    blocker，不得用本文补齐；
+11. P12 已完成时，从路线文档提取 P13 模板，但保留 completion SHA/allowlist/asset/
+    commit 等待用户决定的字段，并明确标记 `NOT ACTIVE`；不得自动创建 P13 branch
+    或实施 P13。
 
 如果现场 HEAD、分支、GitHub、`.53` 或文件状态与本提示词不同，以现场只读证据为准，
 报告差异并停止任何写操作，不得自行 reset、stash、同步或“修复”状态。

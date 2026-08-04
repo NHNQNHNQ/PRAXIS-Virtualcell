@@ -13,12 +13,21 @@
 > 当时产品版本字符串：`1.6.0`
 >
 > 后续状态：P11B 已在
-> `bf44aac25b993e49d0146ccd52dddad5c2fa14de` 完成；P12 尚未开始。当前接手以
+> `bf44aac25b993e49d0146ccd52dddad5c2fa14de` 完成；DOCS-CLOSURE 已在
+> `b19c896202bea56f894d0ad540501331af42a40c` 形成。P12 以该 SHA 为唯一起点，正在
+> `codex/p12-model-registry-v2` 执行，现场状态为 `VALIDATING`，尚未形成 completion
+> SHA。当前接手以
 > [项目与集成指南](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md)
 > 和 [顺序总提示词](PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md) 为准。
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
+
+> P12 只增加 model/artifact/environment/adapter/evidence/operator-policy 分层身份、
+> `vc.model-card.v1` 的 no-promotion 迁移、append-only lifecycle，以及既有 Pack
+> list/API 的路径脱敏只读投影。无法精确绑定的 P8/P9 历史结果保持
+> `unbound/incomplete`；没有真实科学运行或新的 operator decision。P13 仅是 P12
+> 完成后的条件式候选，当前未授权。
 
 ## 1. 项目目标与当前结论
 

@@ -2,18 +2,26 @@
 
 > 文档状态：`CURRENT_PROJECT_AND_INTEGRATION_GUIDE`
 >
-> 核对日期：2026-07-31
+> 核对日期：2026-08-02
 >
 > 当前本地仓库：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前分支：`codex/p11-data-centric-ui`
+> 当前分支：`codex/p12-model-registry-v2`
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
+> DOCS-CLOSURE completion / P12 starting SHA：
+> `b19c896202bea56f894d0ad540501331af42a40c`
+>
+> 当前 work unit：`Phase 12 — Virtual Cell Model Zoo v2`；状态 `VALIDATING`；
+> completion SHA 尚未形成
+>
+> 工作树保护清单：不在本文固定；每轮从现场 `git status --short` 动态重建，任何
+> 新 staged/modified/deleted/untracked 路径默认受保护
+>
 > 当前 Cell-first 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
-> DOCS-CLOSURE/current identity：以包含本文 exact bytes 的现场 Git commit 和完成
-> 报告为准；不得在本文中自嵌未来 SHA
+> 条件式下一候选：`Phase 13 — Model Adapter SDK`；`NOT ACTIVE`、未授权
 
 本文是一份面向其他项目、开发团队、科研合作者和后续智能体的独立项目说明。它回答四个问题：
 
@@ -53,7 +61,32 @@ PRAXIS-VirtualCell 是一个以显式合同、确定性运行、可审计证据�
 > 任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有存在匹配、可执行且
 > 经过验证并获 product policy 批准的模型时才产生预测，否则明确 abstain。
 
-### 1.1 代码与外部资产许可
+### 1.1 当前 Phase 12 验证边界
+
+当前实现候选把 model、artifact、environment、adapter、validation evidence 和
+operator-policy record 拆为独立 version/fingerprint，并把它们接入 Pack-aware
+compatibility、plan 和 job identity。`vc.model-card.v1` 保持兼容，但迁移只生成
+`legacy_incomplete` records；无法精确绑定现有 model identity 的 P8/P9 历史结果只
+保存为 `binding_status=unbound` 的 migration receipt，不创建 evidence、policy 或
+promotion，P9 `available=false` 保持不变。
+
+Registry lifecycle 使用 append-only `cataloged/artifact_ready/revoked/superseded`
+events；历史 release、job 和负结果不原地改写。现有 `praxis-vc pack list` 和
+`GET /api/packs` 调用链提供 `vc.model-registry-catalog.v2` 白名单、路径脱敏只读投影，
+没有新增管理写接口。
+
+Native environment package identity 使用 canonical PEP 503 distribution name 和
+显式 version；legacy `python_dependencies` 的 runtime import-module name 则按原始文本
+分层保留，不能被 package normalization 合并。Native `model_version` 必须 path-safe；
+unsafe legacy raw version 仍进入内部 immutable fingerprint，但所有公开投影返回
+`null`，不会改写旧 card bytes 或回显不安全文本。
+
+P12 当前仍是 `VALIDATING`：这些实现候选在全部约定测试、packaging、一次获准本地
+commit 和 post-commit 核验完成前不能写成稳定完成能力。本阶段没有外置资产、真实
+模型或权重、训练、科学 benchmark/external/OOD run，也没有新的 operator promotion
+decision。P13 明确禁止且未授权。
+
+### 1.2 代码与外部资产许可
 
 仓库源码在 `pyproject.toml` 中声明为 MIT License。公共数据集、数据库下载、模型权重、checkpoint 和其他外置科研资产保留各自的许可、引用和使用限制；不能因为仓库代码使用 MIT，就推定这些外部资产也可按 MIT 再分发。
 
@@ -273,7 +306,7 @@ flowchart TD
     PARSE --> REQ["版本化 Request Contract"]
     REQ --> BROKER["Capability Registry + Model Broker"]
     PACK["VirtualCellPack + Feature Contract"] --> BROKER
-    MODEL["ModelCard + Weight/Environment Identity"] --> BROKER
+    MODEL["ModelCard + P12 Registry v2 identity candidate"] --> BROKER
     ENV["Environment Snapshot"] --> BROKER
 
     BROKER --> COMP["Compatibility Report"]
@@ -313,11 +346,12 @@ LLM 位于科学执行链之外。
 | Upload receipt | 用户上传原始字节的 quarantine 收据 | 已实现，不是 Pack |
 | VirtualCellPack | 数据、语义、资产和 provenance 的版本化包 | 已实现 v0.1–v0.3 |
 | Feature contract | 模型期望的 feature namespace、顺序和映射要求 | 已实现 |
-| ModelCard | 模型能力、输入、输出、资源、OOD 和 wrapper 合同 | 已实现 v1 |
-| Environment snapshot | 依赖、资源、adapter 和运行环境状态 | 已实现 |
-| Compatibility report | Pack × request × model × environment 检查结果 | 已实现 |
-| Execution plan | 可执行步骤及其 fingerprint | 已实现 |
-| Job execution identity | 本次运行绑定的 Pack、模型和兼容性身份 | 已实现 |
+| ModelCard | 模型能力、输入、输出、资源、OOD 和 wrapper 合同 | v1 保持兼容 |
+| Model Registry v2 identities | model release、artifact、environment、adapter、evidence、operator policy | P12 implementation candidate；验证中 |
+| Environment snapshot | 依赖、资源、adapter 和运行环境状态 | v1 保留；Pack-aware v2 candidate 绑定 exact environment identity |
+| Compatibility report | Pack × request × model × environment × adapter × evidence × policy 检查结果 | v1 保留；Pack-aware v2 candidate 验证中 |
+| Execution plan | 可执行步骤及其 fingerprint | v1 保留；Pack-aware v2 candidate 验证中 |
+| Job execution identity | 本次运行绑定的 Pack、release、artifact、environment、adapter、evidence、policy 和 compatibility identity | v1 保留；v2 candidate 验证中 |
 | Persistent Virtual Cell | cell + dataset + Pack + model 的持久化产品对象 | 尚未实现 |
 | Training job | 上传数据到训练、评估和 promotion 的合同 | 尚未实现 |
 | Community model runtime | 多成员动态和交换预测 | 只有抽象合同，尚无真实模型 |
@@ -341,8 +375,11 @@ LLM 位于科学执行链之外。
 `scientifically_validated=false` 改成 true；registry 也不能创建 evidence。
 撤销只影响未来运行，不改写历史 job。
 
-P12 将补齐独立 adapter、evidence 和 operator-policy record identity；当前 P6-era
-合同不能被描述为该工作已经完成。软件版本发布与科学/policy promotion 仍分别治理。
+P12 implementation candidate 已补入独立 artifact、environment、adapter、evidence
+和 operator-policy record identity，并让 Pack-aware runtime 对 exact 完整绑定
+fail closed；但当前状态仍是 `VALIDATING`，不能在 completion SHA 和完成报告形成前
+写成稳定完成。P6-era v1 合同继续兼容，不能与 v2 完整治理混称。软件版本发布与
+科学/policy promotion 仍分别治理。
 
 ---
 
@@ -498,7 +535,24 @@ Phase 11A 曾建立 Dashboard、Organisms、Datasets、VirtualCellPacks、Virtua
 - 展示 execution identity、证据、trace 和 provenance。
 
 Phase 11B 完成的是可信入口，不是“cell 与数据、Pack、模型已经形成可执行绑定”。
-Phase 12 尚未开始；下一阶段是 Virtual Cell Model Zoo v2 的身份和证据注册合同。
+该边界没有被 P12 改写。
+
+### Phase 12：Virtual Cell Model Zoo v2（`VALIDATING`）
+
+P12 从 `b19c896202bea56f894d0ad540501331af42a40c` 开始，在
+`codex/p12-model-registry-v2` 上形成并正在验证：
+
+- model artifact、environment、adapter、validation evidence、operator policy、
+  release 和 lifecycle event 的独立不可变身份；
+- Pack-aware v2 compatibility、execution plan 和 job execution identity；
+- `vc.model-card.v1` 到 `legacy_incomplete` v2 records 的保守迁移；
+- P8/P9 无法 exact model-bind 的 evidence 只作为 `unbound` migration receipt；
+- append-only catalog/readiness/revoke/supersede history；
+- 现有 Pack list/API 的路径脱敏、字段白名单 Model Registry v2 投影。
+
+P12 没有新增、下载或运行真实权重，没有训练或科学验证，没有新的 operator promotion
+decision，也没有管理写 API。当前仍待完整验证和 completion SHA，因此不能写成已
+完成；P13 只是条件式下一候选且未授权。
 
 ---
 
@@ -561,11 +615,30 @@ artifact SHA-256
 - `vc.pack-index.v1`
 - `vc.pack-catalog.v1`
 - `vc.job-execution-identity.v1`
+- `vc.model-artifact.v1`（P12 candidate）
+- `vc.model-environment.v1`（P12 immutable identity；不同于 runtime snapshot）
+- `vc.model-adapter.v1`（P12 identity；不是 P13 Adapter SDK）
+- `vc.model-validation-evidence.v1`
+- `vc.model-operator-policy.v1`
+- `vc.model-release.v1`
+- `vc.model-registry-event.v1`
+- `vc.model-registry-state.v1`
+- `vc.model-registry.v2`
+- `vc.model-registry-catalog.v2`
+- `vc.model-registry-legacy-receipt.v1`
+- `vc.model-registry-legacy-migration-report.v1`
+- `vc.environment.v2`
+- `vc.compatibility-report.v2`
+- `vc.execution-step.v2`
+- `vc.execution-plan.v2`
+- `vc.job-execution-identity.v2`
 - `vc.data-catalog.v1`
 - `vc.upload-receipt.v1`
 - `vc.community-pack.v1`
 
 其他项目应按 `schema_version` 路由解析器，不能依靠字段形状猜测版本。
+以上 P12 新增 schema 当前均属于同一 `VALIDATING` implementation candidate；在 P12
+completion report 形成前，外部项目不应把它们当作已发布稳定协议。
 
 ---
 
@@ -642,6 +715,14 @@ P10 yeast tiny Pack 存在于 CommunityPack fixture/release 资产中，但不�
 
 `ecoli_gem` 的 available 只表示 registry 中的资产/能力状态。当前通用 Pack runtime 缺少 growth output adapter，因此不能把它宣传为可对任意 bacteria Pack 执行的通用生长模型。
 
+P12 的保守迁移不会把这五张卡的 `planned/available/missing` 提升为 v2
+`artifact_ready`、`executable`、scientifically validated 或 promoted。每张旧卡只
+形成 `migration_status=legacy_incomplete` 的 release 和结构化 `legacy_status`；其
+不完整 artifact/environment/adapter records 不能进入 v2 可执行计划。P8/P9 历史
+receipt 若缺 exact model binding 也只进入 unbound migration report。若旧卡的 raw
+`model_version` 不是 canonical path-safe identifier，内部 identity 仍绑定原值，而
+公开 catalog/capability/job projection 的 version 显示 `null`。
+
 对 human/K562 Pack 的历史实测曾出现：
 
 ```text
@@ -712,12 +793,14 @@ FastAPI 应用位于 `praxis_vc_api/main.py`。默认提供：
 
 | 方法 | 路径 | 用途 | 是否执行模型 |
 |---|---|---|---|
-| GET | `/api/packs` | 列出并重新验证 Pack records | 否 |
+| GET | `/api/packs` | 列出并重新验证 Pack records；P12 candidate 同时投影路径脱敏的 `model_registry` | 否 |
 | GET | `/api/packs/{id}/{version}` | 获取单个 Pack record | 否 |
 | GET | `/api/packs/{id}/{version}/validate` | 重新验证注册 Pack | 否 |
 | POST | `/api/packs/compatibility` | 计算兼容性和计划 | 否 |
 
 当前没有远程 Pack register API。Pack 注册是本地 operator CLI/Python 操作。
+P12 没有增加 model-registry 管理写 API；`model_registry` 只包含显式白名单字段，不能
+返回 asset cache path、URI、wrapper/implementation locator 或本地路径。
 
 ### 12.3 数据门户
 
@@ -894,6 +977,9 @@ praxis-vc pack list
 ```
 
 `inspect` 只解析 manifest，不读取全部资产，也不声明 Pack 有效。
+在 P12 candidate 中，`pack list` 复用同一个 Pack catalog payload，额外返回
+`vc.model-registry-catalog.v2` 只读白名单投影；它不执行 lifecycle 写操作，也不把
+cataloged 或 legacy available 解释为可预测。
 
 兼容性规划：
 
@@ -1032,6 +1118,17 @@ Pack-aware job 记录：
 - executable 状态；
 - 整体 execution fingerprint。
 
+P12 candidate 对 `vc.execution-plan.v2` 生成
+`vc.job-execution-identity.v2`，进一步冻结 submitted/normalized request、plan、
+environment snapshot、model release、capability、artifact、environment、adapter、
+evidence、operator policy、lifecycle snapshot、science/policy snapshot verdict 和
+compatibility fingerprints；`plan_id` 使用 canonical plan identity，并单列每个
+execution-step fingerprint。JobStore 要求 submitted request 的 normalized fingerprint
+与 plan 相等，也要求 structured report 与 provenance 保存同一 plan；该 identity 只
+从该次已保存 plan/report 生成，不查询 live registry 来改写历史状态。落盘 structured
+report 与 provenance 中的 execution plan 均替换为同一个字段白名单/路径脱敏 public
+plan。历史 `vc.job-execution-identity.v1` bytes 和 legacy adapter 标记保持兼容。
+
 Legacy job 明确记录：
 
 ```json
@@ -1142,6 +1239,17 @@ wrapper_available
 executable
 scientifically_validated
 ```
+
+P12 candidate 的 `vc.compatibility-report.v2` 还逐项绑定 model release、capability、
+artifact、environment identity、adapter、evidence、operator policy 和 lifecycle
+snapshot。只有 native exact-Pack release、经 hash/size 复验的安全 artifact、
+`vc.environment.v2` exact identity、exact adapter、promotion-eligible evidence、
+production-promoted policy，以及未 revoked/superseded 的 active state 同时成立，
+`vc.execution-plan.v2` 才包含 step；否则保存稳定拒因并空 plan/abstain。
+
+产品 Pack CLI/API 路径显式启用 v2 gate。为保持 P8/legacy 低层回归，直接构造自定义
+`ModelZooRegistry(custom_path)` 的库调用仍可处于 v1 compatibility mode；该路径不是
+v2 fully governed 产品执行面，不能用来绕过 product Pack 路径或声称 P12 完整治理。
 
 当前通用 plugin runtime 只实现：
 
@@ -1422,7 +1530,16 @@ SHA-256  0a31bbb4bfc2f5773cda459e6790b6ccd6ff11dab8d386c026ad37bd0c42aa96
 该 hash 只标识该次本地构建，不代表已经发布到 GitHub。本次 DOCS-CLOSURE 不修改
 代码，也不重跑 core、legacy、frontend 或发行物；只报告实际文档检查。
 
-### 24.3 Skip 和 deselect 的含义
+### 24.3 P12 验证状态
+
+P12 当前位于以 `b19c896...` 为 HEAD 的 allowlisted implementation working tree，状态
+为 `VALIDATING`。Model Registry v2、cache、capability runtime、Pack product 和 job
+identity 的 fail-closed/定向测试正在收口；受影响 core、legacy、frontend、Ruff、
+pip check、packaging、`git diff --check` 和 post-commit 核验仍必须以最终完成报告的
+exact 命令、计数和 SHA 为准。本节不提前记录会随验证变化的数字，也不把 P10、
+`b02d219...` 或 DOCS-CLOSURE 的历史测试继承为 P12 证据。
+
+### 24.4 Skip 和 deselect 的含义
 
 skip/deselect 不能写成：
 
@@ -1460,6 +1577,10 @@ skip/deselect 不能写成：
 ### 模型限制
 
 - 通用 adapter 只支持 delta expression；
+- P12 只定义 adapter identity，不是 P13 Adapter SDK，也没有新增 task/output adapter；
+- P12 v2 identities 和 Pack-aware gate 尚处 `VALIDATING`，没有 completion SHA；
+- custom-path 低层 ModelZooRegistry 保留显式 v1 compatibility mode，不能称 v2 fully
+  governed 产品路径；
 - 当前部署/本地默认环境没有完整真实权重生态；
 - 模型卡 available 不等于 runtime 可执行；
 - Golden baselines 没有科学 promotion；
@@ -1477,6 +1598,7 @@ skip/deselect 不能写成：
 ### 工程限制
 
 - 当前版本字符串存在发布漂移；
+- 当前 P12 working tree 尚待最终验证、一次本地 commit 和 post-commit 核验；
 - 当前 core suite 有一个 packaging/text-contract 失败；
 - JobStore 是本地文件系统；
 - API 除上传外没有通用认证；
@@ -1622,11 +1744,12 @@ artifact hash
 
 ## 28. 后续路线图 P12–P30
 
-以下内容是计划，不是当前已实现能力，也不是自动授权。
+P12 行记录当前正在验证的 work unit；P13–P30 是计划，不是当前已实现能力，也不是
+自动授权。
 
 | 阶段 | 目标 |
 |---|---|
-| P12 | Model Registry v2：artifact、environment、adapter、evidence、policy 身份分层 |
+| P12 | `VALIDATING`：Model Registry v2 artifact、environment、adapter、evidence、policy 身份分层 |
 | P13 | 统一 VirtualCellModelAdapter SDK |
 | P14 | 第一个窄域、真实验证的 E. coli growth capability |
 | P15 | Yeast deletion fitness / condition response |
@@ -1672,11 +1795,17 @@ artifact hash
 
 ## 29. 当前推荐的下一技术闭环
 
-只有现场验证 HEAD 是以 `b02d219...` 为 parent、包含本次 exact allowlisted
-docs-only bytes 且 post-commit status clean 的 DOCS-CLOSURE commit 后，下一 eligible
-work unit 才是 P12 Model Registry v2；否则仍须收口或报告 DOCS-CLOSURE 差异。
-P12 只收紧模型 artifact、environment、adapter、evidence 和 operator-policy record
-identity，不下载或运行新权重、不提前训练，也不作新的 operator promotion decision。
+当前唯一技术闭环是完成 P12 验证和收口：从
+`b19c896202bea56f894d0ad540501331af42a40c` 开始的 exact allowlisted changes 必须通过
+分层 identity、legacy migration、append-only lifecycle、路径脱敏、Pack-aware
+evidence×policy gate、job snapshot 和 v1 compatibility 的全部硬门，再完成定向与
+受影响回归、Ruff、pip check、packaging、`git diff --check`、一次获准本地 commit
+和 post-commit 状态核验。P12 不下载或运行新权重、不训练、不作真实科学验证，也不
+作新的 operator promotion decision。
+
+只有 actual P12 completion SHA 和完成报告形成后，P13 Adapter SDK 才成为唯一下一
+候选。当前不得创建 P13 branch、修改 P13 代码或把本文件当作 P13 授权；任何 P13
+草案都必须标记 `NOT ACTIVE` 并等待用户另发精确 allowlist 和操作边界。
 
 在进入更大世界模型之前，最重要的闭环仍然是：
 
@@ -1732,6 +1861,7 @@ identity，不下载或运行新权重、不提前训练，也不作新的 opera
 - [P8 Golden Norman](ADR-0006-virtualcellpack-p8-golden-norman.md)
 - [P8 Product Surfaces](ADR-0007-virtualcellpack-p8-product-surfaces.md)
 - [P9 OOD Validation](ADR-0008-virtualcellpack-p9-ood-validation.md)
+- [P12 Model Zoo v2](ADR-0009-virtualcell-model-zoo-v2.md)（implementation candidate）
 
 关键 runbook：
 
@@ -1741,6 +1871,7 @@ identity，不下载或运行新权重、不提前训练，也不作新的 opera
 - [Golden Norman](runbooks/VIRTUALCELLPACK-GOLDEN-NORMAN.md)
 - [Pack Product Surfaces](runbooks/VIRTUALCELLPACK-PRODUCT-SURFACES.md)
 - [P9 OOD Validation](runbooks/VIRTUALCELLPACK-P9-OOD-VALIDATION.md)
+- [P12 Model Zoo v2](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md)（validation runbook）
 - [External Disk Git Maintenance](runbooks/EXTERNAL-DISK-GIT-MAINTENANCE.md)
 
 ---
@@ -1751,9 +1882,10 @@ identity，不下载或运行新权重、不提前训练，也不作新的 opera
 PRAXIS-VirtualCell 当前是一个合同驱动、确定性运行、可审计且会诚实
 abstain 的多物种虚拟细胞基础设施。
 
-当前完成到 Phase 11。DOCS-CLOSURE completion identity 必须从包含本文 exact bytes
-的现场 commit 和完成报告核对。核对成立后下一阶段是 Phase 12 Model Registry v2，
-尚未开始、尚未授权。
+已完成产品阶段是 Phase 11，DOCS-CLOSURE completion 是
+b19c896202bea56f894d0ad540501331af42a40c。当前唯一 work unit 是 Phase 12 Model
+Registry v2：以同一 SHA 起步，在 codex/p12-model-registry-v2 上处于 VALIDATING；
+completion SHA 尚未形成。P13 只是条件式下一候选，NOT ACTIVE、未授权。
 
 当前 UI 是：
 选择 Cell Context → Chat → 自动解析/运行 → Report/Abstain，
@@ -1761,9 +1893,14 @@ abstain 的多物种虚拟细胞基础设施。
 背景。Preset 不是持久化 Virtual Cell，当前 Chat 也没有绑定 Pack identity。
 
 数据层已经支持 strict VirtualCellPack v0.1–v0.3、H5AD/H5MU、feature
-contract、hash 和 provenance。模型层已经支持严格 ModelCard、compatibility
-report 和 execution plan，但通用 adapter 当前只支持
-predict_delta_expression → delta_expression。
+contract、hash 和 provenance。模型层已有严格 ModelCard；P12 candidate 进一步
+分离 artifact/environment/adapter/evidence/policy identity，并让 Pack-aware
+compatibility/plan/job 对 exact bindings fail closed。v1 仍兼容，通用 adapter 当前
+仍只支持 predict_delta_expression → delta_expression。
+
+P12 legacy migration 不创建 evidence/policy/promotion；无法精确绑定的 P8/P9
+结果保持 unbound/incomplete。registry lifecycle 是 append-only，Pack list/API 只
+返回路径脱敏白名单投影。P12 没有真实 science run 或新 operator decision。
 
 数据存在不等于 Pack；Pack、registry、per-request compatibility/executable、
 scientific evidence 和 product policy 是五个独立层次。只有 exact

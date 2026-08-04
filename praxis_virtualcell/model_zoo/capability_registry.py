@@ -20,6 +20,10 @@ from praxis_virtualcell.core.request_v2 import (
 )
 from praxis_virtualcell.data_packs.registry import RegisteredPack
 from praxis_virtualcell.model_zoo.cache import ModelCache
+from praxis_virtualcell.model_zoo.registry_v2 import (
+    EnvironmentIdentity,
+    ModelRegistryV2,
+)
 
 _TAXON = re.compile(r"^NCBITaxon:[0-9]+$")
 _CURIE = re.compile(r"^[A-Za-z][A-Za-z0-9._-]*:[A-Za-z0-9][A-Za-z0-9._-]*$")
@@ -416,11 +420,12 @@ class ModelCard(_Contract):
 
 
 class EnvironmentSnapshot(_Contract):
-    schema_version: Literal["vc.environment.v1"]
+    schema_version: Literal["vc.environment.v1", "vc.environment.v2"]
     python_dependencies: tuple[str, ...] = ()
     resources: tuple[str, ...] = ()
     runtime_tasks: tuple[str, ...] = ("predict_delta_expression",)
     runtime_outputs: tuple[str, ...] = ("delta_expression",)
+    identity: EnvironmentIdentity | None = None
 
     @field_validator("python_dependencies", mode="before")
     @classmethod
@@ -439,6 +444,24 @@ class EnvironmentSnapshot(_Contract):
     @classmethod
     def _valid_runtime_contract(cls, value, info):
         return _text_array(value, info.field_name)
+
+    @model_validator(mode="after")
+    def _versioned_identity(self):
+        if self.schema_version == "vc.environment.v1":
+            if self.identity is not None:
+                raise ValueError("vc.environment.v1 cannot contain a v2 identity")
+            return self
+        if self.identity is None:
+            raise ValueError("vc.environment.v2 requires an EnvironmentIdentity")
+        if set(self.resources) != set(self.identity.resources):
+            raise ValueError("environment resources do not match EnvironmentIdentity")
+        return self
+
+    def to_dict(self) -> dict[str, Any]:
+        value = super().to_dict()
+        if self.schema_version == "vc.environment.v1":
+            value.pop("identity", None)
+        return value
 
     @classmethod
     def detect(cls, cards: tuple[ModelCard, ...]) -> EnvironmentSnapshot:
@@ -529,6 +552,196 @@ class CompatibilityReport(_Contract):
         return self
 
 
+class CompatibilityReportV2(_Contract):
+    schema_version: Literal["vc.compatibility-report.v2"]
+    request_id: str
+    request_fingerprint: str
+    model_name: str
+    model_version: str | None
+    model_fingerprint: str
+    release_fingerprint: str | None
+    capability_fingerprint: str | None
+    pack_id: str | None
+    pack_version: str | None
+    pack_fingerprint: str | None
+    environment_fingerprint: str | None
+    environment_snapshot_fingerprint: str
+    artifact_fingerprints: tuple[str, ...]
+    adapter_fingerprints: tuple[str, ...]
+    evidence_fingerprints: tuple[str, ...]
+    policy_fingerprint: str | None
+    cataloged: bool
+    artifact_ready: bool
+    revoked: bool
+    superseded_by: str | None
+    pack_valid: bool
+    model_compatible: bool
+    environment_compatible: bool
+    adapter_compatible: bool
+    assets_ready: bool
+    wrapper_ready: bool
+    benchmark_passed: bool | None
+    scientifically_validated: bool | None
+    promotion_eligible: bool | None
+    policy_present: bool
+    production_promoted: bool
+    executable: bool
+    checks: dict[str, bool]
+    reasons: tuple[str, ...]
+    asset_paths: dict[str, str] = Field(default_factory=dict)
+
+    @field_validator(
+        "request_id",
+        "model_name",
+        mode="before",
+    )
+    @classmethod
+    def _valid_text(cls, value, info):
+        return _text(value, info.field_name)
+
+    @field_validator("model_version", mode="before")
+    @classmethod
+    def _valid_optional_model_version(cls, value):
+        return None if value is None else _text(value, "model_version")
+
+    @field_validator(
+        "request_fingerprint",
+        "model_fingerprint",
+        "environment_snapshot_fingerprint",
+        mode="before",
+    )
+    @classmethod
+    def _valid_fingerprint(cls, value, info):
+        return _fingerprint(value, info.field_name)
+
+    @field_validator(
+        "release_fingerprint",
+        "capability_fingerprint",
+        "pack_fingerprint",
+        "environment_fingerprint",
+        "policy_fingerprint",
+        "superseded_by",
+        mode="before",
+    )
+    @classmethod
+    def _valid_optional_fingerprint(cls, value, info):
+        return None if value is None else _fingerprint(value, info.field_name)
+
+    @field_validator(
+        "artifact_fingerprints",
+        "adapter_fingerprints",
+        "evidence_fingerprints",
+        mode="before",
+    )
+    @classmethod
+    def _valid_fingerprints(cls, value, info):
+        values = _text_array(value, info.field_name, allow_empty=True)
+        return tuple(_fingerprint(item, info.field_name) for item in values)
+
+    @field_validator("reasons", mode="before")
+    @classmethod
+    def _valid_reasons(cls, value):
+        return _text_array(value, "reasons", allow_empty=True)
+
+    @model_validator(mode="after")
+    def _consistent_identity_and_states(self):
+        pack_identity = (
+            self.pack_id is not None,
+            self.pack_version is not None,
+            self.pack_fingerprint is not None,
+        )
+        if any(pack_identity) and not all(pack_identity):
+            raise ValueError("compatibility report Pack identity must be all-or-none")
+        if self.pack_valid != all(pack_identity):
+            raise ValueError("pack_valid must match a complete Pack identity")
+        release_identity = (
+            self.release_fingerprint,
+            self.capability_fingerprint,
+        )
+        if any(item is not None for item in release_identity) and not all(
+            item is not None for item in release_identity
+        ):
+            raise ValueError("release and capability fingerprints must be all-or-none")
+        release_present = all(item is not None for item in release_identity)
+        if not release_present and (
+            self.environment_fingerprint is not None
+            or self.artifact_fingerprints
+            or self.adapter_fingerprints
+            or self.evidence_fingerprints
+            or self.policy_fingerprint is not None
+            or self.cataloged
+            or self.artifact_ready
+            or self.revoked
+            or self.superseded_by is not None
+        ):
+            raise ValueError("release-scoped identity and state require a release")
+        evidence_states = (
+            self.benchmark_passed,
+            self.scientifically_validated,
+            self.promotion_eligible,
+        )
+        if any(item is None for item in evidence_states) and not all(
+            item is None for item in evidence_states
+        ):
+            raise ValueError("scientific evidence states must be all present or unavailable")
+        if bool(self.evidence_fingerprints) != all(
+            item is not None for item in evidence_states
+        ):
+            raise ValueError(
+                "scientific evidence refs and states must agree before executable state"
+            )
+        if self.scientifically_validated and not self.benchmark_passed:
+            raise ValueError("scientific validation requires benchmark_passed")
+        if self.promotion_eligible and not (
+            self.benchmark_passed and self.scientifically_validated
+        ):
+            raise ValueError("promotion eligibility exceeds evidence")
+        if self.policy_present != (self.policy_fingerprint is not None):
+            raise ValueError("policy_present must match policy_fingerprint")
+        if self.production_promoted and not self.policy_present:
+            raise ValueError("production promotion requires a policy record")
+        if self.production_promoted and not (
+            self.evidence_fingerprints
+            and self.benchmark_passed is True
+            and self.scientifically_validated is True
+            and self.promotion_eligible is True
+        ):
+            raise ValueError(
+                "production promotion requires bound passing scientific evidence"
+            )
+        if self.executable and not (
+            release_present
+            and self.model_version is not None
+            and bool(self.artifact_fingerprints)
+            and self.environment_fingerprint is not None
+            and bool(self.adapter_fingerprints)
+            and bool(self.evidence_fingerprints)
+            and self.cataloged
+            and self.artifact_ready
+            and not self.revoked
+            and self.superseded_by is None
+            and self.pack_valid
+            and self.model_compatible
+            and self.environment_compatible
+            and self.adapter_compatible
+            and self.assets_ready
+            and self.wrapper_ready
+            and self.benchmark_passed
+            and self.scientifically_validated
+            and self.promotion_eligible
+            and self.policy_present
+            and self.production_promoted
+        ):
+            raise ValueError("executable exceeds the v2 evidence and policy gates")
+        return self
+
+    def fingerprint(self) -> str:
+        value = self.to_dict()
+        value.pop("asset_paths")
+        value.pop("model_version")
+        return _canonical_fingerprint(value)
+
+
 class ExecutionStep(_Contract):
     model_name: str
     model_version: str
@@ -558,6 +771,80 @@ class ExecutionStep(_Contract):
     @classmethod
     def _valid_fingerprints(cls, value, info):
         return _fingerprint(value, info.field_name)
+
+
+class ExecutionStepV2(_Contract):
+    schema_version: Literal["vc.execution-step.v2"]
+    model_name: str
+    model_version: str
+    model_fingerprint: str
+    release_fingerprint: str
+    capability_fingerprint: str
+    artifact_fingerprints: tuple[str, ...]
+    environment_fingerprint: str
+    adapter_fingerprints: tuple[str, ...]
+    evidence_fingerprints: tuple[str, ...]
+    policy_fingerprint: str
+    compatibility_fingerprint: str
+    wrapper: str
+    agent_name: str
+    asset_paths: dict[str, str] = Field(default_factory=dict)
+
+    @field_validator(
+        "model_name",
+        "model_version",
+        "wrapper",
+        "agent_name",
+        mode="before",
+    )
+    @classmethod
+    def _valid_text(cls, value, info):
+        return _text(value, info.field_name)
+
+    @field_validator(
+        "model_fingerprint",
+        "release_fingerprint",
+        "capability_fingerprint",
+        "environment_fingerprint",
+        "policy_fingerprint",
+        "compatibility_fingerprint",
+        mode="before",
+    )
+    @classmethod
+    def _valid_fingerprint(cls, value, info):
+        return _fingerprint(value, info.field_name)
+
+    @field_validator(
+        "artifact_fingerprints",
+        "adapter_fingerprints",
+        "evidence_fingerprints",
+        mode="before",
+    )
+    @classmethod
+    def _valid_fingerprints(cls, value, info):
+        values = _text_array(value, info.field_name, allow_empty=True)
+        return tuple(_fingerprint(item, info.field_name) for item in values)
+
+    def identity_dict(self) -> dict[str, Any]:
+        value = self.to_dict()
+        value.pop("asset_paths")
+        value.pop("model_version")
+        return value
+
+    def fingerprint(self) -> str:
+        return _canonical_fingerprint(self.identity_dict())
+
+    @model_validator(mode="after")
+    def _consistent_step(self):
+        if not (
+            self.artifact_fingerprints
+            and self.adapter_fingerprints
+            and self.evidence_fingerprints
+        ):
+            raise ValueError("v2 execution steps require artifact, adapter, and evidence refs")
+        if self.agent_name != self.model_name:
+            raise ValueError("execution step agent_name must match model_name")
+        return self
 
 
 class ExecutionPlan(_Contract):
@@ -623,12 +910,206 @@ class ExecutionPlan(_Contract):
         return self
 
 
+class ExecutionPlanV2(_Contract):
+    schema_version: Literal["vc.execution-plan.v2"]
+    plan_id: str
+    request_id: str
+    request_fingerprint: str
+    pack_id: str | None
+    pack_version: str | None
+    pack_fingerprint: str | None
+    environment_snapshot_fingerprint: str
+    executable: bool
+    legacy_adapter: Literal[False] = False
+    steps: tuple[ExecutionStepV2, ...]
+    reports: tuple[CompatibilityReportV2, ...]
+
+    @field_validator(
+        "plan_id",
+        "request_id",
+        "request_fingerprint",
+        "environment_snapshot_fingerprint",
+        mode="before",
+    )
+    @classmethod
+    def _valid_text(cls, value, info):
+        return _text(value, info.field_name)
+
+    @field_validator("plan_id")
+    @classmethod
+    def _valid_plan_id(cls, value):
+        if not _PLAN_ID.fullmatch(value):
+            raise ValueError("plan_id must be plan_ plus 24 lowercase hex characters")
+        return value
+
+    @field_validator(
+        "request_fingerprint",
+        "environment_snapshot_fingerprint",
+        mode="before",
+    )
+    @classmethod
+    def _valid_fingerprint(cls, value, info):
+        return _fingerprint(value, info.field_name)
+
+    @field_validator("pack_fingerprint", mode="before")
+    @classmethod
+    def _valid_optional_pack_fingerprint(cls, value):
+        return None if value is None else _fingerprint(value, "pack_fingerprint")
+
+    @field_validator("steps", "reports", mode="before")
+    @classmethod
+    def _valid_arrays(cls, value, info):
+        if not isinstance(value, (list, tuple)):
+            raise ValueError(f"{info.field_name} must be an array")
+        return tuple(value)
+
+    @classmethod
+    def _canonical_identity(
+        cls,
+        *,
+        request_id: str,
+        request_fingerprint: str,
+        pack_fingerprint: str | None,
+        environment_snapshot_fingerprint: str,
+        reports: tuple[CompatibilityReportV2, ...],
+        steps: tuple[ExecutionStepV2, ...],
+    ) -> dict[str, Any]:
+        return {
+            "request_id": request_id,
+            "request_fingerprint": request_fingerprint,
+            "pack_fingerprint": pack_fingerprint,
+            "environment_snapshot_fingerprint": environment_snapshot_fingerprint,
+            "reports": [report.fingerprint() for report in reports],
+            "steps": [step.identity_dict() for step in steps],
+        }
+
+    @classmethod
+    def build(
+        cls,
+        *,
+        request_id: str,
+        request_fingerprint: str,
+        pack_id: str | None,
+        pack_version: str | None,
+        pack_fingerprint: str | None,
+        environment_snapshot_fingerprint: str,
+        reports: tuple[CompatibilityReportV2, ...],
+        steps: tuple[ExecutionStepV2, ...],
+    ) -> ExecutionPlanV2:
+        identity = cls._canonical_identity(
+            request_id=request_id,
+            request_fingerprint=request_fingerprint,
+            pack_fingerprint=pack_fingerprint,
+            environment_snapshot_fingerprint=environment_snapshot_fingerprint,
+            reports=reports,
+            steps=steps,
+        )
+        return cls(
+            schema_version="vc.execution-plan.v2",
+            plan_id=f"plan_{_canonical_fingerprint(identity)[:24]}",
+            request_id=request_id,
+            request_fingerprint=request_fingerprint,
+            pack_id=pack_id,
+            pack_version=pack_version,
+            pack_fingerprint=pack_fingerprint,
+            environment_snapshot_fingerprint=environment_snapshot_fingerprint,
+            executable=bool(steps),
+            legacy_adapter=False,
+            steps=steps,
+            reports=reports,
+        )
+
+    def rebuild(
+        self,
+        *,
+        reports: tuple[CompatibilityReportV2, ...],
+        steps: tuple[ExecutionStepV2, ...],
+    ) -> ExecutionPlanV2:
+        return type(self).build(
+            request_id=self.request_id,
+            request_fingerprint=self.request_fingerprint,
+            pack_id=self.pack_id,
+            pack_version=self.pack_version,
+            pack_fingerprint=self.pack_fingerprint,
+            environment_snapshot_fingerprint=self.environment_snapshot_fingerprint,
+            reports=reports,
+            steps=steps,
+        )
+
+    @model_validator(mode="after")
+    def _consistent_plan(self):
+        pack_identity = (
+            self.pack_id is not None,
+            self.pack_version is not None,
+            self.pack_fingerprint is not None,
+        )
+        if any(pack_identity) and not all(pack_identity):
+            raise ValueError("execution plan Pack identity must be all-or-none")
+        if self.executable != bool(self.steps):
+            raise ValueError("execution plan executable must match non-empty steps")
+        report_names = tuple(report.model_name for report in self.reports)
+        step_names = tuple(step.model_name for step in self.steps)
+        if len(set(report_names)) != len(report_names):
+            raise ValueError("execution plan reports must have unique model names")
+        if len(set(step_names)) != len(step_names):
+            raise ValueError("execution plan steps must have unique model names")
+        for report in self.reports:
+            if not (
+                report.request_id == self.request_id
+                and report.request_fingerprint == self.request_fingerprint
+                and report.pack_id == self.pack_id
+                and report.pack_version == self.pack_version
+                and report.pack_fingerprint == self.pack_fingerprint
+                and report.environment_snapshot_fingerprint
+                == self.environment_snapshot_fingerprint
+            ):
+                raise ValueError("execution plan report identity does not match the plan")
+        executable_names = {
+            report.model_name for report in self.reports if report.executable
+        }
+        if set(step_names) != executable_names:
+            raise ValueError("execution steps must exactly match executable reports")
+        reports_by_name = {report.model_name: report for report in self.reports}
+        for step in self.steps:
+            report = reports_by_name[step.model_name]
+            if not (
+                step.model_version == report.model_version
+                and step.model_fingerprint == report.model_fingerprint
+                and step.release_fingerprint == report.release_fingerprint
+                and step.capability_fingerprint == report.capability_fingerprint
+                and step.artifact_fingerprints == report.artifact_fingerprints
+                and step.environment_fingerprint == report.environment_fingerprint
+                and step.adapter_fingerprints == report.adapter_fingerprints
+                and step.evidence_fingerprints == report.evidence_fingerprints
+                and step.policy_fingerprint == report.policy_fingerprint
+                and step.compatibility_fingerprint == report.fingerprint()
+                and dict(step.asset_paths) == dict(report.asset_paths)
+            ):
+                raise ValueError("execution step identity does not match its report")
+        identity = self._canonical_identity(
+            request_id=self.request_id,
+            request_fingerprint=self.request_fingerprint,
+            pack_fingerprint=self.pack_fingerprint,
+            environment_snapshot_fingerprint=self.environment_snapshot_fingerprint,
+            reports=self.reports,
+            steps=self.steps,
+        )
+        expected_plan_id = f"plan_{_canonical_fingerprint(identity)[:24]}"
+        if self.plan_id != expected_plan_id:
+            raise ValueError("execution plan_id does not match canonical plan identity")
+        return self
+
+
 class CapabilityRegistry:
     """Evaluate strict model cards without routing, prediction, or scientific inference."""
 
     def __init__(self, model_zoo, cache: ModelCache) -> None:
         self.model_zoo = model_zoo
         self.cache = cache
+        registry_v2 = getattr(model_zoo, "registry_v2", None)
+        if registry_v2 is not None and not isinstance(registry_v2, ModelRegistryV2):
+            raise TypeError("model_zoo.registry_v2 must be ModelRegistryV2")
+        self.registry_v2 = registry_v2
 
     @staticmethod
     def _pack_dimensions(pack: RegisteredPack | None) -> dict[str, Any]:
@@ -740,7 +1221,7 @@ class CapabilityRegistry:
             raise TypeError(f"{card.wrapper} is not a ModelWrapper subclass")
         return wrapper_class
 
-    def evaluate(
+    def _evaluate_v1(
         self,
         request: VirtualCellRequestV2,
         pack: RegisteredPack | None,
@@ -977,16 +1458,372 @@ class CapabilityRegistry:
             asset_paths=asset_paths,
         )
 
+    def evaluate(
+        self,
+        request: VirtualCellRequestV2,
+        pack: RegisteredPack | None,
+        model_name: str,
+        environment: EnvironmentSnapshot,
+    ) -> CompatibilityReport | CompatibilityReportV2:
+        legacy = self._evaluate_v1(request, pack, model_name, environment)
+        if self.registry_v2 is None:
+            return legacy
+        return self._evaluate_v2(request, pack, environment, legacy)
+
+    def _evaluate_v2(
+        self,
+        request: VirtualCellRequestV2,
+        pack: RegisteredPack | None,
+        environment: EnvironmentSnapshot,
+        legacy: CompatibilityReport,
+    ) -> CompatibilityReportV2:
+        assert self.registry_v2 is not None
+        registry = self.registry_v2
+        card = self.model_zoo.card(legacy.model_name)
+        pack_fingerprint = pack.fingerprint if pack is not None else None
+        model_releases = tuple(
+            release
+            for release in registry.releases
+            if release.model_name == card.name
+            and release.model_version == card.version
+            and release.model_fingerprint == card.fingerprint()
+        )
+        exact_releases = tuple(
+            release
+            for release in model_releases
+            if pack_fingerprint is not None
+            and pack_fingerprint in release.pack_fingerprints
+        )
+        release = (
+            exact_releases[0]
+            if len(exact_releases) == 1
+            else model_releases[0]
+            if not exact_releases and len(model_releases) == 1
+            else None
+        )
+        release_fingerprint = release.fingerprint() if release is not None else None
+        capability_fingerprint = (
+            release.capability_fingerprint() if release is not None else None
+        )
+        release_pack_match = bool(
+            release is not None
+            and pack_fingerprint is not None
+            and pack_fingerprint in release.pack_fingerprints
+        )
+
+        state = registry.state(release_fingerprint) if release is not None else None
+        cataloged = bool(state is not None and state.cataloged)
+        registry_artifact_ready = bool(state is not None and state.artifact_ready)
+        revoked = bool(state is not None and state.revoked)
+        superseded_by = state.superseded_by if state is not None else None
+
+        artifact_fingerprints = (
+            release.artifact_fingerprints if release is not None else ()
+        )
+        artifacts = tuple(
+            registry.artifact(fingerprint) for fingerprint in artifact_fingerprints
+        )
+        artifact_by_key = {artifact.cache_key: artifact for artifact in artifacts}
+        asset_paths: dict[str, str] = {}
+        assets_ready = bool(release is not None and artifacts)
+        reasons = list(legacy.reasons)
+        expected_keys = {
+            f"{card.name}/{asset.filename}" for asset in card.assets
+        }
+        if set(artifact_by_key) != expected_keys:
+            assets_ready = False
+            reasons.append("artifact.binding")
+        for asset in card.assets:
+            key = f"{card.name}/{asset.filename}"
+            artifact = artifact_by_key.get(key)
+            if artifact is None or (
+                artifact.legacy_incomplete
+                or artifact.model_fingerprint != card.fingerprint()
+                or artifact.sha256 != asset.sha256
+                or artifact.media_type != asset.media_type
+                or artifact.size_bytes is None
+            ):
+                assets_ready = False
+                continue
+            if artifact.safe_load_policy != "data_only":
+                assets_ready = False
+                reasons.append(f"artifact.safe_load_policy:{asset.filename}")
+                continue
+            status = self.cache.check(
+                card.name,
+                asset.filename,
+                sha256=artifact.sha256,
+                size_bytes=artifact.size_bytes,
+            )
+            if status.available:
+                asset_paths[asset.filename] = status.path
+            else:
+                assets_ready = False
+                code = (
+                    "artifact.path_escape"
+                    if status.reason == "asset_path_escape"
+                    else "artifact.size"
+                    if status.reason.startswith("size_mismatch")
+                    else "artifact.sha256"
+                    if status.reason.startswith("sha256_mismatch")
+                    else "artifact.missing"
+                )
+                reasons.append(f"{code}:{asset.filename}")
+
+        environment_fingerprint = (
+            release.environment_fingerprint if release is not None else None
+        )
+        environment_identity_match = bool(
+            environment.schema_version == "vc.environment.v2"
+            and environment.identity is not None
+            and environment_fingerprint == environment.identity.fingerprint()
+        )
+        adapter_fingerprints = (
+            release.adapter_fingerprints if release is not None else ()
+        )
+        adapters = tuple(
+            registry.adapter(fingerprint) for fingerprint in adapter_fingerprints
+        )
+        requested_outputs = request.task.requested_outputs or (
+            request.output_modality.name,
+        )
+        adapter_compatible = bool(
+            environment_identity_match
+            and adapters
+            and environment.identity is not None
+            and environment.identity.adapter_fingerprints == adapter_fingerprints
+            and all(
+                not adapter.legacy_incomplete
+                and adapter.task == request.task.task_type == card.task
+                and all(output in adapter.outputs for output in requested_outputs)
+                for adapter in adapters
+            )
+        )
+
+        evidence_fingerprints = (
+            release.evidence_fingerprints if release is not None else ()
+        )
+        evidence_records = tuple(
+            registry.evidence(fingerprint) for fingerprint in evidence_fingerprints
+        )
+        evidence_present = bool(
+            evidence_records
+            and pack_fingerprint is not None
+            and any(
+                evidence.pack_fingerprint == pack_fingerprint
+                for evidence in evidence_records
+            )
+        )
+        benchmark_passed = (
+            all(evidence.benchmark_passed for evidence in evidence_records)
+            if evidence_present
+            else None
+        )
+        scientifically_validated = (
+            all(evidence.scientifically_validated for evidence in evidence_records)
+            if evidence_present
+            else None
+        )
+        promotion_eligible = (
+            all(evidence.promotion_eligible for evidence in evidence_records)
+            if evidence_present
+            else None
+        )
+        policy_fingerprint = release.policy_fingerprint if release is not None else None
+        policy = (
+            registry.policy(policy_fingerprint)
+            if policy_fingerprint is not None
+            else None
+        )
+        policy_present = policy is not None
+        production_promoted = bool(
+            policy is not None and policy.production_promoted
+        )
+
+        environment_checks = (
+            legacy.checks["environment.dependencies"]
+            and legacy.checks["environment.resources"]
+            and legacy.checks["environment.runtime_task"]
+            and legacy.checks["environment.runtime_output"]
+        )
+        environment_compatible = bool(
+            environment_checks
+            and environment_identity_match
+            and adapter_compatible
+            and assets_ready
+            and legacy.wrapper_ready
+        )
+        release_native = bool(
+            release is not None and release.migration_status == "native"
+        )
+        executable = bool(
+            legacy.checks["model.status"]
+            and release_native
+            and release_pack_match
+            and cataloged
+            and registry_artifact_ready
+            and not revoked
+            and superseded_by is None
+            and legacy.model_compatible
+            and environment_compatible
+            and evidence_present
+            and benchmark_passed
+            and scientifically_validated
+            and promotion_eligible
+            and policy_present
+            and production_promoted
+        )
+
+        checks = dict(legacy.checks)
+        checks.update(
+            {
+                "registry.release": release is not None,
+                "registry.release_native": release_native,
+                "registry.pack_binding": release_pack_match,
+                "registry.cataloged": cataloged,
+                "registry.artifact_ready": registry_artifact_ready,
+                "registry.not_revoked": not revoked,
+                "registry.not_superseded": superseded_by is None,
+                "model.assets": assets_ready,
+                "environment.identity": environment_identity_match,
+                "environment.adapter": adapter_compatible,
+                "evidence.present": evidence_present,
+                "evidence.benchmark_passed": benchmark_passed is True,
+                "evidence.scientifically_validated": scientifically_validated is True,
+                "evidence.promotion_eligible": promotion_eligible is True,
+                "policy.present": policy_present,
+                "policy.production_promoted": production_promoted,
+            }
+        )
+        if release is None:
+            reasons.append(
+                "registry.release_ambiguous"
+                if len(model_releases) > 1
+                else "registry.release_missing"
+            )
+        elif not release_native:
+            reasons.append("registry.release_incomplete")
+        if not release_pack_match:
+            reasons.append("registry.pack_binding")
+        if not cataloged:
+            reasons.append("registry.not_cataloged")
+        if not registry_artifact_ready:
+            reasons.append("registry.artifact_not_ready")
+        if revoked:
+            reasons.append("registry.revoked")
+        if superseded_by is not None:
+            reasons.append("registry.superseded")
+        if not environment_identity_match:
+            reasons.append("environment.identity")
+        if not adapter_compatible:
+            reasons.append("adapter.identity")
+        if not evidence_present:
+            reasons.append("evidence.missing")
+        elif not (
+            benchmark_passed
+            and scientifically_validated
+            and promotion_eligible
+        ):
+            reasons.append("evidence.not_eligible")
+        if not policy_present:
+            reasons.append("policy.missing")
+        elif not production_promoted:
+            reasons.append("policy.not_promoted")
+
+        manifest = pack.manifest if pack is not None else None
+        return CompatibilityReportV2(
+            schema_version="vc.compatibility-report.v2",
+            request_id=request.request_id,
+            request_fingerprint=_canonical_fingerprint(request.to_dict()),
+            model_name=card.name,
+            model_version=card.version,
+            model_fingerprint=card.fingerprint(),
+            release_fingerprint=release_fingerprint,
+            capability_fingerprint=capability_fingerprint,
+            pack_id=manifest.pack_id if manifest is not None else None,
+            pack_version=manifest.pack_version if manifest is not None else None,
+            pack_fingerprint=pack_fingerprint,
+            environment_fingerprint=environment_fingerprint,
+            environment_snapshot_fingerprint=environment.fingerprint(),
+            artifact_fingerprints=artifact_fingerprints,
+            adapter_fingerprints=adapter_fingerprints,
+            evidence_fingerprints=evidence_fingerprints,
+            policy_fingerprint=policy_fingerprint,
+            cataloged=cataloged,
+            artifact_ready=registry_artifact_ready,
+            revoked=revoked,
+            superseded_by=superseded_by,
+            pack_valid=pack is not None,
+            model_compatible=legacy.model_compatible,
+            environment_compatible=environment_compatible,
+            adapter_compatible=adapter_compatible,
+            assets_ready=assets_ready,
+            wrapper_ready=legacy.wrapper_ready,
+            benchmark_passed=benchmark_passed,
+            scientifically_validated=scientifically_validated,
+            promotion_eligible=promotion_eligible,
+            policy_present=policy_present,
+            production_promoted=production_promoted,
+            executable=executable,
+            checks=checks,
+            reasons=tuple(dict.fromkeys(reasons)),
+            asset_paths=asset_paths,
+        )
+
     def plan(
         self,
         request: VirtualCellRequestV2,
         pack: RegisteredPack | None,
         environment: EnvironmentSnapshot,
-    ) -> ExecutionPlan:
+    ) -> ExecutionPlan | ExecutionPlanV2:
         reports = tuple(
             self.evaluate(request, pack, name, environment)
             for name in self.model_zoo.capability_names()
         )
+        if self.registry_v2 is not None:
+            v2_reports = tuple(
+                report
+                for report in reports
+                if isinstance(report, CompatibilityReportV2)
+            )
+            if len(v2_reports) != len(reports):
+                raise ValueError("v2 planning received a legacy compatibility report")
+            steps_v2 = tuple(
+                ExecutionStepV2(
+                    schema_version="vc.execution-step.v2",
+                    model_name=report.model_name,
+                    model_version=report.model_version,
+                    model_fingerprint=report.model_fingerprint,
+                    release_fingerprint=report.release_fingerprint,
+                    capability_fingerprint=report.capability_fingerprint,
+                    artifact_fingerprints=report.artifact_fingerprints,
+                    environment_fingerprint=report.environment_fingerprint,
+                    adapter_fingerprints=report.adapter_fingerprints,
+                    evidence_fingerprints=report.evidence_fingerprints,
+                    policy_fingerprint=report.policy_fingerprint,
+                    compatibility_fingerprint=report.fingerprint(),
+                    wrapper=self.model_zoo.card(report.model_name).wrapper,
+                    agent_name=report.model_name,
+                    asset_paths=report.asset_paths,
+                )
+                for report in v2_reports
+                if report.executable
+                and report.release_fingerprint is not None
+                and report.capability_fingerprint is not None
+                and report.environment_fingerprint is not None
+                and report.policy_fingerprint is not None
+            )
+            manifest = pack.manifest if pack is not None else None
+            return ExecutionPlanV2.build(
+                request_id=request.request_id,
+                request_fingerprint=_canonical_fingerprint(request.to_dict()),
+                pack_id=manifest.pack_id if manifest is not None else None,
+                pack_version=manifest.pack_version if manifest is not None else None,
+                pack_fingerprint=pack.fingerprint if pack is not None else None,
+                environment_snapshot_fingerprint=environment.fingerprint(),
+                reports=v2_reports,
+                steps=steps_v2,
+            )
         steps = tuple(
             ExecutionStep(
                 model_name=report.model_name,
@@ -1035,9 +1872,13 @@ class CapabilityRegistry:
 
     def instantiate(
         self,
-        step: ExecutionStep,
-        report: CompatibilityReport,
+        step: ExecutionStep | ExecutionStepV2,
+        report: CompatibilityReport | CompatibilityReportV2,
     ):
+        if isinstance(step, ExecutionStepV2) and isinstance(
+            report, CompatibilityReportV2
+        ):
+            return self._instantiate_v2(step, report)
         if not isinstance(step, ExecutionStep) or not isinstance(
             report, CompatibilityReport
         ):
@@ -1066,6 +1907,86 @@ class CapabilityRegistry:
                 or status.path != step.asset_paths.get(asset.filename)
             ):
                 raise ValueError("cannot instantiate with an unavailable model asset")
+        wrapper_class = self._wrapper_class(card)
+        instance = wrapper_class.from_capability(
+            card=card,
+            compatibility_report=report,
+            asset_paths=step.asset_paths,
+        )
+        if not isinstance(instance, wrapper_class) or (
+            instance.name != card.name
+            or instance.model_version != card.version
+        ):
+            raise ValueError("wrapper returned an invalid capability instance")
+        return instance
+
+    def _instantiate_v2(
+        self,
+        step: ExecutionStepV2,
+        report: CompatibilityReportV2,
+    ):
+        if self.registry_v2 is None:
+            raise ValueError("cannot instantiate a v2 step without ModelRegistryV2")
+        card = self.model_zoo.card(step.model_name)
+        release = self.registry_v2.release(step.release_fingerprint)
+        state = self.registry_v2.state(step.release_fingerprint)
+        if not report.executable or not (
+            state.cataloged
+            and state.artifact_ready
+            and not state.revoked
+            and state.superseded_by is None
+            and step.model_name == report.model_name == release.model_name == card.name
+            and step.model_version
+            == report.model_version
+            == release.model_version
+            == card.version
+            and step.model_fingerprint
+            == report.model_fingerprint
+            == release.model_fingerprint
+            == card.fingerprint()
+            and step.capability_fingerprint
+            == report.capability_fingerprint
+            == release.capability_fingerprint()
+            and step.artifact_fingerprints
+            == report.artifact_fingerprints
+            == release.artifact_fingerprints
+            and step.environment_fingerprint
+            == report.environment_fingerprint
+            == release.environment_fingerprint
+            and step.adapter_fingerprints
+            == report.adapter_fingerprints
+            == release.adapter_fingerprints
+            and step.evidence_fingerprints
+            == report.evidence_fingerprints
+            == release.evidence_fingerprints
+            and step.policy_fingerprint
+            == report.policy_fingerprint
+            == release.policy_fingerprint
+            and step.compatibility_fingerprint == report.fingerprint()
+            and step.wrapper == card.wrapper
+            and step.agent_name == card.name
+            and dict(step.asset_paths) == dict(report.asset_paths)
+        ):
+            raise ValueError("cannot instantiate an incompatible v2 execution step")
+        for asset_fingerprint in release.artifact_fingerprints:
+            artifact = self.registry_v2.artifact(asset_fingerprint)
+            if artifact.safe_load_policy != "data_only":
+                raise ValueError("cannot instantiate without an enforced safe load policy")
+            prefix = f"{card.name}/"
+            if not artifact.cache_key.startswith(prefix):
+                raise ValueError("cannot instantiate an incorrectly bound artifact")
+            filename = artifact.cache_key[len(prefix):]
+            status = self.cache.check(
+                card.name,
+                filename,
+                sha256=artifact.sha256,
+                size_bytes=artifact.size_bytes,
+            )
+            if (
+                not status.available
+                or status.path != step.asset_paths.get(filename)
+            ):
+                raise ValueError("cannot instantiate with an unavailable model artifact")
         wrapper_class = self._wrapper_class(card)
         instance = wrapper_class.from_capability(
             card=card,

@@ -10,12 +10,15 @@
 >
 > 当前已完成产品阶段：`Phase 11`
 >
-> DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`；completion
-> identity 以包含本文 exact bytes 的现场 commit 和完成报告为准
+> DOCS-CLOSURE completion / P12 starting SHA：
+> `b19c896202bea56f894d0ad540501331af42a40c`
 >
-> 下一 numbered Phase：`Phase 12`；尚未授权
+> 当前 work unit：`Phase 12 — Model Zoo v2`；branch
+> `codex/p12-model-registry-v2`；状态 `VALIDATING`
 >
-> DOCS-CLOSURE 核对日期：2026-07-31
+> 条件式下一候选：`Phase 13 — Adapter SDK`；`NOT ACTIVE`、未授权
+>
+> 当前状态核对日期：2026-08-02
 
 ## 使用方法
 
@@ -84,10 +87,13 @@ and biological systems.
 
 /Users/mzy/Projects/.PRAXIS-virtualcell-gitdir
 
-DOCS-CLOSURE 的历史 parent 是：
+DOCS-CLOSURE 与当前 work-unit identity：
 
-branch  codex/p11-data-centric-ui
-parent  b02d21985bcde50cf0758d339b05b13bb3e200a2
+docs parent   b02d21985bcde50cf0758d339b05b13bb3e200a2
+docs closure  b19c896202bea56f894d0ad540501331af42a40c
+P12 start     b19c896202bea56f894d0ad540501331af42a40c
+P12 branch    codex/p12-model-registry-v2
+P12 state     VALIDATING
 
 Phase 11 Cell-first 产品代码锚点：
 
@@ -101,7 +107,8 @@ stash、同步或写回以强行匹配本文。
 
 P11A  数据中心化产品骨架
 P11B  Cell-first 白色聊天入口、Data Center、示例问题和直接报告
-P12   Virtual Cell Model Zoo v2，尚未开始
+P12   Virtual Cell Model Zoo v2，当前正在验证，completion SHA 尚未形成
+P13   Model Adapter SDK，仅为条件式下一候选，NOT ACTIVE、未授权
 
 三、第一轮必须执行的只读接手
 
@@ -362,6 +369,20 @@ P30B3 Immutable staging
 P30B4 Production + real rollback
      维护窗口内切流、监控、真实 rollback 和最终保持版本。
 
+当前 P12 implementation candidate 已将 model、artifact、environment、adapter、
+validation evidence 和 operator-policy record 分层并分别 fingerprint；Pack-aware
+compatibility/plan/job 只有 exact evidence 与 policy 同时满足才 executable。
+`vc.model-card.v1` 迁移固定为 legacy/incomplete/no-promotion，无法精确绑定 model
+identity 的 P8/P9 历史结果保留为 `unbound` receipt，P9 `available=false` 不变。
+Registry lifecycle 使用 append-only `cataloged/artifact_ready/revoked/superseded`
+events。`praxis-vc pack list` 和 `GET /api/packs` 只复用既有调用链返回路径脱敏白名单
+投影，不新增管理写接口。Native PEP 503 distribution package identity 与 legacy
+runtime import-module name 分层；unsafe legacy `model_version` 内部保真、公开为
+`null`。v2 job identity 绑定 submitted/normalized request、canonical plan 和 step
+fingerprints；report/provenance 必须引用同一 plan，并使用同一字段白名单/路径脱敏
+plan 投影。本阶段没有外置资产、真实科学验证或新的 operator decision；完成全部
+验证和 post-commit 核验以前不得标记 `COMPLETE`。
+
 九、所有阶段永久科学规则
 
 必须分开：
@@ -535,21 +556,20 @@ STOPPED — awaiting explicit user authorization
 4. 唯一 Next eligible work unit 和 Next numbered Phase；
 5. 该 work unit 的前置门是否满足；
 6. 当前是否已有精确授权；
-7. 如果没有授权，从
-   docs/PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md 提取对应模板，使用现场真实值填充
-   已知字段，保留仍需用户决定的字段；
+7. P12 未完成且当前会话保有完整 exact P12 授权时，只继续 P12；缺任何授权字段时
+   报告 blocker 并停止，不能由本提示词补齐；
 8. 明确本轮没有执行任何写操作；
-9. 停止等待用户授权。
+9. 如现场已有 P12 completion SHA/报告，只生成标记为 `NOT ACTIVE`、仍需用户主动
+   发送的 P13 条件式授权草案，然后停止。
 
 本提示词编写时，预期结论是：
 
 已完成 Phase 11；
-DOCS-CLOSURE 由包含本文 exact bytes、parent 为 b02d219...、exact allowlisted diff
-和 clean post-commit status 的现场 commit/完成报告证明；
-下一阶段是 Phase 12；
-Phase 12 尚未授权；
-P12 starting SHA 必须使用现场验证的 DOCS-CLOSURE completion HEAD，不能使用
-b02d219... 或 bf44aac...，也不能从本文猜测自引用 SHA。
+DOCS-CLOSURE completion 是 b19c896202bea56f894d0ad540501331af42a40c；
+当前唯一 work unit 是 P12，starting SHA 同为 b19c896...，branch 是
+codex/p12-model-registry-v2，状态为 VALIDATING；
+P12 completion SHA 尚未形成，不能提前写 COMPLETE；
+P13 只是 P12 完成后的条件式下一候选，当前未授权，任何草案均 NOT ACTIVE。
 
 如果现场已有更新，以现场 exact evidence 为准，不要把上述预期强行写回仓库。
 ```

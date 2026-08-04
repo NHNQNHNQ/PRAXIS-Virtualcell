@@ -11,6 +11,7 @@ from yaml.constructor import ConstructorError
 
 from praxis_virtualcell.biological_modules import modules as M
 from praxis_virtualcell.model_zoo.capability_registry import ModelCard
+from praxis_virtualcell.model_zoo.registry_v2 import ModelRegistryV2
 
 LEGAL_TYPES = ("public_model", "self_trained")
 LEGAL_STATUS = ("available", "planned", "missing")
@@ -48,10 +49,19 @@ class _UniqueKeyLoader(yaml.SafeLoader):
 
 
 class ModelZooRegistry:
-    def __init__(self, registry_path: str | None = None) -> None:
+    def __init__(
+        self,
+        registry_path: str | None = None,
+        *,
+        enable_v2: bool | None = None,
+        registry_v2: ModelRegistryV2 | None = None,
+    ) -> None:
         self.path = Path(registry_path or _DEFAULT_REGISTRY)
         self._models: dict[str, dict] = {}
         self._cards: dict[str, ModelCard] = {}
+        self._enable_v2 = registry_path is None if enable_v2 is None else enable_v2
+        self._provided_registry_v2 = registry_v2
+        self._registry_v2: ModelRegistryV2 | None = None
         self._load()
 
     def _load(self) -> None:
@@ -60,10 +70,15 @@ class ModelZooRegistry:
                 self.path.read_text(encoding="utf-8"),
                 Loader=_UniqueKeyLoader,
             ) or {}
+        except OSError:
+            raise ValueError("model_zoo registry is unavailable") from None
         except yaml.YAMLError as exc:
             raise ValueError(f"invalid model_zoo YAML: {exc}") from exc
-        if not isinstance(doc, dict) or set(doc) != {"models"}:
-            raise ValueError("model_zoo root must contain only models")
+        if not isinstance(doc, dict) or set(doc) not in (
+            {"models"},
+            {"models", "registry_v2"},
+        ):
+            raise ValueError("model_zoo root must contain models and optional registry_v2")
         models = doc.get("models") or {}
         if not isinstance(models, dict):
             raise ValueError("model_zoo models must be an object")
@@ -81,6 +96,31 @@ class ModelZooRegistry:
             else:
                 self._validate(name, entry)
                 self._models[name] = entry
+        embedded = doc.get("registry_v2")
+        if embedded is not None and self._provided_registry_v2 is not None:
+            raise ValueError("model_zoo registry_v2 cannot be both embedded and injected")
+        if embedded is not None:
+            self._registry_v2 = ModelRegistryV2.from_dict(embedded)
+        elif self._provided_registry_v2 is not None:
+            if not isinstance(self._provided_registry_v2, ModelRegistryV2):
+                raise TypeError("registry_v2 must be ModelRegistryV2")
+            self._registry_v2 = self._provided_registry_v2
+        elif self._enable_v2:
+            self._registry_v2 = ModelRegistryV2.from_v1_cards(self._cards.values())
+        if self._registry_v2 is not None:
+            self._validate_v2_bindings(self._registry_v2)
+
+    def _validate_v2_bindings(self, registry: ModelRegistryV2) -> None:
+        for release in registry.releases:
+            try:
+                card = self._cards[release.model_name]
+            except KeyError as exc:
+                raise ValueError("registry_v2 release has no matching model card") from exc
+            if (
+                release.model_version != card.version
+                or release.model_fingerprint != card.fingerprint()
+            ):
+                raise ValueError("registry_v2 release is bound to a different model card")
 
     @staticmethod
     def _validate(name: str, entry: dict) -> None:
@@ -133,6 +173,10 @@ class ModelZooRegistry:
 
     def capability_names(self) -> list[str]:
         return sorted(self._cards)
+
+    @property
+    def registry_v2(self) -> ModelRegistryV2 | None:
+        return self._registry_v2
 
     def card(self, name: str) -> ModelCard:
         if name not in self._models:

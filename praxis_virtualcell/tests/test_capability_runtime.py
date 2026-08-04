@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import inspect
+import json
 from pathlib import Path
 
 import pytest
@@ -16,14 +17,26 @@ from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.core.request import VirtualCellRequest
 from praxis_virtualcell.core.request_v2 import VirtualCellRequestV2
 from praxis_virtualcell.data_packs.registry import PackRegistry
+from praxis_virtualcell.io.job_store import JobStore
 from praxis_virtualcell.model_zoo.cache import ModelCache
 from praxis_virtualcell.model_zoo.capability_registry import (
     CapabilityRegistry,
     EnvironmentSnapshot,
+    ExecutionPlanV2,
     ExecutionStep,
     ModelCard,
 )
 from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
+from praxis_virtualcell.model_zoo.registry_v2 import (
+    AdapterIdentity,
+    ArtifactIdentity,
+    EnvironmentIdentity,
+    ModelRegistryV2,
+    ModelReleaseRecord,
+    OperatorPolicyRecord,
+    RegistryLifecycleEvent,
+    ValidationEvidence,
+)
 from praxis_virtualcell.model_zoo.wrappers.base import ModelWrapper
 from praxis_virtualcell.workflows.predict_delta_expression import build_runtime
 
@@ -257,13 +270,23 @@ def _legacy_request(*, cell_type: str = "K562") -> VirtualCellRequest:
     )
 
 
-def _write_registry(tmp_path: Path, card: dict) -> ModelZooRegistry:
+def _write_registry(
+    tmp_path: Path,
+    card: dict,
+    *,
+    enable_v2: bool | None = None,
+    registry_v2: ModelRegistryV2 | None = None,
+) -> ModelZooRegistry:
     path = tmp_path / "registry.yaml"
     path.write_text(
         yaml.safe_dump({"models": {card["name"]: card}}, sort_keys=False),
         encoding="utf-8",
     )
-    return ModelZooRegistry(registry_path=str(path))
+    return ModelZooRegistry(
+        registry_path=str(path),
+        enable_v2=enable_v2,
+        registry_v2=registry_v2,
+    )
 
 
 def _pack_registry() -> PackRegistry:
@@ -297,6 +320,168 @@ def _registry_stack(tmp_path: Path, card: dict | None = None):
     cache = _cache_with_model(tmp_path)
     capabilities = CapabilityRegistry(zoo, cache)
     return card, zoo, packs, cache, capabilities
+
+
+def _v2_registry_and_environment(
+    card_value: dict,
+    pack_fingerprint: str,
+    *,
+    promoted: bool = True,
+    safe_load_policy: str = "data_only",
+) -> tuple[ModelRegistryV2, EnvironmentSnapshot]:
+    card = ModelCard.from_dict(card_value)
+    artifact = ArtifactIdentity.from_dict(
+        {
+            "schema_version": "vc.model-artifact.v1",
+            "artifact_id": f"{card.name}:model.bin",
+            "model_fingerprint": card.fingerprint(),
+            "uri": "https://example.invalid/model.bin",
+            "cache_key": f"{card.name}/model.bin",
+            "size_bytes": len(_MODEL_BYTES),
+            "sha256": _MODEL_SHA,
+            "media_type": "application/octet-stream",
+            "license": "CC0-1.0",
+            "source": "test-only-generated-by-pytest",
+            "safe_load_policy": safe_load_policy,
+            "legacy_incomplete": False,
+        }
+    )
+    adapter = AdapterIdentity.from_dict(
+        {
+            "schema_version": "vc.model-adapter.v1",
+            "adapter_id": "test-only-delta-expression-runtime",
+            "version": "1.0.0",
+            "implementation": _DUMMY_WRAPPER,
+            "task": card.task,
+            "outputs": list(card.output),
+            "input_contract_fingerprint": "4" * 64,
+            "output_contract_fingerprint": "5" * 64,
+            "legacy_incomplete": False,
+        }
+    )
+    environment_identity = EnvironmentIdentity.from_dict(
+        {
+            "schema_version": "vc.model-environment.v1",
+            "environment_id": "test-only-cpu-environment",
+            "python_version": "3.13-test",
+            "packages": [],
+            "lock_digest": "6" * 64,
+            "image_digest": None,
+            "cpu_architecture": "test-cpu",
+            "resources": ["cpu"],
+            "accelerators": [],
+            "adapter_fingerprints": [adapter.fingerprint()],
+            "legacy_incomplete": False,
+        }
+    )
+    evidence = ValidationEvidence.from_dict(
+        {
+            "schema_version": "vc.model-validation-evidence.v1",
+            "evidence_id": "test-only-capability-evidence",
+            "pack_fingerprint": pack_fingerprint,
+            "model_fingerprint": card.fingerprint(),
+            "environment_fingerprint": environment_identity.fingerprint(),
+            "adapter_fingerprints": [adapter.fingerprint()],
+            "protocol_fingerprint": "7" * 64,
+            "baseline_fingerprint": "8" * 64,
+            "metric_name": "test_only_loss",
+            "metric_direction": "lower_is_better",
+            "result_sha256": "9" * 64,
+            "benchmark_passed": promoted,
+            "scientifically_validated": promoted,
+            "promotion_eligible": promoted,
+            "legacy_incomplete": False,
+            "binding_errors": [],
+        }
+    )
+    release_without_policy = ModelReleaseRecord.from_dict(
+        {
+            "schema_version": "vc.model-release.v1",
+            "release_id": f"{card.name}@{card.version}",
+            "model_name": card.name,
+            "model_version": card.version,
+            "model_fingerprint": card.fingerprint(),
+            "pack_fingerprints": [pack_fingerprint],
+            "artifact_fingerprints": [artifact.fingerprint()],
+            "environment_fingerprint": environment_identity.fingerprint(),
+            "adapter_fingerprints": [adapter.fingerprint()],
+            "evidence_fingerprints": [evidence.fingerprint()],
+            "policy_fingerprint": None,
+            "migration_status": "native",
+            "incomplete_reasons": [],
+            "legacy_status": None,
+        }
+    )
+    policy = OperatorPolicyRecord.from_dict(
+        {
+            "schema_version": "vc.model-operator-policy.v1",
+            "policy_id": "test-only-capability-policy",
+            "capability_fingerprint": release_without_policy.capability_fingerprint(),
+            "evidence_fingerprints": [evidence.fingerprint()],
+            "production_promoted": promoted,
+            "decision_kind": "operator_decision",
+            "operator_id": "test-only-operator",
+            "decided_at": "2026-08-02T00:00:00Z",
+            "reason": "synthetic contract conformance only",
+        }
+    )
+    release = ModelReleaseRecord.from_dict(
+        {
+            **release_without_policy.to_dict(),
+            "policy_fingerprint": policy.fingerprint(),
+        }
+    )
+    cataloged = RegistryLifecycleEvent.from_dict(
+        {
+            "schema_version": "vc.model-registry-event.v1",
+            "event_id": "test-only-cataloged",
+            "sequence": 1,
+            "previous_event_fingerprint": None,
+            "release_fingerprint": release.fingerprint(),
+            "action": "cataloged",
+            "target_release_fingerprint": None,
+            "recorded_at": "2026-08-02T00:00:00Z",
+            "operator_id": "test-only-operator",
+            "reason": "synthetic contract conformance only",
+        }
+    )
+    ready = RegistryLifecycleEvent.from_dict(
+        {
+            "schema_version": "vc.model-registry-event.v1",
+            "event_id": "test-only-artifact-ready",
+            "sequence": 2,
+            "previous_event_fingerprint": cataloged.fingerprint(),
+            "release_fingerprint": release.fingerprint(),
+            "action": "artifact_ready",
+            "target_release_fingerprint": None,
+            "recorded_at": "2026-08-02T00:00:01Z",
+            "operator_id": "test-only-operator",
+            "reason": "synthetic contract conformance only",
+        }
+    )
+    registry = ModelRegistryV2.from_dict(
+        {
+            "schema_version": "vc.model-registry.v2",
+            "artifacts": [artifact.to_dict()],
+            "environments": [environment_identity.to_dict()],
+            "adapters": [adapter.to_dict()],
+            "evidence_records": [evidence.to_dict()],
+            "policy_records": [policy.to_dict()],
+            "releases": [release.to_dict()],
+            "lifecycle_events": [cataloged.to_dict(), ready.to_dict()],
+        }
+    )
+    environment = EnvironmentSnapshot.from_dict(
+        {
+            "schema_version": "vc.environment.v2",
+            "python_dependencies": [],
+            "resources": ["cpu"],
+            "runtime_tasks": ["predict_delta_expression"],
+            "runtime_outputs": ["delta_expression"],
+            "identity": environment_identity.to_dict(),
+        }
+    )
+    return registry, environment
 
 
 def test_model_card_has_complete_strict_contract_and_stable_fingerprint():
@@ -426,6 +611,287 @@ def test_valid_request_pack_model_environment_produces_compatibility_report(tmp_
     assert len(report.pack_fingerprint) == 64
     assert len(report.environment_fingerprint) == 64
     assert len(report.fingerprint()) == 64
+
+
+def test_v2_migration_without_exact_evidence_or_policy_abstains(tmp_path):
+    card = _card()
+    zoo = _write_registry(tmp_path, card, enable_v2=True)
+    packs = _pack_registry()
+    cache = _cache_with_model(tmp_path)
+    capabilities = CapabilityRegistry(zoo, cache)
+
+    plan = capabilities.plan(
+        VirtualCellRequestV2.from_dict(_request_payload()),
+        packs.record("tiny-human-scrna", "0.1.0"),
+        _environment(),
+    )
+
+    assert plan.schema_version == "vc.execution-plan.v2"
+    assert plan.executable is False
+    assert plan.steps == ()
+    report = plan.reports[0]
+    assert report.schema_version == "vc.compatibility-report.v2"
+    assert report.model_compatible is True
+    assert report.scientifically_validated is None
+    assert report.policy_present is False
+    assert report.production_promoted is False
+    assert "evidence.missing" in report.reasons
+    assert "policy.missing" in report.reasons
+
+
+def test_v2_environment_keeps_distribution_and_import_identities_distinct():
+    identity = EnvironmentIdentity.from_dict(
+        {
+            "schema_version": "vc.model-environment.v1",
+            "environment_id": "test-only-distribution-import-split",
+            "python_version": "3.13-test",
+            "packages": [{"name": "scikit-learn", "version": "1.7.0"}],
+            "lock_digest": "6" * 64,
+            "image_digest": None,
+            "cpu_architecture": "test-cpu",
+            "resources": ["cpu"],
+            "accelerators": [],
+            "adapter_fingerprints": ["7" * 64],
+            "legacy_incomplete": False,
+        }
+    )
+
+    snapshot = EnvironmentSnapshot.from_dict(
+        {
+            "schema_version": "vc.environment.v2",
+            "python_dependencies": ["sklearn"],
+            "resources": ["cpu"],
+            "runtime_tasks": ["predict_delta_expression"],
+            "runtime_outputs": ["delta_expression"],
+            "identity": identity.to_dict(),
+        }
+    )
+
+    assert snapshot.python_dependencies == ("sklearn",)
+    assert snapshot.identity.packages[0].name == "scikit-learn"
+
+
+def test_v2_exact_synthetic_graph_is_the_only_positive_execution_path(tmp_path):
+    card = _card()
+    packs = _pack_registry()
+    pack = packs.record("tiny-human-scrna", "0.1.0")
+    registry_v2, environment = _v2_registry_and_environment(
+        card,
+        pack.fingerprint,
+    )
+    zoo = _write_registry(tmp_path, card, registry_v2=registry_v2)
+    cache = _cache_with_model(tmp_path)
+    capabilities = CapabilityRegistry(zoo, cache)
+
+    plan = capabilities.plan(
+        VirtualCellRequestV2.from_dict(_request_payload()),
+        pack,
+        environment,
+    )
+
+    assert plan.schema_version == "vc.execution-plan.v2"
+    assert plan.executable is True
+    assert len(plan.steps) == 1
+    report = plan.reports[0]
+    assert report.benchmark_passed is True
+    assert report.scientifically_validated is True
+    assert report.promotion_eligible is True
+    assert report.policy_present is True
+    assert report.production_promoted is True
+    assert report.release_fingerprint == registry_v2.releases[0].fingerprint()
+    assert report.policy_fingerprint == registry_v2.policy_records[0].fingerprint()
+    predictor = capabilities.instantiate(plan.steps[0], report)
+    assert predictor.name == _DUMMY_NAME
+
+
+def test_v2_execution_contracts_reject_cross_bound_identity(tmp_path):
+    card = _card()
+    pack = _pack_registry().record("tiny-human-scrna", "0.1.0")
+    registry_v2, environment = _v2_registry_and_environment(card, pack.fingerprint)
+    zoo = _write_registry(tmp_path, card, registry_v2=registry_v2)
+    plan = CapabilityRegistry(zoo, _cache_with_model(tmp_path)).plan(
+        VirtualCellRequestV2.from_dict(_request_payload()),
+        pack,
+        environment,
+    )
+
+    bad_policy_presence = plan.reports[0].to_dict()
+    bad_policy_presence["policy_present"] = False
+    with pytest.raises(ValueError, match="policy_present"):
+        type(plan.reports[0]).from_dict(bad_policy_presence)
+
+    missing_evidence_ref = plan.reports[0].to_dict()
+    missing_evidence_ref["evidence_fingerprints"] = []
+    with pytest.raises(ValueError, match="executable"):
+        type(plan.reports[0]).from_dict(missing_evidence_ref)
+
+    bad_step_binding = plan.to_dict()
+    bad_step_binding["steps"][0]["policy_fingerprint"] = "a" * 64
+    with pytest.raises(ValueError, match="step identity"):
+        type(plan).from_dict(bad_step_binding)
+
+    missing_step = plan.to_dict()
+    missing_step["executable"] = False
+    missing_step["steps"] = []
+    with pytest.raises(ValueError, match="exactly match"):
+        type(plan).from_dict(missing_step)
+
+    wrong_environment = plan.to_dict()
+    wrong_environment["reports"][0]["environment_snapshot_fingerprint"] = "b" * 64
+    with pytest.raises(ValueError, match="report identity"):
+        type(plan).from_dict(wrong_environment)
+
+    forged_wrapper = plan.to_dict()
+    forged_wrapper["steps"][0]["wrapper"] = "private.secret.ForgedWrapper"
+    with pytest.raises(ValueError, match="plan_id"):
+        type(plan).from_dict(forged_wrapper)
+
+    forged_plan_id = plan.to_dict()
+    forged_plan_id["plan_id"] = "plan_" + "0" * 24
+    with pytest.raises(ValueError, match="plan_id"):
+        type(plan).from_dict(forged_plan_id)
+
+    step_with_other_private_path = plan.steps[0].to_dict()
+    step_with_other_private_path["asset_paths"] = {"model.bin": "/private/elsewhere"}
+    assert type(plan.steps[0]).from_dict(step_with_other_private_path).fingerprint() == (
+        plan.steps[0].fingerprint()
+    )
+
+
+def test_v2_job_store_redacts_positive_runtime_paths_from_public_artifacts(tmp_path):
+    card = _card()
+    pack = _pack_registry().record("tiny-human-scrna", "0.1.0")
+    registry_v2, environment = _v2_registry_and_environment(card, pack.fingerprint)
+    zoo = _write_registry(tmp_path, card, registry_v2=registry_v2)
+    plan = CapabilityRegistry(zoo, _cache_with_model(tmp_path)).plan(
+        VirtualCellRequestV2.from_dict(_request_payload()),
+        pack,
+        environment,
+    )
+    assert plan.executable is True
+    raw_plan = plan.to_dict()
+    assert str(tmp_path) in json.dumps(raw_plan)
+    provenance = {
+        "execution_plan": raw_plan,
+        "compatibility_reports": raw_plan["reports"],
+    }
+    result = {
+        "structured_report": {
+            "abstain": False,
+            "prediction": {"delta": [0.25]},
+            "models_used": [_DUMMY_NAME],
+            "provenance": provenance,
+        },
+        "provenance": provenance,
+        "trace": [],
+        "mode": "offline",
+        "llm_enabled": False,
+    }
+
+    store = JobStore(str(tmp_path / "runs"))
+    store.save("positive-v2", request=_request_payload(), result=result)
+    loaded = store.load("positive-v2")
+    rendered = json.dumps(loaded, sort_keys=True)
+
+    assert loaded["execution_identity"]["models"][0]["executable"] is True
+    assert loaded["execution_identity"]["outcome"] == {
+        "abstain": False,
+        "models_used": [_DUMMY_NAME],
+        "prediction_present": True,
+    }
+    assert len(loaded["execution_identity"]["structured_report_fingerprint"]) == 64
+    assert len(loaded["execution_identity"]["execution_step_fingerprints"]) == 1
+    assert "asset_paths" not in rendered
+    assert str(tmp_path) not in rendered
+
+    forged = copy.deepcopy(result)
+    forged["structured_report"].update(
+        {
+            "abstain": True,
+            "prediction": {"forged_numeric": [999]},
+            "models_used": [],
+        }
+    )
+    with pytest.raises(ValueError, match="prediction requires"):
+        store.save("forged-outcome", request=_request_payload(), result=forged)
+    assert not (tmp_path / "runs" / "forged-outcome").exists()
+
+
+def test_v2_negative_evidence_cannot_be_rescued_by_policy(tmp_path):
+    card = _card()
+    packs = _pack_registry()
+    pack = packs.record("tiny-human-scrna", "0.1.0")
+    registry_v2, environment = _v2_registry_and_environment(
+        card,
+        pack.fingerprint,
+        promoted=False,
+    )
+    zoo = _write_registry(tmp_path, card, registry_v2=registry_v2)
+
+    report = CapabilityRegistry(zoo, _cache_with_model(tmp_path)).evaluate(
+        VirtualCellRequestV2.from_dict(_request_payload()),
+        pack,
+        _DUMMY_NAME,
+        environment,
+    )
+
+    assert report.executable is False
+    assert report.benchmark_passed is False
+    assert report.scientifically_validated is False
+    assert report.production_promoted is False
+    assert "evidence.not_eligible" in report.reasons
+    assert "policy.not_promoted" in report.reasons
+
+
+@pytest.mark.parametrize(
+    "safe_load_policy",
+    ["restricted_deserializer", "isolated_runtime"],
+)
+def test_v2_unenforced_artifact_load_policy_abstains(tmp_path, safe_load_policy):
+    card = _card()
+    pack = _pack_registry().record("tiny-human-scrna", "0.1.0")
+    registry_v2, environment = _v2_registry_and_environment(
+        card,
+        pack.fingerprint,
+        safe_load_policy=safe_load_policy,
+    )
+    zoo = _write_registry(tmp_path, card, registry_v2=registry_v2)
+
+    plan = CapabilityRegistry(zoo, _cache_with_model(tmp_path)).plan(
+        VirtualCellRequestV2.from_dict(_request_payload()),
+        pack,
+        environment,
+    )
+
+    assert plan.executable is False
+    assert plan.steps == ()
+    assert plan.reports[0].assets_ready is False
+    assert "artifact.safe_load_policy:model.bin" in plan.reports[0].reasons
+
+
+def test_v2_instantiate_rechecks_safe_load_policy_after_planning(
+    tmp_path,
+    monkeypatch,
+):
+    card = _card()
+    pack = _pack_registry().record("tiny-human-scrna", "0.1.0")
+    registry_v2, environment = _v2_registry_and_environment(card, pack.fingerprint)
+    zoo = _write_registry(tmp_path, card, registry_v2=registry_v2)
+    capabilities = CapabilityRegistry(zoo, _cache_with_model(tmp_path))
+    plan = capabilities.plan(
+        VirtualCellRequestV2.from_dict(_request_payload()),
+        pack,
+        environment,
+    )
+    original_artifact = ModelRegistryV2.artifact
+
+    def unsafe_artifact(registry, fingerprint):
+        artifact = original_artifact(registry, fingerprint)
+        return artifact.model_copy(update={"safe_load_policy": "isolated_runtime"})
+
+    monkeypatch.setattr(ModelRegistryV2, "artifact", unsafe_artifact)
+    with pytest.raises(ValueError, match="safe load policy"):
+        capabilities.instantiate(plan.steps[0], plan.reports[0])
 
 
 def test_compatibility_and_plan_contracts_reject_malformed_bound_fingerprints(
@@ -698,6 +1164,37 @@ def test_bad_asset_hash_fails_closed(tmp_path):
     assert "asset.sha256:model.bin" in report.reasons
 
 
+def test_model_cache_rejects_size_mismatch_and_symlink_escape(tmp_path):
+    cache = _cache_with_model(tmp_path)
+
+    wrong_size = cache.check(
+        _DUMMY_NAME,
+        "model.bin",
+        sha256=_MODEL_SHA,
+        size_bytes=len(_MODEL_BYTES) + 1,
+    )
+    assert wrong_size.available is False
+    assert wrong_size.path is None
+    assert wrong_size.reason.startswith("size_mismatch:")
+
+    outside = tmp_path / "outside.bin"
+    outside.write_bytes(_MODEL_BYTES)
+    link = cache.asset_path(_DUMMY_NAME, "escape.bin")
+    link.symlink_to(outside)
+    escaped = cache.check(
+        _DUMMY_NAME,
+        "escape.bin",
+        sha256=_MODEL_SHA,
+        size_bytes=len(_MODEL_BYTES),
+    )
+    assert escaped.available is False
+    assert escaped.path is None
+    assert escaped.reason == "asset_path_escape"
+
+    with pytest.raises(ValueError, match="canonical relative"):
+        cache.asset_path("../outside", "model.bin")
+
+
 def test_missing_dependency_and_resource_fail_closed(tmp_path):
     card = _card()
     card["resources"] = {
@@ -920,6 +1417,60 @@ def test_model_broker_removes_step_when_wrapper_construction_fails(tmp_path):
     )
 
     plan = bus.latest("execution_plan_ready").payload["execution_plan"]
+    assert plan["executable"] is False
+    assert plan["steps"] == []
+    assert "model.wrapper_initialization" in plan["reports"][0]["reasons"]
+    assert broker.take_prepared(plan["plan_id"]) == []
+
+
+def test_v2_model_broker_rebuilds_canonical_plan_on_wrapper_failure(
+    tmp_path,
+    monkeypatch,
+):
+    card = _card()
+    packs = _pack_registry()
+    pack = packs.record("tiny-human-scrna", "0.1.0")
+    registry_v2, environment = _v2_registry_and_environment(card, pack.fingerprint)
+    zoo = _write_registry(tmp_path, card, registry_v2=registry_v2)
+    broker = ModelBrokerAgent(
+        registry=zoo,
+        cache=_cache_with_model(tmp_path),
+        pack_registry=packs,
+        environment=environment,
+    )
+    initial_plan = broker._capabilities.plan(
+        VirtualCellRequestV2.from_dict(_request_payload()),
+        pack,
+        environment,
+    )
+    assert isinstance(initial_plan, ExecutionPlanV2)
+
+    def fail_instantiation(*_args, **_kwargs):
+        raise RuntimeError("test-only v2 constructor failure")
+
+    monkeypatch.setattr(broker._capabilities, "instantiate", fail_instantiation)
+    bus = MessageBus()
+    broker.handle(
+        AgentMessage(
+            "p12-v2-wrapper-failure",
+            "client",
+            "ModelBrokerAgent",
+            "execution_plan_request",
+            {
+                "request": _request_payload(),
+                "pack_id": "tiny-human-scrna",
+                "pack_version": "0.1.0",
+            },
+            "t1",
+        ),
+        bus,
+    )
+
+    plan = bus.latest("execution_plan_ready").payload["execution_plan"]
+    assert plan["schema_version"] == "vc.execution-plan.v2"
+    rebuilt_plan = ExecutionPlanV2.from_dict(plan)
+    assert rebuilt_plan.plan_id != initial_plan.plan_id
+    assert "origin_plan_id" not in plan
     assert plan["executable"] is False
     assert plan["steps"] == []
     assert "model.wrapper_initialization" in plan["reports"][0]["reasons"]

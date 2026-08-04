@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Documentation Index
 
-> Audited: 2026-07-29
+> Audited: 2026-08-02
 >
-> Status: `CURRENT_DOCUMENT_MAP`
+> Status: `CURRENT_DOCUMENT_MAP — P12_VALIDATING`
 
 This is the navigation authority for the repository. It does not make every linked document current: each section explicitly distinguishes live truth, frozen evidence, active plans, drafts, and history.
 
@@ -10,11 +10,12 @@ This is the navigation authority for the repository. It does not make every link
 
 When documents disagree, use this order:
 
-1. [Project State](status/PROJECT-STATE-2026-07-18.md) for the active path, Git checkpoint, protected worktree, and phase gate.
-2. [Three-Way Sync State](status/SYNC-STATE.md) for local/GitHub/`.53` SHAs, tag publication, dirty state, and synchronization authorization.
-3. [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) for scientific capability and claim boundaries.
-4. [README](../README.md), installation, user, and examples documents for product use, subject to the stale-item register below.
-5. Dated plans, handoffs, findings, papers, and release notes as historical evidence for their stated commit/date only.
+1. Exact local bytes, `git rev-parse` identity, immutable artifacts and the current work-unit completion report.
+2. [README](../README.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the [sequential master prompt](PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and authorization discipline.
+3. The current phase ADR/runbook—P12 uses [ADR-0009](ADR-0009-virtualcell-model-zoo-v2.md) and the [Model Zoo v2 runbook](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md)—for implemented contract and validation boundaries.
+4. [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) for frozen scientific capability and claim boundaries.
+5. [Three-Way Sync State](status/SYNC-STATE.md) only for its dated local/GitHub/`.53` observations; it is not fresh remote authorization.
+6. Dated plans, handoffs, findings, papers, release notes and [Project State 2026-07-18](status/PROJECT-STATE-2026-07-18.md) as historical evidence for their stated commit/date only.
 
 Plans describe intended work. A task is not complete merely because a plan says it should happen; only checked gates plus recorded verification count as completion.
 
@@ -22,13 +23,19 @@ Plans describe intended work. A task is not complete merely because a plan says 
 
 | Document | Authority |
 |---|---|
-| [Project State](status/PROJECT-STATE-2026-07-18.md) | APFS migration, current branch/ref facts, protected assets, phase restart point |
+| [README](../README.md) | current product promise, P12 validation state and primary operator entry points |
+| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P11B/P12 boundary |
+| [P12–P30 Sequential Master Prompt](PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md) | current phase state machine, dynamic work-unit selection and stop rules |
+| [P12–P30 Execution Plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) | phase scopes, dependencies and exact authorization templates |
+| [P12 Model Zoo v2 ADR](ADR-0009-virtualcell-model-zoo-v2.md) | current layered identities, v1 migration, fail-closed execution and safe-load decisions; status remains validating |
+| [P12 Model Zoo v2 Runbook](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md) | read-only catalog/API interpretation and P12 validation commands |
+| [Project State](status/PROJECT-STATE-2026-07-18.md) | historical APFS migration and phase restart snapshot; not current branch/ref authority |
 | [Phase A Completion Gate](status/PHASE-A-GATE-2026-07-18.md) | proof that migration/organization protections passed before baseline testing |
 | [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | Phase B commands, exact results, failure ownership, and `PHASE_B_COMPLETE` gate |
 | [Phase D0 Sync Proposal](status/PHASE-D0-SYNC-PROPOSAL-2026-07-18.md) | frozen pre-publication ledger, exact D1/D2 protocol, protected exceptions, and rollback plan; not the current live sync ledger |
 | [Phase D1a CI Report](status/PHASE-D1A-CI-2026-07-22.md) | first exact candidate-branch publication, run `29894971142`, `1/5` diagnosis, local remediation evidence, and retry authorization boundary |
 | [Phase D1a CI Retry Report](status/PHASE-D1A-CI-RETRY-2026-07-23.md) | exact `6086… → ee36…` retry, run `29971566980`, `4/5` result, Linux process-group diagnosis, and locally verified repair |
-| [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | current local scientific classification, Gate A seam evidence, explicit remote pending, and D0 handoff |
+| [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | frozen 2026-07-18 scientific classification, Gate A seam evidence, explicit remote pending, and D0 handoff |
 | [Scientific Assets](status/SCIENTIFIC-ASSETS-2026-07-18.md) | wheel/container/source/private asset matrix, provenance, licence gaps, and permitted claims |
 | [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | frozen local dependency/bundle/wheel/API/Linux-container evidence and `C4_COMPLETE_LOCAL` boundary |
 | [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen local theme/full-E2E/request-boundary evidence, exact C3 counts, honest S10 skip, and `C3_COMPLETE_LOCAL` boundary |
@@ -58,6 +65,7 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [Golden Norman/K562](runbooks/VIRTUALCELLPACK-GOLDEN-NORMAN.md) | P8 source verification, deterministic Pack derivation, simple baseline build, formal evaluation and remote hash audit |
 | [VirtualCellPack Product Surfaces](runbooks/VIRTUALCELLPACK-PRODUCT-SURFACES.md) | P8 tiny built-in Packs, CLI/API/UI discovery, local registration, compatibility planning and immutable job identity |
 | [VirtualCellPack P9 OOD Validation](runbooks/VIRTUALCELLPACK-P9-OOD-VALIDATION.md) | frozen multi-axis split contract, grouped leakage audit, validation-only abstention threshold and adaptation-free GSE67402→GSE94117 reproduction |
+| [Virtual Cell Model Zoo v2](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md) | P12 read-only registry/catalog projection, legacy migration audit, v2 fail-closed plan and safe-load boundary |
 
 The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` files describe the older PRAXIS-2 classroom/deployment system, including `.40/.53` service topology. They are not VirtualCell current-user entry points.
 
@@ -78,19 +86,21 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [VirtualCellPack P8 ADR](ADR-0006-virtualcellpack-p8-golden-norman.md) | frozen Norman/K562 data/split/metric/bootstrap, three simple baselines, formal runtime path and scientific claim boundary |
 | [VirtualCellPack P8 Product ADR](ADR-0007-virtualcellpack-p8-product-surfaces.md) | three tiny Packs, product index/CLI/API/UI, fail-closed acceptance and immutable historical execution identity |
 | [VirtualCellPack P9 ADR](ADR-0008-virtualcellpack-p9-ood-validation.md) | eight-axis OOD contract, biological-group leakage boundary, external validation, selective metrics and baseline promotion gate |
+| [Virtual Cell Model Zoo v2 ADR](ADR-0009-virtualcell-model-zoo-v2.md) | layered model/artifact/environment/adapter/evidence/policy identities, append-only lifecycle, legacy migration and exact v2 execution gate |
 | [Community Readiness Checklist](COMMUNITY-READINESS-CHECKLIST.md) | P10 model-free CommunityPack gates, two tiny microbial Packs, fail-closed planning and explicitly missing experimental validation |
-| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P10 implementation/status matrix; separates resource availability, `pack_valid`, `model_compatible`, executable and `scientifically_validated` |
+| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P12 implementation/status matrix; separates registry, Pack, computed compatibility/execution, scientific evidence and product policy |
 | [VirtualCellPack Multiomics Runbook](runbooks/VIRTUALCELLPACK-MULTIOMICS.md) | tiny RNA+protein fixture generation, hash binding, P5 tests and asset-update rules |
 | [VirtualCellPack Capability Runtime Runbook](runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md) | local model card/cache/Pack assembly, execution-plan audit and fail-closed reason handling |
 | [VirtualCellPack Data Portal Runbook](runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) | external public-file inventory, service configuration, upload quarantine and operator review boundary |
 | [Golden Norman Runbook](runbooks/VIRTUALCELLPACK-GOLDEN-NORMAN.md) | exact source/Pack/baseline/evaluation hashes and fail-closed reproduction procedure |
 | [VirtualCellPack Product Runbook](runbooks/VIRTUALCELLPACK-PRODUCT-SURFACES.md) | inspect/validate/register/list/compatibility/run operations, read-only API and status interpretation |
 | [VirtualCellPack P9 OOD Runbook](runbooks/VIRTUALCELLPACK-P9-OOD-VALIDATION.md) | exact public input hashes, deterministic external replay, risk-coverage metrics and fail-closed scientific interpretation |
+| [Virtual Cell Model Zoo v2 Runbook](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md) | P12 migration, public projection, lifecycle, path-redaction and directed validation procedure |
 | [Provenance](../PROVENANCE.md) | repository derivation from PRAXIS-2 and bootstrap evidence |
 
 ## Release and version history
 
-- The current publication ledger and bootstrap-through-v1.5 map are in [Three-Way Sync State](status/SYNC-STATE.md).
+- The dated publication ledger and bootstrap-through-v1.5 map are in [Three-Way Sync State](status/SYNC-STATE.md); refresh requires a separately authorized remote window.
 - [v0.1.0 Release Notes](RELEASE-v0.1.0.md) and [v0.6–v0.8 Delivery Report](STATUS-2026-07-03-v0.6-v0.8-delivery.md) are historical release records.
 - Local `v0.9.0` through `v1.5.0` tags are local milestones on 2026-07-18; fresh D0 read-only checks found GitHub and `.53` still only through `v0.8.0`.
 - GitHub candidate branch `codex/project-consolidation` is published at exact SHA `ee36d7948047f346f55a02d62ccaac84391e3c20`; retry run `29971566980` reached `4/5` and did not change GitHub `main` or release tags.
@@ -100,20 +110,23 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 
 | Plan | Status |
 |---|---|
-| [Project consolidation, test, and improvement plan](superpowers/plans/2026-07-18-project-consolidation-test-improvement.md) | the only active orchestration plan; D1a attempt 2 reached `4/5`, the final local repair is verified, and another exact-SHA retry remains approval-gated |
-| [Consolidation goal prompt](superpowers/plans/2026-07-18-project-consolidation-goal-prompt.md) | restart/persistence protocol for final candidate binding and the D1a retry-2 hard gate |
-| [Full frontend E2E plan](superpowers/plans/2026-07-17-frontend-full-e2e-test-plan.md) | subordinate C3 design implemented locally for S1–S9/S11–S13; S10 real-LLM gate remains pending, and active-plan orchestration overrides its historical mechanics |
+| [P12–P30 Sequential Master Prompt](PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md) | active state machine; P12 is `VALIDATING` and completion cannot be inferred from branch name or schema presence |
+| [P12–P30 Execution Plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) | active phase scopes and exact authorization templates; no later phase is automatically authorized |
+| [P12–P30 Detailed Completion Checklist](PHASE12-30-DETAILED-COMPLETION-CHECKLIST.md) | active engineering/science/policy acceptance ledger |
+| [Project consolidation, test, and improvement plan](superpowers/plans/2026-07-18-project-consolidation-test-improvement.md) | historical D1a orchestration; its old retry text is not current authorization |
+| [Consolidation goal prompt](superpowers/plans/2026-07-18-project-consolidation-goal-prompt.md) | historical restart/persistence protocol; not current P12 authority |
+| [Full frontend E2E plan](superpowers/plans/2026-07-17-frontend-full-e2e-test-plan.md) | historical C3 design; S10 remains an explicit external gate in its own scope |
 
-Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*` documents are dated implementation history unless the active plan explicitly references them.
+Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*` documents are dated implementation history unless the current P12–P30 route explicitly references them.
 
 ## Test and quality reports
 
 | Report | Scope |
 |---|---|
-| [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | current B0–B4 environment, static, core, frontend, wheel/CLI, legacy, and remote-boundary evidence |
+| [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | frozen B0–B4 environment, static, core, frontend, wheel/CLI, legacy, and remote-boundary evidence |
 | [Phase D1a CI Report](status/PHASE-D1A-CI-2026-07-22.md) | actual old-SHA GitHub run, job-by-job failure boundary, lock/frontend remediation, honest QEMU limitation, and retry gate |
 | [Phase D1a CI Retry Report](status/PHASE-D1A-CI-RETRY-2026-07-23.md) | exact attempt-2 run, four passing jobs, authoritative Linux failure, process-group repair, and next CAS boundary |
-| [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | current local C5 gate: Python 3.13 core 965, Gate A adapter seam, honest 2-test remote pending, asset/claim classification |
+| [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | frozen local C5 gate: Python 3.13 core 965, Gate A adapter seam, honest 2-test remote pending, asset/claim classification |
 | [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | frozen C4 gate: Python 3.13 core 957, Playwright 56+1, reproducible full wheel, and Linux-container smoke |
 | [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen C3 gate: core 947, Playwright 54+1, theme acceptance, mutation evidence, and then-remaining C4/C5 ownership |
 | [Testing Guide](TESTING.md) | current local commands and counts; distinguishes both exact-head GitHub runs, repaired local Linux evidence, and remote scientific validation |

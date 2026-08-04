@@ -6,16 +6,19 @@
 >
 > 当前已完成产品阶段：`Phase 11`
 >
-> DOCS-CLOSURE：以 `b02d21985bcde50cf0758d339b05b13bb3e200a2` 为 starting
-> SHA；completion identity 由包含本文 exact bytes 的现场 commit 与完成报告证明
+> DOCS-CLOSURE completion：`b19c896202bea56f894d0ad540501331af42a40c`
 >
-> 下一 numbered Phase：`Phase 12 — Virtual Cell Model Zoo v2`；尚未授权
+> 当前 work unit：`Phase 12 — Virtual Cell Model Zoo v2`；starting SHA
+> `b19c896202bea56f894d0ad540501331af42a40c`；branch
+> `codex/p12-model-registry-v2`；状态 `VALIDATING`
+>
+> 条件式下一候选：`Phase 13 — Model Adapter SDK`；`NOT ACTIVE`、未授权
 >
 > 当前 Phase 11 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
-> DOCS-CLOSURE 核对日期：2026-07-31
+> 当前状态核对日期：2026-08-02
 
 本文是一份可以在整个项目周期中逐项对照的执行清单。它把
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)转换为：
@@ -30,8 +33,9 @@
 → 完成记录
 ```
 
-本文不授权实施任何 Phase，不授权访问外置数据或权重，也不授权 commit、push、
-GitHub main/tag、`.53` 或其他远程操作。阶段 scope、资产清单和可复制授权句仍以
+本文自身不授权实施任何 Phase。P12 已由用户另行精确授权，且只允许一次本地
+Phase 12 commit；外置数据或权重、network、push、GitHub main/tag、`.53` 和其他
+远程操作仍禁止。阶段 scope、资产清单和可复制授权句仍以
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)为准。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
@@ -91,12 +95,20 @@ work-unit 执行状态机使用以下状态；总进度表可另用 `NOT_STARTED
 - Phase 11B 已完成 Cell-first 白色聊天入口、Data Center、示例问题和直接报告；
 - Cell preset 仍是 context preset，不是持久化或经过科学验证的 Virtual Cell；
 - Data Center 中存在数据或 Pack，不等于存在匹配、可执行、验证过的模型；
-- Phase 12 尚未实施；
+- DOCS-CLOSURE 已在 `b19c896202bea56f894d0ad540501331af42a40c` 收口；
+- Phase 12 已从该 SHA 获得 exact allowlist 授权并进入 `VALIDATING`，completion SHA
+  尚未形成；
+- 当前实现候选分离 model/artifact/environment/adapter/evidence/operator-policy
+  identity，保持 v1 migration 为 legacy/incomplete/no-promotion，并以 append-only
+  lifecycle 表达 catalog/readiness/revoke/supersede；
+- `praxis-vc pack list` 和 `GET /api/packs` 只复用既有链路返回路径脱敏白名单投影，
+  不新增管理写 API；
+- 未精确绑定现有 model identity 的 P8/P9 结果保留为 `unbound` migration receipt；
+  没有真实科学运行或新的 operator decision；
 - 历史 ref `codex/p12-cell-first-baseline` 是误命名恢复 ref，不定义阶段状态；
-- DOCS-CLOSURE 以 `b02d219...` 为 parent；其 completion SHA 不自嵌入本文，必须从
-  包含这些 exact bytes 的现场 Git commit、exact allowlisted diff、clean
-  post-commit status 和完成报告读取；
-- 只有该证据成立时，下一 eligible work unit 才是 P12；否则仍是 DOCS-CLOSURE。
+- staged/modified/deleted/untracked 保护清单不在本文固定，每轮必须从现场
+  `git status --short` 重建；任何新路径默认受保护；
+- P13 是 P12 完成后的条件式下一候选；当前明确禁止且未授权。
 
 ### 2.2 全路线依赖
 
@@ -130,8 +142,8 @@ flowchart TD
 | Phase | 工程状态 | 科学门 | 产品 policy | 核心完成物或硬门 |
 |---|---|---|---|---|
 | P11 | `COMPLETE` | `NOT_CLAIMED` | `NOT_APPLICABLE` | Cell-first 产品入口和 P11 代码锚点 |
-| DOCS-CLOSURE | `COMPLETE — VERIFY LIVE GIT` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | parent `b02d219...`、exact allowlist、本文所在 commit 和 clean post-commit status |
-| P12 | `NOT_STARTED` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | 模型、资产、环境、证据和 policy 身份分层 |
+| DOCS-CLOSURE | `COMPLETE` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | completion `b19c896...` |
+| P12 | `VALIDATING` | `NOT_APPLICABLE` | `NO_NEW_DECISION` | 分层 identity、v1 no-promotion migration、append-only lifecycle、只读投影；completion SHA pending |
 | P13 | `NOT_STARTED` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | 多 task/output Adapter SDK |
 | P14 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | E. coli growth；policy 另用 P14B |
 | P15 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | Yeast deletion fitness；policy 另用 P15B |
@@ -217,7 +229,11 @@ flowchart TD
 
 ### Phase 12 — Virtual Cell Model Zoo v2
 
-**状态：** `NOT_STARTED`
+**状态：** `VALIDATING`
+
+**执行身份：** starting SHA
+`b19c896202bea56f894d0ad540501331af42a40c`；branch
+`codex/p12-model-registry-v2`；completion SHA pending。
 
 **目标：** 在不下载或运行新权重的前提下，把现有 ModelCard、CapabilityRegistry 和
 ModelBroker 扩展为不可变的模型、资产、环境、adapter、evidence 和 operator-policy
@@ -225,12 +241,16 @@ record identity；不作新的 operator promotion decision。
 
 **前置与授权**
 
-- [x] 路线图、总提示词和本对照表由本次 exact docs-only commit 收口；现场必须核对；
-- [x] docs-only completion identity 定义为包含这些 exact bytes 的现场 HEAD，并在
-  完成报告记录 40 位 SHA；
-- [ ] 用户以该 SHA 明确授权 P12；
-- [ ] 分支为 `codex/p12-model-registry-v2`；
-- [ ] 权重、外置数据、push、`.53`、main/tag 均保持禁止。
+- [x] DOCS-CLOSURE completion 为
+  `b19c896202bea56f894d0ad540501331af42a40c`；
+- [x] 用户以该 SHA、exact allowlist 和操作边界明确授权 P12；
+- [x] 分支为 `codex/p12-model-registry-v2`；
+- [x] 权重、外置数据、network、training/GPU、push、`.53`、remote、service、
+  deploy 和 main/tag 均保持禁止；
+- [x] 只允许一次本地 Phase 12 commit，且尚未用它授权 P13。
+
+当前 implementation candidate 已包含下列交付物；由于最终测试、commit 和
+post-commit 核验尚未全部收口，按本清单规则仍保持未勾选，不能提前当作完成证据。
 
 **交付物**
 
@@ -249,6 +269,22 @@ record identity；不作新的 operator promotion decision。
 - [ ] 路径脱敏的只读 CLI/API 投影；
 - [ ] 现有 5 张模型卡和 P8/P9 evidence 的兼容迁移 fixture。
 
+实现候选使用的版本化身份包括：`vc.model-artifact.v1`、
+`vc.model-environment.v1`、`vc.model-adapter.v1`、
+`vc.model-validation-evidence.v1`、`vc.model-operator-policy.v1`、
+`vc.model-release.v1`、`vc.model-registry-event.v1`、
+`vc.model-registry-state.v1`、`vc.model-registry.v2`、
+`vc.model-registry-catalog.v2`，以及 Pack-aware `vc.environment.v2`、
+`vc.compatibility-report.v2`、`vc.execution-step.v2`、`vc.execution-plan.v2` 和
+`vc.job-execution-identity.v2`。
+
+当前 adversarial audit 还覆盖：native package 使用 canonical PEP 503 distribution
+name/version，而 legacy runtime import-module name 原样分层保留；unsafe legacy raw
+`model_version` 只保留内部 fingerprint，公开显示 `null`；v2 job identity 同时绑定
+submitted/normalized request、canonical `plan_id` 和 step fingerprints；report 与
+provenance 必须引用同一 plan，且两处 plan 使用同一字段白名单/路径脱敏投影。以上
+仍须最终验证，不能提前勾选验收。
+
 **验收**
 
 - [ ] `vc.model-card.v1` 兼容；
@@ -264,6 +300,9 @@ record identity；不作新的 operator promotion decision。
 - `COMPLETE`：软件、迁移和负例全部通过；
 - `BLOCKED`：v1 兼容无法保持或状态仍会自动提升；
 - 不允许因为 registry 完成就声称新增真实模型能力。
+- 当前没有运行真实 benchmark/external/OOD science；`benchmark_passed`、
+  `scientifically_validated` 和 `promotion_eligible` 没有被 P12 创建；没有新的
+  `production_promoted` operator decision。
 
 ---
 
@@ -1093,8 +1132,8 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 
 | Work unit | 工程状态 | 科学门 | 产品 policy | Starting SHA | Completion / unchanged SHA | Evidence / policy / release identity |
 |---|---|---|---|---|---|---|
-| DOCS-CLOSURE | `COMPLETE — VERIFY LIVE GIT` | `N/A` | `N/A` | `b02d21985bcde50cf0758d339b05b13bb3e200a2` | 包含本文 exact bytes 的现场 commit | exact 12-path allowlist、diff checks、clean post-commit status 和完成报告 |
-| P12 | `NOT_STARTED` | `N/A` | `N/A` | — | — | — |
+| DOCS-CLOSURE | `COMPLETE` | `N/A` | `N/A` | `b02d21985bcde50cf0758d339b05b13bb3e200a2` | `b19c896202bea56f894d0ad540501331af42a40c` | docs-only allowlist、diff checks、clean post-commit status 和完成报告 |
+| P12 | `VALIDATING` | `N/A — no science run` | `NO_NEW_DECISION` | `b19c896202bea56f894d0ad540501331af42a40c` | pending | implementation candidate；final tests/fingerprints/completion report pending |
 | P13 | `NOT_STARTED` | `N/A` | `N/A` | — | — | — |
 | P14 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
 | P14B | `NOT_STARTED` | `READ_ONLY` | `NOT_RUN` | — | unchanged | — |
@@ -1205,16 +1244,20 @@ Next exact authorization sentence:
 
 ## 11. 当前停止点与下一授权
 
-DOCS-CLOSURE 的 completion identity 经现场 Git 和完成报告核对后，本 work unit 停止。
-随后唯一可准备但不会自动生效的是 P12 精确授权：
+当前唯一 work unit 是 P12，且处于 `VALIDATING`。当前授权只允许继续完成 P12：
 
 ```text
-现场核对 DOCS-CLOSURE parent、exact allowlisted diff 和 clean status
-→ 从 git rev-parse HEAD 取得 completion SHA
-→ 以该 SHA 和现场动态保护清单填写完整 P12 授权模板
-→ 用户单独授权 P12
-→ 才开始 Model Zoo v2
+完成 schema/migration/lifecycle/projection adversarial audit
+→ 完成定向与受影响 core/legacy/frontend、Ruff、pip check、packaging 和 diff checks
+→ 只 stage 当前 exact allowlist
+→ 创建一次获准的本地 Phase 12 commit
+→ post-commit 核对 exact SHA、tests 和动态保护状态
+→ 写 P12 完成报告并停止
 ```
+
+只有以上全部真实完成后，P13 Adapter SDK 才成为唯一下一候选。任何 P13 授权草案
+都必须保留 `NOT ACTIVE`，不得填写未来 completion SHA，也不得用当前 P12 授权创建
+P13 branch、代码、资产或实验。
 
 可直接跨对话使用的顺序推进提示词见：
 

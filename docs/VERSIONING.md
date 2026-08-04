@@ -1,10 +1,10 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `P11B_COMPLETE — DOCS_CLOSURE — LOCAL_BYTES_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
+> Status: `P12_VALIDATING — LOCAL_BYTES_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
-> Local baseline: branch `codex/p11-data-centric-ui`; P11B product anchor
-> `bf44aac25b993e49d0146ccd52dddad5c2fa14de`; DOCS-CLOSURE parent
-> `b02d21985bcde50cf0758d339b05b13bb3e200a2`
+> Local baseline: branch `codex/p12-model-registry-v2`; P12 unique starting SHA
+> `b19c896202bea56f894d0ad540501331af42a40c`; no completion SHA exists while
+> validation is in progress
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -15,8 +15,8 @@ The repository historically mixed product release tags, package metadata, API/ru
 
 | Namespace | Current value | Source | Meaning |
 |---|---|---|---|
-| local product code | P11B anchor `bf44aac25b993e49d0146ccd52dddad5c2fa14de` | immutable local Git history | Cell-first product code; not P12 and not a release identity |
-| local docs closure | parent `b02d21985bcde50cf0758d339b05b13bb3e200a2` | completion is the live commit containing these exact bytes | docs-only identity; verify with live Git and completion report, never self-embed a future SHA |
+| P11B product code | anchor `bf44aac25b993e49d0146ccd52dddad5c2fa14de` | immutable local Git history | completed Cell-first product code; not P12 or a release identity |
+| P12 validation work unit | start `b19c896202bea56f894d0ad540501331af42a40c` on `codex/p12-model-registry-v2` | live local bytes plus eventual completion report | in progress; branch/schema presence is not completion and a future completion SHA must not be self-embedded |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -40,13 +40,20 @@ The repository historically mixed product release tags, package metadata, API/ru
 | feature mapping asset | `vc.feature-mapping.v1` + mapping ID/version/SHA-256 | Pack-declared JSON asset consumed by `feature_alignment.py` | explicit alias and `sum`/`mean` aggregate rules only; bytes or version changes alter Pack and contract identity when their references are updated |
 | feature alignment report | `vc.alignment-report.v1` | `praxis_virtualcell/data_packs/feature_alignment.py` | records source/target order and every applied alias/aggregate/drop/fill/reorder; proves contract transformation only, not model execution or scientific validation |
 | strict model card | `vc.model-card.v1` + canonical JSON SHA-256 | `model_zoo/capability_registry.py`, `model_zoo/registry.yaml` | binds taxon/modality/assay/domain/perturbation/task/output/namespace/representation/assets/resources/uncertainty/OOD and wrapper revision; card presence is not execution or validation |
-| execution environment snapshot | `vc.environment.v1` + canonical JSON SHA-256 | `model_zoo/capability_registry.py` | records detected Python modules, declared resources, and implemented runtime task/output adapters; it is a local planning snapshot, not remote hardware attestation |
-| model compatibility report | `vc.compatibility-report.v1` + canonical JSON SHA-256 | `model_zoo/capability_registry.py` | binds full request, registered Pack, model card and environment identities while keeping `pack_valid`, `model_compatible`, execution readiness and `scientifically_validated=false` separate |
-| model execution plan | `vc.execution-plan.v1` + deterministic `plan_<sha-prefix>` | `model_zoo/capability_registry.py`, `agents/model_broker_agent.py` | ordered executable wrapper steps plus all compatibility reports; an executable plan is not a performance or scientific claim |
-| Pack product record/catalog | `vc.pack-record.v1`, `vc.pack-catalog.v1` | `pack_product.py`, `/api/packs` | path-redacted, currently revalidated Pack metadata plus declared model capabilities; catalog presence is not per-request compatibility |
+| model artifact identity | `vc.model-artifact.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds relative cache key, size/hash, media type, licence/source and safe-load declaration; identity or `artifact_ready` is not safe execution or validation |
+| model environment identity | `vc.model-environment.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds PEP 503 distribution+version requirements, architecture, lock/image identity, resources/accelerators and adapter fingerprints; distribution names are not import-module probes |
+| model adapter identity | `vc.model-adapter.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds adapter name/version/implementation locator and task/input/output contracts; P12 does not implement the Phase 13 Adapter SDK |
+| validation evidence identity | `vc.model-validation-evidence.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds exact Pack×model×environment×adapter×protocol, baseline, primary metric and result hash; record existence does not make the evidence pass |
+| operator policy identity | `vc.model-operator-policy.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds one named operator decision to one exact capability and evidence set; P12 creates no new promotion decision |
+| model release/lifecycle identities | `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1` | `model_zoo/registry_v2.py` | release graph plus append-only catalog/readiness/revoke/supersede history; registry state, evidence and product policy remain separate |
+| Model Zoo v2 root/public catalog | `vc.model-registry.v2`, `vc.model-registry-catalog.v2` | `model_zoo/registry_v2.py`, `model_zoo/registry.py` | immutable layered registry and path-redacted read projection; v1 migration is `legacy_incomplete`; unsafe legacy `model_version` is public `null`, never rewritten or promoted |
+| execution environment snapshot | `vc.environment.v1` or `vc.environment.v2` + canonical JSON SHA-256 | `model_zoo/capability_registry.py` | v1 preserves legacy planning; v2 binds one exact `EnvironmentIdentity`; `python_dependencies` are import-module availability and are not string-equaled to PEP 503 distributions |
+| model compatibility report | `vc.compatibility-report.v1` or `vc.compatibility-report.v2` + canonical JSON SHA-256 | `model_zoo/capability_registry.py` | v2 binds exact request, Pack, release, artifact, environment, adapter, evidence, policy and lifecycle; fingerprint excludes runtime paths and display-only model version already bound by model/release identity |
+| model execution plan | `vc.execution-plan.v1` or `vc.execution-plan.v2` + deterministic `plan_<sha-prefix>` | `model_zoo/capability_registry.py`, `agents/model_broker_agent.py` | v2 recomputes canonical plan ID and checks report/wrapper/agent step binding; an empty or executable plan is not a performance, evidence or promotion claim |
+| Pack product record/catalog | `vc.pack-record.v1`, `vc.pack-catalog.v1` with nested `vc.model-registry-catalog.v2` | `pack_product.py`, `/api/packs` | outer contract remains compatible; top-level `model_registry` and per-model `registry_releases` are path-redacted discovery projections, not per-request compatibility |
 | local Pack index | `vc.pack-index.v1` + Pack fingerprint | `pack_product.py`, `PRAXIS_VC_PACK_INDEX` | binds a local canonical root to one Pack ID/version/fingerprint; every use revalidates bytes and semantics |
-| Pack compatibility surface | `vc.pack-compatibility-surface.v1` | `pack_product.py`, `/api/packs/compatibility` | public path-redacted projection of the existing execution plan; planning is read-only and is not execution evidence |
-| job execution identity | `vc.job-execution-identity.v1` + canonical JSON SHA-256 | `io/job_store.py` | locks the selected Pack and all planned model/card/compatibility fingerprints for one immutable job directory |
+| Pack compatibility surface | `vc.pack-compatibility-surface.v1` | `pack_product.py`, `/api/packs/compatibility` | public path-redacted projection of v1/v2 execution plans; planning is read-only and is not execution evidence |
+| job execution identity | `vc.job-execution-identity.v1` or `vc.job-execution-identity.v2` + canonical JSON SHA-256 | `io/job_store.py` | v1 remains parseable; v2 also locks submitted/normalized request, structured-report fingerprint, outcome and all Pack/release/component/evidence/policy state snapshots; load never rewrites historical bytes |
 | public data catalog | `vc.data-catalog.v1` | `praxis_virtualcell/catalogs/data_catalog.yaml`, `praxis_vc_api/services/data_portal_service.py` | strict public metadata plus source terms and external-file size/hash allowlist; catalog/file availability does not imply Pack/model/scientific status |
 | quarantined upload receipt | `vc.upload-receipt.v1` | `praxis_vc_api/services/data_portal_service.py` | one byte-preserving quarantine write identity; not content validation, Pack registration, user identity, or prediction evidence |
 | Golden Norman contract | `vc.golden-norman.v1` + canonical JSON SHA-256 | `data/golden/norman_2019/contract.yaml`, `benchmarks/golden_norman.py` | binds one exact public source, source/derived semantics, predefined control/split, metric/bootstrap and simple-baseline definitions; changing any item requires a new identity |
@@ -64,10 +71,12 @@ The repository historically mixed product release tags, package metadata, API/ru
 | model registry revisions | heterogeneous model/dataset identifiers | `model_zoo/registry.yaml` | per-engine/checkpoint revisions, not product SemVer |
 | W4B donor call version | `donor_ml:<Class>@sha256:<content identity>` on `build_runtime_ml` | checkpoint `.json + .pt` bytes via `checkpoint_identity.py` | content identity for this call; not a checked-in integrity pin, product version, or proof of cross-device tensor hashing |
 
-The current P6-era model/environment/plan identities do not provide the independent adapter,
-evidence, operator-policy records or full request×Pack×model×environment×adapter×evidence×policy
-gate planned for P12. Their names and fingerprints must not be used to claim that P12 schemas,
-scientific validation or `production_promoted` already exist.
+P12 current bytes add the layered identities above and a fail-closed exact
+request×Pack×release×artifact×environment×adapter×evidence×policy×lifecycle gate. This is an
+engineering contract under validation, not evidence that any real release satisfies the gate.
+Migrated v1 cards have no evidence or policy record and cannot be promoted. In-process execution
+accepts only the declared `safe_load_policy=data_only`; the declaration is rechecked at planning and
+instantiation but is not yet a type-level proof that an arbitrary wrapper loader is data-only.
 
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
@@ -86,12 +95,19 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | feature mapping schema + ID/version/hash | explicit `vc.feature-mapping.v1` and content identity | mapping rules or bytes change | ontology truth, orthology, or an implicit fallback |
 | alignment report schema | explicit `vc.alignment-report.v1` | incompatible provenance fields or operation semantics | a successful prediction or benchmark |
 | model card schema + fingerprint | explicit `vc.model-card.v1` plus canonical JSON SHA-256 | model capability, asset/resource, uncertainty/OOD or wrapper contract changes | asset availability, successful execution, benchmark quality, or scientific validity |
-| environment snapshot schema + fingerprint | explicit `vc.environment.v1` plus canonical JSON SHA-256 | dependency/resource/runtime-adapter declaration changes | a missing module/resource is available or remotely attested |
-| compatibility report schema + fingerprint | explicit `vc.compatibility-report.v1` plus canonical JSON SHA-256 | compatibility checks, reason semantics or bound identities change incompatibly | `pack_valid`, `model_compatible`, executable and scientifically validated are interchangeable |
-| execution plan schema + plan ID | explicit `vc.execution-plan.v1` and content-derived `plan_*` | step/report/identity semantics change incompatibly | plan creation proves prediction correctness or scientific validation |
-| Pack product record/catalog/index schemas | explicit `vc.pack-record.v1`, `vc.pack-catalog.v1`, `vc.pack-index.v1` | incompatible public metadata, index-field or identity-binding semantics | discovery/registration proves model compatibility or scientific validity |
+| model artifact identity schema + fingerprint | explicit `vc.model-artifact.v1` plus canonical JSON SHA-256 | artifact identity, integrity, licence/source or safe-load declaration changes | artifact readiness proves executable, safe or scientifically valid |
+| model environment identity schema + fingerprint | explicit `vc.model-environment.v1` plus canonical JSON SHA-256 | PEP 503 distribution/version, native/architecture/lock/image/resource/adapter requirements change | a distribution name is the same namespace as an import module, or the environment is currently satisfied |
+| model adapter identity schema + fingerprint | explicit `vc.model-adapter.v1` plus canonical JSON SHA-256 | implementation locator or task/input/output contract changes | adapter implementation exists, conforms, or is scientifically valid |
+| validation evidence schema + fingerprint | explicit `vc.model-validation-evidence.v1` plus canonical JSON SHA-256 | exact capability/protocol/baseline/metric/result binding changes | evidence exists, passes, generalizes, or grants product policy |
+| operator policy schema + fingerprint | explicit `vc.model-operator-policy.v1` plus canonical JSON SHA-256 | named operator, exact capability/evidence decision or policy version changes | engineering or evidence state can manufacture a promotion decision |
+| model release/lifecycle schemas + fingerprints | explicit `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1` | component graph or append-only lifecycle fact changes | catalog/readiness/revocation/supersession is scientific evidence or product policy |
+| Model Zoo root/public catalog schemas | explicit `vc.model-registry.v2`, `vc.model-registry-catalog.v2` | layered registry or path-redacted public projection changes incompatibly | migration/catalog presence makes a release executable, validated or promoted |
+| environment snapshot schema + fingerprint | explicit `vc.environment.v1` or `vc.environment.v2` plus canonical JSON SHA-256 | import-module/resource/runtime-adapter observation or v2 identity binding changes | import-module names must equal PEP 503 distribution names, or a missing resource is available |
+| compatibility report schema + fingerprint | explicit `vc.compatibility-report.v1` or `vc.compatibility-report.v2` plus canonical JSON SHA-256 | compatibility checks, reason semantics, identity inclusion/exclusion or bound refs change incompatibly | display-only model version/path affects the canonical v2 binding, or computed/evidence/policy states are interchangeable |
+| execution step/plan schema + plan ID | explicit `vc.execution-plan.v1`, or `vc.execution-step.v2` and `vc.execution-plan.v2` with content-derived `plan_*` | canonical step/report/wrapper/agent binding or plan identity semantics change incompatibly | plan creation proves prediction correctness, scientific validation or promotion |
+| Pack product record/catalog/index schemas | explicit `vc.pack-record.v1`, `vc.pack-catalog.v1`, `vc.pack-index.v1`; catalog may nest `vc.model-registry-catalog.v2` | incompatible public metadata, index-field, identity binding or registry projection semantics | discovery/registration proves per-request compatibility or scientific validity |
 | Pack compatibility surface schema | explicit `vc.pack-compatibility-surface.v1` | incompatible path-redaction or public execution-plan projection | a compatibility response proves successful execution |
-| job execution identity schema + fingerprint | explicit `vc.job-execution-identity.v1` and content identity | incompatible Pack/model identity-lock semantics | immutable provenance proves model quality or scientific validity |
+| job execution identity schema + fingerprint | explicit `vc.job-execution-identity.v1` or `vc.job-execution-identity.v2` and content identity | incompatible request/report/outcome/Pack/release/component/evidence/policy identity-lock semantics | read-only loading may rewrite old bytes, or immutable provenance proves model quality/validation/promotion |
 | public data catalog schema | explicit `vc.data-catalog.v1` | incompatible metadata, source/terms, identity or file-verification semantics | file availability, Pack validity, model compatibility or scientific validity |
 | upload receipt schema | explicit `vc.upload-receipt.v1` | incompatible quarantine identity/provenance semantics | internal file safety/quality, user authentication identity, Pack registration or model use |
 | Golden benchmark contract + canonical hash | explicit `vc.golden-norman.v1` and content identity | source, semantic field, feature order, control/split, truth, metric/bootstrap or baseline definition changes | one successful run validates another dataset/model or creates scientific truth |
@@ -109,7 +125,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented through C5:
+Implemented history through the current P12 validation bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -128,8 +144,12 @@ Implemented through C5:
 15. P10 adds a model-free CommunityPack pre-interface, one synthetic yeast member Pack, exact toy exchange validation and deterministic no-model abstention. It does not change API/runtime/UI protocols, add a model/weight, modify the P8 catalog, or infer a release/tag.
 16. P11A/P11B add the Data Center and Cell-first UI on the local branch without changing the
     API/runtime protocol or creating a new model, scientific validation, product policy or release.
-17. DOCS-CLOSURE changes documentation only. P12 remains not started and therefore adds no
-    adapter/evidence/policy schema or runtime capability.
+17. DOCS-CLOSURE is the immutable P12 starting baseline
+    `b19c896202bea56f894d0ad540501331af42a40c`.
+18. P12 current bytes add backward-compatible layered Model Zoo identities, append-only lifecycle,
+    v1 migration, path-redacted public projections and v2 fail-closed planning inside the same
+    unpublished candidate. The work unit remains `VALIDATING`: it adds no real model/weight,
+    scientific validation, new operator promotion, product/API/runtime version bump or release tag.
 
 ## Release invariants
 
@@ -154,11 +174,20 @@ moved or reused. A future release needs a new SemVer and separately authorized r
 
 The equality above deliberately excludes `vc.msg.v1`, `vc.request.v2`, all
 `vc.pack.*` versions, `vc.model-feature-contract.v1`, `vc.feature-mapping.v1`,
-`vc.alignment-report.v1`, `vc.model-card.v1`, `vc.environment.v1`,
-`vc.compatibility-report.v1`, `vc.execution-plan.v1`, the other `vc.*.v1`
+`vc.alignment-report.v1`, `vc.model-card.v1`, `vc.model-artifact.v1`,
+`vc.model-environment.v1`, `vc.model-adapter.v1`,
+`vc.model-validation-evidence.v1`, `vc.model-operator-policy.v1`,
+`vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1`,
+`vc.model-registry.v2`, `vc.model-registry-catalog.v2`,
+`vc.model-registry-legacy-receipt.v1`,
+`vc.model-registry-legacy-migration-report.v1`, `vc.environment.v1`,
+`vc.environment.v2`, `vc.compatibility-report.v1`,
+`vc.compatibility-report.v2`, `vc.execution-plan.v1`,
+`vc.execution-step.v2`, `vc.execution-plan.v2`, the other `vc.*.v1`
 domain/bundle schemas, `vc.pack-record.v1`, `vc.pack-catalog.v1`,
 `vc.pack-index.v1`, `vc.pack-compatibility-surface.v1`,
-`vc.job-execution-identity.v1`, `vc.data-catalog.v1`, `vc.upload-receipt.v1`,
+`vc.job-execution-identity.v1`, `vc.job-execution-identity.v2`,
+`vc.data-catalog.v1`, `vc.upload-receipt.v1`,
 `vc.golden-norman.v1`, `vc.golden-baseline.v1`,
 `vc.golden-evaluation.v1`, `vc.golden-artifact-manifest.v1`,
 `vc.community-pack.v1`, the `vc.community-*.v1` exchange/plan/result schemas,

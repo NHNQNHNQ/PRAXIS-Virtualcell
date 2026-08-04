@@ -6,21 +6,28 @@
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
+> DOCS-CLOSURE completion / P12 starting SHA：
+> `b19c896202bea56f894d0ad540501331af42a40c`
+>
+> 当前 work unit：`P12 — Virtual Cell Model Zoo v2`；分支
+> `codex/p12-model-registry-v2`；状态 `VALIDATING`
+>
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
 > 历史误命名恢复 ref：`codex/p12-cell-first-baseline`（名称不再代表 Phase 12 状态）
 >
 > 已记录部署锚点：`http://10.102.106.53:18080`
 >
-> DOCS-CLOSURE 日期：2026-07-31
+> 当前状态核对日期：2026-08-02
 >
-> DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`；completion
-> identity 以包含本文 exact bytes 的现场 Git commit 和完成报告为准
+> P12 completion identity：尚未形成；必须以最终 allowlisted bytes、验证、获准本地
+> commit、post-commit 状态和完成报告共同证明，不在本文猜测未来 SHA
 
 本文把 “An agentic foundation platform for programmable virtual cells across
-species and biological systems.” 愿景转换为可逐阶段
-授权、实施、验证和停止的路线图。本文不授权 P12 或任何后续实现，不授权下载数据/
-权重、push、GitHub main/tag、`.53` 写入或服务操作。
+species and biological systems.” 愿景转换为可逐阶段授权、实施、验证和停止的
+路线图。本文自身不授权任何实现。P12 已由仓库外的用户精确授权进入验证，授权仅限
+该 work unit；本文仍不授权 P13 或任何后续实现，也不授权下载数据/权重、push、
+GitHub main/tag、`.53` 写入或服务操作。
 
 ## 1. 最终目标与准确产品承诺
 
@@ -38,7 +45,7 @@ species and biological systems.” 愿景转换为可逐阶段
 exact-scope 的 Biological World Model research capability。Phase 编号是路线标签，
 不是产品版本、API 协议、schema 或模型版本。
 
-## 2. Phase 11 当前产品基线与 Phase 12 起点
+## 2. Phase 11 产品基线与当前 Phase 12 work unit
 
 ### 2.1 当前身份
 
@@ -47,10 +54,13 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | 规范工作树 | `/Volumes/T7/PRAXIS-virtualcell` |
 | 外置 Git metadata | `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir` |
 | DOCS-CLOSURE parent | `b02d21985bcde50cf0758d339b05b13bb3e200a2` |
-| DOCS-CLOSURE completion | 现场包含本文 exact bytes 的 commit；以 `git rev-parse HEAD` 和完成报告核对，不在文档中自引用未来 SHA |
+| DOCS-CLOSURE completion | `b19c896202bea56f894d0ad540501331af42a40c` |
+| P12 starting SHA | `b19c896202bea56f894d0ad540501331af42a40c` |
 | 产品代码提交 | `bf44aac25b993e49d0146ccd52dddad5c2fa14de` |
 | 历史恢复 ref | `codex/p12-cell-first-baseline`（创建时误把 Cell-first 收口称为 P12；不得移动或删除，但不再定义阶段编号） |
-| 当前开发分支 | `codex/p11-data-centric-ui` |
+| 当前开发分支 | `codex/p12-model-registry-v2` |
+| 当前 work-unit 状态 | `VALIDATING`；completion SHA 尚未形成 |
+| 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
 | `.53` wheel SHA-256 | `bbe81a631c2dcf265dab9ca5b1254775fbbf0952220d0604dbbb3610d79e2d0d` |
@@ -62,8 +72,10 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 
 没有创建 Git tag。根据 `docs/VERSIONING.md`，tag 只能在独立发布授权中创建，不能用
 本地 tag 冒充 GitHub 已发布版本。当前代码/部署身份已由 exact SHA、wheel 和 recovery
-bundle 锚定，但恢复分支本身不是不可移动 release。DOCS-CLOSURE 是否成立必须由现场
-Git identity 和完成报告验证；`.53` preview 也不等于 GitHub main/tag 发布。`bf44aac...`
+bundle 锚定，但恢复分支本身不是不可移动 release。DOCS-CLOSURE 已由
+`b19c896...` 和完成报告收口；当前 P12 completion 仍必须由现场 Git identity、
+allowlisted diff、验证结果、一次获准本地 commit 和 post-commit 状态共同证明。
+`.53` preview 也不等于 GitHub main/tag 发布。`bf44aac...`
 继续暴露 `1.6.0` 构成版本漂移，下一次稳定候选必须使用新的 SemVer，绝不能移动或
 复用已有 `v1.6.0` tag。
 
@@ -72,7 +84,8 @@ Git identity 和完成报告验证；`.53` preview 也不等于 GitHub main/tag 
 ```text
 P11A  数据中心化前端骨架
 P11B  Cell-first 白色聊天入口、Data Center、示例问题和直接报告
-P12   下一阶段：Virtual Cell Model Zoo v2（尚未开始、尚未授权）
+P12   当前阶段：Virtual Cell Model Zoo v2（AUTHORIZED → IN_PROGRESS → VALIDATING）
+P13   条件式下一候选：Model Adapter SDK（NOT ACTIVE；未授权）
 ```
 
 Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
@@ -107,8 +120,10 @@ Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
 
 因此，当前准确结论是：
 
-> Phase 11 已完成可信的 Cell-first 产品入口；Phase 12 尚未开始。cell 与数据、
-> Pack、模型和科学证据的可执行绑定仍未完成。
+> Phase 11 已完成可信的 Cell-first 产品入口。Phase 12 正在验证 model、artifact、
+> environment、adapter、evidence 和 operator-policy record 的分层身份及 Pack-aware
+> fail-closed 接线；在 completion SHA 形成前不能写为完成。当前没有新增真实模型、
+> 科学 evidence 或 product promotion。
 
 ### 2.4 本次编号纠正
 
@@ -299,7 +314,42 @@ staged/modified/deleted/untracked 清单。除当前授权 exact allowlist 外�
 artifact、environment、adapter、evidence 和 operator-policy record 身份层，但本
 阶段不新增、下载或运行真实权重，也不作新的 operator promotion decision。
 
-### 当前缺口
+### 当前验证快照
+
+P12 以 `b19c896202bea56f894d0ad540501331af42a40c` 为唯一起始 SHA，在
+`codex/p12-model-registry-v2` 上处于 `VALIDATING`。实现候选已经形成以下分层合同，
+但只有完成全部约定验证、一次获准本地 commit 和 post-commit 核验后才能标记
+`COMPLETE`：
+
+- `vc.model-artifact.v1`、`vc.model-environment.v1`、`vc.model-adapter.v1`；
+- `vc.model-validation-evidence.v1`、`vc.model-operator-policy.v1`；
+- `vc.model-release.v1`、`vc.model-registry-event.v1`、
+  `vc.model-registry-state.v1` 和 `vc.model-registry.v2`；
+- Pack-aware `vc.environment.v2`、`vc.compatibility-report.v2`、
+  `vc.execution-step.v2`、`vc.execution-plan.v2` 和
+  `vc.job-execution-identity.v2`；
+- 路径脱敏白名单投影 `vc.model-registry-catalog.v2`，复用
+  `praxis-vc pack list` 与 `GET /api/packs`，不增加管理写接口；
+- `vc.model-card.v1` 迁移只产生 `legacy_incomplete` release，不创建 evidence 或
+  policy；无法精确绑定 model identity 的 P8/P9 历史结果保存为
+  `binding_status=unbound` 的 migration receipt，P9 `available=false` 保持不变；
+- native environment 的 package identity 使用 canonical PEP 503 distribution name
+  和显式 version；legacy runtime import-module name 原样分层保留，不能相互归一化；
+- native `model_version` 必须是 path-safe public identifier；unsafe legacy raw version
+  只留在内部 immutable identity，公开投影显示 `null`；
+- v2 JobStore identity 同时绑定 submitted request、normalized request、canonical
+  `plan_id` 和 execution-step fingerprints；JobStore 要求 report/provenance 引用同一
+  plan，并把两处 plan 都替换为相同的字段白名单、路径脱敏投影，不从 live registry
+  回写历史；
+- lifecycle 通过不可变事件 append/reduce 表达
+  `cataloged/artifact_ready/revoked/superseded`，不原地改写 release、历史 job 或负结果。
+
+本阶段没有访问外置资产、网络、训练、GPU、remote、`.53` 或服务；没有运行真实
+科学候选，也没有作出新的 operator promotion decision。P13 仍明确禁止且未授权。
+
+### P12 定义时的原始缺口
+
+以下条目是本阶段开始时冻结的问题陈述；当前是否已解决仍以最终验证和完成报告为准。
 
 - P6 已把 model-card registry、computed compatibility、environment compatibility、
   executable plan 和 `scientifically_validated=false` 分开；P12 不得否认或合并这些
@@ -345,7 +395,9 @@ artifact、environment、adapter、evidence 和 operator-policy record 身份层
 不实现 Adapter SDK，不下载/运行 GEARS/scGPT/Geneformer，不修改权重，不训练模型，
 不改变 `.53`，不发布 Model Marketplace。
 
-### 可复制授权提示词
+### 可复制授权提示词（模板留存；当前 P12 已有独立精确授权）
+
+以下文本保留为审计模板，不替代当前授权，也不能重复或扩大当前 P12 scope。
 
 ```text
 授权以 `<现场验证的 DOCS-CLOSURE exact 40 位 completion SHA>` 作为 Phase 12
@@ -413,7 +465,10 @@ Broker/ExecutionPlan 接入，而不是在核心 runtime 增加模型或物种�
 不接真实 E. coli/yeast/human 模型，不下载权重，不训练，不科学晋级，不做 UI
 Marketplace。
 
-### 可复制授权提示词
+### 可复制授权提示词（`NOT ACTIVE`）
+
+P13 只有在 P12 真实 completion SHA 形成并由用户另发精确授权后才能开始；以下占位
+模板当前不生效。
 
 ```text
 授权以 `<Phase 12 完成 SHA>` 作为 Phase 13（Virtual Cell Model Adapter SDK）
@@ -1840,9 +1895,13 @@ Next exact authorization sentence:
 
 ## 27. 下一步
 
-本路线文档收口后，只有 Phase 12 可进入授权准备。Phase 13–30 中的
-`<Phase N 完成 SHA>` 必须在对应前一阶段真正完成后替换为实际 40 位 SHA，不能提前
-猜测或沿用旧 SHA。
+唯一当前 work unit 是 P12。继续执行仅表示完成 P12 的一致性检查、定向与受影响
+回归、core/legacy/frontend、Ruff、pip check、packaging、`git diff --check`、
+allowlist staging、一次获准本地 commit 和 post-commit 核验。任一硬门失败都必须
+保留为明确负结果或 blocker，不得放宽 schema/science/policy 门。
 
-Phase 12 的第一项工作是身份和证据层，不是下载 GEARS/scGPT，也不是开始训练
-world model。这是后续所有真实模型、训练、Marketplace 和多 Agent 能力可信的前提。
+P12 真实完成后，唯一下一 numbered candidate 才是 P13 Adapter SDK。本文中的 P13
+模板保留占位符且为 `NOT ACTIVE`：必须先取得 P12 actual completion SHA、重新生成
+动态保护清单，再由用户另发完整精确授权。当前 P12 授权不得用于创建 P13 branch、
+修改 P13 代码、下载资产或运行实验。Phase 13–30 中的 `<Phase N 完成 SHA>` 也只能
+在对应前一 work unit 真正完成后替换，不能提前猜测。

@@ -160,7 +160,7 @@ def test_playwright_python_can_be_overridden_without_editing_config():
     )
     readme = (_ROOT / "praxis_vc_react" / "README.md").read_text(encoding="utf-8")
 
-    assert '"${PRAXIS_VC_TEST_PYTHON:-.venv/bin/python}"' in config
+    assert '"\\${PRAXIS_VC_TEST_PYTHON:-.venv/bin/python}"' in config
     assert "PRAXIS_VC_TEST_PYTHON" in readme
 
 

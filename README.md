@@ -4,12 +4,11 @@
 
 用户描述物种、细胞场景和扰动任务后，系统把请求路由到适用的预测器或规则模块，产出包含治理裁决、证据边界和复现信息的 Markdown 报告。默认 `offline`，不需要 API key。
 
-当前阶段事实：Phase 11B Cell-first 产品入口已完成，产品代码锚点为
-`bf44aac25b993e49d0146ccd52dddad5c2fa14de`；Phase 12 Virtual Cell Model Zoo v2
-尚未开始。DOCS-CLOSURE 以
-`b02d21985bcde50cf0758d339b05b13bb3e200a2` 为 parent，其完成身份必须由现场
-`git rev-parse HEAD`、exact allowlisted diff 和完成报告共同核对，不能在提交自身
-中预写未来 SHA。
+当前阶段事实：Phase 11B Cell-first 产品入口和 DOCS-CLOSURE 已完成；Phase 12
+Virtual Cell Model Zoo v2 正在 `codex/p12-model-registry-v2` 验证，唯一起始 SHA 为
+`b19c896202bea56f894d0ad540501331af42a40c`。P12 尚无 completion SHA；完成身份只能由
+现场 `git rev-parse HEAD`、exact allowlisted diff、验证结果和完成报告共同核对，不能
+在提交自身中预写未来 SHA。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -86,8 +85,9 @@ praxis-vc ask \
 所有预测和治理终决由后端确定性 runtime 完成。LLM 只可参与自然语言解析、路由建议、critic 复核和报告润色，不能修改 prediction、hard rule、learned reliability、provenance 或最终 verdict。`llm_assisted` 需要 `DEEPSEEK_API_KEY`；缺少凭证或调用失败时回退到离线路径。
 
 上述 `accept/caution/downgrade/abstain` 是现有 runtime verdict，不等于
-`production_promoted`。P12 才计划补齐独立 adapter、evidence 和 product-policy
-identity；在 P12 完成以前不得假装这些新门已经存在。
+`production_promoted`。P12 当前字节已把 artifact、environment、adapter、validation
+evidence 和 operator-policy 拆成独立 identity，但阶段仍在验证；schema/record 存在
+不表示有真实 evidence、具名 operator 决定或 production promotion。
 
 ## VirtualCellPack 与模型输入
 
@@ -110,17 +110,41 @@ aggregate、drop、fill、reorder 只有被合同或 hash/version 绑定的 mapp
   promotion_eligible`；
 - Product policy：`production_promoted`。
 
-当前实现已有的 Pack、feature、model-card、environment 和 execution-plan 身份不等于
-P12 计划新增的独立 adapter/evidence/policy fingerprint。任何现有状态都不能预先
-推出 P12 已完成或模型已获产品批准。
+P12 当前字节以 `vc.model-registry.v2` 分层保存 `vc.model-artifact.v1`、
+`vc.model-environment.v1`、`vc.model-adapter.v1`、
+`vc.model-validation-evidence.v1`、`vc.model-operator-policy.v1` 和
+`vc.model-release.v1`，并从 append-only lifecycle event 归约
+`cataloged / artifact_ready / revoked / superseded`。旧 `vc.model-card.v1` 字节和
+fingerprint 保持兼容；迁移只生成 `legacy_incomplete` release 和结构化
+`legacy_status`，不生成 evidence/policy，不把 `planned/available/missing` 升级为
+可执行、科学有效或 production promoted。Native `model_version` 必须是 path-safe
+identifier；legacy raw 值只保留在内部 identity/fingerprint，若不安全，公开 catalog
+中的 `model_version` 为 `null`，不会重写原值。
 
-Pack-aware runtime 由严格 `vc.model-card.v1`、`CapabilityRegistry` 和
-`ModelBrokerAgent` 生成 `vc.compatibility-report.v1` 与确定性
-`vc.execution-plan.v1`。只有完整提供已注册的 `pack_id + pack_version` 才走该
-路径；无 Pack 调用保留显式 legacy adapter。缺资产、坏 hash、缺依赖/资源、
-越 scope 或缺 runtime task/output adapter 都会弃权，不会 fallback 到 mock。
-当前 plugin execution adapter 只实现 `predict_delta_expression →
-delta_expression`，模型卡可发现不等于可执行或科学有效。
+Pack-aware 产品路径生成 `vc.environment.v2`、`vc.compatibility-report.v2` 和
+`vc.execution-plan.v2`，逐次核对 exact
+request×Pack×release×artifact×environment×adapter×evidence×policy 及 lifecycle。
+`model_compatible` 只表示 request×Pack×model；`adapter_compatible`、
+`environment_compatible` 和 `executable` 分开计算。任一引用、hash、scope、环境、
+adapter、evidence、policy 或 lifecycle 门缺失即产生空计划并弃权，不会 fallback 到
+mock。`vc.compatibility-report.v1`、`vc.execution-plan.v1` 和无 Pack legacy adapter
+仍可解析，但不是 P12 产品执行授权。
+
+v2 compatibility/step 的 canonical identity 排除 runtime path 和公开 display-only
+`model_version`；raw version 仍由 `model_fingerprint` 与 release fingerprint 约束，
+因此 unsafe legacy version 脱敏为 `null` 不会改变 `plan_id`。`ExecutionPlanV2`
+反序列化时重算 canonical `plan_id`，并核对 report、wrapper 和 agent 的 step binding。
+
+当前 in-process 实例化只接受声明为 `safe_load_policy=data_only` 的 artifact，并在
+计划和实例化时重复检查；`restricted_deserializer`、`isolated_runtime` 和
+`unavailable` 均弃权。`data_only` 目前仍是 registry 声明，尚无类型级 wrapper loader
+证明，因此不能把该字段当成任意权重安全加载证明。P12 没有下载或运行真实权重，也
+没有新增任何真实 promoted release。
+
+`EnvironmentIdentity.packages` 使用 PEP 503 distribution name+version；当次
+`EnvironmentSnapshot.python_dependencies` 记录 import-module availability。两组名称
+不是同一 namespace，不按字符串强行等同；exact environment 由 environment
+fingerprint 及 lockfile/image digest 绑定。
 
 P8 产品化收口随发行物提供三个合成、微型、可审计 Pack：
 `p8-human-tiny`、`p8-mouse-tiny`、`p8-bacteria-tiny`。它们覆盖
@@ -142,9 +166,13 @@ praxis-vc pack run \
 `inspect` 明确返回未校验状态；`validate/register/list/compatibility/run` 均按当前
 bytes 重验。只读 API 位于 `/api/packs`、`/api/packs/{id}/{version}`、
 `/validate` 和 `/api/packs/compatibility`；服务器不提供 Pack register API。
-React“数据资源”页只显示这些后端验证/capability 字段，不复制科学路由。Pack-aware
-历史 job 另存 `vc.job-execution-identity.v1`，锁定 Pack 与 model card
-fingerprint；同名 job 不能覆盖。
+`vc.pack-catalog.v1` 保持外层兼容，同时在 top-level `model_registry` 暴露路径脱敏的
+`vc.model-registry-catalog.v2`，并在每个
+`model_capabilities[*].registry_releases` 中只列该模型的 release 投影。React“数据
+资源”页只显示后端验证/capability 字段，不复制科学路由。v2 Pack-aware job 使用
+`vc.job-execution-identity.v2` 锁定 request、Pack、environment snapshot、release、
+component、evidence、policy、structured report fingerprint 和 outcome；历史 v1 job
+identity 仍可解析，`JobStore.load` 只做只读投影、不改旧 bytes，同名 job 仍不能覆盖。
 
 P7 的“数据资源”页面提供独立的公开下载和隔离上传通道。公开目录使用 strict
 `vc.data-catalog.v1`，只对外置数据根中 path、size、SHA-256 全部匹配的文件开放
@@ -196,18 +224,21 @@ community plan 固定不可执行，run 只能 `prediction=null` 并诚实 absta
 [ADR-0006](docs/ADR-0006-virtualcellpack-p8-golden-norman.md)、
 [ADR-0007](docs/ADR-0007-virtualcellpack-p8-product-surfaces.md)、
 [ADR-0008](docs/ADR-0008-virtualcellpack-p9-ood-validation.md)、
+[ADR-0009](docs/ADR-0009-virtualcell-model-zoo-v2.md)、
 [多组学 runbook](docs/runbooks/VIRTUALCELLPACK-MULTIOMICS.md) 与
 [能力 runtime runbook](docs/runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md)、
 [数据资源库 runbook](docs/runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) 和
 [Golden Norman runbook](docs/runbooks/VIRTUALCELLPACK-GOLDEN-NORMAN.md)、
 [Pack 产品面 runbook](docs/runbooks/VIRTUALCELLPACK-PRODUCT-SURFACES.md)、
 [P9 OOD 验证 runbook](docs/runbooks/VIRTUALCELLPACK-P9-OOD-VALIDATION.md) 和
+[Model Zoo v2 runbook](docs/runbooks/VIRTUALCELL-MODEL-ZOO-V2.md)、
 [Community readiness checklist](docs/COMMUNITY-READINESS-CHECKLIST.md)。
 
 ## 能力边界
 
 PRAXIS-VirtualCell 是带可靠性治理的操作层，不是通用或 SOTA 预测模型。历史
-Phase 10 Gate 的可复现证据只支持以下克制表述；它不构成 P12 evidence/policy：
+Phase 10 Gate 的可复现证据只支持以下克制表述；它不构成 P12
+`ValidationEvidence`、operator policy 或 promotion：
 
 - 当时记录的引擎级覆盖为四类：M2（真实 donor 证据来自 `.53` 历史亲验）、M3、M4
   和 M7。
@@ -245,12 +276,14 @@ CI=1 npm run e2e
 | 文档 | 内容 |
 |---|---|
 | [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11/P12 边界和跨项目集成 |
+| [P12 Model Zoo v2 ADR](docs/ADR-0009-virtualcell-model-zoo-v2.md) | 当前分层 identity、迁移、fail-closed 和安全加载边界 |
+| [P12 Model Zoo v2 runbook](docs/runbooks/VIRTUALCELL-MODEL-ZOO-V2.md) | 当前只读操作、验证命令和状态解释 |
 | [P12–P30 顺序总提示词](docs/PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md) | 当前状态机、动态 work-unit 选择和授权纪律 |
 | [P12–P30 执行路线](docs/PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) | 详细 scope、硬门和条件式授权模板 |
 | [P12–P30 完成清单](docs/PHASE12-30-DETAILED-COMPLETION-CHECKLIST.md) | 工程、科学和 policy 分离的验收台账 |
 | [P12–P30 协调提示词](docs/PHASE12-30-MASTER-PROMPT.md) | 长期协调边界；不得替代现场 Git 证据 |
 | [P11A 设计](docs/PHASE11A-DATA-CENTRIC-UI-DESIGN.md) | P11A 历史实现说明；现行产品以 P11B 为准 |
-| [文档地图](docs/INDEX.md) | 历史材料索引；日期早于 DOCS-CLOSURE 的“当前”描述只作快照 |
+| [文档地图](docs/INDEX.md) | 当前权威入口与历史材料分层索引 |
 | [2026-07-18 项目状态](docs/status/PROJECT-STATE-2026-07-18.md) | 历史快照，不是当前阶段台账 |
 | [三端同步台账](docs/status/SYNC-STATE.md) | 历史远程观测；使用前必须在获准窗口现场刷新 |
 | [安装指南](docs/INSTALL.md) | pip、前端、Docker 现状和可选依赖 |
@@ -262,12 +295,12 @@ CI=1 npm run e2e
 
 唯一允许的流向是：本地 feature branch → GitHub branch/CI → 审批合入 GitHub `main` → 本地 `main` fast-forward → `.53` 从同一 GitHub SHA fast-forward → 三端 SHA 核对。不要在 `.53` 直接开发，也不要把本地 tag 当成已发布 tag。
 
-本次 DOCS-CLOSURE 未刷新 GitHub 或 `.53`。规范工作树是
+当前 P12 窗口未刷新 GitHub 或 `.53`。规范工作树是
 `/Volumes/T7/PRAXIS-virtualcell`，Git metadata 是
 `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`；任何远程数字只有带日期和 exact
 identity 的只读记录意义。
 
-整理分支已按两次精确 D1a 授权把 GitHub `codex/project-consolidation` 快进到 `ee36d7948047f346f55a02d62ccaac84391e3c20`。对应的 [GitHub Actions run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 为 `4/5`：Python core、frontend/Playwright、reproducible wheel 和 Linux release container 通过，legacy 唯一失败是 Linux shell 子进程未随直接 shell 终止。修复提交 `6a8198771581d0897a13457e93e50cfec172d59a` 已把输出截断、timeout、pipe 异常和上层取消统一为进程组清理，并在 macOS/Python 3.13.12 与 Linux/Python 3.13.14 严格锁环境得到 legacy `1139 passed / 0 failed`。包含本段的最终文档提交必须由交接中的 post-commit release artifact 重新绑定，之后才能申请新的 exact-SHA D1a retry；GitHub `main`/tag、本地 `main` 和 `.53` 均未改变。
+历史整理分支曾按两次精确 D1a 授权把 GitHub `codex/project-consolidation` 快进到 `ee36d7948047f346f55a02d62ccaac84391e3c20`。对应的 [GitHub Actions run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 为 `4/5`：Python core、frontend/Playwright、reproducible wheel 和 Linux release container 通过，legacy 唯一失败是 Linux shell 子进程未随直接 shell 终止。修复提交 `6a8198771581d0897a13457e93e50cfec172d59a` 已把输出截断、timeout、pipe 异常和上层取消统一为进程组清理，并在 macOS/Python 3.13.12 与 Linux/Python 3.13.14 严格锁环境得到 legacy `1139 passed / 0 failed`。这些都是绑定旧 SHA 的历史证据，不授权 P12 push、CI、release 或 deploy；GitHub `main`/tag、本地 `main` 和 `.53` 当前状态必须在未来获准窗口重新只读核对。
 
 ## 派生关系
 

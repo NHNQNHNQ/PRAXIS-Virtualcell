@@ -1,15 +1,61 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：分支 `codex/p11-data-centric-ui`；P11B 产品代码锚点
-> `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；DOCS-CLOSURE parent
-> `b02d21985bcde50cf0758d339b05b13bb3e200a2`
+> 当前文档基线：Phase 12 分支 `codex/p12-model-registry-v2`；唯一起始 SHA
+> `b19c896202bea56f894d0ad540501331af42a40c`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：`P11B_COMPLETE — P12_NOT_STARTED`。下述 P4.3–P10 和 CI 数字都是绑定各自
-> exact SHA/日期的历史冻结证据；本轮 docs-only 收口只运行文档一致性、链接和 Git
-> 差异检查，不重跑 core、legacy、frontend、LLM、GPU、remote、external 或 science。
+> 状态：`P12_VALIDATING`。下述 P4.3–P11 和 CI 数字都是绑定各自 exact SHA/日期的
+> 历史冻结证据；P12 当前结果只绑定尚未提交的本地 bytes，不能预写 completion SHA，
+> 也不构成科学验证、operator policy、发布或远程证据。
+
+## Phase 12 `VALIDATING` 本地定向证据
+
+P12 当前字节新增分层 Model Zoo v2 合同、v1 fail-closed 迁移、公开路径脱敏投影和
+v2 Pack-aware execution/job identity；负例还覆盖 environment distribution/import
+namespace 分离、unsafe legacy `model_version` 公开为 `null`、canonical `plan_id` 与
+step/report binding、job request/report/outcome identity。以下命令在无网络、无外置
+资产、无权重、无训练/LLM/GPU/remote 的本地工作树运行：
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_model_registry_v2.py \
+  praxis_virtualcell/tests/test_capability_runtime.py \
+  praxis_virtualcell/tests/test_pack_product.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+```
+
+当前观察结果：`132 passed / 0 failed`；其中单独运行
+`test_model_registry_v2.py` 为 `49 passed / 0 failed`。这些是 directed contract
+结果，不等于最终阶段门；测试中的 native positive release 是 synthetic conformance，
+不是科学 evidence 或 production promotion。
+
+提交前完整 P12 定向口径还包括 v1 registry 和 API 回归：
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_model_registry_v2.py \
+  praxis_virtualcell/tests/test_model_zoo_registry.py \
+  praxis_virtualcell/tests/test_capability_runtime.py \
+  praxis_virtualcell/tests/test_pack_product.py \
+  praxis_virtualcell/tests/test_api.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+
+ruff check \
+  praxis_virtualcell/model_zoo \
+  praxis_virtualcell/pack_product.py \
+  praxis_virtualcell/cli.py \
+  praxis_vc_api \
+  praxis_virtualcell/tests/test_model_registry_v2.py \
+  --no-cache
+python -m pip check
+git diff --check
+```
+
+受影响 core、legacy、frontend 和 packaging 结果必须由本阶段完成报告按实际执行情况
+分别记录；未运行、skip 或 deselect 不能写成通过。完整操作顺序见
+[Model Zoo v2 runbook](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md)。
 
 ## 最近记录的 P11B / `b02d219...` 本地重建证据
 
@@ -29,8 +75,8 @@
 
 核心结果与根 `tests/` 不能相加成一个“总通过数”。前者是 VirtualCell 发布权威口径；后者是继承的 PRAXIS-2 unit 范围。Phase 10 的 `912/40/9` 是新增产品版本契约测试之前的冻结证据，不应在原报告中回写成新数字。
 
-P11A/P11B 的 UI 测试只证明产品交互和已有后端接线，不构成模型科学验证、
-`production_promoted`、P12 实现或发布证据。P11A 锚点为
+P11A/P11B 的 UI 测试只证明产品交互和当时的后端接线，不构成模型科学验证、
+`production_promoted`、P12 验证或发布证据。P11A 锚点为
 `10f629b...`，P11B 完整代码锚点为
 `bf44aac25b993e49d0146ccd52dddad5c2fa14de`。
 
@@ -592,6 +638,6 @@ C4 的 build budget 实测 initial JavaScript aggregate 为 226,046 bytes（gzip
 首次修复后的 candidate `ee36d7948047f346f55a02d62ccaac84391e3c20` 经精确授权快进发布。对应 [run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 的实际结果为 Python core、frontend/Playwright、reproducible wheel、Linux release container **PASS**；legacy **FAIL**，汇总 `1 failed / 1135 passed / 59 skipped / 105 deselected`。唯一失败 `test_huge_output_capped_not_ooming` 是 Linux dash 派生的 `cat` 在直接 shell 被 kill 后仍持有 pipe；详见 [D1a retry report](status/PHASE-D1A-CI-RETRY-2026-07-23.md)。本地修复 `6a81987` 还关闭了 pipe 提前关闭绕过 timeout 与上层取消遗留进程组两个同源缺口。
 
 “存在 run”不等于 CI 全绿，也不证明这些 job 是 branch-protection required checks。
-以上 D1a 指令和 SHA 只属于当时的发布窗口，已不构成当前行动授权。本次
-DOCS-CLOSURE 未读取或修改 GitHub `main`/tag、`.53` 或任何远程状态；未来 CI、
-push、发布和部署仍须以届时现场 HEAD 获得独立精确授权。
+以上 D1a 指令和 SHA 只属于当时的发布窗口，已不构成当前行动授权。P12 窗口未读取
+或修改 GitHub `main`/tag、`.53` 或任何远程状态；未来 CI、push、发布和部署仍须以
+届时现场 HEAD 获得独立精确授权。

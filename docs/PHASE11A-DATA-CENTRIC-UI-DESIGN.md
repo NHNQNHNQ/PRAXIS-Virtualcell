@@ -14,7 +14,12 @@
 本文描述 Phase 11A 已实现的前端产品骨架。它不是未来完整产品的概念稿，也不代表
 Pack Factory、持久化 VirtualCell、自动训练或任意细胞预测已经实现。
 P11B 随后在 `bf44aac25b993e49d0146ccd52dddad5c2fa14de` 完成 Cell-first 产品收口；
-现行 UI 以 P11B 为准。Phase 12 尚未开始。
+现行 UI 以 P11B 为准。DOCS-CLOSURE 已在
+`b19c896202bea56f894d0ad540501331af42a40c` 形成；Phase 12 以该 SHA 为唯一起点，
+正在 `codex/p12-model-registry-v2` 验证，状态为 `VALIDATING`，尚未形成 completion
+SHA。P12 不修改前端，只复用现有 Pack list/API 调用链提供路径脱敏的 Model
+Registry v2 只读投影。P13 Adapter SDK 仅为 P12 完成后的条件式候选，当前
+`NOT ACTIVE`、未授权。
 
 ## 2. 设计定位
 
@@ -70,8 +75,9 @@ UI 和后续治理合同必须区分以下概念：
   promotion_eligible`；
 - Product policy：`production_promoted`。
 
-这些状态不能自动递进。P11A UI 没有实现 P12 计划中的独立
-adapter/evidence/policy identity。
+这些状态不能自动递进。P11A UI 没有实现独立 adapter/evidence/policy identity；
+正在验证的 P12 后端合同补充该分层身份，但不回写 P11A 历史实现，也不由 UI 创建
+evidence、policy 或 promotion。
 
 ### 3.5 LLM 权限最小化
 
