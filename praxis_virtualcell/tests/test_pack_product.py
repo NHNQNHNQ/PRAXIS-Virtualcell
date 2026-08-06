@@ -16,6 +16,7 @@ from praxis_virtualcell.io.job_store import JobStore
 from praxis_virtualcell.model_zoo.wrappers.base import ModelWrapper
 from praxis_virtualcell.pack_product import (
     PackIndex,
+    PackIndexError,
     PackUnavailable,
     builtin_pack_roots,
     compatibility_payload,
@@ -166,6 +167,34 @@ def _product_index(tmp_path: Path) -> PackIndex:
     return PackIndex(index_path=tmp_path / "pack-index.json")
 
 
+def _write_legacy_pack_index(index_path: Path, pack_root: Path) -> dict:
+    """Seed a historical v1 entry without reopening the retired write bypass."""
+
+    record = validate_pack_summary(pack_root, source="registered")
+    assert record["pack_valid"] is True
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    index_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "vc.pack-index.v1",
+                "packs": [
+                    {
+                        "pack_id": record["pack_id"],
+                        "pack_version": record["pack_version"],
+                        "pack_fingerprint": record["pack_fingerprint"],
+                        "root": str(pack_root.resolve()),
+                    }
+                ],
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return record
+
+
 def _human_identity() -> tuple[str, str]:
     return "p8-human-tiny", "1.0.0"
 
@@ -227,7 +256,7 @@ def test_inspect_is_explicitly_unchecked_while_validate_reads_assets():
     assert validated["pack_fingerprint"] == inspected["pack_fingerprint"]
 
 
-def test_register_is_durable_idempotent_and_revalidates_assets(tmp_path):
+def test_legacy_registration_is_readable_and_revalidates_assets(tmp_path):
     external = tmp_path / "external"
     shutil.copytree(builtin_pack_roots()["human"], external)
     manifest_path = external / "manifest.yaml"
@@ -239,10 +268,10 @@ def test_register_is_durable_idempotent_and_revalidates_assets(tmp_path):
     )
     index_path = tmp_path / "index" / "packs.json"
 
+    registered = _write_legacy_pack_index(index_path, external)
     first = PackIndex(index_path=index_path)
-    registered = first.register(external)
-    assert registered["pack_valid"] is True
-    assert first.register(external) == registered
+    with pytest.raises(PackIndexError, match="controlled Pack Factory"):
+        first.register(external)
 
     second = PackIndex(index_path=index_path)
     assert second.get_record("p8-external-human", "1.0.0") == registered
@@ -266,7 +295,7 @@ def test_invalid_registered_pack_record_redacts_server_root(tmp_path):
         encoding="utf-8",
     )
     index = PackIndex(index_path=tmp_path / "pack-index.json")
-    index.register(external)
+    _write_legacy_pack_index(index.path, external)
     manifest_path.unlink()
 
     record = index.get_record("p8-private-path-test", "1.0.0")
@@ -658,7 +687,6 @@ def test_pack_cli_exposes_all_six_commands(tmp_path, monkeypatch, capsys):
     calls = [
         ["pack", "inspect", str(root)],
         ["pack", "validate", str(root)],
-        ["pack", "register", str(root)],
         ["pack", "list"],
         [
             "pack",
@@ -688,19 +716,22 @@ def test_pack_cli_exposes_all_six_commands(tmp_path, monkeypatch, capsys):
         assert cli.main(argv) == 0
         payloads.append(json.loads(capsys.readouterr().out))
 
+    with pytest.raises(SystemExit):
+        cli.main(["pack", "register", str(root)])
+    capsys.readouterr()
+
     assert payloads[0]["validation_status"] == "unchecked"
     assert payloads[1]["pack_valid"] is True
-    assert payloads[2]["pack_id"] == pack_id
-    assert len(payloads[3]["packs"]) == 3
-    assert payloads[3]["model_registry"]["schema_version"] == (
+    assert len(payloads[2]["packs"]) == 3
+    assert payloads[2]["model_registry"]["schema_version"] == (
         "vc.model-registry-catalog.v2"
     )
-    assert payloads[3]["model_capabilities"][0]["registry_releases"]
-    migrated = payloads[3]["model_registry"]["releases"][0]
+    assert payloads[2]["model_capabilities"][0]["registry_releases"]
+    migrated = payloads[2]["model_registry"]["releases"][0]
     assert migrated["scientifically_validated"] is None
     assert migrated["production_promoted"] is False
-    assert payloads[4]["execution_plan"]["executable"] is False
-    assert payloads[5]["reliability_decision"]["abstain"] is True
+    assert payloads[3]["execution_plan"]["executable"] is False
+    assert payloads[4]["reliability_decision"]["abstain"] is True
     assert (
         tmp_path / "runs" / "cli-job" / "execution_identity.json"
     ).is_file()

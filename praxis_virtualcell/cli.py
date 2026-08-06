@@ -112,9 +112,41 @@ def _cmd_pack_validate(a) -> int:
 
 
 def _cmd_pack_register(a) -> int:
+    from praxis_virtualcell.pack_factory import (
+        PackCandidateV1,
+        PackFactoryStore,
+        PackMetadataReviewV1,
+        PackOperatorDecisionV1,
+        PackValidationReportV1,
+        bind_pack_candidate,
+        load_factory_contract,
+        load_quarantined_upload,
+        register_pack_candidate,
+    )
     from praxis_virtualcell.pack_product import PackIndex
 
-    _print_json(PackIndex().register(a.pack_root))
+    upload = load_quarantined_upload(a.upload_directory)
+    candidate = load_factory_contract(a.candidate, PackCandidateV1)
+    review = load_factory_contract(a.review, PackMetadataReviewV1)
+    validation = load_factory_contract(a.validation, PackValidationReportV1)
+    decision = load_factory_contract(a.decision, PackOperatorDecisionV1)
+    prepared = bind_pack_candidate(upload, a.pack_root, candidate)
+    index = PackIndex(index_path=a.index)
+    store = PackFactoryStore.open(a.store)
+    registration = register_pack_candidate(
+        prepared,
+        review,
+        validation,
+        decision,
+        index=index,
+        store=store,
+    )
+    _print_json(
+        {
+            **registration.to_dict(),
+            "registration_fingerprint": registration.fingerprint(),
+        }
+    )
     return 0
 
 
@@ -215,9 +247,16 @@ def main(argv=None) -> int:
     validate_cmd.set_defaults(fn=_cmd_pack_validate)
     register_cmd = pack_sub.add_parser(
         "register",
-        help="验证后把本地 Pack 路径写入索引",
+        help="以完整 P19 receipt/review/validation/operator chain 写入本地索引",
     )
-    register_cmd.add_argument("pack_root")
+    register_cmd.add_argument("--upload-directory", required=True)
+    register_cmd.add_argument("--pack-root", required=True)
+    register_cmd.add_argument("--candidate", required=True)
+    register_cmd.add_argument("--review", required=True)
+    register_cmd.add_argument("--validation", required=True)
+    register_cmd.add_argument("--decision", required=True)
+    register_cmd.add_argument("--index", required=True)
+    register_cmd.add_argument("--store", required=True)
     register_cmd.set_defaults(fn=_cmd_pack_register)
     list_cmd = pack_sub.add_parser(
         "list",

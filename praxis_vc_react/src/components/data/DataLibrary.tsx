@@ -3,8 +3,10 @@ import {
   API_BASE,
   getDataCatalog,
   getPackCatalog,
+  getPackFactoryCatalog,
   type DataCatalog,
   type PackCatalog,
+  type PackFactoryCatalog,
   type UploadReceipt,
   uploadData,
 } from "../../api";
@@ -26,6 +28,9 @@ export default function DataLibrary({
   const [packCatalog, setPackCatalog] = useState<PackCatalog | null>(null);
   const [packError, setPackError] = useState<string | null>(null);
   const [packsLoading, setPacksLoading] = useState(true);
+  const [factoryCatalog, setFactoryCatalog] = useState<PackFactoryCatalog | null>(null);
+  const [factoryError, setFactoryError] = useState<string | null>(null);
+  const [factoryLoading, setFactoryLoading] = useState(section === "packs");
   const [uploadSpecies, setUploadSpecies] = useState("");
   const [token, setToken] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -73,6 +78,31 @@ export default function DataLibrary({
     };
   }, []);
 
+  useEffect(() => {
+    if (section !== "packs") {
+      setFactoryLoading(false);
+      return;
+    }
+    let current = true;
+    setFactoryLoading(true);
+    setFactoryError(null);
+    getPackFactoryCatalog()
+      .then((next) => {
+        if (current) setFactoryCatalog(next);
+      })
+      .catch((error: unknown) => {
+        if (!current) return;
+        setFactoryCatalog(null);
+        setFactoryError(String(error));
+      })
+      .finally(() => {
+        if (current) setFactoryLoading(false);
+      });
+    return () => {
+      current = false;
+    };
+  }, [section]);
+
   async function submitUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!file || !uploadSpecies || !token) return;
@@ -116,6 +146,59 @@ export default function DataLibrary({
       </div>
 
       {section === "packs" && (
+        <>
+        <section
+          className="card data-section"
+          aria-labelledby="pack-factory-title"
+        >
+          <div className="data-section-head">
+            <div>
+              <h2 id="pack-factory-title">Pack Factory 生命周期</h2>
+              <p>只读展示本地工厂的分层身份；每一层都不会隐含下一层成立。</p>
+            </div>
+            <span className="badge">无管理写入口</span>
+          </div>
+
+          {factoryLoading && <p className="data-message">读取 Pack Factory…</p>}
+          {factoryError && (
+            <p className="err" role="alert">
+              Pack Factory 不可用：{factoryError}
+            </p>
+          )}
+          {!factoryLoading && factoryCatalog && !factoryCatalog.configured && (
+            <p className="data-message">未配置本地 Pack Factory store；当前目录为空。</p>
+          )}
+          {factoryCatalog && (
+            <div className="model-capability-grid" aria-label="Pack Factory 五层状态">
+              <article className="model-capability">
+                <strong>1 · Quarantine</strong>
+                <span>{factoryCatalog.receipts.length} 份隔离收据</span>
+                <span>仅确认原始上传字节身份；不是 Pack。</span>
+              </article>
+              <article className="model-capability">
+                <strong>2 · Candidate</strong>
+                <span>{factoryCatalog.candidates.length} 个候选</span>
+                <span>仍需显式审核与严格校验。</span>
+              </article>
+              <article className="model-capability">
+                <strong>3 · Factory-registered</strong>
+                <span>{factoryCatalog.registrations.length} 个登记身份</span>
+                <span>只表示受控登记，不授予模型能力。</span>
+              </article>
+              <article className="model-capability">
+                <strong>4 · Model-compatible</strong>
+                <span>未按具体请求评估</span>
+                <span>须由后端兼容性接口另行裁决。</span>
+              </article>
+              <article className="model-capability">
+                <strong>5 · Executable</strong>
+                <span>否</span>
+                <span>工厂登记不产生执行授权、证据或生产提升。</span>
+              </article>
+            </div>
+          )}
+        </section>
+
         <section
           className="card data-section"
           aria-labelledby="pack-catalog-title"
@@ -233,6 +316,7 @@ export default function DataLibrary({
           </div>
         </div>
         </section>
+        </>
       )}
 
       {section === "datasets" && (

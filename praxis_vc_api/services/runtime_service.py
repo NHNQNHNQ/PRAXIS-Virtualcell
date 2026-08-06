@@ -9,6 +9,7 @@ from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.exceptions import InputValidationError
 from praxis_virtualcell.core.request_v2 import VirtualCellRequestV2
 from praxis_virtualcell.io.job_store import JobStore
+from praxis_virtualcell.pack_factory import factory_catalog_payload
 from praxis_virtualcell.pack_product import (
     PackIndex,
     compatibility_payload,
@@ -171,6 +172,11 @@ def run_job(
 
 def packs() -> dict:
     return pack_catalog_payload()
+
+
+def pack_factory_catalog() -> dict:
+    """Read-only, root-free P19 lifecycle projection; never creates or mutates a store."""
+    return factory_catalog_payload()
 
 
 def pack(pack_id: str, pack_version: str) -> dict:

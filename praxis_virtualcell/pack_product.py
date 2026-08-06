@@ -42,12 +42,18 @@ from praxis_virtualcell.workflows.run_virtualcell_query import (
     validate_candidate,
 )
 
-_INDEX_SCHEMA = "vc.pack-index.v1"
-_INDEX_ENTRY_KEYS = {
+_INDEX_SCHEMA_V1 = "vc.pack-index.v1"
+_INDEX_SCHEMA = "vc.pack-index.v2"
+_INDEX_ENTRY_KEYS_V1 = {
     "pack_id",
     "pack_version",
     "pack_fingerprint",
     "root",
+}
+_INDEX_ENTRY_KEYS = {
+    *_INDEX_ENTRY_KEYS_V1,
+    "factory_registration_fingerprint",
+    "factory_store_root",
 }
 
 
@@ -205,15 +211,42 @@ def _reject_duplicate_json(pairs):
     return value
 
 
-def _valid_index_entry(value: Any) -> dict[str, str]:
-    if not isinstance(value, dict) or set(value) != _INDEX_ENTRY_KEYS:
+def _valid_index_entry(value: Any, *, schema_version: str) -> dict[str, str | None]:
+    expected_fields = (
+        _INDEX_ENTRY_KEYS_V1
+        if schema_version == _INDEX_SCHEMA_V1
+        else _INDEX_ENTRY_KEYS
+    )
+    if not isinstance(value, dict) or set(value) != expected_fields:
         raise PackIndexError("Pack index entry has invalid fields")
-    entry: dict[str, str] = {}
-    for field in _INDEX_ENTRY_KEYS:
+    entry: dict[str, str | None] = {}
+    for field in _INDEX_ENTRY_KEYS_V1:
         item = value[field]
         if not isinstance(item, str) or not item or item.strip() != item:
             raise PackIndexError(f"Pack index {field} must be a non-empty string")
         entry[field] = item
+    registration_fingerprint = value.get("factory_registration_fingerprint")
+    if registration_fingerprint is not None and (
+        not isinstance(registration_fingerprint, str)
+        or len(registration_fingerprint) != 64
+        or any(char not in "0123456789abcdef" for char in registration_fingerprint)
+    ):
+        raise PackIndexError(
+            "Pack index factory registration fingerprint must be lowercase SHA-256 or null"
+        )
+    entry["factory_registration_fingerprint"] = registration_fingerprint
+    factory_store_root = value.get("factory_store_root")
+    if (registration_fingerprint is None) != (factory_store_root is None):
+        raise PackIndexError(
+            "Pack index factory registration and store identities must be present together"
+        )
+    if factory_store_root is not None:
+        if not isinstance(factory_store_root, str) or not factory_store_root:
+            raise PackIndexError("Pack index factory store root must be a non-empty string")
+        store_root = Path(factory_store_root)
+        if not store_root.is_absolute() or str(store_root.resolve()) != factory_store_root:
+            raise PackIndexError("Pack index factory store root must be canonical and absolute")
+    entry["factory_store_root"] = factory_store_root
     if len(entry["pack_fingerprint"]) != 64 or any(
         char not in "0123456789abcdef"
         for char in entry["pack_fingerprint"]
@@ -235,6 +268,7 @@ class PackIndex:
         include_builtins: bool = True,
     ) -> None:
         configured = index_path or os.environ.get("PRAXIS_VC_PACK_INDEX")
+        self.explicit_index_path = index_path is not None
         self.path = Path(
             configured
             or Path.home()
@@ -245,7 +279,7 @@ class PackIndex:
         ).expanduser()
         self.include_builtins = include_builtins
 
-    def _read(self) -> list[dict[str, str]]:
+    def _read(self) -> list[dict[str, str | None]]:
         if not self.path.exists():
             return []
         try:
@@ -258,18 +292,21 @@ class PackIndex:
         if (
             not isinstance(raw, dict)
             or set(raw) != {"schema_version", "packs"}
-            or raw["schema_version"] != _INDEX_SCHEMA
+            or raw["schema_version"] not in {_INDEX_SCHEMA_V1, _INDEX_SCHEMA}
             or not isinstance(raw["packs"], list)
         ):
             raise PackIndexError("invalid Pack index contract")
-        entries = [_valid_index_entry(item) for item in raw["packs"]]
+        entries = [
+            _valid_index_entry(item, schema_version=raw["schema_version"])
+            for item in raw["packs"]
+        ]
         keys = [(item["pack_id"], item["pack_version"]) for item in entries]
         roots = [item["root"] for item in entries]
         if len(set(keys)) != len(keys) or len(set(roots)) != len(roots):
             raise PackIndexError("Pack index contains duplicate identity or root")
         return entries
 
-    def _write(self, entries: list[dict[str, str]]) -> None:
+    def _write(self, entries: list[dict[str, str | None]]) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         payload = json.dumps(
             {
@@ -305,8 +342,8 @@ class PackIndex:
             except FileNotFoundError:
                 pass
 
-    def _roots(self) -> list[tuple[str, Path, dict[str, str] | None]]:
-        roots: list[tuple[str, Path, dict[str, str] | None]] = []
+    def _roots(self) -> list[tuple[str, Path, dict[str, str | None] | None]]:
+        roots: list[tuple[str, Path, dict[str, str | None] | None]] = []
         if self.include_builtins:
             roots.extend(
                 ("builtin", root, None)
@@ -322,7 +359,7 @@ class PackIndex:
     def _record(
         source: str,
         root: Path,
-        expected: dict[str, str] | None,
+        expected: dict[str, str | None] | None,
     ) -> dict[str, Any]:
         try:
             record = validate_pack_summary(root, source=source)
@@ -363,6 +400,36 @@ class PackIndex:
                 record["reasons"].append(
                     f"registered Pack identity changed: {mismatches}"
                 )
+            registration_fingerprint = expected[
+                "factory_registration_fingerprint"
+            ]
+            if registration_fingerprint is not None:
+                try:
+                    from praxis_virtualcell.pack_factory import (
+                        PackFactoryStore,
+                    )
+
+                    store_root = expected["factory_store_root"]
+                    assert isinstance(store_root, str)
+                    store = PackFactoryStore.open(Path(store_root))
+                    registration = store.verify_registration(
+                        registration_fingerprint
+                    )
+                    if (
+                        registration.pack_id != expected["pack_id"]
+                        or registration.pack_version != expected["pack_version"]
+                        or registration.pack_fingerprint
+                        != expected["pack_fingerprint"]
+                    ):
+                        raise PackIndexError(
+                            "factory registration identity does not match index"
+                        )
+                except (AssertionError, OSError, ValueError):
+                    record["validation_status"] = "invalid"
+                    record["pack_valid"] = False
+                    record["reasons"].append(
+                        "factory registration commit is missing or invalid"
+                    )
         return record
 
     def list_records(self) -> list[dict[str, Any]]:
@@ -408,11 +475,84 @@ class PackIndex:
         return registry
 
     def register(self, pack_root: str | Path) -> dict[str, Any]:
-        root = Path(pack_root).resolve(strict=True)
+        """Reject the pre-P19 path-only registration bypass.
+
+        Controlled writes must use ``pack_factory.register_pack_candidate`` so
+        the durable index mutation is bound to receipt, review, validation and
+        named operator identities.  Existing index entries and built-ins remain
+        readable and are not retroactively presented as factory-approved.
+        """
+
+        del pack_root
+        raise PackIndexError(
+            "direct Pack registration is disabled; use the controlled Pack Factory"
+        )
+
+    def _register_validated_path(
+        self,
+        pack_root: str | Path,
+        *,
+        expected_pack_id: str,
+        expected_pack_version: str,
+        expected_pack_fingerprint: str,
+        factory_registration_fingerprint: str,
+        factory_store_root: str,
+    ) -> dict[str, Any]:
+        """Write one exact factory-approved identity and fail closed on drift."""
+
+        if not self.explicit_index_path or not self.path.is_absolute():
+            raise PackIndexError("factory registration requires an explicit absolute index path")
+        index_parent = self.path.parent
+        if (
+            index_parent.is_symlink()
+            or not index_parent.is_dir()
+            or index_parent.resolve(strict=True) != index_parent
+            or self.path.is_symlink()
+        ):
+            raise PackIndexError(
+                "factory registration index parent must be an existing canonical directory"
+            )
+        expected = (
+            expected_pack_id,
+            expected_pack_version,
+            expected_pack_fingerprint,
+        )
+        if any(
+            not isinstance(value, str) or not value or value.strip() != value
+            for value in expected
+        ):
+            raise PackIndexError("expected Pack identity fields must be non-empty strings")
+        for field, value in (
+            ("expected Pack fingerprint", expected_pack_fingerprint),
+            ("factory registration fingerprint", factory_registration_fingerprint),
+        ):
+            if len(value) != 64 or any(char not in "0123456789abcdef" for char in value):
+                raise PackIndexError(f"{field} must be lowercase SHA-256")
+        if not isinstance(factory_store_root, str):
+            raise PackIndexError("factory store root must be an explicit string")
+        store_root = Path(factory_store_root)
+        if (
+            not store_root.is_absolute()
+            or store_root.is_symlink()
+            or not store_root.is_dir()
+            or str(store_root.resolve(strict=True)) != factory_store_root
+        ):
+            raise PackIndexError(
+                "factory store root must be an existing canonical absolute directory"
+            )
+        path = Path(pack_root)
+        if path.is_symlink():
+            raise PackIndexError("factory Pack root must not be a symlink")
+        root = path.resolve(strict=True)
         record = validate_pack_summary(root, source="registered")
-        if not record["pack_valid"]:
-            raise PackUnavailable("; ".join(record["reasons"]))
-        key = (record["pack_id"], record["pack_version"])
+        observed = (
+            record["pack_id"],
+            record["pack_version"],
+            record["pack_fingerprint"],
+        )
+        if observed != expected or not record["pack_valid"]:
+            raise PackUnavailable("factory Pack identity or validation changed")
+        key = expected[:2]
         for builtin_root in (
             builtin_pack_roots().values()
             if self.include_builtins
@@ -420,39 +560,108 @@ class PackIndex:
         ):
             builtin = validate_pack_summary(builtin_root, source="builtin")
             if (builtin["pack_id"], builtin["pack_version"]) == key:
-                if (
-                    builtin["pack_fingerprint"]
-                    != record["pack_fingerprint"]
-                    or builtin_root.resolve() != root
-                ):
-                    raise PackIndexError(f"Pack identity conflicts with built-in: {key}")
-                return builtin
+                raise PackIndexError(f"factory Pack identity conflicts with built-in: {key}")
 
-        self.path.parent.mkdir(parents=True, exist_ok=True)
         lock_path = self.path.with_suffix(self.path.suffix + ".lock")
         with lock_path.open("a+", encoding="utf-8") as lock:
             fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
             entries = self._read()
+            original_entries = [dict(entry) for entry in entries]
+            current = validate_pack_summary(root, source="registered")
+            current_identity = (
+                current["pack_id"],
+                current["pack_version"],
+                current["pack_fingerprint"],
+            )
+            if current_identity != expected or not current["pack_valid"]:
+                raise PackUnavailable("factory Pack changed before locked index mutation")
+            wrote = False
             for entry in entries:
                 entry_key = (entry["pack_id"], entry["pack_version"])
                 if entry_key == key:
                     if (
-                        entry["pack_fingerprint"] != record["pack_fingerprint"]
+                        entry["pack_fingerprint"] != expected_pack_fingerprint
                         or entry["root"] != str(root)
                     ):
                         raise PackIndexError(f"conflicting Pack identity: {key}")
-                    return self._record("registered", root, entry)
+                    existing_registration = entry["factory_registration_fingerprint"]
+                    existing_store_root = entry["factory_store_root"]
+                    if existing_registration not in {
+                        None,
+                        factory_registration_fingerprint,
+                    } or existing_store_root not in {None, factory_store_root}:
+                        raise PackIndexError(
+                            "Pack identity already has a different factory registration"
+                        )
+                    if existing_registration is None:
+                        entry["factory_registration_fingerprint"] = (
+                            factory_registration_fingerprint
+                        )
+                        entry["factory_store_root"] = factory_store_root
+                        self._write(entries)
+                        wrote = True
+                    break
                 if entry["root"] == str(root):
                     raise PackIndexError("Pack root is already bound to another identity")
-            entry = {
-                "pack_id": record["pack_id"],
-                "pack_version": record["pack_version"],
-                "pack_fingerprint": record["pack_fingerprint"],
-                "root": str(root),
-            }
-            entries.append(entry)
-            self._write(entries)
-            return self._record("registered", root, entry)
+            else:
+                entry = {
+                    "pack_id": expected_pack_id,
+                    "pack_version": expected_pack_version,
+                    "pack_fingerprint": expected_pack_fingerprint,
+                    "factory_registration_fingerprint": factory_registration_fingerprint,
+                    "factory_store_root": factory_store_root,
+                    "root": str(root),
+                }
+                entries.append(entry)
+                self._write(entries)
+                wrote = True
+            try:
+                result = validate_pack_summary(root, source="registered")
+                if (
+                    not result["pack_valid"]
+                    or (
+                        result["pack_id"],
+                        result["pack_version"],
+                        result["pack_fingerprint"],
+                    )
+                    != expected
+                ):
+                    raise PackIndexError("Pack changed during index mutation")
+                return result
+            except (OSError, ValueError):
+                if wrote:
+                    self._write(original_entries)
+                raise
+
+    def factory_registration_fingerprint(
+        self,
+        pack_id: str,
+        pack_version: str,
+    ) -> str | None:
+        """Return durable factory provenance; ``None`` marks a legacy entry."""
+
+        for entry in self._read():
+            if (entry["pack_id"], entry["pack_version"]) == (
+                pack_id,
+                pack_version,
+            ):
+                return entry["factory_registration_fingerprint"]
+        raise PackNotFound(f"unknown Pack: {(pack_id, pack_version)}")
+
+    def factory_store_root(
+        self,
+        pack_id: str,
+        pack_version: str,
+    ) -> str | None:
+        """Return the exact store bound to a factory registration entry."""
+
+        for entry in self._read():
+            if (entry["pack_id"], entry["pack_version"]) == (
+                pack_id,
+                pack_version,
+            ):
+                return entry["factory_store_root"]
+        raise PackNotFound(f"unknown Pack: {(pack_id, pack_version)}")
 
 
 def _request_v2(request: dict[str, Any]) -> VirtualCellRequestV2:

@@ -283,6 +283,65 @@ export interface PackCatalog {
   scientifically_validated: false;
 }
 
+export interface PackFactoryCatalog {
+  schema_version: "vc.pack-factory-catalog.v1";
+  configured: boolean;
+  receipts: {
+    receipt_fingerprint: string;
+    status: "quarantined";
+    pack_valid: boolean | null;
+    factory_registered: boolean;
+    model_compatible: null;
+    executable: false;
+  }[];
+  reviews: {
+    review_fingerprint: string;
+    candidate_fingerprint: string;
+    decision: "approve_for_strict_validation" | "reject";
+  }[];
+  validations: {
+    validation_report_fingerprint: string;
+    candidate_fingerprint: string;
+    pack_valid: boolean;
+    registration_allowed: boolean;
+    passed: boolean;
+  }[];
+  decisions: {
+    operator_decision_fingerprint: string;
+    candidate_fingerprint: string;
+    decision: "approve_register" | "reject";
+  }[];
+  candidates: {
+    candidate_fingerprint: string;
+    status: "candidate_unvalidated";
+    reviewed: boolean;
+    validation_passed: boolean;
+    factory_registered: boolean;
+    pack_valid: boolean | null;
+    model_compatible: null;
+    executable: false;
+    scientifically_validated: false;
+    production_promoted: false;
+  }[];
+  registrations: {
+    registration_fingerprint: string;
+    factory_registered: true;
+    pack_valid: true;
+    model_compatible: null;
+    executable: false;
+    scientifically_validated: false;
+    production_promoted: false;
+    superseded_by: string | null;
+  }[];
+  supersessions: Record<string, unknown>[];
+  review_count: number;
+  validation_count: number;
+  operator_decision_count: number;
+  registration_count: number;
+  supersession_count: number;
+  write_api_enabled: false;
+}
+
 // ---- 内部 fetch 助手 ----
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -357,6 +416,10 @@ export function getDataCatalog(species?: string): Promise<DataCatalog> {
 
 export function getPackCatalog(): Promise<PackCatalog> {
   return req<PackCatalog>("/api/packs");
+}
+
+export function getPackFactoryCatalog(): Promise<PackFactoryCatalog> {
+  return req<PackFactoryCatalog>("/api/pack-factory");
 }
 
 export async function uploadData(

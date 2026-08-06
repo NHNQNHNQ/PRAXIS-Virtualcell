@@ -28,6 +28,7 @@ from praxis_vc_api.services import data_portal_service as data_portal
 from praxis_vc_api.services import runtime_service as svc
 from praxis_virtualcell import __version__
 from praxis_virtualcell.core.exceptions import InputValidationError
+from praxis_virtualcell.pack_factory import PackFactoryError
 from praxis_virtualcell.pack_product import (
     PackIndexError,
     PackNotFound,
@@ -147,6 +148,15 @@ def packs():
         return svc.packs()
     except PackIndexError as exc:
         raise HTTPException(status_code=503, detail="pack_index_invalid") from exc
+
+
+@app.get("/api/pack-factory")
+def pack_factory_catalog():
+    """Read-only receipt/candidate/registration projection; no HTTP write route exists."""
+    try:
+        return svc.pack_factory_catalog()
+    except PackFactoryError as exc:
+        raise HTTPException(status_code=503, detail="pack_factory_store_invalid") from exc
 
 
 @app.post("/api/packs/compatibility")

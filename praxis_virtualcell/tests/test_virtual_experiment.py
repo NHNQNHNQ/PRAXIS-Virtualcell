@@ -41,7 +41,10 @@ from praxis_virtualcell.tests.test_model_registry_v2 import (
     _complete_v2_report_payload,
     complete_registry_payload,
 )
-from praxis_virtualcell.tests.test_pack_product import _write_model_stack
+from praxis_virtualcell.tests.test_pack_product import (
+    _write_legacy_pack_index,
+    _write_model_stack,
+)
 from praxis_virtualcell.tests.test_pack_semantics import _fixture, _write_pack
 from praxis_virtualcell.virtual_experiment import (
     VirtualCellBrainContextV1,
@@ -870,7 +873,7 @@ def test_fifth_taxon_direct_v2_service_is_identity_complete_empty_abstain(
     pack_root = _fifth_taxon_pack(tmp_path)
     index_path = tmp_path / "pack-index.json"
     index = PackIndex(index_path=index_path, include_builtins=False)
-    registered = index.register(pack_root)
+    registered = _write_legacy_pack_index(index_path, pack_root)
     registry_path, cache_root = _write_model_stack(tmp_path, empty=True)
     request = _request(
         request_id="p17-zebrafish-request",
