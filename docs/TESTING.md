@@ -1,16 +1,88 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：Phase 13 分支 `codex/p13-model-adapter-sdk`；唯一起始 SHA
-> `f83c13db386cb552b3ce7a5643e5ffbead0ff573`
+> 当前文档基线：P14E 分支 `codex/p14e-ecoli-growth-contract`；唯一起始 SHA
+> `0b193310009d6e4d2ebc0fc8abf95da20a56acdb`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：`P13_ENGINEERING_COMPLETE_P14E_ELIGIBLE`；completion code SHA
-> `744d0a28d2cfc13d1b10e85b133b6c13b9426174`；tree
-> `198e623120688d3704b9312990ddaa93c9a7b0e6`。下述 P4.3–P12 和 CI 数字仍只绑定
-> 各自 exact SHA/日期；P13 本地工程结果不构成科学验证、operator policy、发布或
+> 状态：`P14E_ENGINEERING_COMPLETE_P15E_ELIGIBLE`；SDK prerequisite
+> `c3401450fd79f7829c438d6b55c1902ea2f4cf5f`；completion code SHA
+> `8778e93c31c2dfe1ef0f77f06e7a80a425633736`；tree
+> `fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78`。下述 P4.3–P13 和 CI 数字仍只绑定
+> 各自 exact SHA/日期；P14E 本地工程结果不构成科学验证、operator policy、发布或
 > 远程证据。
+
+## Phase 14E `ENGINEERING_COMPLETE` 本地证据
+
+P14E 只冻结 E. coli K-12 MG1655 / `GCF_000005845.2`、
+`predict_knockout_growth → growth_ratio` 的 strict contract。它要求 exact
+GEM/release/artifact/environment/Pack/mapping/medium/condition/objective/solver 和
+`NCBIGene` target bindings；compatibility fixture 固定
+`assets_verified=false`、`executable=false`、`reason=p14r_not_authorized`。
+`EcoliK12KnockoutGrowthAdapter` 只在测试 local registry 中注册，生产默认 registry
+仍只有 delta-expression reference adapter。
+
+P14E 不读取或运行 GEM/SBML、Cobra、growth/essentiality data 或真实 solver。以下命令
+只使用 synthetic identity 和 wrapper-dictionary fixtures：
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_ecoli_growth_contract.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_ecoli_growth_contract.py \
+  praxis_virtualcell/tests/test_model_adapter_sdk.py \
+  praxis_virtualcell/tests/test_model_adapter_output_flow.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_ecoli_growth_contract.py \
+  praxis_virtualcell/tests/test_model_adapter_sdk.py \
+  praxis_virtualcell/tests/test_model_adapter_output_flow.py \
+  praxis_virtualcell/tests/test_capability_runtime.py \
+  praxis_virtualcell/tests/test_model_registry_v2.py \
+  praxis_virtualcell/tests/test_request_v2.py \
+  praxis_virtualcell/tests/test_packaging.py \
+  praxis_virtualcell/tests/baseline/test_baseline_offline_report.py \
+  praxis_virtualcell/tests/baseline/test_baseline_routing_snapshot.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+~~~
+
+completion code/tree 上的冻结结果：
+
+| Gate | 结果 |
+|---|---|
+| P14E contract | `71 passed` |
+| P14E + adjacent SDK/output flow | `148 passed` |
+| safe nine-file directed | `360 passed` |
+| safe legacy | `1147 passed / 58 skipped / 105 deselected` |
+| full active-tree Ruff / `git diff --check` | PASS |
+| exact-hash adversarial review | 3 independent reviews；no P1/P2 |
+
+明确没有运行 `test_ecoli_gem_case.py`、`test_gem_wrapper.py`、
+`test_medium_shift_case.py`、`test_antibiotic_case.py`、
+`test_yeast_gem_case.py` 或 P10 real-GEM paths。
+
+两个 exact-commit clean archives 在 OS 层禁止网络后独立完成 frontend offline build
+和完整 wheel build；结果 byte-identical：1,086,768 bytes，SHA-256
+`462b89376a5134906e98ea4b1ec573bc24e5f2e53266d5a7104be8d625eb88b3`，包含 14 个
+deterministic React assets 和 P14 module，无 AppleDouble/`__MACOSX`。这不是 artifact
+publication。
+
+隔离 runtime 的 dependency compatibility、installed-wheel imports、delta-only default
+registry、local P14 registration 和 no-Cobra smoke 通过。但本地 uv cache 缺
+`cffi==2.1.0`、`rpds-py==2026.6.3`、`PyYAML==6.0.3` 和
+`pydantic-core==2.46.4` 的原始 wheel bytes/metadata；重打包 cache 内容的 archive hash
+不同。因此本窗口没有重新证明 one-shot `--require-hashes` offline install，不能把受限
+smoke 或 P13 的历史 lock evidence 改写为 P14E exact lock-integrity 证据。
+
+`Science: NOT_RUN`；`P14R: AUTHORIZATION_REQUIRED / NOT_RUN`；
+`P14B: NOT_RUN`；`production_promoted=false`。完整证据见
+[ADR-0011](ADR-0011-virtualcell-ecoli-k12-growth-contract.md)、
+[P14E runbook](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md)和
+[P14E 完成报告](../reports/phase14e/PHASE14E_COMPLETION.md)。
 
 ## Phase 13 `ENGINEERING_COMPLETE` 本地证据
 

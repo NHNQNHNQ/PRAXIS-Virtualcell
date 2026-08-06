@@ -1,11 +1,12 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `P13_ENGINEERING_COMPLETE_P14E_ELIGIBLE — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
+> Status: `P14E_ENGINEERING_COMPLETE_P15E_ELIGIBLE — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
-> Local baseline: branch `codex/p13-model-adapter-sdk`; P13 starting SHA
-> `f83c13db386cb552b3ce7a5643e5ffbead0ff573`; code SHA
-> `744d0a28d2cfc13d1b10e85b133b6c13b9426174`; tree
-> `198e623120688d3704b9312990ddaa93c9a7b0e6`
+> Local baseline: branch `codex/p14e-ecoli-growth-contract`; P14E starting SHA
+> `0b193310009d6e4d2ebc0fc8abf95da20a56acdb`; SDK prerequisite
+> `c3401450fd79f7829c438d6b55c1902ea2f4cf5f`; code SHA
+> `8778e93c31c2dfe1ef0f77f06e7a80a425633736`; tree
+> `fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -19,6 +20,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P11B product code | anchor `bf44aac25b993e49d0146ccd52dddad5c2fa14de` | immutable local Git history | completed Cell-first product code; not P12 or a release identity |
 | P12 Model Zoo v2 work unit | start `b19c896202bea56f894d0ad540501331af42a40c`; completion `1a5464fb0d2d9e105058f6797d92efd69783e5b2` | immutable local Git history plus `reports/phase12/PHASE12_COMPLETION.md` | engineering complete; no science run or new operator decision |
 | P13 Model Adapter SDK work unit | start `f83c13db386cb552b3ce7a5643e5ffbead0ff573`; code `744d0a28d2cfc13d1b10e85b133b6c13b9426174`; tree `198e623120688d3704b9312990ddaa93c9a7b0e6` | immutable local Git history plus `reports/phase13/PHASE13_COMPLETION.md` | engineering complete and P14E-eligible; `Science: NOT_RUN`, `Policy: NO_NEW_DECISION`, no release/version bump |
+| P14E E. coli growth contract work unit | start `0b193310009d6e4d2ebc0fc8abf95da20a56acdb`; prerequisite `c3401450fd79f7829c438d6b55c1902ea2f4cf5f`; code `8778e93c31c2dfe1ef0f77f06e7a80a425633736`; tree `fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78` | immutable local Git history plus `reports/phase14e/PHASE14E_COMPLETION.md` | contract engineering complete and P15E-eligible; P14R authorization required/not run; P14B not run; no real GEM, science, policy, release or version bump |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -51,6 +53,15 @@ The repository historically mixed product release tags, package metadata, API/ru
 | adapter execution provenance | `vc.adapter-execution-provenance.v1` + canonical JSON SHA-256 | `model_zoo/adapter_sdk.py` | binds exact adapter and input/output contract fingerprints to request/Pack/compatibility inputs; provenance is not evidence or policy |
 | adapter output envelope | `vc.adapter-output-envelope.v1` + canonical JSON SHA-256 | `model_zoo/adapter_sdk.py` | strict finite values, shape/unit, uncertainty, OOD, abstention, projection metadata and provenance; invalid or mixed envelopes fail closed |
 | adapter conformance report | `vc.adapter-conformance-report.v1` + canonical JSON SHA-256 | `model_zoo/adapter_sdk.py` | records deterministic contract conformance and, for non-abstain outputs, projection conformance for an exact prepared input; it is not benchmark evidence or production promotion |
+| E. coli growth scope | `vc.ecoli-growth-scope.v1` + canonical JSON SHA-256 | `model_zoo/ecoli_growth_contract.py` | exact K-12 MG1655/assembly plus GEM/release/artifact/environment/adapter/Pack/mapping/medium/condition/objective/solver identities; scope validity is not asset availability |
+| E. coli growth validation protocol | `vc.ecoli-growth-validation-protocol.v1` + canonical JSON SHA-256 | `model_zoo/ecoli_growth_contract.py` | preregisters held-out groups, baseline, metric, paired CI, external and OOD requirements; it is not `vc.model-validation-evidence.v1` or a result |
+| E. coli growth data binding | `vc.ecoli-growth-data-binding.v1` + canonical JSON SHA-256 | `model_zoo/ecoli_growth_contract.py` | binds one future growth-condition Pack identity; the P14E fixture is identity-only and not a real Pack |
+| E. coli growth execution binding | `vc.ecoli-growth-execution-binding.v1` + canonical JSON SHA-256 | `model_zoo/ecoli_growth_contract.py` | exact medium, condition, objective/unit and deterministic solver configuration; deterministic does not imply correct |
+| E. coli growth gene mapping | `vc.ecoli-growth-gene-mapping-binding.v1` + canonical JSON SHA-256 | `model_zoo/ecoli_growth_contract.py` | exact hash-bound NCBIGene→GEM mapping; no symbol, ortholog or implicit fallback |
+| E. coli growth compatibility | `vc.ecoli-growth-compatibility-binding.v1` + canonical JSON SHA-256 | `model_zoo/ecoli_growth_contract.py` | P14E fixes assets_verified/executable false with reason p14r_not_authorized; record presence cannot authorize execution |
+| E. coli growth adapter input | `vc.ecoli-growth-adapter-input-contract.v1` + canonical JSON SHA-256 | `model_zoo/ecoli_growth_contract.py` | binds predict_knockout_growth/growth_ratio, one NCBIGene target and all required exact identities |
+| E. coli growth adapter output | `vc.ecoli-growth-adapter-output-contract.v1` + canonical JSON SHA-256 | `model_zoo/ecoli_growth_contract.py` | one dimensionless wild-type-relative ratio; uncertainty unavailable, OOD/abstain required and flux trace-only |
+| E. coli prepared model input | `vc.ecoli-growth-prepared-model-input.v1` + canonical JSON SHA-256 | `model_zoo/ecoli_growth_contract.py` | cross-binds request/scope/protocol/execution/Pack/compatibility to prepared input; it does not execute a GEM |
 | validation evidence identity | `vc.model-validation-evidence.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds exact Pack×model×environment×adapter×protocol, baseline, primary metric and result hash; record existence does not make the evidence pass |
 | operator policy identity | `vc.model-operator-policy.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds one named operator decision to one exact capability and evidence set; P12 creates no new promotion decision |
 | model release/lifecycle identities | `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1` | `model_zoo/registry_v2.py` | release graph plus append-only catalog/readiness/revoke/supersede history; registry state, evidence and product policy remain separate |
@@ -88,11 +99,20 @@ instantiation but is not yet a type-level proof that an arbitrary wrapper loader
 
 P13 adds the six Adapter SDK schemas above without changing `vc.model-adapter.v1`, product
 SemVer, API/runtime protocol or release tags. The default runtime registry contains only the
-delta-expression reference adapter; growth/fitness adapters remain test-only contract fixtures.
+delta-expression reference adapter; P13's dummy growth/fitness adapters remain test-only contract
+fixtures and are distinct from the later P14E local-only growth contract adapter.
 Engineering completion does not create a real model, scientific run, validation evidence or named
 operator decision. See [ADR-0010](ADR-0010-virtualcell-model-adapter-sdk.md), the
 [runbook](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md), and the
 [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md).
+
+P14E adds the nine E. coli growth schemas above without changing product SemVer, API/runtime
+protocol, Model Registry root schemas, release tags or the default adapter registry. Its local-only
+adapter and synthetic identities prove strict binding/conformance only. `P14R` remains
+`AUTHORIZATION_REQUIRED / NOT_RUN` and `P14B` remains `NOT_RUN`. See
+[ADR-0011](ADR-0011-virtualcell-ecoli-k12-growth-contract.md), the
+[P14E runbook](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md), and the
+[P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md).
 
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
@@ -115,6 +135,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | model environment identity schema + fingerprint | explicit `vc.model-environment.v1` plus canonical JSON SHA-256 | PEP 503 distribution/version, native/architecture/lock/image/resource/adapter requirements change | a distribution name is the same namespace as an import module, or the environment is currently satisfied |
 | model adapter identity schema + fingerprint | explicit `vc.model-adapter.v1` plus canonical JSON SHA-256 | implementation locator or task/input/output contract changes | adapter implementation exists, conforms, or is scientifically valid |
 | adapter SDK schemas + fingerprints | explicit `vc.adapter-input-contract.v1`, `vc.prepared-adapter-input.v1`, `vc.adapter-output-contract.v1`, `vc.adapter-execution-provenance.v1`, `vc.adapter-output-envelope.v1`, `vc.adapter-conformance-report.v1` plus canonical JSON SHA-256 | incompatible input/output, binding, envelope, conformance or projection semantics change | conformance is scientific evidence, a model is production-registered, or policy exists |
+| E. coli growth contract schemas + fingerprints | explicit `vc.ecoli-growth-scope.v1`, `vc.ecoli-growth-validation-protocol.v1`, `vc.ecoli-growth-data-binding.v1`, `vc.ecoli-growth-execution-binding.v1`, `vc.ecoli-growth-gene-mapping-binding.v1`, `vc.ecoli-growth-compatibility-binding.v1`, `vc.ecoli-growth-adapter-input-contract.v1`, `vc.ecoli-growth-adapter-output-contract.v1` and `vc.ecoli-growth-prepared-model-input.v1` | exact biological scope, identity binding, protocol, compatibility, input/output or prepared semantics change incompatibly | a real GEM/Pack exists, FBA ran, science passed, the adapter is in the default registry, or policy exists |
 | validation evidence schema + fingerprint | explicit `vc.model-validation-evidence.v1` plus canonical JSON SHA-256 | exact capability/protocol/baseline/metric/result binding changes | evidence exists, passes, generalizes, or grants product policy |
 | operator policy schema + fingerprint | explicit `vc.model-operator-policy.v1` plus canonical JSON SHA-256 | named operator, exact capability/evidence decision or policy version changes | engineering or evidence state can manufacture a promotion decision |
 | model release/lifecycle schemas + fingerprints | explicit `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1` | component graph or append-only lifecycle fact changes | catalog/readiness/revocation/supersession is scientific evidence or product policy |
@@ -142,7 +163,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented history through the current P13 engineering-complete bytes:
+Implemented history through the current P14E engineering-complete bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -169,9 +190,15 @@ Implemented history through the current P13 engineering-complete bytes:
     scientific validation, new operator promotion, product/API/runtime version bump or release tag.
 19. P13 code `744d0a28d2cfc13d1b10e85b133b6c13b9426174` adds a backward-compatible
     Adapter SDK, delta-only default registry, strict prepared-input/output/provenance binding and
-    generic adapter-aware ensemble/report flow inside the same unpublished candidate. Test-only
-    growth/fitness adapters do not enter the production registry. `Science: NOT_RUN` and
+    generic adapter-aware ensemble/report flow inside the same unpublished candidate. P13
+    test-only dummy growth/fitness adapters do not enter the production registry. `Science: NOT_RUN` and
     `Policy: NO_NEW_DECISION`; no product/API/runtime version bump, release or tag is created.
+20. P14E prerequisite `c3401450fd79f7829c438d6b55c1902ea2f4cf5f` hardens recursive SDK
+    trust boundaries without changing the six frozen P13 fingerprints. P14E code
+    `8778e93c31c2dfe1ef0f77f06e7a80a425633736` adds exact K-12 MG1655
+    knockout→growth-ratio contracts and a local-only adapter inside the same unpublished candidate.
+    The default registry remains delta-only; P14R/P14B are not run. No product/API/runtime version
+    bump, release, tag, real asset, scientific evidence or operator decision is created.
 
 ## Release invariants
 
@@ -201,6 +228,13 @@ The equality above deliberately excludes `vc.msg.v1`, `vc.request.v2`, all
 `vc.adapter-input-contract.v1`, `vc.prepared-adapter-input.v1`,
 `vc.adapter-output-contract.v1`, `vc.adapter-execution-provenance.v1`,
 `vc.adapter-output-envelope.v1`, `vc.adapter-conformance-report.v1`,
+`vc.ecoli-growth-scope.v1`, `vc.ecoli-growth-validation-protocol.v1`,
+`vc.ecoli-growth-data-binding.v1`, `vc.ecoli-growth-execution-binding.v1`,
+`vc.ecoli-growth-gene-mapping-binding.v1`,
+`vc.ecoli-growth-compatibility-binding.v1`,
+`vc.ecoli-growth-adapter-input-contract.v1`,
+`vc.ecoli-growth-adapter-output-contract.v1`,
+`vc.ecoli-growth-prepared-model-input.v1`,
 `vc.model-validation-evidence.v1`, `vc.model-operator-policy.v1`,
 `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1`,
 `vc.model-registry.v2`, `vc.model-registry-catalog.v2`,

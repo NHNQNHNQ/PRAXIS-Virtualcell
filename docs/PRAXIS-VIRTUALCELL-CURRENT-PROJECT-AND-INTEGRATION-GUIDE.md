@@ -6,7 +6,7 @@
 >
 > 当前本地仓库：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前分支：`codex/p13-model-adapter-sdk`
+> 当前分支：`codex/p14e-ecoli-growth-contract`
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
@@ -21,12 +21,18 @@
 > `744d0a28d2cfc13d1b10e85b133b6c13b9426174`；tree
 > `198e623120688d3704b9312990ddaa93c9a7b0e6`
 >
+> 已完成 work unit：`P14E — E. coli K-12 knockout→growth contract`；starting SHA
+> `0b193310009d6e4d2ebc0fc8abf95da20a56acdb`；SDK trust-boundary prerequisite
+> `c3401450fd79f7829c438d6b55c1902ea2f4cf5f`；completion code SHA
+> `8778e93c31c2dfe1ef0f77f06e7a80a425633736`；tree
+> `fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78`
+>
 > 工作树保护清单：不在本文固定；每轮从现场 `git status --short` 动态重建，任何
 > 新 staged/modified/deleted/untracked 路径默认受保护
 >
 > 当前 Cell-first 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
-> 当前下一 work unit：`P14E — E. coli K-12 knockout→growth contract`；`ELIGIBLE`
+> 当前下一 work unit：`P15E — S. cerevisiae gene-deletion→fitness contract`；`ELIGIBLE`
 
 本文是一份面向其他项目、开发团队、科研合作者和后续智能体的独立项目说明。它回答四个问题：
 
@@ -116,7 +122,74 @@ P13 工程状态为 `COMPLETE`；science 为 `NOT_RUN`；policy 为
 `docs/ADR-0010-virtualcell-model-adapter-sdk.md` 和
 `docs/runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md`。
 
-### 1.3 代码与外部资产许可
+### 1.3 Phase 14E 完成边界
+
+P14E 以 `0b193310009d6e4d2ebc0fc8abf95da20a56acdb` 为实际起始 SHA，在
+`codex/p14e-ecoli-growth-contract` 上完成 shared SDK trust-boundary prerequisite
+`c3401450fd79f7829c438d6b55c1902ea2f4cf5f`，并以 code SHA
+`8778e93c31c2dfe1ef0f77f06e7a80a425633736`、tree
+`fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78` 冻结一个窄合同：exact
+`NCBITaxon:562 / NCBITaxon:511145 / GCF_000005845.2`、GEM/medium/condition/
+objective/solver/mapping identities 和一个 canonical NCBIGene knockout；task/output 为
+`predict_knockout_growth / growth_ratio`，shape/unit 为 `(1,) / dimensionless`，reference
+固定为 `wild_type_same_gem_medium_condition`。
+
+P14E 新增九个 strict、frozen、fingerprinted schema：
+`vc.ecoli-growth-scope.v1`、`vc.ecoli-growth-validation-protocol.v1`、
+`vc.ecoli-growth-data-binding.v1`、`vc.ecoli-growth-execution-binding.v1`、
+`vc.ecoli-growth-gene-mapping-binding.v1`、
+`vc.ecoli-growth-compatibility-binding.v1`、
+`vc.ecoli-growth-adapter-input-contract.v1`、
+`vc.ecoli-growth-adapter-output-contract.v1` 和
+`vc.ecoli-growth-prepared-model-input.v1`。adapter/input/output contract fingerprints
+分别为 `0b26d81c99f3ed216f5dcc6c86814379b6997633c0a6c071109d3ed45918b1a9`、
+`6995a1c262367bbd510a488b80b2c01a15e18cd6c32169f3036045869218edfa` 和
+`bfda36704cfd82006ec0a3bd1c772d62209eb8c860b7baffae982f150955f13f`。
+
+canonical synthetic fixture 的 component fingerprints 为：
+
+- artifact：`435f2868ed5e86a7ea1cf5ff47463896213b4cef8f515acd731f30c34d50c283`；
+- environment：`b572089b347346becb09a2915046b8cd6e55c3ba681124e5275d2250c87fa065`；
+- model release：`03db9b219ea47e954a2b89cdd0fa28c6395235cd28a4b938e6aa63ec0de405ba`；
+- mapping：`c355339c2450214384300aa966de130f42e64d68fa50138d9fae3d6e3fef1886`；
+- execution：`832eb94872fc2ed09fbbc97368287538ca6673424f5e3928c61fc5f0699dc5ac`；
+- Pack identity：`5555555555555555555555555555555555555555555555555555555555555555`；
+- data binding：`93faa211ed040d378d67c82055c00f96c5af5399cf677ca986692b5c323d74a6`；
+- compatibility：`b61c7d6bacf2a2ca2de76d0ced740acef4a548155c9f4e09b7e5fa891ba81878`；
+- scope：`bd7bc1cf60877ee8abfeb2e8769cf1cfd6e99e34305487da09fb18e810fc996e`；
+- validation protocol：`a4b0bcc46aed1586cc5a466d06422753f944043ca526a2c88ceeeef79f3a88dc`；
+- prepared input：`f6b1e7f263fc0b4608fedda71475b66fa0a20e9754dbe27a27d7714730e1f344`；
+- output envelope：`c7ea3e0d8d966bed09008425adc81c018be4643566e0fbe3db7fafbe7b1d6cae`；
+- conformance report：`608e931a8a2b5199410b15428587ef03b9c5b6bd6b7b8fdf89ab753b1f1a752e`。
+
+这些值只标识 synthetic test fixture，不证明外置 asset 存在、许可通过、可执行或
+scientifically validated。
+
+`EcoliK12KnockoutGrowthAdapter` 是源代码中的 local/conformance contract adapter，
+不是 P13 的 dummy growth adapter，也没有进入 `DEFAULT_ADAPTER_REGISTRY`。默认 registry
+仍只有 `predict_delta_expression → delta_expression`。它也不复用历史 v1
+`ecoli_gem` card、`GemWrapper`、route table 或 case dispatch 形成 positive path；legacy
+card 的 `available`/迁移状态不能补足 P14E 的 exact assets、environment、evidence 或
+policy。
+
+P14E 的 synthetic compatibility 固定为 `assets_verified=false`、`executable=false`、
+`reason=p14r_not_authorized`。validation protocol 只是未来 P14R 的预登记合同，不是
+scientific evidence。合同测试为 `71 passed`，相邻 SDK/output-flow 为 `148 passed`，
+safe nine-file directed gate 为 `360 passed`，safe legacy 为
+`1147 passed / 58 skipped / 105 deselected`；Ruff 与 `git diff --check` 通过。测试只使用
+synthetic identity/raw dictionary，没有读取或运行 GEM、SBML、growth/essentiality data、
+Cobra 或 solver。
+
+因此 P14E 仅为 `ENGINEERING_COMPLETE`，P14 整体状态为
+`ENGINEERING_COMPLETE_SCIENCE_PENDING`；P14R 仍是
+`AUTHORIZATION_REQUIRED / NOT_RUN`，P14B 仍是 `NOT_RUN`。没有真实 GEM/Pack/model
+execution、benchmark、external cohort、scientific evidence、operator policy、release 或
+promotion。完整边界见 [ADR-0011](ADR-0011-virtualcell-ecoli-k12-growth-contract.md)、
+[P14E runbook](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md) 和
+[P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md)。下一 eligible
+本地工程 work unit 是不依赖 P14R/P14B 正结果的 P15E contract-only 工程。
+
+### 1.4 代码与外部资产许可
 
 仓库源码在 `pyproject.toml` 中声明为 MIT License。公共数据集、数据库下载、模型权重、checkpoint 和其他外置科研资产保留各自的许可、引用和使用限制；不能因为仓库代码使用 MIT，就推定这些外部资产也可按 MIT 再分发。
 
@@ -407,13 +480,14 @@ LLM 位于科学执行链之外。
 
 P12 已补入独立 artifact、environment、adapter、evidence 和 operator-policy record
 identity，并让 Pack-aware runtime 对 exact 完整绑定 fail closed；P13 已在其上完成
-严格 Adapter SDK 和 delta reference path。两阶段均已有 completion code SHA 与完成
-报告，但仍只是本地 engineering-complete、未发布状态。P6-era v1 合同继续兼容，
-不能与 v2 完整治理混称；软件发布、科学 evidence 与 product policy 仍分别治理。
+严格 Adapter SDK 和 delta reference path；P14E 又冻结了 local-only E. coli K-12
+knockout→growth-ratio 合同。三个 work unit 均已有 completion code SHA，但仍只是本地
+engineering-complete、未发布状态；其中 P14E 明确 `executable=false`。P6-era v1 合同继续
+兼容，不能与 v2 完整治理混称；软件发布、科学 evidence 与 product policy 仍分别治理。
 
 ---
 
-## 8. P0–P13 已完成工程工作
+## 8. P0–P14E 已完成工程工作
 
 ### Phase 0：可信边界和确定性基线
 
@@ -598,8 +672,31 @@ P13 从 P12 completion docs SHA
 - delta-expression reference adapter 与 P0/v1/legacy compatibility；
 - growth/fitness test-only conformance，不进入默认生产 registry。
 
-P13 没有运行真实 science，也没有作 operator decision。当前下一 work unit 是本地
-contract-only 的 P14E；真实资产运行 P14R 与 operator-only P14B 保持未授权/未运行。
+P13 没有运行真实 science，也没有作 operator decision。
+
+### Phase 14E：E. coli K-12 knockout→growth contract（`COMPLETE`）
+
+P14E 从 P13 docs-closure SHA
+`0b193310009d6e4d2ebc0fc8abf95da20a56acdb` 开始，在 shared SDK prerequisite
+`c3401450fd79f7829c438d6b55c1902ea2f4cf5f` 之后，以
+`8778e93c31c2dfe1ef0f77f06e7a80a425633736`、tree
+`fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78` 完成：
+
+- exact K-12 MG1655 strain/assembly、GEM、medium、condition、objective、solver、Pack 和
+  NCBIGene→GEM mapping identity contracts；
+- 一个 canonical NCBIGene knockout 到一个 dimensionless `growth_ratio` 的 strict input/
+  output contract；
+- typed-negative compatibility：`assets_verified=false`、`executable=false`、
+  `reason=p14r_not_authorized`；
+- prepared-bound envelope/projection、OOD/value-free abstain 和 deterministic synthetic
+  conformance；
+- local `EcoliK12KnockoutGrowthAdapter`，明确不加入默认 adapter registry；
+- flux 只允许作为未来独立 solver trace，不是公开产品输出。
+
+这里的 adapter 不是 P13 测试 dummy，也不是历史 `ecoli_gem`/`GemWrapper` 的生产接线。
+P14E 没有读取或执行真实 GEM/SBML/data，没有运行 Cobra、solver、benchmark 或 external
+science，没有生成 evidence/policy，也没有 release 或 promotion。P14R 与 P14B 保持
+未授权/未运行。当前下一 work unit 是本地 contract-only 的 P15E。
 
 ---
 
@@ -685,13 +782,23 @@ artifact SHA-256
 - `vc.adapter-output-envelope.v1`
 - `vc.adapter-execution-provenance.v1`
 - `vc.adapter-conformance-report.v1`
+- `vc.ecoli-growth-scope.v1`
+- `vc.ecoli-growth-validation-protocol.v1`
+- `vc.ecoli-growth-data-binding.v1`
+- `vc.ecoli-growth-execution-binding.v1`
+- `vc.ecoli-growth-gene-mapping-binding.v1`
+- `vc.ecoli-growth-compatibility-binding.v1`
+- `vc.ecoli-growth-adapter-input-contract.v1`
+- `vc.ecoli-growth-adapter-output-contract.v1`
+- `vc.ecoli-growth-prepared-model-input.v1`
 - `vc.data-catalog.v1`
 - `vc.upload-receipt.v1`
 - `vc.community-pack.v1`
 
 其他项目应按 `schema_version` 路由解析器，不能依靠字段形状猜测版本。
-以上 P12/P13 新增 schema 属于本地 engineering-complete work units；它们尚未发布，
-外部项目不应仅凭本地 completion 把它们当作已发布协议或真实科学能力。
+以上 P12/P13/P14E 新增 schema 属于本地 engineering-complete work units；它们尚未发布，
+外部项目不应仅凭本地 completion 把它们当作已发布协议或真实科学能力。P14E 的
+validation protocol 和 synthetic fixture 尤其不能被解析为 P12 validation evidence。
 
 ---
 
@@ -1315,11 +1422,17 @@ predict_delta_expression → delta_expression
 unit、finite value、uncertainty、OOD、abstain 和 exact execution provenance 校验；
 unexpected adapter/runtime faults 也 fail closed。
 
-SDK 的合同可表达 growth、fitness 等输出，但相应 adapters 目前只存在于 tests，默认
-registry 不包含它们。要接入 growth、fitness、absolute expression、metabolic flux、
-drug response 等生产输出，仍需新增明确的生产 adapter、exact model/assets、独立测试、
-科学 evidence 与 operator policy。不能仅修改模型卡的 `status` 或 `outputs`，也不能
-引用测试 dummy adapter，就宣称模型可运行。
+P13 的通用 growth/fitness adapters 仍只存在于 tests。P14E 另新增了一个明确版本化的
+`predict_knockout_growth → growth_ratio` local contract adapter，但它只可在显式本地
+`AdapterRegistry` 中用于 synthetic conformance，未进入默认 registry，且其 compatibility
+固定 `executable=false`。它不是测试 dummy，也不是生产 adapter。
+
+历史 v1 `ecoli_gem` card/`GemWrapper`/legacy route 的存在或 `available` 状态不能把 P14E
+升级为真实 GEM capability，不能补足 exact asset、environment、Pack、mapping、evidence
+或 policy。要接入 growth、fitness、absolute expression、metabolic flux、drug response
+等生产输出，仍需明确的 executable adapter、exact model/assets、独立科学测试、evidence
+与 operator policy。不能只修改模型卡的 `status`/`outputs`，引用 P13 dummy，或引用 P14E
+contract adapter，就宣称模型可运行。
 
 模型权重和大型资产必须外置，并通过 hash、模型卡和环境身份绑定，不能直接提交进 Git。
 
@@ -1616,7 +1729,26 @@ clean install 均通过。wheel 为 1,076,180 bytes，SHA-256
 `3658b6247a909d0351d760295e0bcbb8082eac930d96fdfe39e4377b591b4f23`。完整 scope 和
 未运行项见 `reports/phase13/PHASE13_COMPLETION.md`。
 
-### 24.5 Skip 和 deselect 的含义
+### 24.5 P14E 完成状态
+
+P14E starting SHA 为 `0b193310009d6e4d2ebc0fc8abf95da20a56acdb`，SDK prerequisite
+为 `c3401450fd79f7829c438d6b55c1902ea2f4cf5f`，completion code SHA 为
+`8778e93c31c2dfe1ef0f77f06e7a80a425633736`，tree 为
+`fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78`。P14E contract file 为 `71 passed`；
+P14E + adjacent SDK/output-flow 为 `148 passed`；safe nine-file directed gate 为
+`360 passed`；safe legacy 为 `1147 passed, 58 skipped, 105 deselected`。full active-tree
+Ruff 与 `git diff --check` 通过，三次 exact-hash adversarial review 无 P1/P2 finding。
+
+这些 gate 没有运行 `test_ecoli_gem_case.py`、`test_gem_wrapper.py`、medium/antibiotic/
+yeast GEM tests 或其他真实 GEM/Cobra science path。两次 clean archive 构建的完整 wheel
+byte-identical：1,086,768 bytes，SHA-256
+`462b89376a5134906e98ea4b1ec573bc24e5f2e53266d5a7104be8d625eb88b3`；这只是未发布的本地
+构建 identity。由于本地 cache 缺四个 dependency 的原始 wheel bytes，本窗口没有刷新
+严格 one-shot offline `--require-hashes` install 证明；受限 compatibility smoke 不能冒充
+lockfile hash-integrity evidence。完整记录见
+`reports/phase14e/PHASE14E_COMPLETION.md`。
+
+### 24.6 Skip 和 deselect 的含义
 
 skip/deselect 不能写成：
 
@@ -1654,7 +1786,11 @@ skip/deselect 不能写成：
 ### 模型限制
 
 - P13 SDK 支持严格注册多种 task/output 合同，但默认生产 registry 仍只包含 delta
-  expression reference adapter；growth/fitness adapters 仅为测试 dummy；
+  expression reference adapter；P13 growth/fitness adapters 仅为测试 dummy；
+- P14E growth adapter 是 local、non-default、typed-negative 的 contract adapter，不是
+  production adapter；它没有真实 GEM/Pack/model release、evidence 或 policy；
+- 历史 `ecoli_gem` card、legacy `GemWrapper`/route 和 P14E contract adapter 是不同边界，
+  不能相互补足或合并宣传为可执行 E. coli growth capability；
 - P12 adapter identity 与 P13 executable adapter SDK 已完成接线，但没有新增生产
   growth/fitness adapter、真实模型或 task-scoped science evidence；
 - P12 v2 identities 和 Pack-aware gate 工程完成，但没有新增真实科学 evidence/policy；
@@ -1668,6 +1804,8 @@ skip/deselect 不能写成：
 ### 科学限制
 
 - 没有“任意细胞预测器”；
+- P14E 没有读取/运行真实 GEM、growth/essentiality data 或 solver，没有 E. coli
+  benchmark、paired CI、independent cohort、real OOD 或 scientific validation；
 - 没有多物种科学能力同时通过的证据；
 - 没有真实 Community model；
 - 没有 Host–Microbiome model；
@@ -1677,7 +1815,8 @@ skip/deselect 不能写成：
 ### 工程限制
 
 - 当前版本字符串存在发布漂移；
-- P13 Adapter SDK 仅在本地工程完成，尚未发布；
+- P13 Adapter SDK 与 P14E growth contract 仅在本地工程完成，尚未发布；
+- P14E 尚无任意未来 GEM loader 为 `data_only` 的类型级证明；
 - JobStore 是本地文件系统；
 - API 除上传外没有通用认证；
 - `docs/USER-GUIDE.md` 的五阶段网页描述已过时；
@@ -1822,17 +1961,19 @@ artifact hash
 
 ## 28. 后续路线图 P12–P30
 
-P12/P13 行记录已完成的工程 work units；P14E 只是下一 eligible 本地合同工程，
-P14R/P14B 及其后各阶段尚未完成，不能当作当前能力。
+P12/P13/P14E 行记录已完成的工程 work units；P14R/P14B 仍未运行。下一 eligible
+本地合同工程是 P15E；P15R/P15B 及其后真实科学或 policy 窗口不能当作当前能力。
 
 | 阶段 | 目标 |
 |---|---|
 | P12 | `COMPLETE`：Model Registry v2 artifact、environment、adapter、evidence、policy 身份分层 |
 | P13 | `COMPLETE`：统一 VirtualCellModelAdapter SDK、delta reference 与 conformance harness |
-| P14E | `ELIGIBLE`：E. coli K-12 knockout→growth contract，不运行真实资产 |
+| P14E | `COMPLETE`：E. coli K-12 knockout→growth-ratio local contract；`executable=false` |
 | P14R | `AUTHORIZATION_REQUIRED / NOT_RUN`：exact GEM/data/assets 的科学运行 |
 | P14B | `NOT_RUN`：正科学 evidence 后的独立 operator decision |
-| P15 | Yeast deletion fitness / condition response |
+| P15E | `ELIGIBLE`：exact S. cerevisiae strain/condition gene-deletion→fitness contract |
+| P15R | `AUTHORIZATION_REQUIRED / NOT_RUN`：exact deletion screen/model/assets 的科学运行 |
+| P15B | `NOT_RUN`：正科学 evidence 后的独立 operator decision |
 | P16 | Human K562 perturbation delta expression |
 | P17 | PRAXIS Virtual Cell Brain，多模型分解、选择、执行和审查 |
 | P18 | Multi-omics cell-state representation |
@@ -1875,11 +2016,15 @@ P14R/P14B 及其后各阶段尚未完成，不能当作当前能力。
 
 ## 29. 当前推荐的下一技术闭环
 
-当前技术闭环是 P14E E. coli K-12 knockout→growth contract：复用 P13 adapter SDK，
-冻结 exact strain/assembly/gene namespace、medium/condition、knockout input、growth/growth
-ratio output、unit、provenance 与 fail-closed tests。P14E 不读取或运行真实 GEM/data，
-不得产生科学 evidence/promotion；P14R 必须另获逐资产和 exact run window 授权，P14B
-必须等待正科学结果与具名 operator 决定。
+P14E E. coli K-12 knockout→growth-ratio contract 已在不读取或运行真实 GEM/data 的边界内
+完成。P14R 仍须逐资产、exact output root 和 run window 授权，P14B 仍须等待正科学结果
+与具名 operator 决定；P14E completion 不改变这两个状态。
+
+当前下一技术闭环是 P15E S. cerevisiae gene-deletion→fitness contract：复用 P12 identity
+与 P13 prepared-bound Adapter SDK，冻结 exact strain/assembly、SGD systematic ID、
+condition/control、fitness output/unit、evidence preregistration 与 abstain 边界。P15E 只能
+使用 synthetic contract fixture，不得把 P10 yeast tiny Pack、历史 yeast GEM 或 planned
+model card 当作真实 deletion-fitness data/model/evidence。P15R/P15B 分别保持独立授权窗口。
 
 在进入更大世界模型之前，最重要的闭环仍然是：
 
@@ -1921,10 +2066,11 @@ ratio output、unit、provenance 与 fail-closed tests。P14E 不读取或运行
 10. [P12–P30 Master Prompt](PHASE12-30-MASTER-PROMPT.md)
 11. [P12–P30 Sequential Master Prompt](PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md)
 12. [P13 Completion Report](../reports/phase13/PHASE13_COMPLETION.md)
-13. 本当前项目与集成指南
-14. [Repository Layout](REPOSITORY-LAYOUT.md)
-15. [Installation Guide](INSTALL.md)
-16. 当前 work unit 的 ADR、runbook、contracts、代码和测试
+13. [P14E Completion Report](../reports/phase14e/PHASE14E_COMPLETION.md)
+14. 本当前项目与集成指南
+15. [Repository Layout](REPOSITORY-LAYOUT.md)
+16. [Installation Guide](INSTALL.md)
+17. 当前 work unit 的 ADR、runbook、contracts、代码和测试
 
 关键 ADR：
 
@@ -1938,6 +2084,7 @@ ratio output、unit、provenance 与 fail-closed tests。P14E 不读取或运行
 - [P9 OOD Validation](ADR-0008-virtualcellpack-p9-ood-validation.md)
 - [P12 Model Zoo v2](ADR-0009-virtualcell-model-zoo-v2.md)
 - [P13 Model Adapter SDK](ADR-0010-virtualcell-model-adapter-sdk.md)
+- [P14E E. coli K-12 Growth Contract](ADR-0011-virtualcell-ecoli-k12-growth-contract.md)
 
 关键 runbook：
 
@@ -1949,6 +2096,7 @@ ratio output、unit、provenance 与 fail-closed tests。P14E 不读取或运行
 - [P9 OOD Validation](runbooks/VIRTUALCELLPACK-P9-OOD-VALIDATION.md)
 - [P12 Model Zoo v2](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md)（validation runbook）
 - [P13 Model Adapter SDK](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md)
+- [P14E E. coli K-12 Growth Contract](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md)
 - [External Disk Git Maintenance](runbooks/EXTERNAL-DISK-GIT-MAINTENANCE.md)
 
 ---
@@ -1965,8 +2113,13 @@ completion code SHA 是 1a5464fb0d2d9e105058f6797d92efd69783e5b2；工程完成�
 真实科学验证或 promotion。P13 Model Adapter SDK 以
 f83c13db386cb552b3ce7a5643e5ffbead0ff573 起步，completion code SHA 是
 744d0a28d2cfc13d1b10e85b133b6c13b9426174；工程 COMPLETE，science NOT_RUN，policy
-NO_NEW_DECISION。P14E E. coli K-12 knockout→growth contract 是下一 eligible 本地
-work unit；P14R/P14B 未授权、未运行。
+NO_NEW_DECISION。P14E 从 0b193310009d6e4d2ebc0fc8abf95da20a56acdb 起步，经 SDK
+prerequisite c3401450fd79f7829c438d6b55c1902ea2f4cf5f，以
+8778e93c31c2dfe1ef0f77f06e7a80a425633736（tree
+fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78）完成 local E. coli K-12
+knockout→growth-ratio 合同；工程 COMPLETE，science NOT_RUN，policy NO_NEW_DECISION，
+executable=false。P14R/P14B 未授权、未运行。下一 eligible 本地 work unit 是 P15E
+S. cerevisiae gene-deletion→fitness contract。
 
 当前 UI 是：
 选择 Cell Context → Chat → 自动解析/运行 → Report/Abstain，
@@ -1978,13 +2131,17 @@ contract、hash 和 provenance。模型层已有严格 ModelCard；P12 candidate
 分离 artifact/environment/adapter/evidence/policy identity，并让 Pack-aware
 compatibility/plan/job 对 exact bindings fail closed。P13 已提供严格 input/output、
 prepared input、execution provenance 和 conformance contracts；v1 仍兼容，默认生产
-registry 当前只注册 predict_delta_expression → delta_expression。growth/fitness
-adapters 仅在测试中，不能视为生产 capability。
+registry 当前只注册 predict_delta_expression → delta_expression。P13 growth/fitness
+adapters 仅在测试中；P14E 另有 local、non-default、typed-negative 的
+predict_knockout_growth → growth_ratio contract adapter。后者不是 dummy，也不是生产
+capability，更不能与 legacy ecoli_gem/GemWrapper 合并为真实执行能力。
 
 P12 legacy migration 不创建 evidence/policy/promotion；无法精确绑定的 P8/P9
 结果保持 unbound/incomplete。registry lifecycle 是 append-only，Pack list/API 只
 返回路径脱敏白名单投影。P12 没有真实 science run 或新 operator decision。
-P13 同样没有真实模型、数据、权重、science run 或新 operator decision。
+P13 同样没有真实模型、数据、权重、science run 或新 operator decision。P14E 也没有
+读取/运行真实 GEM、SBML、growth data 或 solver，没有 benchmark/evidence/policy、release
+或 promotion；synthetic conformance fingerprints 只证明合同确定性。
 
 数据存在不等于 Pack；Pack、registry、per-request compatibility/executable、
 scientific evidence 和 product policy 是五个独立层次。只有 exact

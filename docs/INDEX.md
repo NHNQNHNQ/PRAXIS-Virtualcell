@@ -2,7 +2,7 @@
 
 > Audited: 2026-08-06
 >
-> Status: `CURRENT_DOCUMENT_MAP — P13_ENGINEERING_COMPLETE_P14E_ELIGIBLE`
+> Status: `CURRENT_DOCUMENT_MAP — P14E_ENGINEERING_COMPLETE_P15E_ELIGIBLE`
 
 This is the navigation authority for the repository. It does not make every linked document current: each section explicitly distinguishes live truth, frozen evidence, active plans, drafts, and history.
 
@@ -11,23 +11,35 @@ This is the navigation authority for the repository. It does not make every link
 When documents disagree, use this order:
 
 1. Exact local bytes, `git rev-parse` identity, immutable artifacts and the current work-unit completion report.
-2. [README](../README.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), the preserved [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
-3. The latest completed phase ADR/runbook—P13 uses [ADR-0010](ADR-0010-virtualcell-model-adapter-sdk.md) and the [Model Adapter SDK runbook](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md); P12 remains documented by [ADR-0009](ADR-0009-virtualcell-model-zoo-v2.md) and the [Model Zoo v2 runbook](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md)—for implemented contract and validation boundaries.
+2. [README](../README.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), the preserved [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), the preserved [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
+3. The latest completed phase ADR/runbook—P14E uses [ADR-0011](ADR-0011-virtualcell-ecoli-k12-growth-contract.md) and the [E. coli K-12 growth-contract runbook](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md); P13 remains documented by [ADR-0010](ADR-0010-virtualcell-model-adapter-sdk.md) and the [Model Adapter SDK runbook](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md), and P12 by [ADR-0009](ADR-0009-virtualcell-model-zoo-v2.md) and the [Model Zoo v2 runbook](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md)—for implemented contract and validation boundaries.
 4. [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) for frozen scientific capability and claim boundaries.
 5. [Three-Way Sync State](status/SYNC-STATE.md) only for its dated local/GitHub/`.53` observations; it is not fresh remote authorization.
 6. Dated plans, handoffs, findings, papers, release notes and [Project State 2026-07-18](status/PROJECT-STATE-2026-07-18.md) as historical evidence for their stated commit/date only.
 
 Plans describe intended work. A task is not complete merely because a plan says it should happen; only checked gates plus recorded verification count as completion.
 
+P14E is complete only as a local engineering contract at code
+`8778e93c31c2dfe1ef0f77f06e7a80a425633736` and tree
+`fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78`, starting from
+`0b193310009d6e4d2ebc0fc8abf95da20a56acdb`. Its E. coli growth adapter is
+contract-only, local-registration-only and absent from the default registry. P14E did not run a
+real GEM, establish scientific evidence, make a promotion decision, publish a release or deploy.
+P14R remains `AUTHORIZATION_REQUIRED / NOT_RUN`, P14B remains `NOT_RUN`, and the next eligible
+local work unit is P15E.
+
 ## Current state
 
 | Document | Authority |
 |---|---|
-| [README](../README.md) | current product promise, P13 completion boundary and primary operator entry points |
+| [README](../README.md) | current product promise, P14E completion boundary and primary operator entry points |
 | [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13/P14E boundary |
-| [P13 Completion Report](../reports/phase13/PHASE13_COMPLETION.md) | exact P13 start/code/tree, Adapter SDK validation, artifact identity and science/policy non-claims |
-| [P13 Model Adapter SDK ADR](ADR-0010-virtualcell-model-adapter-sdk.md) | six strict SDK schemas, exact identity/input/output binding, delta reference path and fail-closed decisions |
-| [P13 Model Adapter SDK Runbook](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md) | adapter registration, conformance, runtime audit and directed local verification |
+| [P14E Completion Report](../reports/phase14e/PHASE14E_COMPLETION.md) | exact P14E start/code/tree, contract-only validation, packaging evidence and P14R/P14B non-claims |
+| [P14E E. coli K-12 Growth Contract ADR](ADR-0011-virtualcell-ecoli-k12-growth-contract.md) | exact scope, nine strict contracts, prepared-bound output and default-registry isolation |
+| [P14E E. coli K-12 Growth Contract Runbook](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md) | local contract audit, directed validation, P14R authorization gate and fail-closed interpretation |
+| [P13 Completion Report](../reports/phase13/PHASE13_COMPLETION.md) | preserved historical P13 start/code/tree, Adapter SDK validation and science/policy non-claims |
+| [P13 Model Adapter SDK ADR](ADR-0010-virtualcell-model-adapter-sdk.md) | preserved P13 SDK schemas, exact identity/input/output binding, delta reference path and fail-closed decisions |
+| [P13 Model Adapter SDK Runbook](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md) | preserved P13 adapter registration, conformance, runtime audit and directed local verification |
 | [P12 Completion Report](../reports/phase12/PHASE12_COMPLETION.md) | exact P12 code SHA, validation, artifact fingerprints and science/policy non-claims |
 | [P12–P30 Sequential Master Prompt](PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md) | superseded per-phase authorization prompt; historical only |
 | [P12–P30 Execution Plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) | phase scopes, dependencies and exact authorization templates |
@@ -71,6 +83,7 @@ Plans describe intended work. A task is not complete merely because a plan says 
 | [VirtualCellPack P9 OOD Validation](runbooks/VIRTUALCELLPACK-P9-OOD-VALIDATION.md) | frozen multi-axis split contract, grouped leakage audit, validation-only abstention threshold and adaptation-free GSE67402→GSE94117 reproduction |
 | [Virtual Cell Model Zoo v2](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md) | P12 read-only registry/catalog projection, legacy migration audit, v2 fail-closed plan and safe-load boundary |
 | [Virtual Cell Model Adapter SDK](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md) | P13 delta reference adapter, exact prepared-input/output provenance, conformance and fail-closed runtime interpretation |
+| [E. coli K-12 Growth Contract](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md) | P14E local contract-only adapter, exact prepared binding, P14R authorization prerequisites and default-registry isolation |
 
 The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` files describe the older PRAXIS-2 classroom/deployment system, including `.40/.53` service topology. They are not VirtualCell current-user entry points.
 
@@ -93,8 +106,9 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [VirtualCellPack P9 ADR](ADR-0008-virtualcellpack-p9-ood-validation.md) | eight-axis OOD contract, biological-group leakage boundary, external validation, selective metrics and baseline promotion gate |
 | [Virtual Cell Model Zoo v2 ADR](ADR-0009-virtualcell-model-zoo-v2.md) | layered model/artifact/environment/adapter/evidence/policy identities, append-only lifecycle, legacy migration and exact v2 execution gate |
 | [Virtual Cell Model Adapter SDK ADR](ADR-0010-virtualcell-model-adapter-sdk.md) | six versioned SDK contracts, delta-only default registry, strict output envelope and P0-compatible execution flow |
+| [E. coli K-12 Growth Contract ADR](ADR-0011-virtualcell-ecoli-k12-growth-contract.md) | P14E exact scope, typed negative compatibility, prepared-bound projection and contract-only local registration |
 | [Community Readiness Checklist](COMMUNITY-READINESS-CHECKLIST.md) | P10 model-free CommunityPack gates, two tiny microbial Packs, fail-closed planning and explicitly missing experimental validation |
-| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P13 implementation/status matrix; separates registry, Pack, adapter/runtime compatibility, scientific evidence and product policy |
+| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P14E implementation/status matrix; separates registry, Pack, adapter/runtime compatibility, scientific evidence and product policy |
 | [VirtualCellPack Multiomics Runbook](runbooks/VIRTUALCELLPACK-MULTIOMICS.md) | tiny RNA+protein fixture generation, hash binding, P5 tests and asset-update rules |
 | [VirtualCellPack Capability Runtime Runbook](runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md) | local model card/cache/Pack assembly, execution-plan audit and fail-closed reason handling |
 | [VirtualCellPack Data Portal Runbook](runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) | external public-file inventory, service configuration, upload quarantine and operator review boundary |
@@ -103,6 +117,7 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [VirtualCellPack P9 OOD Runbook](runbooks/VIRTUALCELLPACK-P9-OOD-VALIDATION.md) | exact public input hashes, deterministic external replay, risk-coverage metrics and fail-closed scientific interpretation |
 | [Virtual Cell Model Zoo v2 Runbook](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md) | P12 migration, public projection, lifecycle, path-redaction and directed validation procedure |
 | [Virtual Cell Model Adapter SDK Runbook](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md) | P13 registration allowlist, adapter conformance, prepared-input binding, output envelope and directed validation procedure |
+| [E. coli K-12 Growth Contract Runbook](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md) | P14E local contract audit, fail-closed tests, P14R asset/run prerequisites and scientific non-claim boundary |
 | [Provenance](../PROVENANCE.md) | repository derivation from PRAXIS-2 and bootstrap evidence |
 
 ## Release and version history
@@ -130,13 +145,14 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 
 | Report | Scope |
 |---|---|
+| [P14E Completion Report](../reports/phase14e/PHASE14E_COMPLETION.md) | exact engineering closure, directed and legacy validation, reproducible full wheel, P14R/P14B non-runs and P15E eligibility |
 | [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | frozen B0–B4 environment, static, core, frontend, wheel/CLI, legacy, and remote-boundary evidence |
 | [Phase D1a CI Report](status/PHASE-D1A-CI-2026-07-22.md) | actual old-SHA GitHub run, job-by-job failure boundary, lock/frontend remediation, honest QEMU limitation, and retry gate |
 | [Phase D1a CI Retry Report](status/PHASE-D1A-CI-RETRY-2026-07-23.md) | exact attempt-2 run, four passing jobs, authoritative Linux failure, process-group repair, and next CAS boundary |
 | [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | frozen local C5 gate: Python 3.13 core 965, Gate A adapter seam, honest 2-test remote pending, asset/claim classification |
 | [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | frozen C4 gate: Python 3.13 core 957, Playwright 56+1, reproducible full wheel, and Linux-container smoke |
 | [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen C3 gate: core 947, Playwright 54+1, theme acceptance, mutation evidence, and then-remaining C4/C5 ownership |
-| [Testing Guide](TESTING.md) | current P13 local commands and counts; preserves exact-head historical CI/Linux evidence and remote scientific-validation boundaries |
+| [Testing Guide](TESTING.md) | current P14E local commands and counts; preserves prior exact-SHA and historical CI/Linux evidence plus remote scientific-validation boundaries |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | capability gate plus `.53` evidence and remaining remote backlog |
 | [Phase 10 Summary](../reports/phase10/PHASE10_SUMMARY.md) | `952 tests = 912 passed + 40 skipped` for the non-LLM package scope; 9 LLM tests are deselected in the `912/40/9` reporting style |
 | [Phase 10 UI E2E](../reports/phase10/PHASE10_UI_E2E.md) | three structural Playwright specs; explicitly excludes CSS/pixel and deep abstain assertions |

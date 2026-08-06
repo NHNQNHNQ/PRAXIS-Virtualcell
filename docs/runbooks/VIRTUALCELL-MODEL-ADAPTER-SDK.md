@@ -154,6 +154,31 @@ legacy、fingerprint/task/output/shape/unit 不同或任一 envelope abstain 时
 Delta reference 的 ensemble mean 明确返回 unavailable uncertainty；不要把它展示为
 calibrated。Learned reliability 只可用于 delta task/output，其他 output 保持 unsupported。
 
+### 5.1 P14E 后续 trust-boundary 加固
+
+P14E prerequisite commit `c3401450fd79f7829c438d6b55c1902ea2f4cf5f` 在不改变 P13
+schema 或 delta reference identity 的前提下，加固了递归 exact-type validation：
+Pydantic hidden/extra/excluded/computed subtype fields、dataclass subtype fields、
+nested `model_copy` extras 和 typed mapping drift 都必须 fail closed。
+
+Generic SDK 同时新增 `project_prepared_output(prepared, envelope)`。Conformance runner
+现在调用 prepared-aware projection；需要 exact request/Pack/scope binding 的 adapter
+应拒绝 standalone `validate_envelope`、`project_output` 或 aggregation，并只在
+`validate_prepared_envelope` 后投影。Delta reference 仍可使用其兼容实现。
+
+加固后的 P13 冻结 fingerprints 仍为：
+
+~~~text
+adapter       17afc27e56dba13567001ff1982cbf1660e2948fadf2147301a1d0dcf61aeb3d
+input         d10cf437291dc1ebb1689c3f4c5eea4d82af3842491c224172215faddca93078
+output        d863783786504ebf768cfd7e2fbad66cfd03a029deb1dee3543a9872712e363d
+prepared      31d1859a226c50375b7f4d65b6307a9680d9e71e978f4f16e5eb053d90c5de3e
+envelope      a6745427e8f0e9d516789ec9418a42fdb024e245d452b1ca4825c24398996ba2
+conformance   b40374d81f9ec3362d9950bffcfa97f123e46abc80f8b4b135fd5afa02bded18
+~~~
+
+这些是兼容性/工程证据，不把 P13 或 P14E 提升为科学验证。
+
 ## 6. Pack-aware runtime 与 legacy 边界
 
 严格路径应按以下顺序审计：
@@ -263,5 +288,6 @@ runtime projection 时必须：
 5. 不改写 P9 negative result；
 6. 不把工程 conformance 描述成 scientific validation 或 production promotion。
 
-P13 engineering 已 COMPLETE。下一阶段是 P14E；P14R 真实科学运行和 P14B operator
-policy/promotion 均需单独授权。
+P13 engineering 已 COMPLETE，P14E 也已作为独立 contract-only work unit 完成。
+P14R 真实科学运行和 P14B operator policy/promotion 均需单独授权；不依赖其正结果的
+下一本地工程 work unit 是 P15E。

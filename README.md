@@ -10,11 +10,18 @@ Virtual Cell Model Zoo v2 工程于
 从 `f83c13db386cb552b3ce7a5643e5ffbead0ff573` 开始，在
 `744d0a28d2cfc13d1b10e85b133b6c13b9426174`（tree
 `198e623120688d3704b9312990ddaa93c9a7b0e6`）完成本地工程，状态为
-`P13_ENGINEERING_COMPLETE_P14E_ELIGIBLE`。exact 验证与克制的科学/policy 边界见
-[P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)和
-[P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)。
-下一 eligible 本地 work unit 是 `P14E — E. coli K-12 knockout→growth contract`；
-真实 GEM/data/assets 运行 `P14R` 仍需逐项授权，operator decision `P14B` 尚未运行。
+`P13_ENGINEERING_COMPLETE_P14E_ELIGIBLE`，现作为历史工程证据保留。Phase 14E 从
+`0b193310009d6e4d2ebc0fc8abf95da20a56acdb` 开始，在
+`8778e93c31c2dfe1ef0f77f06e7a80a425633736`（tree
+`fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78`）完成本地 E. coli K-12
+knockout→growth 工程合同，当前状态为
+`P14E_ENGINEERING_COMPLETE_P15E_ELIGIBLE`。exact 验证与克制的科学/policy 边界见
+[P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
+[P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
+[P14E 完成报告](reports/phase14e/PHASE14E_COMPLETION.md)。P14R 真实
+GEM/data/assets 运行仍为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B 为 `NOT_RUN`；
+下一 eligible 本地 work unit 是 `P15E — S. cerevisiae strain/condition
+gene-deletion→fitness contract`。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -162,12 +169,23 @@ abstain 清除公开 output 并保留审计 provenance。其 provenance 绑定 e
 Pack、compatibility 和 adapter/input/output contract fingerprint。非法 shape/unit/type、
 非有限值、漂移的 feature
 alignment/provenance、未注册或混合 adapter 输出均 fail-closed。默认 registry 只注册
-delta-expression reference adapter；growth/fitness adapter 仅存在于合同测试，不是生产
-registry、真实模型或科学 evidence。P13 没有运行科学评估（`Science: NOT_RUN`），没有
+delta-expression reference adapter；P13 的 growth/fitness dummy 仅存在于通用 SDK
+合同测试，不是生产 registry、真实模型或科学 evidence。P13 没有运行科学评估
+（`Science: NOT_RUN`），没有
 新增 operator policy（`Policy: NO_NEW_DECISION`），也没有 release、版本 bump、真实权重、
 训练、下载或 production promotion。设计与操作边界见
 [P13 ADR](docs/ADR-0010-virtualcell-model-adapter-sdk.md)和
 [P13 runbook](docs/runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md)。
+
+P14E 只冻结 E. coli K-12 MG1655 单基因 knockout→`growth_ratio` 的严格工程
+合同与合成 conformance。`EcoliK12KnockoutGrowthAdapter` 是 local contract-only
+adapter，必须由测试或未来获授权的集成代码显式放入本地 `AdapterRegistry`；
+它不在 `DEFAULT_ADAPTER_REGISTRY` 中，也没有修改 runtime route、wrapper 或 product
+surface。P14E 没有读取或运行真实 GEM/SBML/data，没有 Cobra/solver 科学运行、
+benchmark/evidence、operator promotion 或 release/deploy。设计、操作和完成边界见
+[P14E ADR](docs/ADR-0011-virtualcell-ecoli-k12-growth-contract.md)、
+[P14E runbook](docs/runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md)和
+[P14E 完成报告](reports/phase14e/PHASE14E_COMPLETION.md)。
 
 P8 产品化收口随发行物提供三个合成、微型、可审计 Pack：
 `p8-human-tiny`、`p8-mouse-tiny`、`p8-bacteria-tiny`。它们覆盖
@@ -298,8 +316,11 @@ CI=1 npm run e2e
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P13 边界和跨项目集成 |
-| [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md) | exact code/tree、Adapter SDK 验证和 science/policy 非声明 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P14E 边界和跨项目集成 |
+| [P14E 完成报告](reports/phase14e/PHASE14E_COMPLETION.md) | exact start/code/tree、本地 contract-only 验证、P14R/P14B 非运行边界 |
+| [P14E E. coli K-12 growth ADR](docs/ADR-0011-virtualcell-ecoli-k12-growth-contract.md) | exact scope、九个合同、prepared-bound 输出与 default-registry 隔离 |
+| [P14E E. coli K-12 growth runbook](docs/runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md) | 本地合同审计、定向验证、P14R 授权门和 fail-closed 解读 |
+| [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md) | 历史 exact code/tree、Adapter SDK 验证和 science/policy 非声明 |
 | [P13 Model Adapter SDK ADR](docs/ADR-0010-virtualcell-model-adapter-sdk.md) | 六个严格 schema、identity binding、fail-closed 输出与兼容边界 |
 | [P13 Model Adapter SDK runbook](docs/runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md) | adapter 注册、conformance、运行时审计和定向验证 |
 | [P12 Model Zoo v2 ADR](docs/ADR-0009-virtualcell-model-zoo-v2.md) | 当前分层 identity、迁移、fail-closed 和安全加载边界 |
@@ -321,12 +342,12 @@ CI=1 npm run e2e
 
 唯一允许的流向是：本地 feature branch → GitHub branch/CI → 审批合入 GitHub `main` → 本地 `main` fast-forward → `.53` 从同一 GitHub SHA fast-forward → 三端 SHA 核对。不要在 `.53` 直接开发，也不要把本地 tag 当成已发布 tag。
 
-当前 P13 窗口未刷新 GitHub 或 `.53`。规范工作树是
+当前 P14E 窗口未刷新 GitHub 或 `.53`。规范工作树是
 `/Volumes/T7/PRAXIS-virtualcell`，Git metadata 是
 `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`；任何远程数字只有带日期和 exact
 identity 的只读记录意义。
 
-历史整理分支曾按两次精确 D1a 授权把 GitHub `codex/project-consolidation` 快进到 `ee36d7948047f346f55a02d62ccaac84391e3c20`。对应的 [GitHub Actions run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 为 `4/5`：Python core、frontend/Playwright、reproducible wheel 和 Linux release container 通过，legacy 唯一失败是 Linux shell 子进程未随直接 shell 终止。修复提交 `6a8198771581d0897a13457e93e50cfec172d59a` 已把输出截断、timeout、pipe 异常和上层取消统一为进程组清理，并在 macOS/Python 3.13.12 与 Linux/Python 3.13.14 严格锁环境得到 legacy `1139 passed / 0 failed`。这些都是绑定旧 SHA 的历史证据，不授权当前 P13 push、CI、release 或 deploy；GitHub `main`/tag、本地 `main` 和 `.53` 当前状态必须在未来获准窗口重新只读核对。
+历史整理分支曾按两次精确 D1a 授权把 GitHub `codex/project-consolidation` 快进到 `ee36d7948047f346f55a02d62ccaac84391e3c20`。对应的 [GitHub Actions run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 为 `4/5`：Python core、frontend/Playwright、reproducible wheel 和 Linux release container 通过，legacy 唯一失败是 Linux shell 子进程未随直接 shell 终止。修复提交 `6a8198771581d0897a13457e93e50cfec172d59a` 已把输出截断、timeout、pipe 异常和上层取消统一为进程组清理，并在 macOS/Python 3.13.12 与 Linux/Python 3.13.14 严格锁环境得到 legacy `1139 passed / 0 failed`。这些都是绑定旧 SHA 的历史证据，不授权当前 P14E push、CI、release 或 deploy；GitHub `main`/tag、本地 `main` 和 `.53` 当前状态必须在未来获准窗口重新只读核对。
 
 ## 派生关系
 
