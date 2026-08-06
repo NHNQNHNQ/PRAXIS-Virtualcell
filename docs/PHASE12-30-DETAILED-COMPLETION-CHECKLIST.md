@@ -4,7 +4,7 @@
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前已完成工程 work unit：`Phase 14E`
+> 当前已完成工程 work unit：`Phase 15E`
 >
 > DOCS-CLOSURE completion：`b19c896202bea56f894d0ad540501331af42a40c`
 >
@@ -15,8 +15,13 @@
 > `8778e93c31c2dfe1ef0f77f06e7a80a425633736`；tree
 > `fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78`；状态 `COMPLETE`
 >
-> 下一 eligible 本地工程 work unit：`P15E — S. cerevisiae deletion→fitness contract`；
-> `ELIGIBLE`
+> 已完成 work unit：`Phase 15E — S. cerevisiae S288C deletion→fitness contract`；
+> starting SHA `0ff6870a70a04d71098a16875e633f909e31cc5a`；branch
+> `codex/p15e-yeast-fitness-contract`；completion code SHA
+> `62480a3951173a2aa7b006403af9b169521db138`；tree
+> `64906691c4c989a843df4da97f0a93f32cd65ad2`；状态 `COMPLETE`
+>
+> 下一 eligible 本地工程 gate：`P16E`；`ELIGIBLE / NOT_COMPLETE`
 >
 > 当前 Phase 11 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
@@ -37,11 +42,11 @@
 → 完成记录
 ```
 
-本文自身不授权实施任何 Phase。P12、P13 和 P14E 已在持续本地授权内完成；该授权仍不包含
+本文自身不授权实施任何 Phase。P12、P13、P14E 和 P15E 已在持续本地授权内完成；该授权仍不包含
 外置数据或权重、network、push、GitHub main/tag、`.53`、服务、发布、部署或真实
 科学运行。P14E 已独立收口；P14R 仍需逐资产/窗口授权，P14B 仍只能在
-正科学结果后由具名 operator 决定。P15 同样拆为当前可连续本地实施的 `P15E`、
-需独立资产/运行授权的 `P15R` 和 operator-only `P15B`。阶段 scope、资产清单和可复制授权句仍以
+正科学结果后由具名 operator 决定。P15E 已独立收口；P15R 仍需逐资产/窗口授权，
+P15B 仍只能在正科学结果后由具名 operator 决定。阶段 scope、资产清单和可复制授权句仍以
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)为准。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
@@ -125,6 +130,16 @@ work-unit 执行状态机使用以下状态；总进度表可另用 `NOT_STARTED
   knockout→growth 合同、负向 compatibility、prepared-bound conformance 与 fail-closed 边界；
 - P14E 只使用纯合成合同 fixtures，未读取或运行真实 GEM/data/assets/solver，
   growth adapter 未进入默认 registry；P14R science 与 P14B policy 均为 `NOT_RUN`；
+- Phase 15E 已从 P14E docs-closure actual SHA
+  `0ff6870a70a04d71098a16875e633f909e31cc5a` 开始，在
+  `codex/p15e-yeast-fitness-contract` 以 code SHA
+  `62480a3951173a2aa7b006403af9b169521db138`（tree
+  `64906691c4c989a843df4da97f0a93f32cd65ad2`）完成 exact S288C/R64
+  deletion→fitness contract、negative compatibility、prepared-bound conformance 与
+  fail-closed 边界；
+- P15E 只使用纯合成 identity/contract fixtures，未读取或运行真实 deletion
+  screen/model/GEM/assets；adapter 未进入默认 registry，没有 science、policy、release
+  或版本 bump；P15R 为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P15B 为 `NOT_RUN`；
 - `praxis-vc pack list` 和 `GET /api/packs` 只复用既有链路返回路径脱敏白名单投影，
   不新增管理写 API；
 - 未精确绑定现有 model identity 的 P8/P9 结果保留为 `unbound` migration receipt；
@@ -132,8 +147,8 @@ work-unit 执行状态机使用以下状态；总进度表可另用 `NOT_STARTED
 - 历史 ref `codex/p12-cell-first-baseline` 是误命名恢复 ref，不定义阶段状态；
 - staged/modified/deleted/untracked 保护清单不在本文固定，每轮必须从现场
   `git status --short` 重建；任何新路径默认受保护；
-- P15E 是当前持续本地授权下的下一 eligible 合同工程 work unit；它必须从本次
-  P14E docs-closure 完成后的 actual Git SHA 开始，本文不预测或自引用该未来 commit；
+- P16E 是当前持续本地授权下的下一 eligible 本地 gate；它尚未完成，开始前仍须从
+  P15E docs-closure 后的 actual Git SHA 和现场动态保护清单重新核对；
 - P14R/P14B 与 P15R/P15B 均保持各自的 exact external/operator 授权门，一个外部门
   不阻塞无依赖的 eligible 本地 E work unit。
 
@@ -175,10 +190,10 @@ flowchart TD
 | P14E | `COMPLETE` | `NOT_APPLICABLE — CONTRACT_ONLY` | `NO_NEW_DECISION` | E. coli K-12 knockout→growth 合同与 fail-closed 工程边界；completion `8778e93c...` |
 | P14R | `AUTHORIZATION_REQUIRED` | `NOT_RUN` | `NOT_APPLICABLE` | exact GEM/data/assets/output root/run window 后才可真实运行 |
 | P14B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | 仅在正科学结果后由具名 operator 决定 |
-| P15E | `ELIGIBLE` | `NOT_APPLICABLE — CONTRACT_ONLY` | `NOT_APPLICABLE` | exact S. cerevisiae deletion→fitness 合同、adapter、preregistration 与 abstain |
+| P15E | `COMPLETE` | `NOT_APPLICABLE — CONTRACT_ONLY` | `NO_NEW_DECISION` | exact S288C deletion→fitness 合同、negative compatibility、preregistration 与 abstain；completion `62480a39...` |
 | P15R | `AUTHORIZATION_REQUIRED` | `NOT_RUN` | `NOT_APPLICABLE` | exact deletion screen/model/assets/output root/run window 后才可真实运行 |
 | P15B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | 仅在正科学结果后由具名 operator 决定 |
-| P16 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | K562 delta-expression；policy 另用 P16B |
+| P16E | `ELIGIBLE` | `NOT_RUN` | `NOT_RUN` | 下一本地 gate；K562 delta-expression，尚未完成；policy 另用 P16B |
 | P17 | `NOT_STARTED` | `NOT_RUN` | `NOT_APPLICABLE` | DAG 合同；真实多模型需至少两个 promoted 能力 |
 | P18 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | typed multi-omics input；真实能力独立过门 |
 | P19 | `NOT_STARTED` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | receipt 到 RegisteredPack，不训练 |
@@ -525,8 +540,14 @@ E. coli K-12 + exact GEM/medium/condition + gene knockout
 
 ### Phase 15 — S. cerevisiae Virtual Cell
 
-**状态拆分：** `P15E ELIGIBLE`；`P15R AUTHORIZATION_REQUIRED / NOT_RUN`；
+**状态拆分：** `P15E COMPLETE`；`P15R AUTHORIZATION_REQUIRED / NOT_RUN`；
 `P15B NOT_RUN`
+
+**P15E 执行身份：** starting SHA
+`0ff6870a70a04d71098a16875e633f909e31cc5a`；branch
+`codex/p15e-yeast-fitness-contract`；completion code SHA
+`62480a3951173a2aa7b006403af9b169521db138`；tree
+`64906691c4c989a843df4da97f0a93f32cd65ad2`。
 
 **唯一任务：**
 
@@ -535,28 +556,47 @@ exact S. cerevisiae strain/condition + gene deletion
 → deletion fitness
 ```
 
-`P15E` 是持续本地授权下的下一 contract-only 工程 work unit。它必须从本次 P14E
-docs-closure 完成后由 Git history 读取的 actual SHA 开始；本文不预测或自引用该未来
-commit。`P15R` 的真实资产和运行、`P15B` 的 operator decision 均不包含在该授权中。
+`P15E` 已在 contract-only、local-only 边界内完成；只冻结 S288C/R64 exact scope、
+strict input/output、prepared-bound adapter、preregistration、OOD 与 abstain。P15R 的
+真实资产/科学运行和 P15B 的 operator decision 均未授权、未运行。
 
 **P15E 合同工程前置**
 
-- [ ] 从 Git history 读取 P14E actual docs-closure SHA，并以它作为唯一 starting SHA；
-- [ ] P10 yeast tiny Pack 明确保持 synthetic contract fixture；
-- [ ] 重新读取 `git status --short`，只操作届时 exact allowlist；
-- [ ] 只使用合成 fixtures，不读取或运行真实 deletion screen/model/assets。
+- [x] 从 Git history 读取 P14E actual docs-closure SHA
+  `0ff6870a70a04d71098a16875e633f909e31cc5a`，并以它作为唯一 starting SHA；
+- [x] P10 yeast tiny Pack 明确保持 synthetic contract fixture；
+- [x] 重新读取 `git status --short`，只操作 exact allowlist；
+- [x] 只使用合成 fixtures，未读取或运行真实 deletion screen/model/GEM/assets。
 
 **P15E 交付物**
 
-- [ ] strain、assembly、SGD systematic ID、condition、control、unit 和 output 冻结；
-- [ ] 复用 P12 identities 与 P13 Adapter SDK，定义 deletion-fitness adapter、prepared
+- [x] strain、assembly、SGD systematic ID、condition、control、unit 和 output 冻结；
+- [x] 复用 P12 identities 与 P13 Adapter SDK，定义 deletion-fitness adapter、prepared
   input、strict output envelope、provenance、uncertainty/OOD 与 abstain 合同；
-- [ ] 冻结 future P15R 的 condition/replicate group、baseline、primary metric、paired
+- [x] 冻结 future P15R 的 condition/replicate group、baseline、primary metric、paired
   CI、external/OOD 与 zero-adaptation preregistration；不得把 protocol 写成 evidence；
-- [ ] 纯合成、小型合同 fixtures 的 exact binding、deterministic conformance、负例和
+- [x] 纯合成、小型合同 fixtures 的 exact binding、deterministic conformance、负例和
   abstain；
-- [ ] adapter 不进入默认生产 registry，不生成 benchmark/evidence/policy/promotion；
-- [ ] P15E engineering report 收口后，在持续本地授权内选择下一 eligible E work unit。
+- [x] adapter 不进入默认生产 registry，negative compatibility 固定为
+  `p15r_not_authorized`，不生成 benchmark/evidence/policy/promotion；
+- [x] [ADR-0012](ADR-0012-virtualcell-yeast-deletion-fitness-contract.md)、
+  [runbook](runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md)、测试和
+  [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md) 已收口；
+- [x] 下一 eligible 本地 gate 记为 P16E，但没有把它写成已完成。
+
+**P15E 冻结证据**
+
+- public module：`praxis_virtualcell/model_zoo/yeast_deletion_fitness_contract.py`；
+  tests：`praxis_virtualcell/tests/test_yeast_deletion_fitness_contract.py`；
+- P15E contract tests：`98 passed`；safe directed gate：`458 passed`；safe legacy gate：
+  `1147 passed, 58 skipped, 105 deselected`；
+- authoritative Ruff 使用 `--extend-exclude old` 通过；format 与 `git diff --check` 通过；
+- 两次 wheel byte-identical，SHA-256
+  `7758c13bd5a53c74618d556b14c6e27e0492381162a9ab3364aee7dde5d2bb8d`；
+- 严格 official build cache 因缺 `packaging==26.2` fail closed；系统全局 `pip check`
+  被已知全局环境污染，不能作为 P15E 证据；
+- 这些证据只证明 contract engineering，没有真实 asset/GEM/science、policy、release、
+  version bump、push 或 deploy。
 
 **P15R 前置、交付物与验收（另行授权）**
 
@@ -580,6 +620,7 @@ commit。`P15R` 的真实资产和运行、`P15B` 的 operator decision 均不�
 
 **P15R/P15B 完成与 policy**
 
+- [x] P15E engineering report 独立收口，不等待 P15R science；
 - [ ] 失败时记录 `SOFTWARE_COMPLETE_NEGATIVE_SCIENCE`；
 - [ ] evidence 过门后，P15B 具名 operator 单独决定 product policy；
 - [ ] P15B 不得修改 `scientifically_validated`。
@@ -588,7 +629,7 @@ commit。`P15R` 的真实资产和运行、`P15B` 的 operator decision 均不�
 
 ### Phase 16 — Human/K562 Virtual Cell
 
-**状态：** `NOT_STARTED`
+**状态：** `P16E ELIGIBLE / NOT_COMPLETE`
 
 **唯一任务：**
 
@@ -600,7 +641,8 @@ Golden Norman K562 perturbation
 
 **前置与授权**
 
-- [ ] P15 completion SHA 已记录；
+- [x] P15E completion code SHA `62480a3951173a2aa7b006403af9b169521db138`
+  已记录；P16E 实际 starting SHA 仍须在 P15E docs-closure 后从 Git history 读取；
 - [ ] Golden Pack、candidate checkpoint、environment 和 external dataset 精确授权；
 - [ ] P8 frozen split、feature order、metric、bootstrap 和 baseline 保持不变；
 - [ ] 用户明确授权 `codex/p16-k562-perturbation`。
@@ -1274,10 +1316,10 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | P14E | `COMPLETE` | `N/A — contract only` | `NO_NEW_DECISION` | `0b193310009d6e4d2ebc0fc8abf95da20a56acdb` | `8778e93c31c2dfe1ef0f77f06e7a80a425633736` | `reports/phase14e/PHASE14E_COMPLETION.md`; prerequisite `c3401450...`; tree `fa85e049...`; adapter `0b26d81c...` |
 | P14R | `AUTHORIZATION_REQUIRED` | `NOT_RUN` | `N/A` | — | unchanged | exact GEM/data/assets/output root/run window 未授权 |
 | P14B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | — | unchanged | 仅在正科学结果与具名 operator 决定后可运行 |
-| P15E | `ELIGIBLE` | `N/A — contract only` | `N/A` | P14E docs-closure commit（从 Git history 读取；本文不自引用） | — | S. cerevisiae deletion→fitness contract only |
+| P15E | `COMPLETE` | `N/A — contract only` | `NO_NEW_DECISION` | `0ff6870a70a04d71098a16875e633f909e31cc5a` | `62480a3951173a2aa7b006403af9b169521db138` | `reports/phase15e/PHASE15E_COMPLETION.md`; tree `64906691...`; wheel `7758c13b...` |
 | P15R | `AUTHORIZATION_REQUIRED` | `NOT_RUN` | `N/A` | — | unchanged | exact deletion screen/model/assets/output root/run window 未授权 |
 | P15B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | — | unchanged | 仅在正科学结果与具名 operator 决定后可运行 |
-| P16 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
+| P16E | `ELIGIBLE` | `NOT_RUN` | `NOT_RUN` | P15E docs-closure 后从 Git history 读取 | — | next local gate；not complete |
 | P16B | `NOT_STARTED` | `READ_ONLY` | `NOT_RUN` | — | unchanged | — |
 | P17 | `NOT_STARTED` | `NOT_RUN` | `N/A` | — | — | — |
 | P18 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
@@ -1388,12 +1430,16 @@ P14E 已从 `0b193310009d6e4d2ebc0fc8abf95da20a56acdb` 开始，经 prerequisite
 `fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78` 完成 contract-only 工程收口。P14R 仍为
 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B 仍为 `NOT_RUN`。
 
-持续本地授权下的下一 eligible work unit 是 P15E S. cerevisiae deletion→fitness
-合同工程；它必须以本次 P14E docs-closure 完成后从 Git history 读取的 actual SHA 为
-starting SHA，本文不预测或自引用该未来 commit。P15R 仍为
-`AUTHORIZATION_REQUIRED / NOT_RUN`，P15B 仍为 `NOT_RUN`。外置资产、真实模型/训练、
-network、push、发布、部署和 operator promotion 仍不在授权范围；这些外部门不阻塞
-无依赖的 eligible 本地 E work unit。
+P15E 已从 P14E docs-closure
+`0ff6870a70a04d71098a16875e633f909e31cc5a` 开始，以 completion code SHA
+`62480a3951173a2aa7b006403af9b169521db138` 和 tree
+`64906691c4c989a843df4da97f0a93f32cd65ad2` 完成 contract-only 工程收口。P15R 仍为
+`AUTHORIZATION_REQUIRED / NOT_RUN`，P15B 仍为 `NOT_RUN`。
+
+持续本地授权下的下一 eligible gate 是 P16E；它尚未完成，实际 starting SHA 必须在
+P15E docs-closure 后从 Git history 读取。外置资产、真实模型/训练、network、push、
+发布、部署和 operator promotion 仍不在授权范围；这些外部门不阻塞无依赖的 eligible
+本地工程 gate。
 
 可直接跨对话使用的顺序推进提示词见：
 

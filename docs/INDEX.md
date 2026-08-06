@@ -2,7 +2,7 @@
 
 > Audited: 2026-08-06
 >
-> Status: `CURRENT_DOCUMENT_MAP — P14E_ENGINEERING_COMPLETE_P15E_ELIGIBLE`
+> Status: `CURRENT_DOCUMENT_MAP — P15E_ENGINEERING_COMPLETE_P16E_ELIGIBLE`
 
 This is the navigation authority for the repository. It does not make every linked document current: each section explicitly distinguishes live truth, frozen evidence, active plans, drafts, and history.
 
@@ -11,29 +11,33 @@ This is the navigation authority for the repository. It does not make every link
 When documents disagree, use this order:
 
 1. Exact local bytes, `git rev-parse` identity, immutable artifacts and the current work-unit completion report.
-2. [README](../README.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), the preserved [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), the preserved [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
-3. The latest completed phase ADR/runbook—P14E uses [ADR-0011](ADR-0011-virtualcell-ecoli-k12-growth-contract.md) and the [E. coli K-12 growth-contract runbook](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md); P13 remains documented by [ADR-0010](ADR-0010-virtualcell-model-adapter-sdk.md) and the [Model Adapter SDK runbook](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md), and P12 by [ADR-0009](ADR-0009-virtualcell-model-zoo-v2.md) and the [Model Zoo v2 runbook](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md)—for implemented contract and validation boundaries.
+2. [README](../README.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), the preserved [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
+3. The latest completed phase ADR/runbook—P15E uses [ADR-0012](ADR-0012-virtualcell-yeast-deletion-fitness-contract.md) and the [yeast deletion-fitness runbook](runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md); P14E remains documented by [ADR-0011](ADR-0011-virtualcell-ecoli-k12-growth-contract.md) and the [E. coli K-12 growth-contract runbook](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md), P13 by [ADR-0010](ADR-0010-virtualcell-model-adapter-sdk.md), and P12 by [ADR-0009](ADR-0009-virtualcell-model-zoo-v2.md)—for implemented contract and validation boundaries.
 4. [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) for frozen scientific capability and claim boundaries.
 5. [Three-Way Sync State](status/SYNC-STATE.md) only for its dated local/GitHub/`.53` observations; it is not fresh remote authorization.
 6. Dated plans, handoffs, findings, papers, release notes and [Project State 2026-07-18](status/PROJECT-STATE-2026-07-18.md) as historical evidence for their stated commit/date only.
 
 Plans describe intended work. A task is not complete merely because a plan says it should happen; only checked gates plus recorded verification count as completion.
 
-P14E is complete only as a local engineering contract at code
-`8778e93c31c2dfe1ef0f77f06e7a80a425633736` and tree
-`fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78`, starting from
-`0b193310009d6e4d2ebc0fc8abf95da20a56acdb`. Its E. coli growth adapter is
-contract-only, local-registration-only and absent from the default registry. P14E did not run a
-real GEM, establish scientific evidence, make a promotion decision, publish a release or deploy.
-P14R remains `AUTHORIZATION_REQUIRED / NOT_RUN`, P14B remains `NOT_RUN`, and the next eligible
-local work unit is P15E.
+P15E is complete only as a local engineering contract at code
+`62480a3951173a2aa7b006403af9b169521db138` and tree
+`64906691c4c989a843df4da97f0a93f32cd65ad2`, starting from P14E docs-closure
+`0ff6870a70a04d71098a16875e633f909e31cc5a`. Its exact S288C deletion-fitness
+adapter is contract-only, local-registration-only, absent from the default registry and fixed to
+negative compatibility `p15r_not_authorized`. P15E did not read or run real assets/GEM, establish
+scientific evidence, make a policy decision, publish a release, bump a version or deploy. P15R
+remains `AUTHORIZATION_REQUIRED / NOT_RUN`, P15B remains `NOT_RUN`, and P16E is the next eligible
+local gate; it is not complete.
 
 ## Current state
 
 | Document | Authority |
 |---|---|
-| [README](../README.md) | current product promise, P14E completion boundary and primary operator entry points |
-| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13/P14E boundary |
+| [README](../README.md) | current product promise, P15E completion boundary and primary operator entry points |
+| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13–P15E boundary |
+| [P15E Completion Report](../reports/phase15e/PHASE15E_COMPLETION.md) | exact P15E code/tree, local contract validation, reproducible wheel and P15R/P15B non-claims |
+| [P15E S. cerevisiae Deletion-Fitness Contract ADR](ADR-0012-virtualcell-yeast-deletion-fitness-contract.md) | exact S288C scope, strict prepared binding, negative compatibility and local-only registration |
+| [P15E S. cerevisiae Deletion-Fitness Runbook](runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md) | local contract audit, directed validation, P15R authorization gate and fail-closed interpretation |
 | [P14E Completion Report](../reports/phase14e/PHASE14E_COMPLETION.md) | exact P14E start/code/tree, contract-only validation, packaging evidence and P14R/P14B non-claims |
 | [P14E E. coli K-12 Growth Contract ADR](ADR-0011-virtualcell-ecoli-k12-growth-contract.md) | exact scope, nine strict contracts, prepared-bound output and default-registry isolation |
 | [P14E E. coli K-12 Growth Contract Runbook](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md) | local contract audit, directed validation, P14R authorization gate and fail-closed interpretation |
@@ -84,6 +88,7 @@ local work unit is P15E.
 | [Virtual Cell Model Zoo v2](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md) | P12 read-only registry/catalog projection, legacy migration audit, v2 fail-closed plan and safe-load boundary |
 | [Virtual Cell Model Adapter SDK](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md) | P13 delta reference adapter, exact prepared-input/output provenance, conformance and fail-closed runtime interpretation |
 | [E. coli K-12 Growth Contract](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md) | P14E local contract-only adapter, exact prepared binding, P14R authorization prerequisites and default-registry isolation |
+| [S. cerevisiae Deletion-Fitness Contract](runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md) | P15E local contract-only adapter, exact S288C prepared binding, P15R authorization prerequisites and default-registry isolation |
 
 The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` files describe the older PRAXIS-2 classroom/deployment system, including `.40/.53` service topology. They are not VirtualCell current-user entry points.
 
@@ -107,8 +112,9 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Virtual Cell Model Zoo v2 ADR](ADR-0009-virtualcell-model-zoo-v2.md) | layered model/artifact/environment/adapter/evidence/policy identities, append-only lifecycle, legacy migration and exact v2 execution gate |
 | [Virtual Cell Model Adapter SDK ADR](ADR-0010-virtualcell-model-adapter-sdk.md) | six versioned SDK contracts, delta-only default registry, strict output envelope and P0-compatible execution flow |
 | [E. coli K-12 Growth Contract ADR](ADR-0011-virtualcell-ecoli-k12-growth-contract.md) | P14E exact scope, typed negative compatibility, prepared-bound projection and contract-only local registration |
+| [S. cerevisiae Deletion-Fitness Contract ADR](ADR-0012-virtualcell-yeast-deletion-fitness-contract.md) | P15E exact S288C scope, typed negative compatibility, prepared-bound scalar fitness and local-only registration |
 | [Community Readiness Checklist](COMMUNITY-READINESS-CHECKLIST.md) | P10 model-free CommunityPack gates, two tiny microbial Packs, fail-closed planning and explicitly missing experimental validation |
-| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P14E implementation/status matrix; separates registry, Pack, adapter/runtime compatibility, scientific evidence and product policy |
+| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | P0–P15E implementation/status matrix; separates registry, Pack, adapter/runtime compatibility, scientific evidence and product policy |
 | [VirtualCellPack Multiomics Runbook](runbooks/VIRTUALCELLPACK-MULTIOMICS.md) | tiny RNA+protein fixture generation, hash binding, P5 tests and asset-update rules |
 | [VirtualCellPack Capability Runtime Runbook](runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md) | local model card/cache/Pack assembly, execution-plan audit and fail-closed reason handling |
 | [VirtualCellPack Data Portal Runbook](runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) | external public-file inventory, service configuration, upload quarantine and operator review boundary |
@@ -118,6 +124,7 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Virtual Cell Model Zoo v2 Runbook](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md) | P12 migration, public projection, lifecycle, path-redaction and directed validation procedure |
 | [Virtual Cell Model Adapter SDK Runbook](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md) | P13 registration allowlist, adapter conformance, prepared-input binding, output envelope and directed validation procedure |
 | [E. coli K-12 Growth Contract Runbook](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md) | P14E local contract audit, fail-closed tests, P14R asset/run prerequisites and scientific non-claim boundary |
+| [S. cerevisiae Deletion-Fitness Contract Runbook](runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md) | P15E local contract audit, fail-closed tests, P15R asset/run prerequisites and scientific non-claim boundary |
 | [Provenance](../PROVENANCE.md) | repository derivation from PRAXIS-2 and bootstrap evidence |
 
 ## Release and version history
@@ -145,6 +152,7 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 
 | Report | Scope |
 |---|---|
+| [P15E Completion Report](../reports/phase15e/PHASE15E_COMPLETION.md) | exact engineering closure, 98 contract tests, safe directed/legacy validation, reproducible wheel and P15R/P15B non-runs |
 | [P14E Completion Report](../reports/phase14e/PHASE14E_COMPLETION.md) | exact engineering closure, directed and legacy validation, reproducible full wheel, P14R/P14B non-runs and P15E eligibility |
 | [Post-consolidation Quality Baseline](../reports/quality/BASELINE-2026-07-18.md) | frozen B0–B4 environment, static, core, frontend, wheel/CLI, legacy, and remote-boundary evidence |
 | [Phase D1a CI Report](status/PHASE-D1A-CI-2026-07-22.md) | actual old-SHA GitHub run, job-by-job failure boundary, lock/frontend remediation, honest QEMU limitation, and retry gate |
@@ -152,7 +160,7 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 | [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | frozen local C5 gate: Python 3.13 core 965, Gate A adapter seam, honest 2-test remote pending, asset/claim classification |
 | [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | frozen C4 gate: Python 3.13 core 957, Playwright 56+1, reproducible full wheel, and Linux-container smoke |
 | [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen C3 gate: core 947, Playwright 54+1, theme acceptance, mutation evidence, and then-remaining C4/C5 ownership |
-| [Testing Guide](TESTING.md) | current P14E local commands and counts; preserves prior exact-SHA and historical CI/Linux evidence plus remote scientific-validation boundaries |
+| [Testing Guide](TESTING.md) | current P15E local commands and counts; preserves prior exact-SHA and historical CI/Linux evidence plus remote scientific-validation boundaries |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | capability gate plus `.53` evidence and remaining remote backlog |
 | [Phase 10 Summary](../reports/phase10/PHASE10_SUMMARY.md) | `952 tests = 912 passed + 40 skipped` for the non-LLM package scope; 9 LLM tests are deselected in the `912/40/9` reporting style |
 | [Phase 10 UI E2E](../reports/phase10/PHASE10_UI_E2E.md) | three structural Playwright specs; explicitly excludes CSS/pixel and deep abstain assertions |

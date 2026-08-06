@@ -1,17 +1,77 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P14E 分支 `codex/p14e-ecoli-growth-contract`；唯一起始 SHA
-> `0b193310009d6e4d2ebc0fc8abf95da20a56acdb`
+> 当前文档基线：P15E 分支 `codex/p15e-yeast-fitness-contract`；唯一起始 SHA
+> `0ff6870a70a04d71098a16875e633f909e31cc5a`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：`P14E_ENGINEERING_COMPLETE_P15E_ELIGIBLE`；SDK prerequisite
-> `c3401450fd79f7829c438d6b55c1902ea2f4cf5f`；completion code SHA
-> `8778e93c31c2dfe1ef0f77f06e7a80a425633736`；tree
-> `fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78`。下述 P4.3–P13 和 CI 数字仍只绑定
-> 各自 exact SHA/日期；P14E 本地工程结果不构成科学验证、operator policy、发布或
+> 状态：`P15E_ENGINEERING_COMPLETE_P16E_ELIGIBLE`；completion code SHA
+> `62480a3951173a2aa7b006403af9b169521db138`；tree
+> `64906691c4c989a843df4da97f0a93f32cd65ad2`。下述 P4.3–P14E 和 CI 数字仍只绑定
+> 各自 exact SHA/日期；P15E 本地工程结果不构成科学验证、operator policy、发布或
 > 远程证据。
+
+## Phase 15E `ENGINEERING_COMPLETE` 本地证据
+
+P15E 只冻结 S. cerevisiae S288C / `GCF_000146045.2`、单个 complete gene
+deletion 和 exact SGD systematic mapping。`YeastDeletionFitnessAdapter` 的唯一输出是
+`predict_deletion_fitness → fitness`：一个相对于同 condition/platform matched
+non-deletion control 的 dimensionless finite scalar。数值原样透传，负数和大于
+`1` 的数不会被自动归一化或裁剪。非 success/OOD 输出必须 value-free
+abstain，uncertainty 固定为 `not_available`，公开 projection 只能在 exact prepared
+input 绑定后生成。
+
+该 adapter 复用 native P12 artifact/environment/release identities，但 P15E compatibility
+固定 `assets_verified=false`、`executable=false`、`reason=p15r_not_authorized`。
+它不在 `DEFAULT_ADAPTER_REGISTRY`；默认 registry 仍只包含 delta-expression
+reference adapter。以下命令只使用 synthetic identities 和 raw dictionaries：
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_yeast_deletion_fitness_contract.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_yeast_deletion_fitness_contract.py \
+  praxis_virtualcell/tests/test_ecoli_growth_contract.py \
+  praxis_virtualcell/tests/test_model_adapter_sdk.py \
+  praxis_virtualcell/tests/test_model_adapter_output_flow.py \
+  praxis_virtualcell/tests/test_capability_runtime.py \
+  praxis_virtualcell/tests/test_model_registry_v2.py \
+  praxis_virtualcell/tests/test_request_v2.py \
+  praxis_virtualcell/tests/test_packaging.py \
+  praxis_virtualcell/tests/baseline/test_baseline_offline_report.py \
+  praxis_virtualcell/tests/baseline/test_baseline_routing_snapshot.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+~~~
+
+completion code/tree 上的冻结结果：
+
+| Gate | 结果 |
+|---|---|
+| P15E contract | `98 passed` |
+| safe directed | `458 passed` |
+| safe legacy | `1147 passed / 58 skipped / 105 deselected` |
+| authoritative `ruff check . --extend-exclude old --no-cache` | PASS |
+| format check / `git diff --check` | PASS |
+
+这些 gate 没有读取真实 deletion screen/model/assets，没有运行 yeast GEM、
+benchmark、external/OOD science、training、GPU 或 network。从两个 manual clean Git
+archive 使用本地 Python 3.13 toolchain，在 offline 且 OS-level network-denied 边界内
+构建的 wheel byte-identical，SHA-256 为
+`7758c13bd5a53c74618d556b14c6e27e0492381162a9ab3364aee7dde5d2bb8d`。这是未发布的
+本地 build identity；版本仍为 `1.6.0`，没有 version bump。
+
+严格安装脚本所用本地 cache 缺 `packaging==26.2`，因此按设计 fail closed，
+不能记为新的 lock-integrity 或 clean-install 证据。系统环境的 `pip check` 受
+global packages 污染，也不作为 P15E 全局依赖兼容性证据。
+
+`Science: NOT_RUN`；`P15R: AUTHORIZATION_REQUIRED / NOT_RUN`；
+`P15B: NOT_RUN`；`Policy: NO_NEW_DECISION`。完整边界见
+[ADR-0012](ADR-0012-virtualcell-yeast-deletion-fitness-contract.md)、
+[P15E runbook](runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md) 和
+[P15E 完成报告](../reports/phase15e/PHASE15E_COMPLETION.md)。
 
 ## Phase 14E `ENGINEERING_COMPLETE` 本地证据
 

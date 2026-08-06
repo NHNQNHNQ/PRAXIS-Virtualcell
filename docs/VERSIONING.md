@@ -1,12 +1,11 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `P14E_ENGINEERING_COMPLETE_P15E_ELIGIBLE — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
+> Status: `P15E_ENGINEERING_COMPLETE_P16E_ELIGIBLE — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
-> Local baseline: branch `codex/p14e-ecoli-growth-contract`; P14E starting SHA
-> `0b193310009d6e4d2ebc0fc8abf95da20a56acdb`; SDK prerequisite
-> `c3401450fd79f7829c438d6b55c1902ea2f4cf5f`; code SHA
-> `8778e93c31c2dfe1ef0f77f06e7a80a425633736`; tree
-> `fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78`
+> Local baseline: branch `codex/p15e-yeast-fitness-contract`; P15E starting SHA
+> `0ff6870a70a04d71098a16875e633f909e31cc5a`; code SHA
+> `62480a3951173a2aa7b006403af9b169521db138`; tree
+> `64906691c4c989a843df4da97f0a93f32cd65ad2`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -21,6 +20,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P12 Model Zoo v2 work unit | start `b19c896202bea56f894d0ad540501331af42a40c`; completion `1a5464fb0d2d9e105058f6797d92efd69783e5b2` | immutable local Git history plus `reports/phase12/PHASE12_COMPLETION.md` | engineering complete; no science run or new operator decision |
 | P13 Model Adapter SDK work unit | start `f83c13db386cb552b3ce7a5643e5ffbead0ff573`; code `744d0a28d2cfc13d1b10e85b133b6c13b9426174`; tree `198e623120688d3704b9312990ddaa93c9a7b0e6` | immutable local Git history plus `reports/phase13/PHASE13_COMPLETION.md` | engineering complete and P14E-eligible; `Science: NOT_RUN`, `Policy: NO_NEW_DECISION`, no release/version bump |
 | P14E E. coli growth contract work unit | start `0b193310009d6e4d2ebc0fc8abf95da20a56acdb`; prerequisite `c3401450fd79f7829c438d6b55c1902ea2f4cf5f`; code `8778e93c31c2dfe1ef0f77f06e7a80a425633736`; tree `fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78` | immutable local Git history plus `reports/phase14e/PHASE14E_COMPLETION.md` | contract engineering complete and P15E-eligible; P14R authorization required/not run; P14B not run; no real GEM, science, policy, release or version bump |
+| P15E yeast deletion-fitness contract work unit | start `0ff6870a70a04d71098a16875e633f909e31cc5a`; code `62480a3951173a2aa7b006403af9b169521db138`; tree `64906691c4c989a843df4da97f0a93f32cd65ad2` | immutable local Git history plus `reports/phase15e/PHASE15E_COMPLETION.md` | contract engineering complete and P16E-eligible; P15R authorization required/not run; P15B not run; no real deletion screen/model/GEM, science, policy, release or version bump |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -62,6 +62,15 @@ The repository historically mixed product release tags, package metadata, API/ru
 | E. coli growth adapter input | `vc.ecoli-growth-adapter-input-contract.v1` + canonical JSON SHA-256 | `model_zoo/ecoli_growth_contract.py` | binds predict_knockout_growth/growth_ratio, one NCBIGene target and all required exact identities |
 | E. coli growth adapter output | `vc.ecoli-growth-adapter-output-contract.v1` + canonical JSON SHA-256 | `model_zoo/ecoli_growth_contract.py` | one dimensionless wild-type-relative ratio; uncertainty unavailable, OOD/abstain required and flux trace-only |
 | E. coli prepared model input | `vc.ecoli-growth-prepared-model-input.v1` + canonical JSON SHA-256 | `model_zoo/ecoli_growth_contract.py` | cross-binds request/scope/protocol/execution/Pack/compatibility to prepared input; it does not execute a GEM |
+| yeast deletion-fitness scope | `vc.yeast-deletion-fitness-scope.v1` + canonical JSON SHA-256 | `model_zoo/yeast_deletion_fitness_contract.py` | exact S288C/assembly, release/artifact/environment/adapter/Pack/mapping/condition/control/assay/platform/fitness identities; scope validity is not asset availability |
+| yeast deletion-fitness validation protocol | `vc.yeast-deletion-fitness-validation-protocol.v1` + canonical JSON SHA-256 | `model_zoo/yeast_deletion_fitness_contract.py` | preregisters grouped split, baseline, metric, paired CI, external and OOD requirements; it is not evidence or a result |
+| yeast deletion-fitness data binding | `vc.yeast-deletion-fitness-data-binding.v1` + canonical JSON SHA-256 | `model_zoo/yeast_deletion_fitness_contract.py` | identity-only future deletion-screen Pack binding; P15E does not read a real screen |
+| yeast deletion-fitness execution binding | `vc.yeast-deletion-fitness-execution-binding.v1` + canonical JSON SHA-256 | `model_zoo/yeast_deletion_fitness_contract.py` | binds exact condition/control/assay/platform/fitness semantics and inference configuration; it is not an execution result |
+| yeast deletion-fitness gene mapping | `vc.yeast-deletion-fitness-gene-mapping-binding.v1` + canonical JSON SHA-256 | `model_zoo/yeast_deletion_fitness_contract.py` | exact SGD systematic mapping and target universe; no symbol/case/version guessing or implicit fallback |
+| yeast deletion-fitness compatibility | `vc.yeast-deletion-fitness-compatibility-binding.v1` + canonical JSON SHA-256 | `model_zoo/yeast_deletion_fitness_contract.py` | P15E fixes assets_verified/executable false with reason p15r_not_authorized; record presence cannot authorize execution |
+| yeast deletion-fitness adapter input | `vc.yeast-deletion-fitness-adapter-input-contract.v1` + canonical JSON SHA-256 | `model_zoo/yeast_deletion_fitness_contract.py` | binds predict_deletion_fitness/fitness, one complete deletion target and all exact identities |
+| yeast deletion-fitness adapter output | `vc.yeast-deletion-fitness-adapter-output-contract.v1` + canonical JSON SHA-256 | `model_zoo/yeast_deletion_fitness_contract.py` | one finite dimensionless matched-control-relative scalar; uncertainty unavailable and OOD/value-free abstain required |
+| yeast deletion-fitness prepared model input | `vc.yeast-deletion-fitness-prepared-model-input.v1` + canonical JSON SHA-256 | `model_zoo/yeast_deletion_fitness_contract.py` | cross-binds request/scope/protocol/execution/Pack/compatibility; public projection remains prepared-only |
 | validation evidence identity | `vc.model-validation-evidence.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds exact Pack×model×environment×adapter×protocol, baseline, primary metric and result hash; record existence does not make the evidence pass |
 | operator policy identity | `vc.model-operator-policy.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds one named operator decision to one exact capability and evidence set; P12 creates no new promotion decision |
 | model release/lifecycle identities | `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1` | `model_zoo/registry_v2.py` | release graph plus append-only catalog/readiness/revoke/supersede history; registry state, evidence and product policy remain separate |
@@ -114,6 +123,15 @@ adapter and synthetic identities prove strict binding/conformance only. `P14R` r
 [P14E runbook](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md), and the
 [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md).
 
+P15E similarly adds the nine yeast deletion-fitness schemas above without changing product
+SemVer (`1.6.0`), API/runtime protocols, release tags or the default delta-only registry. Its
+local-only adapter uses native P12 identities and a typed-negative compatibility record; finite
+scalar passthrough and deterministic conformance are engineering properties, not fitness evidence.
+`P15R` remains `AUTHORIZATION_REQUIRED / NOT_RUN`, `P15B` remains `NOT_RUN`, and no new policy
+decision exists. See [ADR-0012](ADR-0012-virtualcell-yeast-deletion-fitness-contract.md), the
+[P15E runbook](runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md), and the
+[P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md).
+
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
 ## Namespace contract
@@ -136,6 +154,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | model adapter identity schema + fingerprint | explicit `vc.model-adapter.v1` plus canonical JSON SHA-256 | implementation locator or task/input/output contract changes | adapter implementation exists, conforms, or is scientifically valid |
 | adapter SDK schemas + fingerprints | explicit `vc.adapter-input-contract.v1`, `vc.prepared-adapter-input.v1`, `vc.adapter-output-contract.v1`, `vc.adapter-execution-provenance.v1`, `vc.adapter-output-envelope.v1`, `vc.adapter-conformance-report.v1` plus canonical JSON SHA-256 | incompatible input/output, binding, envelope, conformance or projection semantics change | conformance is scientific evidence, a model is production-registered, or policy exists |
 | E. coli growth contract schemas + fingerprints | explicit `vc.ecoli-growth-scope.v1`, `vc.ecoli-growth-validation-protocol.v1`, `vc.ecoli-growth-data-binding.v1`, `vc.ecoli-growth-execution-binding.v1`, `vc.ecoli-growth-gene-mapping-binding.v1`, `vc.ecoli-growth-compatibility-binding.v1`, `vc.ecoli-growth-adapter-input-contract.v1`, `vc.ecoli-growth-adapter-output-contract.v1` and `vc.ecoli-growth-prepared-model-input.v1` | exact biological scope, identity binding, protocol, compatibility, input/output or prepared semantics change incompatibly | a real GEM/Pack exists, FBA ran, science passed, the adapter is in the default registry, or policy exists |
+| yeast deletion-fitness contract schemas + fingerprints | explicit `vc.yeast-deletion-fitness-scope.v1`, `vc.yeast-deletion-fitness-validation-protocol.v1`, `vc.yeast-deletion-fitness-data-binding.v1`, `vc.yeast-deletion-fitness-execution-binding.v1`, `vc.yeast-deletion-fitness-gene-mapping-binding.v1`, `vc.yeast-deletion-fitness-compatibility-binding.v1`, `vc.yeast-deletion-fitness-adapter-input-contract.v1`, `vc.yeast-deletion-fitness-adapter-output-contract.v1` and `vc.yeast-deletion-fitness-prepared-model-input.v1` | exact strain/condition/control/assay/platform/mapping/protocol/input/output/prepared semantics change incompatibly | a real deletion screen/model exists, fitness science passed, the adapter is default/runtime-ready, or policy exists |
 | validation evidence schema + fingerprint | explicit `vc.model-validation-evidence.v1` plus canonical JSON SHA-256 | exact capability/protocol/baseline/metric/result binding changes | evidence exists, passes, generalizes, or grants product policy |
 | operator policy schema + fingerprint | explicit `vc.model-operator-policy.v1` plus canonical JSON SHA-256 | named operator, exact capability/evidence decision or policy version changes | engineering or evidence state can manufacture a promotion decision |
 | model release/lifecycle schemas + fingerprints | explicit `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1` | component graph or append-only lifecycle fact changes | catalog/readiness/revocation/supersession is scientific evidence or product policy |
@@ -163,7 +182,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented history through the current P14E engineering-complete bytes:
+Implemented history through the current P15E engineering-complete bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -199,6 +218,12 @@ Implemented history through the current P14E engineering-complete bytes:
     knockout→growth-ratio contracts and a local-only adapter inside the same unpublished candidate.
     The default registry remains delta-only; P14R/P14B are not run. No product/API/runtime version
     bump, release, tag, real asset, scientific evidence or operator decision is created.
+21. P15E code `62480a3951173a2aa7b006403af9b169521db138` adds exact S288C single
+    complete-gene-deletion→dimensionless-fitness contracts and a local-only adapter inside the same
+    unpublished candidate. Native P12 bindings remain typed-negative with
+    `reason=p15r_not_authorized`; the default registry remains delta-only. P15R/P15B are not run,
+    and no product/API/runtime version bump, release, tag, real asset/GEM, scientific evidence or
+    operator decision is created.
 
 ## Release invariants
 
@@ -235,6 +260,15 @@ The equality above deliberately excludes `vc.msg.v1`, `vc.request.v2`, all
 `vc.ecoli-growth-adapter-input-contract.v1`,
 `vc.ecoli-growth-adapter-output-contract.v1`,
 `vc.ecoli-growth-prepared-model-input.v1`,
+`vc.yeast-deletion-fitness-scope.v1`,
+`vc.yeast-deletion-fitness-validation-protocol.v1`,
+`vc.yeast-deletion-fitness-data-binding.v1`,
+`vc.yeast-deletion-fitness-execution-binding.v1`,
+`vc.yeast-deletion-fitness-gene-mapping-binding.v1`,
+`vc.yeast-deletion-fitness-compatibility-binding.v1`,
+`vc.yeast-deletion-fitness-adapter-input-contract.v1`,
+`vc.yeast-deletion-fitness-adapter-output-contract.v1`,
+`vc.yeast-deletion-fitness-prepared-model-input.v1`,
 `vc.model-validation-evidence.v1`, `vc.model-operator-policy.v1`,
 `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1`,
 `vc.model-registry.v2`, `vc.model-registry-catalog.v2`,

@@ -37,8 +37,10 @@ adapter id/version  delta-expression-reference / 1.0.0
 task/output         predict_delta_expression / delta_expression
 ```
 
-growth 和 fitness adapters 只存在于测试；若它们出现在
-`DEFAULT_ADAPTER_REGISTRY`，立即视为边界破坏。
+P13 的 growth/fitness dummy adapters 只存在于测试。P14E/P15E 后续分别新增
+local-only growth 和 fitness contract adapters，但它们也没有进入
+`DEFAULT_ADAPTER_REGISTRY`；若默认 registry 不再是唯一 delta adapter，立即视为
+边界破坏。
 
 ## 2. 检查默认 registry 和冻结 fingerprints
 
@@ -177,7 +179,44 @@ envelope      a6745427e8f0e9d516789ec9418a42fdb024e245d452b1ca4825c24398996ba2
 conformance   b40374d81f9ec3362d9950bffcfa97f123e46abc80f8b4b135fd5afa02bded18
 ~~~
 
-这些是兼容性/工程证据，不把 P13 或 P14E 提升为科学验证。
+这些是兼容性/工程证据，不把 P13、P14E 或 P15E 提升为科学验证。
+
+### 5.2 P15E local-only fitness contract
+
+P15E code `62480a3951173a2aa7b006403af9b169521db138`（tree
+`64906691c4c989a843df4da97f0a93f32cd65ad2`）在
+`model_zoo/yeast_deletion_fitness_contract.py` 中新增 exact S. cerevisiae S288C
+single complete-gene-deletion contract。`YeastDeletionFitnessAdapter` 只在显式本地
+registry/synthetic conformance 中使用；默认 registry 仍只有
+`predict_delta_expression → delta_expression`。
+
+该 adapter 的窄边界是：
+
+- exact S288C / `GCF_000146045.2`、SGD systematic mapping、condition/control/
+  assay/platform 和 native P12 identities；
+- `predict_deletion_fitness → fitness`，shape `(1,)`、`dimensionless`，reference 为
+  matched non-deletion control in the same condition/platform；
+- finite raw scalar 原样透传；负数和大于 `1` 不会被裁剪或归一化；
+- uncertainty 固定 `not_available`；OOD 或非 success 必须 value-free abstain；
+- standalone envelope validation/projection/aggregation 拒绝，只允许 exact prepared-bound
+  public projection；
+- compatibility 固定 `assets_verified=false`、`executable=false`、
+  `reason=p15r_not_authorized`。
+
+这只证明 contract/conformance，不读取 deletion screen/model/GEM，不签发
+evidence 或 policy。定向回归为：
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_yeast_deletion_fitness_contract.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+```
+
+completion code 上是 `98 passed`；safe directed 是 `458 passed`，safe legacy 是
+`1147 passed / 58 skipped / 105 deselected`。详细边界见
+[ADR-0012](../ADR-0012-virtualcell-yeast-deletion-fitness-contract.md)、
+[P15E runbook](VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md) 和
+[completion report](../../reports/phase15e/PHASE15E_COMPLETION.md)。
 
 ## 6. Pack-aware runtime 与 legacy 边界
 
@@ -288,6 +327,7 @@ runtime projection 时必须：
 5. 不改写 P9 negative result；
 6. 不把工程 conformance 描述成 scientific validation 或 production promotion。
 
-P13 engineering 已 COMPLETE，P14E 也已作为独立 contract-only work unit 完成。
-P14R 真实科学运行和 P14B operator policy/promotion 均需单独授权；不依赖其正结果的
-下一本地工程 work unit 是 P15E。
+P13 engineering 已 COMPLETE，P14E/P15E 也已作为独立 contract-only work units
+完成。P14R/P15R 真实科学运行与 P14B/P15B operator policy/promotion 均需
+单独授权。P15E 完成不表示 fitness runtime-ready、scientifically validated、
+released 或 promoted；下一 eligible 本地工程 work unit 是 P16E。
