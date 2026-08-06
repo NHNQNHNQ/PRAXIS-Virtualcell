@@ -44,9 +44,14 @@ Phase 20 从 P19 docs-closure `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`
 `a4003704b70f06eb65297ddd32e0695ae8ee146b`（tree
 `d12d64a7c8d013d8d299272eea88a4ce0431ccab`，source date epoch `1786040663`）
 完成 RegisteredPack-bound Virtual Cell Training Pipeline 工程合同，状态为
-`COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`，policy `NO_NEW_DECISION`。下一可进入 gate
-仅为 `P21A SYSTEM_ONLY / NOT_COMPLETE`；P21B/P21C 未授权、未运行；没有 product/API/runtime
-version bump、release 或 push。
+`COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`，policy `NO_NEW_DECISION`。Phase 21A 从
+P20 docs-closure `5f3fc2d88c20e8083fb66a4c3399c5fe148241be` 开始，在分支
+`codex/p21-benchmark-system` 的 `20ecc12542e5df40c90d1fc367dbe86b563478b8`
+（tree `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`，source date epoch
+`1786050825`）完成 Virtual Cell Benchmark System，状态为
+`COMPLETE — SYSTEM_ONLY`；science `NOT_RUN`，policy `NO_NEW_DECISION`。P21B/P21C
+均为 `AUTHORIZATION_REQUIRED / NOT_RUN`；下一可进入的本地工作仅为 P22
+contract-only。没有 product/API/runtime version bump、release 或 push。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
@@ -56,7 +61,8 @@ exact 验证与克制的科学/policy 边界见
 [P17 完成报告](reports/phase17/PHASE17_COMPLETION.md)和
 [P18 完成报告](reports/phase18/PHASE18_COMPLETION.md)及
 [P19 完成报告](reports/phase19/PHASE19_COMPLETION.md)和
-[P20 完成报告](reports/phase20/PHASE20_COMPLETION.md)。P14R、P15R 与 P16R 的真实
+[P20 完成报告](reports/phase20/PHASE20_COMPLETION.md)以及
+[P21A 完成报告](reports/phase21a/PHASE21A_COMPLETION.md)。P14R、P15R 与 P16R 的真实
 asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B、P15B 与 P16B 均为
 `NOT_RUN`。当前 registry 有 5 个 release、0 个 native、0 个 production-promoted
 capability；P18 没有真实 multi-omics model execution/acceptance，science 为 `NOT_RUN`，
@@ -67,6 +73,16 @@ training、benchmark、evidence、registry 或 promotion。在 Pack-root asset-b
 manifest 与 split metadata 在 audit 前读取，train-consumed feature/label bytes 只在 audit
 通过后打开；stored P19 tree 仅作历史 provenance，test/external、未消费或上传的 code-like
 asset 从未打开。Exact P19 store-chain replay 与受信 repository source verification 仍独立执行。
+
+P21A 只实现严格的 benchmark protocol/run/result/evidence 合同、重算门和
+content-addressed 负证据 ledger。未经独立信任边界提供的 P21B composite
+execution fingerprint（exact authorization + run + result）时，bundle 默认导出负状态；
+合同和 content hash 不认证签发者。Ledger 只允许负证据，durable head 能检出
+tail truncation，但没有外部/签名 anchor 时不能检出连同 head 一起回滚或删除。
+合成 positive gate 仅是临时 conformance 测试，不是真实 benchmark、science、policy、
+promotion 或 release 证据。设计和运维边界见
+[P21A ADR](docs/ADR-0018-virtual-cell-benchmark-system.md)与
+[P21A runbook](docs/runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md)。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -442,13 +458,19 @@ npm run build
 CI=1 npm run e2e
 ```
 
-当前精确结果、skip/deselect 含义、显式外部门和 GitHub CI 状态见 [测试指南](docs/TESTING.md)。普通测试默认不访问固定私网服务；`integration`、`llm`、`remote` 分别需要 `--run-integration`、`--run-llm`、`--run-remote`，一个测试拥有多个 marker 时必须同时满足对应门。
+当前 P21A 精确本地结果为 focused `35 passed`、affected `238 passed`、safe
+`1,645 passed / 49 skipped / 387 deselected`、legacy
+`1,147 passed / 58 skipped / 105 deselected`，静态门通过。完整命令、用时、skip/deselect
+含义、显式外部门和 GitHub CI 状态见 [测试指南](docs/TESTING.md)。普通测试默认不访问固定私网服务；`integration`、`llm`、`remote` 分别需要 `--run-integration`、`--run-llm`、`--run-remote`，一个测试拥有多个 marker 时必须同时满足对应门。
 
 ## 文档入口
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P20 边界和跨项目集成 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P21A 边界和跨项目集成 |
+| [P21A 完成报告](reports/phase21a/PHASE21A_COMPLETION.md) | exact benchmark-system closure、reproducible local-toolchain wheel 与真实 benchmark/science/policy/promotion 非运行边界 |
+| [P21A Benchmark System ADR](docs/ADR-0018-virtual-cell-benchmark-system.md) | frozen protocol/run/result/evidence、out-of-band P21B execution trust 与 negative-only ledger 边界 |
+| [P21A Benchmark System runbook](docs/runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md) | local contract gates、bundle/ledger 核查、rollback 限制和 P22 contract-only handoff |
 | [P20 完成报告](reports/phase20/PHASE20_COMPLETION.md) | exact training-contract closure、reproducible local-toolchain wheel 与真实 training/test/external/science 非运行、policy `NO_NEW_DECISION` |
 | [P20 Training Pipeline ADR](docs/ADR-0017-virtual-cell-training-pipeline.md) | RegisteredPack binding、audit-before-label、fixed worker 与 candidate-only artifact 边界 |
 | [P20 Training Pipeline runbook](docs/runbooks/VIRTUALCELL-TRAINING-PIPELINE.md) | local contract gates、read ordering、atomic artifact publish/cleanup 与 P21A handoff |
@@ -492,7 +514,7 @@ CI=1 npm run e2e
 
 唯一允许的流向是：本地 feature branch → GitHub branch/CI → 审批合入 GitHub `main` → 本地 `main` fast-forward → `.53` 从同一 GitHub SHA fast-forward → 三端 SHA 核对。不要在 `.53` 直接开发，也不要把本地 tag 当成已发布 tag。
 
-本轮 P20 contract/docs closure 窗口未刷新 GitHub 或 `.53`。规范工作树是
+本轮 P21A system/docs closure 窗口未刷新 GitHub 或 `.53`。规范工作树是
 `/Volumes/T7/PRAXIS-virtualcell`，Git metadata 是
 `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`；任何远程数字只有带日期和 exact
 identity 的只读记录意义。

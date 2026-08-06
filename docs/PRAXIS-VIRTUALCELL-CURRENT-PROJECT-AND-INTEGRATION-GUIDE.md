@@ -61,13 +61,19 @@
 > `d12d64a7c8d013d8d299272eea88a4ce0431ccab`；source date epoch `1786040663`；状态
 > `COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`
 >
+> 已完成 work unit：`P21A — Virtual Cell Benchmark System`；starting SHA
+> `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`；completion code SHA
+> `20ecc12542e5df40c90d1fc367dbe86b563478b8`；tree
+> `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`；source date epoch `1786050825`；状态
+> `COMPLETE — SYSTEM_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`
+>
 > 工作树保护清单：不在本文固定；每轮从现场 `git status --short` 动态重建，任何
 > 新 staged/modified/deleted/untracked 路径默认受保护
 >
 > 当前 Cell-first 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
-> 当前下一 work unit：`P21A — Virtual Cell Benchmark System`；`SYSTEM_ONLY / NOT_COMPLETE`；
-> starting SHA `FINAL_P20_DOCUMENTATION_CLOSURE_SHA`；P21B/P21C
+> 当前下一 eligible 本地工程 work unit：`P22 — Curated Virtual Cell Registry`；
+> `CONTRACT_ONLY / NOT_STARTED`；P21B/P21C
 > `AUTHORIZATION_REQUIRED / NOT_RUN`
 
 本文是一份面向其他项目、开发团队、科研合作者和后续智能体的独立项目说明。它回答四个问题：
@@ -1085,9 +1091,25 @@ Focused `56 passed`；P19+P20 `99 passed / 1 skipped`；safe `1,610/49/387`；le
 `2273ee71fb58fef543eae358d3df2aefccec42e80fe72a23380200718c223d79` / `370` entries /
 `14` React / `0` tests / `0` AppleDouble。Real candidate training、test/external、science
 均 `NOT_RUN`，policy `NO_NEW_DECISION`。该 wheel 只证明 exact local source/toolchain 可复现，
-不是 pinned dependency closure 或 clean-install evidence。下一 gate 仅为 P21A
-`SYSTEM_ONLY / NOT_COMPLETE`，starting SHA 保留
-`FINAL_P20_DOCUMENTATION_CLOSURE_SHA`。
+不是 pinned dependency closure 或 clean-install evidence。P21A 随后从 P20 docs-closure
+`5f3fc2d88c20e8083fb66a4c3399c5fe148241be` 开始。
+
+### Phase 21A：Virtual Cell Benchmark System（`COMPLETE — SYSTEM_ONLY`）
+
+P21A 以 code SHA `20ecc12542e5df40c90d1fc367dbe86b563478b8`、tree
+`ffcd261dd7d506d0ad852023afcba0f5c97a2d72`、source date epoch `1786050825`
+冻结 strict benchmark protocol/run/result/evidence、validation-only threshold、paired CI、
+calibration/OOD/selective gates 和只接受负结果的 content-addressed ledger。formal
+adapter/Broker/runtime 只形成 typed receipt 合同，未执行真实模型。
+
+本阶段没有真实 candidate run、test/external、资产、权重、训练、GPU、network、operator、
+promotion、release 或 deploy；science `NOT_RUN`，policy `NO_NEW_DECISION`。synthetic
+positive fixtures 只验证合同，不是 evidence；只读兼容重放保持 P8 historical
+null/unbound 和 P9 exact negative/unbound。任何 P21B 执行都必须由外部可信边界独立固定
+composite execution identity；content fingerprint 只证明内容身份，不构成 issuer
+authentication。P21B/P21C 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`；下一 eligible 本地工程
+gate 是 P22 `CONTRACT_ONLY / NOT_STARTED`，不得制造 executable、validated 或 promoted
+release。
 
 ---
 
@@ -2544,9 +2566,9 @@ artifact hash
 
 ## 28. 后续路线图 P12–P30
 
-P12/P13/P14E/P15E/P16E/P17/P18/P19/P20 行记录已完成的工程 work units；P14R/P14B、
-P15R/P15B 与 P16R/P16B 仍未运行。下一 eligible 本地工程仅为 P21A
-`SYSTEM_ONLY / NOT_COMPLETE`；P21B/P21C 未授权、未运行，真实科学或 policy 窗口不能
+P12/P13/P14E/P15E/P16E/P17/P18/P19/P20/P21A 行记录已完成的工程 work units；
+P14R/P14B、P15R/P15B 与 P16R/P16B 仍未运行。下一 eligible 本地工程仅为 P22
+`CONTRACT_ONLY / NOT_STARTED`；P21B/P21C 未授权、未运行，真实科学或 policy 窗口不能
 当作当前能力。
 
 | 阶段 | 目标 |
@@ -2566,10 +2588,10 @@ P15R/P15B 与 P16R/P16B 仍未运行。下一 eligible 本地工程仅为 P21A
 | P18 | `COMPLETE / CONTRACT_ONLY`：typed multi-omics model input；real model acceptance pending |
 | P19 | `COMPLETE / CONTRACT_ONLY`：受控 receipt→RegisteredPack；real fixture/operator/science/policy NOT_RUN |
 | P20 | `COMPLETE / CONTRACT_ONLY`：exact P19-bound training job/result、safe checkpoint/model identity 和 tiny dry-run；science `NOT_RUN`；policy `NO_NEW_DECISION` |
-| P21A | `SYSTEM_ONLY / NOT_COMPLETE`：下一 gate；从 `FINAL_P20_DOCUMENTATION_CLOSURE_SHA` 冻结 Benchmark System、运行合同和 append-only evidence ledger |
+| P21A | `COMPLETE / SYSTEM_ONLY`：从 `5f3fc2d88c20e8083fb66a4c3399c5fe148241be` 冻结 Benchmark System、typed runtime receipts 和 negative ledger；completion `20ecc12542e5df40c90d1fc367dbe86b563478b8`；science `NOT_RUN`；policy `NO_NEW_DECISION` |
 | P21B | `AUTHORIZATION_REQUIRED / NOT_RUN`：每个 candidate 的独立 run-only evidence 窗口 |
 | P21C | `AUTHORIZATION_REQUIRED / NOT_RUN`：每个 exact scope 的独立 operator-only policy 窗口 |
-| P22 | Curated Virtual Cell Registry；只导入已有 evidence/policy |
+| P22 | `CONTRACT_ONLY / NOT_STARTED`：下一 eligible 本地 gate；没有 positive evidence/policy 时不得导入 executable release |
 | P23A | Cell interaction evidence score |
 | P23B | 可选 receiver response；需独立干预数据和授权 |
 | P24 | 真实 CommunityModelAdapter |
@@ -2622,9 +2644,12 @@ model input 也已完成，但 caller-declared adapter marker 未经 Broker/Regi
 数据/模型/science 仍未运行。P19 controlled Pack Factory 已完成本地受控 registration
 合同；真实 external fixture/output root/operator/science/policy 仍未运行。P20 Training
 Pipeline 也已在 exact P19-bound、repository tiny、contract-only 边界完成；真实 candidate、
-test/external、benchmark/science 均未运行，policy 为 `NO_NEW_DECISION`。当前下一 eligible 技术闭环仅为 P21A
-Benchmark System/protocol freeze，starting SHA 为未来 P20 文档闭包提交
-`FINAL_P20_DOCUMENTATION_CLOSURE_SHA`；P21B/P21C 未授权、未运行。
+test/external、benchmark/science 均未运行，policy 为 `NO_NEW_DECISION`。P21A 随后从
+P20 文档闭包提交 `5f3fc2d88c20e8083fb66a4c3399c5fe148241be` 开始，以
+`20ecc12542e5df40c90d1fc367dbe86b563478b8`（tree
+`ffcd261dd7d506d0ad852023afcba0f5c97a2d72`）完成 system-only benchmark contracts
+与 negative ledger；science `NOT_RUN`，policy `NO_NEW_DECISION`。P21B/P21C 未授权、
+未运行；当前下一 eligible 技术闭环仅为 P22 contract-only。
 
 在进入更大世界模型之前，最重要的闭环仍然是：
 
@@ -2768,8 +2793,12 @@ f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a 起步，以
 a4003704b70f06eb65297ddd32e0695ae8ee146b（tree
 d12d64a7c8d013d8d299272eea88a4ce0431ccab）完成 exact P19-bound Training Pipeline
 contract；engineering COMPLETE — CONTRACT_ONLY，science NOT_RUN，policy NO_NEW_DECISION。
-下一 eligible 本地 work unit 仅为 P21A SYSTEM_ONLY / NOT_COMPLETE，starting SHA 保留
-FINAL_P20_DOCUMENTATION_CLOSURE_SHA；P21B/P21C 未授权、未运行。
+P21A 从 5f3fc2d88c20e8083fb66a4c3399c5fe148241be 起步，以
+20ecc12542e5df40c90d1fc367dbe86b563478b8（tree
+ffcd261dd7d506d0ad852023afcba0f5c97a2d72；epoch 1786050825）完成 frozen benchmark
+system 和 negative ledger；engineering COMPLETE — SYSTEM_ONLY，science NOT_RUN，policy
+NO_NEW_DECISION。P21B/P21C 未授权、未运行。下一 eligible 本地 work unit 仅为 P22
+CONTRACT_ONLY / NOT_STARTED。
 
 当前 UI 是：
 选择 Cell Context → Chat → 自动解析/运行 → Report/Abstain，

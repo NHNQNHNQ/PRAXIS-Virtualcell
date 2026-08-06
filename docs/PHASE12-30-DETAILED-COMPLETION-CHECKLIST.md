@@ -55,8 +55,14 @@
 > `d12d64a7c8d013d8d299272eea88a4ce0431ccab`；source date epoch `1786040663`；状态
 > `COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`
 >
-> 下一 eligible 本地工程 gate：`P21A SYSTEM_ONLY / NOT_COMPLETE`；starting SHA
-> `FINAL_P20_DOCUMENTATION_CLOSURE_SHA`；P21B/P21C
+> 已完成 work unit：`Phase 21A — Virtual Cell Benchmark System`；starting SHA
+> `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`；branch
+> `codex/p21-benchmark-system`；completion code SHA
+> `20ecc12542e5df40c90d1fc367dbe86b563478b8`；tree
+> `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`；source date epoch `1786050825`；
+> engineering `COMPLETE — SYSTEM_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`
+>
+> 下一 eligible 本地工程 gate：`P22 CONTRACT_ONLY / NOT_STARTED`；P21B/P21C
 > `AUTHORIZATION_REQUIRED / NOT_RUN`
 >
 > 当前 Phase 11 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
@@ -239,9 +245,14 @@ work-unit 执行状态机使用以下状态；总进度表可另用 `NOT_STARTED
   training job/result、fixed worker、safe checkpoint、candidate-only model identity 和
   atomic publish contract；
 - P20 只运行 repository tiny fixtures；真实 candidate、test/external、benchmark/science
-  均 `NOT_RUN`，policy `NO_NEW_DECISION`。当前下一 gate 仅为 P21A
-  `SYSTEM_ONLY / NOT_COMPLETE`，starting SHA 必须使用
-  `FINAL_P20_DOCUMENTATION_CLOSURE_SHA`；
+  均 `NOT_RUN`，policy `NO_NEW_DECISION`；
+- Phase 21A 已从 P20 docs-closure
+  `5f3fc2d88c20e8083fb66a4c3399c5fe148241be` 开始，以 code SHA
+  `20ecc12542e5df40c90d1fc367dbe86b563478b8`、tree
+  `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`、source date epoch `1786050825`
+  完成 frozen benchmark system 和 negative ledger；engineering
+  `COMPLETE — SYSTEM_ONLY`，science `NOT_RUN`，policy `NO_NEW_DECISION`。下一 gate 为
+  P22 `CONTRACT_ONLY / NOT_STARTED`；
 - P14R/P14B、P15R/P15B 与 P16R/P16B 均保持各自的 exact external/operator 授权门，一个外部门
   不阻塞无依赖的 eligible 本地 E work unit。
 
@@ -293,7 +304,7 @@ flowchart TD
 | P18 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | typed multi-omics input、exact join/missingness/alignment 与 immutable runtime snapshots；completion `626c71ff...`；真实模型验收 pending |
 | P19 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | controlled receipt→RegisteredPack；completion `42eabe63...`；real external fixture/operator 未运行 |
 | P20 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | exact RegisteredPack-bound training contracts、fixed `-I -S` worker、safe checkpoint/candidate identity；completion `a4003704...` |
-| P21A | `SYSTEM_ONLY / NOT_COMPLETE` | `SYSTEM_ONLY` | `NOT_APPLICABLE` | 下一 gate；start `FINAL_P20_DOCUMENTATION_CLOSURE_SHA`；benchmark/evidence system |
+| P21A | `COMPLETE — SYSTEM_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | frozen benchmark/evidence contracts 与 negative ledger；start `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`；completion `20ecc12542e5df40c90d1fc367dbe86b563478b8` |
 | P21B | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_APPLICABLE` | per-candidate run-only evidence |
 | P21C | `AUTHORIZATION_REQUIRED / NOT_RUN` | `READ_ONLY / NOT_RUN` | `NOT_RUN` | per-scope operator-only policy |
 | P22 | `NOT_STARTED` | `IMPORTED_ONLY` | `IMPORTED_ONLY` | curated Virtual Cell Registry |
@@ -1086,23 +1097,29 @@ Focused `56 passed`；P19+P20 `99 passed / 1 skipped`；safe
 
 ### Phase 21 — Virtual Cell Benchmark System
 
-**状态：** P21A `SYSTEM_ONLY / NOT_COMPLETE`；P21B/P21C
-`AUTHORIZATION_REQUIRED / NOT_RUN`
+**状态：** P21A engineering `COMPLETE — SYSTEM_ONLY`；science `NOT_RUN`；policy
+`NO_NEW_DECISION`。P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN`。下一 eligible 本地
+工程 gate 为 P22 `CONTRACT_ONLY / NOT_STARTED`。
 
 #### P21A — 系统与冻结协议
 
-- [ ] `benchmark protocol/run/result/promotion-evidence` 合同；
-- [ ] protocol 在 candidate result 前冻结；
-- [ ] Pack、split、feature/output、metric/direction、baseline、CI、seeds、OOD、
+- [x] `benchmark protocol/run/result/promotion-evidence` 合同；
+- [x] protocol 在 candidate result 前冻结；
+- [x] Pack、split、feature/output、metric/direction、baseline、CI、seeds、OOD、
   threshold partition 和 external policy 全绑定；
-- [ ] 正式 adapter/Broker/runtime evaluation；
-- [ ] validation-only threshold；
-- [ ] P9 biological-group leakage audit 和 condition bootstrap 复用；
-- [ ] calibration、coverage、selective risk、wrong accept 和 unnecessary abstain；
-- [ ] 多维 capability profile；
-- [ ] append-only negative ledger；
-- [ ] P8 成功 baseline 和 P9 失败 artifact 兼容重放；
-- [ ] runner 不能写 `production_promoted`。
+- [x] 正式 adapter/Broker/runtime typed receipt 合同（未执行真实模型）；
+- [x] validation-only threshold；
+- [x] P9 biological-group leakage audit 和 condition bootstrap 复用；
+- [x] calibration、coverage、selective risk、wrong accept 和 unnecessary abstain；
+- [x] 多维 capability profile，不生成 composite score；
+- [x] append-only negative ledger；
+- [x] 只读兼容重放保持 P8 historical null/unbound 与 P9 exact negative/unbound；
+- [x] runner 不能写 `production_promoted`。
+
+P21A 的 synthetic positive fixtures 只验证合同，绝不是科学 evidence。本阶段没有真实
+candidate run、test/external、资产、权重、训练、GPU、network、operator、promotion、
+release 或 deploy。任何 P21B 执行都必须由外部可信边界独立固定 composite execution
+identity；content fingerprint 只证明内容身份，不构成 issuer authentication。
 
 #### P21B — 单个真实 candidate run-only
 
@@ -1144,7 +1161,8 @@ Marketplace。
 
 **前置**
 
-- [ ] P21A benchmark-system completion SHA；
+- [x] P21A benchmark-system completion code SHA
+  `20ecc12542e5df40c90d1fc367dbe86b563478b8`；
 - [ ] 若要导入可执行 release，至少有一个 exact-scope P21B evidence 和对应
   P21C/P14B/P15B/P16B operator policy；
 - [ ] 没有 positive evidence/policy 时只允许收口 registry 合同，不得制造
@@ -1554,7 +1572,7 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | P18 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | `f253664239e4b1c9665301cf1bdf4e117a3e9c31` | `626c71ffd1ce18a5adc200f6a6e376e57b269beb` | tree `2b570398...`; report `reports/phase18/PHASE18_COMPLETION.md`; wheel `1,132,811` bytes / `015724a90656...` / `367` entries; real multi-omics model acceptance pending |
 | P19 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be` | `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` | tree `b4bd6383...`; report `reports/phase19/PHASE19_COMPLETION.md`; real external fixture/output root/operator/science/policy not run |
 | P20 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a` | `a4003704b70f06eb65297ddd32e0695ae8ee146b` | tree `d12d64a7...`; report `reports/phase20/PHASE20_COMPLETION.md`; exact-local-toolchain wheel `1,178,805` bytes / `2273ee71...` / `370` entries; real candidate/test/external/science not run |
-| P21A | `SYSTEM_ONLY / NOT_COMPLETE` | `SYSTEM_ONLY` | `N/A` | `FINAL_P20_DOCUMENTATION_CLOSURE_SHA` | — | next local gate；future P20 docs-closure SHA placeholder |
+| P21A | `COMPLETE — SYSTEM_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | `5f3fc2d88c20e8083fb66a4c3399c5fe148241be` | `20ecc12542e5df40c90d1fc367dbe86b563478b8` | tree `ffcd261d...`；epoch `1786050825`；frozen benchmark system、negative ledger；synthetic conformance only |
 | P21B | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `N/A` | — | unchanged | exact candidate/assets/protocol/output authorization absent |
 | P21C | `AUTHORIZATION_REQUIRED / NOT_RUN` | `READ_ONLY / NOT_RUN` | `NOT_RUN` | — | unchanged | exact evidence/scope/named-operator authorization absent |
 | P22 | `NOT_STARTED` | `IMPORTED_ONLY` | `IMPORTED_ONLY` | — | — | — |
@@ -1696,12 +1714,13 @@ P20 已从 P19 docs-closure
 `d12d64a7c8d013d8d299272eea88a4ce0431ccab` 完成 contract-only Training Pipeline。
 真实 candidate/test/external/science 未运行，policy 无新决定。
 
-持续本地授权下的下一 eligible gate 仅为 P21A `SYSTEM_ONLY / NOT_COMPLETE`；其实际
-starting SHA 是未来 P20 docs-closure commit，当前必须保留
-`FINAL_P20_DOCUMENTATION_CLOSURE_SHA` 占位符。P21B/P21C 均
-`AUTHORIZATION_REQUIRED / NOT_RUN`。外置资产、真实模型/训练、network、push、
-发布、部署和 operator promotion 仍不在授权范围；这些外部门不阻塞无依赖的 eligible
-本地工程 gate。
+P21A 已从 `5f3fc2d88c20e8083fb66a4c3399c5fe148241be` 开始，以 code SHA
+`20ecc12542e5df40c90d1fc367dbe86b563478b8`、tree
+`ffcd261dd7d506d0ad852023afcba0f5c97a2d72`、epoch `1786050825` 完成 system-only
+工程；science `NOT_RUN`，policy `NO_NEW_DECISION`。P21B/P21C 均
+`AUTHORIZATION_REQUIRED / NOT_RUN`。下一 eligible gate 为 P22
+`CONTRACT_ONLY / NOT_STARTED`；外置资产、真实模型/训练、GPU、network、push、发布、
+部署和 operator promotion 仍不在授权范围。
 
 可直接跨对话使用的顺序推进提示词见：
 

@@ -1,19 +1,88 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P20 分支 `codex/p20-training-pipeline`；唯一起始 SHA
-> `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`
+> 当前文档基线：P21A 分支 `codex/p21-benchmark-system`；唯一起始 SHA
+> `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：P20 `COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`；policy
+> 状态：P21A `COMPLETE — SYSTEM_ONLY`；science `NOT_RUN`；policy
 > `NO_NEW_DECISION`；completion code SHA
-> `a4003704b70f06eb65297ddd32e0695ae8ee146b`；tree
-> `d12d64a7c8d013d8d299272eea88a4ce0431ccab`；source date epoch `1786040663`。
-> 下述 P4.3–P19 和 CI 数字仍只绑定各自 exact SHA/日期；P20 本地工程结果不构成真实
-> candidate training、test/external evaluation、benchmark、科学验证、product policy、
-> promotion、发布或远程证据。下一 gate 仅为 `P21A SYSTEM_ONLY / NOT_COMPLETE`；
-> P21B/P21C 未授权、未运行。
+> `20ecc12542e5df40c90d1fc367dbe86b563478b8`；tree
+> `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`；source date epoch `1786050825`。
+> 下述 P4.3–P20 和 CI 数字仍只绑定各自 exact SHA/日期；P21A 本地工程结果不构成真实
+> candidate execution、benchmark、test/external evaluation、科学验证、product policy、
+> promotion、发布或远程证据。P21B/P21C 为
+> `AUTHORIZATION_REQUIRED / NOT_RUN`；下一可进入的本地工作仅为 P22 contract-only。
+
+## Phase 21A `COMPLETE — SYSTEM_ONLY` 本地证据
+
+P21A 新增严格的 benchmark scope/dataset/split/baseline/metric/gate、run authorization/
+runtime receipt、result/profile/external evaluation、evidence/bundle 与 content-addressed ledger
+合同。Primary、paired CI、calibration、selective 和 OOD 结果从嵌入的 exact rows 重算；
+P8/P9 compatibility helper 仍是冻结的本地语义，不生成新科学决策。
+
+授权候选的正向证据必须由调用方从独立受信源提供 P21B composite
+execution fingerprint，它同时绑定 exact authorization、run 和 result。合同内的签发者字段和
+content hash 不是身份认证；默认 self-contained bundle 导出
+`p21b_execution_not_verified` 负状态。测试中的受信 synthetic positive 仅验证门逻辑，
+不是可发布的 benchmark/science evidence，也不允许写入 negative-only ledger。
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_benchmark_system.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -ra \
+  praxis_virtualcell/tests/test_benchmark_system.py \
+  praxis_virtualcell/tests/test_ood_validation.py \
+  praxis_virtualcell/tests/test_model_registry_v2.py \
+  praxis_virtualcell/tests/test_training_pipeline.py \
+  praxis_virtualcell/tests/test_capability_runtime.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -ra praxis_virtualcell/tests \
+  --ignore=praxis_virtualcell/tests/test_mudata_alignment.py \
+  -k 'not golden and not gem and not norman'
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -ra tests \
+  -m 'not (integration or llm or remote)'
+
+python -m ruff check . --extend-exclude old --no-cache
+
+python -m ruff format --check \
+  praxis_virtualcell/benchmarks/system.py \
+  praxis_virtualcell/tests/test_benchmark_system.py
+
+python -m py_compile \
+  praxis_virtualcell/benchmarks/system.py \
+  praxis_virtualcell/tests/test_benchmark_system.py
+
+git diff --check
+~~~
+
+| Gate | 结果 |
+|---|---|
+| P21A focused | `35 passed` |
+| affected P8/P9/P12/P20/P21A | `238 passed` |
+| safe Python gate | `1,645 passed / 49 skipped / 387 deselected / 285.21s` |
+| legacy gate | `1,147 passed / 58 skipped / 105 deselected / 61.52s` |
+| Ruff lint / targeted format / `py_compile` / diff | PASS |
+| reproducible packaging / ZIP integrity | PASS；wheel `1,202,180` bytes；SHA-256 `ee98d4b3c6895bb6a91be1c439a0f927050cb813e9f7e5c61a37552a15c326f`；`371` entries |
+
+两次 exact-code offline wheel byte-identical，React `14`、tests `0`、AppleDouble `0`；
+source/wheel `praxis_virtualcell/benchmarks/system.py` SHA-256 均为
+`583d14434216c26ddffa170e2c35f24963f03461d4e9f10c3fe105073624c4d0`。前端明确使用
+`npm ci --offline`，Python build 明确使用 `--no-isolation --skip-dependency-check`；因此
+该证据是当前本地工具链的 source/wheel/ZIP 一致性，不是 pinned dependency closure
+或 clean-install 证据。宿主环境存在既有污染，所以 global `pip check` 结果无效，
+没有记为 PASS。
+
+Ledger 只接受负证据，使用 hash chain 和 durable head 检查内容篡改与 tail
+truncation。如果攻击者同时回滚或删除全部 entries 与 head，没有外部/签名 anchor 时
+仍不可检出。本轮没有真实 candidate、benchmark run、test/external data read、network、
+GPU、remote、science、operator policy、promotion、version bump、release、push 或 deploy。
+完整边界见 [ADR-0018](ADR-0018-virtual-cell-benchmark-system.md)、
+[P21A runbook](runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md) 和
+[P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md)。
 
 ## Phase 20 `COMPLETE — CONTRACT_ONLY` 本地证据
 

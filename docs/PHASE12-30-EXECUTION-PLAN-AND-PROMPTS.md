@@ -59,8 +59,14 @@
 > `codex/p20-training-pipeline`；状态 `COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`；
 > policy `NO_NEW_DECISION`
 >
-> 当前下一本地 gate：`P21A SYSTEM_ONLY / NOT_COMPLETE`；其 starting SHA 为未来 P20
-> 文档闭包提交 `FINAL_P20_DOCUMENTATION_CLOSURE_SHA`；P21B/P21C
+> 已完成 work unit：`P21A — Virtual Cell Benchmark System`；starting SHA
+> `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`；completion code SHA
+> `20ecc12542e5df40c90d1fc367dbe86b563478b8`；tree
+> `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`；source date epoch `1786050825`；branch
+> `codex/p21-benchmark-system`；工程 `COMPLETE — SYSTEM_ONLY`；science `NOT_RUN`；
+> policy `NO_NEW_DECISION`
+>
+> 当前下一 eligible 本地工程 gate：`P22 CONTRACT_ONLY / NOT_STARTED`；P21B/P21C
 > `AUTHORIZATION_REQUIRED / NOT_RUN`；
 > P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN`
 >
@@ -96,7 +102,7 @@ species and biological systems.” 愿景转换为可逐阶段授权、实施、
 exact-scope 的 Biological World Model research capability。Phase 编号是路线标签，
 不是产品版本、API 协议、schema 或模型版本。
 
-## 2. Phase 11 产品基线、已完成 P12–P20 与当前 P21A system-only gate
+## 2. Phase 11 产品基线、已完成 P12–P21A 与当前 P22 contract-only gate
 
 ### 2.1 当前身份
 
@@ -136,7 +142,10 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | P20 starting SHA | `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`（P19 docs-closure） |
 | P20 completion code SHA / tree | `a4003704b70f06eb65297ddd32e0695ae8ee146b` / `d12d64a7c8d013d8d299272eea88a4ce0431ccab` |
 | P20 source date epoch / 完成分支 | `1786040663` / `codex/p20-training-pipeline` |
-| 当前 work-unit 状态 | P20 `COMPLETE — CONTRACT_ONLY / SCIENCE NOT_RUN / POLICY NO_NEW_DECISION`；P21A `SYSTEM_ONLY / NOT_COMPLETE`；P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN`；P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN` |
+| P21A starting SHA | `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`（P20 docs-closure） |
+| P21A completion code SHA / tree | `20ecc12542e5df40c90d1fc367dbe86b563478b8` / `ffcd261dd7d506d0ad852023afcba0f5c97a2d72` |
+| P21A source date epoch / 完成分支 | `1786050825` / `codex/p21-benchmark-system` |
+| 当前 work-unit 状态 | P21A `COMPLETE — SYSTEM_ONLY / SCIENCE NOT_RUN / POLICY NO_NEW_DECISION`；P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN`；P22 `CONTRACT_ONLY / NOT_STARTED`（下一 eligible 本地 gate）；P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN` |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -180,7 +189,8 @@ P17   Virtual Cell Brain deterministic contract（COMPLETE at 16636f1b...；real
 P18   typed multi-omics contract（COMPLETE at 626c71ff...；real model acceptance pending）
 P19   controlled Pack Factory contract（COMPLETE；real fixture/operator/science/policy NOT_RUN）
 P20   Training Pipeline contract（COMPLETE — CONTRACT_ONLY at a4003704...；science NOT_RUN）
-P21A  Benchmark System/protocol freeze（SYSTEM_ONLY / NOT_COMPLETE；start FINAL_P20_DOCUMENTATION_CLOSURE_SHA）
+P21A  Benchmark System/protocol freeze（COMPLETE — SYSTEM_ONLY at 20ecc12542e5df40c90d1fc367dbe86b563478b8；start 5f3fc2d88c20e8083fb66a4c3399c5fe148241be；science NOT_RUN）
+P22   Curated Virtual Cell Registry（CONTRACT_ONLY / NOT_STARTED；next eligible local gate）
 ```
 
 Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
@@ -228,7 +238,7 @@ Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
 > Broker/Registry/model/science 执行。P19 已完成受控 Pack Factory 工程合同，但真实
 > fixture/output root/operator/science/policy 均未运行。P20 随后完成 exact
 > RegisteredPack-bound Training Pipeline contract；它没有运行真实 candidate 或读取
-> test/external。下一本地 gate 仅为 P21A system-only。
+> test/external。P21A system-only 现已完成；下一本地 gate 仅为 P22 contract-only。
 
 ### 2.4 本次编号纠正
 
@@ -1197,7 +1207,7 @@ Multi-Omics Cell State Representation。
 
 以下文本只保留 P19 启动前的 replay/provenance 形状。P19 已在
 `codex/p19-controlled-pack-factory` 完成；不得复制该旧模板重新启动 P19。P20 也已完成，
-当前 gate 仅为 P21A system-only。
+P21A system-only 现已完成；当前 gate 仅为 P22 contract-only。
 
 ```text
 授权以 `<Phase 17 完成 SHA>` 作为 Phase 18（Multi-omics Virtual Cell）
@@ -1422,10 +1432,25 @@ Phase 21A 精确授权句。
 
 ## 15. Phase 21：Virtual Cell Benchmark System
 
-**当前 gate：** P21A `SYSTEM_ONLY / NOT_COMPLETE`；actual starting SHA 必须使用未来
-P20 documentation-closure commit `FINAL_P20_DOCUMENTATION_CLOSURE_SHA`。P21B real
-candidate run 与 P21C independent operator policy 均
+**当前状态：** P21A 已从 P20 documentation-closure commit
+`5f3fc2d88c20e8083fb66a4c3399c5fe148241be` 开始，以 code SHA
+`20ecc12542e5df40c90d1fc367dbe86b563478b8`、tree
+`ffcd261dd7d506d0ad852023afcba0f5c97a2d72`、source date epoch `1786050825`
+完成系统工程；engineering `COMPLETE — SYSTEM_ONLY`，science `NOT_RUN`，policy
+`NO_NEW_DECISION`。P21B real candidate run 与 P21C independent operator policy 均
 `AUTHORIZATION_REQUIRED / NOT_RUN`，不由 P20 candidate identity 自动授权。
+
+P21A 冻结 strict benchmark protocol/run/result/evidence 合同、validation-only threshold、
+paired CI、calibration/OOD/selective gates，以及只接受负结果的 content-addressed ledger。
+本阶段没有读取或运行真实 candidate/test/external 资产或权重，没有训练、GPU、network、
+operator、promotion、release 或 deploy。synthetic positive fixtures 只验证合同，绝不是
+科学 evidence；兼容重放只确认 P8 历史状态仍为 null/unbound、P9 exact negative/unbound
+状态不变。任何 P21B 执行都必须由外部可信边界独立固定 composite execution identity；
+content fingerprint 只证明内容身份，不构成 issuer authentication。
+
+**下一 eligible 本地工程 gate：** P22 `CONTRACT_ONLY / NOT_STARTED`；只允许先收口
+registry 合同，不得在缺少 P21B/P21C evidence/policy 时制造 executable、validated 或
+promoted release。
 
 ### 目标
 
@@ -1469,8 +1494,7 @@ evidence，而不是改写其冻结统计实现。
 
 ### 验收门
 
-- 至少重放 P8 成功 baseline artifact 和 P9 失败 artifact；
-- P9 失败状态保持不变；
+- 只读兼容重放保持 P8 历史 null/unbound 和 P9 exact negative/unbound 状态不变；
 - benchmark protocol/result 被篡改时拒绝；
 - baseline、CI、external 或 leakage 任一不满足时 production plan 过滤 candidate；
 - 失败结果不可覆写或删除。
@@ -1478,7 +1502,7 @@ evidence，而不是改写其冻结统计实现。
 ### P21A 可复制授权提示词：系统与冻结协议
 
 ```text
-授权以 `FINAL_P20_DOCUMENTATION_CLOSURE_SHA` 作为 Phase 21A（Virtual Cell Benchmark System）
+授权以 `5f3fc2d88c20e8083fb66a4c3399c5fe148241be` 作为 Phase 21A（Virtual Cell Benchmark System）
 唯一起始基线，创建 `codex/p21-benchmark-system`，仅实现严格、版本化的 benchmark
 protocol/run/result/promotion-evidence 合同，复用 P8/P9 统计和 leakage 审计，建立
 正式 adapter/runtime evaluation、validation-only threshold、paired CI、calibration、
@@ -2383,10 +2407,14 @@ P20 已从 P19 docs-closure `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`
 工程。它只运行 repository tiny fixtures：真实 candidate training、test/external read、
 science 均 `NOT_RUN`，policy `NO_NEW_DECISION`。
 
-持续本地授权下的下一 eligible gate 仅为 P21A `SYSTEM_ONLY / NOT_COMPLETE`；actual
-starting SHA 必须使用未来 P20 文档闭包提交
-`FINAL_P20_DOCUMENTATION_CLOSURE_SHA` 并重新生成动态保护清单。P21B/P21C
-`AUTHORIZATION_REQUIRED / NOT_RUN`。
+P21A 已从 P20 文档闭包提交 `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`
+开始，以 code SHA `20ecc12542e5df40c90d1fc367dbe86b563478b8`、tree
+`ffcd261dd7d506d0ad852023afcba0f5c97a2d72`、source date epoch `1786050825`
+完成 system-only 工程；science `NOT_RUN`，policy `NO_NEW_DECISION`。冻结合同、负结果
+ledger 与 synthetic conformance 不代表真实 evidence；P8 保持 null/unbound，P9 保持
+exact negative/unbound。P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN`。下一 eligible
+本地工程 gate 为 P22 `CONTRACT_ONLY / NOT_STARTED`，不得导入或制造 executable、
+validated、promoted release。
 
 当前持续本地授权不覆盖 P14R、P14B、P15R、P15B、P16R 或 P16B。没有逐项 exact
 assets/output root/run window 授权时，不得读取或运行真实资产、产生科学

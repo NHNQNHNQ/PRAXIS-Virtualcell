@@ -1,12 +1,13 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: P20 `COMPLETE — CONTRACT_ONLY`; science `NOT_RUN`; policy `NO_NEW_DECISION`;
-> P21A `SYSTEM_ONLY / NOT_COMPLETE` — `LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
+> Status: P21A `COMPLETE — SYSTEM_ONLY`; science `NOT_RUN`; policy `NO_NEW_DECISION`;
+> P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN`; P22 contract-only next —
+> `LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
-> Local baseline: branch `codex/p20-training-pipeline`; P20 starting SHA
-> `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`; completion code SHA/tree
-> `a4003704b70f06eb65297ddd32e0695ae8ee146b` /
-> `d12d64a7c8d013d8d299272eea88a4ce0431ccab`; source date epoch `1786040663`
+> Local baseline: branch `codex/p21-benchmark-system`; P21A starting SHA
+> `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`; completion code SHA/tree
+> `20ecc12542e5df40c90d1fc367dbe86b563478b8` /
+> `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`; source date epoch `1786050825`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -27,6 +28,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P18 multi-omics model-input work unit | start `f253664239e4b1c9665301cf1bdf4e117a3e9c31`; code `626c71ffd1ce18a5adc200f6a6e376e57b269beb`; tree `2b570398caff6cf955d789c3cb4a7a77dc13a082` | immutable local Git history plus `reports/phase18/PHASE18_COMPLETION.md` | strict joint-input contract complete; real multi-omics model acceptance pending; registry unchanged at 5/0/0, science not run, no policy/release/version bump; local complete wheel `1,132,811` bytes / `015724a90656...` / `367` entries / `14` React entries |
 | P19 Controlled Pack Factory work unit | start `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be`; code `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5`; tree `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f` | immutable local Git history plus `reports/phase19/PHASE19_COMPLETION.md` | contract-only receipt→registration complete; v2 index reads v1, path-only register retired, public projection read-only; real external fixture/output root/operator/science/policy not run; no version/release bump; reproducible wheel `1,154,421` bytes / `1231f948e6f5...` / `368` entries |
 | P20 Virtual Cell Training Pipeline work unit | start `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`; code `a4003704b70f06eb65297ddd32e0695ae8ee146b`; tree `d12d64a7c8d013d8d299272eea88a4ce0431ccab`; epoch `1786040663` | immutable local Git history plus `reports/phase20/PHASE20_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY`; exact RegisteredPack-bound job/audit/checkpoint/result/candidate chain; success `candidate_cataloged_contract_only`; science `NOT_RUN`, policy `NO_NEW_DECISION`; no real training/test/external/benchmark/evidence/promotion or version/release bump; P21A system-only eligible; exact-local-source/toolchain wheel `1,178,805` bytes / `2273ee71fb58...` / `370` entries, not pinned dependency closure |
+| P21A Virtual Cell Benchmark System work unit | start `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`; code `20ecc12542e5df40c90d1fc367dbe86b563478b8`; tree `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`; epoch `1786050825` | immutable local Git history plus `reports/phase21a/PHASE21A_COMPLETION.md` | `COMPLETE — SYSTEM_ONLY`; exact protocol/run/result/evidence and negative-ledger contracts; P21B exact authorization+run+result execution trust remains out of band; science `NOT_RUN`, policy `NO_NEW_DECISION`, P21B/P21C authorization required/not run; no real benchmark/promotion or version/release bump; P22 contract-only eligible; exact-local-source/toolchain wheel `1,202,180` bytes / `ee98d4b3c689...` / `371` entries, not pinned dependency closure |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -242,10 +244,41 @@ React entries, with no tests or AppleDouble; source/wheel hashes match for `pipe
 they are not pinned dependency-closure or clean-install evidence. This changes no product SemVer,
 API/runtime protocol, release or publication. Real training, test/external evaluation,
 benchmark, science, evidence, registry promotion, push and deploy remain not run; policy is
-`NO_NEW_DECISION`. Next eligible work is P21A system-only; P21B/P21C are unauthorized and not run.
+`NO_NEW_DECISION`. At P20 closure P21A system-only was next eligible; it subsequently completed,
+while P21B/P21C remain authorization-required and not run.
 See [ADR-0017](ADR-0017-virtual-cell-training-pipeline.md), the
 [P20 runbook](runbooks/VIRTUALCELL-TRAINING-PIPELINE.md), and the
 [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md).
+
+P21A adds the strict Virtual Cell Benchmark System contracts inside the same unpublished
+`1.6.0` candidate. It starts at P20 docs-closure
+`5f3fc2d88c20e8083fb66a4c3399c5fe148241be` and completes at code/tree
+`20ecc12542e5df40c90d1fc367dbe86b563478b8` /
+`ffcd261dd7d506d0ad852023afcba0f5c97a2d72` with source date epoch `1786050825`.
+The system binds and recomputes exact protocol, authorization, run, result, primary/CI,
+calibration, selective/OOD/external and evidence identities. A positive authorized-candidate
+derivation requires an independently trusted P21B composite fingerprint over exact authorization,
+run and result; contract fields and content hashes do not authenticate their issuer. A normal
+self-contained bundle therefore remains negative unless a P21B consumer supplies that trust
+out of band.
+
+The append-only store admits only negative evidence. Its hash chain and durable head detect content
+tampering and tail truncation, but without an external or signed anchor cannot detect a rollback or
+deletion that also restores/removes the complete ledger head. Focused P21A is `35 passed`; affected
+is `238 passed`; safe is `1,645 passed / 49 skipped / 387 deselected`; legacy is
+`1,147 passed / 58 skipped / 105 deselected`; static checks pass. Two offline exact-code wheels are
+byte-identical at `1,202,180` bytes /
+`ee98d4b3c6895bb6a91be1c439a0f927050cb813e9f7e5c61a37552a15c326f` / `371` entries /
+`14` React entries, with no tests or AppleDouble. The source/wheel benchmark-system module SHA-256
+is `583d14434216c26ddffa170e2c35f24963f03461d4e9f10c3fe105073624c4d0`.
+Builds used `npm ci --offline` plus Python `--no-isolation --skip-dependency-check`, so this is not
+pinned dependency-closure or clean-install evidence; host-polluted global `pip check` is invalid and
+is not a passing gate. P21A creates no product/API/runtime version bump or release identity, and
+does not run a real candidate, benchmark, science, operator policy, promotion, push or deploy.
+P21B/P21C remain `AUTHORIZATION_REQUIRED / NOT_RUN`; P22 contract-only is next eligible. See
+[ADR-0018](ADR-0018-virtual-cell-benchmark-system.md), the
+[P21A runbook](runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md), and the
+[P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md).
 
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
@@ -281,6 +314,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | Pack product record/catalog/index schemas | explicit `vc.pack-record.v1`, `vc.pack-catalog.v1`, v1-readable/`vc.pack-index.v2`-written index; catalog may nest `vc.model-registry-catalog.v2` | incompatible public metadata, index-field, identity binding or registry projection semantics | legacy readability or registration proves per-request compatibility or scientific validity |
 | Pack Factory lifecycle/store/catalog schemas + fingerprints | explicit `vc.pack-candidate.v1`, `vc.pack-metadata-review.v1`, `vc.pack-validation-report.v1`, `vc.pack-operator-decision.v1`, `vc.factory-registered-pack.v1`, `vc.pack-supersession.v1`, exact `.factory-store.json` marker bytes `{"schema_version":"vc.pack-factory-store.v1"}\n` and `vc.pack-factory-catalog.v1` plus canonical JSON SHA-256 | receipt/candidate/review/validation/decision/registration/supersession identity, initialized-store ownership or public redaction semantics change incompatibly | an arbitrary directory is a store, or factory registration is model compatibility, execution, evidence, scientific validation or product policy |
 | training pipeline schemas + fingerprints | explicit P20 job/environment/split/audit, worker/checkpoint/result and candidate/run schema literals listed above plus canonical JSON SHA-256 | job/environment/split/audit/checkpoint/result/candidate identity or serialization semantics change incompatibly | contract-only dry-run is real training, benchmark evidence, scientific validation, registry insertion or promotion policy |
+| benchmark system schemas + fingerprints | explicit `vc.benchmark-*.v1`, `vc.p21b-execution-identity.v1`, `vc.benchmark-evidence-ledger.v1` and canonical JSON SHA-256 | protocol/run/result/measurement/evidence/bundle, independent P21B execution-trust lookup or negative-ledger identity/serialization semantics change incompatibly | a self-asserted authorization/content hash is authenticated, a synthetic passing fixture is science, evidence grants operator policy, or the ledger has an external rollback anchor |
 | Pack compatibility surface schema | explicit `vc.pack-compatibility-surface.v1` | incompatible path-redaction or public execution-plan projection | a compatibility response proves successful execution |
 | job execution identity schema + fingerprint | explicit `vc.job-execution-identity.v1`, `vc.job-execution-identity.v2` or `vc.job-execution-identity.v3` and content identity | incompatible request/report/outcome/Pack/release/component/evidence/policy identity-lock semantics; v3 also binds Brain/DAG and companion-backed contract-only report semantics | read-only loading may rewrite old bytes, schema downgrade may bypass current bindings, or immutable provenance proves model quality/validation/promotion |
 | public data catalog schema | explicit `vc.data-catalog.v1` | incompatible metadata, source/terms, identity or file-verification semantics | file availability, Pack validity, model compatibility or scientific validity |
@@ -300,7 +334,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented history through the current P20 contract-complete bytes:
+Implemented history through the current P21A system-complete bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -309,7 +343,7 @@ Implemented history through the current P20 contract-complete bytes:
 5. `/api/health` separately exposes product, API protocol, runtime protocol, and injected build SHA while retaining `runtime_version="v0.3"`.
 6. The UI consumes backend `product_version` and `git_sha`; an E2E mock with product `9.9.9` proves that it does not invent this truth from frontend metadata.
 7. `npm version 1.6.0 --no-git-tag-version` synchronized the private package and lock root as a generated mirror. Neither is manually authoritative.
-8. The normative full-release workflow requires hash-locked Python 3.13 build dependencies, packaged React UI, and clean-install verification against installed distribution metadata. P20's contract-closure wheel is narrower exact-local-source/toolchain evidence and did not satisfy this release gate.
+8. The normative full-release workflow requires hash-locked Python 3.13 build dependencies, packaged React UI, and clean-install verification against installed distribution metadata. P21A's system-closure wheel is narrower exact-local-source/toolchain evidence and did not satisfy this release gate.
 9. The release container installs that same wheel into `/opt/venv`, injects `GIT_SHA` into both its OCI revision label and health response, and never infers identity from an image tag or embedded `.git` directory.
 10. W4B donor adapters use a checkpoint-content identity as their per-call model version and validate the expected slot/class before loading weights. Other ML callers retain their existing explicit or class fallback, so this must not be generalized to every registry model.
 11. P7 adds backward-compatible `vc.api.v1` endpoints and a user-visible data-resource page inside the still-unpublished `1.6.0` minor candidate. It adds independent `vc.data-catalog.v1` and `vc.upload-receipt.v1` contracts; no product tag or API/runtime protocol bump is inferred.
@@ -391,7 +425,18 @@ Implemented history through the current P20 contract-complete bytes:
     dependency-closure or clean-install evidence. Success is only
     `candidate_cataloged_contract_only`; science is `NOT_RUN`, policy is `NO_NEW_DECISION`, and no
     real training/test/external/benchmark/evidence/promotion, product/API/runtime version bump,
-    release, tag, push or deploy is created. P21A system-only is next eligible; P21B/P21C are not run.
+    release, tag, push or deploy is created. P21A system-only subsequently completed; P21B/P21C
+    remain authorization-required and not run.
+27. P21A starts at P20 docs-closure `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`
+    and adds exact benchmark protocol/run/result/evidence, out-of-band P21B execution-trust and
+    negative-only content-addressed ledger contracts. Final code/tree are
+    `20ecc12542e5df40c90d1fc367dbe86b563478b8` /
+    `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`; its exact-local-source/toolchain wheel is
+    reproducible at `1,202,180` bytes / `ee98d4b3c689...` / `371` entries, but is not pinned
+    dependency-closure or clean-install evidence. Engineering is `COMPLETE — SYSTEM_ONLY`, science
+    is `NOT_RUN`, policy is `NO_NEW_DECISION`; P21B/P21C are authorization-required/not-run. No
+    real benchmark, promotion, product/API/runtime version bump, release identity, tag, push or
+    deploy is created. The product version remains unchanged at `1.6.0`; P22 contract-only is next.
 
 ## Release invariants
 
