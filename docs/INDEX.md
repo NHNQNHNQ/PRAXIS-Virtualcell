@@ -2,7 +2,7 @@
 
 > Audited: 2026-08-07
 >
-> Status: `CURRENT_DOCUMENT_MAP — P21A COMPLETE — SYSTEM_ONLY; SCIENCE NOT_RUN; POLICY NO_NEW_DECISION`
+> Status: `CURRENT_DOCUMENT_MAP — P22 COMPLETE — CONTRACT_ONLY; SCIENCE NOT_RUN; POLICY NO_NEW_DECISION`
 
 This is the navigation authority for the repository. It does not make every linked document current: each section explicitly distinguishes live truth, frozen evidence, active plans, drafts, and history.
 
@@ -11,8 +11,8 @@ This is the navigation authority for the repository. It does not make every link
 When documents disagree, use this order:
 
 1. Exact local bytes, `git rev-parse` identity, immutable artifacts and the current work-unit completion report.
-2. [README](../README.md), the [P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md), [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md), [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
-3. The latest completed phase ADR/runbook—P21A uses [ADR-0018](ADR-0018-virtual-cell-benchmark-system.md) and the [Benchmark System runbook](runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md); P20 remains documented by [ADR-0017](ADR-0017-virtual-cell-training-pipeline.md) and the [Training Pipeline runbook](runbooks/VIRTUALCELL-TRAINING-PIPELINE.md)—for implemented contract and validation boundaries.
+2. [README](../README.md), the [P22 completion report](../reports/phase22/PHASE22_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md), [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md), [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md), [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
+3. The latest completed phase ADR/runbook—P22 uses [ADR-0019](ADR-0019-curated-virtual-cell-registry.md) and the [Curated Registry runbook](runbooks/VIRTUALCELL-CURATED-REGISTRY.md); P21A remains documented by [ADR-0018](ADR-0018-virtual-cell-benchmark-system.md) and the [Benchmark System runbook](runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md)—for implemented contract and validation boundaries.
 4. [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) for frozen scientific capability and claim boundaries.
 5. [Three-Way Sync State](status/SYNC-STATE.md) only for its dated local/GitHub/`.53` observations; it is not fresh remote authorization.
 6. Dated plans, handoffs, findings, papers, release notes and [Project State 2026-07-18](status/PROJECT-STATE-2026-07-18.md) as historical evidence for their stated commit/date only.
@@ -62,14 +62,31 @@ negative-only content-addressed ledger. Contract/content identity does not authe
 The durable ledger head detects tail truncation but, without an external or signed anchor, not a
 whole-ledger rollback or deletion that also restores/removes the head. No real candidate execution,
 benchmark, external evaluation, science, policy, promotion, release or deploy occurred. P21B/P21C are
-`AUTHORIZATION_REQUIRED / NOT_RUN`; P22 contract-only is the next eligible local work unit.
+`AUTHORIZATION_REQUIRED / NOT_RUN`.
+P22 then completed the contract-only Curated Virtual Cell Registry from P21A docs closure
+`09792e13e29a76b5e4434507f3334eefb947789c`, with P21A code
+`20ecc12542e5df40c90d1fc367dbe86b563478b8` as prerequisite, at code
+`bca5ad661856e8d9aa832c47f23c6ad7179ee0c9` / tree
+`f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a` with source date epoch `1786056220`.
+Its v1 composition is exactly One-Pack/P21B and consumes one already-positive P12
+release/evidence/policy closure without creating or upgrading science or policy. Import is
+quarantine-first; lifecycle decisions are append-only metadata. Default-deny external trust and an
+independently persisted checkpoint authorize and anchor the log; verification anchors the prefix and
+reauthorizes every suffix record. Until a revoke/supersede tail is externally checkpointed, rollback
+to the prior checkpoint remains possible. Hashes are not issuer authentication. The default curated
+store/catalog is absent or empty, public query is Python-only/redacted/non-executable, and no real
+lifecycle, HTTP/UI/runtime/install/execution, release or deploy occurred. P23A is the next eligible
+local contract-only work unit; it is evidence-only and cannot produce receiver response or causal claims.
 
 ## Current state
 
 | Document | Authority |
 |---|---|
-| [README](../README.md) | current product promise, P21A system boundary and primary operator entry points |
-| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13–P21A boundary |
+| [README](../README.md) | current product promise, P22 contract boundary and primary operator entry points |
+| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13–P22 boundary |
+| [P22 Completion Report](../reports/phase22/PHASE22_COMPLETION.md) | exact P22 closure ledger, local conformance/package evidence, default-deny trust/checkpoint boundary and all real lifecycle/science/policy non-runs |
+| [P22 Curated Registry ADR](ADR-0019-curated-virtual-cell-registry.md) | exact One-Pack/P21B release composition, immutable science/policy boundary, append-only lifecycle and external checkpoint decision |
+| [P22 Curated Registry Runbook](runbooks/VIRTUALCELL-CURATED-REGISTRY.md) | local import/decision/query audit, suffix reauthorization, checkpoint advancement and rollback limitation |
 | [P21A Completion Report](../reports/phase21a/PHASE21A_COMPLETION.md) | exact P21A closure ledger, local conformance/package evidence, P21B/P21C authorization gate and all real benchmark/science/policy non-runs |
 | [P21A Benchmark System ADR](ADR-0018-virtual-cell-benchmark-system.md) | frozen evidence derivation, independent P21B execution trust and negative-only ledger boundary |
 | [P21A Benchmark System Runbook](runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md) | local bundle/ledger verification, tamper/truncation checks, rollback limitation and P22 interpretation |
@@ -148,6 +165,7 @@ benchmark, external evaluation, science, policy, promotion, release or deploy oc
 | [Controlled Pack Factory](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md) | P19 explicit initialized store/index targets, deterministic pending→committed registration provenance, reviewer-bound taxon confirmation and read-only public audit |
 | [Virtual Cell Training Pipeline](runbooks/VIRTUALCELL-TRAINING-PIPELINE.md) | P20 RegisteredPack-bound job/audit/checkpoint/candidate contract, local gates and no-real-training boundary |
 | [Virtual Cell Benchmark System](runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md) | P21A exact benchmark contract/bundle audit, out-of-band P21B execution trust, negative-ledger checks and no-real-benchmark boundary |
+| [Curated Virtual Cell Registry](runbooks/VIRTUALCELL-CURATED-REGISTRY.md) | P22 exact One-Pack release import/lifecycle/query audit, external trust/checkpoint workflow and no-real-lifecycle boundary |
 
 The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` files describe the older PRAXIS-2 classroom/deployment system, including `.40/.53` service topology. They are not VirtualCell current-user entry points.
 
@@ -178,8 +196,9 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Controlled Pack Factory ADR](ADR-0016-controlled-pack-factory.md) | P19 explicit initialized store/index ownership, deterministic immutable artifact lifecycle, reviewer-bound exact taxon and redacted read-only projection |
 | [Virtual Cell Training Pipeline ADR](ADR-0017-virtual-cell-training-pipeline.md) | P20 exact RegisteredPack binding, audit-before-label, trusted fixed worker, safe candidate artifacts and no-promotion boundary |
 | [Virtual Cell Benchmark System ADR](ADR-0018-virtual-cell-benchmark-system.md) | P21A exact protocol/run/result/evidence derivation, independent composite execution-trust boundary and negative-only ledger semantics |
+| [Curated Virtual Cell Registry ADR](ADR-0019-curated-virtual-cell-registry.md) | P22 exact One-Pack/P21B composition, quarantine-first append-only lifecycle, default-deny trust and external checkpoint semantics |
 | [Community Readiness Checklist](COMMUNITY-READINESS-CHECKLIST.md) | P10 model-free CommunityPack gates, two tiny microbial Packs, fail-closed planning and explicitly missing experimental validation |
-| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | historical P0–P16E implementation/status matrix; current P21A state is carried by this index and its completion report |
+| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | historical P0–P16E implementation/status matrix; current P22 state is carried by this index and its completion report |
 | [VirtualCellPack Multiomics Runbook](runbooks/VIRTUALCELLPACK-MULTIOMICS.md) | tiny RNA+protein fixture generation, hash binding, P5 tests and asset-update rules |
 | [VirtualCellPack Capability Runtime Runbook](runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md) | local model card/cache/Pack assembly, execution-plan audit and fail-closed reason handling |
 | [VirtualCellPack Data Portal Runbook](runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) | external public-file inventory, service configuration, upload quarantine and operator review boundary |
@@ -196,6 +215,7 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Controlled Pack Factory Runbook](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md) | P19 initialized-store marker, v2/v1 index handling, receipt replay/tamper audit and all real-operation non-runs |
 | [Virtual Cell Training Pipeline Runbook](runbooks/VIRTUALCELL-TRAINING-PIPELINE.md) | P20 local contract verification, audit/read ordering, staging cleanup and P21A handoff |
 | [Virtual Cell Benchmark System Runbook](runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md) | P21A local contract verification, default-negative bundles, ledger tamper/truncation handling and P22 handoff |
+| [Curated Virtual Cell Registry Runbook](runbooks/VIRTUALCELL-CURATED-REGISTRY.md) | P22 local contract verification, exact allowlists, suffix reauthorization, checkpoint persistence and evidence-only P23A handoff |
 | [Provenance](../PROVENANCE.md) | repository derivation from PRAXIS-2 and bootstrap evidence |
 
 ## Release and version history
@@ -223,6 +243,7 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 
 | Report | Scope |
 |---|---|
+| [P22 Completion Report](../reports/phase22/PHASE22_COMPLETION.md) | exact contract-only closure; focused `35`, affected `289/1`, safe `1,680/49/387`, legacy `1,147/58/105`; reproducible exact-local-toolchain `1,217,155`-byte wheel, not clean-install proof; real lifecycle/science/policy/promotion non-runs |
 | [P21A Completion Report](../reports/phase21a/PHASE21A_COMPLETION.md) | exact system-only closure; focused `35`, affected `238`, safe `1,645/49/387`, legacy `1,147/58/105`; reproducible exact-local-toolchain `1,202,180`-byte wheel, not clean-install proof; real benchmark/science/policy/promotion non-runs |
 | [P20 Completion Report](../reports/phase20/PHASE20_COMPLETION.md) | exact contract closure; focused `56`, P19-adjacent `99/1`, safe `1,610/49/387`, legacy `1,147/58/105`; reproducible exact-local-toolchain `1,178,805`-byte wheel, not clean-install proof; real training/test/external/science non-runs; policy `NO_NEW_DECISION` |
 | [P19 Completion Report](../reports/phase19/PHASE19_COMPLETION.md) | exact contract closure; focused `23/1`, combined `108/1`, safe `1,554/49/387`, legacy `1,143/58/105`; reproducible `1,154,421`-byte wheel; real external fixture/output/operator/science/policy non-runs |
@@ -237,7 +258,7 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 | [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | frozen local C5 gate: Python 3.13 core 965, Gate A adapter seam, honest 2-test remote pending, asset/claim classification |
 | [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | frozen C4 gate: Python 3.13 core 957, Playwright 56+1, reproducible full wheel, and Linux-container smoke |
 | [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen C3 gate: core 947, Playwright 54+1, theme acceptance, mutation evidence, and then-remaining C4/C5 ownership |
-| [Testing Guide](TESTING.md) | current P21A local commands and counts; preserves prior exact-SHA and historical CI/Linux evidence plus remote scientific-validation boundaries |
+| [Testing Guide](TESTING.md) | current P22 local commands and counts; preserves prior exact-SHA and historical CI/Linux evidence plus remote scientific-validation boundaries |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | capability gate plus `.53` evidence and remaining remote backlog |
 | [Phase 10 Summary](../reports/phase10/PHASE10_SUMMARY.md) | `952 tests = 912 passed + 40 skipped` for the non-LLM package scope; 9 LLM tests are deselected in the `912/40/9` reporting style |
 | [Phase 10 UI E2E](../reports/phase10/PHASE10_UI_E2E.md) | three structural Playwright specs; explicitly excludes CSS/pixel and deep abstain assertions |

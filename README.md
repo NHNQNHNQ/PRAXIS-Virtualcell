@@ -49,9 +49,18 @@ P20 docs-closure `5f3fc2d88c20e8083fb66a4c3399c5fe148241be` 开始，在分支
 `codex/p21-benchmark-system` 的 `20ecc12542e5df40c90d1fc367dbe86b563478b8`
 （tree `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`，source date epoch
 `1786050825`）完成 Virtual Cell Benchmark System，状态为
-`COMPLETE — SYSTEM_ONLY`；science `NOT_RUN`，policy `NO_NEW_DECISION`。P21B/P21C
-均为 `AUTHORIZATION_REQUIRED / NOT_RUN`；下一可进入的本地工作仅为 P22
-contract-only。没有 product/API/runtime version bump、release 或 push。
+`COMPLETE — SYSTEM_ONLY`；science `NOT_RUN`，policy `NO_NEW_DECISION`。Phase 22 从
+P21A docs-closure `09792e13e29a76b5e4434507f3334eefb947789c` 开始，以 P21A code
+`20ecc12542e5df40c90d1fc367dbe86b563478b8` 为 prerequisite，在分支
+`codex/p22-virtual-cell-registry` 的 `bca5ad661856e8d9aa832c47f23c6ad7179ee0c9`
+（tree `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`，source date epoch
+`1786056220`）完成 Curated Virtual Cell Registry 工程合同，状态为
+`COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`，policy `NO_NEW_DECISION`，真实
+import/catalog/revoke/supersede lifecycle 为 `NOT_RUN`。P21B/P21C 均为
+`AUTHORIZATION_REQUIRED / NOT_RUN`；P23A 是下一 eligible 本地 contract-only work unit，
+只能建立 sender→receiver `interaction_evidence_score`，不得输出 receiver response 或 causal
+claim；真实 release、interaction data 与执行仍须满足各自 exact 输入/授权门。没有
+product/API/runtime version bump、release 或 push。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
@@ -62,9 +71,10 @@ exact 验证与克制的科学/policy 边界见
 [P18 完成报告](reports/phase18/PHASE18_COMPLETION.md)及
 [P19 完成报告](reports/phase19/PHASE19_COMPLETION.md)和
 [P20 完成报告](reports/phase20/PHASE20_COMPLETION.md)以及
-[P21A 完成报告](reports/phase21a/PHASE21A_COMPLETION.md)。P14R、P15R 与 P16R 的真实
+[P21A 完成报告](reports/phase21a/PHASE21A_COMPLETION.md)与
+[P22 完成报告](reports/phase22/PHASE22_COMPLETION.md)。P14R、P15R 与 P16R 的真实
 asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B、P15B 与 P16B 均为
-`NOT_RUN`。当前 registry 有 5 个 release、0 个 native、0 个 production-promoted
+`NOT_RUN`。当前 P12 `ModelRegistryV2` 有 5 个 legacy release、0 个 native、0 个 production-promoted
 capability；P18 没有真实 multi-omics model execution/acceptance，science 为 `NOT_RUN`，
 policy 为 `NO_NEW_DECISION`。P19 的 Git 外 real fixture/output root、真实 operator、
 science 与 policy 也未运行；factory registration 不等于模型兼容、执行或 promotion。
@@ -83,6 +93,27 @@ tail truncation，但没有外部/签名 anchor 时不能检出连同 head 一�
 promotion 或 release 证据。设计和运维边界见
 [P21A ADR](docs/ADR-0018-virtual-cell-benchmark-system.md)与
 [P21A runbook](docs/runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md)。
+
+P22 v1 严格组合一个 `FactoryRegisteredPackV1`、一个 P12 release/evidence/policy
+closure、一个 P21B evidence bundle 和所有被 exact wrapper approval 约束的 adapter；它
+不会创建或提升 scientific evidence/operator policy。Multi-Pack 和 direct P14/P15/P16
+或其他 non-P21B evidence route 必须使用未来新 schema，不能静默扩宽 v1。Curated
+registry import 一律从 quarantined 开始，后续只能通过显式 approve/quarantine/revoke/
+supersede decision 改变 catalog metadata；science/policy state、asset 安装和执行均不变。
+
+外置 trust 默认为 deny-all，并按 exact import/decision fingerprint allowlist 授权；稳定
+authorization reference 不把可变 trust 全量哈希进记录。外置 checkpoint 是精确
+`entry_count + last_entry_fingerprint`，必须独立保存在 registry root 之外；打开时先锚定
+prefix，再用当前 trust 重验全部 suffix。`checkpoint()` 只返回新锚点，不替 operator
+持久化；revoke/supersede 后在新 checkpoint 外置推进前，回滚到旧 checkpoint 仍可能。
+content hash 和 authorization reference 都不是签名或签发者认证。
+
+默认仓库不创建 curated root，也没有真实 curated release。公开面仅是 Python
+`public_catalog()`/query 的路径与敏感字段脱敏投影，`executable=false`，installed 和
+compatibility 均为 unknown；没有 HTTP/API、UI、Data Center、chat、runtime planning、
+asset installation 或 execution 接线。设计和运维边界见
+[P22 ADR](docs/ADR-0019-curated-virtual-cell-registry.md)与
+[P22 runbook](docs/runbooks/VIRTUALCELL-CURATED-REGISTRY.md)。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -458,16 +489,19 @@ npm run build
 CI=1 npm run e2e
 ```
 
-当前 P21A 精确本地结果为 focused `35 passed`、affected `238 passed`、safe
-`1,645 passed / 49 skipped / 387 deselected`、legacy
-`1,147 passed / 58 skipped / 105 deselected`，静态门通过。完整命令、用时、skip/deselect
+当前 P22 精确本地结果为 focused `35 passed`（`43.55s`）、affected `289 passed / 1 skipped`
+（`64.94s`）、safe `1,680 passed / 49 skipped / 387 deselected`（`334.23s`）、legacy
+`1,147 passed / 58 skipped / 105 deselected`（`60.48s`），静态门通过。完整命令、用时、skip/deselect
 含义、显式外部门和 GitHub CI 状态见 [测试指南](docs/TESTING.md)。普通测试默认不访问固定私网服务；`integration`、`llm`、`remote` 分别需要 `--run-integration`、`--run-llm`、`--run-remote`，一个测试拥有多个 marker 时必须同时满足对应门。
 
 ## 文档入口
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P21A 边界和跨项目集成 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P22 边界和跨项目集成 |
+| [P22 完成报告](reports/phase22/PHASE22_COMPLETION.md) | exact curated-registry closure、default-deny external trust/checkpoint、reproducible local-toolchain wheel 与真实 lifecycle/science/policy 非运行边界 |
+| [P22 Curated Registry ADR](docs/ADR-0019-curated-virtual-cell-registry.md) | exact One-Pack/P21B release composition、append-only lifecycle、stable authorization reference 与外置 checkpoint 边界 |
+| [P22 Curated Registry runbook](docs/runbooks/VIRTUALCELL-CURATED-REGISTRY.md) | local import/decision/query 审计、suffix reauthorization、checkpoint 推进与 rollback 限制 |
 | [P21A 完成报告](reports/phase21a/PHASE21A_COMPLETION.md) | exact benchmark-system closure、reproducible local-toolchain wheel 与真实 benchmark/science/policy/promotion 非运行边界 |
 | [P21A Benchmark System ADR](docs/ADR-0018-virtual-cell-benchmark-system.md) | frozen protocol/run/result/evidence、out-of-band P21B execution trust 与 negative-only ledger 边界 |
 | [P21A Benchmark System runbook](docs/runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md) | local contract gates、bundle/ledger 核查、rollback 限制和 P22 contract-only handoff |
@@ -514,7 +548,7 @@ CI=1 npm run e2e
 
 唯一允许的流向是：本地 feature branch → GitHub branch/CI → 审批合入 GitHub `main` → 本地 `main` fast-forward → `.53` 从同一 GitHub SHA fast-forward → 三端 SHA 核对。不要在 `.53` 直接开发，也不要把本地 tag 当成已发布 tag。
 
-本轮 P21A system/docs closure 窗口未刷新 GitHub 或 `.53`。规范工作树是
+本轮 P22 contract/docs closure 窗口未刷新 GitHub 或 `.53`。规范工作树是
 `/Volumes/T7/PRAXIS-virtualcell`，Git metadata 是
 `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`；任何远程数字只有带日期和 exact
 identity 的只读记录意义。

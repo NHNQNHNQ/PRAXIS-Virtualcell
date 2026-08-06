@@ -66,7 +66,17 @@
 > `codex/p21-benchmark-system`；工程 `COMPLETE — SYSTEM_ONLY`；science `NOT_RUN`；
 > policy `NO_NEW_DECISION`
 >
-> 当前下一 eligible 本地工程 gate：`P22 CONTRACT_ONLY / NOT_STARTED`；P21B/P21C
+> 已完成 work unit：`P22 — Curated Virtual Cell Registry`；actual starting docs-closure SHA
+> `09792e13e29a76b5e4434507f3334eefb947789c`；P21A prerequisite code SHA
+> `20ecc12542e5df40c90d1fc367dbe86b563478b8`；completion code SHA
+> `bca5ad661856e8d9aa832c47f23c6ad7179ee0c9`；tree
+> `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`；source date epoch `1786056220`；branch
+> `codex/p22-virtual-cell-registry`；工程 `COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`；
+> policy `NO_NEW_DECISION`
+>
+> 下一 eligible 本地 work unit 为 P23A contract-only：仅实现 sender→receiver
+> `interaction_evidence_score` 和 synthetic conformance，不输出 receiver response 或 causal
+> claim；真实 release/data/asset/execution 仍受 exact gate 约束；P21B/P21C
 > `AUTHORIZATION_REQUIRED / NOT_RUN`；
 > P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN`
 >
@@ -102,7 +112,7 @@ species and biological systems.” 愿景转换为可逐阶段授权、实施、
 exact-scope 的 Biological World Model research capability。Phase 编号是路线标签，
 不是产品版本、API 协议、schema 或模型版本。
 
-## 2. Phase 11 产品基线、已完成 P12–P21A 与当前 P22 contract-only gate
+## 2. Phase 11 产品基线、已完成 P12–P22 与当前 P23A 本地合同门
 
 ### 2.1 当前身份
 
@@ -145,7 +155,10 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | P21A starting SHA | `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`（P20 docs-closure） |
 | P21A completion code SHA / tree | `20ecc12542e5df40c90d1fc367dbe86b563478b8` / `ffcd261dd7d506d0ad852023afcba0f5c97a2d72` |
 | P21A source date epoch / 完成分支 | `1786050825` / `codex/p21-benchmark-system` |
-| 当前 work-unit 状态 | P21A `COMPLETE — SYSTEM_ONLY / SCIENCE NOT_RUN / POLICY NO_NEW_DECISION`；P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN`；P22 `CONTRACT_ONLY / NOT_STARTED`（下一 eligible 本地 gate）；P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN` |
+| P22 actual starting SHA / P21A prerequisite code | `09792e13e29a76b5e4434507f3334eefb947789c`（P21A docs-closure） / `20ecc12542e5df40c90d1fc367dbe86b563478b8` |
+| P22 completion code SHA / tree | `bca5ad661856e8d9aa832c47f23c6ad7179ee0c9` / `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a` |
+| P22 source date epoch / 完成分支 | `1786056220` / `codex/p22-virtual-cell-registry` |
+| 当前 work-unit 状态 | P22 `COMPLETE — CONTRACT_ONLY / SCIENCE NOT_RUN / POLICY NO_NEW_DECISION`；默认 P22 registry absent/empty；P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN`；P23A `NEXT_ELIGIBLE — CONTRACT_ONLY / NOT_STARTED`，真实输入/执行另行 gated；P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN` |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -190,7 +203,8 @@ P18   typed multi-omics contract（COMPLETE at 626c71ff...；real model acceptan
 P19   controlled Pack Factory contract（COMPLETE；real fixture/operator/science/policy NOT_RUN）
 P20   Training Pipeline contract（COMPLETE — CONTRACT_ONLY at a4003704...；science NOT_RUN）
 P21A  Benchmark System/protocol freeze（COMPLETE — SYSTEM_ONLY at 20ecc12542e5df40c90d1fc367dbe86b563478b8；start 5f3fc2d88c20e8083fb66a4c3399c5fe148241be；science NOT_RUN）
-P22   Curated Virtual Cell Registry（CONTRACT_ONLY / NOT_STARTED；next eligible local gate）
+P22   Curated Virtual Cell Registry（COMPLETE — CONTRACT_ONLY at bca5ad661856e8d9aa832c47f23c6ad7179ee0c9；start 09792e13e29a76b5e4434507f3334eefb947789c；default registry empty；science NOT_RUN）
+P23A  Cell Interaction Evidence（NEXT_ELIGIBLE — CONTRACT_ONLY / NOT_STARTED；evidence-only）
 ```
 
 Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
@@ -238,7 +252,9 @@ Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
 > Broker/Registry/model/science 执行。P19 已完成受控 Pack Factory 工程合同，但真实
 > fixture/output root/operator/science/policy 均未运行。P20 随后完成 exact
 > RegisteredPack-bound Training Pipeline contract；它没有运行真实 candidate 或读取
-> test/external。P21A system-only 现已完成；下一本地 gate 仅为 P22 contract-only。
+> test/external。P21A system-only 与 P22 contract-only 现已完成；P23A contract-only 是
+> 下一 eligible 本地 work unit，只能建立 evidence-only contract/synthetic conformance；真实
+> sender/receiver release、Pack/context、interaction data 或执行仍须另行满足 exact gate。
 
 ### 2.4 本次编号纠正
 
@@ -418,8 +434,8 @@ staged/modified/deleted/untracked 清单。除当前授权 exact allowlist 外�
 | 19 | 受控 upload receipt → RegisteredPack 闭环 | contract-only 工程已完成；metadata/mapping/operator review 可重放 | receipt 保持 quarantine，不注册 |
 | 20 | training job/result、checkpoint 和 tiny deterministic dry-run | contract-only 工程已完成；可进入 P21A system/protocol freeze | 不运行真实候选、不生成 evidence |
 | 21 | 统一 benchmark/evidence ledger + 独立 candidate-run 窗口 | protocol/result/负结果可复现 | 保留分散 benchmark；candidate 不晋级 |
-| 22 | 可版本化 Virtual Cell Registry | job 精确绑定 release identity | 只读 catalog，不允许执行 |
-| 23 | 一个窄 cell-cell interaction 模型 | held-out pair/context 过门 | 只显示 evidence，不预测 |
+| 22 | 可版本化 Virtual Cell Registry | contract-only registry 已完成；真实 import/runtime 仍须独立 evidence/policy/release identity | 默认 absent/empty，只读 Python catalog，固定不执行 |
+| 23 | 一个窄 cell-cell interaction evidence 模型 | 本地 contract-only 先冻结 evidence-only schema/scoring；真实 paired data/execution 再经 exact gate 和 held-out pair/context 门 | P23A next eligible；只显示 evidence score，不预测 receiver response |
 | 24 | 一个真实 CommunityModelAdapter | 共培养外部条件胜独立成员 baseline | P10 no-model abstain 保持 |
 | 25 | 一个定义群落 microbiome prototype | 独立批次/条件过门 | 不称 microbiome predictor |
 | 26 | 一个窄 host–microbiome 联合任务 | held-out donor/batch 过门 | 分别返回 host/community 结果 |
@@ -1207,7 +1223,8 @@ Multi-Omics Cell State Representation。
 
 以下文本只保留 P19 启动前的 replay/provenance 形状。P19 已在
 `codex/p19-controlled-pack-factory` 完成；不得复制该旧模板重新启动 P19。P20 也已完成，
-P21A system-only 现已完成；当前 gate 仅为 P22 contract-only。
+P21A system-only 与 P22 contract-only 现已完成；P23A contract-only 是下一 eligible 本地
+work unit，真实 sender/receiver release/evidence/data/execution 则继续受 exact gate 约束。
 
 ```text
 授权以 `<Phase 17 完成 SHA>` 作为 Phase 18（Multi-omics Virtual Cell）
@@ -1448,9 +1465,8 @@ operator、promotion、release 或 deploy。synthetic positive fixtures 只验�
 状态不变。任何 P21B 执行都必须由外部可信边界独立固定 composite execution identity；
 content fingerprint 只证明内容身份，不构成 issuer authentication。
 
-**下一 eligible 本地工程 gate：** P22 `CONTRACT_ONLY / NOT_STARTED`；只允许先收口
-registry 合同，不得在缺少 P21B/P21C evidence/policy 时制造 executable、validated 或
-promoted release。
+P22 contract-only 随后完成，但没有借 P21A completion 制造 executable、validated 或
+promoted release；P21B/P21C 仍未运行。
 
 ### 目标
 
@@ -1560,6 +1576,31 @@ evidence fingerprints 和 exact operator-decision fingerprint。该模板可在 
 
 ## 16. Phase 22：Curated Virtual Cell Registry
 
+### 完成快照（`COMPLETE — CONTRACT_ONLY`）
+
+P22 以 P21A code `20ecc12542e5df40c90d1fc367dbe86b563478b8` 为 prerequisite，
+从实际 P21A docs-closure `09792e13e29a76b5e4434507f3334eefb947789c` 开始，在
+`codex/p22-virtual-cell-registry` 以 code SHA
+`bca5ad661856e8d9aa832c47f23c6ad7179ee0c9`、tree
+`f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`、source date epoch `1786056220`
+完成 contract-only registry。Engineering `COMPLETE — CONTRACT_ONLY`；science
+`NOT_RUN`；policy `NO_NEW_DECISION`；P21B/P21C 仍
+`AUTHORIZATION_REQUIRED / NOT_RUN`。
+
+Focused `35 passed`；affected `289 passed / 1 skipped`；safe
+`1,680 passed / 49 skipped / 387 deselected`；legacy
+`1,147 passed / 58 skipped / 105 deselected`；static gates PASS。两次 exact-code wheel
+byte-identical，为 `1,217,155` bytes / SHA-256
+`3f978e9f3eb06ea17017c1838002762f28ae717ee08d987cfb8ea059162a2485` / `372`
+entries / React `14` / tests `0` / AppleDouble `0`；source/wheel
+`praxis_virtualcell/model_zoo/curated_registry.py` SHA-256 均为
+`9678b2460aff6738935a2728e12abf398985c4475d66be96d37a721a21bf62ff`。
+
+本轮没有真实 imported/cataloged/quarantined/revoked/superseded release；默认 P22 registry
+未配置/不存在或为空。所有 positive import/lifecycle fixtures 仅为 pytest temporary-root
+contract conformance。P12 ModelRegistryV2 仍独立保持 5 legacy releases / 0 native / 0
+promoted；不得把它与 P22 空 catalog 混为一个计数。
+
 ### 目标
 
 第一版只实现 operator-curated、content-addressed Virtual Cell Registry，不做开放
@@ -1568,44 +1609,75 @@ evidence fingerprints 和 exact operator-decision fingerprint。该模板可在 
 ### Virtual Cell release 内容
 
 - species/cell context identity；
-- one or more Pack ID/version/fingerprint；
+- v1 exact one-Pack ID/version/fingerprint 与 P19 registration；
 - model release、adapter、environment requirement；
-- benchmark protocol/result/scientific evidence 和独立 operator product-policy decision；
+- exact P21B benchmark protocol/result/scientific evidence 和独立 P21C product-policy decision；
 - capability scope、OOD/abstain policy；
 - license/source/publisher/reviewer；
 - approved/quarantined/revoked/superseded 状态；
 - append-only audit history。
 
-### 依次实施
+### 实际实施与保留项
 
-1. 冻结 Virtual Cell release schema 和 fingerprint；
-2. 复用 PackIndex 的原子写入、冲突拒绝和每次读取重验模式；
-3. 同一 ID/version 不允许不同 bytes；
-4. import 时重验所有 schema/hash/license/dependency/adapter approval；
-5. wrapper entrypoint 作为代码执行边界，必须 allowlist/review；
-6. 公共 API 只读、路径脱敏；
-7. 管理员可 import、控制 catalog visibility、revoke/supersede，并导入已签发的
-   product-policy decision；registry 操作本身不得生成、提升或改写 scientific
-   evidence/production promotion；
-8. Data Center 改为读取真实 Virtual Cell release，不再只显示 context preset；
-9. 新聊天绑定 exact release，job execution identity 锁定全部 Pack/model/evidence；
-10. UI 分列显示 cataloged、installed、compatible、executable、validated。
+1. [x] 冻结 strict `vc.virtual-cell-release.v1` 和 canonical fingerprint；
+2. [x] 复用原子 write-new、冲突拒绝、held-descriptor 与每次读取重验模式；
+3. [x] 同一 ID/version 不允许不同 bytes；
+4. [x] import 重验 exact one-Pack/P19、P12 model graph、P21B bundle/execution、P21C
+   evidence/policy、dependency 和 wrapper approval；license/source metadata identity 与
+   credential-free HTTPS URI syntax 被绑定，但不 fetch 或 live-verify license/source truth；
+5. [x] wrapper entrypoint 必须有独立 review/approval，registry 从不 import 或执行它；
+6. [x] 提供路径脱敏、nonexecuting、read-only Python public projection/query；
+7. [x] operator-owned default-deny import/decision allowlists、stable authorization reference、
+   append-only approve_catalog/quarantine/revoke/supersede 与 independently persisted checkpoint；
+8. [ ] HTTP registry API；
+9. [ ] Data Center 读取真实 Virtual Cell release；
+10. [ ] Chat/job execution identity 绑定 exact release；
+11. [ ] UI 分列状态；
+12. [ ] asset install、runtime compatibility/plan 或 execution；
+13. [ ] multi-Pack、direct P14/P15/P16 或其他 non-P21B evidence route。
 
 ### 验收门
 
-- revoked/quarantined artifact 永不进入 execution plan；
+- 同 ID/version、cross-binding、stale hash、unknown field、duplicate JSON key、path/symlink、
+  collision、inode swap、chain/head tamper、truncation 和 crash-tail adversarial tests 通过；
+- quarantined/revoked/superseded release 不进入默认 public catalog；本阶段未接 runtime plan；
+- public projection 固定 `executable=false`，installed/model/environment/adapter compatibility
+  保持 unknown/null；
 - registry approval 不自动意味着资产安装、模型兼容或科学验证；
-- release import/approve/revoke 不能把 `benchmark_passed`、
+- release import/approve/quarantine/revoke/supersede 不能把 `benchmark_passed`、
   `scientifically_validated` 或 `production_promoted` 从 false 变 true；
-- 历史 job 不因 release revoke/supersede 被改写；
+- append-only registry 不改写历史 release/decision bytes；JobStore 未接线，不能声称已验证
+  历史 job revoke/supersede 行为；
 - 无任意 remote plugin 自动下载/import；
-- 用户选择的 cell 与实际 execution identity 一致。
+- HTTP/UI/Data Center/chat/job/runtime integration 保持未完成。
 
-### 可复制授权提示词
+### Trust、checkpoint 与 rollback 边界
+
+Content fingerprint 只证明内容身份，不认证 issuer。Import 与 lifecycle decision 只有 exact
+identity 存在于 operator-owned default-deny allowlist 时才可 append；authorization reference
+稳定绑定 authority/kind/subject。读取时，trusted checkpoint 之后的每个 suffix entry 都重新
+核对 authorization provenance，不能仅凭 coherent hash-chain 自授权。
+
+Checkpoint 必须在 registry 外独立持久化。Registry 的 head/hash chain 能发现受信 checkpoint
+之前的回退、内容篡改、tail truncation 和未锚 tail；但外部 checkpoint 尚未推进时，攻击者若把
+registry/head 一起回滚到最近受信 checkpoint，仍可能无法检出。P22 completion 没有创建或推进
+任何真实 operator checkpoint。
+
+完整完成边界见 [ADR-0019](ADR-0019-curated-virtual-cell-registry.md)、
+[P22 runbook](runbooks/VIRTUALCELL-CURATED-REGISTRY.md) 和
+[P22 completion report](../reports/phase22/PHASE22_COMPLETION.md)。
+
+### 历史 P22 授权形状（阶段已完成，不得重复执行）
+
+下列模板保留原计划边界。实际 P22 只完成上述 Python contract/store/projection；模板中的
+HTTP、Data Center、聊天、job、UI、真实 release import 和 runtime 项均未运行，不得由模板文字
+推断为完成。
 
 ```text
-授权以 `<P21A benchmark-system code SHA>` 作为 Phase 22（Curated Virtual Cell
-Registry）唯一起始代码基线，并以 `<逐项列明的 P14/P15/P16 capability/scientific
+授权以 `20ecc12542e5df40c90d1fc367dbe86b563478b8` 作为 Phase 22（Curated Virtual Cell
+Registry）prerequisite code identity，并以 P21A docs-closure
+`09792e13e29a76b5e4434507f3334eefb947789c` 作为 actual repository starting SHA；仅在未来
+真实导入窗口，才可再以 `<逐项列明的 P14/P15/P16 capability/scientific
 evidence fingerprints + 对应 P14B/P15B/P16B policy fingerprints，或 P21B
 evidence fingerprints + 对应 P21C policy fingerprints>` 及其 exact read-only
 path/size/SHA-256 作为只读导入身份，创建
@@ -1627,6 +1699,11 @@ release fingerprint、权限负例、E2E 和下一授权句。
 ```
 
 ## 17. Phase 23：Cell Interaction Model
+
+**当前状态：** `NEXT_ELIGIBLE — CONTRACT_ONLY / NOT_STARTED`。本地 strict schema、
+evidence-only scoring 和 synthetic conformance 可直接推进；P22 默认 registry 为空，真实
+sender/receiver curated release、Pack/context、interaction evidence/data、asset 或执行仍须满足
+各自 exact 输入和授权门。
 
 ### P23A 最小科学目标
 
@@ -1667,7 +1744,7 @@ advisory/基线，不能称真实共培养、信号转导或因果模型。
 - finite output、uncertainty、OOD 和 execution identity 完整；
 - 没有真实 paired evidence 或未胜 baseline 时 `prediction=null`/abstain。
 
-### P23A 可复制授权提示词
+### P23A 真实数据/执行窗口可复制授权提示词
 
 ```text
 授权以 `<Phase 22 完成 SHA>` 作为 Phase 23A（Cell Interaction Evidence Model v1）
@@ -2412,9 +2489,16 @@ P21A 已从 P20 文档闭包提交 `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`
 `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`、source date epoch `1786050825`
 完成 system-only 工程；science `NOT_RUN`，policy `NO_NEW_DECISION`。冻结合同、负结果
 ledger 与 synthetic conformance 不代表真实 evidence；P8 保持 null/unbound，P9 保持
-exact negative/unbound。P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN`。下一 eligible
-本地工程 gate 为 P22 `CONTRACT_ONLY / NOT_STARTED`，不得导入或制造 executable、
-validated、promoted release。
+exact negative/unbound。P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN`。
+
+P22 已从实际 P21A docs-closure `09792e13e29a76b5e4434507f3334eefb947789c`
+开始，以 code SHA `bca5ad661856e8d9aa832c47f23c6ad7179ee0c9`、tree
+`f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`、source date epoch `1786056220`
+完成 contract-only curated registry。它只组合并重验既有 immutable P19/P12/P21B/P21C
+identity；没有真实 release import/catalog/quarantine/revoke/supersede，默认 registry
+absent/empty，science `NOT_RUN`，policy `NO_NEW_DECISION`。下一 eligible 本地 work unit 为
+P23A contract-only，只能实现 sender→receiver evidence score 和 synthetic conformance；真实
+sender/receiver curated release、Pack/context、interaction evidence/data 或执行仍受 exact gate 约束。
 
 当前持续本地授权不覆盖 P14R、P14B、P15R、P15B、P16R 或 P16B。没有逐项 exact
 assets/output root/run window 授权时，不得读取或运行真实资产、产生科学

@@ -1,19 +1,95 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P21A 分支 `codex/p21-benchmark-system`；唯一起始 SHA
-> `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`
+> 当前文档基线：P22 分支 `codex/p22-virtual-cell-registry`；docs 起始 SHA
+> `09792e13e29a76b5e4434507f3334eefb947789c`；P21A prerequisite code SHA
+> `20ecc12542e5df40c90d1fc367dbe86b563478b8`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：P21A `COMPLETE — SYSTEM_ONLY`；science `NOT_RUN`；policy
+> 状态：P22 `COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`；policy
 > `NO_NEW_DECISION`；completion code SHA
-> `20ecc12542e5df40c90d1fc367dbe86b563478b8`；tree
-> `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`；source date epoch `1786050825`。
-> 下述 P4.3–P20 和 CI 数字仍只绑定各自 exact SHA/日期；P21A 本地工程结果不构成真实
-> candidate execution、benchmark、test/external evaluation、科学验证、product policy、
-> promotion、发布或远程证据。P21B/P21C 为
-> `AUTHORIZATION_REQUIRED / NOT_RUN`；下一可进入的本地工作仅为 P22 contract-only。
+> `bca5ad661856e8d9aa832c47f23c6ad7179ee0c9`；tree
+> `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`；source date epoch `1786056220`。
+> 下述 P4.3–P21A 和 CI 数字仍只绑定各自 exact SHA/日期；P22 本地工程结果不构成真实
+> registry import/catalog/revoke/supersede、candidate execution、benchmark、test/external
+> evaluation、科学验证、product policy、promotion、发布或远程证据。P21B/P21C 为
+> `AUTHORIZATION_REQUIRED / NOT_RUN`；P23A 是下一 eligible 本地 contract-only 阶段，
+> 仅可实现 sender→receiver evidence score，真实 release/data/execution 仍受 exact gate 约束。
+
+## Phase 22 `COMPLETE — CONTRACT_ONLY` 本地证据
+
+P22 新增 strict Curated Virtual Cell Registry library contract。v1 release composition
+严格只允许一个 `FactoryRegisteredPackV1`、一个已有的 P12 release/evidence/policy closure、
+一个 P21B evidence bundle 和所有带 exact wrapper approval 的 adapter。它只消费已有的
+positive scientific/policy state，不能创建、升级或重算这些状态。Multi-Pack、direct
+P14/P15/P16 和其他 non-P21B evidence route 均留待未来新 schema。
+
+Import 默认进入 quarantined；approve/quarantine/revoke/supersede 只改变 curated lifecycle
+metadata，不安装资产、不执行模型，也不改变 science/policy。外置 trust 默认 deny-all，按
+exact import/decision fingerprint allowlist 授权；外置 checkpoint 精确绑定
+`entry_count + last_entry_fingerprint`，打开时先锚定 prefix，再用当前 trust 重验全部
+suffix。`checkpoint()` 不替调用方在 registry root 外持久化锚点；revoke/supersede 后在
+外部 checkpoint 推进前，回滚到旧 checkpoint 仍可能。content hash 与 stable
+authorization reference 均不是签名或 issuer authentication。
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_curated_registry.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -ra \
+  praxis_virtualcell/tests/test_curated_registry.py \
+  praxis_virtualcell/tests/test_model_registry_v2.py \
+  praxis_virtualcell/tests/test_benchmark_system.py \
+  praxis_virtualcell/tests/test_pack_factory.py \
+  praxis_virtualcell/tests/test_pack_product.py \
+  praxis_virtualcell/tests/test_capability_runtime.py \
+  praxis_virtualcell/tests/test_virtual_experiment.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -ra praxis_virtualcell/tests \
+  --ignore=praxis_virtualcell/tests/test_mudata_alignment.py \
+  -k 'not golden and not gem and not norman'
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -ra tests \
+  -m 'not (integration or llm or remote)'
+
+python -m ruff check . --extend-exclude old --no-cache
+
+python -m ruff format --check \
+  praxis_virtualcell/model_zoo/curated_registry.py \
+  praxis_virtualcell/tests/test_curated_registry.py
+
+python -m py_compile \
+  praxis_virtualcell/model_zoo/curated_registry.py \
+  praxis_virtualcell/tests/test_curated_registry.py
+
+git diff --check
+~~~
+
+| Gate | 结果 |
+|---|---|
+| P22 focused | `35 passed / 43.55s` |
+| P22 affected regression gate | `289 passed / 1 skipped / 64.94s` |
+| safe Python gate | `1,680 passed / 49 skipped / 387 deselected / 334.23s` |
+| legacy gate | `1,147 passed / 58 skipped / 105 deselected / 60.48s` |
+| Ruff excluding `old` / targeted format / `py_compile` / diff | PASS |
+| reproducible packaging / ZIP integrity | PASS；wheel `1,217,155` bytes；SHA-256 `3f978e9f3eb06ea17017c1838002762f28ae717ee08d987cfb8ea059162a2485`；`372` entries |
+
+两次 exact-code wheel byte-identical，React `14`、tests `0`、AppleDouble `0`，ZIP
+integrity PASS；source/wheel `praxis_virtualcell/model_zoo/curated_registry.py` SHA-256 均为
+`9678b2460aff6738935a2728e12abf398985c4475d66be96d37a721a21bf62ff`。工具链为
+Python `3.13.12`、build `1.5.0`、setuptools `70.2.0`、packaging `26.0`、Node
+`25.8.2`、npm `11.11.1`、Vite `8.1.2`。前端明确 offline，Python build 明确使用
+`--no-isolation --skip-dependency-check`；因此这是当前本地 source/toolchain 的可复现性
+证据，不是 pinned dependency closure 或 clean-install 证明。
+
+默认没有 checked-in curated registry root 或真实 curated release；公开投影只有 Python
+library query，敏感字段脱敏、`executable=false`、installed/compatibility unknown。没有
+HTTP/UI/Data Center/chat/runtime planning、asset install/execution、真实 lifecycle、network、
+GPU、remote、science、operator policy、promotion、version bump、release、push 或 deploy。
+完整边界见 [ADR-0019](ADR-0019-curated-virtual-cell-registry.md)、
+[P22 runbook](runbooks/VIRTUALCELL-CURATED-REGISTRY.md) 和
+[P22 completion report](../reports/phase22/PHASE22_COMPLETION.md)。
 
 ## Phase 21A `COMPLETE — SYSTEM_ONLY` 本地证据
 
@@ -66,7 +142,7 @@ git diff --check
 | safe Python gate | `1,645 passed / 49 skipped / 387 deselected / 285.21s` |
 | legacy gate | `1,147 passed / 58 skipped / 105 deselected / 61.52s` |
 | Ruff lint / targeted format / `py_compile` / diff | PASS |
-| reproducible packaging / ZIP integrity | PASS；wheel `1,202,180` bytes；SHA-256 `ee98d4b3c6895bb6a91be1c439a0f927050cb813e9f7e5c61a37552a15c326f`；`371` entries |
+| reproducible packaging / ZIP integrity | PASS；wheel `1,202,180` bytes；SHA-256 `ee98d4b3c6895bb6a91be1c439a0f927050cb813e9f7e5c61a37552a15c326f1`；`371` entries |
 
 两次 exact-code offline wheel byte-identical，React `14`、tests `0`、AppleDouble `0`；
 source/wheel `praxis_virtualcell/benchmarks/system.py` SHA-256 均为
