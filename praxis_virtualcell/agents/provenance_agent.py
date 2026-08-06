@@ -13,6 +13,11 @@ class ProvenanceAgent(BaseAgent):
         p = message.payload
         bc = p.get("brain_context", {})
         routing = bc.get("routing", {})
+        adapter_outputs = {
+            r.get("agent_name"): (r.get("provenance") or {}).get("adapter_output")
+            for r in p.get("results", [])
+            if (r.get("provenance") or {}).get("adapter_output") is not None
+        }
         provenance = {
             "n_messages": len(bus.trace),
             "rules_referenced": bc.get("rules_referenced", []),
@@ -31,6 +36,10 @@ class ProvenanceAgent(BaseAgent):
                                 for r in p.get("results", [])
                                 if (r.get("provenance") or {}).get("per_call")},
         }
+        if adapter_outputs:
+            provenance["adapter_outputs"] = adapter_outputs
+        if p.get("adapter_output") is not None:
+            provenance["adapter_output"] = p["adapter_output"]
         bus.send(AgentMessage(message.message_id + ":prov", self.name, "Report",
             "provenance_done", {**p, "provenance": provenance}, message.timestamp,
             message.message_id))

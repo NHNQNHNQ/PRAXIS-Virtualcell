@@ -18,6 +18,10 @@ from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.core.request_v2 import VirtualCellRequestV2
 from praxis_virtualcell.data_packs.errors import PackRegistryError
 from praxis_virtualcell.data_packs.registry import PackRegistry
+from praxis_virtualcell.model_zoo.adapter_sdk import (
+    AdapterContractError,
+    AdapterRegistry,
+)
 from praxis_virtualcell.model_zoo.cache import ModelCache
 from praxis_virtualcell.model_zoo.capability_registry import (
     CapabilityRegistry,
@@ -44,13 +48,18 @@ class ModelBrokerAgent(BaseAgent):
     def __init__(self, registry: ModelZooRegistry | None = None,
                  cache: ModelCache | None = None,
                  pack_registry: PackRegistry | None = None,
-                 environment: EnvironmentSnapshot | None = None) -> None:
+                 environment: EnvironmentSnapshot | None = None,
+                 adapter_registry: AdapterRegistry | None = None) -> None:
         self._reg = registry or ModelZooRegistry()
         self._cache = cache or ModelCache()
         self._packs = pack_registry or PackRegistry()
         cards = tuple(self._reg.card(name) for name in self._reg.capability_names())
         self._environment = environment or EnvironmentSnapshot.detect(cards)
-        self._capabilities = CapabilityRegistry(self._reg, self._cache)
+        self._capabilities = CapabilityRegistry(
+            self._reg,
+            self._cache,
+            adapter_registry=adapter_registry,
+        )
         self._prepared: dict[str, list] = {}
 
     def handle(self, message: AgentMessage, bus: MessageBus) -> None:
@@ -80,14 +89,21 @@ class ModelBrokerAgent(BaseAgent):
         plan = self._capabilities.plan(request, pack, self._environment)
         reports = {report.model_name: report for report in plan.reports}
         prepared = []
-        failed = set()
+        failed: dict[str, str] = {}
         for step in plan.steps:
             try:
                 prepared.append(
-                    self._capabilities.instantiate(step, reports[step.model_name])
+                    self._capabilities.instantiate(
+                        step,
+                        reports[step.model_name],
+                        request=request,
+                        pack=pack,
+                    )
                 )
+            except AdapterContractError:
+                failed[step.model_name] = "adapter.input_preparation"
             except Exception:  # noqa: BLE001 - constructor/import failures are a broker gate
-                failed.add(step.model_name)
+                failed[step.model_name] = "model.wrapper_initialization"
         if failed:
             revised_reports = []
             for report in plan.reports:
@@ -95,7 +111,8 @@ class ModelBrokerAgent(BaseAgent):
                     revised_reports.append(report)
                     continue
                 checks = dict(report.checks)
-                checks["model.wrapper_initialization"] = False
+                reason = failed[report.model_name]
+                checks[reason] = False
                 revised = report.to_dict()
                 revised.update(
                     {
@@ -104,7 +121,7 @@ class ModelBrokerAgent(BaseAgent):
                         "executable": False,
                         "checks": checks,
                         "reasons": list(report.reasons)
-                        + ["model.wrapper_initialization"],
+                        + [reason],
                     }
                 )
                 revised_reports.append(

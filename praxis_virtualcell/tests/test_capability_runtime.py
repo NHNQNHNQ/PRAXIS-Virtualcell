@@ -15,9 +15,17 @@ from praxis_virtualcell.agents.model_broker_agent import ModelBrokerAgent
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.core.request import VirtualCellRequest
-from praxis_virtualcell.core.request_v2 import VirtualCellRequestV2
+from praxis_virtualcell.core.request_v2 import (
+    VirtualCellRequestV2,
+    legacy_request_to_v2,
+)
 from praxis_virtualcell.data_packs.registry import PackRegistry
 from praxis_virtualcell.io.job_store import JobStore
+from praxis_virtualcell.model_zoo.adapter_sdk import (
+    AdapterInputContract,
+    AdapterRegistry,
+    DeltaExpressionReferenceAdapter,
+)
 from praxis_virtualcell.model_zoo.cache import ModelCache
 from praxis_virtualcell.model_zoo.capability_registry import (
     CapabilityRegistry,
@@ -28,7 +36,6 @@ from praxis_virtualcell.model_zoo.capability_registry import (
 )
 from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
 from praxis_virtualcell.model_zoo.registry_v2 import (
-    AdapterIdentity,
     ArtifactIdentity,
     EnvironmentIdentity,
     ModelRegistryV2,
@@ -69,6 +76,7 @@ class DummyPredictor(ModelWrapper):
         return {
             "prediction": {"delta": [0.25]},
             "uncertainty": {"method": "deterministic_fixture"},
+            "ood": {"detected": False, "dimensions": [], "reason": None},
             "evidence": ["test_only_dummy"],
         }
 
@@ -129,6 +137,22 @@ class RaisingPredictor(ModelWrapper):
 
     def run_prediction(self, model_input: dict) -> dict:
         raise AssertionError("unreachable")
+
+
+class DataRequiredDeltaAdapter(DeltaExpressionReferenceAdapter):
+    """Test-only adapter proving Broker refuses to invent Pack matrix input."""
+
+    adapter_id = "test-only-data-required-delta"
+    input_contract = AdapterInputContract(
+        schema_version="vc.adapter-input-contract.v1",
+        task="predict_delta_expression",
+        output="delta_expression",
+        value_type="float",
+        shape=(None, None),
+        unit=None,
+        pack_data_required=True,
+        alignment_required=True,
+    )
 
 
 def _card() -> dict:
@@ -328,6 +352,7 @@ def _v2_registry_and_environment(
     *,
     promoted: bool = True,
     safe_load_policy: str = "data_only",
+    runtime_adapter=None,
 ) -> tuple[ModelRegistryV2, EnvironmentSnapshot]:
     card = ModelCard.from_dict(card_value)
     artifact = ArtifactIdentity.from_dict(
@@ -346,19 +371,7 @@ def _v2_registry_and_environment(
             "legacy_incomplete": False,
         }
     )
-    adapter = AdapterIdentity.from_dict(
-        {
-            "schema_version": "vc.model-adapter.v1",
-            "adapter_id": "test-only-delta-expression-runtime",
-            "version": "1.0.0",
-            "implementation": _DUMMY_WRAPPER,
-            "task": card.task,
-            "outputs": list(card.output),
-            "input_contract_fingerprint": "4" * 64,
-            "output_contract_fingerprint": "5" * 64,
-            "legacy_incomplete": False,
-        }
-    )
+    adapter = (runtime_adapter or DeltaExpressionReferenceAdapter()).identity()
     environment_identity = EnvironmentIdentity.from_dict(
         {
             "schema_version": "vc.model-environment.v1",
@@ -700,8 +713,53 @@ def test_v2_exact_synthetic_graph_is_the_only_positive_execution_path(tmp_path):
     assert report.production_promoted is True
     assert report.release_fingerprint == registry_v2.releases[0].fingerprint()
     assert report.policy_fingerprint == registry_v2.policy_records[0].fingerprint()
-    predictor = capabilities.instantiate(plan.steps[0], report)
+    predictor = capabilities.instantiate(
+        plan.steps[0],
+        report,
+        request=VirtualCellRequestV2.from_dict(_request_payload()),
+        pack=pack,
+    )
     assert predictor.name == _DUMMY_NAME
+
+
+def test_v2_unregistered_runtime_adapter_produces_an_empty_plan(tmp_path):
+    card = _card()
+    pack = _pack_registry().record("tiny-human-scrna", "0.1.0")
+    registry_v2, environment = _v2_registry_and_environment(card, pack.fingerprint)
+    zoo = _write_registry(tmp_path, card, registry_v2=registry_v2)
+    capabilities = CapabilityRegistry(
+        zoo,
+        _cache_with_model(tmp_path),
+        adapter_registry=AdapterRegistry(),
+    )
+
+    plan = capabilities.plan(
+        VirtualCellRequestV2.from_dict(_request_payload()),
+        pack,
+        environment,
+    )
+
+    assert plan.executable is False
+    assert plan.steps == ()
+    assert plan.reports[0].adapter_compatible is False
+    assert plan.reports[0].checks["environment.adapter"] is False
+    assert "adapter.identity" in plan.reports[0].reasons
+
+
+def test_v2_instantiation_requires_broker_bound_request_and_pack(tmp_path):
+    card = _card()
+    pack = _pack_registry().record("tiny-human-scrna", "0.1.0")
+    registry_v2, environment = _v2_registry_and_environment(card, pack.fingerprint)
+    zoo = _write_registry(tmp_path, card, registry_v2=registry_v2)
+    capabilities = CapabilityRegistry(zoo, _cache_with_model(tmp_path))
+    plan = capabilities.plan(
+        VirtualCellRequestV2.from_dict(_request_payload()),
+        pack,
+        environment,
+    )
+
+    with pytest.raises(ValueError, match="exact request and registered Pack"):
+        capabilities.instantiate(plan.steps[0], plan.reports[0])
 
 
 def test_v2_execution_contracts_reject_cross_bound_identity(tmp_path):
@@ -891,7 +949,12 @@ def test_v2_instantiate_rechecks_safe_load_policy_after_planning(
 
     monkeypatch.setattr(ModelRegistryV2, "artifact", unsafe_artifact)
     with pytest.raises(ValueError, match="safe load policy"):
-        capabilities.instantiate(plan.steps[0], plan.reports[0])
+        capabilities.instantiate(
+            plan.steps[0],
+            plan.reports[0],
+            request=VirtualCellRequestV2.from_dict(_request_payload()),
+            pack=pack,
+        )
 
 
 def test_compatibility_and_plan_contracts_reject_malformed_bound_fingerprints(
@@ -1477,6 +1540,51 @@ def test_v2_model_broker_rebuilds_canonical_plan_on_wrapper_failure(
     assert broker.take_prepared(plan["plan_id"]) == []
 
 
+def test_v2_broker_refuses_to_invent_required_pack_matrix_input(tmp_path):
+    card = _card()
+    packs = _pack_registry()
+    pack = packs.record("tiny-human-scrna", "0.1.0")
+    runtime_adapter = DataRequiredDeltaAdapter()
+    registry_v2, environment = _v2_registry_and_environment(
+        card,
+        pack.fingerprint,
+        runtime_adapter=runtime_adapter,
+    )
+    zoo = _write_registry(tmp_path, card, registry_v2=registry_v2)
+    broker = ModelBrokerAgent(
+        registry=zoo,
+        cache=_cache_with_model(tmp_path),
+        pack_registry=packs,
+        environment=environment,
+        adapter_registry=AdapterRegistry([runtime_adapter]),
+    )
+    bus = MessageBus()
+
+    broker.handle(
+        AgentMessage(
+            "p13-data-required",
+            "client",
+            "ModelBrokerAgent",
+            "execution_plan_request",
+            {
+                "request": _request_payload(),
+                "pack_id": "tiny-human-scrna",
+                "pack_version": "0.1.0",
+            },
+            "t1",
+        ),
+        bus,
+    )
+
+    plan = bus.latest("execution_plan_ready").payload["execution_plan"]
+    assert plan["schema_version"] == "vc.execution-plan.v2"
+    assert plan["executable"] is False
+    assert plan["steps"] == []
+    assert plan["reports"][0]["checks"]["adapter.input_preparation"] is False
+    assert "adapter.input_preparation" in plan["reports"][0]["reasons"]
+    assert broker.take_prepared(plan["plan_id"]) == []
+
+
 def test_build_runtime_registers_broker_once():
     runtime = build_runtime()
     assert isinstance(runtime._agents["ModelBrokerAgent"], ModelBrokerAgent)
@@ -1515,6 +1623,64 @@ def test_dummy_plugin_runs_without_model_specific_runtime_or_legacy_dispatch_edi
         inspect.getsource(case_dispatch),
     ):
         assert _DUMMY_NAME not in source
+
+
+def test_v2_runtime_uses_broker_prepared_input_and_strict_adapter_envelope(tmp_path):
+    card = _card()
+    packs = _pack_registry()
+    pack = packs.record("tiny-human-scrna", "0.1.0")
+    registry_v2, environment = _v2_registry_and_environment(card, pack.fingerprint)
+    zoo = _write_registry(tmp_path, card, registry_v2=registry_v2)
+    runtime = build_runtime(
+        model_registry=zoo,
+        model_cache=_cache_with_model(tmp_path),
+        pack_registry=packs,
+        environment=environment,
+    )
+
+    report = runtime.run_workflow(
+        _legacy_request(),
+        pack_id="tiny-human-scrna",
+        pack_version="0.1.0",
+    )
+
+    adapter = DeltaExpressionReferenceAdapter()
+    assert report["abstain"] is False
+    assert report["prediction"] == {"delta": [0.25]}
+    assert report["models_used"] == [_DUMMY_NAME]
+    assert report["adapter_output"]["schema_version"] == (
+        "vc.adapter-output-envelope.v1"
+    )
+    assert report["adapter_output"]["provenance"]["adapter_fingerprint"] == (
+        adapter.fingerprint()
+    )
+    assert report["provenance"]["execution_plan"]["steps"][0][
+        "adapter_fingerprints"
+    ] == [adapter.fingerprint()]
+    assert report["provenance"]["adapter_outputs"][_DUMMY_NAME][
+        "provenance"
+    ]["input_contract_fingerprint"] == adapter.input_contract.fingerprint()
+
+    result = {
+        "structured_report": report,
+        "provenance": report["provenance"],
+        "trace": [],
+        "mode": "offline",
+        "llm_enabled": False,
+    }
+    store = JobStore(str(tmp_path / "runs"))
+    store.save(
+        "p13-v2-runtime",
+        request=legacy_request_to_v2(_legacy_request()).to_dict(),
+        result=result,
+    )
+    stored = store.load("p13-v2-runtime")
+    assert stored["execution_identity"]["models"][0]["adapter_fingerprints"] == [
+        adapter.fingerprint()
+    ]
+    assert len(
+        stored["execution_identity"]["structured_report_fingerprint"]
+    ) == 64
 
 
 def test_pack_aware_runtime_never_falls_back_to_mock_when_asset_missing(tmp_path):

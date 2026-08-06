@@ -70,11 +70,21 @@ class ReliabilityAgent(BaseAgent):
         learned_prov = None
         learned_active = False
         learned_decision = None
-        if self.mode != "rule":
+        adapter_output = p.get("adapter_output") or {}
+        learned_adapter_supported = not adapter_output or (
+            adapter_output.get("task") == "predict_delta_expression"
+            and adapter_output.get("output") == "delta_expression"
+        )
+        if self.mode != "rule" and learned_adapter_supported:
             learned_prov = self._learned(p, dis)
             if not learned_prov.get("fallback"):
                 learned_active = True
                 learned_decision = learned_prov["abstain_decision"]
+        elif self.mode != "rule":
+            learned_prov = {
+                "fallback": True,
+                "reason": "unsupported_adapter_output",
+            }
 
         # rule 软 abstain(仅在非 learned-active 时用 rule 的 disagreement abstain)
         if disagreement_high and "model_disagreement_too_high" in abstain_rules and not learned_active:

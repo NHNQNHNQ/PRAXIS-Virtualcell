@@ -19,6 +19,8 @@ def apply_governance_gate(report: dict, reason: str, prov_key: str, detail: dict
     if gated:
         report["abstain"] = True
         report["prediction"] = None
+        if "adapter_output" in report:
+            report["adapter_output"] = None
         report.setdefault("abstain_reasons", []).append(reason)
     report.setdefault("provenance", {})[prov_key] = {
         **detail, "gate_abstained": gated, "reliability_original_abstain": original}

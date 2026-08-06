@@ -19,6 +19,11 @@ from praxis_virtualcell.core.request_v2 import (
     _json_value,
 )
 from praxis_virtualcell.data_packs.registry import RegisteredPack
+from praxis_virtualcell.model_zoo.adapter_sdk import (
+    DEFAULT_ADAPTER_REGISTRY,
+    AdapterContractError,
+    AdapterRegistry,
+)
 from praxis_virtualcell.model_zoo.cache import ModelCache
 from praxis_virtualcell.model_zoo.registry_v2 import (
     EnvironmentIdentity,
@@ -1103,9 +1108,22 @@ class ExecutionPlanV2(_Contract):
 class CapabilityRegistry:
     """Evaluate strict model cards without routing, prediction, or scientific inference."""
 
-    def __init__(self, model_zoo, cache: ModelCache) -> None:
+    def __init__(
+        self,
+        model_zoo,
+        cache: ModelCache,
+        *,
+        adapter_registry: AdapterRegistry | None = None,
+    ) -> None:
         self.model_zoo = model_zoo
         self.cache = cache
+        self.adapter_registry = (
+            DEFAULT_ADAPTER_REGISTRY
+            if adapter_registry is None
+            else adapter_registry
+        )
+        if not isinstance(self.adapter_registry, AdapterRegistry):
+            raise TypeError("adapter_registry must be AdapterRegistry")
         registry_v2 = getattr(model_zoo, "registry_v2", None)
         if registry_v2 is not None and not isinstance(registry_v2, ModelRegistryV2):
             raise TypeError("model_zoo.registry_v2 must be ModelRegistryV2")
@@ -1587,18 +1605,25 @@ class CapabilityRegistry:
         requested_outputs = request.task.requested_outputs or (
             request.output_modality.name,
         )
-        adapter_compatible = bool(
-            environment_identity_match
-            and adapters
-            and environment.identity is not None
-            and environment.identity.adapter_fingerprints == adapter_fingerprints
-            and all(
-                not adapter.legacy_incomplete
-                and adapter.task == request.task.task_type == card.task
-                and all(output in adapter.outputs for output in requested_outputs)
-                for adapter in adapters
+        try:
+            runtime_adapter = self.adapter_registry.resolve_requested(
+                request.task.task_type,
+                requested_outputs,
             )
-        )
+            adapter_compatible = bool(
+                environment_identity_match
+                and len(adapters) == 1
+                and environment.identity is not None
+                and environment.identity.adapter_fingerprints == adapter_fingerprints
+                and adapter_fingerprints == (runtime_adapter.fingerprint(),)
+                and not adapters[0].legacy_incomplete
+                and adapters[0].task == request.task.task_type == card.task
+                and adapters[0].outputs == tuple(requested_outputs)
+                and self.adapter_registry.resolve_identity(adapters[0])
+                is runtime_adapter
+            )
+        except (AdapterContractError, TypeError, ValueError):
+            adapter_compatible = False
 
         evidence_fingerprints = (
             release.evidence_fingerprints if release is not None else ()
@@ -1874,11 +1899,19 @@ class CapabilityRegistry:
         self,
         step: ExecutionStep | ExecutionStepV2,
         report: CompatibilityReport | CompatibilityReportV2,
+        *,
+        request: VirtualCellRequestV2 | None = None,
+        pack: RegisteredPack | None = None,
     ):
         if isinstance(step, ExecutionStepV2) and isinstance(
             report, CompatibilityReportV2
         ):
-            return self._instantiate_v2(step, report)
+            return self._instantiate_v2(
+                step,
+                report,
+                request=request,
+                pack=pack,
+            )
         if not isinstance(step, ExecutionStep) or not isinstance(
             report, CompatibilityReport
         ):
@@ -1924,9 +1957,16 @@ class CapabilityRegistry:
         self,
         step: ExecutionStepV2,
         report: CompatibilityReportV2,
+        *,
+        request: VirtualCellRequestV2 | None,
+        pack: RegisteredPack | None,
     ):
         if self.registry_v2 is None:
             raise ValueError("cannot instantiate a v2 step without ModelRegistryV2")
+        if not isinstance(request, VirtualCellRequestV2) or not isinstance(
+            pack, RegisteredPack
+        ):
+            raise ValueError("v2 instantiation requires the exact request and registered Pack")
         card = self.model_zoo.card(step.model_name)
         release = self.registry_v2.release(step.release_fingerprint)
         state = self.registry_v2.state(step.release_fingerprint)
@@ -1963,6 +2003,9 @@ class CapabilityRegistry:
             == report.policy_fingerprint
             == release.policy_fingerprint
             and step.compatibility_fingerprint == report.fingerprint()
+            and _canonical_fingerprint(request.to_dict())
+            == report.request_fingerprint
+            and pack.fingerprint == report.pack_fingerprint
             and step.wrapper == card.wrapper
             and step.agent_name == card.name
             and dict(step.asset_paths) == dict(report.asset_paths)
@@ -1987,11 +2030,41 @@ class CapabilityRegistry:
                 or status.path != step.asset_paths.get(filename)
             ):
                 raise ValueError("cannot instantiate with an unavailable model artifact")
+        adapter_identities = tuple(
+            self.registry_v2.adapter(fingerprint)
+            for fingerprint in release.adapter_fingerprints
+        )
+        requested_outputs = request.task.requested_outputs or (
+            request.output_modality.name,
+        )
+        try:
+            runtime_adapter = self.adapter_registry.resolve_requested(
+                request.task.task_type,
+                requested_outputs,
+            )
+            if (
+                len(adapter_identities) != 1
+                or runtime_adapter.fingerprint() != release.adapter_fingerprints[0]
+                or self.adapter_registry.resolve_identity(adapter_identities[0])
+                is not runtime_adapter
+            ):
+                raise AdapterContractError("release adapter binding is not exact")
+            prepared_input = runtime_adapter.prepare_input(
+                request,
+                pack=pack,
+                compatibility_report=report,
+            )
+        except Exception as exc:  # noqa: BLE001 — third-party input adapter boundary
+            raise AdapterContractError(
+                f"cannot prepare an exact registered adapter input: {exc}"
+            ) from exc
         wrapper_class = self._wrapper_class(card)
         instance = wrapper_class.from_capability(
             card=card,
             compatibility_report=report,
             asset_paths=step.asset_paths,
+            runtime_adapter=runtime_adapter,
+            prepared_input=prepared_input,
         )
         if not isinstance(instance, wrapper_class) or (
             instance.name != card.name

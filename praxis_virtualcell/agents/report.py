@@ -33,5 +33,7 @@ class ReportAgent(BaseAgent):
             "learned_reliability": p.get("learned_reliability"),  # M2.1 Step6:learned 决策+provenance(rule 模式为 None)
             "provenance": p.get("provenance", {}),
         }
+        if p.get("adapter_output") is not None:
+            report["adapter_output"] = None if rd.get("abstain") else p["adapter_output"]
         bus.send(AgentMessage(message.message_id + ":rep", self.name, "client",
             "report_done", {"report": report}, message.timestamp, message.message_id))

@@ -68,7 +68,11 @@ class PredictorAgent(BaseAgent):
             out = self.run_prediction(model_input)
             if not isinstance(out, dict):
                 raise TypeError("run_prediction must return a dict")
-            if not isinstance(out.get("prediction"), dict):
+            adapter_abstain = (
+                out.get("prediction") is None
+                and getattr(self, "_runtime_adapter", None) is not None
+            )
+            if not isinstance(out.get("prediction"), dict) and not adapter_abstain:
                 raise TypeError("run_prediction.prediction must be a dict")
             for field in ("uncertainty", "provenance", "ood"):
                 if out.get(field) is not None and not isinstance(out[field], dict):

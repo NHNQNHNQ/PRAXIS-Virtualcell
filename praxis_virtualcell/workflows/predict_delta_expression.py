@@ -20,6 +20,7 @@ from praxis_virtualcell.core.config import Clock, IdGen, Mode, RuntimeConfig
 from praxis_virtualcell.core.request import VirtualCellRequest
 from praxis_virtualcell.core.runtime import AgentRuntime
 from praxis_virtualcell.data_packs.registry import PackRegistry
+from praxis_virtualcell.model_zoo.adapter_sdk import AdapterRegistry
 from praxis_virtualcell.model_zoo.cache import ModelCache
 from praxis_virtualcell.model_zoo.capability_registry import EnvironmentSnapshot
 from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
@@ -36,6 +37,7 @@ def build_runtime(
     model_cache: ModelCache | None = None,
     pack_registry: PackRegistry | None = None,
     environment: EnvironmentSnapshot | None = None,
+    adapter_registry: AdapterRegistry | None = None,
 ) -> AgentRuntime:
     cfg = config or RuntimeConfig()
     rt = AgentRuntime(cfg, bus=MessageBus(), clock=Clock(), idgen=IdGen())
@@ -46,10 +48,12 @@ def build_runtime(
                   cache=model_cache,
                   pack_registry=pack_registry,
                   environment=environment,
+                  adapter_registry=adapter_registry,
               ),
               MockLinearAgent(), MockCPAAgent(), MockGEARSAgent(),
               CaseRunnerPredictorAgent(),
-              EnsembleCoordinatorAgent(), ReliabilityAgent(mode=cfg.reliability_mode), CriticAgent(),
+              EnsembleCoordinatorAgent(adapter_registry=adapter_registry),
+              ReliabilityAgent(mode=cfg.reliability_mode), CriticAgent(),
               ProvenanceAgent(), ReportAgent()):
         rt.register_agent(a)
     # Phase 4:module-aware 路由两节点(OFFLINE 也注册 → 产确定性 module_plan,零 LLM)

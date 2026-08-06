@@ -11,8 +11,13 @@ from __future__ import annotations
 
 import math
 from abc import abstractmethod
+from copy import deepcopy
 
 from praxis_virtualcell.core.request_v2 import _json_value
+from praxis_virtualcell.model_zoo.adapter_sdk import (
+    PreparedAdapterInput,
+    VirtualCellModelAdapter,
+)
 from praxis_virtualcell.predictors.base import PredictorAgent
 
 
@@ -29,14 +34,33 @@ class ModelWrapper(PredictorAgent):
     name = "ModelWrapper"
 
     @classmethod
-    def from_capability(cls, *, card, compatibility_report, asset_paths):
+    def from_capability(
+        cls,
+        *,
+        card,
+        compatibility_report,
+        asset_paths,
+        runtime_adapter=None,
+        prepared_input=None,
+    ):
         """Construct and bind a zero-argument plugin after broker validation."""
+        if (runtime_adapter is None) != (prepared_input is None):
+            raise ValueError("runtime_adapter and prepared_input must be bound together")
+        if runtime_adapter is not None:
+            if not isinstance(runtime_adapter, VirtualCellModelAdapter):
+                raise TypeError("runtime_adapter must implement VirtualCellModelAdapter")
+            if not isinstance(prepared_input, PreparedAdapterInput):
+                raise TypeError("prepared_input must be PreparedAdapterInput")
+            prepared_input = runtime_adapter.validate_prepared_input(prepared_input)
         instance = cls()
         instance.name = card.name
         instance.model_version = card.version
         instance._capability_card = card
         instance._compatibility_report = compatibility_report
         instance._capability_assets = dict(asset_paths)
+        if runtime_adapter is not None:
+            instance._runtime_adapter = runtime_adapter
+            instance._prepared_adapter_input = prepared_input
         return instance
 
     @property
@@ -51,7 +75,53 @@ class ModelWrapper(PredictorAgent):
             return 0.0, "broker_compatibility_rejected"
         return super().assess_applicability(request, brain_context)
 
+    def prepare_input(self, request: dict, brain_context: dict) -> dict:
+        prepared = getattr(self, "_prepared_adapter_input", None)
+        if prepared is None:
+            return super().prepare_input(request, brain_context)
+        if request.get("request_id") != prepared.model_input.get("request_id"):
+            raise ValueError("runtime request_id differs from broker-prepared input")
+        return deepcopy(prepared.model_input)
+
     def _result_status(self, out: dict) -> tuple[str, str | None]:
+        adapter = getattr(self, "_runtime_adapter", None)
+        prepared = getattr(self, "_prepared_adapter_input", None)
+        if adapter is not None:
+            try:
+                _json_value(out, "$.plugin_output")
+                envelope = adapter.adapt_output(prepared, out)
+                envelope = adapter.validate_prepared_envelope(prepared, envelope)
+            except Exception:  # noqa: BLE001 — third-party adapter boundary is fail-closed
+                return "rejected", "runtime_output_adapter_contract"
+            if out.get("provenance") is None:
+                out["provenance"] = {}
+            out["provenance"]["adapter_output"] = envelope.to_dict()
+            uncertainty_contract = getattr(
+                getattr(self, "_capability_card", None), "uncertainty", None
+            )
+            if uncertainty_contract is not None:
+                if (
+                    getattr(uncertainty_contract, "required", False)
+                    and envelope.uncertainty is None
+                ):
+                    return "rejected", "uncertainty_contract_missing"
+                allowed_methods = getattr(uncertainty_contract, "methods", ())
+                if (
+                    envelope.uncertainty is not None
+                    and allowed_methods
+                    and envelope.uncertainty.method not in allowed_methods
+                ):
+                    return "rejected", "uncertainty_contract_method"
+                calibrated = getattr(uncertainty_contract, "calibrated", None)
+                if (
+                    envelope.uncertainty is not None
+                    and isinstance(calibrated, bool)
+                    and envelope.uncertainty.calibrated != calibrated
+                ):
+                    return "rejected", "uncertainty_contract_calibration"
+            if envelope.abstain:
+                return "rejected", "runtime_adapter_abstained"
+            return super()._result_status(out)
         card = getattr(self, "_capability_card", None)
         if card is None:
             return super()._result_status(out)

@@ -42,6 +42,7 @@ class CriticAgent(BaseAgent):
             violations.append("missing_provenance")
         # 5. success 漏报不确定性(诚实性):success predictor 须带 uncertainty.sigma
         no_sigma = sorted(r["agent_name"] for r in results if r.get("status") == "success"
+                          and (r.get("provenance") or {}).get("adapter_output") is None
                           and (r.get("uncertainty") is None or "sigma" not in (r.get("uncertainty") or {})))
         if no_sigma:
             violations.append(f"missing_uncertainty:{no_sigma}")

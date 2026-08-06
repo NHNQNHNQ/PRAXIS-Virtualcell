@@ -216,6 +216,8 @@ class AgentRuntime:
                 if gate_abstained:
                     report["abstain"] = True
                     report["prediction"] = None
+                    if "adapter_output" in report:
+                        report["adapter_output"] = None
                     report.setdefault("abstain_reasons", []).append("cross_module_inconsistency")
                 report.setdefault("provenance", {})["cross_module_consistency"] = {
                     "violations": violations,
