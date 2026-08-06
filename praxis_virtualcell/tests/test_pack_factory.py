@@ -681,6 +681,12 @@ def test_candidate_must_bind_every_member_of_the_complete_receipt_tuple(
 
 def test_registration_requires_explicit_absolute_index_and_store(tmp_path):
     chain = _chain(tmp_path / "explicit-dependencies", register=False)
+    ordinary_directory = (tmp_path / "ordinary-existing-directory").resolve()
+    ordinary_directory.mkdir()
+    with pytest.raises(PackFactoryError, match="write-new directory"):
+        PackFactoryStore.open(ordinary_directory)
+    with pytest.raises(PackFactoryError, match="write-new"):
+        PackFactoryStore.create(ordinary_directory)
 
     with pytest.raises(PackFactoryError, match="explicitly injected exact PackIndex"):
         register_pack_candidate(

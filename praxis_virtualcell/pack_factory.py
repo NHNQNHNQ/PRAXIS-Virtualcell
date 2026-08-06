@@ -32,6 +32,8 @@ from praxis_virtualcell.data_packs.validator import resolve_asset_path
 
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _UTC_SECONDS = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$")
+_STORE_MARKER_NAME = ".factory-store.json"
+_STORE_MARKER_BYTES = b'{"schema_version":"vc.pack-factory-store.v1"}\n'
 REQUIRED_REVIEW_TOPICS = (
     "taxon",
     "assembly",
@@ -1883,6 +1885,16 @@ class PackFactoryStore:
             raise PackFactoryError("factory store root must be an explicit absolute Path")
         if root.is_symlink() or not root.is_dir() or root.resolve(strict=True) != root:
             raise PackFactoryError("factory store root must be a canonical real directory")
+        marker = root / _STORE_MARKER_NAME
+        try:
+            if marker.is_symlink() or not stat.S_ISREG(marker.lstat().st_mode):
+                raise PackFactoryError("factory store marker must be a regular non-symlink file")
+            if marker.read_bytes() != _STORE_MARKER_BYTES:
+                raise PackFactoryError("factory store marker is invalid")
+        except FileNotFoundError as exc:
+            raise PackFactoryError("factory store must be initialized in a write-new directory") from exc
+        except OSError as exc:
+            raise PackFactoryError("factory store marker is unavailable") from exc
         self.root = root
 
     @classmethod
@@ -1899,6 +1911,26 @@ class PackFactoryStore:
             raise PackFactoryError("factory store must be write-new") from exc
         except OSError as exc:
             raise PackFactoryError("cannot create factory store") from exc
+        marker = path / _STORE_MARKER_NAME
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        try:
+            descriptor = os.open(marker, flags, 0o600)
+            with os.fdopen(descriptor, "wb") as stream:
+                stream.write(_STORE_MARKER_BYTES)
+                stream.flush()
+                os.fsync(stream.fileno())
+            directory_flags = os.O_RDONLY
+            if hasattr(os, "O_DIRECTORY"):
+                directory_flags |= os.O_DIRECTORY
+            directory_descriptor = os.open(path, directory_flags)
+            try:
+                os.fsync(directory_descriptor)
+            finally:
+                os.close(directory_descriptor)
+        except OSError as exc:
+            raise PackFactoryError("cannot initialize factory store marker") from exc
         return cls(path.resolve(strict=True))
 
     @classmethod
