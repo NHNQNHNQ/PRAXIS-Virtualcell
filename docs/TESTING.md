@@ -6,11 +6,12 @@
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：`P12_VALIDATING`。下述 P4.3–P11 和 CI 数字都是绑定各自 exact SHA/日期的
-> 历史冻结证据；P12 当前结果只绑定尚未提交的本地 bytes，不能预写 completion SHA，
-> 也不构成科学验证、operator policy、发布或远程证据。
+> 状态：`P12_ENGINEERING_COMPLETE`；completion code SHA
+> `1a5464fb0d2d9e105058f6797d92efd69783e5b2`。下述 P4.3–P11 和 CI 数字仍只绑定
+> 各自 exact SHA/日期；P12 本地工程结果不构成科学验证、operator policy、发布或
+> 远程证据。
 
-## Phase 12 `VALIDATING` 本地定向证据
+## Phase 12 `ENGINEERING_COMPLETE` 本地证据
 
 P12 当前字节新增分层 Model Zoo v2 合同、v1 fail-closed 迁移、公开路径脱敏投影和
 v2 Pack-aware execution/job identity；负例还覆盖 environment distribution/import
@@ -26,12 +27,11 @@ PYTHONDONTWRITEBYTECODE=1 python -m pytest \
   -o addopts='' -p no:cacheprovider -q -ra
 ```
 
-当前观察结果：`132 passed / 0 failed`；其中单独运行
-`test_model_registry_v2.py` 为 `49 passed / 0 failed`。这些是 directed contract
-结果，不等于最终阶段门；测试中的 native positive release 是 synthetic conformance，
-不是科学 evidence 或 production promotion。
+completion SHA 的当前观察结果：`184 passed / 0 failed`；其中单独运行
+`test_model_registry_v2.py` 为 `60 passed / 0 failed`。测试中的 native positive
+release 是 synthetic conformance，不是科学 evidence 或 production promotion。
 
-提交前完整 P12 定向口径还包括 v1 registry 和 API 回归：
+完整 P12 定向口径还包括 v1 registry 和 API 回归：
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 python -m pytest \
@@ -53,9 +53,12 @@ python -m pip check
 git diff --check
 ```
 
-受影响 core、legacy、frontend 和 packaging 结果必须由本阶段完成报告按实际执行情况
-分别记录；未运行、skip 或 deselect 不能写成通过。完整操作顺序见
-[Model Zoo v2 runbook](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md)。
+最终本地门为：core `1388 passed / 35 skipped / 9 deselected`；legacy
+`1146 passed / 59 skipped / 105 deselected`；packaging `13 passed`；Ruff、隔离环境
+`pip check`、`git diff --check`、frontend typecheck/lint/build 和 bundle budget 均通过。
+两次 release wheel 构建 byte-identical（1,064,637 bytes；SHA-256
+`d6e431dd5f1f175eaec9b605e25df4e47864194932f86ca9dfa5c8cc4be63543`），clean-wheel
+安装验证通过。完整证据与明确未运行项见 [P12 完成报告](../reports/phase12/PHASE12_COMPLETION.md)。
 
 ## 最近记录的 P11B / `b02d219...` 本地重建证据
 

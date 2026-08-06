@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Documentation Index
 
-> Audited: 2026-08-02
+> Audited: 2026-08-06
 >
-> Status: `CURRENT_DOCUMENT_MAP — P12_VALIDATING`
+> Status: `CURRENT_DOCUMENT_MAP — P12_COMPLETE_P13_ELIGIBLE`
 
 This is the navigation authority for the repository. It does not make every linked document current: each section explicitly distinguishes live truth, frozen evidence, active plans, drafts, and history.
 
@@ -11,7 +11,7 @@ This is the navigation authority for the repository. It does not make every link
 When documents disagree, use this order:
 
 1. Exact local bytes, `git rev-parse` identity, immutable artifacts and the current work-unit completion report.
-2. [README](../README.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the [sequential master prompt](PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and authorization discipline.
+2. [README](../README.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
 3. The current phase ADR/runbook—P12 uses [ADR-0009](ADR-0009-virtualcell-model-zoo-v2.md) and the [Model Zoo v2 runbook](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md)—for implemented contract and validation boundaries.
 4. [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) for frozen scientific capability and claim boundaries.
 5. [Three-Way Sync State](status/SYNC-STATE.md) only for its dated local/GitHub/`.53` observations; it is not fresh remote authorization.
@@ -23,11 +23,12 @@ Plans describe intended work. A task is not complete merely because a plan says 
 
 | Document | Authority |
 |---|---|
-| [README](../README.md) | current product promise, P12 validation state and primary operator entry points |
-| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P11B/P12 boundary |
-| [P12–P30 Sequential Master Prompt](PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md) | current phase state machine, dynamic work-unit selection and stop rules |
+| [README](../README.md) | current product promise, P12 completion boundary and primary operator entry points |
+| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P12/P13 boundary |
+| [P12 Completion Report](../reports/phase12/PHASE12_COMPLETION.md) | exact P12 code SHA, validation, artifact fingerprints and science/policy non-claims |
+| [P12–P30 Sequential Master Prompt](PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md) | superseded per-phase authorization prompt; historical only |
 | [P12–P30 Execution Plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) | phase scopes, dependencies and exact authorization templates |
-| [P12 Model Zoo v2 ADR](ADR-0009-virtualcell-model-zoo-v2.md) | current layered identities, v1 migration, fail-closed execution and safe-load decisions; status remains validating |
+| [P12 Model Zoo v2 ADR](ADR-0009-virtualcell-model-zoo-v2.md) | completed layered identities, v1 migration, fail-closed execution and safe-load decisions |
 | [P12 Model Zoo v2 Runbook](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md) | read-only catalog/API interpretation and P12 validation commands |
 | [Project State](status/PROJECT-STATE-2026-07-18.md) | historical APFS migration and phase restart snapshot; not current branch/ref authority |
 | [Phase A Completion Gate](status/PHASE-A-GATE-2026-07-18.md) | proof that migration/organization protections passed before baseline testing |
@@ -110,8 +111,8 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 
 | Plan | Status |
 |---|---|
-| [P12–P30 Sequential Master Prompt](PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md) | active state machine; P12 is `VALIDATING` and completion cannot be inferred from branch name or schema presence |
-| [P12–P30 Execution Plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) | active phase scopes and exact authorization templates; no later phase is automatically authorized |
+| [P12–P30 Sequential Master Prompt](PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md) | superseded historical per-phase authorization prompt; do not use as current action authority |
+| [P12–P30 Execution Plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) | active phase scopes and external-action boundaries |
 | [P12–P30 Detailed Completion Checklist](PHASE12-30-DETAILED-COMPLETION-CHECKLIST.md) | active engineering/science/policy acceptance ledger |
 | [Project consolidation, test, and improvement plan](superpowers/plans/2026-07-18-project-consolidation-test-improvement.md) | historical D1a orchestration; its old retry text is not current authorization |
 | [Consolidation goal prompt](superpowers/plans/2026-07-18-project-consolidation-goal-prompt.md) | historical restart/persistence protocol; not current P12 authority |

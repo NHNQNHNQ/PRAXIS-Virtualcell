@@ -1,6 +1,11 @@
 # PRAXIS-VirtualCell Phase 12–30 顺序推进总提示词
 
-> 文档状态：`COPYABLE SEQUENTIAL COORDINATION PROMPT`
+> 文档状态：`SUPERSEDED HISTORICAL PER-PHASE PROMPT — DO NOT COPY AS CURRENT AUTHORITY`
+>
+> 2026-08-06 状态：P12 completion code SHA 为
+> `1a5464fb0d2d9e105058f6797d92efd69783e5b2`，P13 为下一 eligible 本地 work unit。
+> 本文余下的逐 Phase 停止/另行本地授权规则已被持续本地推进总提示词取代；外部资产、
+> network、真实训练、operator promotion、remote Git、发布和部署仍需独立授权。
 >
 > 作用：恢复项目事实，识别唯一当前阶段，并在逐阶段授权下持续完成该阶段
 >

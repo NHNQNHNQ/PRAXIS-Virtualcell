@@ -9,8 +9,10 @@
 > DOCS-CLOSURE completion / P12 starting SHA：
 > `b19c896202bea56f894d0ad540501331af42a40c`
 >
-> 当前 work unit：`P12 — Virtual Cell Model Zoo v2`；分支
-> `codex/p12-model-registry-v2`；状态 `VALIDATING`
+> 已完成 work unit：`P12 — Virtual Cell Model Zoo v2`；completion code SHA
+> `1a5464fb0d2d9e105058f6797d92efd69783e5b2`
+>
+> 当前 work unit：`P13 — Model Adapter SDK`；状态 `ELIGIBLE`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
@@ -18,16 +20,15 @@
 >
 > 已记录部署锚点：`http://10.102.106.53:18080`
 >
-> 当前状态核对日期：2026-08-02
+> 当前状态核对日期：2026-08-06
 >
-> P12 completion identity：尚未形成；必须以最终 allowlisted bytes、验证、获准本地
-> commit、post-commit 状态和完成报告共同证明，不在本文猜测未来 SHA
+> P12 completion identity：实现 commit、post-commit 验证与
+> `reports/phase12/PHASE12_COMPLETION.md` 共同证明
 
 本文把 “An agentic foundation platform for programmable virtual cells across
 species and biological systems.” 愿景转换为可逐阶段授权、实施、验证和停止的
-路线图。本文自身不授权任何实现。P12 已由仓库外的用户精确授权进入验证，授权仅限
-该 work unit；本文仍不授权 P13 或任何后续实现，也不授权下载数据/权重、push、
-GitHub main/tag、`.53` 写入或服务操作。
+路线图。本文自身不授权任何实现；当前持续本地授权由接手总提示词提供。该授权仍不
+包含下载数据/权重、真实训练、push、GitHub main/tag、`.53` 写入、服务、发布或部署。
 
 ## 1. 最终目标与准确产品承诺
 
@@ -45,7 +46,7 @@ GitHub main/tag、`.53` 写入或服务操作。
 exact-scope 的 Biological World Model research capability。Phase 编号是路线标签，
 不是产品版本、API 协议、schema 或模型版本。
 
-## 2. Phase 11 产品基线与当前 Phase 12 work unit
+## 2. Phase 11 产品基线、已完成 P12 与当前 P13 work unit
 
 ### 2.1 当前身份
 
@@ -58,8 +59,9 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | P12 starting SHA | `b19c896202bea56f894d0ad540501331af42a40c` |
 | 产品代码提交 | `bf44aac25b993e49d0146ccd52dddad5c2fa14de` |
 | 历史恢复 ref | `codex/p12-cell-first-baseline`（创建时误把 Cell-first 收口称为 P12；不得移动或删除，但不再定义阶段编号） |
-| 当前开发分支 | `codex/p12-model-registry-v2` |
-| 当前 work-unit 状态 | `VALIDATING`；completion SHA 尚未形成 |
+| P12 completion code SHA | `1a5464fb0d2d9e105058f6797d92efd69783e5b2` |
+| P12 完成分支 | `codex/p12-model-registry-v2` |
+| 当前 work-unit 状态 | P13 `ELIGIBLE` |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -84,8 +86,8 @@ allowlisted diff、验证结果、一次获准本地 commit 和 post-commit 状�
 ```text
 P11A  数据中心化前端骨架
 P11B  Cell-first 白色聊天入口、Data Center、示例问题和直接报告
-P12   当前阶段：Virtual Cell Model Zoo v2（AUTHORIZED → IN_PROGRESS → VALIDATING）
-P13   条件式下一候选：Model Adapter SDK（NOT ACTIVE；未授权）
+P12   Virtual Cell Model Zoo v2（COMPLETE at 1a5464fb...）
+P13   当前本地 work unit：Model Adapter SDK（ELIGIBLE）
 ```
 
 Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
@@ -314,12 +316,11 @@ staged/modified/deleted/untracked 清单。除当前授权 exact allowlist 外�
 artifact、environment、adapter、evidence 和 operator-policy record 身份层，但本
 阶段不新增、下载或运行真实权重，也不作新的 operator promotion decision。
 
-### 当前验证快照
+### 完成快照
 
 P12 以 `b19c896202bea56f894d0ad540501331af42a40c` 为唯一起始 SHA，在
-`codex/p12-model-registry-v2` 上处于 `VALIDATING`。实现候选已经形成以下分层合同，
-但只有完成全部约定验证、一次获准本地 commit 和 post-commit 核验后才能标记
-`COMPLETE`：
+`codex/p12-model-registry-v2` 上以
+`1a5464fb0d2d9e105058f6797d92efd69783e5b2` 完成以下分层合同：
 
 - `vc.model-artifact.v1`、`vc.model-environment.v1`、`vc.model-adapter.v1`；
 - `vc.model-validation-evidence.v1`、`vc.model-operator-policy.v1`；
@@ -345,7 +346,8 @@ P12 以 `b19c896202bea56f894d0ad540501331af42a40c` 为唯一起始 SHA，在
   `cataloged/artifact_ready/revoked/superseded`，不原地改写 release、历史 job 或负结果。
 
 本阶段没有访问外置资产、网络、训练、GPU、remote、`.53` 或服务；没有运行真实
-科学候选，也没有作出新的 operator promotion decision。P13 仍明确禁止且未授权。
+科学候选，也没有作出新的 operator promotion decision。完整验证见
+`reports/phase12/PHASE12_COMPLETION.md`；P13 是下一 eligible 本地 work unit。
 
 ### P12 定义时的原始缺口
 
@@ -465,10 +467,10 @@ Broker/ExecutionPlan 接入，而不是在核心 runtime 增加模型或物种�
 不接真实 E. coli/yeast/human 模型，不下载权重，不训练，不科学晋级，不做 UI
 Marketplace。
 
-### 可复制授权提示词（`NOT ACTIVE`）
+### 历史可复制授权提示词
 
-P13 只有在 P12 真实 completion SHA 形成并由用户另发精确授权后才能开始；以下占位
-模板当前不生效。
+P12 completion 已形成，当前持续本地授权已覆盖 P13 工程工作。以下模板仅作为历史
+scope 参考，不扩大外部资产、网络、真实模型、训练、发布或部署权限。
 
 ```text
 授权以 `<Phase 12 完成 SHA>` 作为 Phase 13（Virtual Cell Model Adapter SDK）

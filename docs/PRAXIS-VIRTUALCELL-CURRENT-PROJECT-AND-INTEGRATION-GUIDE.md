@@ -2,7 +2,7 @@
 
 > 文档状态：`CURRENT_PROJECT_AND_INTEGRATION_GUIDE`
 >
-> 核对日期：2026-08-02
+> 核对日期：2026-08-06
 >
 > 当前本地仓库：`/Volumes/T7/PRAXIS-virtualcell`
 >
@@ -13,15 +13,15 @@
 > DOCS-CLOSURE completion / P12 starting SHA：
 > `b19c896202bea56f894d0ad540501331af42a40c`
 >
-> 当前 work unit：`Phase 12 — Virtual Cell Model Zoo v2`；状态 `VALIDATING`；
-> completion SHA 尚未形成
+> 已完成 work unit：`Phase 12 — Virtual Cell Model Zoo v2`；completion code SHA
+> `1a5464fb0d2d9e105058f6797d92efd69783e5b2`
 >
 > 工作树保护清单：不在本文固定；每轮从现场 `git status --short` 动态重建，任何
 > 新 staged/modified/deleted/untracked 路径默认受保护
 >
 > 当前 Cell-first 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
-> 条件式下一候选：`Phase 13 — Model Adapter SDK`；`NOT ACTIVE`、未授权
+> 当前下一 work unit：`Phase 13 — Model Adapter SDK`；`ELIGIBLE`
 
 本文是一份面向其他项目、开发团队、科研合作者和后续智能体的独立项目说明。它回答四个问题：
 
@@ -61,7 +61,7 @@ PRAXIS-VirtualCell 是一个以显式合同、确定性运行、可审计证据�
 > 任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有存在匹配、可执行且
 > 经过验证并获 product policy 批准的模型时才产生预测，否则明确 abstain。
 
-### 1.1 当前 Phase 12 验证边界
+### 1.1 Phase 12 完成边界
 
 当前实现候选把 model、artifact、environment、adapter、validation evidence 和
 operator-policy record 拆为独立 version/fingerprint，并把它们接入 Pack-aware
@@ -81,10 +81,10 @@ Native environment package identity 使用 canonical PEP 503 distribution name �
 unsafe legacy raw version 仍进入内部 immutable fingerprint，但所有公开投影返回
 `null`，不会改写旧 card bytes 或回显不安全文本。
 
-P12 当前仍是 `VALIDATING`：这些实现候选在全部约定测试、packaging、一次获准本地
-commit 和 post-commit 核验完成前不能写成稳定完成能力。本阶段没有外置资产、真实
-模型或权重、训练、科学 benchmark/external/OOD run，也没有新的 operator promotion
-decision。P13 明确禁止且未授权。
+P12 工程已由 completion code SHA、全部约定本地测试、packaging、post-commit 核验
+和完成报告收口。本阶段没有外置资产、真实模型或权重、训练、科学
+benchmark/external/OOD run，也没有新的 operator promotion decision；因此工程完成
+不能写成新增真实模型能力或 production promotion。
 
 ### 1.2 代码与外部资产许可
 
@@ -347,11 +347,11 @@ LLM 位于科学执行链之外。
 | VirtualCellPack | 数据、语义、资产和 provenance 的版本化包 | 已实现 v0.1–v0.3 |
 | Feature contract | 模型期望的 feature namespace、顺序和映射要求 | 已实现 |
 | ModelCard | 模型能力、输入、输出、资源、OOD 和 wrapper 合同 | v1 保持兼容 |
-| Model Registry v2 identities | model release、artifact、environment、adapter、evidence、operator policy | P12 implementation candidate；验证中 |
-| Environment snapshot | 依赖、资源、adapter 和运行环境状态 | v1 保留；Pack-aware v2 candidate 绑定 exact environment identity |
-| Compatibility report | Pack × request × model × environment × adapter × evidence × policy 检查结果 | v1 保留；Pack-aware v2 candidate 验证中 |
-| Execution plan | 可执行步骤及其 fingerprint | v1 保留；Pack-aware v2 candidate 验证中 |
-| Job execution identity | 本次运行绑定的 Pack、release、artifact、environment、adapter、evidence、policy 和 compatibility identity | v1 保留；v2 candidate 验证中 |
+| Model Registry v2 identities | model release、artifact、environment、adapter、evidence、operator policy | P12 工程完成；不代表科学验证或 promotion |
+| Environment snapshot | 依赖、资源、adapter 和运行环境状态 | v1 保留；Pack-aware v2 绑定 exact environment identity |
+| Compatibility report | Pack × request × model × environment × adapter × evidence × policy 检查结果 | v1 保留；Pack-aware v2 工程完成 |
+| Execution plan | 可执行步骤及其 fingerprint | v1 保留；Pack-aware v2 工程完成 |
+| Job execution identity | 本次运行绑定的 Pack、release、artifact、environment、adapter、evidence、policy 和 compatibility identity | v1 保留；v2 工程完成 |
 | Persistent Virtual Cell | cell + dataset + Pack + model 的持久化产品对象 | 尚未实现 |
 | Training job | 上传数据到训练、评估和 promotion 的合同 | 尚未实现 |
 | Community model runtime | 多成员动态和交换预测 | 只有抽象合同，尚无真实模型 |
@@ -537,10 +537,11 @@ Phase 11A 曾建立 Dashboard、Organisms、Datasets、VirtualCellPacks、Virtua
 Phase 11B 完成的是可信入口，不是“cell 与数据、Pack、模型已经形成可执行绑定”。
 该边界没有被 P12 改写。
 
-### Phase 12：Virtual Cell Model Zoo v2（`VALIDATING`）
+### Phase 12：Virtual Cell Model Zoo v2（`COMPLETE`）
 
 P12 从 `b19c896202bea56f894d0ad540501331af42a40c` 开始，在
-`codex/p12-model-registry-v2` 上形成并正在验证：
+`codex/p12-model-registry-v2` 上以
+`1a5464fb0d2d9e105058f6797d92efd69783e5b2` 完成：
 
 - model artifact、environment、adapter、validation evidence、operator policy、
   release 和 lifecycle event 的独立不可变身份；
@@ -551,8 +552,8 @@ P12 从 `b19c896202bea56f894d0ad540501331af42a40c` 开始，在
 - 现有 Pack list/API 的路径脱敏、字段白名单 Model Registry v2 投影。
 
 P12 没有新增、下载或运行真实权重，没有训练或科学验证，没有新的 operator promotion
-decision，也没有管理写 API。当前仍待完整验证和 completion SHA，因此不能写成已
-完成；P13 只是条件式下一候选且未授权。
+decision，也没有管理写 API。这里的 `COMPLETE` 只表示工程合同完成；P13 是下一
+eligible 本地工程 work unit。
 
 ---
 
@@ -637,8 +638,8 @@ artifact SHA-256
 - `vc.community-pack.v1`
 
 其他项目应按 `schema_version` 路由解析器，不能依靠字段形状猜测版本。
-以上 P12 新增 schema 当前均属于同一 `VALIDATING` implementation candidate；在 P12
-completion report 形成前，外部项目不应把它们当作已发布稳定协议。
+以上 P12 新增 schema 属于同一 engineering-complete candidate；它们尚未发布，外部
+项目不应仅凭本地 completion 把它们当作已发布协议或真实科学能力。
 
 ---
 
@@ -1530,14 +1531,13 @@ SHA-256  0a31bbb4bfc2f5773cda459e6790b6ccd6ff11dab8d386c026ad37bd0c42aa96
 该 hash 只标识该次本地构建，不代表已经发布到 GitHub。本次 DOCS-CLOSURE 不修改
 代码，也不重跑 core、legacy、frontend 或发行物；只报告实际文档检查。
 
-### 24.3 P12 验证状态
+### 24.3 P12 完成状态
 
-P12 当前位于以 `b19c896...` 为 HEAD 的 allowlisted implementation working tree，状态
-为 `VALIDATING`。Model Registry v2、cache、capability runtime、Pack product 和 job
-identity 的 fail-closed/定向测试正在收口；受影响 core、legacy、frontend、Ruff、
-pip check、packaging、`git diff --check` 和 post-commit 核验仍必须以最终完成报告的
-exact 命令、计数和 SHA 为准。本节不提前记录会随验证变化的数字，也不把 P10、
-`b02d219...` 或 DOCS-CLOSURE 的历史测试继承为 P12 证据。
+P12 completion code SHA 为 `1a5464fb0d2d9e105058f6797d92efd69783e5b2`。Model
+Registry v2、cache、capability runtime、Pack product 和 job identity 的 fail-closed
+门，以及 core、legacy、frontend 静态门、Ruff、隔离 `pip check`、packaging、wheel
+reproducibility、`git diff --check` 和 post-commit 核验，均记录在
+`reports/phase12/PHASE12_COMPLETION.md`。P10 或更早历史测试没有被继承为 P12 证据。
 
 ### 24.4 Skip 和 deselect 的含义
 
@@ -1578,7 +1578,7 @@ skip/deselect 不能写成：
 
 - 通用 adapter 只支持 delta expression；
 - P12 只定义 adapter identity，不是 P13 Adapter SDK，也没有新增 task/output adapter；
-- P12 v2 identities 和 Pack-aware gate 尚处 `VALIDATING`，没有 completion SHA；
+- P12 v2 identities 和 Pack-aware gate 工程完成，但没有新增真实科学 evidence/policy；
 - custom-path 低层 ModelZooRegistry 保留显式 v1 compatibility mode，不能称 v2 fully
   governed 产品路径；
 - 当前部署/本地默认环境没有完整真实权重生态；
@@ -1598,8 +1598,7 @@ skip/deselect 不能写成：
 ### 工程限制
 
 - 当前版本字符串存在发布漂移；
-- 当前 P12 working tree 尚待最终验证、一次本地 commit 和 post-commit 核验；
-- 当前 core suite 有一个 packaging/text-contract 失败；
+- P13 Adapter SDK 尚未完成；
 - JobStore 是本地文件系统；
 - API 除上传外没有通用认证；
 - `docs/USER-GUIDE.md` 的五阶段网页描述已过时；
@@ -1744,13 +1743,12 @@ artifact hash
 
 ## 28. 后续路线图 P12–P30
 
-P12 行记录当前正在验证的 work unit；P13–P30 是计划，不是当前已实现能力，也不是
-自动授权。
+P12 行记录已完成的工程 work unit；P13–P30 尚未完成，不能当作当前能力。
 
 | 阶段 | 目标 |
 |---|---|
-| P12 | `VALIDATING`：Model Registry v2 artifact、environment、adapter、evidence、policy 身份分层 |
-| P13 | 统一 VirtualCellModelAdapter SDK |
+| P12 | `COMPLETE`：Model Registry v2 artifact、environment、adapter、evidence、policy 身份分层 |
+| P13 | `ELIGIBLE`：统一 VirtualCellModelAdapter SDK |
 | P14 | 第一个窄域、真实验证的 E. coli growth capability |
 | P15 | Yeast deletion fitness / condition response |
 | P16 | Human K562 perturbation delta expression |
@@ -1795,17 +1793,10 @@ P12 行记录当前正在验证的 work unit；P13–P30 是计划，不是当�
 
 ## 29. 当前推荐的下一技术闭环
 
-当前唯一技术闭环是完成 P12 验证和收口：从
-`b19c896202bea56f894d0ad540501331af42a40c` 开始的 exact allowlisted changes 必须通过
-分层 identity、legacy migration、append-only lifecycle、路径脱敏、Pack-aware
-evidence×policy gate、job snapshot 和 v1 compatibility 的全部硬门，再完成定向与
-受影响回归、Ruff、pip check、packaging、`git diff --check`、一次获准本地 commit
-和 post-commit 状态核验。P12 不下载或运行新权重、不训练、不作真实科学验证，也不
-作新的 operator promotion decision。
-
-只有 actual P12 completion SHA 和完成报告形成后，P13 Adapter SDK 才成为唯一下一
-候选。当前不得创建 P13 branch、修改 P13 代码或把本文件当作 P13 授权；任何 P13
-草案都必须标记 `NOT ACTIVE` 并等待用户另发精确 allowlist 和操作边界。
+当前技术闭环是 P13 Adapter SDK：复用 P5 feature/alignment 合同和 P12 adapter
+identity，建立严格 task/output adapter registry、输入/输出 envelope、delta reference
+adapter 与 deterministic conformance；不得接入真实模型、下载权重、训练或产生科学
+evidence/promotion。
 
 在进入更大世界模型之前，最重要的闭环仍然是：
 
@@ -1883,9 +1874,9 @@ PRAXIS-VirtualCell 当前是一个合同驱动、确定性运行、可审计且�
 abstain 的多物种虚拟细胞基础设施。
 
 已完成产品阶段是 Phase 11，DOCS-CLOSURE completion 是
-b19c896202bea56f894d0ad540501331af42a40c。当前唯一 work unit 是 Phase 12 Model
-Registry v2：以同一 SHA 起步，在 codex/p12-model-registry-v2 上处于 VALIDATING；
-completion SHA 尚未形成。P13 只是条件式下一候选，NOT ACTIVE、未授权。
+b19c896202bea56f894d0ad540501331af42a40c。Phase 12 Model Registry v2 以该 SHA 起步，
+completion code SHA 是 1a5464fb0d2d9e105058f6797d92efd69783e5b2；工程完成不代表
+真实科学验证或 promotion。P13 Model Adapter SDK 是下一本地 work unit。
 
 当前 UI 是：
 选择 Cell Context → Chat → 自动解析/运行 → Report/Abstain，

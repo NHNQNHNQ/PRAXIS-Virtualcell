@@ -5,10 +5,10 @@
 用户描述物种、细胞场景和扰动任务后，系统把请求路由到适用的预测器或规则模块，产出包含治理裁决、证据边界和复现信息的 Markdown 报告。默认 `offline`，不需要 API key。
 
 当前阶段事实：Phase 11B Cell-first 产品入口和 DOCS-CLOSURE 已完成；Phase 12
-Virtual Cell Model Zoo v2 正在 `codex/p12-model-registry-v2` 验证，唯一起始 SHA 为
-`b19c896202bea56f894d0ad540501331af42a40c`。P12 尚无 completion SHA；完成身份只能由
-现场 `git rev-parse HEAD`、exact allowlisted diff、验证结果和完成报告共同核对，不能
-在提交自身中预写未来 SHA。
+Virtual Cell Model Zoo v2 工程于
+`1a5464fb0d2d9e105058f6797d92efd69783e5b2` 完成。exact 验证与克制的科学/policy
+边界见 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)。Phase 13 Model Adapter
+SDK 是下一本地工程 work unit。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -85,9 +85,9 @@ praxis-vc ask \
 所有预测和治理终决由后端确定性 runtime 完成。LLM 只可参与自然语言解析、路由建议、critic 复核和报告润色，不能修改 prediction、hard rule、learned reliability、provenance 或最终 verdict。`llm_assisted` 需要 `DEEPSEEK_API_KEY`；缺少凭证或调用失败时回退到离线路径。
 
 上述 `accept/caution/downgrade/abstain` 是现有 runtime verdict，不等于
-`production_promoted`。P12 当前字节已把 artifact、environment、adapter、validation
-evidence 和 operator-policy 拆成独立 identity，但阶段仍在验证；schema/record 存在
-不表示有真实 evidence、具名 operator 决定或 production promotion。
+`production_promoted`。P12 已把 artifact、environment、adapter、validation evidence
+和 operator-policy 拆成独立 identity；工程完成不表示存在真实 evidence、具名
+operator 决定或 production promotion。
 
 ## VirtualCellPack 与模型输入
 
@@ -110,7 +110,7 @@ aggregate、drop、fill、reorder 只有被合同或 hash/version 绑定的 mapp
   promotion_eligible`；
 - Product policy：`production_promoted`。
 
-P12 当前字节以 `vc.model-registry.v2` 分层保存 `vc.model-artifact.v1`、
+P12 以 `vc.model-registry.v2` 分层保存 `vc.model-artifact.v1`、
 `vc.model-environment.v1`、`vc.model-adapter.v1`、
 `vc.model-validation-evidence.v1`、`vc.model-operator-policy.v1` 和
 `vc.model-release.v1`，并从 append-only lifecycle event 归约

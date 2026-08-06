@@ -1,10 +1,10 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `P12_VALIDATING — LOCAL_BYTES_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
+> Status: `P12_ENGINEERING_COMPLETE — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
 > Local baseline: branch `codex/p12-model-registry-v2`; P12 unique starting SHA
-> `b19c896202bea56f894d0ad540501331af42a40c`; no completion SHA exists while
-> validation is in progress
+> `b19c896202bea56f894d0ad540501331af42a40c`; completion code SHA
+> `1a5464fb0d2d9e105058f6797d92efd69783e5b2`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -16,7 +16,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | Namespace | Current value | Source | Meaning |
 |---|---|---|---|
 | P11B product code | anchor `bf44aac25b993e49d0146ccd52dddad5c2fa14de` | immutable local Git history | completed Cell-first product code; not P12 or a release identity |
-| P12 validation work unit | start `b19c896202bea56f894d0ad540501331af42a40c` on `codex/p12-model-registry-v2` | live local bytes plus eventual completion report | in progress; branch/schema presence is not completion and a future completion SHA must not be self-embedded |
+| P12 Model Zoo v2 work unit | start `b19c896202bea56f894d0ad540501331af42a40c`; completion `1a5464fb0d2d9e105058f6797d92efd69783e5b2` | immutable local Git history plus `reports/phase12/PHASE12_COMPLETION.md` | engineering complete; no science run or new operator decision |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -71,9 +71,9 @@ The repository historically mixed product release tags, package metadata, API/ru
 | model registry revisions | heterogeneous model/dataset identifiers | `model_zoo/registry.yaml` | per-engine/checkpoint revisions, not product SemVer |
 | W4B donor call version | `donor_ml:<Class>@sha256:<content identity>` on `build_runtime_ml` | checkpoint `.json + .pt` bytes via `checkpoint_identity.py` | content identity for this call; not a checked-in integrity pin, product version, or proof of cross-device tensor hashing |
 
-P12 current bytes add the layered identities above and a fail-closed exact
-request×Pack×release×artifact×environment×adapter×evidence×policy×lifecycle gate. This is an
-engineering contract under validation, not evidence that any real release satisfies the gate.
+P12 adds the layered identities above and a fail-closed exact
+request×Pack×release×artifact×environment×adapter×evidence×policy×lifecycle gate. This is a
+completed engineering contract, not evidence that any real release satisfies the gate.
 Migrated v1 cards have no evidence or policy record and cannot be promoted. In-process execution
 accepts only the declared `safe_load_policy=data_only`; the declaration is rechecked at planning and
 instantiation but is not yet a type-level proof that an arbitrary wrapper loader is data-only.

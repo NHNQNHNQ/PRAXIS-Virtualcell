@@ -1,8 +1,9 @@
 # ADR-0009：Virtual Cell Model Zoo v2 分层身份与状态治理
 
-- 状态：Accepted（Phase 12 本地候选）
+- 状态：Accepted（Phase 12 engineering complete）
 - 日期：2026-08-02
 - 唯一起始基线：`b19c896202bea56f894d0ad540501331af42a40c`
+- Completion code SHA：`1a5464fb0d2d9e105058f6797d92efd69783e5b2`
 - 分支：`codex/p12-model-registry-v2`
 - 前置：ADR-0004、ADR-0007、ADR-0008
 - 范围：Phase 12；不实施 Phase 13 Adapter SDK，不作 operator promotion 决定

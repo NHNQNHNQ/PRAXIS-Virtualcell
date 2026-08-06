@@ -96,9 +96,9 @@ work-unit 执行状态机使用以下状态；总进度表可另用 `NOT_STARTED
 - Cell preset 仍是 context preset，不是持久化或经过科学验证的 Virtual Cell；
 - Data Center 中存在数据或 Pack，不等于存在匹配、可执行、验证过的模型；
 - DOCS-CLOSURE 已在 `b19c896202bea56f894d0ad540501331af42a40c` 收口；
-- Phase 12 已从该 SHA 获得 exact allowlist 授权并进入 `VALIDATING`，completion SHA
-  尚未形成；
-- 当前实现候选分离 model/artifact/environment/adapter/evidence/operator-policy
+- Phase 12 已从该 SHA 完成 exact-scope 工程实现，completion code SHA 为
+  `1a5464fb0d2d9e105058f6797d92efd69783e5b2`；
+- P12 实现分离 model/artifact/environment/adapter/evidence/operator-policy
   identity，保持 v1 migration 为 legacy/incomplete/no-promotion，并以 append-only
   lifecycle 表达 catalog/readiness/revoke/supersede；
 - `praxis-vc pack list` 和 `GET /api/packs` 只复用既有链路返回路径脱敏白名单投影，
@@ -108,7 +108,7 @@ work-unit 执行状态机使用以下状态；总进度表可另用 `NOT_STARTED
 - 历史 ref `codex/p12-cell-first-baseline` 是误命名恢复 ref，不定义阶段状态；
 - staged/modified/deleted/untracked 保护清单不在本文固定，每轮必须从现场
   `git status --short` 重建；任何新路径默认受保护；
-- P13 是 P12 完成后的条件式下一候选；当前明确禁止且未授权。
+- P13 是当前持续本地授权下的下一 eligible work unit。
 
 ### 2.2 全路线依赖
 
@@ -143,8 +143,8 @@ flowchart TD
 |---|---|---|---|---|
 | P11 | `COMPLETE` | `NOT_CLAIMED` | `NOT_APPLICABLE` | Cell-first 产品入口和 P11 代码锚点 |
 | DOCS-CLOSURE | `COMPLETE` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | completion `b19c896...` |
-| P12 | `VALIDATING` | `NOT_APPLICABLE` | `NO_NEW_DECISION` | 分层 identity、v1 no-promotion migration、append-only lifecycle、只读投影；completion SHA pending |
-| P13 | `NOT_STARTED` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | 多 task/output Adapter SDK |
+| P12 | `COMPLETE` | `NOT_APPLICABLE` | `NO_NEW_DECISION` | 分层 identity、v1 no-promotion migration、append-only lifecycle、只读投影；completion `1a5464fb...` |
+| P13 | `ELIGIBLE` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | 多 task/output Adapter SDK |
 | P14 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | E. coli growth；policy 另用 P14B |
 | P15 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | Yeast deletion fitness；policy 另用 P15B |
 | P16 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | K562 delta-expression；policy 另用 P16B |
@@ -229,11 +229,12 @@ flowchart TD
 
 ### Phase 12 — Virtual Cell Model Zoo v2
 
-**状态：** `VALIDATING`
+**状态：** `COMPLETE`
 
 **执行身份：** starting SHA
 `b19c896202bea56f894d0ad540501331af42a40c`；branch
-`codex/p12-model-registry-v2`；completion SHA pending。
+`codex/p12-model-registry-v2`；completion code SHA
+`1a5464fb0d2d9e105058f6797d92efd69783e5b2`。
 
 **目标：** 在不下载或运行新权重的前提下，把现有 ModelCard、CapabilityRegistry 和
 ModelBroker 扩展为不可变的模型、资产、环境、adapter、evidence 和 operator-policy
@@ -247,27 +248,26 @@ record identity；不作新的 operator promotion decision。
 - [x] 分支为 `codex/p12-model-registry-v2`；
 - [x] 权重、外置数据、network、training/GPU、push、`.53`、remote、service、
   deploy 和 main/tag 均保持禁止；
-- [x] 只允许一次本地 Phase 12 commit，且尚未用它授权 P13。
+- [x] 本地 Phase 12 实现 commit 已形成；未执行 push、发布或部署。
 
-当前 implementation candidate 已包含下列交付物；由于最终测试、commit 和
-post-commit 核验尚未全部收口，按本清单规则仍保持未勾选，不能提前当作完成证据。
+下列交付物已由 completion code SHA、post-commit 验证和完成报告共同收口。
 
 **交付物**
 
-- [ ] Model Registry v2 ADR；
-- [ ] v1 到 v2 状态迁移表；
-- [ ] model artifact identity：URI/cache key、size、SHA-256、media type、license、
+- [x] Model Registry v2 ADR；
+- [x] v1 到 v2 状态迁移表；
+- [x] model artifact identity：URI/cache key、size、SHA-256、media type、license、
   source 和安全加载策略；
-- [ ] environment identity：Python/package、lock/image digest、CPU/accelerator 和
+- [x] environment identity：Python/package、lock/image digest、CPU/accelerator 和
   adapter 集；
-- [ ] validation evidence identity，绑定 Pack×model×environment×adapter×protocol；
-- [ ] registry state：`cataloged/artifact_ready/revoked/superseded`；
-- [ ] evidence state：`benchmark_passed/scientifically_validated/promotion_eligible`；
-- [ ] versioned/fingerprinted operator-policy record schema 和 no-promotion migration
+- [x] validation evidence identity，绑定 Pack×model×environment×adapter×protocol；
+- [x] registry state：`cataloged/artifact_ready/revoked/superseded`；
+- [x] evidence state：`benchmark_passed/scientifically_validated/promotion_eligible`；
+- [x] versioned/fingerprinted operator-policy record schema 和 no-promotion migration
   fixture；不作新的 operator decision；
-- [ ] revoke/supersede append-only 记录；
-- [ ] 路径脱敏的只读 CLI/API 投影；
-- [ ] 现有 5 张模型卡和 P8/P9 evidence 的兼容迁移 fixture。
+- [x] revoke/supersede append-only 记录；
+- [x] 路径脱敏的只读 CLI/API 投影；
+- [x] 现有 5 张模型卡和 P8/P9 evidence 的兼容迁移 fixture。
 
 实现候选使用的版本化身份包括：`vc.model-artifact.v1`、
 `vc.model-environment.v1`、`vc.model-adapter.v1`、
@@ -278,22 +278,21 @@ post-commit 核验尚未全部收口，按本清单规则仍保持未勾选，�
 `vc.compatibility-report.v2`、`vc.execution-step.v2`、`vc.execution-plan.v2` 和
 `vc.job-execution-identity.v2`。
 
-当前 adversarial audit 还覆盖：native package 使用 canonical PEP 503 distribution
+adversarial audit 覆盖：native package 使用 canonical PEP 503 distribution
 name/version，而 legacy runtime import-module name 原样分层保留；unsafe legacy raw
 `model_version` 只保留内部 fingerprint，公开显示 `null`；v2 job identity 同时绑定
 submitted/normalized request、canonical `plan_id` 和 step fingerprints；report 与
-provenance 必须引用同一 plan，且两处 plan 使用同一字段白名单/路径脱敏投影。以上
-仍须最终验证，不能提前勾选验收。
+provenance 必须引用同一 plan，且两处 plan 使用同一字段白名单/路径脱敏投影。
 
 **验收**
 
-- [ ] `vc.model-card.v1` 兼容；
-- [ ] planned/available 状态没有被迁移成 executable 或 validated；
-- [ ] P9 `available=false` 和负结果保持不变；
-- [ ] 坏 hash、身份错绑、evidence 错配、路径泄露和状态越级全部拒绝；
-- [ ] 相同 bytes 得到相同 fingerprint；
-- [ ] artifact/evidence bytes 变化得到新 identity；
-- [ ] 受影响测试、Ruff 和 pip check 通过。
+- [x] `vc.model-card.v1` 兼容；
+- [x] planned/available 状态没有被迁移成 executable 或 validated；
+- [x] P9 `available=false` 和负结果保持不变；
+- [x] 坏 hash、身份错绑、evidence 错配、路径泄露和状态越级全部拒绝；
+- [x] 相同 bytes 得到相同 fingerprint；
+- [x] artifact/evidence bytes 变化得到新 identity；
+- [x] 受影响测试、Ruff 和 pip check 通过。
 
 **完成判定**
 
@@ -308,17 +307,17 @@ provenance 必须引用同一 plan，且两处 plan 使用同一字段白名单/
 
 ### Phase 13 — Virtual Cell Model Adapter SDK
 
-**状态：** `NOT_STARTED`
+**状态：** `ELIGIBLE`
 
 **目标：** 建立按 task/output 注册的统一 Adapter SDK，消除核心 runtime 中的模型、
 物种和 `prediction.delta` 专用硬编码。
 
 **前置与授权**
 
-- [ ] P12 completion SHA 已记录；
-- [ ] P12 状态迁移和 registry tests 已通过；
-- [ ] 用户明确授权 `codex/p13-model-adapter-sdk`；
-- [ ] 未授权任何真实模型、数据或权重。
+- [x] P12 completion SHA 已记录；
+- [x] P12 状态迁移和 registry tests 已通过；
+- [x] 持续本地授权允许进入 `codex/p13-model-adapter-sdk`；
+- [x] 未授权任何真实模型、数据或权重。
 
 **交付物**
 
@@ -1133,8 +1132,8 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | Work unit | 工程状态 | 科学门 | 产品 policy | Starting SHA | Completion / unchanged SHA | Evidence / policy / release identity |
 |---|---|---|---|---|---|---|
 | DOCS-CLOSURE | `COMPLETE` | `N/A` | `N/A` | `b02d21985bcde50cf0758d339b05b13bb3e200a2` | `b19c896202bea56f894d0ad540501331af42a40c` | docs-only allowlist、diff checks、clean post-commit status 和完成报告 |
-| P12 | `VALIDATING` | `N/A — no science run` | `NO_NEW_DECISION` | `b19c896202bea56f894d0ad540501331af42a40c` | pending | implementation candidate；final tests/fingerprints/completion report pending |
-| P13 | `NOT_STARTED` | `N/A` | `N/A` | — | — | — |
+| P12 | `COMPLETE` | `N/A — no science run` | `NO_NEW_DECISION` | `b19c896202bea56f894d0ad540501331af42a40c` | `1a5464fb0d2d9e105058f6797d92efd69783e5b2` | `reports/phase12/PHASE12_COMPLETION.md`; wheel SHA-256 `d6e431dd5f1f175eaec9b605e25df4e47864194932f86ca9dfa5c8cc4be63543` |
+| P13 | `ELIGIBLE` | `N/A` | `N/A` | `1a5464fb0d2d9e105058f6797d92efd69783e5b2` | — | — |
 | P14 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
 | P14B | `NOT_STARTED` | `READ_ONLY` | `NOT_RUN` | — | unchanged | — |
 | P15 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
@@ -1242,22 +1241,11 @@ Next exact authorization sentence:
 
 ---
 
-## 11. 当前停止点与下一授权
+## 11. 当前推进点
 
-当前唯一 work unit 是 P12，且处于 `VALIDATING`。当前授权只允许继续完成 P12：
-
-```text
-完成 schema/migration/lifecycle/projection adversarial audit
-→ 完成定向与受影响 core/legacy/frontend、Ruff、pip check、packaging 和 diff checks
-→ 只 stage 当前 exact allowlist
-→ 创建一次获准的本地 Phase 12 commit
-→ post-commit 核对 exact SHA、tests 和动态保护状态
-→ 写 P12 完成报告并停止
-```
-
-只有以上全部真实完成后，P13 Adapter SDK 才成为唯一下一候选。任何 P13 授权草案
-都必须保留 `NOT ACTIVE`，不得填写未来 completion SHA，也不得用当前 P12 授权创建
-P13 branch、代码、资产或实验。
+P12 已由 completion code SHA、post-commit 验证和完成报告收口。持续本地授权下的
+下一 work unit 是 P13 Adapter SDK；外置资产、真实模型/训练、network、push、发布、
+部署和 operator promotion 仍不在授权范围。
 
 可直接跨对话使用的顺序推进提示词见：
 

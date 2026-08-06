@@ -1,6 +1,11 @@
 # PRAXIS-VirtualCell Phase 12–30 总控提示词
 
-> 文档状态：`MASTER COORDINATION PROMPT — NOT A BLANKET IMPLEMENTATION AUTHORIZATION`
+> 文档状态：`SUPERSEDED HISTORICAL COORDINATION PROMPT — DO NOT COPY AS CURRENT AUTHORITY`
+>
+> 2026-08-06 状态：P12 completion code SHA 为
+> `1a5464fb0d2d9e105058f6797d92efd69783e5b2`，P13 为下一 eligible 本地 work unit。
+> 本文余下的逐 Phase 授权/停止规则已被持续本地推进总提示词取代；外部资产、network、
+> 真实训练、operator promotion、remote Git、发布和部署仍需独立授权。
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
