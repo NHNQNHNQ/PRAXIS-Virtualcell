@@ -1,11 +1,11 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `P15E_ENGINEERING_COMPLETE_P16E_ELIGIBLE — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
+> Status: `P16E_ENGINEERING_COMPLETE_P17_CONTRACT_ONLY_ELIGIBLE — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
-> Local baseline: branch `codex/p15e-yeast-fitness-contract`; P15E starting SHA
-> `0ff6870a70a04d71098a16875e633f909e31cc5a`; code SHA
-> `62480a3951173a2aa7b006403af9b169521db138`; tree
-> `64906691c4c989a843df4da97f0a93f32cd65ad2`
+> Local baseline: branch `codex/p16e-k562-perturbation-contract`; P16E starting SHA
+> `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`; code SHA
+> `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`; tree
+> `098cd563e3d865e080a0d121727b987e2d40ed18`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -21,6 +21,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P13 Model Adapter SDK work unit | start `f83c13db386cb552b3ce7a5643e5ffbead0ff573`; code `744d0a28d2cfc13d1b10e85b133b6c13b9426174`; tree `198e623120688d3704b9312990ddaa93c9a7b0e6` | immutable local Git history plus `reports/phase13/PHASE13_COMPLETION.md` | engineering complete and P14E-eligible; `Science: NOT_RUN`, `Policy: NO_NEW_DECISION`, no release/version bump |
 | P14E E. coli growth contract work unit | start `0b193310009d6e4d2ebc0fc8abf95da20a56acdb`; prerequisite `c3401450fd79f7829c438d6b55c1902ea2f4cf5f`; code `8778e93c31c2dfe1ef0f77f06e7a80a425633736`; tree `fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78` | immutable local Git history plus `reports/phase14e/PHASE14E_COMPLETION.md` | contract engineering complete and P15E-eligible; P14R authorization required/not run; P14B not run; no real GEM, science, policy, release or version bump |
 | P15E yeast deletion-fitness contract work unit | start `0ff6870a70a04d71098a16875e633f909e31cc5a`; code `62480a3951173a2aa7b006403af9b169521db138`; tree `64906691c4c989a843df4da97f0a93f32cd65ad2` | immutable local Git history plus `reports/phase15e/PHASE15E_COMPLETION.md` | contract engineering complete and P16E-eligible; P15R authorization required/not run; P15B not run; no real deletion screen/model/GEM, science, policy, release or version bump |
+| P16E K562 Golden delta contract work unit | start `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`; code `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`; tree `098cd563e3d865e080a0d121727b987e2d40ed18` | immutable local Git history plus P16E closure evidence | contract engineering complete and P17 contract-only eligible; P16R authorization required/not run; P16B not run; no real checkpoint/data/science, policy, release or version bump; local wheel `1,108,165` bytes / `d333180996a4...` / `365` entries / `14` React entries |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -71,6 +72,15 @@ The repository historically mixed product release tags, package metadata, API/ru
 | yeast deletion-fitness adapter input | `vc.yeast-deletion-fitness-adapter-input-contract.v1` + canonical JSON SHA-256 | `model_zoo/yeast_deletion_fitness_contract.py` | binds predict_deletion_fitness/fitness, one complete deletion target and all exact identities |
 | yeast deletion-fitness adapter output | `vc.yeast-deletion-fitness-adapter-output-contract.v1` + canonical JSON SHA-256 | `model_zoo/yeast_deletion_fitness_contract.py` | one finite dimensionless matched-control-relative scalar; uncertainty unavailable and OOD/value-free abstain required |
 | yeast deletion-fitness prepared model input | `vc.yeast-deletion-fitness-prepared-model-input.v1` + canonical JSON SHA-256 | `model_zoo/yeast_deletion_fitness_contract.py` | cross-binds request/scope/protocol/execution/Pack/compatibility; public projection remains prepared-only |
+| K562 Golden perturbation scope | `vc.k562-golden-perturbation-scope.v1` + canonical JSON SHA-256 | `model_zoo/k562_golden_delta_contract.py` | exact K562/CVCL/assembly/assay/feature order, release/artifact/environment/adapter/Pack/perturbation/execution/compatibility and delta semantics; scope validity is not executable availability |
+| K562 Golden validation protocol | `vc.k562-golden-validation-protocol.v1` + canonical JSON SHA-256 | `model_zoo/k562_golden_delta_contract.py` | preregisters frozen condition holdout, additive-ridge comparator, candidate-minus-comparator bootstrap, contamination/external/OOD and separate-scope requirements; it is not evidence or policy |
+| K562 Golden data binding | `vc.k562-golden-data-binding.v1` + canonical JSON SHA-256 | `model_zoo/k562_golden_delta_contract.py` | binds checked-in P8 contract/Pack/manifest/assets/control/split identities without reading H5AD/NPY or claiming asset availability |
+| K562 Golden perturbation binding | `vc.k562-golden-perturbation-binding.v1` + canonical JSON SHA-256 | `model_zoo/k562_golden_delta_contract.py` | binds one exact condition and ordered Ensembl targets while record membership remains unverified with reason p16r_not_authorized |
+| K562 Golden execution binding | `vc.k562-golden-execution-binding.v1` + canonical JSON SHA-256 | `model_zoo/k562_golden_delta_contract.py` | native delta-expression and exact 5,045-feature order only; no normalization/reorder/fill/impute/dedup or silent absolute-to-delta conversion |
+| K562 Golden compatibility | `vc.k562-golden-compatibility-binding.v1` + canonical JSON SHA-256 | `model_zoo/k562_golden_delta_contract.py` | P16E fixes assets_verified/executable false with reason p16r_not_authorized; checked-in manifests do not authorize execution |
+| K562 Golden adapter input | `vc.k562-golden-adapter-input-contract.v1` + canonical JSON SHA-256 | `model_zoo/k562_golden_delta_contract.py` | binds predict_delta_expression/delta_expression, K562 Golden biology, single/combination scopes and all exact identities |
+| K562 Golden adapter output | `vc.k562-golden-adapter-output-contract.v1` + canonical JSON SHA-256 | `model_zoo/k562_golden_delta_contract.py` | one finite ordered `(5045,)` delta vector; uncertainty unavailable and OOD/value-free abstain required |
+| K562 Golden prepared model input | `vc.k562-golden-prepared-model-input.v1` + canonical JSON SHA-256 | `model_zoo/k562_golden_delta_contract.py` | cross-binds request/scope/protocol/perturbation/execution/Pack/compatibility; public projection remains prepared-only |
 | validation evidence identity | `vc.model-validation-evidence.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds exact Pack×model×environment×adapter×protocol, baseline, primary metric and result hash; record existence does not make the evidence pass |
 | operator policy identity | `vc.model-operator-policy.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds one named operator decision to one exact capability and evidence set; P12 creates no new promotion decision |
 | model release/lifecycle identities | `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1` | `model_zoo/registry_v2.py` | release graph plus append-only catalog/readiness/revoke/supersede history; registry state, evidence and product policy remain separate |
@@ -132,6 +142,20 @@ decision exists. See [ADR-0012](ADR-0012-virtualcell-yeast-deletion-fitness-cont
 [P15E runbook](runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md), and the
 [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md).
 
+P16E adds the nine K562 Golden schemas above without changing product SemVer (`1.6.0`),
+API/runtime protocols, release tags or the default delta-reference registry. Its local-only adapter
+uses native P12 identities, exact checked-in P8 Golden identities and typed-negative compatibility;
+5,045-vector passthrough and deterministic conformance are engineering properties, not K562
+science evidence. `P16R` remains `AUTHORIZATION_REQUIRED / NOT_RUN`, `P16B` remains `NOT_RUN`,
+`Science: NOT_RUN`, and `Policy: NO_NEW_DECISION`. Two exact clean-archive wheels are byte-identical:
+`1,108,165` bytes, SHA-256
+`d333180996a4ed91161d364275589e992d0be634582cc83a57e9758b86c03c66`, `365` entries and `14`
+React entries; none is a release or version bump. Because P14–P16 still have fewer than two
+production-promoted capabilities, P17 is eligible only for contract-only work. See
+[ADR-0013](ADR-0013-virtualcell-k562-golden-delta-contract.md), the
+[P16E runbook](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md), and the
+[P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md).
+
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
 ## Namespace contract
@@ -155,6 +179,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | adapter SDK schemas + fingerprints | explicit `vc.adapter-input-contract.v1`, `vc.prepared-adapter-input.v1`, `vc.adapter-output-contract.v1`, `vc.adapter-execution-provenance.v1`, `vc.adapter-output-envelope.v1`, `vc.adapter-conformance-report.v1` plus canonical JSON SHA-256 | incompatible input/output, binding, envelope, conformance or projection semantics change | conformance is scientific evidence, a model is production-registered, or policy exists |
 | E. coli growth contract schemas + fingerprints | explicit `vc.ecoli-growth-scope.v1`, `vc.ecoli-growth-validation-protocol.v1`, `vc.ecoli-growth-data-binding.v1`, `vc.ecoli-growth-execution-binding.v1`, `vc.ecoli-growth-gene-mapping-binding.v1`, `vc.ecoli-growth-compatibility-binding.v1`, `vc.ecoli-growth-adapter-input-contract.v1`, `vc.ecoli-growth-adapter-output-contract.v1` and `vc.ecoli-growth-prepared-model-input.v1` | exact biological scope, identity binding, protocol, compatibility, input/output or prepared semantics change incompatibly | a real GEM/Pack exists, FBA ran, science passed, the adapter is in the default registry, or policy exists |
 | yeast deletion-fitness contract schemas + fingerprints | explicit `vc.yeast-deletion-fitness-scope.v1`, `vc.yeast-deletion-fitness-validation-protocol.v1`, `vc.yeast-deletion-fitness-data-binding.v1`, `vc.yeast-deletion-fitness-execution-binding.v1`, `vc.yeast-deletion-fitness-gene-mapping-binding.v1`, `vc.yeast-deletion-fitness-compatibility-binding.v1`, `vc.yeast-deletion-fitness-adapter-input-contract.v1`, `vc.yeast-deletion-fitness-adapter-output-contract.v1` and `vc.yeast-deletion-fitness-prepared-model-input.v1` | exact strain/condition/control/assay/platform/mapping/protocol/input/output/prepared semantics change incompatibly | a real deletion screen/model exists, fitness science passed, the adapter is default/runtime-ready, or policy exists |
+| K562 Golden delta contract schemas + fingerprints | explicit `vc.k562-golden-perturbation-scope.v1`, `vc.k562-golden-validation-protocol.v1`, `vc.k562-golden-data-binding.v1`, `vc.k562-golden-perturbation-binding.v1`, `vc.k562-golden-execution-binding.v1`, `vc.k562-golden-compatibility-binding.v1`, `vc.k562-golden-adapter-input-contract.v1`, `vc.k562-golden-adapter-output-contract.v1` and `vc.k562-golden-prepared-model-input.v1` | exact K562/assembly/assay/ordered-feature/condition/perturbation/protocol/input/output/prepared semantics change incompatibly | a checkpoint or large asset was read, K562 science passed, the adapter is default/runtime-ready, or evidence/policy exists |
 | validation evidence schema + fingerprint | explicit `vc.model-validation-evidence.v1` plus canonical JSON SHA-256 | exact capability/protocol/baseline/metric/result binding changes | evidence exists, passes, generalizes, or grants product policy |
 | operator policy schema + fingerprint | explicit `vc.model-operator-policy.v1` plus canonical JSON SHA-256 | named operator, exact capability/evidence decision or policy version changes | engineering or evidence state can manufacture a promotion decision |
 | model release/lifecycle schemas + fingerprints | explicit `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1` | component graph or append-only lifecycle fact changes | catalog/readiness/revocation/supersession is scientific evidence or product policy |
@@ -182,7 +207,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented history through the current P15E engineering-complete bytes:
+Implemented history through the current P16E engineering-complete bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -224,6 +249,16 @@ Implemented history through the current P15E engineering-complete bytes:
     `reason=p15r_not_authorized`; the default registry remains delta-only. P15R/P15B are not run,
     and no product/API/runtime version bump, release, tag, real asset/GEM, scientific evidence or
     operator decision is created.
+22. P16E code `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2` adds exact K562 Golden
+    single-gene/combination→5,045-feature native delta-expression contracts and a local-only adapter
+    inside the same unpublished candidate. Checked-in P8 identities are bound without reading H5AD/
+    NPY or running Golden science; compatibility remains typed-negative with
+    `reason=p16r_not_authorized`, and the default registry remains the P13 delta reference only.
+    P16R/P16B are not run; no product/API/runtime version bump, release, tag, checkpoint/training,
+    scientific evidence or operator decision is created. Two clean-archive wheels are byte-identical
+    at `1,108,165` bytes, SHA-256
+    `d333180996a4ed91161d364275589e992d0be634582cc83a57e9758b86c03c66`, with `365` entries and
+    `14` React entries; these local build values are not release identity.
 
 ## Release invariants
 
@@ -269,6 +304,15 @@ The equality above deliberately excludes `vc.msg.v1`, `vc.request.v2`, all
 `vc.yeast-deletion-fitness-adapter-input-contract.v1`,
 `vc.yeast-deletion-fitness-adapter-output-contract.v1`,
 `vc.yeast-deletion-fitness-prepared-model-input.v1`,
+`vc.k562-golden-perturbation-scope.v1`,
+`vc.k562-golden-validation-protocol.v1`,
+`vc.k562-golden-data-binding.v1`,
+`vc.k562-golden-perturbation-binding.v1`,
+`vc.k562-golden-execution-binding.v1`,
+`vc.k562-golden-compatibility-binding.v1`,
+`vc.k562-golden-adapter-input-contract.v1`,
+`vc.k562-golden-adapter-output-contract.v1`,
+`vc.k562-golden-prepared-model-input.v1`,
 `vc.model-validation-evidence.v1`, `vc.model-operator-policy.v1`,
 `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1`,
 `vc.model-registry.v2`, `vc.model-registry-catalog.v2`,

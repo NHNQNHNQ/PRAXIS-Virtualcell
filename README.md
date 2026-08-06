@@ -19,14 +19,20 @@ knockout→growth 工程合同，收口状态为
 P14E docs-closure `0ff6870a70a04d71098a16875e633f909e31cc5a` 开始，在
 `62480a3951173a2aa7b006403af9b169521db138`（tree
 `64906691c4c989a843df4da97f0a93f32cd65ad2`）完成本地 S. cerevisiae S288C
-gene-deletion→fitness 工程合同，当前收口状态为
-`P15E_ENGINEERING_COMPLETE_P16E_ELIGIBLE`。exact 验证与克制的科学/policy 边界见
+gene-deletion→fitness 工程合同，收口状态为
+`P15E_ENGINEERING_COMPLETE_P16E_ELIGIBLE`，现作为历史工程证据保留。Phase 16E 从
+P15E docs-closure `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2` 开始，在
+`9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`（tree
+`098cd563e3d865e080a0d121727b987e2d40ed18`）完成本地 Human/K562 Golden Norman
+perturbation→delta-expression 工程合同，当前收口状态为
+`P16E_ENGINEERING_COMPLETE_P17_ELIGIBLE`。exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
 [P14E 完成报告](reports/phase14e/PHASE14E_COMPLETION.md)及
-[P15E 完成报告](reports/phase15e/PHASE15E_COMPLETION.md)。P14R 与 P15R 的真实
-asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B 与 P15B 均为
-`NOT_RUN`；下一 eligible 本地 gate 是 `P16E`，但尚未完成。
+[P15E 完成报告](reports/phase15e/PHASE15E_COMPLETION.md)和
+[P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md)。P14R、P15R 与 P16R 的真实
+asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B、P15B 与 P16B 均为
+`NOT_RUN`；下一 eligible 本地 gate 是 contract-only `P17 — Virtual Cell Brain`，但尚未完成。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -205,6 +211,21 @@ benchmark，没有生成 evidence/policy、release、版本 bump、push 或 depl
 [P15E runbook](docs/runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md)和
 [P15E 完成报告](reports/phase15e/PHASE15E_COMPLETION.md)。
 
+P16E 只冻结 Human/K562（`NCBITaxon:9606`、`CVCL_0004`、GRCh38、Ensembl 84）
+Golden Norman perturbation→`delta_expression` 的 strict、prepared-bound 工程合同。
+`K562GoldenPerturbationAdapter` 分开绑定 single-gene 与 ordered combination scope，
+只允许显式本地注册；negative compatibility 固定为 `assets_verified=false`、
+`executable=false`、`reason=p16r_not_authorized`。A549 只作为 upstream metadata error
+原样保留，不是请求 cell identity。实现与测试分别位于
+`praxis_virtualcell/model_zoo/k562_golden_delta_contract.py` 和
+`praxis_virtualcell/tests/test_k562_golden_delta_contract.py`。P16E 只读取 checked-in
+小型 YAML/JSON identity manifests 并使用合成 5,045 维向量，没有读取 H5AD、运行
+candidate/additive ridge、生成 MSE/CI/external evidence、修改 policy、release、版本、
+push 或 deploy。设计、操作和完成边界见
+[P16E ADR](docs/ADR-0013-virtualcell-k562-golden-delta-contract.md)、
+[P16E runbook](docs/runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md)和
+[P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md)。
+
 P8 产品化收口随发行物提供三个合成、微型、可审计 Pack：
 `p8-human-tiny`、`p8-mouse-tiny`、`p8-bacteria-tiny`。它们覆盖
 `EnsemblGene` 与 `NCBIGene` 两种 feature namespace，均通过同一个既有
@@ -334,7 +355,10 @@ CI=1 npm run e2e
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P15E 边界和跨项目集成 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P16E 边界和跨项目集成 |
+| [P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md) | exact code/tree、本地 contract-only 验证、reproducible wheel 与 P16R/P16B 非运行边界 |
+| [P16E K562 Golden delta ADR](docs/ADR-0013-virtualcell-k562-golden-delta-contract.md) | exact K562/P8 scope、ordered perturbation binding、prepared-bound 输出与 local-only adapter |
+| [P16E K562 Golden delta runbook](docs/runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) | 本地 manifest/合同审计、定向验证、P16R 授权门和 fail-closed 解读 |
 | [P15E 完成报告](reports/phase15e/PHASE15E_COMPLETION.md) | exact code/tree、本地 contract-only 验证、reproducible wheel 与 P15R/P15B 非运行边界 |
 | [P15E S. cerevisiae deletion-fitness ADR](docs/ADR-0012-virtualcell-yeast-deletion-fitness-contract.md) | exact S288C scope、strict binding、prepared-bound 输出与 local-only adapter |
 | [P15E S. cerevisiae deletion-fitness runbook](docs/runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md) | 本地合同审计、定向验证、P15R 授权门和 fail-closed 解读 |
@@ -363,12 +387,12 @@ CI=1 npm run e2e
 
 唯一允许的流向是：本地 feature branch → GitHub branch/CI → 审批合入 GitHub `main` → 本地 `main` fast-forward → `.53` 从同一 GitHub SHA fast-forward → 三端 SHA 核对。不要在 `.53` 直接开发，也不要把本地 tag 当成已发布 tag。
 
-当前 P15E 窗口未刷新 GitHub 或 `.53`。规范工作树是
+当前 P16E 窗口未刷新 GitHub 或 `.53`。规范工作树是
 `/Volumes/T7/PRAXIS-virtualcell`，Git metadata 是
 `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`；任何远程数字只有带日期和 exact
 identity 的只读记录意义。
 
-历史整理分支曾按两次精确 D1a 授权把 GitHub `codex/project-consolidation` 快进到 `ee36d7948047f346f55a02d62ccaac84391e3c20`。对应的 [GitHub Actions run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 为 `4/5`：Python core、frontend/Playwright、reproducible wheel 和 Linux release container 通过，legacy 唯一失败是 Linux shell 子进程未随直接 shell 终止。修复提交 `6a8198771581d0897a13457e93e50cfec172d59a` 已把输出截断、timeout、pipe 异常和上层取消统一为进程组清理，并在 macOS/Python 3.13.12 与 Linux/Python 3.13.14 严格锁环境得到 legacy `1139 passed / 0 failed`。这些都是绑定旧 SHA 的历史证据，不授权当前 P15E push、CI、release 或 deploy；GitHub `main`/tag、本地 `main` 和 `.53` 当前状态必须在未来获准窗口重新只读核对。
+历史整理分支曾按两次精确 D1a 授权把 GitHub `codex/project-consolidation` 快进到 `ee36d7948047f346f55a02d62ccaac84391e3c20`。对应的 [GitHub Actions run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 为 `4/5`：Python core、frontend/Playwright、reproducible wheel 和 Linux release container 通过，legacy 唯一失败是 Linux shell 子进程未随直接 shell 终止。修复提交 `6a8198771581d0897a13457e93e50cfec172d59a` 已把输出截断、timeout、pipe 异常和上层取消统一为进程组清理，并在 macOS/Python 3.13.12 与 Linux/Python 3.13.14 严格锁环境得到 legacy `1139 passed / 0 failed`。这些都是绑定旧 SHA 的历史证据，不授权当前 P16E push、CI、release 或 deploy；GitHub `main`/tag、本地 `main` 和 `.53` 当前状态必须在未来获准窗口重新只读核对。
 
 ## 派生关系
 

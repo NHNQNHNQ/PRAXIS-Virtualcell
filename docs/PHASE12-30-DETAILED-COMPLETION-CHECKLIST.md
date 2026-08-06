@@ -4,7 +4,7 @@
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前已完成工程 work unit：`Phase 15E`
+> 当前已完成工程 work unit：`Phase 16E`
 >
 > DOCS-CLOSURE completion：`b19c896202bea56f894d0ad540501331af42a40c`
 >
@@ -21,7 +21,13 @@
 > `62480a3951173a2aa7b006403af9b169521db138`；tree
 > `64906691c4c989a843df4da97f0a93f32cd65ad2`；状态 `COMPLETE`
 >
-> 下一 eligible 本地工程 gate：`P16E`；`ELIGIBLE / NOT_COMPLETE`
+> 已完成 work unit：`Phase 16E — K562 Golden perturbation→delta-expression contract`；
+> starting SHA `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`；branch
+> `codex/p16e-k562-perturbation-contract`；completion code SHA
+> `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`；tree
+> `098cd563e3d865e080a0d121727b987e2d40ed18`；状态 `COMPLETE`
+>
+> 下一 eligible 本地工程 gate：`P17 CONTRACT_ONLY`；`ELIGIBLE / NOT_COMPLETE`
 >
 > 当前 Phase 11 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
@@ -42,11 +48,13 @@
 → 完成记录
 ```
 
-本文自身不授权实施任何 Phase。P12、P13、P14E 和 P15E 已在持续本地授权内完成；该授权仍不包含
+本文自身不授权实施任何 Phase。P12、P13、P14E、P15E 和 P16E 已在持续本地授权内完成；该授权仍不包含
 外置数据或权重、network、push、GitHub main/tag、`.53`、服务、发布、部署或真实
 科学运行。P14E 已独立收口；P14R 仍需逐资产/窗口授权，P14B 仍只能在
 正科学结果后由具名 operator 决定。P15E 已独立收口；P15R 仍需逐资产/窗口授权，
-P15B 仍只能在正科学结果后由具名 operator 决定。阶段 scope、资产清单和可复制授权句仍以
+P15B 仍只能在正科学结果后由具名 operator 决定。P16E 已独立收口；P16R 仍需
+逐资产/窗口授权，P16B 仍只能在正科学结果后由具名 operator 决定。阶段 scope、
+资产清单和可复制授权句仍以
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)为准。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
@@ -140,6 +148,17 @@ work-unit 执行状态机使用以下状态；总进度表可另用 `NOT_STARTED
 - P15E 只使用纯合成 identity/contract fixtures，未读取或运行真实 deletion
   screen/model/GEM/assets；adapter 未进入默认 registry，没有 science、policy、release
   或版本 bump；P15R 为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P15B 为 `NOT_RUN`；
+- Phase 16E 已从 P15E docs-closure actual SHA
+  `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2` 开始，在
+  `codex/p16e-k562-perturbation-contract` 以 code SHA
+  `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`（tree
+  `098cd563e3d865e080a0d121727b987e2d40ed18`）完成 exact K562 Golden
+  gene/gene-combination→5,045-feature delta-expression contract、negative compatibility、
+  prepared-only conformance 与 fail-closed 边界；
+- P16E 只读取已检入的小型 Golden text manifests 以冻结 identity，未读取或运行
+  H5AD/NPY/checkpoint/Golden science；adapter 未进入默认 registry，没有 science、
+  policy、release 或 version bump；P16R 为 `AUTHORIZATION_REQUIRED / NOT_RUN`，
+  P16B 为 `NOT_RUN`；
 - `praxis-vc pack list` 和 `GET /api/packs` 只复用既有链路返回路径脱敏白名单投影，
   不新增管理写 API；
 - 未精确绑定现有 model identity 的 P8/P9 结果保留为 `unbound` migration receipt；
@@ -147,9 +166,9 @@ work-unit 执行状态机使用以下状态；总进度表可另用 `NOT_STARTED
 - 历史 ref `codex/p12-cell-first-baseline` 是误命名恢复 ref，不定义阶段状态；
 - staged/modified/deleted/untracked 保护清单不在本文固定，每轮必须从现场
   `git status --short` 重建；任何新路径默认受保护；
-- P16E 是当前持续本地授权下的下一 eligible 本地 gate；它尚未完成，开始前仍须从
-  P15E docs-closure 后的 actual Git SHA 和现场动态保护清单重新核对；
-- P14R/P14B 与 P15R/P15B 均保持各自的 exact external/operator 授权门，一个外部门
+- P17 contract-only 是当前持续本地授权下的下一 eligible 本地 gate；它尚未完成，
+  开始前仍须从 P16E docs-closure 后的 actual Git SHA 和现场动态保护清单重新核对；
+- P14R/P14B、P15R/P15B 与 P16R/P16B 均保持各自的 exact external/operator 授权门，一个外部门
   不阻塞无依赖的 eligible 本地 E work unit。
 
 ### 2.2 全路线依赖
@@ -193,8 +212,10 @@ flowchart TD
 | P15E | `COMPLETE` | `NOT_APPLICABLE — CONTRACT_ONLY` | `NO_NEW_DECISION` | exact S288C deletion→fitness 合同、negative compatibility、preregistration 与 abstain；completion `62480a39...` |
 | P15R | `AUTHORIZATION_REQUIRED` | `NOT_RUN` | `NOT_APPLICABLE` | exact deletion screen/model/assets/output root/run window 后才可真实运行 |
 | P15B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | 仅在正科学结果后由具名 operator 决定 |
-| P16E | `ELIGIBLE` | `NOT_RUN` | `NOT_RUN` | 下一本地 gate；K562 delta-expression，尚未完成；policy 另用 P16B |
-| P17 | `NOT_STARTED` | `NOT_RUN` | `NOT_APPLICABLE` | DAG 合同；真实多模型需至少两个 promoted 能力 |
+| P16E | `COMPLETE` | `NOT_APPLICABLE — CONTRACT_ONLY` | `NO_NEW_DECISION` | exact K562 Golden delta contract、negative compatibility、prepared-only output 与 abstain；completion `9f6b14ea...` |
+| P16R | `AUTHORIZATION_REQUIRED` | `NOT_RUN` | `NOT_APPLICABLE` | exact checkpoint/data/assets/output root/run window 后才可真实运行 |
+| P16B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | 仅在正科学结果后由具名 operator 决定 |
+| P17 | `ELIGIBLE — CONTRACT_ONLY` | `NOT_RUN` | `NOT_APPLICABLE` | 下一本地 gate；少于两个 promoted capabilities，不得宣称真实多模型编排 |
 | P18 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | typed multi-omics input；真实能力独立过门 |
 | P19 | `NOT_STARTED` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | receipt 到 RegisteredPack，不训练 |
 | P20 | `NOT_STARTED` | `CONTRACT_ONLY` | `NOT_APPLICABLE` | training contracts 和 tiny dry-run |
@@ -582,7 +603,8 @@ strict input/output、prepared-bound adapter、preregistration、OOD 与 abstain
 - [x] [ADR-0012](ADR-0012-virtualcell-yeast-deletion-fitness-contract.md)、
   [runbook](runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md)、测试和
   [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md) 已收口；
-- [x] 下一 eligible 本地 gate 记为 P16E，但没有把它写成已完成。
+- [x] P15E 收口时如实记录 P16E 为下一 eligible gate；P16E 后续已从
+  P15E docs-closure actual SHA 独立完成。
 
 **P15E 冻结证据**
 
@@ -629,7 +651,14 @@ strict input/output、prepared-bound adapter、preregistration、OOD 与 abstain
 
 ### Phase 16 — Human/K562 Virtual Cell
 
-**状态：** `P16E ELIGIBLE / NOT_COMPLETE`
+**状态拆分：** `P16E COMPLETE`；`P16R AUTHORIZATION_REQUIRED / NOT_RUN`；
+`P16B NOT_RUN`
+
+**P16E 执行身份：** starting SHA
+`d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`；branch
+`codex/p16e-k562-perturbation-contract`；completion code SHA
+`9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`；tree
+`098cd563e3d865e080a0d121727b987e2d40ed18`。
 
 **唯一任务：**
 
@@ -639,15 +668,60 @@ Golden Norman K562 perturbation
 → condition-macro MSE
 ```
 
-**前置与授权**
+P16E 已在 contract-only、local-only 边界完成。它冻结 exact P8 Golden 小型文本
+identities、K562/CVCL/GRCh38/scRNA/Ensembl 84、single/combination 分开 scope、
+native delta semantics、neutral preregistration、prepared-only output 与 fail-closed abstain；不读取
+H5AD/NPY/checkpoint，不运行 science。
+
+**P16E 合同工程前置**
 
 - [x] P15E completion code SHA `62480a3951173a2aa7b006403af9b169521db138`
-  已记录；P16E 实际 starting SHA 仍须在 P15E docs-closure 后从 Git history 读取；
-- [ ] Golden Pack、candidate checkpoint、environment 和 external dataset 精确授权；
-- [ ] P8 frozen split、feature order、metric、bootstrap 和 baseline 保持不变；
-- [ ] 用户明确授权 `codex/p16-k562-perturbation`。
+  已记录；并从 P15E docs-closure 读取 actual starting SHA
+  `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`；
+- [x] 重新读取现场保护清单，只修改 exact allowlist；
+- [x] 只使用 checked-in 小型 text manifests 和 synthetic wrapper fixtures；
+- [x] P8 frozen split、feature order、metric、bootstrap 和 baseline 未修改。
 
-**交付物**
+**P16E 交付物**
+
+- [x] `K562GoldenPerturbationScope`、validation/data/perturbation/execution/compatibility
+  bindings、strict input/output 和 prepared model input schemas；
+- [x] exact `NCBITaxon:9606`、K562/`CVCL_0004`、GRCh38/
+  `GCA_000001405.15`、scRNA/`EFO:0008913`、Ensembl 84 和 5,045 ordered features；
+- [x] single-gene/combination 分开 condition/ordered-target binding，不猜 symbol/version/
+  ortholog；`A549` 只保留为 upstream metadata error；
+- [x] native delta-expression only，不 normalization/reorder/fill/impute/deduplicate/
+  silent absolute→delta；
+- [x] future P16R 的 condition holdout、additive-ridge primary comparator、
+  candidate-minus-additive paired bootstrap、contamination、independent K562 external、
+  zero adaptation、separate-scope preregistration；不写 evidence/policy；
+- [x] uncertainty neutral unavailable；OOD/非 success value-free abstain；公开 projection 只能
+  exact prepared-bound；
+- [x] compatibility 固定 `assets_verified=false`、`executable=false`、
+  `reason=p16r_not_authorized`；adapter local-only，默认 registry 不变。
+- [x] [ADR-0013](ADR-0013-virtualcell-k562-golden-delta-contract.md)、
+  [runbook](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md)、测试和
+  [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md) 已收口。
+
+**P16E 冻结证据**
+
+- public module：`praxis_virtualcell/model_zoo/k562_golden_delta_contract.py`；tests：
+  `praxis_virtualcell/tests/test_k562_golden_delta_contract.py`；
+- P16E contract tests：`231 passed`；safe directed gate：`689 passed`；safe legacy gate：
+  `1147 passed, 58 skipped, 105 deselected`；
+- authoritative Ruff（`--extend-exclude old`）、format 与 `git diff --check` 通过；
+- 两个 clean archive 的 local exact-commit wheel byte-identical：`1,108,165` bytes；
+  SHA-256 `d333180996a4ed91161d364275589e992d0be634582cc83a57e9758b86c03c66`；
+  `365` entries；`14` React entries；这些本地 build 值不是 release；
+- science `NOT_RUN`；policy `NO_NEW_DECISION`；无 release/version bump/push/deploy。
+
+**P16R 前置与授权（另行授权）**
+
+- [ ] Golden Pack、candidate checkpoint、environment 和 external dataset 精确授权；
+- [ ] exact read-only source roots、write-new output root、run window 和网络策略明确；
+- [ ] 用户明确授权 P16R exact-asset science run。
+
+**P16R 交付物**
 
 - [ ] candidate/checkpoint/environment/adapter identity；
 - [ ] 原生 delta-expression 语义，或 test 前冻结的 hash-bound conversion contract；
@@ -667,7 +741,7 @@ Golden Norman K562 perturbation
 | global mean | `0.0045820474` |
 | additive ridge | `0.0032570634` |
 
-**验收**
+**P16R 验收**
 
 - [ ] additive ridge 是 primary comparator；
 - [ ] candidate-minus-additive 95% CI 上界 `< 0`；
@@ -677,8 +751,9 @@ Golden Norman K562 perturbation
 - [ ] single-gene 与 combination 不互相借门；
 - [ ] 未通过的 scope 保持 abstain。
 
-**完成与 policy**
+**P16R/P16B 完成与 policy**
 
+- [x] P16E engineering 已独立收口，不等待 P16R science；
 - [ ] 负结果按 scope append-only 保存；
 - [ ] 过门 scope 另行执行 P16B operator-only decision；
 - [ ] 没有独立 P16B 时不得标记 production promotion。
@@ -689,17 +764,18 @@ Golden Norman K562 perturbation
 
 ### Phase 17 — PRAXIS Virtual Cell Brain
 
-**状态：** `NOT_STARTED`
+**状态：** `CONTRACT_ONLY ELIGIBLE / NOT_COMPLETE`
 
 **目标：** 把科学问题编译为确定性、可审计和可重放的 Virtual Experiment DAG。
 
 **前置与授权**
 
-- [ ] P16 completion code SHA 已记录；
+- [x] P16E completion code SHA `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2` 已记录；
 - [ ] 用户明确授权 `codex/p17-virtual-cell-brain`；
 - [ ] 若验收真实多模型组合，至少列出两个 P14B/P15B/P16B
   `production_promoted` decisions；
-- [ ] 少于两个 promoted capability 时，授权明确限定为 contract-only。
+- [x] 当前少于两个 promoted capability，因此下一本地 gate 明确限定为
+  contract-only，不运行真实多模型编排。
 
 **交付物**
 
@@ -1319,9 +1395,10 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | P15E | `COMPLETE` | `N/A — contract only` | `NO_NEW_DECISION` | `0ff6870a70a04d71098a16875e633f909e31cc5a` | `62480a3951173a2aa7b006403af9b169521db138` | `reports/phase15e/PHASE15E_COMPLETION.md`; tree `64906691...`; wheel `7758c13b...` |
 | P15R | `AUTHORIZATION_REQUIRED` | `NOT_RUN` | `N/A` | — | unchanged | exact deletion screen/model/assets/output root/run window 未授权 |
 | P15B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | — | unchanged | 仅在正科学结果与具名 operator 决定后可运行 |
-| P16E | `ELIGIBLE` | `NOT_RUN` | `NOT_RUN` | P15E docs-closure 后从 Git history 读取 | — | next local gate；not complete |
-| P16B | `NOT_STARTED` | `READ_ONLY` | `NOT_RUN` | — | unchanged | — |
-| P17 | `NOT_STARTED` | `NOT_RUN` | `N/A` | — | — | — |
+| P16E | `COMPLETE` | `N/A — contract only` | `NO_NEW_DECISION` | `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2` | `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2` | tree `098cd563...`; wheel `1,108,165` bytes / `d333180996a4...` / `365` entries / `14` React entries |
+| P16R | `AUTHORIZATION_REQUIRED` | `NOT_RUN` | `N/A` | — | unchanged | exact checkpoint/data/assets/output root/run window 未授权 |
+| P16B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | — | unchanged | 仅在正科学结果与具名 operator 决定后可运行 |
+| P17 | `ELIGIBLE — CONTRACT_ONLY` | `NOT_RUN` | `N/A` | P16E docs-closure 后从 Git history 读取 | — | next local gate；少于两个 promoted capabilities |
 | P18 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
 | P19 | `NOT_STARTED` | `N/A` | `N/A` | — | — | — |
 | P20 | `NOT_STARTED` | `CONTRACT_ONLY` | `N/A` | — | — | — |
@@ -1436,8 +1513,16 @@ P15E 已从 P14E docs-closure
 `64906691c4c989a843df4da97f0a93f32cd65ad2` 完成 contract-only 工程收口。P15R 仍为
 `AUTHORIZATION_REQUIRED / NOT_RUN`，P15B 仍为 `NOT_RUN`。
 
-持续本地授权下的下一 eligible gate 是 P16E；它尚未完成，实际 starting SHA 必须在
-P15E docs-closure 后从 Git history 读取。外置资产、真实模型/训练、network、push、
+P16E 已从 P15E docs-closure
+`d1e2e37b69784bd2f440cba34f51cfb56dcc00b2` 开始，以 completion code SHA
+`9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2` 和 tree
+`098cd563e3d865e080a0d121727b987e2d40ed18` 完成 contract-only 工程收口。P16R 仍为
+`AUTHORIZATION_REQUIRED / NOT_RUN`，P16B 仍为 `NOT_RUN`，science 未运行，policy 无新决定。
+
+持续本地授权下的下一 eligible gate 是 P17 contract-only；它尚未完成，实际 starting SHA
+必须在 P16E docs-closure 后从 Git history 读取。在 P14–P16 少于两个
+production-promoted capabilities 时，不得运行或宣称真实多模型编排。外置资产、
+真实模型/训练、network、push、
 发布、部署和 operator promotion 仍不在授权范围；这些外部门不阻塞无依赖的 eligible
 本地工程 gate。
 

@@ -37,8 +37,8 @@ adapter id/version  delta-expression-reference / 1.0.0
 task/output         predict_delta_expression / delta_expression
 ```
 
-P13 的 growth/fitness dummy adapters 只存在于测试。P14E/P15E 后续分别新增
-local-only growth 和 fitness contract adapters，但它们也没有进入
+P13 的 growth/fitness dummy adapters 只存在于测试。P14E/P15E/P16E 后续分别新增
+local-only growth、fitness 和 K562 Golden delta contract adapters，但它们也没有进入
 `DEFAULT_ADAPTER_REGISTRY`；若默认 registry 不再是唯一 delta adapter，立即视为
 边界破坏。
 
@@ -179,7 +179,7 @@ envelope      a6745427e8f0e9d516789ec9418a42fdb024e245d452b1ca4825c24398996ba2
 conformance   b40374d81f9ec3362d9950bffcfa97f123e46abc80f8b4b135fd5afa02bded18
 ~~~
 
-这些是兼容性/工程证据，不把 P13、P14E 或 P15E 提升为科学验证。
+这些是兼容性/工程证据，不把 P13、P14E、P15E 或 P16E 提升为科学验证。
 
 ### 5.2 P15E local-only fitness contract
 
@@ -217,6 +217,51 @@ completion code 上是 `98 passed`；safe directed 是 `458 passed`，safe legac
 [ADR-0012](../ADR-0012-virtualcell-yeast-deletion-fitness-contract.md)、
 [P15E runbook](VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md) 和
 [completion report](../../reports/phase15e/PHASE15E_COMPLETION.md)。
+
+### 5.3 P16E local-only K562 Golden delta contract
+
+P16E code `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`（tree
+`098cd563e3d865e080a0d121727b987e2d40ed18`）在
+`model_zoo/k562_golden_delta_contract.py` 中新增 exact K562 Golden Norman
+gene/gene-combination→5,045-feature delta-expression contract。
+`K562GoldenPerturbationAdapter` 只在显式 local registry 和 synthetic conformance
+中使用；默认 registry 仍只解析 P13
+`predict_delta_expression → delta_expression` reference adapter。
+
+该 adapter 的窄边界是：
+
+- exact `NCBITaxon:9606` / K562 / `CVCL_0004` / GRCh38 / `GCA_000001405.15`、
+  `scRNA` / `EFO:0008913` 和 Ensembl 84 有序 feature identities；
+- exact P8 canonical contract/Pack/manifest/hash/size/control/split identities，但不读取
+  H5AD/NPY，不执行 Golden benchmark；
+- single-gene 和 combination 使用分开的 condition/ordered-target/scope/protocol
+  bindings，`A549` 只保留为 upstream metadata error，绝不接受为 request cell；
+- raw finite `(5045,)` vector 保持原顺序，不得归一化、reorder、fill、impute、
+  deduplicate 或把 absolute expression 静默转为 delta；
+- uncertainty 固定 `not_available`；OOD 或非 success 必须 value-free abstain；
+- standalone envelope validation/projection/aggregation 拒绝，公开 projection 只能是
+  exact prepared-bound `{"delta_expression": [...]}`；
+- compatibility 固定 `assets_verified=false`、`executable=false`、
+  `reason=p16r_not_authorized`。
+
+定向回归为：
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_k562_golden_delta_contract.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+```
+
+completion code 上是 `231 passed`；safe directed 是 `689 passed`，safe legacy 是
+`1147 passed / 58 skipped / 105 deselected`；authoritative Ruff、format 和
+`git diff --check` 通过。两个 clean archive 的本地 wheel byte-identical：
+`1,108,165` bytes / `d333180996a4ed91161d364275589e992d0be634582cc83a57e9758b86c03c66` /
+`365` entries / `14` React entries；这些 build 值不是 release 或版本变更。`P16R` 仍为
+`AUTHORIZATION_REQUIRED / NOT_RUN`，
+`P16B` 为 `NOT_RUN`，`Science: NOT_RUN`，`Policy: NO_NEW_DECISION`。详细边界见
+[ADR-0013](../ADR-0013-virtualcell-k562-golden-delta-contract.md)、
+[P16E runbook](VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) 和
+[completion report](../../reports/phase16e/PHASE16E_COMPLETION.md)。
 
 ## 6. Pack-aware runtime 与 legacy 边界
 
@@ -327,7 +372,9 @@ runtime projection 时必须：
 5. 不改写 P9 negative result；
 6. 不把工程 conformance 描述成 scientific validation 或 production promotion。
 
-P13 engineering 已 COMPLETE，P14E/P15E 也已作为独立 contract-only work units
-完成。P14R/P15R 真实科学运行与 P14B/P15B operator policy/promotion 均需
-单独授权。P15E 完成不表示 fitness runtime-ready、scientifically validated、
-released 或 promoted；下一 eligible 本地工程 work unit 是 P16E。
+P13 engineering 已 COMPLETE，P14E/P15E/P16E 也已作为独立 contract-only work units
+完成。P14R/P15R/P16R 真实科学运行与 P14B/P15B/P16B operator
+policy/promotion 均需单独授权。P16E 完成不表示 K562 runtime-ready、
+scientifically validated、released 或 promoted；由于 P14–P16 仍少于两个
+production-promoted capabilities，下一 eligible 本地工程 work unit 仅是
+P17 contract-only。

@@ -6,7 +6,7 @@
 >
 > 当前本地仓库：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前分支：`codex/p15e-yeast-fitness-contract`
+> 当前分支：`codex/p16e-k562-perturbation-contract`
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
@@ -32,12 +32,17 @@
 > `62480a3951173a2aa7b006403af9b169521db138`；tree
 > `64906691c4c989a843df4da97f0a93f32cd65ad2`
 >
+> 已完成 work unit：`P16E — Human/K562 perturbation→delta-expression contract`；starting SHA
+> `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`；completion code SHA
+> `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`；tree
+> `098cd563e3d865e080a0d121727b987e2d40ed18`
+>
 > 工作树保护清单：不在本文固定；每轮从现场 `git status --short` 动态重建，任何
 > 新 staged/modified/deleted/untracked 路径默认受保护
 >
 > 当前 Cell-first 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
-> 当前下一 work unit：`P16E — Human/K562 perturbation→delta-expression contract`；`ELIGIBLE`
+> 当前下一 work unit：`P17 — Virtual Cell Brain deterministic DAG`；`ELIGIBLE / CONTRACT_ONLY`
 
 本文是一份面向其他项目、开发团队、科研合作者和后续智能体的独立项目说明。它回答四个问题：
 
@@ -228,7 +233,40 @@ policy 为 `NO_NEW_DECISION`。完整边界见
 [P15E runbook](runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md) 和
 [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md)。
 
-### 1.5 代码与外部资产许可
+### 1.5 Phase 16E 完成边界
+
+P16E 以 P15E docs-closure `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`
+为起始 SHA，在 `codex/p16e-k562-perturbation-contract` 上以 code SHA
+`9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`、tree
+`098cd563e3d865e080a0d121727b987e2d40ed18` 完成。它冻结 exact Human/K562
+`CVCL_0004`、GRCh38、scRNA、Ensembl 84 ordered 5,045 features，以及
+`predict_delta_expression → delta_expression`。请求仍使用 core-accepted
+`cell_type_name=K562`、`cell_type_id=None`，并在 attributes 绑定
+`cell_identity_id=CVCL_0004`；P8 source 中的 A549 只作为 upstream metadata error
+原样保存，绝不是请求 identity。
+
+`K562GoldenPerturbationAdapter` 将 single-gene 与 ordered combination scope、record、
+protocol 和 fingerprint 分开；`record_membership_verified=false`，checked-in aggregate
+hash 不能证明任意外置 record membership。adapter 只允许 local registration，不在
+`DEFAULT_ADAPTER_REGISTRY`；默认仍是 P13 generic delta reference adapter。raw successful
+vector 必须是 5,045 个 finite JSON-safe numbers 并逐项原样透传，禁止 symbol/version
+修正、ortholog、normalization、reorder、fill、impute、dedup 和 absolute→delta。非
+success/OOD 必须 value-free abstain，uncertainty 固定 `not_available`，公开 projection
+只能绑定 exact prepared input。
+
+validation protocol 固定 P8 `train→train / test→validation / ood→test`、137/30/116
+non-control conditions、`condition_id` leakage guard、condition-macro full-feature delta MSE、
+additive ridge comparator 和 candidate-MSE-minus-additive-MSE paired CI 方向。这只是
+`preregistration_not_evidence`；历史 additive result 只作 checked-in comparator reference。
+P16E 没有读取 H5AD、运行 candidate/comparator、产生 MSE/CI/external/contamination
+result，也没有 evidence、policy、promotion、release 或 deploy。compatibility 固定
+`assets_verified=false`、`executable=false`、`reason=p16r_not_authorized`。P16R 为
+`AUTHORIZATION_REQUIRED / NOT_RUN`，P16B 为 `NOT_RUN`，policy 为
+`NO_NEW_DECISION`。完整边界见 [ADR-0013](ADR-0013-virtualcell-k562-golden-delta-contract.md)、
+[P16E runbook](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) 和
+[P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md)。
+
+### 1.6 代码与外部资产许可
 
 仓库源码在 `pyproject.toml` 中声明为 MIT License。公共数据集、数据库下载、模型权重、checkpoint 和其他外置科研资产保留各自的许可、引用和使用限制；不能因为仓库代码使用 MIT，就推定这些外部资产也可按 MIT 再分发。
 
@@ -519,15 +557,16 @@ LLM 位于科学执行链之外。
 
 P12 已补入独立 artifact、environment、adapter、evidence 和 operator-policy record
 identity，并让 Pack-aware runtime 对 exact 完整绑定 fail closed；P13 已在其上完成
-严格 Adapter SDK 和 delta reference path；P14E/P15E 分别冻结了 local-only E. coli
-growth 和 S288C deletion-fitness 合同。这些 work units 均已有 completion code SHA，
-但仍只是本地 engineering-complete、未发布状态；P14E/P15E 都明确
+严格 Adapter SDK 和 delta reference path；P14E/P15E/P16E 分别冻结了 local-only
+E. coli growth、S288C deletion-fitness 和 K562 Golden delta-expression 合同。这些
+work units 均已有 completion code SHA，但仍只是本地 engineering-complete、未发布状态；
+P14E/P15E/P16E 都明确
 `executable=false`。P6-era v1 合同继续
 兼容，不能与 v2 完整治理混称；软件发布、科学 evidence 与 product policy 仍分别治理。
 
 ---
 
-## 8. P0–P15E 已完成工程工作
+## 8. P0–P16E 已完成工程工作
 
 ### Phase 0：可信边界和确定性基线
 
@@ -759,7 +798,33 @@ P15E 从 P14E docs-closure SHA
 
 P15E 没有读取或运行真实 deletion screen/model/GEM，没有 science run、
 evidence/policy、release 或 promotion。P15R 与 P15B 保持未授权/未运行。
-当前下一 eligible 本地工程 work unit 是 P16E。
+P16E 不依赖这些正结果，且已作为独立 contract-only work unit 完成。
+
+### Phase 16E：Human/K562 Golden perturbation→delta-expression contract（`COMPLETE`）
+
+P16E 从 P15E docs-closure SHA
+`d1e2e37b69784bd2f440cba34f51cfb56dcc00b2` 开始，以
+`9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`、tree
+`098cd563e3d865e080a0d121727b987e2d40ed18` 完成：
+
+- exact Human/K562 `CVCL_0004`、GRCh38、scRNA、Ensembl 84、P8 Pack/manifests、
+  split controls 和 5,045 ordered feature identities；
+- generic single-gene / ordered two-gene combination record contract，两个 scope 独立；
+- native P12 release/artifact/environment binding 和 typed-negative compatibility：
+  `assets_verified=false`、`executable=false`、`reason=p16r_not_authorized`；
+- native delta-expression vector 原样透传，禁止任何隐式 ID 或数值转换；
+- additive ridge comparator、paired CI sign、validation-only tuning、external/OOD 和
+  leakage 的 evidence-neutral preregistration；
+- `not_available` uncertainty、OOD/non-success value-free abstain 和 prepared-only
+  public projection；
+- local `K562GoldenPerturbationAdapter`，不加入默认 adapter registry。
+
+P16E 只读取小型 checked-in YAML/JSON manifests，没有打开 H5AD 或运行 Golden
+benchmark/candidate/additive ridge，没有产生 scientific evidence 或 policy，也没有
+release、promotion 或 deploy。P16R 为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P16B 为
+`NOT_RUN`。当前下一 eligible 本地 work unit 是 P17；由于少于两个
+`production_promoted` capability，P17 只能完成 deterministic DAG contract，必须
+fail closed 或 abstain，不能声称真实多模型执行。
 
 ---
 
@@ -863,14 +928,23 @@ artifact SHA-256
 - `vc.yeast-deletion-fitness-adapter-input-contract.v1`
 - `vc.yeast-deletion-fitness-adapter-output-contract.v1`
 - `vc.yeast-deletion-fitness-prepared-model-input.v1`
+- `vc.k562-golden-perturbation-scope.v1`
+- `vc.k562-golden-validation-protocol.v1`
+- `vc.k562-golden-data-binding.v1`
+- `vc.k562-golden-perturbation-binding.v1`
+- `vc.k562-golden-execution-binding.v1`
+- `vc.k562-golden-compatibility-binding.v1`
+- `vc.k562-golden-adapter-input-contract.v1`
+- `vc.k562-golden-adapter-output-contract.v1`
+- `vc.k562-golden-prepared-model-input.v1`
 - `vc.data-catalog.v1`
 - `vc.upload-receipt.v1`
 - `vc.community-pack.v1`
 
 其他项目应按 `schema_version` 路由解析器，不能依靠字段形状猜测版本。
-以上 P12/P13/P14E/P15E 新增 schema 属于本地 engineering-complete work units；
+以上 P12/P13/P14E/P15E/P16E 新增 schema 属于本地 engineering-complete work units；
 它们尚未发布，外部项目不应仅凭本地 completion 把它们当作已发布协议或
-真实科学能力。P14E/P15E 的 validation protocols 和 synthetic fixtures 尤其不能
+真实科学能力。P14E/P15E/P16E 的 validation protocols 和 synthetic fixtures 尤其不能
 被解析为 P12 validation evidence。
 
 ---
@@ -1511,7 +1585,7 @@ dimensionless finite scalar；它未进入默认 registry，且 compatibility �
 或 policy。要接入 growth、fitness、absolute expression、metabolic flux、drug response
 等生产输出，仍需明确的 executable adapter、exact model/assets、独立科学测试、evidence
 与 operator policy。不能只修改模型卡的 `status`/`outputs`，引用 P13 dummy，或引用
-P14E/P15E contract adapter，就宣称模型可运行。
+P14E/P15E/P16E contract adapter，就宣称模型可运行。
 
 模型权重和大型资产必须外置，并通过 hash、模型卡和环境身份绑定，不能直接提交进 Git。
 
@@ -1845,7 +1919,28 @@ Python 3.13 本地 toolchain 上构建出 byte-identical wheel，SHA-256
 版本仍为 `1.6.0`，没有 release/version bump。完整记录见
 `reports/phase15e/PHASE15E_COMPLETION.md`。
 
-### 24.7 Skip 和 deselect 的含义
+### 24.7 P16E 完成状态
+
+P16E starting SHA 为 `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`，completion
+code SHA 为 `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`，tree 为
+`098cd563e3d865e080a0d121727b987e2d40ed18`。P16E contract 为 `231 passed`，
+safe directed 为 `689 passed`，safe legacy 为
+`1147 passed, 58 skipped, 105 deselected`。authoritative
+`ruff check . --extend-exclude old --no-cache`、format 和 `git diff --check` 通过，
+最终 adversarial verification 无剩余 P1/P2 finding。
+
+这些 gate 只读取 checked-in 小型 Golden YAML/JSON manifests，并用 synthetic
+5,045-value vectors；没有读取 H5AD、运行 candidate/additive ridge/Golden science、
+training、GPU 或 network。两个 clean archive 的 exact wheel byte-identical：
+`1,108,165` bytes，SHA-256
+`d333180996a4ed91161d364275589e992d0be634582cc83a57e9758b86c03c66`，`365` entries，
+其中 `14` 个 React static entries；该 wheel 未发布。
+严格 offline install、全局 `pip check` 与 limited installed-wheel smoke 的真实边界见
+completion report，不能把受污染或非 hash-locked 环境改写成 release evidence。
+版本仍为 `1.6.0`，没有 release/version bump。完整记录见
+`reports/phase16e/PHASE16E_COMPLETION.md`。
+
+### 24.8 Skip 和 deselect 的含义
 
 skip/deselect 不能写成：
 
@@ -1888,6 +1983,8 @@ skip/deselect 不能写成：
   production adapter；它没有真实 GEM/Pack/model release、evidence 或 policy；
 - P15E fitness adapter 同样是 local、non-default、typed-negative contract adapter；它没有
   真实 deletion screen/model/Pack evidence 或 policy，不能与 planned card 合并宣传；
+- P16E K562 adapter 同样是 local、non-default、typed-negative contract adapter；它没有
+  真实 candidate/model execution/evidence 或 policy，历史 P8 additive result 不能冒充候选证据；
 - 历史 `ecoli_gem` card、legacy `GemWrapper`/route 和 P14E contract adapter 是不同边界，
   不能相互补足或合并宣传为可执行 E. coli growth capability；
 - P12 adapter identity 与 P13 executable adapter SDK 已完成接线，但没有新增生产
@@ -1907,7 +2004,11 @@ skip/deselect 不能写成：
   benchmark、paired CI、independent cohort、real OOD 或 scientific validation；
 - P15E 没有读取/运行真实 deletion-fitness data/model/GEM，没有 benchmark、
   paired CI、independent condition/platform、real OOD 或 scientific validation；
+- P16E 没有读取 H5AD 或运行 candidate/additive ridge，没有新的 MSE、paired CI、
+  contamination、external K562/platform、real OOD 或 scientific validation；
 - 没有多物种科学能力同时通过的证据；
+- 少于两个 capability 拥有 exact positive evidence 与 named-operator
+  `production_promoted`，所以 P17 只能 contract-only，不能声称真实多模型执行；
 - 没有真实 Community model；
 - 没有 Host–Microbiome model；
 - 没有 biological world model；
@@ -1916,7 +2017,7 @@ skip/deselect 不能写成：
 ### 工程限制
 
 - 当前版本字符串存在发布漂移；
-- P13 Adapter SDK 与 P14E/P15E narrow contracts 仅在本地工程完成，尚未发布；
+- P13 Adapter SDK 与 P14E/P15E/P16E narrow contracts 仅在本地工程完成，尚未发布；
 - P14E 尚无任意未来 GEM loader 为 `data_only` 的类型级证明；
 - JobStore 是本地文件系统；
 - API 除上传外没有通用认证；
@@ -2062,8 +2163,8 @@ artifact hash
 
 ## 28. 后续路线图 P12–P30
 
-P12/P13/P14E/P15E 行记录已完成的工程 work units；P14R/P14B 与
-P15R/P15B 仍未运行。下一 eligible 本地合同工程是 P16E；真实科学或 policy
+P12/P13/P14E/P15E/P16E 行记录已完成的工程 work units；P14R/P14B、
+P15R/P15B 与 P16R/P16B 仍未运行。下一 eligible 本地合同工程是 P17；真实科学或 policy
 窗口不能当作当前能力。
 
 | 阶段 | 目标 |
@@ -2076,8 +2177,10 @@ P15R/P15B 仍未运行。下一 eligible 本地合同工程是 P16E；真实科�
 | P15E | `COMPLETE`：exact S. cerevisiae strain/condition gene-deletion→fitness local contract；`executable=false` |
 | P15R | `AUTHORIZATION_REQUIRED / NOT_RUN`：exact deletion screen/model/assets 的科学运行 |
 | P15B | `NOT_RUN`：正科学 evidence 后的独立 operator decision |
-| P16 | `ELIGIBLE`：Human K562 perturbation delta expression contract |
-| P17 | PRAXIS Virtual Cell Brain，多模型分解、选择、执行和审查 |
+| P16E | `COMPLETE`：exact Human/K562 Golden perturbation→delta-expression local contract；`executable=false` |
+| P16R | `AUTHORIZATION_REQUIRED / NOT_RUN`：exact candidate/model/assets 的科学运行 |
+| P16B | `NOT_RUN`：正科学 evidence 后的独立 operator decision |
+| P17 | `ELIGIBLE / CONTRACT_ONLY`：deterministic Virtual Cell Brain DAG；少于两个 promoted capabilities 时 fail closed/abstain |
 | P18 | Multi-omics cell-state representation |
 | P19 | 受控 Pack Factory：receipt → reviewed/validated RegisteredPack |
 | P20 | Training Pipeline：training job/result、checkpoint/model identity 和 tiny dry-run |
@@ -2124,8 +2227,13 @@ P14E E. coli K-12 knockout→growth-ratio contract 已在不读取或运行真�
 
 P15E S. cerevisiae gene-deletion→fitness contract 已在 synthetic、local-only 边界内
 完成。P15R/P15B 分别保持独立授权窗口，P10 yeast tiny Pack、历史
-yeast GEM 和 planned model card 仍不能冒充真实 deletion-fitness evidence。当前下一
-eligible 技术闭环是 P16E Human/K562 perturbation→delta-expression contract。
+yeast GEM 和 planned model card 仍不能冒充真实 deletion-fitness evidence。
+
+P16E Human/K562 Golden perturbation→delta-expression contract 也已在 local-only、
+typed-negative 边界内完成。P16R/P16B 分别保持独立授权窗口，P8 historical baseline
+结果不是 P16 candidate evidence。当前下一 eligible 技术闭环是 P17 deterministic
+Virtual Cell Brain DAG contract；由于没有至少两个 exact `production_promoted`
+capabilities，所有真实多模型执行请求必须 fail closed 或 abstain。
 
 在进入更大世界模型之前，最重要的闭环仍然是：
 
@@ -2169,10 +2277,11 @@ eligible 技术闭环是 P16E Human/K562 perturbation→delta-expression contrac
 12. [P13 Completion Report](../reports/phase13/PHASE13_COMPLETION.md)
 13. [P14E Completion Report](../reports/phase14e/PHASE14E_COMPLETION.md)
 14. [P15E Completion Report](../reports/phase15e/PHASE15E_COMPLETION.md)
-15. 本当前项目与集成指南
-16. [Repository Layout](REPOSITORY-LAYOUT.md)
-17. [Installation Guide](INSTALL.md)
-18. 当前 work unit 的 ADR、runbook、contracts、代码和测试
+15. [P16E Completion Report](../reports/phase16e/PHASE16E_COMPLETION.md)
+16. 本当前项目与集成指南
+17. [Repository Layout](REPOSITORY-LAYOUT.md)
+18. [Installation Guide](INSTALL.md)
+19. 当前 work unit 的 ADR、runbook、contracts、代码和测试
 
 关键 ADR：
 
@@ -2188,6 +2297,7 @@ eligible 技术闭环是 P16E Human/K562 perturbation→delta-expression contrac
 - [P13 Model Adapter SDK](ADR-0010-virtualcell-model-adapter-sdk.md)
 - [P14E E. coli K-12 Growth Contract](ADR-0011-virtualcell-ecoli-k12-growth-contract.md)
 - [P15E S. cerevisiae Deletion-Fitness Contract](ADR-0012-virtualcell-yeast-deletion-fitness-contract.md)
+- [P16E K562 Golden Delta Contract](ADR-0013-virtualcell-k562-golden-delta-contract.md)
 
 关键 runbook：
 
@@ -2201,6 +2311,7 @@ eligible 技术闭环是 P16E Human/K562 perturbation→delta-expression contrac
 - [P13 Model Adapter SDK](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md)
 - [P14E E. coli K-12 Growth Contract](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md)
 - [P15E S. cerevisiae Deletion-Fitness Contract](runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md)
+- [P16E K562 Golden Delta Contract](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md)
 - [External Disk Git Maintenance](runbooks/EXTERNAL-DISK-GIT-MAINTENANCE.md)
 
 ---
@@ -2226,7 +2337,12 @@ executable=false。P14R/P14B 未授权、未运行。P15E 以
 62480a3951173a2aa7b006403af9b169521db138（tree
 64906691c4c989a843df4da97f0a93f32cd65ad2）完成 local S288C
 single-deletion→fitness contract；工程 COMPLETE，executable=false，P15R/P15B/science/policy
-未运行。下一 eligible 本地 work unit 是 P16E Human/K562 contract。
+未运行。P16E 从 d1e2e37b69784bd2f440cba34f51cfb56dcc00b2 起步，以
+9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2（tree
+098cd563e3d865e080a0d121727b987e2d40ed18）完成 local K562 Golden
+perturbation→delta-expression contract；工程 COMPLETE，executable=false，
+P16R/P16B/science/policy 未运行。下一 eligible 本地 work unit 是 P17 deterministic
+Virtual Cell Brain DAG contract；少于两个 promoted capabilities 时不得真实多模型执行。
 
 当前 UI 是：
 选择 Cell Context → Chat → 自动解析/运行 → Report/Abstain，
@@ -2244,6 +2360,9 @@ predict_knockout_growth → growth_ratio contract adapter。后者不是 dummy�
 capability，更不能与 legacy ecoli_gem/GemWrapper 合并为真实执行能力。
 P15E 另有 local、non-default、typed-negative 的 predict_deletion_fitness → fitness
 contract adapter，同样不是 runtime-ready 或科学能力。
+P16E 另有 local、non-default、typed-negative 的 K562 Golden
+predict_delta_expression → delta_expression contract adapter；它与默认 generic delta
+reference adapter 不同，也不进入默认 registry。
 
 P12 legacy migration 不创建 evidence/policy/promotion；无法精确绑定的 P8/P9
 结果保持 unbound/incomplete。registry lifecycle 是 append-only，Pack list/API 只
@@ -2251,7 +2370,8 @@ P12 legacy migration 不创建 evidence/policy/promotion；无法精确绑定的
 P13 同样没有真实模型、数据、权重、science run 或新 operator decision。P14E 也没有
 读取/运行真实 GEM、SBML、growth data 或 solver，没有 benchmark/evidence/policy、release
 或 promotion；P15E 也没有读取/运行真实 deletion screen/model/GEM 或生成
-evidence/policy。synthetic conformance 只证明合同确定性。
+evidence/policy；P16E 也没有读取 H5AD、运行 candidate/additive comparator 或生成
+MSE/CI/external evidence/policy。synthetic conformance 只证明合同确定性。
 
 数据存在不等于 Pack；Pack、registry、per-request compatibility/executable、
 scientific evidence 和 product policy 是五个独立层次。只有 exact

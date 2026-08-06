@@ -1,16 +1,80 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P15E 分支 `codex/p15e-yeast-fitness-contract`；唯一起始 SHA
-> `0ff6870a70a04d71098a16875e633f909e31cc5a`
+> 当前文档基线：P16E 分支 `codex/p16e-k562-perturbation-contract`；唯一起始 SHA
+> `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：`P15E_ENGINEERING_COMPLETE_P16E_ELIGIBLE`；completion code SHA
-> `62480a3951173a2aa7b006403af9b169521db138`；tree
-> `64906691c4c989a843df4da97f0a93f32cd65ad2`。下述 P4.3–P14E 和 CI 数字仍只绑定
-> 各自 exact SHA/日期；P15E 本地工程结果不构成科学验证、operator policy、发布或
+> 状态：`P16E_ENGINEERING_COMPLETE_P17_CONTRACT_ONLY_ELIGIBLE`；completion code SHA
+> `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`；tree
+> `098cd563e3d865e080a0d121727b987e2d40ed18`。下述 P4.3–P15E 和 CI 数字仍只绑定
+> 各自 exact SHA/日期；P16E 本地工程结果不构成科学验证、operator policy、发布或
 > 远程证据。
+
+## Phase 16E `ENGINEERING_COMPLETE` 本地证据
+
+P16E 只冻结 Golden Norman K562 / `CVCL_0004`、`GRCh38` / `GCA_000001405.15`、
+`scRNA` / `EFO:0008913`、Ensembl 84 有序 5,045-feature delta-expression 合同。
+`K562GoldenPerturbationAdapter` 的唯一任务是
+`predict_delta_expression → delta_expression`；single-gene 和 combination 的 exact
+condition/ordered targets 分开绑定，不做 symbol/version/ortholog 猜测，不将
+absolute expression 静默转成 delta。raw 5,045-vector 只能在 exact prepared
+input 下原顺序透传；非 success/OOD 必须 value-free abstain，uncertainty 固定
+`not_available`。
+
+该 adapter 复用 native P12 artifact/environment/release identities 并绑定已检入的 P8
+Golden contract/Pack/manifest identities，但 P16E compatibility 固定
+`assets_verified=false`、`executable=false`、`reason=p16r_not_authorized`。它只能在
+explicit local registry 中使用；`DEFAULT_ADAPTER_REGISTRY` 仍只有原 P13 delta
+reference adapter。以下命令不读取 H5AD/NPY、不运行 Golden/science benchmark：
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_k562_golden_delta_contract.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_k562_golden_delta_contract.py \
+  praxis_virtualcell/tests/test_yeast_deletion_fitness_contract.py \
+  praxis_virtualcell/tests/test_ecoli_growth_contract.py \
+  praxis_virtualcell/tests/test_model_adapter_sdk.py \
+  praxis_virtualcell/tests/test_model_adapter_output_flow.py \
+  praxis_virtualcell/tests/test_capability_runtime.py \
+  praxis_virtualcell/tests/test_model_registry_v2.py \
+  praxis_virtualcell/tests/test_request_v2.py \
+  praxis_virtualcell/tests/test_packaging.py \
+  praxis_virtualcell/tests/baseline/test_baseline_offline_report.py \
+  praxis_virtualcell/tests/baseline/test_baseline_routing_snapshot.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+~~~
+
+completion code/tree 上的冻结结果：
+
+| Gate | 结果 |
+|---|---|
+| P16E contract | `231 passed` |
+| safe directed | `689 passed` |
+| safe legacy | `1147 passed / 58 skipped / 105 deselected` |
+| authoritative `ruff check . --extend-exclude old --no-cache` | PASS |
+| format check / `git diff --check` | PASS |
+
+两个 clean archive 的 exact-commit wheel byte-identical：`1,108,165` bytes，SHA-256
+`d333180996a4ed91161d364275589e992d0be634582cc83a57e9758b86c03c66`，`365` entries，
+其中 `14` 个 React entries。这些本地 build 值不是 release identity，版本仍为 `1.6.0`，
+没有 version bump。official strict offline build 因本地 hash cache 缺 `packaging==26.2`
+而 fail closed；受污染的 system-site venv 仅完成有限 install/import/CLI smoke，不能作为
+clean hash-locked install 或 dependency-integrity 证据。
+
+`Science: NOT_RUN`；`P16R: AUTHORIZATION_REQUIRED / NOT_RUN`；
+`P16B: NOT_RUN`；`Policy: NO_NEW_DECISION`。P16E 只证明 contract/conformance，
+没有读取或运行真实 checkpoint/data/assets，没有 training、GPU、network、
+release、push 或 deploy。因 P14–P16 仍少于两个 production-promoted
+capabilities，下一本地 work unit 仅以 `P17 CONTRACT_ONLY ELIGIBLE / NOT_COMPLETE`
+进入，不得宣称真实多模型编排。完整边界见
+[ADR-0013](ADR-0013-virtualcell-k562-golden-delta-contract.md)、
+[P16E runbook](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) 和
+[P16E 完成报告](../reports/phase16e/PHASE16E_COMPLETION.md)。
 
 ## Phase 15E `ENGINEERING_COMPLETE` 本地证据
 
