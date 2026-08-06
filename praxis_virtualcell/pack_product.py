@@ -663,6 +663,38 @@ class PackIndex:
                 return entry["factory_store_root"]
         raise PackNotFound(f"unknown Pack: {(pack_id, pack_version)}")
 
+    def factory_provenance(
+        self,
+        pack_id: str,
+        pack_version: str,
+    ) -> dict[str, str]:
+        """Return one frozen v2 factory binding without opening Pack assets.
+
+        Consumers that must audit metadata before materializing labels use this
+        narrow accessor, then independently verify the bound store, manifest,
+        and their exact allowlisted assets. Legacy entries fail closed.
+        """
+
+        for entry in self._read():
+            if (entry["pack_id"], entry["pack_version"]) != (
+                pack_id,
+                pack_version,
+            ):
+                continue
+            registration = entry["factory_registration_fingerprint"]
+            store_root = entry["factory_store_root"]
+            if registration is None or store_root is None:
+                raise PackIndexError("legacy Pack index entry has no factory provenance")
+            return {
+                "pack_id": entry["pack_id"],
+                "pack_version": entry["pack_version"],
+                "pack_fingerprint": entry["pack_fingerprint"],
+                "root": entry["root"],
+                "factory_registration_fingerprint": registration,
+                "factory_store_root": store_root,
+            }
+        raise PackNotFound(f"unknown Pack: {(pack_id, pack_version)}")
+
 
 def _request_v2(request: dict[str, Any]) -> VirtualCellRequestV2:
     if request.get("schema_version") == "vc.request.v2":

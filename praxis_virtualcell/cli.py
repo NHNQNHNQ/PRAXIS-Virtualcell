@@ -200,6 +200,36 @@ def _cmd_pack_run(a) -> int:
     return 0
 
 
+def _cmd_training_dry_run(a) -> int:
+    from praxis_virtualcell.model_zoo.training.pipeline import (
+        TrainingPipelineError,
+        load_training_job,
+        run_training_job,
+    )
+    from praxis_virtualcell.pack_product import PackIndex
+
+    try:
+        job = load_training_job(a.job)
+        outcome = run_training_job(
+            job,
+            index=PackIndex(index_path=a.index, include_builtins=False),
+            output_root=a.output_root,
+        )
+    except TrainingPipelineError:
+        _print_json({"status": "rejected"})
+        return 2
+    _print_json(
+        {
+            "status": "candidate_cataloged_contract_only",
+            "training_job_fingerprint": outcome.job.fingerprint(),
+            "checkpoint_fingerprint": outcome.checkpoint.fingerprint(),
+            "training_result_fingerprint": outcome.result.fingerprint(),
+            "candidate_model_fingerprint": outcome.candidate_model.fingerprint(),
+        }
+    )
+    return 0
+
+
 def _pack_identity_arguments(parser) -> None:
     parser.add_argument("--pack-id", required=True)
     parser.add_argument("--pack-version", required=True)
@@ -284,6 +314,19 @@ def main(argv=None) -> int:
         dest="llm_report",
     )
     pack_run_cmd.set_defaults(fn=_cmd_pack_run)
+    training = sub.add_parser(
+        "training",
+        help="运行 contract-only 确定性训练 dry-run",
+    )
+    training_sub = training.add_subparsers(dest="training_cmd", required=True)
+    dry_run_cmd = training_sub.add_parser(
+        "dry-run",
+        help="从冻结 job 同步生成 candidate artifacts",
+    )
+    dry_run_cmd.add_argument("--job", required=True)
+    dry_run_cmd.add_argument("--index", required=True)
+    dry_run_cmd.add_argument("--output-root", required=True)
+    dry_run_cmd.set_defaults(fn=_cmd_training_dry_run)
     a = p.parse_args(argv)
     return a.fn(a)
 

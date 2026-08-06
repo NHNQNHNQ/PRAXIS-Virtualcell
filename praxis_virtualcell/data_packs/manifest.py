@@ -346,10 +346,25 @@ class PackManifest(SchemaObject):
         return hashlib.sha256(canonical).hexdigest()
 
 
+def load_manifest_bytes(payload: bytes) -> PackManifest:
+    """Parse one manifest from already-authenticated bytes."""
+
+    if type(payload) is not bytes:
+        raise PackManifestError("Pack manifest payload must be bytes")
+    try:
+        value = yaml.load(payload.decode("utf-8"), Loader=_UniqueKeyLoader)
+    except (UnicodeDecodeError, yaml.YAMLError) as exc:
+        raise PackManifestError(f"cannot parse Pack manifest: {exc}") from exc
+    return PackManifest.from_dict(value)
+
+
 def load_manifest(path: str | Path) -> PackManifest:
     manifest_path = Path(path)
     try:
-        value = yaml.load(manifest_path.read_text(encoding="utf-8"), Loader=_UniqueKeyLoader)
-    except (OSError, yaml.YAMLError) as exc:
+        payload = manifest_path.read_bytes()
+    except OSError as exc:
         raise PackManifestError(f"cannot read Pack manifest {manifest_path}: {exc}") from exc
-    return PackManifest.from_dict(value)
+    try:
+        return load_manifest_bytes(payload)
+    except PackManifestError as exc:
+        raise PackManifestError(f"cannot read Pack manifest {manifest_path}: {exc}") from exc
