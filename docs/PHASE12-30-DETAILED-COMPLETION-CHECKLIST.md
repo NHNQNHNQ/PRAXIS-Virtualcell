@@ -4,21 +4,23 @@
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前已完成产品阶段：`Phase 11`
+> 当前已完成工程阶段：`Phase 13`
 >
 > DOCS-CLOSURE completion：`b19c896202bea56f894d0ad540501331af42a40c`
 >
-> 当前 work unit：`Phase 12 — Virtual Cell Model Zoo v2`；starting SHA
-> `b19c896202bea56f894d0ad540501331af42a40c`；branch
-> `codex/p12-model-registry-v2`；状态 `VALIDATING`
+> 已完成 work unit：`Phase 13 — Virtual Cell Model Adapter SDK`；starting SHA
+> `f83c13db386cb552b3ce7a5643e5ffbead0ff573`；branch
+> `codex/p13-model-adapter-sdk`；completion code SHA
+> `744d0a28d2cfc13d1b10e85b133b6c13b9426174`；状态 `COMPLETE`
 >
-> 条件式下一候选：`Phase 13 — Model Adapter SDK`；`NOT ACTIVE`、未授权
+> 下一 eligible 本地工程 work unit：`P14E — E. coli K-12 knockout→growth contract`；
+> `ELIGIBLE`
 >
 > 当前 Phase 11 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
-> 当前状态核对日期：2026-08-02
+> 当前状态核对日期：2026-08-06
 
 本文是一份可以在整个项目周期中逐项对照的执行清单。它把
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)转换为：
@@ -33,9 +35,10 @@
 → 完成记录
 ```
 
-本文自身不授权实施任何 Phase。P12 已由用户另行精确授权，且只允许一次本地
-Phase 12 commit；外置数据或权重、network、push、GitHub main/tag、`.53` 和其他
-远程操作仍禁止。阶段 scope、资产清单和可复制授权句仍以
+本文自身不授权实施任何 Phase。P12 和 P13 已在持续本地授权内完成；该授权仍不包含
+外置数据或权重、network、push、GitHub main/tag、`.53`、服务、发布、部署或真实
+科学运行。P14 进一步拆为本地合同工程 `P14E`、需逐资产/窗口授权的 `P14R` 和仅能在
+正科学结果后由具名 operator 决定的 `P14B`。阶段 scope、资产清单和可复制授权句仍以
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)为准。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
@@ -101,6 +104,15 @@ work-unit 执行状态机使用以下状态；总进度表可另用 `NOT_STARTED
 - P12 实现分离 model/artifact/environment/adapter/evidence/operator-policy
   identity，保持 v1 migration 为 legacy/incomplete/no-promotion，并以 append-only
   lifecycle 表达 catalog/readiness/revoke/supersede；
+- P12 completion docs commit `f83c13db386cb552b3ce7a5643e5ffbead0ff573`
+  是 P13 的实际 starting SHA；P13 不能错误地从 P12 code SHA 直接起算；
+- Phase 13 已在 `codex/p13-model-adapter-sdk` 以 code SHA
+  `744d0a28d2cfc13d1b10e85b133b6c13b9426174`（tree
+  `198e623120688d3704b9312990ddaa93c9a7b0e6`）完成统一 Adapter SDK、prepared input、
+  strict output envelope、deterministic conformance 与 runtime/report 接线；
+- P13 默认生产 registry 仅注册 `predict_delta_expression → delta_expression`；growth
+  和 fitness adapters 只存在于测试，未新增真实模型、数据、权重、science run 或
+  operator decision；
 - `praxis-vc pack list` 和 `GET /api/packs` 只复用既有链路返回路径脱敏白名单投影，
   不新增管理写 API；
 - 未精确绑定现有 model identity 的 P8/P9 结果保留为 `unbound` migration receipt；
@@ -108,7 +120,9 @@ work-unit 执行状态机使用以下状态；总进度表可另用 `NOT_STARTED
 - 历史 ref `codex/p12-cell-first-baseline` 是误命名恢复 ref，不定义阶段状态；
 - staged/modified/deleted/untracked 保护清单不在本文固定，每轮必须从现场
   `git status --short` 重建；任何新路径默认受保护；
-- P13 是当前持续本地授权下的下一 eligible work unit。
+- P14E 是当前持续本地授权下的下一 eligible 合同工程 work unit；P14R 仍需 exact
+  GEM/data/assets/output root/run window 授权，P14B 在正科学结果与具名 operator 决定前
+  保持 `NOT_RUN`。
 
 ### 2.2 全路线依赖
 
@@ -144,8 +158,10 @@ flowchart TD
 | P11 | `COMPLETE` | `NOT_CLAIMED` | `NOT_APPLICABLE` | Cell-first 产品入口和 P11 代码锚点 |
 | DOCS-CLOSURE | `COMPLETE` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | completion `b19c896...` |
 | P12 | `COMPLETE` | `NOT_APPLICABLE` | `NO_NEW_DECISION` | 分层 identity、v1 no-promotion migration、append-only lifecycle、只读投影；completion `1a5464fb...` |
-| P13 | `ELIGIBLE` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | 多 task/output Adapter SDK |
-| P14 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | E. coli growth；policy 另用 P14B |
+| P13 | `COMPLETE` | `NOT_RUN` | `NO_NEW_DECISION` | 统一 Adapter SDK、delta reference、conformance 与 runtime/report 接线；completion `744d0a28...` |
+| P14E | `ELIGIBLE` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | E. coli K-12 knockout→growth 合同与 fail-closed 工程边界 |
+| P14R | `AUTHORIZATION_REQUIRED` | `NOT_RUN` | `NOT_APPLICABLE` | exact GEM/data/assets/output root/run window 后才可真实运行 |
+| P14B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | 仅在正科学结果后由具名 operator 决定 |
 | P15 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | Yeast deletion fitness；policy 另用 P15B |
 | P16 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | K562 delta-expression；policy 另用 P16B |
 | P17 | `NOT_STARTED` | `NOT_RUN` | `NOT_APPLICABLE` | DAG 合同；真实多模型需至少两个 promoted 能力 |
@@ -307,53 +323,93 @@ provenance 必须引用同一 plan，且两处 plan 使用同一字段白名单/
 
 ### Phase 13 — Virtual Cell Model Adapter SDK
 
-**状态：** `ELIGIBLE`
+**状态：** `COMPLETE`
 
-**目标：** 建立按 task/output 注册的统一 Adapter SDK，消除核心 runtime 中的模型、
-物种和 `prediction.delta` 专用硬编码。
+**执行身份：** starting SHA
+`f83c13db386cb552b3ce7a5643e5ffbead0ff573`；branch
+`codex/p13-model-adapter-sdk`；completion code SHA
+`744d0a28d2cfc13d1b10e85b133b6c13b9426174`；tree
+`198e623120688d3704b9312990ddaa93c9a7b0e6`。
+
+**目标：** 建立按 task/output 注册的统一 Adapter SDK，使 Pack-aware strict path 接入
+新 adapter 时无需新增 model/species 分支；显式保留 legacy/delta compatibility 分支。
 
 **前置与授权**
 
-- [x] P12 completion SHA 已记录；
+- [x] P12 completion docs SHA `f83c13db386cb552b3ce7a5643e5ffbead0ff573`
+  已记录并作为 P13 actual starting SHA；
 - [x] P12 状态迁移和 registry tests 已通过；
 - [x] 持续本地授权允许进入 `codex/p13-model-adapter-sdk`；
 - [x] 未授权任何真实模型、数据或权重。
 
 **交付物**
 
-- [ ] Adapter SDK ADR；
-- [ ] adapter schema/version/fingerprint；
-- [ ] 复用 `vc.model-feature-contract.v1` 的输入合同；
-- [ ] 严格 output envelope：task、output、shape、unit、finite number、uncertainty、
+- [x] Adapter SDK ADR；
+- [x] adapter schema/version/fingerprint；
+- [x] 复用 `vc.model-feature-contract.v1` 的输入合同；
+- [x] 严格 output envelope：task、output、shape、unit、finite number、uncertainty、
   OOD、abstain 和 provenance；
-- [ ] `predict_delta_expression → delta_expression` reference adapter；
-- [ ] adapter registry；
-- [ ] adapter fingerprint 接入 compatibility、plan、job 和 report identity；
-- [ ] wrapper 只消费 Broker 准备好的输入和 hash-bound assets；
-- [ ] dummy delta/growth/fitness conformance adapters，仅用于测试；
-- [ ] legacy 和 P0 确定性报告兼容层。
+- [x] `predict_delta_expression → delta_expression` reference adapter；
+- [x] adapter registry；
+- [x] adapter fingerprint 接入 compatibility、plan 和 job execution identity，并经
+  `adapter_output`/provenance 纳入 structured report fingerprint；
+- [x] wrapper 只消费 Broker 准备好的输入和 hash-bound assets；
+- [x] delta reference 与 dummy growth/fitness conformance adapters；dummy 仅用于测试；
+- [x] legacy 和 P0 确定性报告兼容层。
 
 **验收**
 
-- [ ] delta reference adapter 与 P6/P8 行为兼容；
-- [ ] 无 adapter 时 execution plan 为空；
-- [ ] 未注册 task/output、错 feature order、mapping drift、错 unit/shape/type 拒绝；
-- [ ] NaN、Inf、超大整数和 unknown field 拒绝；
-- [ ] 新测试 plugin 不修改 `route_table.py`、`case_dispatch.py` 或物种分支；
-- [ ] dummy adapter 没有进入生产 registry；
-- [ ] 相关契约、core、legacy 和 Ruff 通过。
+- [x] delta reference adapter 与 P6/P8 行为兼容；
+- [x] 无 adapter 时 execution plan 为空；
+- [x] 未注册 task/output、错 feature order、mapping drift、错 unit/shape/type 拒绝；
+- [x] NaN、Inf、超大整数和 unknown field 拒绝；
+- [x] 新测试 plugin 不修改 `route_table.py`、`case_dispatch.py` 或物种分支；
+- [x] dummy adapter 没有进入生产 registry；
+- [x] 相关契约、core、legacy 和 Ruff 通过。
+
+**冻结证据**
+
+- adapter fingerprint：
+  `17afc27e56dba13567001ff1982cbf1660e2948fadf2147301a1d0dcf61aeb3d`；
+- input contract fingerprint：
+  `d10cf437291dc1ebb1689c3f4c5eea4d82af3842491c224172215faddca93078`；
+- output contract fingerprint：
+  `d863783786504ebf768cfd7e2fbad66cfd03a029deb1dee3543a9872712e363d`；
+- completion test-fixture prepared-input fingerprint（`p13-reference`、K562/TP53、无 Pack）：
+  `31d1859a226c50375b7f4d65b6307a9680d9e71e978f4f16e5eb053d90c5de3e`；
+- 同一 fixture output fingerprint（raw delta `[0.25, -0.5]`）：
+  `a6745427e8f0e9d516789ec9418a42fdb024e245d452b1ca4825c24398996ba2`；
+- 同一 fixture conformance report fingerprint：
+  `b40374d81f9ec3362d9950bffcfa97f123e46abc80f8b4b135fd5afa02bded18`；
+- 上述三个 fixture fingerprints 是 execution-specific reproducibility evidence，不是
+  adapter-global identity；request/Pack/compatibility/raw output 改变时必须改变；
+- authoritative core：`1462 passed, 35 skipped, 9 deselected`；legacy：
+  `1146 passed, 59 skipped, 105 deselected`；7-file directed gate：`265 passed`；
+  Ruff、`pip check`、frontend typecheck/lint/build、packaging 与 post-commit checks 通过；
+- exact-commit wheel SHA-256：
+  `3658b6247a909d0351d760295e0bcbb8082eac930d96fdfe39e4377b591b4f23`；
+  两次离线构建 byte-identical。
 
 **完成判定**
 
 - `COMPLETE`：SDK、reference adapter 和 conformance harness 全部通过；
 - `BLOCKED`：仍需核心 runtime 的模型/物种专用分支；
-- 本阶段不能声称 growth 或 fitness 已有真实模型。
+- 本阶段实际结论为工程 `COMPLETE`、science `NOT_RUN`、policy
+  `NO_NEW_DECISION`；默认 registry 只有 delta reference adapter，不能声称 growth
+  或 fitness 已有生产 adapter 或真实模型。完整证据见
+  `reports/phase13/PHASE13_COMPLETION.md`。
 
 ---
 
 ### Phase 14 — E. coli K-12 Virtual Cell
 
-**状态：** `NOT_STARTED`
+**状态拆分：** `P14E ELIGIBLE`；`P14R AUTHORIZATION_REQUIRED / NOT_RUN`；
+`P14B NOT_RUN`
+
+`P14E` 只冻结 E. coli K-12 knockout→growth 的版本化输入/输出、adapter 与 fail-closed
+合同，不读取或运行真实 GEM/data。下列真实资产、benchmark、external/OOD 和运行项目
+属于 `P14R`，必须在 exact path/size/SHA-256/license/source/output root/run window 获得
+新授权后才可勾选；`P14B` 只能消费正科学 evidence，由具名 operator 独立决定。
 
 **唯一任务：**
 
@@ -362,20 +418,36 @@ E. coli K-12 + exact GEM/medium/condition + gene knockout
 → growth / growth ratio
 ```
 
-**前置与授权**
+**P14E 合同工程前置**
 
-- [ ] P13 completion SHA 已记录；
+- [x] P13 completion code SHA 已记录；
+- [ ] 从 Git history 读取 P13 docs-closure actual SHA，并以它创建
+  `codex/p14e-ecoli-growth-contract`；
+- [ ] 只冻结窄 task/input/output/adapter/provenance 与 fail-closed tests，不读取或运行
+  下列真实资产。
+
+**P14R 前置与授权（P14E 不依赖这些资产）**
+
 - [ ] GEM、growth/essentiality data 和 output root 获得逐文件精确授权；
 - [ ] 每个资产记录 path、size、SHA-256、license、source 和 usage；
 - [ ] source 只读，output write-new，网络策略明确；
-- [ ] 用户明确授权 `codex/p14-ecoli-growth`。
+- [ ] 用户明确授权 exact P14R asset/run window；不得用 P14E 分支授权代替。
 
-**交付物**
+**P14E 交付物**
 
-- [ ] 冻结 strain、assembly、GEM、medium、gene namespace 和 output unit；
+- [ ] 冻结要求调用方显式提供的 strain、assembly、GEM identity、medium/condition、
+  gene namespace、knockout target、growth/growth-ratio output 和 unit；
+- [ ] 复用 P13 SDK 的 growth input/output adapter contract/conformance；无真实
+  model/assets/data 时不加入默认生产 registry；
+- [ ] 纯合成合同 fixture 与 missing scope、namespace/unit/shape/type、unknown field、
+  missing binding、OOD/abstain 负例；
+- [ ] P14E ADR、runbook、定向/回归测试与 engineering completion report；
+- [ ] P9 negative、delta default registry、legacy/P0 与 science/policy 状态保持不变。
+
+**P14R 交付物（另行授权）**
+
 - [ ] GEM artifact identity；
 - [ ] 真实 growth/condition data Pack；
-- [ ] growth input/output adapter；
 - [ ] `GemWrapper` 只消费显式绑定 GEM；
 - [ ] biological-group split、baseline、主指标、CI 和 OOD protocol；
 - [ ] gene mapping、leakage、mass/constraint audit；
@@ -383,7 +455,14 @@ E. coli K-12 + exact GEM/medium/condition + gene knockout
 - [ ] 独立 dataset/platform 或实验批次零适配验证；
 - [ ] task-scoped immutable capability evidence 或负结果。
 
-**验收**
+**P14E 验收**
+
+- [ ] 不读取/运行真实 GEM/data/assets，不生成 benchmark/evidence/policy；
+- [ ] 缺 exact scope/binding、错 namespace/unit/shape/type 或 OOD 时 fail closed；
+- [ ] growth/fitness 测试合同不会进入默认生产 registry；
+- [ ] P13/P0/legacy/negative regressions、Ruff、packaging 按影响范围通过。
+
+**P14R 验收（另行授权）**
 
 - [ ] target 不在 exact GEM namespace 时 abstain；
 - [ ] 没有 textbook、mock 或隐式模型 fallback；
@@ -395,8 +474,9 @@ E. coli K-12 + exact GEM/medium/condition + gene knockout
 
 **完成与 policy**
 
-- [ ] P14 软件和科学报告已收口；
-- [ ] 若科学门失败，状态为 `SOFTWARE_COMPLETE_NEGATIVE_SCIENCE`；
+- [ ] P14E engineering report 独立收口，不等待 P14R science；
+- [ ] P14R 获授权并运行后才形成科学报告；若科学门失败，状态为
+  `SOFTWARE_COMPLETE_NEGATIVE_SCIENCE`；
 - [ ] 若 evidence 过门，另行执行 P14B operator-only policy decision；
 - [ ] 没有 P14B 时不得写 `production_promoted=true`。
 
@@ -1133,9 +1213,10 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 |---|---|---|---|---|---|---|
 | DOCS-CLOSURE | `COMPLETE` | `N/A` | `N/A` | `b02d21985bcde50cf0758d339b05b13bb3e200a2` | `b19c896202bea56f894d0ad540501331af42a40c` | docs-only allowlist、diff checks、clean post-commit status 和完成报告 |
 | P12 | `COMPLETE` | `N/A — no science run` | `NO_NEW_DECISION` | `b19c896202bea56f894d0ad540501331af42a40c` | `1a5464fb0d2d9e105058f6797d92efd69783e5b2` | `reports/phase12/PHASE12_COMPLETION.md`; wheel SHA-256 `d6e431dd5f1f175eaec9b605e25df4e47864194932f86ca9dfa5c8cc4be63543` |
-| P13 | `ELIGIBLE` | `N/A` | `N/A` | `1a5464fb0d2d9e105058f6797d92efd69783e5b2` | — | — |
-| P14 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
-| P14B | `NOT_STARTED` | `READ_ONLY` | `NOT_RUN` | — | unchanged | — |
+| P13 | `COMPLETE` | `NOT_RUN` | `NO_NEW_DECISION` | `f83c13db386cb552b3ce7a5643e5ffbead0ff573` | `744d0a28d2cfc13d1b10e85b133b6c13b9426174` | `reports/phase13/PHASE13_COMPLETION.md`; tree `198e623120688d3704b9312990ddaa93c9a7b0e6`; adapter `17afc27e...`; wheel `3658b624...` |
+| P14E | `ELIGIBLE` | `N/A — contract only` | `N/A` | P13 docs-closure commit（从 Git history 读取；本文不自引用） | — | E. coli K-12 knockout→growth contract only |
+| P14R | `AUTHORIZATION_REQUIRED` | `NOT_RUN` | `N/A` | — | unchanged | exact GEM/data/assets/output root/run window 未授权 |
+| P14B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | — | unchanged | 仅在正科学结果与具名 operator 决定后可运行 |
 | P15 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
 | P15B | `NOT_STARTED` | `READ_ONLY` | `NOT_RUN` | — | unchanged | — |
 | P16 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
@@ -1243,8 +1324,10 @@ Next exact authorization sentence:
 
 ## 11. 当前推进点
 
-P12 已由 completion code SHA、post-commit 验证和完成报告收口。持续本地授权下的
-下一 work unit 是 P13 Adapter SDK；外置资产、真实模型/训练、network、push、发布、
+P13 已由 starting SHA、completion code SHA/tree、冻结 fingerprints、post-commit
+验证和完成报告收口。持续本地授权下的下一 work unit 是 P14E E. coli K-12
+knockout→growth 合同工程；P14R 的 GEM/data/assets/output root/run window 与 P14B 的
+operator decision 均未授权、未运行。外置资产、真实模型/训练、network、push、发布、
 部署和 operator promotion 仍不在授权范围。
 
 可直接跨对话使用的顺序推进提示词见：

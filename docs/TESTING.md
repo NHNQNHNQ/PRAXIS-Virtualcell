@@ -1,15 +1,62 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：Phase 12 分支 `codex/p12-model-registry-v2`；唯一起始 SHA
-> `b19c896202bea56f894d0ad540501331af42a40c`
+> 当前文档基线：Phase 13 分支 `codex/p13-model-adapter-sdk`；唯一起始 SHA
+> `f83c13db386cb552b3ce7a5643e5ffbead0ff573`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：`P12_ENGINEERING_COMPLETE`；completion code SHA
-> `1a5464fb0d2d9e105058f6797d92efd69783e5b2`。下述 P4.3–P11 和 CI 数字仍只绑定
-> 各自 exact SHA/日期；P12 本地工程结果不构成科学验证、operator policy、发布或
+> 状态：`P13_ENGINEERING_COMPLETE_P14E_ELIGIBLE`；completion code SHA
+> `744d0a28d2cfc13d1b10e85b133b6c13b9426174`；tree
+> `198e623120688d3704b9312990ddaa93c9a7b0e6`。下述 P4.3–P12 和 CI 数字仍只绑定
+> 各自 exact SHA/日期；P13 本地工程结果不构成科学验证、operator policy、发布或
 > 远程证据。
+
+## Phase 13 `ENGINEERING_COMPLETE` 本地证据
+
+P13 当前字节在 P12 `vc.model-adapter.v1` identity 上新增六个严格 Adapter SDK
+schema：`vc.adapter-input-contract.v1`、`vc.adapter-output-contract.v1`、
+`vc.prepared-adapter-input.v1`、`vc.adapter-execution-provenance.v1`、
+`vc.adapter-output-envelope.v1` 和 `vc.adapter-conformance-report.v1`。默认 registry
+只新增 delta-expression reference adapter；growth/fitness adapter 仍只是测试 fixture。
+以下三组合同测试可分别运行：
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_model_adapter_sdk.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_model_adapter_output_flow.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest \
+  praxis_virtualcell/tests/test_capability_runtime.py \
+  -o addopts='' -p no:cacheprovider -q -ra
+```
+
+completion code/tree 上的冻结结果：
+
+| Gate | 结果 |
+|---|---|
+| Adapter SDK | `48 passed` |
+| Adapter output flow | `22 passed` |
+| Capability runtime | `75 passed` |
+| P13 directed（含相邻 runtime 回归） | `265 passed` |
+| VirtualCell core | `1462 passed / 35 skipped / 9 deselected`；2 条已知 MuData deprecation warnings |
+| Legacy unit | `1146 passed / 59 skipped / 105 deselected` |
+| Packaging | `13 passed` |
+| Ruff / isolated `pip check` | PASS |
+| Frontend typecheck/lint/build/bundle budget | PASS |
+
+两次从 exact completion code 构建的 wheel byte-identical：均为 1,076,180 bytes，
+SHA-256 `3658b6247a909d0351d760295e0bcbb8082eac930d96fdfe39e4377b591b4f23`；clean-wheel
+安装以及 SDK/default-registry import 均通过。全部命令均在无网络、无外置资产、无真实
+权重、无训练/LLM/GPU/remote 的本地范围运行。`Science: NOT_RUN`，
+`Policy: NO_NEW_DECISION`；没有版本 bump、release、真实模型注册或 promotion。
+实现边界和操作步骤见 [ADR-0010](ADR-0010-virtualcell-model-adapter-sdk.md)、
+[Model Adapter SDK runbook](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md)和
+[P13 完成报告](../reports/phase13/PHASE13_COMPLETION.md)。
 
 ## Phase 12 `ENGINEERING_COMPLETE` 本地证据
 
@@ -641,6 +688,6 @@ C4 的 build budget 实测 initial JavaScript aggregate 为 226,046 bytes（gzip
 首次修复后的 candidate `ee36d7948047f346f55a02d62ccaac84391e3c20` 经精确授权快进发布。对应 [run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 的实际结果为 Python core、frontend/Playwright、reproducible wheel、Linux release container **PASS**；legacy **FAIL**，汇总 `1 failed / 1135 passed / 59 skipped / 105 deselected`。唯一失败 `test_huge_output_capped_not_ooming` 是 Linux dash 派生的 `cat` 在直接 shell 被 kill 后仍持有 pipe；详见 [D1a retry report](status/PHASE-D1A-CI-RETRY-2026-07-23.md)。本地修复 `6a81987` 还关闭了 pipe 提前关闭绕过 timeout 与上层取消遗留进程组两个同源缺口。
 
 “存在 run”不等于 CI 全绿，也不证明这些 job 是 branch-protection required checks。
-以上 D1a 指令和 SHA 只属于当时的发布窗口，已不构成当前行动授权。P12 窗口未读取
+以上 D1a 指令和 SHA 只属于当时的发布窗口，已不构成当前行动授权。P13 窗口未读取
 或修改 GitHub `main`/tag、`.53` 或任何远程状态；未来 CI、push、发布和部署仍须以
 届时现场 HEAD 获得独立精确授权。

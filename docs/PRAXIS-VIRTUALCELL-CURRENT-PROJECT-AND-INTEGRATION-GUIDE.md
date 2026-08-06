@@ -6,7 +6,7 @@
 >
 > 当前本地仓库：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前分支：`codex/p12-model-registry-v2`
+> 当前分支：`codex/p13-model-adapter-sdk`
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
@@ -16,12 +16,17 @@
 > 已完成 work unit：`Phase 12 — Virtual Cell Model Zoo v2`；completion code SHA
 > `1a5464fb0d2d9e105058f6797d92efd69783e5b2`
 >
+> 已完成 work unit：`Phase 13 — Model Adapter SDK`；starting SHA
+> `f83c13db386cb552b3ce7a5643e5ffbead0ff573`；completion code SHA
+> `744d0a28d2cfc13d1b10e85b133b6c13b9426174`；tree
+> `198e623120688d3704b9312990ddaa93c9a7b0e6`
+>
 > 工作树保护清单：不在本文固定；每轮从现场 `git status --short` 动态重建，任何
 > 新 staged/modified/deleted/untracked 路径默认受保护
 >
 > 当前 Cell-first 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
-> 当前下一 work unit：`Phase 13 — Model Adapter SDK`；`ELIGIBLE`
+> 当前下一 work unit：`P14E — E. coli K-12 knockout→growth contract`；`ELIGIBLE`
 
 本文是一份面向其他项目、开发团队、科研合作者和后续智能体的独立项目说明。它回答四个问题：
 
@@ -86,7 +91,32 @@ P12 工程已由 completion code SHA、全部约定本地测试、packaging、po
 benchmark/external/OOD run，也没有新的 operator promotion decision；因此工程完成
 不能写成新增真实模型能力或 production promotion。
 
-### 1.2 代码与外部资产许可
+### 1.2 Phase 13 完成边界
+
+P13 以 `f83c13db386cb552b3ce7a5643e5ffbead0ff573` 为实际起始 SHA，在
+`codex/p13-model-adapter-sdk` 上以 code SHA
+`744d0a28d2cfc13d1b10e85b133b6c13b9426174`、tree
+`198e623120688d3704b9312990ddaa93c9a7b0e6` 完成。它新增统一
+`VirtualCellModelAdapter`/`AdapterRegistry`、Broker 准备的递归不可变输入、严格输出
+envelope、execution provenance 与 deterministic conformance，并复用 P5
+`ModelFeatureContract`/`AlignmentReport` 和 P12 exact `AdapterIdentity`。
+
+默认生产 registry 只包含
+`predict_delta_expression → delta_expression` reference adapter；growth/fitness adapters
+只存在于 conformance tests，不能被外部集成方当作 E. coli 或 yeast 生产能力。SDK
+本身不猜 Pack rows、mapping、control 或 split，不补零或静默转换；合同声明
+`pack_data_required`/`alignment_required` 时，缺 values+Pack 或 feature/alignment binding
+会 fail closed。control/split 等额外要求必须由具体 adapter 显式实现和测试。adapter 也
+不能在 prediction metadata 中写入 reserved science/policy 字段，不能签发 evidence 或
+promotion。
+
+P13 工程状态为 `COMPLETE`；science 为 `NOT_RUN`；policy 为
+`NO_NEW_DECISION`。没有真实模型、数据、权重、训练、科学运行、发布或部署。完整证据见
+`reports/phase13/PHASE13_COMPLETION.md`，设计与操作边界见
+`docs/ADR-0010-virtualcell-model-adapter-sdk.md` 和
+`docs/runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md`。
+
+### 1.3 代码与外部资产许可
 
 仓库源码在 `pyproject.toml` 中声明为 MIT License。公共数据集、数据库下载、模型权重、checkpoint 和其他外置科研资产保留各自的许可、引用和使用限制；不能因为仓库代码使用 MIT，就推定这些外部资产也可按 MIT 再分发。
 
@@ -375,15 +405,15 @@ LLM 位于科学执行链之外。
 `scientifically_validated=false` 改成 true；registry 也不能创建 evidence。
 撤销只影响未来运行，不改写历史 job。
 
-P12 implementation candidate 已补入独立 artifact、environment、adapter、evidence
-和 operator-policy record identity，并让 Pack-aware runtime 对 exact 完整绑定
-fail closed；但当前状态仍是 `VALIDATING`，不能在 completion SHA 和完成报告形成前
-写成稳定完成。P6-era v1 合同继续兼容，不能与 v2 完整治理混称。软件版本发布与
-科学/policy promotion 仍分别治理。
+P12 已补入独立 artifact、environment、adapter、evidence 和 operator-policy record
+identity，并让 Pack-aware runtime 对 exact 完整绑定 fail closed；P13 已在其上完成
+严格 Adapter SDK 和 delta reference path。两阶段均已有 completion code SHA 与完成
+报告，但仍只是本地 engineering-complete、未发布状态。P6-era v1 合同继续兼容，
+不能与 v2 完整治理混称；软件发布、科学 evidence 与 product policy 仍分别治理。
 
 ---
 
-## 8. P0–P11 已完成工作
+## 8. P0–P13 已完成工程工作
 
 ### Phase 0：可信边界和确定性基线
 
@@ -552,8 +582,24 @@ P12 从 `b19c896202bea56f894d0ad540501331af42a40c` 开始，在
 - 现有 Pack list/API 的路径脱敏、字段白名单 Model Registry v2 投影。
 
 P12 没有新增、下载或运行真实权重，没有训练或科学验证，没有新的 operator promotion
-decision，也没有管理写 API。这里的 `COMPLETE` 只表示工程合同完成；P13 是下一
-eligible 本地工程 work unit。
+decision，也没有管理写 API。这里的 `COMPLETE` 只表示工程合同完成。
+
+### Phase 13：Model Adapter SDK（`COMPLETE`）
+
+P13 从 P12 completion docs SHA
+`f83c13db386cb552b3ce7a5643e5ffbead0ff573` 开始，以
+`744d0a28d2cfc13d1b10e85b133b6c13b9426174` 完成：
+
+- 六个 versioned schema：input/output contracts、prepared input、output envelope、
+  execution provenance 和 conformance report；
+- 按 exact task/output 注册、按 P12 identity fingerprint 绑定的 adapter registry；
+- Broker-only prepared input 与 wrapper-only consumption；
+- strict finite/shape/unit/uncertainty/OOD/abstain/provenance 校验；
+- delta-expression reference adapter 与 P0/v1/legacy compatibility；
+- growth/fitness test-only conformance，不进入默认生产 registry。
+
+P13 没有运行真实 science，也没有作 operator decision。当前下一 work unit 是本地
+contract-only 的 P14E；真实资产运行 P14R 与 operator-only P14B 保持未授权/未运行。
 
 ---
 
@@ -633,13 +679,19 @@ artifact SHA-256
 - `vc.execution-step.v2`
 - `vc.execution-plan.v2`
 - `vc.job-execution-identity.v2`
+- `vc.adapter-input-contract.v1`
+- `vc.prepared-adapter-input.v1`
+- `vc.adapter-output-contract.v1`
+- `vc.adapter-output-envelope.v1`
+- `vc.adapter-execution-provenance.v1`
+- `vc.adapter-conformance-report.v1`
 - `vc.data-catalog.v1`
 - `vc.upload-receipt.v1`
 - `vc.community-pack.v1`
 
 其他项目应按 `schema_version` 路由解析器，不能依靠字段形状猜测版本。
-以上 P12 新增 schema 属于同一 engineering-complete candidate；它们尚未发布，外部
-项目不应仅凭本地 completion 把它们当作已发布协议或真实科学能力。
+以上 P12/P13 新增 schema 属于本地 engineering-complete work units；它们尚未发布，
+外部项目不应仅凭本地 completion 把它们当作已发布协议或真实科学能力。
 
 ---
 
@@ -1241,7 +1293,7 @@ executable
 scientifically_validated
 ```
 
-P12 candidate 的 `vc.compatibility-report.v2` 还逐项绑定 model release、capability、
+P12 的 `vc.compatibility-report.v2` 还逐项绑定 model release、capability、
 artifact、environment identity、adapter、evidence、operator policy 和 lifecycle
 snapshot。只有 native exact-Pack release、经 hash/size 复验的安全 artifact、
 `vc.environment.v2` exact identity、exact adapter、promotion-eligible evidence、
@@ -1252,13 +1304,22 @@ production-promoted policy，以及未 revoked/superseded 的 active state 同�
 `ModelZooRegistry(custom_path)` 的库调用仍可处于 v1 compatibility mode；该路径不是
 v2 fully governed 产品执行面，不能用来绕过 product Pack 路径或声称 P12 完整治理。
 
-当前通用 plugin runtime 只实现：
+P13 已建立通用 `VirtualCellModelAdapter` SDK。生产默认 registry 当前只注册：
 
 ```text
 predict_delta_expression → delta_expression
 ```
 
-要接入 growth、fitness、absolute expression、metabolic flux、drug response 等输出，需要新增明确的 output adapter 和相应测试。不能仅修改模型卡的 `status` 或 `outputs` 就宣称模型可运行。
+该 reference adapter 通过 Broker-prepared immutable input 和 strict output envelope 接入
+现有 runtime、provenance、report 与 governance。每次输出必须通过 task/output、shape、
+unit、finite value、uncertainty、OOD、abstain 和 exact execution provenance 校验；
+unexpected adapter/runtime faults 也 fail closed。
+
+SDK 的合同可表达 growth、fitness 等输出，但相应 adapters 目前只存在于 tests，默认
+registry 不包含它们。要接入 growth、fitness、absolute expression、metabolic flux、
+drug response 等生产输出，仍需新增明确的生产 adapter、exact model/assets、独立测试、
+科学 evidence 与 operator policy。不能仅修改模型卡的 `status` 或 `outputs`，也不能
+引用测试 dummy adapter，就宣称模型可运行。
 
 模型权重和大型资产必须外置，并通过 hash、模型卡和环境身份绑定，不能直接提交进 Git。
 
@@ -1519,9 +1580,12 @@ API health/root                    PASS
 test_playwright_python_can_be_overridden_without_editing_config
 ```
 
-原因是 `playwright.config.ts` 中环境变量表达式包含转义的 `\${...}`，而 packaging 文本合同测试要求未转义源码字符串。这是当前已知 packaging/text-contract 回归，不是 runtime 执行失败，但在修复并重跑前不能声称“当前全部测试通过”。
+原因是 `playwright.config.ts` 中环境变量表达式包含转义的 `\${...}`，而 packaging
+文本合同测试要求未转义源码字符串。这是只绑定 `b02d219...` 的当时
+packaging/text-contract 回归，不是 runtime 执行失败；该 exact SHA 不能写成全绿。
+后续 P12/P13 已分别在其 completion code SHA 重验通过，不能用后续结果回写这条历史。
 
-最新本地 wheel 证据：
+该次 `b02d219...` 本地 wheel 证据：
 
 ```text
 size     1,043,145 bytes
@@ -1539,7 +1603,20 @@ Registry v2、cache、capability runtime、Pack product 和 job identity 的 fai
 reproducibility、`git diff --check` 和 post-commit 核验，均记录在
 `reports/phase12/PHASE12_COMPLETION.md`。P10 或更早历史测试没有被继承为 P12 证据。
 
-### 24.4 Skip 和 deselect 的含义
+### 24.4 P13 完成状态
+
+P13 从 `f83c13db386cb552b3ce7a5643e5ffbead0ff573` 开始，completion code SHA 为
+`744d0a28d2cfc13d1b10e85b133b6c13b9426174`，tree 为
+`198e623120688d3704b9312990ddaa93c9a7b0e6`。Adapter SDK、output flow 与 capability
+runtime 分别为 `48/22/75 passed`；7-file directed gate 为 `265 passed`；core 为
+`1462 passed, 35 skipped, 9 deselected`（2 条已知 MuData deprecation warnings）；
+legacy 为 `1146 passed, 59 skipped, 105 deselected`；packaging `13 passed`。Ruff、隔离
+`pip check`、frontend typecheck/lint/build/bundle budget、两次 byte-identical wheel 与
+clean install 均通过。wheel 为 1,076,180 bytes，SHA-256
+`3658b6247a909d0351d760295e0bcbb8082eac930d96fdfe39e4377b591b4f23`。完整 scope 和
+未运行项见 `reports/phase13/PHASE13_COMPLETION.md`。
+
+### 24.5 Skip 和 deselect 的含义
 
 skip/deselect 不能写成：
 
@@ -1576,8 +1653,10 @@ skip/deselect 不能写成：
 
 ### 模型限制
 
-- 通用 adapter 只支持 delta expression；
-- P12 只定义 adapter identity，不是 P13 Adapter SDK，也没有新增 task/output adapter；
+- P13 SDK 支持严格注册多种 task/output 合同，但默认生产 registry 仍只包含 delta
+  expression reference adapter；growth/fitness adapters 仅为测试 dummy；
+- P12 adapter identity 与 P13 executable adapter SDK 已完成接线，但没有新增生产
+  growth/fitness adapter、真实模型或 task-scoped science evidence；
 - P12 v2 identities 和 Pack-aware gate 工程完成，但没有新增真实科学 evidence/policy；
 - custom-path 低层 ModelZooRegistry 保留显式 v1 compatibility mode，不能称 v2 fully
   governed 产品路径；
@@ -1598,7 +1677,7 @@ skip/deselect 不能写成：
 ### 工程限制
 
 - 当前版本字符串存在发布漂移；
-- P13 Adapter SDK 尚未完成；
+- P13 Adapter SDK 仅在本地工程完成，尚未发布；
 - JobStore 是本地文件系统；
 - API 除上传外没有通用认证；
 - `docs/USER-GUIDE.md` 的五阶段网页描述已过时；
@@ -1743,13 +1822,16 @@ artifact hash
 
 ## 28. 后续路线图 P12–P30
 
-P12 行记录已完成的工程 work unit；P13–P30 尚未完成，不能当作当前能力。
+P12/P13 行记录已完成的工程 work units；P14E 只是下一 eligible 本地合同工程，
+P14R/P14B 及其后各阶段尚未完成，不能当作当前能力。
 
 | 阶段 | 目标 |
 |---|---|
 | P12 | `COMPLETE`：Model Registry v2 artifact、environment、adapter、evidence、policy 身份分层 |
-| P13 | `ELIGIBLE`：统一 VirtualCellModelAdapter SDK |
-| P14 | 第一个窄域、真实验证的 E. coli growth capability |
+| P13 | `COMPLETE`：统一 VirtualCellModelAdapter SDK、delta reference 与 conformance harness |
+| P14E | `ELIGIBLE`：E. coli K-12 knockout→growth contract，不运行真实资产 |
+| P14R | `AUTHORIZATION_REQUIRED / NOT_RUN`：exact GEM/data/assets 的科学运行 |
+| P14B | `NOT_RUN`：正科学 evidence 后的独立 operator decision |
 | P15 | Yeast deletion fitness / condition response |
 | P16 | Human K562 perturbation delta expression |
 | P17 | PRAXIS Virtual Cell Brain，多模型分解、选择、执行和审查 |
@@ -1793,10 +1875,11 @@ P12 行记录已完成的工程 work unit；P13–P30 尚未完成，不能当�
 
 ## 29. 当前推荐的下一技术闭环
 
-当前技术闭环是 P13 Adapter SDK：复用 P5 feature/alignment 合同和 P12 adapter
-identity，建立严格 task/output adapter registry、输入/输出 envelope、delta reference
-adapter 与 deterministic conformance；不得接入真实模型、下载权重、训练或产生科学
-evidence/promotion。
+当前技术闭环是 P14E E. coli K-12 knockout→growth contract：复用 P13 adapter SDK，
+冻结 exact strain/assembly/gene namespace、medium/condition、knockout input、growth/growth
+ratio output、unit、provenance 与 fail-closed tests。P14E 不读取或运行真实 GEM/data，
+不得产生科学 evidence/promotion；P14R 必须另获逐资产和 exact run window 授权，P14B
+必须等待正科学结果与具名 operator 决定。
 
 在进入更大世界模型之前，最重要的闭环仍然是：
 
@@ -1837,10 +1920,11 @@ evidence/promotion。
 9. [P12–P30 Detailed Checklist](PHASE12-30-DETAILED-COMPLETION-CHECKLIST.md)
 10. [P12–P30 Master Prompt](PHASE12-30-MASTER-PROMPT.md)
 11. [P12–P30 Sequential Master Prompt](PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md)
-12. 本当前项目与集成指南
-13. [Repository Layout](REPOSITORY-LAYOUT.md)
-14. [Installation Guide](INSTALL.md)
-15. 当前 work unit 的 ADR、runbook、contracts、代码和测试
+12. [P13 Completion Report](../reports/phase13/PHASE13_COMPLETION.md)
+13. 本当前项目与集成指南
+14. [Repository Layout](REPOSITORY-LAYOUT.md)
+15. [Installation Guide](INSTALL.md)
+16. 当前 work unit 的 ADR、runbook、contracts、代码和测试
 
 关键 ADR：
 
@@ -1852,7 +1936,8 @@ evidence/promotion。
 - [P8 Golden Norman](ADR-0006-virtualcellpack-p8-golden-norman.md)
 - [P8 Product Surfaces](ADR-0007-virtualcellpack-p8-product-surfaces.md)
 - [P9 OOD Validation](ADR-0008-virtualcellpack-p9-ood-validation.md)
-- [P12 Model Zoo v2](ADR-0009-virtualcell-model-zoo-v2.md)（implementation candidate）
+- [P12 Model Zoo v2](ADR-0009-virtualcell-model-zoo-v2.md)
+- [P13 Model Adapter SDK](ADR-0010-virtualcell-model-adapter-sdk.md)
 
 关键 runbook：
 
@@ -1863,6 +1948,7 @@ evidence/promotion。
 - [Pack Product Surfaces](runbooks/VIRTUALCELLPACK-PRODUCT-SURFACES.md)
 - [P9 OOD Validation](runbooks/VIRTUALCELLPACK-P9-OOD-VALIDATION.md)
 - [P12 Model Zoo v2](runbooks/VIRTUALCELL-MODEL-ZOO-V2.md)（validation runbook）
+- [P13 Model Adapter SDK](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md)
 - [External Disk Git Maintenance](runbooks/EXTERNAL-DISK-GIT-MAINTENANCE.md)
 
 ---
@@ -1876,7 +1962,11 @@ abstain 的多物种虚拟细胞基础设施。
 已完成产品阶段是 Phase 11，DOCS-CLOSURE completion 是
 b19c896202bea56f894d0ad540501331af42a40c。Phase 12 Model Registry v2 以该 SHA 起步，
 completion code SHA 是 1a5464fb0d2d9e105058f6797d92efd69783e5b2；工程完成不代表
-真实科学验证或 promotion。P13 Model Adapter SDK 是下一本地 work unit。
+真实科学验证或 promotion。P13 Model Adapter SDK 以
+f83c13db386cb552b3ce7a5643e5ffbead0ff573 起步，completion code SHA 是
+744d0a28d2cfc13d1b10e85b133b6c13b9426174；工程 COMPLETE，science NOT_RUN，policy
+NO_NEW_DECISION。P14E E. coli K-12 knockout→growth contract 是下一 eligible 本地
+work unit；P14R/P14B 未授权、未运行。
 
 当前 UI 是：
 选择 Cell Context → Chat → 自动解析/运行 → Report/Abstain，
@@ -1886,12 +1976,15 @@ completion code SHA 是 1a5464fb0d2d9e105058f6797d92efd69783e5b2；工程完成�
 数据层已经支持 strict VirtualCellPack v0.1–v0.3、H5AD/H5MU、feature
 contract、hash 和 provenance。模型层已有严格 ModelCard；P12 candidate 进一步
 分离 artifact/environment/adapter/evidence/policy identity，并让 Pack-aware
-compatibility/plan/job 对 exact bindings fail closed。v1 仍兼容，通用 adapter 当前
-仍只支持 predict_delta_expression → delta_expression。
+compatibility/plan/job 对 exact bindings fail closed。P13 已提供严格 input/output、
+prepared input、execution provenance 和 conformance contracts；v1 仍兼容，默认生产
+registry 当前只注册 predict_delta_expression → delta_expression。growth/fitness
+adapters 仅在测试中，不能视为生产 capability。
 
 P12 legacy migration 不创建 evidence/policy/promotion；无法精确绑定的 P8/P9
 结果保持 unbound/incomplete。registry lifecycle 是 append-only，Pack list/API 只
 返回路径脱敏白名单投影。P12 没有真实 science run 或新 operator decision。
+P13 同样没有真实模型、数据、权重、science run 或新 operator decision。
 
 数据存在不等于 Pack；Pack、registry、per-request compatibility/executable、
 scientific evidence 和 product policy 是五个独立层次。只有 exact

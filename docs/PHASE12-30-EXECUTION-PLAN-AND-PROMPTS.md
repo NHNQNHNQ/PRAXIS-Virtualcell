@@ -12,7 +12,12 @@
 > 已完成 work unit：`P12 — Virtual Cell Model Zoo v2`；completion code SHA
 > `1a5464fb0d2d9e105058f6797d92efd69783e5b2`
 >
-> 当前 work unit：`P13 — Model Adapter SDK`；状态 `ELIGIBLE`
+> 已完成 work unit：`P13 — Model Adapter SDK`；starting SHA
+> `f83c13db386cb552b3ce7a5643e5ffbead0ff573`；completion code SHA
+> `744d0a28d2cfc13d1b10e85b133b6c13b9426174`
+>
+> 当前下一 work unit：`P14E — E. coli K-12 knockout→growth contract`；状态
+> `ELIGIBLE`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
@@ -22,8 +27,8 @@
 >
 > 当前状态核对日期：2026-08-06
 >
-> P12 completion identity：实现 commit、post-commit 验证与
-> `reports/phase12/PHASE12_COMPLETION.md` 共同证明
+> P13 completion identity：实现 commit/tree、post-commit 验证与
+> `reports/phase13/PHASE13_COMPLETION.md` 共同证明
 
 本文把 “An agentic foundation platform for programmable virtual cells across
 species and biological systems.” 愿景转换为可逐阶段授权、实施、验证和停止的
@@ -46,7 +51,7 @@ species and biological systems.” 愿景转换为可逐阶段授权、实施、
 exact-scope 的 Biological World Model research capability。Phase 编号是路线标签，
 不是产品版本、API 协议、schema 或模型版本。
 
-## 2. Phase 11 产品基线、已完成 P12 与当前 P13 work unit
+## 2. Phase 11 产品基线、已完成 P12/P13 与当前 P14E work unit
 
 ### 2.1 当前身份
 
@@ -61,7 +66,10 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | 历史恢复 ref | `codex/p12-cell-first-baseline`（创建时误把 Cell-first 收口称为 P12；不得移动或删除，但不再定义阶段编号） |
 | P12 completion code SHA | `1a5464fb0d2d9e105058f6797d92efd69783e5b2` |
 | P12 完成分支 | `codex/p12-model-registry-v2` |
-| 当前 work-unit 状态 | P13 `ELIGIBLE` |
+| P13 starting SHA | `f83c13db386cb552b3ce7a5643e5ffbead0ff573` |
+| P13 completion code SHA / tree | `744d0a28d2cfc13d1b10e85b133b6c13b9426174` / `198e623120688d3704b9312990ddaa93c9a7b0e6` |
+| P13 完成分支 | `codex/p13-model-adapter-sdk` |
+| 当前 work-unit 状态 | P14E `ELIGIBLE`；P14R `AUTHORIZATION_REQUIRED / NOT_RUN`；P14B `NOT_RUN` |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -74,9 +82,9 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 
 没有创建 Git tag。根据 `docs/VERSIONING.md`，tag 只能在独立发布授权中创建，不能用
 本地 tag 冒充 GitHub 已发布版本。当前代码/部署身份已由 exact SHA、wheel 和 recovery
-bundle 锚定，但恢复分支本身不是不可移动 release。DOCS-CLOSURE 已由
-`b19c896...` 和完成报告收口；当前 P12 completion 仍必须由现场 Git identity、
-allowlisted diff、验证结果、一次获准本地 commit 和 post-commit 状态共同证明。
+bundle 锚定，但恢复分支本身不是不可移动 release。DOCS-CLOSURE、P12 和 P13 已分别由
+exact Git identity、allowlisted diff、验证结果、获准本地 commit、post-commit 状态与
+完成报告收口。
 `.53` preview 也不等于 GitHub main/tag 发布。`bf44aac...`
 继续暴露 `1.6.0` 构成版本漂移，下一次稳定候选必须使用新的 SemVer，绝不能移动或
 复用已有 `v1.6.0` tag。
@@ -87,7 +95,10 @@ allowlisted diff、验证结果、一次获准本地 commit 和 post-commit 状�
 P11A  数据中心化前端骨架
 P11B  Cell-first 白色聊天入口、Data Center、示例问题和直接报告
 P12   Virtual Cell Model Zoo v2（COMPLETE at 1a5464fb...）
-P13   当前本地 work unit：Model Adapter SDK（ELIGIBLE）
+P13   Model Adapter SDK（COMPLETE at 744d0a28...）
+P14E  当前本地 work unit：E. coli K-12 knockout→growth contract（ELIGIBLE）
+P14R  exact GEM/data/assets 与真实运行（AUTHORIZATION_REQUIRED / NOT_RUN）
+P14B  positive science 后的 operator decision（NOT_RUN）
 ```
 
 Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
@@ -122,10 +133,10 @@ Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
 
 因此，当前准确结论是：
 
-> Phase 11 已完成可信的 Cell-first 产品入口。Phase 12 正在验证 model、artifact、
-> environment、adapter、evidence 和 operator-policy record 的分层身份及 Pack-aware
-> fail-closed 接线；在 completion SHA 形成前不能写为完成。当前没有新增真实模型、
-> 科学 evidence 或 product promotion。
+> Phase 11 已完成可信的 Cell-first 产品入口；P12 已完成分层 Model Registry v2；P13
+> 已完成统一 Adapter SDK、delta reference adapter 与 fail-closed runtime/report
+> 接线。P13 没有新增真实模型、数据、权重、科学 evidence 或 product promotion；
+> growth/fitness adapters 只存在于测试。下一本地闭环仅是 P14E 合同工程。
 
 ### 2.4 本次编号纠正
 
@@ -153,7 +164,7 @@ Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
 ```mermaid
 flowchart TD
     P11["P11 Cell-first 产品入口"] --> P12["P12 模型身份与证据注册"]
-    P12 --> P13["P13 Adapter SDK 与多输出合同"]
+    P12 --> P13["P13 Adapter SDK 与严格输出合同"]
     P13 --> P14["P14 E. coli 窄任务闭环"]
     P14 --> P15["P15 Yeast 窄任务闭环"]
     P15 --> P16["P16 Human/K562 窄任务闭环"]
@@ -176,7 +187,8 @@ flowchart TD
 关键依赖：
 
 1. P12 先拆开 catalog、资产、环境、adapter、执行与科学晋级身份；
-2. P13 才能消除当前只支持 `delta_expression` 的执行硬编码；
+2. P13 为 Pack-aware strict path 建立无需新增 model/species 分支的 task/output adapter
+   接线，同时保留显式 legacy/delta compatibility 分支；
 3. P14–P16 每个物种只先完成一个窄任务，科学结论互不继承；
 4. P17 只有在至少两个真实能力可由 Broker 调用后，才有多模型编排意义；
 5. P18 才建立真实、typed multi-omics 模型输入；
@@ -347,7 +359,8 @@ P12 以 `b19c896202bea56f894d0ad540501331af42a40c` 为唯一起始 SHA，在
 
 本阶段没有访问外置资产、网络、训练、GPU、remote、`.53` 或服务；没有运行真实
 科学候选，也没有作出新的 operator promotion decision。完整验证见
-`reports/phase12/PHASE12_COMPLETION.md`；P13 是下一 eligible 本地 work unit。
+`reports/phase12/PHASE12_COMPLETION.md`；P12 完成时，P13 是下一 eligible 本地 work
+unit，现已由 §7 的 P13 completion snapshot 取代。
 
 ### P12 定义时的原始缺口
 
@@ -397,9 +410,10 @@ P12 以 `b19c896202bea56f894d0ad540501331af42a40c` 为唯一起始 SHA，在
 不实现 Adapter SDK，不下载/运行 GEARS/scGPT/Geneformer，不修改权重，不训练模型，
 不改变 `.53`，不发布 Model Marketplace。
 
-### 可复制授权提示词（模板留存；当前 P12 已有独立精确授权）
+### 历史可复制授权提示词（P12 已完成）
 
-以下文本保留为审计模板，不替代当前授权，也不能重复或扩大当前 P12 scope。
+以下文本只保留 P12 当时的审计 scope，不是当前 action authority，不能重复执行或扩大
+已完成 P12 的 scope。
 
 ```text
 授权以 `<现场验证的 DOCS-CLOSURE exact 40 位 completion SHA>` 作为 Phase 12
@@ -430,6 +444,33 @@ schema/fingerprint、测试、负例、已知限制和下一阶段精确授权�
 
 ## 7. Phase 13：Virtual Cell Model Adapter SDK
 
+### 完成快照（`COMPLETE`）
+
+P13 以 `f83c13db386cb552b3ce7a5643e5ffbead0ff573` 为实际 starting SHA，在
+`codex/p13-model-adapter-sdk` 上形成 code SHA
+`744d0a28d2cfc13d1b10e85b133b6c13b9426174` 和 tree
+`198e623120688d3704b9312990ddaa93c9a7b0e6`。默认生产 registry 只注册
+`predict_delta_expression → delta_expression` reference adapter；dummy growth/fitness
+adapters 只用于 conformance tests，没有进入生产 registry。
+
+adapter-global 冻结 identity 为：adapter
+`17afc27e56dba13567001ff1982cbf1660e2948fadf2147301a1d0dcf61aeb3d`，input contract
+`d10cf437291dc1ebb1689c3f4c5eea4d82af3842491c224172215faddca93078`，output contract
+`d863783786504ebf768cfd7e2fbad66cfd03a029deb1dee3543a9872712e363d`。completion test fixture
+为 `p13-reference` K562/TP53、无 Pack、raw delta `[0.25, -0.5]`；其 execution-specific
+prepared input `31d1859a226c50375b7f4d65b6307a9680d9e71e978f4f16e5eb053d90c5de3e`，output
+`a6745427e8f0e9d516789ec9418a42fdb024e245d452b1ca4825c24398996ba2`，conformance report
+`b40374d81f9ec3362d9950bffcfa97f123e46abc80f8b4b135fd5afa02bded18`。后三者会随
+request/Pack/compatibility/raw output 改变，不是 adapter-global identity。
+
+authoritative core 为 `1462 passed, 35 skipped, 9 deselected`，legacy 为
+`1146 passed, 59 skipped, 105 deselected`，7-file directed gate 为 `265 passed`；
+Ruff、`pip check`、frontend typecheck/lint/build、packaging 和 post-commit checks 全部
+通过。exact-commit wheel SHA-256 为
+`3658b6247a909d0351d760295e0bcbb8082eac930d96fdfe39e4377b591b4f23`，两次离线构建
+byte-identical。工程状态 `COMPLETE`；science `NOT_RUN`；policy
+`NO_NEW_DECISION`。完整记录见 `reports/phase13/PHASE13_COMPLETION.md`。
+
 ### 目标
 
 建立按 task/output 显式注册的 Adapter SDK，使深度学习、机制和数学模型使用同一
@@ -438,17 +479,21 @@ Broker/ExecutionPlan 接入，而不是在核心 runtime 增加模型或物种�
 ### 依次实施
 
 1. 写 Adapter SDK ADR，冻结 adapter schema/version/fingerprint；
-2. 复用 `vc.model-feature-contract.v1` 和 P5 alignment provenance 定义 input：
-   Pack modality、observation/control/split、feature order、alignment report、单位
-   和显式 transform；不得创建平行 mapping/alignment 合同；
+2. 复用 `vc.model-feature-contract.v1` 和 P5 alignment provenance；通用 input contract
+   冻结 task/output、value type、shape、unit、`pack_data_required` 和
+   `alignment_required`，prepared input 可绑定 request、Pack/compatibility、values/unit
+   与 feature/alignment。observation/control/split/transform 等额外要求留给具体 adapter
+   显式实现和测试，不得创建平行 mapping/alignment 合同；
 3. 定义 output envelope：task/output、shape、单位、finite number、uncertainty、
    OOD、abstain 和 execution provenance；adapter 不能签发、修改或推断科学 evidence；
 4. 将现有 `predict_delta_expression → delta_expression` 收敛为 reference adapter；
-5. 建 adapter registry，并把 adapter fingerprint 写入 compatibility、plan、job 和
-   report identity；Broker 只把 registry 中已核验的只读 `evidence_refs` 注入 plan；
+5. 建 adapter registry，并把 adapter fingerprint 写入 compatibility、plan 和 job
+   execution identity，再经 `adapter_output`/provenance 纳入 structured report
+   fingerprint；CapabilityRegistry 只把 registry 中已核验的只读
+   `evidence_fingerprints` 写入 report/step/plan identity；
 6. 让 wrapper 只接收 Broker 准备好的输入和 hash-bound assets；
 7. 清除 ensemble、reliability 和 report 对 `prediction.delta` 的不必要硬编码；
-8. 建 conformance harness：dummy delta、growth、fitness 输出只用于合同测试；
+8. 建 conformance harness：delta reference 与 dummy growth/fitness 输出用于合同测试；
 9. 未注册 task/output、错误单位/shape/type、NaN/Inf/超大整数、未知字段、错 feature
    order 和 mapping hash drift 均 fail-closed；
 10. 保留无 Pack legacy adapter 和 P0 确定性报告兼容性。
@@ -469,15 +514,15 @@ Marketplace。
 
 ### 历史可复制授权提示词
 
-P12 completion 已形成，当前持续本地授权已覆盖 P13 工程工作。以下模板仅作为历史
-scope 参考，不扩大外部资产、网络、真实模型、训练、发布或部署权限。
+P13 已完成。以下模板仅作为历史 scope 参考，不扩大外部资产、网络、真实模型、训练、
+发布或部署权限，也不能重新执行或改写已冻结的 P13 identity。
 
 ```text
 授权以 `<Phase 12 完成 SHA>` 作为 Phase 13（Virtual Cell Model Adapter SDK）
 唯一起始基线，创建 `codex/p13-model-adapter-sdk`，仅实现版本化 input/output adapter
 合同、adapter registry、delta-expression reference adapter、Broker/ExecutionPlan/
-job identity 接线、conformance harness、ADR、runbook 和测试；允许用测试内 dummy
-adapter 验证 delta_expression、growth、fitness 的严格 envelope，但不得加入生产
+job identity 接线、conformance harness、ADR、runbook 和测试；允许用 delta reference
+及测试内 dummy growth/fitness adapters 验证严格 envelope，但 dummy 不得加入生产
 模型或 mock fallback。必须拒绝未注册 task/output、错 feature order、未声明 mapping、
 错单位/shape、未知字段、NaN/Inf 和不匹配 uncertainty/OOD；不得在核心 runtime、
 route table 或 case dispatch 增加模型/物种专用分支。不得实施 Phase 14 或以后阶段，
@@ -487,6 +532,17 @@ schema/fingerprint、回归证据和下一条授权句。
 ```
 
 ## 8. Phase 14：第一个真实 Virtual Cell — E. coli K-12
+
+### 当前授权拆分
+
+- `P14E — E. coli K-12 knockout→growth contract`：`ELIGIBLE`。只允许本地冻结版本化
+  input/output、adapter、provenance 与 fail-closed tests；不读取、下载或运行真实
+  GEM/data/assets，不产生科学 evidence 或 policy；
+- `P14R — exact-asset science run`：`AUTHORIZATION_REQUIRED / NOT_RUN`。必须先逐项
+  给出 GEM/data/assets/output root 的 path、size、SHA-256、license、source、读写策略
+  与 exact run window；
+- `P14B — operator decision`：`NOT_RUN`。只有 P14R 形成正科学 evidence 后，具名
+  operator 才能在独立窗口决定；工程完成或 runtime success 不能代替该决定。
 
 ### 最小科学目标
 
@@ -501,56 +557,71 @@ gene expression 和 resistance phenotype 不作为 P14 通过条件；没有独�
 继续 abstain。内部 flux 可以作为 solver trace 和约束审计，不是 P14 产品预测输出，
 除非以后另有独立验证和授权。
 
-### 依次实施
+### P14E：当前 contract-only 工程
 
-1. 冻结 strain、assembly、GEM、medium、gene namespace、output unit 和任务边界；
-2. 选择许可清晰的真实 GEM 与 growth/essentiality evidence；只有符合 §4.6 的精确
-   授权后才可放入 Git 外只读 source 和独立 write-new output roots；
-3. 用 P12 artifact identity 绑定 SBML/GEM 模型资产，另建真实 growth/condition
-   data Pack；不能把模型资产塞进不兼容的 H5AD Pack，也不能把
-   `p8-bacteria-tiny` synthetic scRNA 当 GEM；
-4. 实现 growth input/output adapter；
-5. `GemWrapper` 必须消费 model release 显式绑定的 SBML/GEM，并同时核对请求所用
-   data Pack，不允许隐式 textbook fallback；
-6. 预声明 held-out gene/condition biological groups、baseline、主指标和 CI；
-7. 运行 exact gene mapping、leakage、mass/constraint 和 OOD 审计；
-8. 通过同一 Broker/runtime 产生 prediction 或 abstain；
-9. 在独立 dataset/platform 或独立实验批次上零适配验证；
-10. 只有主指标、paired CI 和独立 cohort 门都通过，才生成 task-scoped immutable
-    capability evidence；P22 以前不创建 Virtual Cell release，也不修改 Data Center。
+P14E 必须从本次 P13 docs-closure 后由 Git history 读取的 actual SHA 开始，创建
+`codex/p14e-ecoli-growth-contract`；不能在 P13 文档 commit 内猜测该 SHA。
 
-### 验收门
+1. 冻结 E. coli K-12 knockout→growth/growth-ratio 的 versioned task/input/output
+   contract，要求调用方显式提供 strain/assembly、GEM identity、medium/condition、
+   gene namespace、knockout target、output unit 和 provenance；
+2. 复用 P12 identity 与 P13 Adapter SDK，定义 growth adapter 的 contract/conformance
+   边界；没有 exact model/assets/data 时不得加入默认生产 registry 或形成 executable
+   positive path；
+3. 增加纯合成、小型、合同级 fixture 与 fail-closed tests，覆盖缺 scope、错 namespace、
+   错 unit/shape/type、unknown field、missing asset/data binding、OOD 与 abstain；
+4. 保持现有 delta default registry、legacy/P0、P9 negative result 和 science/policy
+   状态不变；
+5. 收口 ADR、runbook、测试和 P14E engineering completion report。
 
-- Pack/model/environment/adapter/evidence 全部 fingerprint 绑定；
-- target 不在精确 GEM namespace 时 abstain；
-- 外部验证 adaptation 为零；
-- 主指标严格胜预声明 baseline 且 CI 支持改善；
-- deterministic FBA 如实声明 deterministic，不伪造 calibration；
-- strain、medium、condition 或 task 域外输入明确 abstain；
-- 失败也视为阶段完成，但不生成 `promotion_eligible/production_promoted`；registry
-  身份不改写，production plan 继续 abstain。
+P14E 的验收只证明合同、拒绝路径和 conformance。它不得读取、下载或运行真实 GEM、
+growth/essentiality data，不运行 benchmark/external/OOD science，不生成 evidence/policy，
+不作 `production_promoted` 决定。
+
+### P14R：另行授权的 exact-asset science run
+
+只有 P14E 完成且逐项 exact 资产/输出/run window 授权后，才执行：
+
+1. 选择许可清晰的真实 GEM 与 growth/essentiality evidence，放入 Git 外只读 source 和
+   独立 write-new output roots；
+2. 用 P12 artifact identity 绑定 SBML/GEM 模型资产，另建真实 growth/condition data
+   Pack；不能把模型资产塞进不兼容的 H5AD Pack，也不能把 `p8-bacteria-tiny`
+   synthetic scRNA 当 GEM；
+3. 让 `GemWrapper` 消费 model release 显式绑定的 SBML/GEM 并核对请求所用 data Pack，
+   不允许隐式 textbook fallback；
+4. 预声明 held-out gene/condition biological groups、baseline、主指标、CI 和 OOD；
+5. 运行 exact gene mapping、leakage、mass/constraint 和 OOD 审计；
+6. 通过同一 Broker/runtime 产生 prediction 或 abstain；
+7. 在独立 dataset/platform 或独立实验批次上零适配验证；
+8. 只有主指标、paired CI 和独立 cohort 门都通过，才生成 task-scoped immutable
+   capability evidence；P22 以前不创建 Virtual Cell release，也不修改 Data Center。
+
+P14R 验收要求 Pack/model/environment/adapter/evidence 全部 fingerprint 绑定；target 不在
+exact GEM namespace、strain/medium/condition/task 域外或任一资产/环境门失败时必须
+abstain；external adaptation 为零；主指标严格胜预声明 baseline 且 paired CI 支持改善；
+deterministic FBA 必须如实声明 deterministic。科学门失败仍可形成诚实负结果，但不能
+生成 `promotion_eligible/production_promoted`，registry identity 不得改写。
 
 ### 不可声称
 
 FBA growth 不是 transcriptome response；K-12 单一 GEM 不代表任意 bacteria Pack；
 deterministic 不等于正确；P9 的转录组负结果不验证本 GEM。
 
-### 可复制授权提示词
+### P14R 可复制授权提示词（当前未授权）
 
 ```text
-授权以 `<Phase 13 完成 SHA>` 作为 Phase 14（E. coli K-12 Virtual Cell v1）
-唯一起始基线，创建 `codex/p14-ecoli-growth`，仅实现一个窄任务：
+授权以 `<P14E actual completion SHA>` 作为 P14R（E. coli K-12 exact-asset science run）
+唯一代码基线，并指定 `<exact branch>` 与 `<exact run window>`，只运行一个窄任务：
 “批准的 E. coli K-12 strain/GEM/medium/condition 下 gene knockout → growth/growth
-ratio”。仅在另行授权用 exact 绝对路径、逐文件 size/SHA-256/license/source 列出
-输入，并指定只读 source root、全新 write-new output root、禁止覆盖和网络策略后，
-才允许使用 Git 外 GEM、growth/essentiality 数据和派生 artifact；
-Git 只提交合同、小 fixture、hash、代码、测试、ADR 和 runbook，不提交大数据或权重。
+ratio”。必须用 exact 绝对路径逐文件列出 input size/SHA-256/license/source，并指定
+只读 source root、全新 write-new output root、禁止覆盖和网络策略；只有列明的 Git 外
+GEM、growth/essentiality data 和派生 artifact 可访问，不提交大数据或权重。
 必须让模型消费显式绑定的 GEM，禁止 textbook fallback、symbol/ortholog 猜测、静默
 单位转换和 mock；预声明 biological-group split、baseline、主指标、CI、OOD 和
 promotion gate，并在独立 dataset/platform 或实验批次零适配验证。若任一门失败，
 阶段仍收口，但不得生成 production promotion，prediction 继续 abstain。不得实施
 yeast、human、gene-expression、resistance、community 或
-训练平台。本地 commit 仅在本阶段精确授权明确为 yes 时允许；除非另发精确资产/remote 授权，不访问或写 .53；
+训练平台。本地 commit 仅在本阶段精确授权明确为 yes 时允许；不访问或写 .53；
 不 push，不修改 GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact HEAD、所有
 asset/result hash、科学结论，并生成 P14B operator-decision 授权句。
 ```
@@ -558,8 +629,9 @@ asset/result hash、科学结论，并生成 P14B operator-decision 授权句。
 ### P14B 可复制授权提示词：独立 product-policy decision
 
 ```text
-授权具名 operator `<姓名/角色>` 以 `<P14 完成 SHA>`、`<exact capability evidence
-fingerprint>` 和 `<exact validation/result fingerprints>` 为唯一只读输入，审查
+授权具名 operator `<姓名/角色>` 以 `<P14R code SHA or unchanged P14E SHA>`、
+`<exact capability evidence fingerprint>` 和 `<exact validation/result fingerprints>` 为
+唯一只读输入，审查
 E. coli growth exact scope 的全部预声明硬门。禁止重跑、调参、替换 evidence、
 修改代码或 Git；只允许在 `<必须填写的 exact absolute policy output path>` write-new
 一份 immutable operator decision，不得覆盖。只有 benchmark、paired CI、independent
@@ -1897,13 +1969,13 @@ Next exact authorization sentence:
 
 ## 27. 下一步
 
-唯一当前 work unit 是 P12。继续执行仅表示完成 P12 的一致性检查、定向与受影响
-回归、core/legacy/frontend、Ruff、pip check、packaging、`git diff --check`、
-allowlist staging、一次获准本地 commit 和 post-commit 核验。任一硬门失败都必须
-保留为明确负结果或 blocker，不得放宽 schema/science/policy 门。
+P13 已由 exact starting SHA、completion code SHA/tree、冻结 fingerprints、完整验证和
+完成报告收口。唯一下一 eligible 本地工程 work unit 是 P14E：冻结 E. coli K-12
+knockout→growth 的窄合同与 fail-closed 边界。开始时必须以 P13 docs-closure 后的实际
+HEAD 作为 starting SHA，重新生成动态保护清单；不得提前猜测该 closure commit。
 
-P12 真实完成后，唯一下一 numbered candidate 才是 P13 Adapter SDK。本文中的 P13
-模板保留占位符且为 `NOT ACTIVE`：必须先取得 P12 actual completion SHA、重新生成
-动态保护清单，再由用户另发完整精确授权。当前 P12 授权不得用于创建 P13 branch、
-修改 P13 代码、下载资产或运行实验。Phase 13–30 中的 `<Phase N 完成 SHA>` 也只能
-在对应前一 work unit 真正完成后替换，不能提前猜测。
+当前持续本地授权不覆盖 P14R 或 P14B。没有逐项 exact GEM/data/assets/output root/run
+window 授权时，不得读取或运行真实资产、产生科学 evidence；没有正科学结果与具名
+operator 独立决定时，不得创建 production promotion。network、push、GitHub main/tag、
+`.53`、service、release 和 deploy 继续禁止。Phase 14–30 中的 `<Phase N 完成 SHA>`
+只能在对应前一 work unit 真正完成后替换，不能提前猜测。

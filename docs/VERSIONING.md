@@ -1,10 +1,11 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `P12_ENGINEERING_COMPLETE — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
+> Status: `P13_ENGINEERING_COMPLETE_P14E_ELIGIBLE — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
-> Local baseline: branch `codex/p12-model-registry-v2`; P12 unique starting SHA
-> `b19c896202bea56f894d0ad540501331af42a40c`; completion code SHA
-> `1a5464fb0d2d9e105058f6797d92efd69783e5b2`
+> Local baseline: branch `codex/p13-model-adapter-sdk`; P13 starting SHA
+> `f83c13db386cb552b3ce7a5643e5ffbead0ff573`; code SHA
+> `744d0a28d2cfc13d1b10e85b133b6c13b9426174`; tree
+> `198e623120688d3704b9312990ddaa93c9a7b0e6`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -17,6 +18,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 |---|---|---|---|
 | P11B product code | anchor `bf44aac25b993e49d0146ccd52dddad5c2fa14de` | immutable local Git history | completed Cell-first product code; not P12 or a release identity |
 | P12 Model Zoo v2 work unit | start `b19c896202bea56f894d0ad540501331af42a40c`; completion `1a5464fb0d2d9e105058f6797d92efd69783e5b2` | immutable local Git history plus `reports/phase12/PHASE12_COMPLETION.md` | engineering complete; no science run or new operator decision |
+| P13 Model Adapter SDK work unit | start `f83c13db386cb552b3ce7a5643e5ffbead0ff573`; code `744d0a28d2cfc13d1b10e85b133b6c13b9426174`; tree `198e623120688d3704b9312990ddaa93c9a7b0e6` | immutable local Git history plus `reports/phase13/PHASE13_COMPLETION.md` | engineering complete and P14E-eligible; `Science: NOT_RUN`, `Policy: NO_NEW_DECISION`, no release/version bump |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -42,7 +44,13 @@ The repository historically mixed product release tags, package metadata, API/ru
 | strict model card | `vc.model-card.v1` + canonical JSON SHA-256 | `model_zoo/capability_registry.py`, `model_zoo/registry.yaml` | binds taxon/modality/assay/domain/perturbation/task/output/namespace/representation/assets/resources/uncertainty/OOD and wrapper revision; card presence is not execution or validation |
 | model artifact identity | `vc.model-artifact.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds relative cache key, size/hash, media type, licence/source and safe-load declaration; identity or `artifact_ready` is not safe execution or validation |
 | model environment identity | `vc.model-environment.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds PEP 503 distribution+version requirements, architecture, lock/image identity, resources/accelerators and adapter fingerprints; distribution names are not import-module probes |
-| model adapter identity | `vc.model-adapter.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds adapter name/version/implementation locator and task/input/output contracts; P12 does not implement the Phase 13 Adapter SDK |
+| model adapter identity | `vc.model-adapter.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py`, `model_zoo/adapter_sdk.py` | P12 binds adapter name/version/implementation locator and contract fingerprints; P13 resolves the exact registered runtime implementation without changing the P12 identity schema |
+| adapter input contract | `vc.adapter-input-contract.v1` + canonical JSON SHA-256 | `model_zoo/adapter_sdk.py` | binds exact task/output/value type/shape/unit and explicit Pack-data/alignment requirements; contract validity is not data availability or scientific validity |
+| prepared adapter input | `vc.prepared-adapter-input.v1` + canonical JSON SHA-256 | `model_zoo/adapter_sdk.py` | immutable request/Pack/compatibility/feature-alignment/model-input binding; preparation does not execute a model |
+| adapter output contract | `vc.adapter-output-contract.v1` + canonical JSON SHA-256 | `model_zoo/adapter_sdk.py` | binds task/output/value type/shape/unit plus uncertainty/OOD/abstention requirements; a conforming shape is not a quality claim |
+| adapter execution provenance | `vc.adapter-execution-provenance.v1` + canonical JSON SHA-256 | `model_zoo/adapter_sdk.py` | binds exact adapter and input/output contract fingerprints to request/Pack/compatibility inputs; provenance is not evidence or policy |
+| adapter output envelope | `vc.adapter-output-envelope.v1` + canonical JSON SHA-256 | `model_zoo/adapter_sdk.py` | strict finite values, shape/unit, uncertainty, OOD, abstention, projection metadata and provenance; invalid or mixed envelopes fail closed |
+| adapter conformance report | `vc.adapter-conformance-report.v1` + canonical JSON SHA-256 | `model_zoo/adapter_sdk.py` | records deterministic contract conformance and, for non-abstain outputs, projection conformance for an exact prepared input; it is not benchmark evidence or production promotion |
 | validation evidence identity | `vc.model-validation-evidence.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds exact Pack×model×environment×adapter×protocol, baseline, primary metric and result hash; record existence does not make the evidence pass |
 | operator policy identity | `vc.model-operator-policy.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds one named operator decision to one exact capability and evidence set; P12 creates no new promotion decision |
 | model release/lifecycle identities | `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1` | `model_zoo/registry_v2.py` | release graph plus append-only catalog/readiness/revoke/supersede history; registry state, evidence and product policy remain separate |
@@ -78,6 +86,14 @@ Migrated v1 cards have no evidence or policy record and cannot be promoted. In-p
 accepts only the declared `safe_load_policy=data_only`; the declaration is rechecked at planning and
 instantiation but is not yet a type-level proof that an arbitrary wrapper loader is data-only.
 
+P13 adds the six Adapter SDK schemas above without changing `vc.model-adapter.v1`, product
+SemVer, API/runtime protocol or release tags. The default runtime registry contains only the
+delta-expression reference adapter; growth/fitness adapters remain test-only contract fixtures.
+Engineering completion does not create a real model, scientific run, validation evidence or named
+operator decision. See [ADR-0010](ADR-0010-virtualcell-model-adapter-sdk.md), the
+[runbook](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md), and the
+[P13 completion report](../reports/phase13/PHASE13_COMPLETION.md).
+
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
 ## Namespace contract
@@ -98,6 +114,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | model artifact identity schema + fingerprint | explicit `vc.model-artifact.v1` plus canonical JSON SHA-256 | artifact identity, integrity, licence/source or safe-load declaration changes | artifact readiness proves executable, safe or scientifically valid |
 | model environment identity schema + fingerprint | explicit `vc.model-environment.v1` plus canonical JSON SHA-256 | PEP 503 distribution/version, native/architecture/lock/image/resource/adapter requirements change | a distribution name is the same namespace as an import module, or the environment is currently satisfied |
 | model adapter identity schema + fingerprint | explicit `vc.model-adapter.v1` plus canonical JSON SHA-256 | implementation locator or task/input/output contract changes | adapter implementation exists, conforms, or is scientifically valid |
+| adapter SDK schemas + fingerprints | explicit `vc.adapter-input-contract.v1`, `vc.prepared-adapter-input.v1`, `vc.adapter-output-contract.v1`, `vc.adapter-execution-provenance.v1`, `vc.adapter-output-envelope.v1`, `vc.adapter-conformance-report.v1` plus canonical JSON SHA-256 | incompatible input/output, binding, envelope, conformance or projection semantics change | conformance is scientific evidence, a model is production-registered, or policy exists |
 | validation evidence schema + fingerprint | explicit `vc.model-validation-evidence.v1` plus canonical JSON SHA-256 | exact capability/protocol/baseline/metric/result binding changes | evidence exists, passes, generalizes, or grants product policy |
 | operator policy schema + fingerprint | explicit `vc.model-operator-policy.v1` plus canonical JSON SHA-256 | named operator, exact capability/evidence decision or policy version changes | engineering or evidence state can manufacture a promotion decision |
 | model release/lifecycle schemas + fingerprints | explicit `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1` | component graph or append-only lifecycle fact changes | catalog/readiness/revocation/supersession is scientific evidence or product policy |
@@ -125,7 +142,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented history through the current P12 validation bytes:
+Implemented history through the current P13 engineering-complete bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -148,8 +165,13 @@ Implemented history through the current P12 validation bytes:
     `b19c896202bea56f894d0ad540501331af42a40c`.
 18. P12 current bytes add backward-compatible layered Model Zoo identities, append-only lifecycle,
     v1 migration, path-redacted public projections and v2 fail-closed planning inside the same
-    unpublished candidate. The work unit remains `VALIDATING`: it adds no real model/weight,
+    unpublished candidate. The work unit is engineering-complete: it adds no real model/weight,
     scientific validation, new operator promotion, product/API/runtime version bump or release tag.
+19. P13 code `744d0a28d2cfc13d1b10e85b133b6c13b9426174` adds a backward-compatible
+    Adapter SDK, delta-only default registry, strict prepared-input/output/provenance binding and
+    generic adapter-aware ensemble/report flow inside the same unpublished candidate. Test-only
+    growth/fitness adapters do not enter the production registry. `Science: NOT_RUN` and
+    `Policy: NO_NEW_DECISION`; no product/API/runtime version bump, release or tag is created.
 
 ## Release invariants
 
@@ -176,6 +198,9 @@ The equality above deliberately excludes `vc.msg.v1`, `vc.request.v2`, all
 `vc.pack.*` versions, `vc.model-feature-contract.v1`, `vc.feature-mapping.v1`,
 `vc.alignment-report.v1`, `vc.model-card.v1`, `vc.model-artifact.v1`,
 `vc.model-environment.v1`, `vc.model-adapter.v1`,
+`vc.adapter-input-contract.v1`, `vc.prepared-adapter-input.v1`,
+`vc.adapter-output-contract.v1`, `vc.adapter-execution-provenance.v1`,
+`vc.adapter-output-envelope.v1`, `vc.adapter-conformance-report.v1`,
 `vc.model-validation-evidence.v1`, `vc.model-operator-policy.v1`,
 `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1`,
 `vc.model-registry.v2`, `vc.model-registry-catalog.v2`,
