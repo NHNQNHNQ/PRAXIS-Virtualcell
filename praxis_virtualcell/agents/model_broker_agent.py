@@ -17,7 +17,7 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.core.request_v2 import VirtualCellRequestV2
 from praxis_virtualcell.data_packs.errors import PackRegistryError
-from praxis_virtualcell.data_packs.registry import PackRegistry
+from praxis_virtualcell.data_packs.registry import PackRegistry, RegisteredPack
 from praxis_virtualcell.model_zoo.adapter_sdk import (
     AdapterContractError,
     AdapterRegistry,
@@ -26,6 +26,7 @@ from praxis_virtualcell.model_zoo.cache import ModelCache
 from praxis_virtualcell.model_zoo.capability_registry import (
     CapabilityRegistry,
     EnvironmentSnapshot,
+    ExecutionPlan,
     ExecutionPlanV2,
 )
 from praxis_virtualcell.model_zoo.downloader import resolve_source
@@ -74,6 +75,14 @@ class ModelBrokerAgent(BaseAgent):
             message_type="model_broker_result", payload=result,
             timestamp=message.timestamp, parent_message_id=message.message_id))
 
+    def plan(
+        self,
+        request: VirtualCellRequestV2,
+        pack: RegisteredPack | None,
+    ) -> ExecutionPlan | ExecutionPlanV2:
+        """Build the authoritative plan without preparing model wrappers."""
+        return self._capabilities.plan(request, pack, self._environment)
+
     def _handle_execution_plan(
         self,
         message: AgentMessage,
@@ -86,7 +95,7 @@ class ModelBrokerAgent(BaseAgent):
             pack = self._packs.record(pack_id, pack_version)
         except PackRegistryError:
             pack = None
-        plan = self._capabilities.plan(request, pack, self._environment)
+        plan = self.plan(request, pack)
         reports = {report.model_name: report for report in plan.reports}
         prepared = []
         failed: dict[str, str] = {}

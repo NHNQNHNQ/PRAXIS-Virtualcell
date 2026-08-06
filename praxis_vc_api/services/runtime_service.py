@@ -7,12 +7,14 @@ import os
 
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.exceptions import InputValidationError
+from praxis_virtualcell.core.request_v2 import VirtualCellRequestV2
 from praxis_virtualcell.io.job_store import JobStore
 from praxis_virtualcell.pack_product import (
     PackIndex,
     compatibility_payload,
     pack_catalog_payload,
     run_pack_query,
+    virtual_experiment_payload,
 )
 from praxis_virtualcell.version import (
     API_PROTOCOL_VERSION,
@@ -116,6 +118,27 @@ def run_job(
     pack_id: str | None = None,
     pack_version: str | None = None,
 ) -> dict:
+    if request.get("schema_version") == "vc.request.v2":
+        if not all(
+            isinstance(value, str) and value and value.strip() == value
+            for value in (pack_id, pack_version)
+        ):
+            raise InputValidationError(
+                "vc.request.v2 requires exact pack_id and pack_version"
+            )
+        try:
+            validated_request = VirtualCellRequestV2.from_dict(request).to_dict()
+        except (TypeError, ValueError) as exc:
+            raise InputValidationError("invalid vc.request.v2") from exc
+        out = virtual_experiment_payload(
+            validated_request,
+            pack_id=pack_id,
+            pack_version=pack_version,
+        )
+        job_id = _job_id(validated_request, pack_id, pack_version)
+        JobStore(RUNS_DIR).save(job_id, request=validated_request, result=out)
+        return {"job_id": job_id, "status": "done"}
+
     cfg = config_for(mode)
     validation = validate_candidate(request)
     if not validation["schema_valid"]:

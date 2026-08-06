@@ -55,6 +55,12 @@ def _valid_execution_identity(value: dict) -> bool:
         )
 
     schema = value.get("schema_version")
+    if schema not in {
+        "vc.job-execution-identity.v1",
+        "vc.job-execution-identity.v2",
+        "vc.job-execution-identity.v3",
+    }:
+        return False
     common_keys = {
         "schema_version",
         "legacy_adapter",
@@ -63,7 +69,10 @@ def _valid_execution_identity(value: dict) -> bool:
         "fingerprint",
     }
     expected_keys = common_keys
-    if schema == "vc.job-execution-identity.v2":
+    if schema in {
+        "vc.job-execution-identity.v2",
+        "vc.job-execution-identity.v3",
+    }:
         expected_keys = common_keys | {
             "plan_id",
             "submitted_request_fingerprint",
@@ -73,6 +82,8 @@ def _valid_execution_identity(value: dict) -> bool:
             "structured_report_fingerprint",
             "outcome",
         }
+        if schema == "vc.job-execution-identity.v3":
+            expected_keys |= {"brain_fingerprint", "dag_fingerprint"}
     if set(value) != expected_keys:
         return False
 
@@ -117,7 +128,7 @@ def _valid_execution_identity(value: dict) -> bool:
     }
     for model in value["models"]:
         if not isinstance(model, dict) or set(model) != (
-            v2_model_keys if schema == "vc.job-execution-identity.v2" else v1_model_keys
+            v1_model_keys if schema == "vc.job-execution-identity.v1" else v2_model_keys
         ):
             return False
         if not (
@@ -238,6 +249,11 @@ def _valid_execution_identity(value: dict) -> bool:
         and fingerprint(value["structured_report_fingerprint"])
     ):
         return False
+    if schema == "vc.job-execution-identity.v3" and not (
+        fingerprint(value["brain_fingerprint"])
+        and fingerprint(value["dag_fingerprint"])
+    ):
+        return False
     outcome = value["outcome"]
     if not (
         isinstance(outcome, dict)
@@ -269,6 +285,7 @@ def _public_execution_identity(value: object) -> dict:
     if not isinstance(value, dict) or value.get("schema_version") not in {
         "vc.job-execution-identity.v1",
         "vc.job-execution-identity.v2",
+        "vc.job-execution-identity.v3",
     } or not _valid_execution_identity(value):
         return {
             "schema_version": None,
@@ -308,7 +325,10 @@ def _public_execution_identity(value: object) -> dict:
             if isinstance(raw.get("executable"), bool)
             else False,
         }
-        if value["schema_version"] == "vc.job-execution-identity.v2":
+        if value["schema_version"] in {
+            "vc.job-execution-identity.v2",
+            "vc.job-execution-identity.v3",
+        }:
             model.update(
                 {
                     "release_fingerprint": fingerprint(
@@ -372,7 +392,10 @@ def _public_execution_identity(value: object) -> dict:
         "models": models,
         "fingerprint": fingerprint(value.get("fingerprint")),
     }
-    if value["schema_version"] == "vc.job-execution-identity.v2":
+    if value["schema_version"] in {
+        "vc.job-execution-identity.v2",
+        "vc.job-execution-identity.v3",
+    }:
         raw_outcome = value.get("outcome")
         outcome = None
         if isinstance(raw_outcome, dict):
@@ -410,6 +433,15 @@ def _public_execution_identity(value: object) -> dict:
                 "outcome": outcome,
             }
         )
+        if value["schema_version"] == "vc.job-execution-identity.v3":
+            public.update(
+                {
+                    "brain_fingerprint": fingerprint(
+                        value.get("brain_fingerprint")
+                    ),
+                    "dag_fingerprint": fingerprint(value.get("dag_fingerprint")),
+                }
+            )
     return public
 
 
@@ -498,21 +530,221 @@ class JobStore:
                 )
 
                 submitted_request_fingerprint = _canonical_fingerprint(request)
+                normalized_request = _runtime_request_v2(request)
                 normalized_request_fingerprint = _canonical_fingerprint(
-                    _runtime_request_v2(request).to_dict()
+                    normalized_request.to_dict()
                 )
                 if normalized_request_fingerprint != plan.request_fingerprint:
                     raise ValueError("submitted request does not match execution plan")
+                raw_compilation = provenance.get("virtual_experiment")
+                experiment_contract = provenance.get("execution_contract")
+                compilation = None
+                if raw_compilation is not None:
+                    from praxis_virtualcell.virtual_experiment import (
+                        VirtualExperimentCompilationV1,
+                    )
+
+                    compilation = VirtualExperimentCompilationV1.from_dict(
+                        raw_compilation
+                    )
                 structured_report = result.get("structured_report")
                 if not isinstance(structured_report, dict):
                     raise ValueError("v2 execution identity requires a structured report")
+                experiment_report_keys = {
+                    "request_id",
+                    "prediction",
+                    "models_used",
+                    "models_rejected",
+                    "models_failed",
+                    "abstain",
+                    "abstain_reasons",
+                    "reliability",
+                    "provenance",
+                }
+                direct_contract_shape = (
+                    request.get("schema_version") == "vc.request.v2"
+                    and structured_report.get("abstain") is True
+                    and structured_report.get("prediction") is None
+                    and structured_report.get("models_used") == []
+                )
+                if compilation is None and (
+                    experiment_contract
+                    == "vc.virtual-experiment-compilation.v1"
+                    or direct_contract_shape
+                ):
+                    raise ValueError(
+                        "direct contract-only jobs require a virtual experiment"
+                    )
+                if compilation is not None and (
+                    experiment_contract
+                    != "vc.virtual-experiment-compilation.v1"
+                ):
+                    raise ValueError(
+                        "virtual experiment provenance contract marker is missing"
+                    )
+                report_provenance = structured_report.get("provenance") or {}
+                if compilation is not None and report_provenance != provenance:
+                    raise ValueError(
+                        "structured report and top-level provenances differ"
+                    )
                 report_plan = (
-                    (structured_report.get("provenance") or {}).get("execution_plan")
-                    if isinstance(structured_report.get("provenance") or {}, dict)
+                    report_provenance.get("execution_plan")
+                    if isinstance(report_provenance, dict)
                     else None
                 )
                 if report_plan != raw_plan:
                     raise ValueError("structured report and provenance execution plans differ")
+                report_compilation = (
+                    report_provenance.get("virtual_experiment")
+                    if isinstance(report_provenance, dict)
+                    else None
+                )
+                if report_compilation != raw_compilation:
+                    raise ValueError(
+                        "structured report and provenance virtual experiments differ"
+                    )
+                if compilation is not None:
+                    from praxis_virtualcell.virtual_experiment import (
+                        execution_plan_fingerprint,
+                    )
+
+                    dag = compilation.dag
+                    brain = compilation.brain_context
+                    reports = plan.reports
+                    steps_by_fingerprint = {
+                        step.fingerprint(): step for step in plan.steps
+                    }
+                    expected_step_fingerprints = tuple(
+                        sorted(steps_by_fingerprint)
+                    )
+                    expected_capability_fingerprints = tuple(
+                        sorted({step.capability_fingerprint for step in plan.steps})
+                    )
+                    if not (
+                        dag.request_id == plan.request_id
+                        and dag.request_fingerprint == plan.request_fingerprint
+                        and dag.cell_context_fingerprint
+                        == _canonical_fingerprint(
+                            normalized_request.cell_context.to_dict()
+                        )
+                        and dag.pack_id == plan.pack_id
+                        and dag.pack_version == plan.pack_version
+                        and dag.pack_fingerprint == plan.pack_fingerprint
+                        and dag.environment_snapshot_fingerprint
+                        == plan.environment_snapshot_fingerprint
+                        and dag.plan_id == plan.plan_id
+                        and dag.plan_fingerprint == execution_plan_fingerprint(plan)
+                        and brain.request_id == plan.request_id
+                        and brain.request_fingerprint == plan.request_fingerprint
+                        and brain.pack_id == plan.pack_id
+                        and brain.pack_version == plan.pack_version
+                        and brain.pack_fingerprint == plan.pack_fingerprint
+                        and brain.environment_snapshot_fingerprint
+                        == plan.environment_snapshot_fingerprint
+                        and brain.plan_id == plan.plan_id
+                        and brain.plan_fingerprint == dag.plan_fingerprint
+                        and brain.dag_fingerprint == dag.fingerprint()
+                        and dag.validated_step_fingerprints
+                        == expected_step_fingerprints
+                        and dag.participating_capability_fingerprints
+                        == expected_capability_fingerprints
+                        and brain.execution_step_fingerprints
+                        == expected_step_fingerprints
+                        and brain.participating_capability_fingerprints
+                        == expected_capability_fingerprints
+                        and compilation.decision.participating_capability_fingerprints
+                        == expected_capability_fingerprints
+                    ):
+                        raise ValueError(
+                            "virtual experiment does not match execution plan"
+                        )
+                    for node in dag.nodes:
+                        step = steps_by_fingerprint.get(
+                            node.execution_step_fingerprint
+                        )
+                        if step is None or not (
+                            node.model_fingerprint == step.model_fingerprint
+                            and node.release_fingerprint
+                            == step.release_fingerprint
+                            and node.capability_fingerprint
+                            == step.capability_fingerprint
+                            and node.environment_fingerprint
+                            == step.environment_fingerprint
+                            and node.adapter_fingerprints
+                            == step.adapter_fingerprints
+                        ):
+                            raise ValueError(
+                                "DAG node does not match an execution plan step"
+                            )
+                    expected_brain_bindings = {
+                        "compatibility_fingerprints": tuple(
+                            sorted({report.fingerprint() for report in reports})
+                        ),
+                        "model_fingerprints": tuple(
+                            sorted({report.model_fingerprint for report in reports})
+                        ),
+                        "release_fingerprints": tuple(
+                            sorted(
+                                {
+                                    report.release_fingerprint
+                                    for report in reports
+                                    if report.release_fingerprint is not None
+                                }
+                            )
+                        ),
+                        "capability_fingerprints": tuple(
+                            sorted(
+                                {
+                                    report.capability_fingerprint
+                                    for report in reports
+                                    if report.capability_fingerprint is not None
+                                }
+                            )
+                        ),
+                        "environment_fingerprints": tuple(
+                            sorted(
+                                {
+                                    report.environment_fingerprint
+                                    for report in reports
+                                    if report.environment_fingerprint is not None
+                                }
+                            )
+                        ),
+                        "adapter_fingerprints": tuple(
+                            sorted(
+                                {
+                                    item
+                                    for report in reports
+                                    for item in report.adapter_fingerprints
+                                }
+                            )
+                        ),
+                        "evidence_fingerprints": tuple(
+                            sorted(
+                                {
+                                    item
+                                    for report in reports
+                                    for item in report.evidence_fingerprints
+                                }
+                            )
+                        ),
+                        "policy_fingerprints": tuple(
+                            sorted(
+                                {
+                                    report.policy_fingerprint
+                                    for report in reports
+                                    if report.policy_fingerprint is not None
+                                }
+                            )
+                        ),
+                    }
+                    if any(
+                        getattr(brain, field) != expected
+                        for field, expected in expected_brain_bindings.items()
+                    ):
+                        raise ValueError(
+                            "Brain context does not match compatibility reports"
+                        )
                 model_names = {step.model_name for step in plan.steps}
                 models_used = structured_report.get("models_used")
                 if not isinstance(models_used, list) or any(
@@ -533,12 +765,53 @@ class JobStore:
                     )
                 if not abstain and prediction is None:
                     raise ValueError("non-abstained structured report requires a prediction")
+                if compilation is not None and (
+                    not abstain
+                    or prediction is not None
+                    or models_used
+                    or not compilation.decision.abstain
+                    or compilation.decision.execution_performed
+                ):
+                    raise ValueError(
+                        "virtual experiment jobs must remain contract-only abstentions"
+                    )
+                if compilation is not None:
+                    rejected_models = [
+                        report.model_name
+                        for report in plan.reports
+                        if not report.executable
+                    ]
+                    if not (
+                        set(structured_report) == experiment_report_keys
+                        and structured_report["request_id"] == plan.request_id
+                        and structured_report["models_rejected"]
+                        == rejected_models
+                        and structured_report["models_failed"] == []
+                        and structured_report["abstain_reasons"]
+                        == [compilation.decision.reason]
+                        and structured_report["reliability"] == "low"
+                    ):
+                        raise ValueError(
+                            "virtual experiment structured report is inconsistent"
+                        )
+                    if result.get("trace") != [] or result.get("narrative") is not None:
+                        raise ValueError(
+                            "virtual experiment trace and narrative must be empty"
+                        )
                 public_report = json.loads(json.dumps(structured_report))
                 public_report["provenance"] = _public_provenance(
                     structured_report.get("provenance") or {}
                 )
+                if compilation is not None:
+                    public_report["provenance"]["virtual_experiment"] = (
+                        compilation.authoritative_dict()
+                    )
                 value = {
-                    "schema_version": "vc.job-execution-identity.v2",
+                    "schema_version": (
+                        "vc.job-execution-identity.v3"
+                        if compilation is not None
+                        else "vc.job-execution-identity.v2"
+                    ),
                     "legacy_adapter": False,
                     "plan_id": plan.plan_id,
                     "submitted_request_fingerprint": (
@@ -597,6 +870,15 @@ class JobStore:
                         for report in plan.reports
                     ],
                 }
+                if compilation is not None:
+                    value.update(
+                        {
+                            "brain_fingerprint": (
+                                compilation.brain_context.fingerprint()
+                            ),
+                            "dag_fingerprint": compilation.dag.fingerprint(),
+                        }
+                    )
         value["fingerprint"] = _canonical_fingerprint(value)
         return value
 
@@ -690,8 +972,39 @@ class JobStore:
                 report["provenance"] = _public_provenance(report["provenance"])
             out["report"] = report
         if "execution_identity" in out:
+            execution_identity = out["execution_identity"]
+            schema = (
+                execution_identity.get("schema_version")
+                if isinstance(execution_identity, dict)
+                else None
+            )
+            if schema in {
+                "vc.job-execution-identity.v1",
+                "vc.job-execution-identity.v2",
+                "vc.job-execution-identity.v3",
+            }:
+                companion_keys = ("request", "report", "provenance", "trace")
+                companions_present = tuple(key in out for key in companion_keys)
+                if any(companions_present) and not all(companions_present):
+                    execution_identity = {}
+                elif all(companions_present):
+                    try:
+                        expected = self._execution_identity(
+                            {
+                                "structured_report": out["report"],
+                                "provenance": out["provenance"],
+                                "trace": out["trace"],
+                                "narrative": out.get("narrative"),
+                            },
+                            request=out["request"],
+                        )
+                    except (KeyError, TypeError, ValueError):
+                        execution_identity = {}
+                    else:
+                        if execution_identity != expected:
+                            execution_identity = {}
             out["execution_identity"] = _public_execution_identity(
-                out["execution_identity"]
+                execution_identity
             )
         return out
 

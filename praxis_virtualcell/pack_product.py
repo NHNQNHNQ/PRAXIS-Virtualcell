@@ -11,6 +11,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+from praxis_virtualcell.agents.model_broker_agent import ModelBrokerAgent
 from praxis_virtualcell.core.config import RuntimeConfig
 from praxis_virtualcell.core.exceptions import InputValidationError
 from praxis_virtualcell.core.request import VirtualCellRequest
@@ -28,9 +29,14 @@ from praxis_virtualcell.model_zoo.cache import ModelCache
 from praxis_virtualcell.model_zoo.capability_registry import (
     CapabilityRegistry,
     EnvironmentSnapshot,
+    ExecutionPlanV2,
 )
 from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
 from praxis_virtualcell.model_zoo.registry_v2 import public_model_version
+from praxis_virtualcell.virtual_experiment import (
+    VirtualExperimentContractError,
+    compile_virtual_experiment,
+)
 from praxis_virtualcell.workflows.run_virtualcell_query import (
     run_query,
     validate_candidate,
@@ -660,6 +666,24 @@ def _public_provenance(provenance: dict[str, Any]) -> dict[str, Any]:
                 public["compatibility_reports"] = projected["reports"]
     elif "compatibility_reports" in public:
         public["compatibility_reports"] = []
+    raw_compilation = public.get("virtual_experiment")
+    if raw_compilation is not None:
+        try:
+            from praxis_virtualcell.virtual_experiment import (
+                VirtualExperimentCompilationV1,
+            )
+
+            public["virtual_experiment"] = (
+                VirtualExperimentCompilationV1.from_dict(
+                    raw_compilation
+                ).to_dict()
+            )
+        except (KeyError, TypeError, ValueError):
+            public["virtual_experiment"] = {
+                "schema_version": None,
+                "available": False,
+                "reason": "unsupported_or_invalid_virtual_experiment",
+            }
     return public
 
 
@@ -776,6 +800,98 @@ def compatibility_payload(
     }
 
 
+def virtual_experiment_payload(
+    request: dict[str, Any],
+    *,
+    pack_id: str,
+    pack_version: str,
+    index: PackIndex | None = None,
+    model_registry_path: str | Path | None = None,
+    model_cache_root: str | Path | None = None,
+    candidate_dag: object = None,
+) -> dict[str, Any]:
+    """Compile a direct-v2, Pack-bound experiment without executing models."""
+    if (
+        not isinstance(request, dict)
+        or request.get("schema_version") != "vc.request.v2"
+    ):
+        raise InputValidationError(
+            "virtual experiments require an exact vc.request.v2"
+        )
+    request_v2 = VirtualCellRequestV2.from_dict(request)
+    product_index = index or PackIndex()
+    registry = product_index.registry_for(pack_id, pack_version)
+    pack = registry.record(pack_id, pack_version)
+    zoo, cache, environment = _model_stack(
+        model_registry_path,
+        model_cache_root,
+    )
+    broker = ModelBrokerAgent(
+        registry=zoo,
+        cache=cache,
+        pack_registry=registry,
+        environment=environment,
+    )
+    plan = broker.plan(request_v2, pack)
+    if not isinstance(plan, ExecutionPlanV2) or zoo.registry_v2 is None:
+        raise PackUnavailable(
+            "virtual experiments require the v2 model registry"
+        )
+    try:
+        compilation = compile_virtual_experiment(
+            request_v2,
+            plan,
+            zoo.registry_v2,
+            candidate_dag=candidate_dag,
+        )
+    except VirtualExperimentContractError as exc:
+        raise PackUnavailable(
+            "virtual experiment contract is unavailable"
+        ) from exc
+
+    rejected = [report for report in plan.reports if not report.executable]
+    provenance = {
+        "execution_contract": "vc.virtual-experiment-compilation.v1",
+        "execution_plan": plan.to_dict(),
+        "compatibility_reports": [report.to_dict() for report in plan.reports],
+        "virtual_experiment": compilation.to_dict(),
+        "rejection_reasons": {
+            report.model_name: ", ".join(report.reasons) or "not_executable"
+            for report in rejected
+        },
+        "rules_referenced": [],
+        "rules_hit": [],
+        "n_messages": 0,
+    }
+    report = {
+        "request_id": request_v2.request_id,
+        "prediction": None,
+        "models_used": [],
+        "models_rejected": [report.model_name for report in rejected],
+        "models_failed": [],
+        "abstain": True,
+        "abstain_reasons": [compilation.decision.reason],
+        "reliability": "low",
+        "provenance": provenance,
+    }
+    return _public_run_result(
+        {
+            "structured_report": report,
+            "narrative": None,
+            "trace": [],
+            "provenance": provenance,
+            "reliability_decision": {
+                "abstain": True,
+                "reliability": "low",
+                "learned_reliability": None,
+            },
+            "llm_used_for_prediction": False,
+            "mode": "offline",
+            "llm_enabled": False,
+        }
+    )
+
+
 def run_pack_query(
     request: dict[str, Any],
     *,
@@ -787,6 +903,13 @@ def run_pack_query(
     config=None,
     enable_llm_report: bool = False,
 ) -> dict[str, Any]:
+    if (
+        isinstance(request, dict)
+        and request.get("schema_version") == "vc.request.v2"
+    ):
+        raise InputValidationError(
+            "vc.request.v2 must use the direct virtual experiment entry"
+        )
     runtime_config = config or RuntimeConfig.from_env()
     if runtime_config.llm_enabled:
         raise PackUnavailable(
