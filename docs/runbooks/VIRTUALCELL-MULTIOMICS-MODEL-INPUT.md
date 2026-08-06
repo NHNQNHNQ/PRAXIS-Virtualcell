@@ -271,3 +271,6 @@ registry=5 releases / 0 native / 0 promoted
 
 工程合同完成不等于真实 multi-omics model acceptance。只有后续独立授权和全部预注册科学 gates
 通过后，才可讨论 evidence 或 promotion；P18 本身不能生成这些结论。
+
+P19 后续合同状态与当前下一 gate 见 [P19 completion report](../../reports/phase19/PHASE19_COMPLETION.md)
+及 [documentation index](../INDEX.md)；不得用 P19 的工厂合同反向解释为 P18 已完成真实模型验收。

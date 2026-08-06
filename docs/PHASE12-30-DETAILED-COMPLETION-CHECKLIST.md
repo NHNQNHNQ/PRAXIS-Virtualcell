@@ -4,7 +4,7 @@
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前已完成工程 work unit：`Phase 18`
+> 当前已完成工程 work unit：`Phase 19`
 >
 > DOCS-CLOSURE completion：`b19c896202bea56f894d0ad540501331af42a40c`
 >
@@ -41,13 +41,20 @@
 > `2b570398caff6cf955d789c3cb4a7a77dc13a082`；状态
 > `P18_CONTRACT_COMPLETE_REAL_MULTIOMICS_MODEL_ACCEPTANCE_PENDING`
 >
-> 下一 eligible 本地工程 gate：`P19 CONTRACT_ONLY`；`ELIGIBLE / NOT_COMPLETE`
+> 已完成 work unit：`Phase 19 — Controlled Pack Factory contract`；starting SHA
+> `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be`；branch
+> `codex/p19-controlled-pack-factory`；completion code SHA
+> `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5`；tree
+> `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`；状态
+> `P19_CONTRACT_COMPLETE_REAL_EXTERNAL_FIXTURE_OPERATOR_SCIENCE_POLICY_NOT_RUN`
+>
+> 下一 eligible 本地工程 gate：`P20 CONTRACT_ONLY`；`ELIGIBLE / NOT_COMPLETE`
 >
 > 当前 Phase 11 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
-> 当前状态核对日期：2026-08-06
+> 当前状态核对日期：2026-08-07
 
 本文是一份可以在整个项目周期中逐项对照的执行清单。它把
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)转换为：
@@ -62,14 +69,16 @@
 → 完成记录
 ```
 
-本文自身不授权实施任何 Phase。P12、P13、P14E、P15E、P16E、P17 和 P18 已在持续本地授权内完成；该授权仍不包含
+本文自身不授权实施任何 Phase。P12、P13、P14E、P15E、P16E、P17、P18 和 P19 已在持续本地授权内完成；该授权仍不包含
 外置数据或权重、network、push、GitHub main/tag、`.53`、服务、发布、部署或真实
 科学运行。P14E 已独立收口；P14R 仍需逐资产/窗口授权，P14B 仍只能在
 正科学结果后由具名 operator 决定。P15E 已独立收口；P15R 仍需逐资产/窗口授权，
 P15B 仍只能在正科学结果后由具名 operator 决定。P16E 已独立收口；P16R 仍需
 逐资产/窗口授权，P16B 仍只能在正科学结果后由具名 operator 决定。P17 已完成
 contract-only 工程闭包；真实多模型验收仍需至少两个 promoted capabilities。P18 已完成
-typed multi-omics 输入合同；真实 Broker/Registry 兼容、模型执行与科学验收仍 pending。阶段 scope、
+typed multi-omics 输入合同；真实 Broker/Registry 兼容、模型执行与科学验收仍 pending。
+P19 已完成受控 registration 工程合同，但 Git 外真实 fixture、新 output root、真实
+operator/science/policy 均未运行；factory registration 不是模型兼容、执行或 promotion。阶段 scope、
 资产清单和可复制授权句仍以
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)为准。
 
@@ -202,7 +211,16 @@ work-unit 执行状态机使用以下状态；总进度表可另用 `NOT_STARTED
 - P18 只编译 contract-only abstention；caller-declared adapter identity 未经 Broker 或
   Registry 解析，未运行 wrapper/model/science，registry 保持 5 releases / 0 native /
   0 promoted，science `NOT_RUN`、policy `NO_NEW_DECISION`；
-- P19 contract-only 是当前持续本地授权下的下一 eligible 本地 gate；开始前须从 P18
+- Phase 19 已从 P18 docs-closure actual SHA
+  `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be` 开始，在
+  `codex/p19-controlled-pack-factory` 完成 receipt→candidate→review→validation→decision→
+  registration、explicit store/index、v1-readable/v2-write index、read-only projection 与
+  fail-closed commit 工程；completion code SHA/tree 是 `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` /
+  `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`；
+- P19 未运行 Git 外真实 fixture、新 output root、真实 operator、science 或 product policy，
+  也未训练或生成 checkpoint/evidence/promotion；P7 species 均为 routing-only，exact taxon
+  只由 manifest 与 reviewer confirmation 绑定；
+- P20 contract-only 是当前持续本地授权下的下一 eligible 本地 gate；开始前须从 P19
   docs-closure 后的 actual Git SHA 和现场动态保护清单重新核对；
 - P14R/P14B、P15R/P15B 与 P16R/P16B 均保持各自的 exact external/operator 授权门，一个外部门
   不阻塞无依赖的 eligible 本地 E work unit。
@@ -253,8 +271,8 @@ flowchart TD
 | P16B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | 仅在正科学结果后由具名 operator 决定 |
 | P17 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | deterministic Virtual Experiment DAG/Brain 与 fail-closed abstain；completion `16636f1b...`；真实多模型验收 pending |
 | P18 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | typed multi-omics input、exact join/missingness/alignment 与 immutable runtime snapshots；completion `626c71ff...`；真实模型验收 pending |
-| P19 | `ELIGIBLE — CONTRACT_ONLY / NOT_COMPLETE` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | 下一本地 gate：receipt 到 RegisteredPack，不训练 |
-| P20 | `NOT_STARTED` | `CONTRACT_ONLY` | `NOT_APPLICABLE` | training contracts 和 tiny dry-run |
+| P19 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | controlled receipt→RegisteredPack；completion `42eabe63...`；real external fixture/operator 未运行 |
+| P20 | `ELIGIBLE — CONTRACT_ONLY / NOT_COMPLETE` | `CONTRACT_ONLY` | `NOT_APPLICABLE` | 下一本地 gate：training contracts 和 tiny dry-run |
 | P21A | `NOT_STARTED` | `SYSTEM_ONLY` | `NOT_APPLICABLE` | benchmark/evidence system |
 | P21B | `NOT_STARTED` | `NOT_RUN` | `NOT_APPLICABLE` | per-candidate run-only evidence |
 | P21C | `NOT_STARTED` | `READ_ONLY` | `NOT_RUN` | per-scope operator-only policy |
@@ -918,7 +936,7 @@ Golden/GEM/Norman science、evidence、promotion、push、release 或 deploy；s
 
 ### Phase 19 — 受控 Pack Factory
 
-**状态：** `ELIGIBLE — CONTRACT_ONLY / NOT_COMPLETE`
+**状态：** `P19_CONTRACT_COMPLETE_REAL_EXTERNAL_FIXTURE_OPERATOR_SCIENCE_POLICY_NOT_RUN`
 
 **唯一闭环：**
 
@@ -933,38 +951,58 @@ upload receipt
 
 **交付物**
 
-- [ ] receipt immutable raw-bytes identity；
-- [ ] taxon、assembly、cell identity、modality、namespace、value semantics、
+- [x] receipt immutable raw-bytes identity；
+- [x] taxon、assembly、cell identity、modality、namespace、value semantics、
   condition/control、unit、split 和 leakage group 显式确认；
-- [ ] inferred metadata/mapping 只作为候选；
-- [ ] mapping version/hash 和未映射、重复、顺序报告；
-- [ ] 完整 validation report；
-- [ ] named operator decision 绑定 exact candidate fingerprint；
-- [ ] upload、candidate、validation、decision、RegisteredPack 和 supersede 分层；
-- [ ] 本地 operator CLI/library；
-- [ ] 公共 API 只读投影；
-- [ ] 经精确授权的 Git 外 tiny fixture 插件性证明。
+- [x] inferred metadata/mapping 只作为候选；
+- [x] mapping version/hash 和未映射、重复、out-of-domain、顺序报告；
+- [x] 完整 validation report，包含 `taxon_review_binding` 且 warning 不当 pass；
+- [x] named registration-only operator decision 绑定 exact candidate/review/report fingerprints；
+- [x] upload、candidate、review、validation、decision、RegisteredPack 和 supersede 分层；
+- [x] 本地 operator CLI/library，显式 absolute index 与由 `PackFactoryStore.create()` write-new 初始化、exact marker 验证通过的 store；
+- [x] 公共 API/UI 只读、root-free，并 redacted reviewer/operator raw ID、rationale 与 reason；
+- [ ] 经精确授权的 Git 外 tiny fixture 插件性证明（`NOT_RUN`，无 exact asset/output root 授权）。
 
 **验收**
 
-- [ ] 任一关键 metadata/mapping 未确认时不能 register；
-- [ ] 原始上传 bytes 不变；
-- [ ] 相同输入和确认内容得到相同 candidate/Pack fingerprint；
-- [ ] 源 bytes、metadata、mapping 或 decision 改变得到新 identity；
-- [ ] traversal、symlink、坏 hash、错 taxon/assembly、未知字段和重复 key 拒绝；
-- [ ] UI/API 区分 receipt、candidate、RegisteredPack、compatible 和 executable；
-- [ ] fixture 不被写成科学证据。
+- [x] 任一关键 metadata/mapping 未确认时不能 register；
+- [x] 原始上传 bytes 不变，且必须是 Pack 实际 data asset；
+- [x] 相同输入和确认内容得到相同 candidate/Pack fingerprint；
+- [x] 源 bytes、metadata、mapping 或 decision 改变得到新 identity 或冲突失败；
+- [x] traversal、symlink、坏 hash、taxon review drift、未知字段和重复 key 拒绝；
+- [x] P7 species 只作 routing hint；coarse bacteria 不推断 exact taxon；
+- [x] index v2 兼容读 v1，旧 path-only register 退役；pending commit 对 consumer fail closed；
+- [x] UI/API 区分 receipt、candidate、factory-registered、model-compatible 和 executable；
+- [x] synthetic fixture 不被写成科学证据，真实外置 fixture 明确 `NOT_RUN`。
 
 **禁止**
 
-- [ ] 确认没有训练、checkpoint、model card、benchmark、evidence 或 promotion；
-- [ ] 确认没有自动 normalization、补零、去重、重排、随机 split 或同源转换。
+- [x] 确认没有训练、checkpoint、model card、benchmark、evidence 或 promotion；
+- [x] 确认没有自动 normalization、补零、去重、重排、随机 split 或 identifier conversion。
+
+P19 从 P18 docs-closure
+`871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be` 开始，在
+`42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5`（tree
+`b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`）完成。Focused `23 passed / 1 skipped`；combined
+focused+adjacent `108 passed / 1 skipped`；safe gate `1,554/49/387`；legacy
+`1,143/58/105`。当前合同把 Pack index
+write 到 store registration append 之间视为 pending；consumer 必须验证 store 中完整 chain，
+缺失或不一致时 fail closed，双向一致后才 committed。`vc.pack-index.v2` 写入 factory
+registration/store provenance，同时继续只读兼容 v1 legacy entries；v1 不会被追认为
+factory-approved。
+
+Public `GET /api/pack-factory` 无写 route，删除 local roots、reviewer/operator raw IDs、
+rationale 与 reason，
+并固定 `model_compatible=null`、`executable=false`、science/promotion false。完整边界见
+[ADR-0016](ADR-0016-controlled-pack-factory.md)、
+[runbook](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md) 与
+[P19 completion report](../reports/phase19/PHASE19_COMPLETION.md)。
 
 ---
 
 ### Phase 20 — Virtual Cell Training Pipeline
 
-**状态：** `NOT_STARTED`
+**状态：** `ELIGIBLE — CONTRACT_ONLY / NOT_COMPLETE`
 
 **唯一闭环：**
 
@@ -1476,8 +1514,8 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | P16B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | — | unchanged | 仅在正科学结果与具名 operator 决定后可运行 |
 | P17 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | `ff525a0611901df422161a7143ebfe9d1e051008` | `16636f1b2c36e0a0fabb782a662b5b3b934891e0` | tree `321a59ee...`; report `reports/phase17/PHASE17_COMPLETION.md`; wheel `1,118,410` bytes / `bd3752b90a6d...` / `366` entries; real multi-model acceptance pending |
 | P18 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | `f253664239e4b1c9665301cf1bdf4e117a3e9c31` | `626c71ffd1ce18a5adc200f6a6e376e57b269beb` | tree `2b570398...`; report `reports/phase18/PHASE18_COMPLETION.md`; wheel `1,132,811` bytes / `015724a90656...` / `367` entries; real multi-omics model acceptance pending |
-| P19 | `ELIGIBLE — CONTRACT_ONLY / NOT_COMPLETE` | `N/A` | `N/A` | P18 docs-closure 后从 Git history 读取 | — | next local gate；controlled Pack factory |
-| P20 | `NOT_STARTED` | `CONTRACT_ONLY` | `N/A` | — | — | — |
+| P19 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be` | `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` | tree `b4bd6383...`; report `reports/phase19/PHASE19_COMPLETION.md`; real external fixture/output root/operator/science/policy not run |
+| P20 | `ELIGIBLE — CONTRACT_ONLY / NOT_COMPLETE` | `CONTRACT_ONLY` | `N/A` | P19 docs-closure 后从 Git history 读取 | — | next local gate；training contract only |
 | P21A | `NOT_STARTED` | `SYSTEM_ONLY` | `N/A` | — | — | — |
 | P21B | `NOT_STARTED` | `NOT_RUN` | `N/A` | — | unchanged | — |
 | P21C | `NOT_STARTED` | `READ_ONLY` | `NOT_RUN` | — | unchanged | — |
@@ -1607,8 +1645,15 @@ P18 已从 P17 docs-closure `f253664239e4b1c9665301cf1bdf4e117a3e9c31`
 输入工程收口。真实 Broker/Registry/model/science 未运行，science `NOT_RUN`、policy
 `NO_NEW_DECISION`，真实 multi-omics model acceptance 仍 pending。
 
-持续本地授权下的下一 eligible gate 是 P19 contract-only；其实际 starting SHA 必须在
-P18 docs-closure 后从 Git history 读取。外置资产、
+P19 已从 P18 docs-closure
+`871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be` 开始完成 controlled Pack Factory
+contract-only 工程。Final code SHA/tree 已冻结为
+`42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` /
+`b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`；外置 real tiny
+fixture、新 output root、真实 operator/science/policy 未运行。
+
+持续本地授权下的下一 eligible gate 是 P20 contract-only；其实际 starting SHA 必须在
+P19 docs-closure 后从 Git history 读取。外置资产、
 真实模型/训练、network、push、
 发布、部署和 operator promotion 仍不在授权范围；这些外部门不阻塞无依赖的 eligible
 本地工程 gate。

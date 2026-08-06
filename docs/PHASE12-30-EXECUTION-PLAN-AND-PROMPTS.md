@@ -46,7 +46,13 @@
 > `codex/p18-multiomics-cell-state`；状态
 > `P18_CONTRACT_COMPLETE_REAL_MULTIOMICS_MODEL_ACCEPTANCE_PENDING`
 >
-> 当前下一本地 gate：`P19 CONTRACT_ONLY`；状态 `ELIGIBLE / NOT_COMPLETE`；
+> 已完成 work unit：`P19 — Controlled Pack Factory contract`；starting SHA
+> `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be`；completion code SHA
+> `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5`；tree
+> `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`；branch `codex/p19-controlled-pack-factory`；状态
+> `P19_CONTRACT_COMPLETE_REAL_EXTERNAL_FIXTURE_OPERATOR_SCIENCE_POLICY_NOT_RUN`
+>
+> 当前下一本地 gate：`P20 CONTRACT_ONLY`；状态 `ELIGIBLE / NOT_COMPLETE`；
 > P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
@@ -55,11 +61,10 @@
 >
 > 已记录部署锚点：`http://10.102.106.53:18080`
 >
-> 当前状态核对日期：2026-08-06
+> 当前状态核对日期：2026-08-07
 >
-> P18 completion identity：实现 commit/tree、post-commit 验证与工程闭包记录共同
-> 证明；本次文档提交不在本文中
-> 预测或自引用
+> P19 completion identity 已冻结；exact code/tree、post-commit validation 与 packaging
+> evidence 见 [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md)
 
 本文把 “An agentic foundation platform for programmable virtual cells across
 species and biological systems.” 愿景转换为可逐阶段授权、实施、验证和停止的
@@ -82,7 +87,7 @@ species and biological systems.” 愿景转换为可逐阶段授权、实施、
 exact-scope 的 Biological World Model research capability。Phase 编号是路线标签，
 不是产品版本、API 协议、schema 或模型版本。
 
-## 2. Phase 11 产品基线、已完成 P12–P18 与当前 P19 contract-only gate
+## 2. Phase 11 产品基线、已完成 P12–P19 与当前 P20 contract-only gate
 
 ### 2.1 当前身份
 
@@ -116,7 +121,10 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | P18 starting SHA | `f253664239e4b1c9665301cf1bdf4e117a3e9c31` |
 | P18 completion code SHA / tree | `626c71ffd1ce18a5adc200f6a6e376e57b269beb` / `2b570398caff6cf955d789c3cb4a7a77dc13a082` |
 | P18 完成分支 | `codex/p18-multiomics-cell-state` |
-| 当前 work-unit 状态 | P17 `CONTRACT_COMPLETE / REAL_MULTI_MODEL_ACCEPTANCE_PENDING`；P18 `CONTRACT_COMPLETE / REAL_MULTIOMICS_MODEL_ACCEPTANCE_PENDING`；P19 `CONTRACT_ONLY ELIGIBLE / NOT_COMPLETE`；P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN` |
+| P19 starting SHA | `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be`（P18 docs-closure） |
+| P19 completion code SHA / tree | `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` / `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f` |
+| P19 完成分支 | `codex/p19-controlled-pack-factory` |
+| 当前 work-unit 状态 | P19 `CONTRACT_COMPLETE / REAL_EXTERNAL_FIXTURE_OPERATOR_SCIENCE_POLICY_NOT_RUN`；P20 `CONTRACT_ONLY ELIGIBLE / NOT_COMPLETE`；P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN` |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -158,7 +166,8 @@ P16R  exact checkpoint/data/assets 与真实科学运行（AUTHORIZATION_REQUIRE
 P16B  positive science 后的 operator decision（NOT_RUN）
 P17   Virtual Cell Brain deterministic contract（COMPLETE at 16636f1b...；real acceptance pending）
 P18   typed multi-omics contract（COMPLETE at 626c71ff...；real model acceptance pending）
-P19   controlled Pack Factory contract-only 本地 gate（ELIGIBLE / NOT_COMPLETE）
+P19   controlled Pack Factory contract（COMPLETE；real fixture/operator/science/policy NOT_RUN）
+P20   Training Pipeline contract-only 本地 gate（ELIGIBLE / NOT_COMPLETE）
 ```
 
 Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
@@ -203,7 +212,8 @@ Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
 > contract-only 边界收口。P17 已完成 direct-v2 Pack-aware deterministic DAG/Brain
 > 合同；当前 registry 为 5 releases / 0 native / 0 promoted，因此所有真实 P17 direct-v2 请求均
 > abstain，真实多模型验收仍 pending。P18 已完成 typed multi-omics 输入合同，但没有
-> Broker/Registry/model/science 执行。下一本地 gate 是尚未完成的 P19 contract-only。
+> Broker/Registry/model/science 执行。P19 已完成受控 Pack Factory 工程合同，但真实
+> fixture/output root/operator/science/policy 均未运行；下一本地 gate 是 P20 contract-only。
 
 ### 2.4 本次编号纠正
 
@@ -1168,7 +1178,10 @@ Multi-Omics Cell State Representation。
 - optional modality 缺失只有在 model card/adapter 明确支持时才可执行；
 - real benchmark 未过门时只可声称 multi-omics 数据/输入合同可用。
 
-### 可复制授权提示词
+### 历史执行前授权模板（非当前 authority）
+
+以下文本只保留 P19 启动前的 replay/provenance 形状。P19 已在
+`codex/p19-controlled-pack-factory` 完成；不得复制该旧模板重新启动 P19，当前 gate 是 P20。
 
 ```text
 授权以 `<Phase 17 完成 SHA>` 作为 Phase 18（Multi-omics Virtual Cell）
@@ -1190,8 +1203,11 @@ Phase 20 training、Marketplace、cell interaction 或 community。本地 commit
 
 ## 13. Phase 19：受控 Pack Factory
 
-**当前 gate：** `CONTRACT_ONLY ELIGIBLE / NOT_COMPLETE`。actual starting SHA 必须在
-P18 docs-closure 后从 Git history 读取；P18 code SHA 不能代替该 docs-closure identity。
+**当前 gate：** `CONTRACT_COMPLETE / REAL_EXTERNAL_FIXTURE_OPERATOR_SCIENCE_POLICY_NOT_RUN`。
+Actual starting SHA 是 P18 docs-closure
+`871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be`；completion code SHA/tree 是
+`42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` /
+`b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`。
 
 ### 目标
 
@@ -1237,6 +1253,32 @@ scientific evidence 或 product promotion。它只证明新数据能在不修改
 - fixture 只证明 authoring/validation 插件性，不构成真实 dataset 或科学能力；
 - receipt、candidate、RegisteredPack、model-compatible 和 executable 在 UI/API 中分开。
 
+### P19 completion snapshot
+
+P19 已在 contract-only 边界完成本地 library/CLI 最小闭环、content-addressed append-only
+store、`vc.pack-index.v2`、只读 `GET /api/pack-factory` 与五层 UI projection。旧
+`PackIndex.register(pack_root)`/`praxis-vc pack register /path` path-only 写入口已退役；
+受控 CLI 现在必须显式提供 upload directory、Pack root、candidate/review/validation/
+decision JSON、absolute index 和由 `PackFactoryStore.create()` write-new 初始化且 exact-marker
+验证通过的 store。Marker bytes 为 `{"schema_version":"vc.pack-factory-store.v1"}\n`；普通目录
+不能被 `open()` 当作 store。
+
+Index v2 兼容读取 v1；legacy entry 保持 readable，但 factory provenance 为 null，不能
+追认为 P19-approved。Index write 到 store registration append 之间按 pending 处理；consumer
+必须回查完整 store chain，registration 缺失或不一致时 fail closed，双向一致后才 committed。
+
+P7 species 全部只作 routing hint。Exact taxon 只绑定 candidate manifest 与 reviewer-confirmed
+claim；coarse bacteria receipt 不推断 *E. coli* 或其他 exact taxon。公共 catalog 不返回
+local root、原始 operator/reviewer ID、rationale/reason 等 free text，且没有 HTTP write route。
+
+计划中的 Git 外 real tiny fixture 与 exact new write-only output root 均 `NOT_RUN`；真实
+operator、science 也 `NOT_RUN`，product policy `NO_NEW_DECISION`。P19 未训练、创建
+checkpoint/model card、读取 test/external 结果、生成 benchmark/evidence 或 promotion。
+最终 focused `23 passed / 1 skipped`，combined focused+adjacent `108 passed / 1 skipped`，safe
+gate `1,554/49/387`，legacy `1,143/58/105`；exact packaging identity 见 [ADR-0016](ADR-0016-controlled-pack-factory.md)、
+[runbook](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md) 和
+[completion report](../reports/phase19/PHASE19_COMPLETION.md)。
+
 ### 可复制授权提示词
 
 ```text
@@ -1261,6 +1303,10 @@ runbook 和测试。不得让 inferred metadata/mapping 静默成为真相，不
 ```
 
 ## 14. Phase 20：Virtual Cell Training Pipeline
+
+**当前 gate：** `CONTRACT_ONLY ELIGIBLE / NOT_COMPLETE`。Actual starting SHA 必须从 P19
+docs-closure 后的 Git history 读取；不得把 P19 completion code identity
+`42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` 误作未来 docs-closure starting SHA。
 
 ### 目标
 
@@ -2273,8 +2319,15 @@ completion code SHA `626c71ffd1ce18a5adc200f6a6e376e57b269beb` 和 tree
 输入工程。science `NOT_RUN`、policy `NO_NEW_DECISION`，真实 Broker/Registry/model
 acceptance 仍 pending。
 
-持续本地授权下的下一 eligible gate 是 P19 contract-only；actual starting SHA 必须在
-P18 docs-closure 后从 Git history 读取并重新生成动态保护清单。
+P19 已从 P18 docs-closure
+`871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be` 开始完成 controlled Pack Factory
+contract-only 工程；completion code SHA/tree 已冻结为
+`42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` /
+`b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`。Git 外真实 fixture、新 output root、真实 operator/science/policy 均未运行；
+没有 training、checkpoint、evidence 或 promotion。
+
+持续本地授权下的下一 eligible gate 是 P20 contract-only；actual starting SHA 必须在
+P19 docs-closure 后从 Git history 读取并重新生成动态保护清单。
 
 当前持续本地授权不覆盖 P14R、P14B、P15R、P15B、P16R 或 P16B。没有逐项 exact
 assets/output root/run window 授权时，不得读取或运行真实资产、产生科学

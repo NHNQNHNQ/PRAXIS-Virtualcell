@@ -1,16 +1,87 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P18 分支 `codex/p18-multiomics-cell-state`；唯一起始 SHA
-> `f253664239e4b1c9665301cf1bdf4e117a3e9c31`
+> 当前文档基线：P19 分支 `codex/p19-controlled-pack-factory`；唯一起始 SHA
+> `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：`P18_CONTRACT_COMPLETE_REAL_MULTIOMICS_MODEL_ACCEPTANCE_PENDING`；
-> completion code SHA `626c71ffd1ce18a5adc200f6a6e376e57b269beb`；tree
-> `2b570398caff6cf955d789c3cb4a7a77dc13a082`。下述 P4.3–P17 和 CI 数字仍只绑定
-> 各自 exact SHA/日期；P18 本地工程结果不构成真实 multi-omics model acceptance、
-> 科学验证、operator policy、发布或远程证据。
+> 状态：`P19_CONTRACT_COMPLETE_REAL_EXTERNAL_FIXTURE_OPERATOR_SCIENCE_POLICY_NOT_RUN`；
+> completion code SHA `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5`；tree
+> `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`；source date epoch `1786034362`。
+> 下述 P4.3–P18 和 CI 数字仍只绑定各自 exact SHA/日期；P19 本地工程结果不构成真实
+> external ingestion、operator acceptance、科学验证、product policy、发布或远程证据。
+
+## Phase 19 `CONTRACT_COMPLETE` 本地证据
+
+P19 新增 controlled receipt→candidate→review→validation→decision→registration chain、
+content-addressed append-only store、v1-readable/v2-writing Pack index、显式 local CLI
+dependencies 和 root-free、reviewer/operator ID/rationale/reason-redacted
+`GET /api/pack-factory`。旧 path-only register 已退役；
+index 写入到 store registration append 之间的 pending 状态对所有 consumer fail closed。
+
+P7 species 全部只作 routing hint；exact taxon 由 candidate manifest 与 reviewer confirmation
+绑定。Coarse bacteria receipt 不推断 *E. coli*。Factory registration 固定
+`model_compatible=null`、`executable=false`，不会创建 training/checkpoint/evidence/promotion。
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_pack_factory.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -ra \
+  praxis_virtualcell/tests/test_pack_factory.py \
+  praxis_virtualcell/tests/test_pack_product.py \
+  praxis_virtualcell/tests/test_data_packs.py \
+  praxis_virtualcell/tests/test_virtual_experiment.py
+
+python -m pytest -o addopts='' -q praxis_virtualcell/tests \
+  --ignore=praxis_virtualcell/tests/test_mudata_alignment.py \
+  -k 'not golden and not gem and not norman'
+
+python -m ruff check \
+  praxis_virtualcell/pack_factory.py \
+  praxis_virtualcell/pack_product.py \
+  praxis_virtualcell/cli.py \
+  praxis_vc_api/main.py \
+  praxis_vc_api/services/runtime_service.py \
+  praxis_virtualcell/tests/test_pack_factory.py
+
+python -m ruff format --check \
+  praxis_virtualcell/pack_factory.py \
+  praxis_virtualcell/tests/test_pack_factory.py
+
+python -m py_compile \
+  praxis_virtualcell/pack_factory.py \
+  praxis_virtualcell/pack_product.py \
+  praxis_virtualcell/cli.py
+
+npm --prefix praxis_vc_react run typecheck
+npm --prefix praxis_vc_react run lint
+npm --prefix praxis_vc_react run build
+git diff --check
+~~~
+
+| Gate | 结果 |
+|---|---|
+| P19 focused | `23 passed / 1 skipped` |
+| combined focused + adjacent four-file gate | `108 passed / 1 skipped` |
+| safe Python gate | `1,554 passed / 49 skipped / 387 deselected` |
+| legacy gate | `1,143 passed / 58 skipped / 105 deselected` |
+| frontend typecheck/lint/build | PASS |
+| Ruff check / P19 changed-file format / `py_compile` / diff | PASS |
+| reproducible packaging / ZIP integrity | PASS；wheel `1,154,421` bytes；SHA-256 `1231f948e6f519b9cea66e5ab0e7ccb41b3b7f5a7aa73efdd7dbaf885bfa969f`；`368` entries |
+
+Focused/combined 的一个 skip 是本地未安装 `mudata` 的可选 MuData 正向路径；没有联网补装，
+也没有记为 pass。两个 exact-code offline clean-archive wheel byte-identical，React `14`、tests
+`0`、AppleDouble `0`；source/wheel `pack_factory.py` SHA-256 均为
+`06fb5267c47e8fcf8bcc596e18c9d12e3cb429b0670b662eb0b2ae448b560508`。这不另行声称
+dependency-closure/clean-install proof。
+
+Git 外 real tiny fixture、exact new write-only output root、真实 operator、science 与 policy
+均未运行；test-controlled temporary fixtures 仅证明工程合同。完整边界见
+[ADR-0016](ADR-0016-controlled-pack-factory.md)、
+[P19 runbook](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md) 和
+[P19 completion report](../reports/phase19/PHASE19_COMPLETION.md)。
 
 ## Phase 18 `CONTRACT_COMPLETE` 本地证据
 

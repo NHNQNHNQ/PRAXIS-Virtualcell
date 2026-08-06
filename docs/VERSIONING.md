@@ -1,11 +1,11 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `P18_CONTRACT_COMPLETE_REAL_MULTIOMICS_MODEL_ACCEPTANCE_PENDING — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
+> Status: `P19_CONTRACT_COMPLETE_REAL_EXTERNAL_FIXTURE_OPERATOR_SCIENCE_POLICY_NOT_RUN — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
-> Local baseline: branch `codex/p18-multiomics-cell-state`; P18 starting SHA
-> `f253664239e4b1c9665301cf1bdf4e117a3e9c31`; code SHA
-> `626c71ffd1ce18a5adc200f6a6e376e57b269beb`; tree
-> `2b570398caff6cf955d789c3cb4a7a77dc13a082`
+> Local baseline: branch `codex/p19-controlled-pack-factory`; P19 starting SHA
+> `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be`; completion code SHA/tree
+> `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` /
+> `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -24,6 +24,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P16E K562 Golden delta contract work unit | start `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`; code `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`; tree `098cd563e3d865e080a0d121727b987e2d40ed18` | immutable local Git history plus P16E closure evidence | contract engineering complete and P17 contract-only eligible; P16R authorization required/not run; P16B not run; no real checkpoint/data/science, policy, release or version bump; local wheel `1,108,165` bytes / `d333180996a4...` / `365` entries / `14` React entries |
 | P17 Virtual Cell Brain work unit | start `ff525a0611901df422161a7143ebfe9d1e051008`; code `16636f1b2c36e0a0fabb782a662b5b3b934891e0`; tree `321a59eed44c45bf2bb8798714352b3303b92e58` | immutable local Git history plus `reports/phase17/PHASE17_COMPLETION.md` | deterministic contract complete and P18 contract-only eligible; real multi-model acceptance pending because registry is 5 releases / 0 native / 0 promoted; science not run, no new policy/release/version bump; local complete wheel `1,118,410` bytes / `bd3752b90a6d...` / `366` entries / `14` React entries |
 | P18 multi-omics model-input work unit | start `f253664239e4b1c9665301cf1bdf4e117a3e9c31`; code `626c71ffd1ce18a5adc200f6a6e376e57b269beb`; tree `2b570398caff6cf955d789c3cb4a7a77dc13a082` | immutable local Git history plus `reports/phase18/PHASE18_COMPLETION.md` | strict joint-input contract complete; real multi-omics model acceptance pending; registry unchanged at 5/0/0, science not run, no policy/release/version bump; local complete wheel `1,132,811` bytes / `015724a90656...` / `367` entries / `14` React entries |
+| P19 Controlled Pack Factory work unit | start `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be`; code `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5`; tree `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f` | immutable local Git history plus `reports/phase19/PHASE19_COMPLETION.md` | contract-only receipt→registration complete; v2 index reads v1, path-only register retired, public projection read-only; real external fixture/output root/operator/science/policy not run; no version/release bump; reproducible wheel `1,154,421` bytes / `1231f948e6f5...` / `368` entries |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -96,7 +97,9 @@ The repository historically mixed product release tags, package metadata, API/ru
 | Virtual Cell Brain context/decision | `vc.virtual-cell-brain-context.v1`, `vc.virtual-experiment-decision.v1` + canonical JSON SHA-256 | `virtual_experiment.py` | immutable request/Pack/model/release/capability/environment/adapter-contract/evidence/policy context and fail-closed verdict; P17 decision is always contract-only abstain |
 | candidate DAG review/compilation | `vc.candidate-virtual-experiment-dag.v1`, `vc.candidate-dag-review.v1`, `vc.virtual-experiment-compilation.v1` | `virtual_experiment.py` | candidate review has its own checksum but is excluded from authoritative DAG/Brain/decision fingerprint; LLM output cannot authorize execution or change verdict |
 | Pack product record/catalog | `vc.pack-record.v1`, `vc.pack-catalog.v1` with nested `vc.model-registry-catalog.v2` | `pack_product.py`, `/api/packs` | outer contract remains compatible; top-level `model_registry` and per-model `registry_releases` are path-redacted discovery projections, not per-request compatibility |
-| local Pack index | `vc.pack-index.v1` + Pack fingerprint | `pack_product.py`, `PRAXIS_VC_PACK_INDEX` | binds a local canonical root to one Pack ID/version/fingerprint; every use revalidates bytes and semantics |
+| local Pack index | `vc.pack-index.v2` write, compatible v1/v2 read + Pack/factory fingerprints | `pack_product.py`, `PRAXIS_VC_PACK_INDEX` | v2 binds exact factory registration/store provenance; legacy v1 remains readable with null factory provenance; every use revalidates bytes, semantics and committed store chain |
+| Controlled Pack Factory lifecycle/store | `vc.pack-candidate.v1`, `vc.pack-metadata-review.v1`, `vc.pack-validation-report.v1`, `vc.pack-operator-decision.v1`, `vc.factory-registered-pack.v1`, `vc.pack-supersession.v1` + canonical SHA-256; exact `.factory-store.json` bytes `{"schema_version":"vc.pack-factory-store.v1"}\n` | `pack_factory.py` | append-only receipt→registration identities in an explicitly initialized write-new store; named registration decision is not model policy, evidence, compatibility or execution |
+| Pack Factory public catalog | `vc.pack-factory-catalog.v1` | `pack_factory.py`, `GET /api/pack-factory` | root-free read-only lifecycle projection with reviewer/operator raw IDs, rationale and reason redacted; `write_api_enabled=false`, model compatibility not evaluated, execution false |
 | Pack compatibility surface | `vc.pack-compatibility-surface.v1` | `pack_product.py`, `/api/packs/compatibility` | public path-redacted projection of v1/v2 execution plans; planning is read-only and is not execution evidence |
 | job execution identity | `vc.job-execution-identity.v1`, `.v2`, or `.v3` + canonical JSON SHA-256 | `io/job_store.py` | v1 remains parseable; v2 locks request/report/outcome and Pack/release/component/evidence/policy state; v3 additionally binds Brain/DAG and contract-only report semantics; companion-backed load recomputes identity without rewriting historical bytes |
 | public data catalog | `vc.data-catalog.v1` | `praxis_virtualcell/catalogs/data_catalog.yaml`, `praxis_vc_api/services/data_portal_service.py` | strict public metadata plus source terms and external-file size/hash allowlist; catalog/file availability does not imply Pack/model/scientific status |
@@ -188,6 +191,26 @@ policy is `NO_NEW_DECISION`, and there was no execution, release, push or deploy
 [P18 runbook](runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md), and the
 [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md).
 
+P19 adds the controlled Pack Factory schemas, `vc.pack-index.v2` and backward-compatible read-only
+`GET /api/pack-factory` inside the same unpublished `1.6.0` candidate. Index v2 remains able to read
+v1; legacy v1 entries have null factory provenance and are not retroactively approved. The old
+path-only `PackIndex.register(pack_root)` write is intentionally retired. Registration requires an
+explicit store and absolute index, and consumers treat the index→store interval as pending/fail
+closed until the complete registration chain is committed.
+
+P7 species values remain routing-only; exact taxon is the manifest identity separately confirmed
+by the reviewer, so a coarse bacteria receipt does not imply *E. coli*. The public projection is
+root-free and redacts raw operator/reviewer IDs, rationale and reason. P19 does not change product SemVer,
+API/runtime protocol, model registry, evidence or promotion policy. Exact completion code/tree are
+`42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` /
+`b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`; two offline clean-archive wheels are byte-identical at
+`1,154,421` bytes / `1231f948e6f519b9cea66e5ab0e7ccb41b3b7f5a7aa73efdd7dbaf885bfa969f` /
+`368` entries / `14` React entries, with no tests or AppleDouble. Real external
+fixture/output root/operator/science/policy are not run.
+See [ADR-0016](ADR-0016-controlled-pack-factory.md), the
+[P19 runbook](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md), and the
+[P19 completion report](../reports/phase19/PHASE19_COMPLETION.md).
+
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
 ## Namespace contract
@@ -219,7 +242,8 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | environment snapshot schema + fingerprint | explicit `vc.environment.v1` or `vc.environment.v2` plus canonical JSON SHA-256 | import-module/resource/runtime-adapter observation or v2 identity binding changes | import-module names must equal PEP 503 distribution names, or a missing resource is available |
 | compatibility report schema + fingerprint | explicit `vc.compatibility-report.v1` or `vc.compatibility-report.v2` plus canonical JSON SHA-256 | compatibility checks, reason semantics, identity inclusion/exclusion or bound refs change incompatibly | display-only model version/path affects the canonical v2 binding, or computed/evidence/policy states are interchangeable |
 | execution step/plan schema + plan ID | explicit `vc.execution-plan.v1`, or `vc.execution-step.v2` and `vc.execution-plan.v2` with content-derived `plan_*` | canonical step/report/wrapper/agent binding or plan identity semantics change incompatibly | plan creation proves prediction correctness, scientific validation or promotion |
-| Pack product record/catalog/index schemas | explicit `vc.pack-record.v1`, `vc.pack-catalog.v1`, `vc.pack-index.v1`; catalog may nest `vc.model-registry-catalog.v2` | incompatible public metadata, index-field, identity binding or registry projection semantics | discovery/registration proves per-request compatibility or scientific validity |
+| Pack product record/catalog/index schemas | explicit `vc.pack-record.v1`, `vc.pack-catalog.v1`, v1-readable/`vc.pack-index.v2`-written index; catalog may nest `vc.model-registry-catalog.v2` | incompatible public metadata, index-field, identity binding or registry projection semantics | legacy readability or registration proves per-request compatibility or scientific validity |
+| Pack Factory lifecycle/store/catalog schemas + fingerprints | explicit `vc.pack-candidate.v1`, `vc.pack-metadata-review.v1`, `vc.pack-validation-report.v1`, `vc.pack-operator-decision.v1`, `vc.factory-registered-pack.v1`, `vc.pack-supersession.v1`, exact `.factory-store.json` marker bytes `{"schema_version":"vc.pack-factory-store.v1"}\n` and `vc.pack-factory-catalog.v1` plus canonical JSON SHA-256 | receipt/candidate/review/validation/decision/registration/supersession identity, initialized-store ownership or public redaction semantics change incompatibly | an arbitrary directory is a store, or factory registration is model compatibility, execution, evidence, scientific validation or product policy |
 | Pack compatibility surface schema | explicit `vc.pack-compatibility-surface.v1` | incompatible path-redaction or public execution-plan projection | a compatibility response proves successful execution |
 | job execution identity schema + fingerprint | explicit `vc.job-execution-identity.v1`, `vc.job-execution-identity.v2` or `vc.job-execution-identity.v3` and content identity | incompatible request/report/outcome/Pack/release/component/evidence/policy identity-lock semantics; v3 also binds Brain/DAG and companion-backed contract-only report semantics | read-only loading may rewrite old bytes, schema downgrade may bypass current bindings, or immutable provenance proves model quality/validation/promotion |
 | public data catalog schema | explicit `vc.data-catalog.v1` | incompatible metadata, source/terms, identity or file-verification semantics | file availability, Pack validity, model compatibility or scientific validity |
@@ -239,7 +263,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented history through the current P18 contract-complete bytes:
+Implemented history through the current P19 contract-complete bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -308,6 +332,19 @@ Implemented history through the current P18 contract-complete bytes:
     release, tag, push or deploy is created. Two clean offline archive wheels are byte-identical at
     `1,132,811` bytes / `015724a90656706c0441e4f4f873ee51f8db87dfaae9de35a3e841e7c70b2b7c` /
     `367` entries / `14` React entries, with no tests or AppleDouble.
+25. P19 starts at P18 docs-closure `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be`
+    and adds the controlled receipt/candidate/review/validation/decision/registration chain,
+    append-only store with exact `.factory-store.json`
+    `{"schema_version":"vc.pack-factory-store.v1"}\n` initialization marker,
+    v1-compatible/v2-writing Pack index, explicit local CLI dependencies and
+    root-free read-only catalog/UI inside the same unpublished candidate. The former path-only
+    registration bypass is rejected, and incomplete index/store commit remains unconsumable.
+    P7 species remains routing-only; no exact taxon is inferred. Final code/tree are
+    `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` /
+    `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`; reproducible wheel is `1,154,421` bytes /
+    `1231f948e6f5...` / `368` entries. No product/API/runtime version bump, release, tag, training,
+    checkpoint, evidence, push or deploy is created; network, external fixture/output root and real
+    operator/science/policy remain not run.
 
 ## Release invariants
 
@@ -371,7 +408,11 @@ The equality above deliberately excludes `vc.msg.v1`, `vc.request.v2`, all
 `vc.compatibility-report.v2`, `vc.execution-plan.v1`,
 `vc.execution-step.v2`, `vc.execution-plan.v2`, the other `vc.*.v1`
 domain/bundle schemas, `vc.pack-record.v1`, `vc.pack-catalog.v1`,
-`vc.pack-index.v1`, `vc.pack-compatibility-surface.v1`,
+`vc.pack-index.v1`, `vc.pack-index.v2`, `vc.pack-candidate.v1`,
+`vc.pack-metadata-review.v1`, `vc.pack-validation-report.v1`,
+`vc.pack-operator-decision.v1`, `vc.factory-registered-pack.v1`,
+`vc.pack-supersession.v1`, `vc.pack-factory-store.v1`, `vc.pack-factory-catalog.v1`,
+`vc.pack-compatibility-surface.v1`,
 `vc.job-execution-identity.v1`, `vc.job-execution-identity.v2`,
 `vc.data-catalog.v1`, `vc.upload-receipt.v1`,
 `vc.golden-norman.v1`, `vc.golden-baseline.v1`,

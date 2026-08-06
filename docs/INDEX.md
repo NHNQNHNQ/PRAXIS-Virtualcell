@@ -1,8 +1,8 @@
 # PRAXIS-VirtualCell Documentation Index
 
-> Audited: 2026-08-06
+> Audited: 2026-08-07
 >
-> Status: `CURRENT_DOCUMENT_MAP — P18_CONTRACT_COMPLETE_REAL_MULTIOMICS_MODEL_ACCEPTANCE_PENDING`
+> Status: `CURRENT_DOCUMENT_MAP — P19_CONTRACT_COMPLETE_REAL_EXTERNAL_FIXTURE_OPERATOR_SCIENCE_POLICY_NOT_RUN`
 
 This is the navigation authority for the repository. It does not make every linked document current: each section explicitly distinguishes live truth, frozen evidence, active plans, drafts, and history.
 
@@ -11,8 +11,8 @@ This is the navigation authority for the repository. It does not make every link
 When documents disagree, use this order:
 
 1. Exact local bytes, `git rev-parse` identity, immutable artifacts and the current work-unit completion report.
-2. [README](../README.md), the [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
-3. The latest completed phase ADR/runbook—P18 uses [ADR-0015](ADR-0015-multiomics-model-input.md) and the [Multi-omics Model Input runbook](runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md); P17 remains documented by [ADR-0014](ADR-0014-virtual-cell-brain.md) and the [Virtual Experiment DAG runbook](runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md)—for implemented contract and validation boundaries.
+2. [README](../README.md), the [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
+3. The latest completed phase ADR/runbook—P19 uses [ADR-0016](ADR-0016-controlled-pack-factory.md) and the [Controlled Pack Factory runbook](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md); P18 remains documented by [ADR-0015](ADR-0015-multiomics-model-input.md) and the [Multi-omics Model Input runbook](runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md)—for implemented contract and validation boundaries.
 4. [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) for frozen scientific capability and claim boundaries.
 5. [Three-Way Sync State](status/SYNC-STATE.md) only for its dated local/GitHub/`.53` observations; it is not fresh remote authorization.
 6. Dated plans, handoffs, findings, papers, release notes and [Project State 2026-07-18](status/PROJECT-STATE-2026-07-18.md) as historical evidence for their stated commit/date only.
@@ -36,13 +36,26 @@ P18 subsequently completed strict contract-only joint multi-omics input at code
 `2b570398caff6cf955d789c3cb4a7a77dc13a082`, starting from P17 docs-closure
 `f253664239e4b1c9665301cf1bdf4e117a3e9c31`. Real multi-omics model acceptance remains pending;
 there was no execution, science run, policy decision, release, push or deploy.
+P19 then completed a controlled, contract-only Pack Factory from P18 docs-closure
+`871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be` at code
+`42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` / tree
+`b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`. It adds explicit initialized factory store
+and Pack-index v2 targets, deterministic pending→committed registration provenance, v1-compatible
+index reads, P7 routing-only species proposals with reviewer-bound exact taxon confirmation, and a
+read-only, root-free public projection with reviewer/operator raw IDs, rationales and reasons
+redacted. No real external fixture, real output root, operator run, training, checkpoint, evidence,
+promotion, science run or policy decision occurred.
+P20 is contract-only eligible; its actual starting SHA must be read only after P19 docs closure.
 
 ## Current state
 
 | Document | Authority |
 |---|---|
-| [README](../README.md) | current product promise, P18 contract boundary and primary operator entry points |
-| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13–P18 boundary |
+| [README](../README.md) | current product promise, P19 contract boundary and primary operator entry points |
+| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13–P19 boundary |
+| [P19 Completion Report](../reports/phase19/PHASE19_COMPLETION.md) | exact P19 closure ledger, controlled store/index contract, validation evidence and all real-world non-runs |
+| [P19 Controlled Pack Factory ADR](ADR-0016-controlled-pack-factory.md) | explicit store/index ownership, deterministic lifecycle, species-review boundary and read-only public projection |
+| [P19 Controlled Pack Factory Runbook](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md) | local factory audit, tamper/fail-closed checks, safe migration and real-operation interpretation |
 | [P18 Completion Report](../reports/phase18/PHASE18_COMPLETION.md) | exact P18 code/tree, strict joint-input validation, reproducible wheel and real multi-omics non-claim |
 | [P18 Multi-omics Model Input ADR](ADR-0015-multiomics-model-input.md) | ordered modalities, exact joins/masks and Pack/view/adapter/matrix identity boundary |
 | [P18 Multi-omics Model Input Runbook](runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md) | contract audit, tamper/replay checks and real-model acceptance interpretation |
@@ -109,6 +122,7 @@ there was no execution, science run, policy decision, release, push or deploy.
 | [K562 Golden Delta Contract](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) | P16E local contract-only adapter, exact K562/P8 ordered prepared binding, P16R authorization prerequisites and default-registry isolation |
 | [Virtual Experiment DAG](runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md) | P17 deterministic DAG/Brain, candidate-only LLM boundary, v3 job identity and contract-only abstention audit |
 | [Multi-omics Model Input](runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md) | P18 ordered joint-input contract, exact observation/matrix identity and no-fabrication audit |
+| [Controlled Pack Factory](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md) | P19 explicit initialized store/index targets, deterministic pending→committed registration provenance, reviewer-bound taxon confirmation and read-only public audit |
 
 The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` files describe the older PRAXIS-2 classroom/deployment system, including `.40/.53` service topology. They are not VirtualCell current-user entry points.
 
@@ -136,8 +150,9 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [K562 Golden Delta Contract ADR](ADR-0013-virtualcell-k562-golden-delta-contract.md) | P16E exact K562/P8 scope, separated single/combination records, typed negative compatibility and prepared-bound delta output |
 | [Virtual Cell Brain ADR](ADR-0014-virtual-cell-brain.md) | P17 deterministic authoritative DAG/Brain/decision, plan-only integration, candidate isolation and fail-closed persistence |
 | [Multi-omics Model Input ADR](ADR-0015-multiomics-model-input.md) | P18 strict joint-input identities, real joins/masks, adapter ownership and contract-only abstention |
+| [Controlled Pack Factory ADR](ADR-0016-controlled-pack-factory.md) | P19 explicit initialized store/index ownership, deterministic immutable artifact lifecycle, reviewer-bound exact taxon and redacted read-only projection |
 | [Community Readiness Checklist](COMMUNITY-READINESS-CHECKLIST.md) | P10 model-free CommunityPack gates, two tiny microbial Packs, fail-closed planning and explicitly missing experimental validation |
-| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | historical P0–P16E implementation/status matrix; current P18 state is carried by this index and its completion report |
+| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | historical P0–P16E implementation/status matrix; current P19 state is carried by this index and its completion report |
 | [VirtualCellPack Multiomics Runbook](runbooks/VIRTUALCELLPACK-MULTIOMICS.md) | tiny RNA+protein fixture generation, hash binding, P5 tests and asset-update rules |
 | [VirtualCellPack Capability Runtime Runbook](runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md) | local model card/cache/Pack assembly, execution-plan audit and fail-closed reason handling |
 | [VirtualCellPack Data Portal Runbook](runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) | external public-file inventory, service configuration, upload quarantine and operator review boundary |
@@ -151,6 +166,7 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [K562 Golden Delta Contract Runbook](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) | P16E local manifest/contract audit, fail-closed tests, P16R asset/run prerequisites and scientific non-claim boundary |
 | [Virtual Experiment DAG Runbook](runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md) | P17 direct-v2 compilation, Brain/DAG fingerprints, downgrade/tamper checks and zero-promoted abstention boundary |
 | [Multi-omics Model Input Runbook](runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md) | P18 strict input compilation, matrix/replay checks and no-execution boundary |
+| [Controlled Pack Factory Runbook](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md) | P19 initialized-store marker, v2/v1 index handling, receipt replay/tamper audit and all real-operation non-runs |
 | [Provenance](../PROVENANCE.md) | repository derivation from PRAXIS-2 and bootstrap evidence |
 
 ## Release and version history
@@ -178,6 +194,7 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 
 | Report | Scope |
 |---|---|
+| [P19 Completion Report](../reports/phase19/PHASE19_COMPLETION.md) | exact contract closure; focused `23/1`, combined `108/1`, safe `1,554/49/387`, legacy `1,143/58/105`; reproducible `1,154,421`-byte wheel; real external fixture/output/operator/science/policy non-runs |
 | [P18 Completion Report](../reports/phase18/PHASE18_COMPLETION.md) | exact contract closure, 44 focused tests, safe regression, reproducible wheel and real multi-omics model acceptance pending |
 | [P17 Completion Report](../reports/phase17/PHASE17_COMPLETION.md) | exact contract closure, 41 focused tests, safe regression, reproducible wheel and real multi-model acceptance pending |
 | [P16E Completion Report](../reports/phase16e/PHASE16E_COMPLETION.md) | exact engineering closure, 231 contract tests, safe directed/legacy validation, reproducible wheel and P16R/P16B non-runs |
@@ -189,7 +206,7 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 | [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | frozen local C5 gate: Python 3.13 core 965, Gate A adapter seam, honest 2-test remote pending, asset/claim classification |
 | [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | frozen C4 gate: Python 3.13 core 957, Playwright 56+1, reproducible full wheel, and Linux-container smoke |
 | [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen C3 gate: core 947, Playwright 54+1, theme acceptance, mutation evidence, and then-remaining C4/C5 ownership |
-| [Testing Guide](TESTING.md) | current P18 local commands and counts; preserves prior exact-SHA and historical CI/Linux evidence plus remote scientific-validation boundaries |
+| [Testing Guide](TESTING.md) | current P19 local commands and counts; preserves prior exact-SHA and historical CI/Linux evidence plus remote scientific-validation boundaries |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | capability gate plus `.53` evidence and remaining remote backlog |
 | [Phase 10 Summary](../reports/phase10/PHASE10_SUMMARY.md) | `952 tests = 912 passed + 40 skipped` for the non-LLM package scope; 9 LLM tests are deselected in the `912/40/9` reporting style |
 | [Phase 10 UI E2E](../reports/phase10/PHASE10_UI_E2E.md) | three structural Playwright specs; explicitly excludes CSS/pixel and deep abstain assertions |

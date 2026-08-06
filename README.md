@@ -34,6 +34,11 @@ Phase 18 从 P17 docs-closure `f253664239e4b1c9665301cf1bdf4e117a3e9c31`
 开始，在 `626c71ffd1ce18a5adc200f6a6e376e57b269beb`（tree
 `2b570398caff6cf955d789c3cb4a7a77dc13a082`）完成 strict joint multi-omics
 model-input 合同，状态为 `P18_CONTRACT_COMPLETE_REAL_MULTIOMICS_MODEL_ACCEPTANCE_PENDING`。
+Phase 19 从 P18 docs-closure
+`871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be` 开始，在
+`42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5`（tree
+`b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`）完成 Controlled Pack Factory 工程合同，
+状态为 `P19_CONTRACT_COMPLETE_REAL_EXTERNAL_FIXTURE_OPERATOR_SCIENCE_POLICY_NOT_RUN`。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
@@ -41,11 +46,13 @@ exact 验证与克制的科学/policy 边界见
 [P15E 完成报告](reports/phase15e/PHASE15E_COMPLETION.md)和
 [P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md)及
 [P17 完成报告](reports/phase17/PHASE17_COMPLETION.md)和
-[P18 完成报告](reports/phase18/PHASE18_COMPLETION.md)。P14R、P15R 与 P16R 的真实
+[P18 完成报告](reports/phase18/PHASE18_COMPLETION.md)及
+[P19 完成报告](reports/phase19/PHASE19_COMPLETION.md)。P14R、P15R 与 P16R 的真实
 asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B、P15B 与 P16B 均为
 `NOT_RUN`。当前 registry 有 5 个 release、0 个 native、0 个 production-promoted
 capability；P18 没有真实 multi-omics model execution/acceptance，science 为 `NOT_RUN`，
-policy 为 `NO_NEW_DECISION`。
+policy 为 `NO_NEW_DECISION`。P19 的 Git 外 real fixture/output root、真实 operator、
+science 与 policy 也未运行；factory registration 不等于模型兼容、执行或 promotion。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -263,6 +270,23 @@ abstain。当前 registry 仍为 5 releases / 0 native / 0 promoted，且环境�
 [P18 runbook](docs/runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md)和
 [P18 完成报告](reports/phase18/PHASE18_COMPLETION.md)。
 
+P19 把 P7 quarantine receipt/payload、operator-authored candidate、完整 metadata/mapping
+review、strict validation report 和 registration-only decision 绑定到 append-only factory
+store 与 `vc.pack-index.v2`。P7 species 全部只作 routing hint；exact taxon 只来自 manifest
+与 reviewer confirmation，coarse bacteria 不推断 *E. coli*。Index v2 兼容读 v1；旧
+path-only register 已退役。Store 必须由 `PackFactoryStore.create()` 在 write-new directory
+创建，并带 exact `.factory-store.json` marker
+`{"schema_version":"vc.pack-factory-store.v1"}\n`；普通既存目录拒绝。
+
+公共 `GET /api/pack-factory` 只返回 root-free、reviewer/operator raw ID 与 rationale/reason
+redacted 的 lifecycle catalog，无 HTTP 写 route；Quarantine、Candidate、Factory-registered、
+Model-compatible 和 Executable 分层。
+P19 没有训练/checkpoint/evidence/promotion，real external fixture/output root/operator/science/
+policy 未运行。设计、操作和完成边界见
+[P19 ADR](docs/ADR-0016-controlled-pack-factory.md)、
+[P19 runbook](docs/runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md)和
+[P19 完成报告](reports/phase19/PHASE19_COMPLETION.md)。
+
 P8 产品化收口随发行物提供三个合成、微型、可审计 Pack：
 `p8-human-tiny`、`p8-mouse-tiny`、`p8-bacteria-tiny`。它们覆盖
 `EnsemblGene` 与 `NCBIGene` 两种 feature namespace，均通过同一个既有
@@ -271,7 +295,6 @@ P8 产品化收口随发行物提供三个合成、微型、可审计 Pack：
 ```bash
 praxis-vc pack inspect /absolute/path/to/pack
 praxis-vc pack validate /absolute/path/to/pack
-praxis-vc pack register /absolute/path/to/pack
 praxis-vc pack list
 praxis-vc pack compatibility \
   --request request.json --pack-id p8-human-tiny --pack-version 1.0.0
@@ -280,9 +303,25 @@ praxis-vc pack run \
   --mode offline --out runs/p8-example
 ```
 
+P19 受控 register 不再接受单一路径，必须先由 library 生成/复核 artifacts，并初始化
+write-new store：
+
+```bash
+praxis-vc pack register \
+  --upload-directory /absolute/quarantine/<upload-id> \
+  --pack-root /absolute/operator-authored-pack \
+  --candidate /absolute/contracts/candidate.json \
+  --review /absolute/contracts/review.json \
+  --validation /absolute/contracts/validation.json \
+  --decision /absolute/contracts/decision.json \
+  --index /absolute/existing-parent/pack-index.json \
+  --store /absolute/initialized-factory-store
+```
+
 `inspect` 明确返回未校验状态；`validate/register/list/compatibility/run` 均按当前
 bytes 重验。只读 API 位于 `/api/packs`、`/api/packs/{id}/{version}`、
-`/validate` 和 `/api/packs/compatibility`；服务器不提供 Pack register API。
+`/api/packs/{id}/{version}/validate`、`/api/packs/compatibility` 和 `/api/pack-factory`；
+服务器不提供 Pack register API。
 `vc.pack-catalog.v1` 保持外层兼容，同时在 top-level `model_registry` 暴露路径脱敏的
 `vc.model-registry-catalog.v2`，并在每个
 `model_capabilities[*].registry_releases` 中只列该模型的 release 投影。React“数据
@@ -395,7 +434,10 @@ CI=1 npm run e2e
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P18 边界和跨项目集成 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P19 边界和跨项目集成 |
+| [P19 完成报告](reports/phase19/PHASE19_COMPLETION.md) | controlled registration、v2 index/read-only catalog 与 real fixture/operator/science/policy 非运行边界 |
+| [P19 Controlled Pack Factory ADR](docs/ADR-0016-controlled-pack-factory.md) | receipt→registration identities、explicit store/index 与 pending→committed fail-closed |
+| [P19 Controlled Pack Factory runbook](docs/runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md) | local CLI migration、store marker、validation/public projection 审计 |
 | [P18 完成报告](reports/phase18/PHASE18_COMPLETION.md) | exact code/tree、44 focused tests、reproducible wheel 与真实 multi-omics model acceptance 未完成边界 |
 | [P18 Multi-omics Model Input ADR](docs/ADR-0015-multiomics-model-input.md) | ordered slots、join/missingness、Pack/view/adapter/matrix identity 与 contract-only abstain |
 | [P18 Multi-omics Model Input runbook](docs/runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md) | strict contract 审计、tamper/replay 检查与 fail-closed 解读 |
@@ -433,7 +475,7 @@ CI=1 npm run e2e
 
 唯一允许的流向是：本地 feature branch → GitHub branch/CI → 审批合入 GitHub `main` → 本地 `main` fast-forward → `.53` 从同一 GitHub SHA fast-forward → 三端 SHA 核对。不要在 `.53` 直接开发，也不要把本地 tag 当成已发布 tag。
 
-本轮 P18 contract/docs closure 窗口未刷新 GitHub 或 `.53`。规范工作树是
+本轮 P19 contract/docs closure 窗口未刷新 GitHub 或 `.53`。规范工作树是
 `/Volumes/T7/PRAXIS-virtualcell`，Git metadata 是
 `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`；任何远程数字只有带日期和 exact
 identity 的只读记录意义。

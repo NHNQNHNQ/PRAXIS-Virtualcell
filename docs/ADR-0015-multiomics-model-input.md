@@ -192,3 +192,6 @@ P18 全程未访问网络或外置资产，未运行 GPU、training、调参、w
 未操作 `.53`、服务或端口，未 push、release、deploy，也未运行 Golden/GEM/Norman science。
 真实 multi-omics acceptance 仍需另行授权的固定数据/模型、单组学 baseline、ablation、主指标、
 CI、external 与 OOD gates；未通过时只能保留本合同及诚实负结果。
+
+P19 后续合同状态与当前下一 gate 以 [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md)
+和 [documentation index](INDEX.md) 为准；该后续工作不回写或提升 P18 的科学结论。
