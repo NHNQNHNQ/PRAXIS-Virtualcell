@@ -1,16 +1,74 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P16E 分支 `codex/p16e-k562-perturbation-contract`；唯一起始 SHA
-> `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`
+> 当前文档基线：P17 分支 `codex/p17-virtual-cell-brain`；唯一起始 SHA
+> `ff525a0611901df422161a7143ebfe9d1e051008`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：`P16E_ENGINEERING_COMPLETE_P17_CONTRACT_ONLY_ELIGIBLE`；completion code SHA
-> `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`；tree
-> `098cd563e3d865e080a0d121727b987e2d40ed18`。下述 P4.3–P15E 和 CI 数字仍只绑定
-> 各自 exact SHA/日期；P16E 本地工程结果不构成科学验证、operator policy、发布或
-> 远程证据。
+> 状态：`P17_CONTRACT_COMPLETE_REAL_MULTI_MODEL_ACCEPTANCE_PENDING_P18_ELIGIBLE`；
+> completion code SHA `16636f1b2c36e0a0fabb782a662b5b3b934891e0`；tree
+> `321a59eed44c45bf2bb8798714352b3303b92e58`。下述 P4.3–P16E 和 CI 数字仍只绑定
+> 各自 exact SHA/日期；P17 本地工程结果不构成真实多模型验收、科学验证、operator
+> policy、发布或远程证据。
+
+## Phase 17 `CONTRACT_COMPLETE` 本地证据
+
+P17 新增 direct exact `vc.request.v2` + exact Pack 的 plan-only 编译路径。它重用
+`CapabilityRegistry`、`ModelBrokerAgent.plan()` 和 `ExecutionPlanV2`，只生成 deterministic
+Virtual Experiment DAG、immutable Brain context 与 contract-only abstain decision；不准备
+wrapper、不运行预测、不调用 LLM。可选 LLM candidate 只进入独立 review/checksum，不能改变
+authoritative fingerprint。JobStore v3 绑定 Brain/DAG，并交叉核验 companions、报告语义、
+trace/narrative 与 provenance。
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_virtual_experiment.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_request_v2.py \
+  praxis_virtualcell/tests/test_pack_semantics.py \
+  praxis_virtualcell/tests/test_data_packs.py \
+  praxis_virtualcell/tests/test_pack_product.py \
+  praxis_virtualcell/tests/test_model_registry_v2.py \
+  praxis_virtualcell/tests/test_capability_runtime.py \
+  praxis_virtualcell/tests/test_model_broker_agent.py \
+  praxis_virtualcell/tests/test_broker_public_models.py \
+  praxis_virtualcell/tests/test_registry_public_models.py \
+  praxis_virtualcell/tests/test_api.py \
+  praxis_virtualcell/tests/test_packaging.py \
+  praxis_virtualcell/tests/test_versioning.py \
+  praxis_virtualcell/tests/test_virtual_experiment.py
+
+python -m pytest -o addopts='' -q praxis_virtualcell/tests \
+  --ignore=praxis_virtualcell/tests/test_mudata_alignment.py \
+  -k 'not golden and not gem and not norman'
+~~~
+
+| Gate | 结果 |
+|---|---|
+| P17 contract | `41 passed` |
+| adjacent directed | `377 passed / 1 skipped` |
+| safe Python gate | `1487 passed / 48 skipped / 387 deselected` |
+| authoritative `ruff check . --extend-exclude old --no-cache` | PASS |
+| exact-file format / `py_compile` / `git diff --check` | PASS |
+
+`test_mudata_alignment.py` 未纳入该门，因为当前解释器缺可选 `mudata`；第一次 collection
+在导入时 fail closed。Global `pip check` 也因宿主环境既有 invalid distributions 与
+`vcbench` 冲突而不是有效通过证据。两个 offline clean archive 完整 wheel byte-identical：
+`1,118,410` bytes，SHA-256
+`bd3752b90a6d8e4d7a825b2f4925d00eb7e5204021fef3404b67e88f7a0e23bd`，`366` entries，
+其中 React `14`、tests `0`、AppleDouble `0`，并包含 Brain module。Official strict build
+在离线且缺 locked `packaging==26.2` distribution 时 fail closed；system-site no-deps smoke
+只是受污染环境中的有限 import/static/CLI 检查。
+
+当前 registry 是 5 releases / 0 native / 0 promoted；因此 P17 real multi-model acceptance
+仍 pending，所有真实 direct-v2 请求 abstain，science `NOT_RUN`，policy
+`NO_NEW_DECISION`。测试内 `Danio rerio / NCBITaxon:7955` 只在临时 fixture 中存在，未注册。
+下一 eligible 本地 gate 是尚未完成的 P18 contract-only multi-omics。完整边界见
+[ADR-0014](ADR-0014-virtual-cell-brain.md)、
+[P17 runbook](runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md)和
+[P17 完成报告](../reports/phase17/PHASE17_COMPLETION.md)。
 
 ## Phase 16E `ENGINEERING_COMPLETE` 本地证据
 
@@ -70,8 +128,7 @@ clean hash-locked install 或 dependency-integrity 证据。
 `P16B: NOT_RUN`；`Policy: NO_NEW_DECISION`。P16E 只证明 contract/conformance，
 没有读取或运行真实 checkpoint/data/assets，没有 training、GPU、network、
 release、push 或 deploy。因 P14–P16 仍少于两个 production-promoted
-capabilities，下一本地 work unit 仅以 `P17 CONTRACT_ONLY ELIGIBLE / NOT_COMPLETE`
-进入，不得宣称真实多模型编排。完整边界见
+capabilities，P17 后续只在 contract-only 边界完成，未宣称真实多模型编排。完整边界见
 [ADR-0013](ADR-0013-virtualcell-k562-golden-delta-contract.md)、
 [P16E runbook](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) 和
 [P16E 完成报告](../reports/phase16e/PHASE16E_COMPLETION.md)。

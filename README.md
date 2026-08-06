@@ -25,14 +25,22 @@ P15E docs-closure `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2` 开始，在
 `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`（tree
 `098cd563e3d865e080a0d121727b987e2d40ed18`）完成本地 Human/K562 Golden Norman
 perturbation→delta-expression 工程合同，当前收口状态为
-`P16E_ENGINEERING_COMPLETE_P17_ELIGIBLE`。exact 验证与克制的科学/policy 边界见
+`P16E_ENGINEERING_COMPLETE`。Phase 17 从 P16E docs-closure
+`ff525a0611901df422161a7143ebfe9d1e051008` 开始，在
+`16636f1b2c36e0a0fabb782a662b5b3b934891e0`（tree
+`321a59eed44c45bf2bb8798714352b3303b92e58`）完成 deterministic Virtual Cell Brain
+合同，状态为 `P17_CONTRACT_COMPLETE_REAL_MULTI_MODEL_ACCEPTANCE_PENDING_P18_ELIGIBLE`。
+exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
 [P14E 完成报告](reports/phase14e/PHASE14E_COMPLETION.md)及
 [P15E 完成报告](reports/phase15e/PHASE15E_COMPLETION.md)和
-[P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md)。P14R、P15R 与 P16R 的真实
+[P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md)及
+[P17 完成报告](reports/phase17/PHASE17_COMPLETION.md)。P14R、P15R 与 P16R 的真实
 asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B、P15B 与 P16B 均为
-`NOT_RUN`；下一 eligible 本地 gate 是 contract-only `P17 — Virtual Cell Brain`，但尚未完成。
+`NOT_RUN`。当前 registry 有 5 个 release、0 个 native、0 个 production-promoted
+capability，因此 P17 没有真实多模型执行或验收，所有 direct-v2 Virtual Experiment
+保持 abstain；下一 eligible 本地 gate 是尚未完成的 contract-only `P18 — Multi-omics`。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -226,6 +234,20 @@ push 或 deploy。设计、操作和完成边界见
 [P16E runbook](docs/runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md)和
 [P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md)。
 
+P17 在不实例化 wrapper、不运行模型、不调用 LLM 的 direct exact `vc.request.v2` + exact
+Pack 路径上编译 deterministic `vc.virtual-experiment-dag.v1`、immutable
+`vc.virtual-cell-brain-context.v1` 与 contract-only abstain decision。Broker 的公开
+plan-only 入口只生成既有 `ExecutionPlanV2`；LLM 只能提供严格候选 DAG，候选审计及其
+独立 checksum 不进入 authoritative DAG/Brain/decision fingerprint。
+`vc.job-execution-identity.v3` 绑定 Brain/DAG，并在有 companion 文件时拒绝降级、分裂
+provenance、报告语义、trace/narrative 或重签篡改。测试内第五 taxon
+`Danio rerio / NCBITaxon:7955` 只存在于临时 tiny fixture，未写入生产 registry 或
+species route。当前 0 promoted capabilities，所以真实请求仍是空 DAG/abstain；该工程
+完成不构成真实 multi-model acceptance、scientific evidence、policy、release 或 deploy。
+设计、操作和完成边界见 [P17 ADR](docs/ADR-0014-virtual-cell-brain.md)、
+[P17 runbook](docs/runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md)和
+[P17 完成报告](reports/phase17/PHASE17_COMPLETION.md)。
+
 P8 产品化收口随发行物提供三个合成、微型、可审计 Pack：
 `p8-human-tiny`、`p8-mouse-tiny`、`p8-bacteria-tiny`。它们覆盖
 `EnsemblGene` 与 `NCBIGene` 两种 feature namespace，均通过同一个既有
@@ -253,6 +275,9 @@ bytes 重验。只读 API 位于 `/api/packs`、`/api/packs/{id}/{version}`、
 `vc.job-execution-identity.v2` 锁定 request、Pack、environment snapshot、release、
 component、evidence、policy、structured report fingerprint 和 outcome；历史 v1 job
 identity 仍可解析，`JobStore.load` 只做只读投影、不改旧 bytes，同名 job 仍不能覆盖。
+P17 compilation-backed direct-v2 job 使用 `vc.job-execution-identity.v3`，在上述字段外绑定
+Brain 与 DAG fingerprint；v1/v2/v3 只要存在 request/report/provenance/trace companions
+就会重算并交叉核验，真正无 companions 的 historical identity-only 记录继续只读兼容。
 
 P7 的“数据资源”页面提供独立的公开下载和隔离上传通道。公开目录使用 strict
 `vc.data-catalog.v1`，只对外置数据根中 path、size、SHA-256 全部匹配的文件开放
@@ -355,7 +380,10 @@ CI=1 npm run e2e
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P16E 边界和跨项目集成 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P17 边界和跨项目集成 |
+| [P17 完成报告](reports/phase17/PHASE17_COMPLETION.md) | exact code/tree、deterministic contract 验证、reproducible wheel 与真实多模型验收未完成边界 |
+| [P17 Virtual Cell Brain ADR](docs/ADR-0014-virtual-cell-brain.md) | authoritative DAG/Brain/decision、candidate isolation 与 JobStore v3 identity |
+| [P17 Virtual Experiment DAG runbook](docs/runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md) | direct-v2 contract 审计、tamper/downgrade 检查与 fail-closed 解读 |
 | [P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md) | exact code/tree、本地 contract-only 验证、reproducible wheel 与 P16R/P16B 非运行边界 |
 | [P16E K562 Golden delta ADR](docs/ADR-0013-virtualcell-k562-golden-delta-contract.md) | exact K562/P8 scope、ordered perturbation binding、prepared-bound 输出与 local-only adapter |
 | [P16E K562 Golden delta runbook](docs/runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) | 本地 manifest/合同审计、定向验证、P16R 授权门和 fail-closed 解读 |
@@ -387,12 +415,12 @@ CI=1 npm run e2e
 
 唯一允许的流向是：本地 feature branch → GitHub branch/CI → 审批合入 GitHub `main` → 本地 `main` fast-forward → `.53` 从同一 GitHub SHA fast-forward → 三端 SHA 核对。不要在 `.53` 直接开发，也不要把本地 tag 当成已发布 tag。
 
-当前 P16E 窗口未刷新 GitHub 或 `.53`。规范工作树是
+本轮 P17 contract/docs closure 窗口未刷新 GitHub 或 `.53`。规范工作树是
 `/Volumes/T7/PRAXIS-virtualcell`，Git metadata 是
 `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`；任何远程数字只有带日期和 exact
 identity 的只读记录意义。
 
-历史整理分支曾按两次精确 D1a 授权把 GitHub `codex/project-consolidation` 快进到 `ee36d7948047f346f55a02d62ccaac84391e3c20`。对应的 [GitHub Actions run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 为 `4/5`：Python core、frontend/Playwright、reproducible wheel 和 Linux release container 通过，legacy 唯一失败是 Linux shell 子进程未随直接 shell 终止。修复提交 `6a8198771581d0897a13457e93e50cfec172d59a` 已把输出截断、timeout、pipe 异常和上层取消统一为进程组清理，并在 macOS/Python 3.13.12 与 Linux/Python 3.13.14 严格锁环境得到 legacy `1139 passed / 0 failed`。这些都是绑定旧 SHA 的历史证据，不授权当前 P16E push、CI、release 或 deploy；GitHub `main`/tag、本地 `main` 和 `.53` 当前状态必须在未来获准窗口重新只读核对。
+历史整理分支曾按两次精确 D1a 授权把 GitHub `codex/project-consolidation` 快进到 `ee36d7948047f346f55a02d62ccaac84391e3c20`。对应的 [GitHub Actions run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 为 `4/5`：Python core、frontend/Playwright、reproducible wheel 和 Linux release container 通过，legacy 唯一失败是 Linux shell 子进程未随直接 shell 终止。修复提交 `6a8198771581d0897a13457e93e50cfec172d59a` 已把输出截断、timeout、pipe 异常和上层取消统一为进程组清理，并在 macOS/Python 3.13.12 与 Linux/Python 3.13.14 严格锁环境得到 legacy `1139 passed / 0 failed`。这些都是绑定旧 SHA 的历史证据，不授权当前工作单元 push、CI、release 或 deploy；GitHub `main`/tag、本地 `main` 和 `.53` 当前状态必须在未来获准窗口重新只读核对。
 
 ## 派生关系
 

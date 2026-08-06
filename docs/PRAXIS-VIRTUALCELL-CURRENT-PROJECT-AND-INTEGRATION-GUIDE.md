@@ -6,7 +6,7 @@
 >
 > 当前本地仓库：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前分支：`codex/p16e-k562-perturbation-contract`
+> 当前完成分支：`codex/p17-virtual-cell-brain`
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
@@ -37,12 +37,18 @@
 > `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`；tree
 > `098cd563e3d865e080a0d121727b987e2d40ed18`
 >
+> 已完成 work unit：`P17 — PRAXIS Virtual Cell Brain contract`；starting SHA
+> `ff525a0611901df422161a7143ebfe9d1e051008`；completion code SHA
+> `16636f1b2c36e0a0fabb782a662b5b3b934891e0`；tree
+> `321a59eed44c45bf2bb8798714352b3303b92e58`；状态
+> `P17_CONTRACT_COMPLETE_REAL_MULTI_MODEL_ACCEPTANCE_PENDING_P18_ELIGIBLE`
+>
 > 工作树保护清单：不在本文固定；每轮从现场 `git status --short` 动态重建，任何
 > 新 staged/modified/deleted/untracked 路径默认受保护
 >
 > 当前 Cell-first 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
-> 当前下一 work unit：`P17 — Virtual Cell Brain deterministic DAG`；`ELIGIBLE / CONTRACT_ONLY`
+> 当前下一 work unit：`P18 — Multi-omics Virtual Cell`；`ELIGIBLE / CONTRACT_ONLY / NOT_COMPLETE`
 
 本文是一份面向其他项目、开发团队、科研合作者和后续智能体的独立项目说明。它回答四个问题：
 
@@ -65,6 +71,8 @@ PRAXIS-VirtualCell 是一个以显式合同、确定性运行、可审计证据�
 - 接入符合 VirtualCellPack 合同的数据；
 - 检查请求、Pack、模型和执行环境之间的兼容性；
 - 在存在匹配且可执行的模型时生成执行计划；
+- 将 direct exact `vc.request.v2` Pack-aware 请求编译为确定性、可重放的
+  Virtual Experiment DAG/Brain/decision；
 - 保存请求、报告、trace、provenance 和 execution identity；
 - 在缺数据、缺模型、不兼容、环境不满足或超出科学范围时明确 abstain；
 - 使用可选 LLM 做自然语言解析和文字解释，但不让 LLM 参与数值预测或最终裁决。
@@ -74,6 +82,7 @@ PRAXIS-VirtualCell 是一个以显式合同、确定性运行、可审计证据�
 - 上传任意原始组学数据后自动训练出预测器的平台；
 - 任意物种、任意细胞都已经可预测的世界模型；
 - 已经完成科学验证的通用 Virtual Cell；
+- 已完成真实多模型科学验收的 Virtual Cell Brain；
 - 由 LLM 直接生成生物学数值结论的问答系统；
 - 已经实现的 Community world model 或 Host–Microbiome digital twin。
 
@@ -266,7 +275,41 @@ result，也没有 evidence、policy、promotion、release 或 deploy。compatib
 [P16E runbook](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) 和
 [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md)。
 
-### 1.6 代码与外部资产许可
+### 1.6 Phase 17 完成边界
+
+P17 以 P16E docs-closure `ff525a0611901df422161a7143ebfe9d1e051008` 为起始 SHA，
+在 `codex/p17-virtual-cell-brain` 上以 code SHA
+`16636f1b2c36e0a0fabb782a662b5b3b934891e0`、tree
+`321a59eed44c45bf2bb8798714352b3303b92e58` 完成。direct exact
+`vc.request.v2` Pack-aware 入口把 canonical request、cell context、Pack、plan、model、
+environment、adapter、evidence、policy、step/edge 和最终 deterministic decision 绑定进
+immutable Virtual Experiment DAG 与 Brain identity。Broker 只生成既有
+CapabilityRegistry/ExecutionPlan，不实例化 legacy wrapper；legacy 入口仍保留且 v2
+marker 不能降级进入它。
+
+LLM 只能提交 schema-bound candidate DAG；candidate review 有独立 checksum，但不进入
+权威 DAG/Brain/decision fingerprint，因而 LLM off、timeout 或 injection 不能改写权威
+结果。JobStore `vc.job-execution-identity.v3` 绑定 Brain/DAG 并在 reload 时重验 request、
+report、provenance、plan、step 和 capability identities。测试临时目录中的第五 taxon
+Danio rerio（NCBITaxon:7955）只证明 species-neutral contract compilation，从未注册为生产 Pack/release，也
+没有新增物种分支。
+
+当前 registry 精确为 5 releases、0 native、0 promoted。故没有真实多模型 execution，
+每个真实 P17 direct-v2 请求均形成 identity 完整的 abstain；science `NOT_RUN`，policy
+`NO_NEW_DECISION`，状态是 contract complete、real multi-model acceptance pending。
+engineering contracts、tests 与 artifact-ready packaging 均已收口。验证为 P17
+`41 passed`、adjacent `377 passed / 1 skipped`、safe gate
+`1487 passed / 48 skipped / 387 deselected`，Ruff passed。exact code commit 的两次
+clean-archive wheel byte-identical：`1,118,410` bytes、SHA-256
+`bd3752b90a6d8e4d7a825b2f4925d00eb7e5204021fef3404b67e88f7a0e23bd`、
+`366` entries、`14` React entries、`0` tests、`0` AppleDouble，并包含 Brain 模块；
+official strict build 仍因 offline cache 缺 `packaging==26.2` fail closed。未运行
+P14R/P15R/P16R/B，未 push、release、deploy 或 version bump。完整边界见
+[ADR-0014](ADR-0014-virtual-cell-brain.md)、
+[P17 runbook](runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md) 和
+[P17 completion report](../reports/phase17/PHASE17_COMPLETION.md)。
+
+### 1.7 代码与外部资产许可
 
 仓库源码在 `pyproject.toml` 中声明为 MIT License。公共数据集、数据库下载、模型权重、checkpoint 和其他外置科研资产保留各自的许可、引用和使用限制；不能因为仓库代码使用 MIT，就推定这些外部资产也可按 MIT 再分发。
 
@@ -563,10 +606,12 @@ work units 均已有 completion code SHA，但仍只是本地 engineering-comple
 P14E/P15E/P16E 都明确
 `executable=false`。P6-era v1 合同继续
 兼容，不能与 v2 完整治理混称；软件发布、科学 evidence 与 product policy 仍分别治理。
+P17 在这些边界之上完成 deterministic DAG/Brain contract，但没有把 0 promoted
+capabilities 改写成真实多模型能力；所有真实 P17 direct-v2 请求继续 abstain。
 
 ---
 
-## 8. P0–P16E 已完成工程工作
+## 8. P0–P17 已完成工程工作
 
 ### Phase 0：可信边界和确定性基线
 
@@ -822,9 +867,24 @@ P16E 从 P15E docs-closure SHA
 P16E 只读取小型 checked-in YAML/JSON manifests，没有打开 H5AD 或运行 Golden
 benchmark/candidate/additive ridge，没有产生 scientific evidence 或 policy，也没有
 release、promotion 或 deploy。P16R 为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P16B 为
-`NOT_RUN`。当前下一 eligible 本地 work unit 是 P17；由于少于两个
-`production_promoted` capability，P17 只能完成 deterministic DAG contract，必须
-fail closed 或 abstain，不能声称真实多模型执行。
+`NOT_RUN`。
+
+### Phase 17：PRAXIS Virtual Cell Brain contract（`CONTRACT_COMPLETE`）
+
+P17 从 P16E docs-closure SHA `ff525a0611901df422161a7143ebfe9d1e051008`
+开始，以 `16636f1b2c36e0a0fabb782a662b5b3b934891e0`、tree
+`321a59eed44c45bf2bb8798714352b3303b92e58` 完成：
+
+- direct exact request-v2 Pack-aware contract path，legacy 路径保留；
+- immutable Brain、deterministic DAG/decision、step/edge 与 plan identity；
+- 复用 CapabilityRegistry、plan-only ModelBroker 和 ExecutionPlan；
+- non-authoritative LLM candidate review，不影响权威 fingerprint/verdict；
+- conflict/partial/abstain/final-verdict governance 与 JobStore v3 cross-binding；
+- test-only Danio rerio fifth taxon fixture，不进入生产注册。
+
+当前 registry 为 5 releases / 0 native / 0 promoted，因此 real multi-model acceptance
+pending，所有真实 P17 direct-v2 请求 abstain；science `NOT_RUN`、policy `NO_NEW_DECISION`。当前下一
+eligible 本地 work unit 是 P18 contract-only multi-omics input；它仍为 `NOT_COMPLETE`。
 
 ---
 
@@ -937,15 +997,24 @@ artifact SHA-256
 - `vc.k562-golden-adapter-input-contract.v1`
 - `vc.k562-golden-adapter-output-contract.v1`
 - `vc.k562-golden-prepared-model-input.v1`
+- `vc.virtual-experiment-node.v1`
+- `vc.virtual-experiment-edge.v1`
+- `vc.virtual-experiment-dag.v1`
+- `vc.virtual-cell-brain-context.v1`
+- `vc.virtual-experiment-decision.v1`
+- `vc.candidate-virtual-experiment-dag.v1`
+- `vc.candidate-dag-review.v1`
+- `vc.virtual-experiment-compilation.v1`
+- `vc.job-execution-identity.v3`
 - `vc.data-catalog.v1`
 - `vc.upload-receipt.v1`
 - `vc.community-pack.v1`
 
 其他项目应按 `schema_version` 路由解析器，不能依靠字段形状猜测版本。
-以上 P12/P13/P14E/P15E/P16E 新增 schema 属于本地 engineering-complete work units；
+以上 P12/P13/P14E/P15E/P16E/P17 新增 schema 属于本地 engineering-complete work units；
 它们尚未发布，外部项目不应仅凭本地 completion 把它们当作已发布协议或
-真实科学能力。P14E/P15E/P16E 的 validation protocols 和 synthetic fixtures 尤其不能
-被解析为 P12 validation evidence。
+真实科学能力。P14E/P15E/P16E 的 validation protocols、synthetic fixtures 与 P17
+contract-only DAG 尤其不能被解析为 P12 validation evidence 或真实多模型验收。
 
 ---
 
@@ -2008,7 +2077,7 @@ skip/deselect 不能写成：
   contamination、external K562/platform、real OOD 或 scientific validation；
 - 没有多物种科学能力同时通过的证据；
 - 少于两个 capability 拥有 exact positive evidence 与 named-operator
-  `production_promoted`，所以 P17 只能 contract-only，不能声称真实多模型执行；
+  `production_promoted`；P17 contract 已完成，但不能声称真实多模型执行或科学验收；
 - 没有真实 Community model；
 - 没有 Host–Microbiome model；
 - 没有 biological world model；
@@ -2017,7 +2086,8 @@ skip/deselect 不能写成：
 ### 工程限制
 
 - 当前版本字符串存在发布漂移；
-- P13 Adapter SDK 与 P14E/P15E/P16E narrow contracts 仅在本地工程完成，尚未发布；
+- P13 Adapter SDK、P14E/P15E/P16E narrow contracts 与 P17 Brain/DAG contract 仅在
+  本地工程完成，尚未发布；
 - P14E 尚无任意未来 GEM loader 为 `data_only` 的类型级证明；
 - JobStore 是本地文件系统；
 - API 除上传外没有通用认证；
@@ -2163,8 +2233,8 @@ artifact hash
 
 ## 28. 后续路线图 P12–P30
 
-P12/P13/P14E/P15E/P16E 行记录已完成的工程 work units；P14R/P14B、
-P15R/P15B 与 P16R/P16B 仍未运行。下一 eligible 本地合同工程是 P17；真实科学或 policy
+P12/P13/P14E/P15E/P16E/P17 行记录已完成的工程 work units；P14R/P14B、
+P15R/P15B 与 P16R/P16B 仍未运行。下一 eligible 本地合同工程是 P18；真实科学或 policy
 窗口不能当作当前能力。
 
 | 阶段 | 目标 |
@@ -2180,8 +2250,8 @@ P15R/P15B 与 P16R/P16B 仍未运行。下一 eligible 本地合同工程是 P17
 | P16E | `COMPLETE`：exact Human/K562 Golden perturbation→delta-expression local contract；`executable=false` |
 | P16R | `AUTHORIZATION_REQUIRED / NOT_RUN`：exact candidate/model/assets 的科学运行 |
 | P16B | `NOT_RUN`：正科学 evidence 后的独立 operator decision |
-| P17 | `ELIGIBLE / CONTRACT_ONLY`：deterministic Virtual Cell Brain DAG；少于两个 promoted capabilities 时 fail closed/abstain |
-| P18 | Multi-omics cell-state representation |
+| P17 | `COMPLETE / CONTRACT_ONLY`：deterministic Virtual Cell Brain DAG/Brain/decision；real multi-model acceptance pending |
+| P18 | `ELIGIBLE / CONTRACT_ONLY / NOT_COMPLETE`：typed multi-omics cell-state representation |
 | P19 | 受控 Pack Factory：receipt → reviewed/validated RegisteredPack |
 | P20 | Training Pipeline：training job/result、checkpoint/model identity 和 tiny dry-run |
 | P21A | 冻结 Benchmark System、运行合同和 append-only evidence ledger |
@@ -2231,9 +2301,12 @@ yeast GEM 和 planned model card 仍不能冒充真实 deletion-fitness evidence
 
 P16E Human/K562 Golden perturbation→delta-expression contract 也已在 local-only、
 typed-negative 边界内完成。P16R/P16B 分别保持独立授权窗口，P8 historical baseline
-结果不是 P16 candidate evidence。当前下一 eligible 技术闭环是 P17 deterministic
-Virtual Cell Brain DAG contract；由于没有至少两个 exact `production_promoted`
-capabilities，所有真实多模型执行请求必须 fail closed 或 abstain。
+结果不是 P16 candidate evidence。
+
+P17 deterministic Virtual Cell Brain DAG/Brain contract 已完成。当前 registry 为
+5 releases / 0 native / 0 promoted，所以真实多模型 acceptance 仍 pending，所有真实
+P17 direct-v2 请求必须 fail closed 或 abstain。当前下一 eligible 技术闭环是 P18 contract-only
+typed multi-omics cell-state input；它仍未完成，真实数据/模型/science 另行过门。
 
 在进入更大世界模型之前，最重要的闭环仍然是：
 
@@ -2298,6 +2371,7 @@ capabilities，所有真实多模型执行请求必须 fail closed 或 abstain�
 - [P14E E. coli K-12 Growth Contract](ADR-0011-virtualcell-ecoli-k12-growth-contract.md)
 - [P15E S. cerevisiae Deletion-Fitness Contract](ADR-0012-virtualcell-yeast-deletion-fitness-contract.md)
 - [P16E K562 Golden Delta Contract](ADR-0013-virtualcell-k562-golden-delta-contract.md)
+- [P17 Virtual Cell Brain](ADR-0014-virtual-cell-brain.md)
 
 关键 runbook：
 
@@ -2312,6 +2386,7 @@ capabilities，所有真实多模型执行请求必须 fail closed 或 abstain�
 - [P14E E. coli K-12 Growth Contract](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md)
 - [P15E S. cerevisiae Deletion-Fitness Contract](runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md)
 - [P16E K562 Golden Delta Contract](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md)
+- [P17 Virtual Experiment DAG](runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md)
 - [External Disk Git Maintenance](runbooks/EXTERNAL-DISK-GIT-MAINTENANCE.md)
 
 ---
@@ -2341,8 +2416,14 @@ single-deletion→fitness contract；工程 COMPLETE，executable=false，P15R/P
 9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2（tree
 098cd563e3d865e080a0d121727b987e2d40ed18）完成 local K562 Golden
 perturbation→delta-expression contract；工程 COMPLETE，executable=false，
-P16R/P16B/science/policy 未运行。下一 eligible 本地 work unit 是 P17 deterministic
-Virtual Cell Brain DAG contract；少于两个 promoted capabilities 时不得真实多模型执行。
+P16R/P16B/science/policy 未运行。P17 从
+ff525a0611901df422161a7143ebfe9d1e051008 起步，以
+16636f1b2c36e0a0fabb782a662b5b3b934891e0（tree
+321a59eed44c45bf2bb8798714352b3303b92e58）完成 deterministic direct-v2
+Virtual Experiment DAG/Brain/decision 与 JobStore v3 contract。registry 为
+5 releases / 0 native / 0 promoted，故所有真实 P17 direct-v2 请求 abstain；science NOT_RUN，policy
+NO_NEW_DECISION，real multi-model acceptance pending。下一 eligible 本地 work unit 是
+P18 contract-only typed multi-omics input；它仍为 NOT_COMPLETE。
 
 当前 UI 是：
 选择 Cell Context → Chat → 自动解析/运行 → Report/Abstain，
@@ -2363,6 +2444,8 @@ contract adapter，同样不是 runtime-ready 或科学能力。
 P16E 另有 local、non-default、typed-negative 的 K562 Golden
 predict_delta_expression → delta_expression contract adapter；它与默认 generic delta
 reference adapter 不同，也不进入默认 registry。
+P17 复用这些 registry/adapter boundaries 形成 plan-only deterministic Brain/DAG；它
+没有创建新生产能力，LLM candidate 不进入权威 decision 或 fingerprint。
 
 P12 legacy migration 不创建 evidence/policy/promotion；无法精确绑定的 P8/P9
 结果保持 unbound/incomplete。registry lifecycle 是 append-only，Pack list/API 只
@@ -2371,7 +2454,8 @@ P13 同样没有真实模型、数据、权重、science run 或新 operator dec
 读取/运行真实 GEM、SBML、growth data 或 solver，没有 benchmark/evidence/policy、release
 或 promotion；P15E 也没有读取/运行真实 deletion screen/model/GEM 或生成
 evidence/policy；P16E 也没有读取 H5AD、运行 candidate/additive comparator 或生成
-MSE/CI/external evidence/policy。synthetic conformance 只证明合同确定性。
+MSE/CI/external evidence/policy。P17 同样没有运行真实多模型 science、P14R/P15R/P16R/B
+或生成 promotion；contract conformance 只证明工程确定性。
 
 数据存在不等于 Pack；Pack、registry、per-request compatibility/executable、
 scientific evidence 和 product policy 是五个独立层次。只有 exact

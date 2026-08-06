@@ -1,11 +1,11 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `P16E_ENGINEERING_COMPLETE_P17_CONTRACT_ONLY_ELIGIBLE — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
+> Status: `P17_CONTRACT_COMPLETE_REAL_MULTI_MODEL_ACCEPTANCE_PENDING_P18_ELIGIBLE — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
-> Local baseline: branch `codex/p16e-k562-perturbation-contract`; P16E starting SHA
-> `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`; code SHA
-> `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`; tree
-> `098cd563e3d865e080a0d121727b987e2d40ed18`
+> Local baseline: branch `codex/p17-virtual-cell-brain`; P17 starting SHA
+> `ff525a0611901df422161a7143ebfe9d1e051008`; code SHA
+> `16636f1b2c36e0a0fabb782a662b5b3b934891e0`; tree
+> `321a59eed44c45bf2bb8798714352b3303b92e58`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -22,6 +22,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P14E E. coli growth contract work unit | start `0b193310009d6e4d2ebc0fc8abf95da20a56acdb`; prerequisite `c3401450fd79f7829c438d6b55c1902ea2f4cf5f`; code `8778e93c31c2dfe1ef0f77f06e7a80a425633736`; tree `fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78` | immutable local Git history plus `reports/phase14e/PHASE14E_COMPLETION.md` | contract engineering complete and P15E-eligible; P14R authorization required/not run; P14B not run; no real GEM, science, policy, release or version bump |
 | P15E yeast deletion-fitness contract work unit | start `0ff6870a70a04d71098a16875e633f909e31cc5a`; code `62480a3951173a2aa7b006403af9b169521db138`; tree `64906691c4c989a843df4da97f0a93f32cd65ad2` | immutable local Git history plus `reports/phase15e/PHASE15E_COMPLETION.md` | contract engineering complete and P16E-eligible; P15R authorization required/not run; P15B not run; no real deletion screen/model/GEM, science, policy, release or version bump |
 | P16E K562 Golden delta contract work unit | start `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`; code `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`; tree `098cd563e3d865e080a0d121727b987e2d40ed18` | immutable local Git history plus P16E closure evidence | contract engineering complete and P17 contract-only eligible; P16R authorization required/not run; P16B not run; no real checkpoint/data/science, policy, release or version bump; local wheel `1,108,165` bytes / `d333180996a4...` / `365` entries / `14` React entries |
+| P17 Virtual Cell Brain work unit | start `ff525a0611901df422161a7143ebfe9d1e051008`; code `16636f1b2c36e0a0fabb782a662b5b3b934891e0`; tree `321a59eed44c45bf2bb8798714352b3303b92e58` | immutable local Git history plus `reports/phase17/PHASE17_COMPLETION.md` | deterministic contract complete and P18 contract-only eligible; real multi-model acceptance pending because registry is 5 releases / 0 native / 0 promoted; science not run, no new policy/release/version bump; local complete wheel `1,118,410` bytes / `bd3752b90a6d...` / `366` entries / `14` React entries |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -88,10 +89,13 @@ The repository historically mixed product release tags, package metadata, API/ru
 | execution environment snapshot | `vc.environment.v1` or `vc.environment.v2` + canonical JSON SHA-256 | `model_zoo/capability_registry.py` | v1 preserves legacy planning; v2 binds one exact `EnvironmentIdentity`; `python_dependencies` are import-module availability and are not string-equaled to PEP 503 distributions |
 | model compatibility report | `vc.compatibility-report.v1` or `vc.compatibility-report.v2` + canonical JSON SHA-256 | `model_zoo/capability_registry.py` | v2 binds exact request, Pack, release, artifact, environment, adapter, evidence, policy and lifecycle; fingerprint excludes runtime paths and display-only model version already bound by model/release identity |
 | model execution plan | `vc.execution-plan.v1` or `vc.execution-plan.v2` + deterministic `plan_<sha-prefix>` | `model_zoo/capability_registry.py`, `agents/model_broker_agent.py` | v2 recomputes canonical plan ID and checks report/wrapper/agent step binding; an empty or executable plan is not a performance, evidence or promotion claim |
+| Virtual Experiment DAG/node/edge | `vc.virtual-experiment-dag.v1`, `vc.virtual-experiment-node.v1`, `vc.virtual-experiment-edge.v1` + canonical JSON SHA-256 | `virtual_experiment.py` | binds request/cell/Pack/environment/plan/validated steps/capabilities and typed acyclic edges; contract existence is not execution or multi-model acceptance |
+| Virtual Cell Brain context/decision | `vc.virtual-cell-brain-context.v1`, `vc.virtual-experiment-decision.v1` + canonical JSON SHA-256 | `virtual_experiment.py` | immutable request/Pack/model/release/capability/environment/adapter-contract/evidence/policy context and fail-closed verdict; P17 decision is always contract-only abstain |
+| candidate DAG review/compilation | `vc.candidate-virtual-experiment-dag.v1`, `vc.candidate-dag-review.v1`, `vc.virtual-experiment-compilation.v1` | `virtual_experiment.py` | candidate review has its own checksum but is excluded from authoritative DAG/Brain/decision fingerprint; LLM output cannot authorize execution or change verdict |
 | Pack product record/catalog | `vc.pack-record.v1`, `vc.pack-catalog.v1` with nested `vc.model-registry-catalog.v2` | `pack_product.py`, `/api/packs` | outer contract remains compatible; top-level `model_registry` and per-model `registry_releases` are path-redacted discovery projections, not per-request compatibility |
 | local Pack index | `vc.pack-index.v1` + Pack fingerprint | `pack_product.py`, `PRAXIS_VC_PACK_INDEX` | binds a local canonical root to one Pack ID/version/fingerprint; every use revalidates bytes and semantics |
 | Pack compatibility surface | `vc.pack-compatibility-surface.v1` | `pack_product.py`, `/api/packs/compatibility` | public path-redacted projection of v1/v2 execution plans; planning is read-only and is not execution evidence |
-| job execution identity | `vc.job-execution-identity.v1` or `vc.job-execution-identity.v2` + canonical JSON SHA-256 | `io/job_store.py` | v1 remains parseable; v2 also locks submitted/normalized request, structured-report fingerprint, outcome and all Pack/release/component/evidence/policy state snapshots; load never rewrites historical bytes |
+| job execution identity | `vc.job-execution-identity.v1`, `.v2`, or `.v3` + canonical JSON SHA-256 | `io/job_store.py` | v1 remains parseable; v2 locks request/report/outcome and Pack/release/component/evidence/policy state; v3 additionally binds Brain/DAG and contract-only report semantics; companion-backed load recomputes identity without rewriting historical bytes |
 | public data catalog | `vc.data-catalog.v1` | `praxis_virtualcell/catalogs/data_catalog.yaml`, `praxis_vc_api/services/data_portal_service.py` | strict public metadata plus source terms and external-file size/hash allowlist; catalog/file availability does not imply Pack/model/scientific status |
 | quarantined upload receipt | `vc.upload-receipt.v1` | `praxis_vc_api/services/data_portal_service.py` | one byte-preserving quarantine write identity; not content validation, Pack registration, user identity, or prediction evidence |
 | Golden Norman contract | `vc.golden-norman.v1` + canonical JSON SHA-256 | `data/golden/norman_2019/contract.yaml`, `benchmarks/golden_norman.py` | binds one exact public source, source/derived semantics, predefined control/split, metric/bootstrap and simple-baseline definitions; changing any item requires a new identity |
@@ -151,10 +155,22 @@ science evidence. `P16R` remains `AUTHORIZATION_REQUIRED / NOT_RUN`, `P16B` rema
 `1,108,165` bytes, SHA-256
 `d333180996a4ed91161d364275589e992d0be634582cc83a57e9758b86c03c66`, `365` entries and `14`
 React entries; none is a release or version bump. Because P14–P16 still have fewer than two
-production-promoted capabilities, P17 is eligible only for contract-only work. See
+production-promoted capabilities, P17 subsequently completed only contract work. See
 [ADR-0013](ADR-0013-virtualcell-k562-golden-delta-contract.md), the
 [P16E runbook](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md), and the
 [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md).
+
+P17 adds the DAG/Brain/candidate-review/compilation schemas and job identity v3 above without
+changing product SemVer (`1.6.0`), API/runtime protocols, release tags, registry releases or
+promotion policy. Its exact code commit is `16636f1b2c36e0a0fabb782a662b5b3b934891e0`.
+The current registry remains 5 releases / 0 native / 0 promoted, so real multi-model acceptance
+is pending and the new direct-v2 path abstains without execution. Two offline clean-archive full
+wheels are byte-identical at `1,118,410` bytes, SHA-256
+`bd3752b90a6d8e4d7a825b2f4925d00eb7e5204021fef3404b67e88f7a0e23bd`, with `366` entries,
+`14` React entries, no tests or AppleDouble, and the Brain module present. These are local
+engineering artifacts, not a release. See [ADR-0014](ADR-0014-virtual-cell-brain.md), the
+[P17 runbook](runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md), and the
+[P17 completion report](../reports/phase17/PHASE17_COMPLETION.md).
 
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
@@ -189,7 +205,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | execution step/plan schema + plan ID | explicit `vc.execution-plan.v1`, or `vc.execution-step.v2` and `vc.execution-plan.v2` with content-derived `plan_*` | canonical step/report/wrapper/agent binding or plan identity semantics change incompatibly | plan creation proves prediction correctness, scientific validation or promotion |
 | Pack product record/catalog/index schemas | explicit `vc.pack-record.v1`, `vc.pack-catalog.v1`, `vc.pack-index.v1`; catalog may nest `vc.model-registry-catalog.v2` | incompatible public metadata, index-field, identity binding or registry projection semantics | discovery/registration proves per-request compatibility or scientific validity |
 | Pack compatibility surface schema | explicit `vc.pack-compatibility-surface.v1` | incompatible path-redaction or public execution-plan projection | a compatibility response proves successful execution |
-| job execution identity schema + fingerprint | explicit `vc.job-execution-identity.v1` or `vc.job-execution-identity.v2` and content identity | incompatible request/report/outcome/Pack/release/component/evidence/policy identity-lock semantics | read-only loading may rewrite old bytes, or immutable provenance proves model quality/validation/promotion |
+| job execution identity schema + fingerprint | explicit `vc.job-execution-identity.v1`, `vc.job-execution-identity.v2` or `vc.job-execution-identity.v3` and content identity | incompatible request/report/outcome/Pack/release/component/evidence/policy identity-lock semantics; v3 also binds Brain/DAG and companion-backed contract-only report semantics | read-only loading may rewrite old bytes, schema downgrade may bypass current bindings, or immutable provenance proves model quality/validation/promotion |
 | public data catalog schema | explicit `vc.data-catalog.v1` | incompatible metadata, source/terms, identity or file-verification semantics | file availability, Pack validity, model compatibility or scientific validity |
 | upload receipt schema | explicit `vc.upload-receipt.v1` | incompatible quarantine identity/provenance semantics | internal file safety/quality, user authentication identity, Pack registration or model use |
 | Golden benchmark contract + canonical hash | explicit `vc.golden-norman.v1` and content identity | source, semantic field, feature order, control/split, truth, metric/bootstrap or baseline definition changes | one successful run validates another dataset/model or creates scientific truth |
@@ -207,7 +223,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented history through the current P16E engineering-complete bytes:
+Implemented history through the current P17 contract-complete bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -259,6 +275,15 @@ Implemented history through the current P16E engineering-complete bytes:
     at `1,108,165` bytes, SHA-256
     `d333180996a4ed91161d364275589e992d0be634582cc83a57e9758b86c03c66`, with `365` entries and
     `14` React entries; these local build values are not release identity.
+23. P17 code `16636f1b2c36e0a0fabb782a662b5b3b934891e0` adds deterministic
+    Virtual Experiment DAG/Brain/decision contracts, a plan-only direct-v2 Pack path, candidate
+    review isolation and companion-bound job identity v3 inside the same unpublished candidate.
+    It does not instantiate wrappers, execute models, call an LLM, add a registry release or make
+    evidence/policy claims. The registry remains 5/0/0 releases/native/promoted, so real
+    multi-model acceptance is pending. No product/API/runtime version bump, release, tag, push or
+    deploy is created. The exact full wheel identity is `1,118,410` bytes /
+    `bd3752b90a6d8e4d7a825b2f4925d00eb7e5204021fef3404b67e88f7a0e23bd` / `366` entries /
+    `14` React entries and is not a published release.
 
 ## Release invariants
 

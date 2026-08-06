@@ -32,7 +32,14 @@
 > `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`；tree
 > `098cd563e3d865e080a0d121727b987e2d40ed18`
 >
-> 当前下一本地 gate：`P17 CONTRACT_ONLY`；状态 `ELIGIBLE / NOT_COMPLETE`；
+> 已完成 work unit：`P17 — PRAXIS Virtual Cell Brain contract`；starting SHA
+> `ff525a0611901df422161a7143ebfe9d1e051008`；completion code SHA
+> `16636f1b2c36e0a0fabb782a662b5b3b934891e0`；tree
+> `321a59eed44c45bf2bb8798714352b3303b92e58`；branch
+> `codex/p17-virtual-cell-brain`；状态
+> `P17_CONTRACT_COMPLETE_REAL_MULTI_MODEL_ACCEPTANCE_PENDING_P18_ELIGIBLE`
+>
+> 当前下一本地 gate：`P18 CONTRACT_ONLY`；状态 `ELIGIBLE / NOT_COMPLETE`；
 > P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
@@ -43,7 +50,7 @@
 >
 > 当前状态核对日期：2026-08-06
 >
-> P16E completion identity：实现 commit/tree、post-commit 验证与工程闭包记录共同
+> P17 completion identity：实现 commit/tree、post-commit 验证与工程闭包记录共同
 > 证明；本次文档提交不在本文中
 > 预测或自引用
 
@@ -68,7 +75,7 @@ species and biological systems.” 愿景转换为可逐阶段授权、实施、
 exact-scope 的 Biological World Model research capability。Phase 编号是路线标签，
 不是产品版本、API 协议、schema 或模型版本。
 
-## 2. Phase 11 产品基线、已完成 P12–P16E 与当前 P17 contract-only gate
+## 2. Phase 11 产品基线、已完成 P12–P17 与当前 P18 contract-only gate
 
 ### 2.1 当前身份
 
@@ -96,7 +103,10 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | P16E starting SHA | `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2` |
 | P16E completion code SHA / tree | `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2` / `098cd563e3d865e080a0d121727b987e2d40ed18` |
 | P16E 完成分支 | `codex/p16e-k562-perturbation-contract` |
-| 当前 work-unit 状态 | P16E `COMPLETE`；P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN`；P17 `CONTRACT_ONLY ELIGIBLE / NOT_COMPLETE` |
+| P17 starting SHA | `ff525a0611901df422161a7143ebfe9d1e051008` |
+| P17 completion code SHA / tree | `16636f1b2c36e0a0fabb782a662b5b3b934891e0` / `321a59eed44c45bf2bb8798714352b3303b92e58` |
+| P17 完成分支 | `codex/p17-virtual-cell-brain` |
+| 当前 work-unit 状态 | P17 `CONTRACT_COMPLETE / REAL_MULTI_MODEL_ACCEPTANCE_PENDING`；P18 `CONTRACT_ONLY ELIGIBLE / NOT_COMPLETE`；P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN` |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -112,7 +122,8 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 bundle 锚定，但恢复分支本身不是不可移动 release。DOCS-CLOSURE、P12、P13、P14E 和 P15E 已分别由
 exact Git identity、allowlisted diff、验证结果、获准本地 commit、post-commit 状态与
 完成报告收口。P16E 也已由 exact Git identity、限定 diff、安全验证和
-本地闭包记录收口。
+本地闭包记录收口。P17 已由 exact Git identity、deterministic contract tests、
+byte-identical wheel 和完成报告收口；这不等于真实多模型科学验收。
 `.53` preview 也不等于 GitHub main/tag 发布。`bf44aac...`
 继续暴露 `1.6.0` 构成版本漂移，下一次稳定候选必须使用新的 SemVer，绝不能移动或
 复用已有 `v1.6.0` tag。
@@ -133,7 +144,8 @@ P15B  positive science 后的 operator decision（NOT_RUN）
 P16E  K562 Golden perturbation→delta-expression contract（COMPLETE at 9f6b14ea...）
 P16R  exact checkpoint/data/assets 与真实科学运行（AUTHORIZATION_REQUIRED / NOT_RUN）
 P16B  positive science 后的 operator decision（NOT_RUN）
-P17   仅 contract-only 本地 gate（ELIGIBLE / NOT_COMPLETE）
+P17   Virtual Cell Brain deterministic contract（COMPLETE at 16636f1b...；real acceptance pending）
+P18   typed multi-omics contract-only 本地 gate（ELIGIBLE / NOT_COMPLETE）
 ```
 
 Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
@@ -175,8 +187,9 @@ Phase 身份由本文和完成证据定义，不由历史 branch 名称推导。
 > science evidence 或 product promotion。P15E 已在相同 contract-only 边界内收口 exact
 > S288C deletion→fitness 合同、negative compatibility 与 prepared-bound conformance；
 > P14R/P14B、P15R/P15B、P16R/P16B 保持未授权/未运行。P16E 已在同一
-> contract-only 边界收口；因少于两个 production-promoted capabilities，下一
-> 本地 gate 仅为尚未完成的 P17 contract-only。
+> contract-only 边界收口。P17 已完成 direct-v2 Pack-aware deterministic DAG/Brain
+> 合同；当前 registry 为 5 releases / 0 native / 0 promoted，因此所有真实 P17 direct-v2 请求均
+> abstain，真实多模型验收仍 pending。下一本地 gate 是尚未完成的 P18 contract-only。
 
 ### 2.4 本次编号纠正
 
@@ -351,8 +364,8 @@ staged/modified/deleted/untracked 清单。除当前授权 exact allowlist 外�
 | 16E | K562 Golden delta-expression 合同与 fail-closed conformance | 工程合同/回归已通过；只可继续 P17 contract-only | 不读取真实资产，不生成 evidence/policy |
 | 16R | exact-asset K562 science run | 同口径胜 additive ridge + independent K562 external gate | candidate 保持未晋级 |
 | 16B | K562 scope-separated operator policy | 具名 operator 绑定 exact positive evidence | 保持未 promotion |
-| 17 | 可审计多模型 Virtual Experiment DAG | 当前少于两个 promoted capability，仅 contract-only | 不运行真实多模型；abstain |
-| 18 | 一份真实多组学状态与模型证据 | 胜单组学 baseline 或诚实负结果 | 只保留数据合同 |
+| 17 | 可审计 Virtual Experiment DAG/Brain 合同 | contract-only 工程已完成；真实验收仍需至少两个 promoted capabilities | 不运行真实多模型；所有真实 P17 direct-v2 请求 abstain |
+| 18 | typed multi-omics 状态合同；真实模型证据另行过门 | 当前可继续 contract-only；真实候选须胜单组学 baseline 或诚实负结果 | 只保留数据合同 |
 | 19 | 受控 upload receipt → RegisteredPack 闭环 | metadata/mapping/operator review 可重放 | receipt 保持 quarantine，不注册 |
 | 20 | training job/result、checkpoint 和 tiny deterministic dry-run | 合同级训练重放和失败原子性通过 | 不运行真实候选、不生成 evidence |
 | 21 | 统一 benchmark/evidence ledger + 独立 candidate-run 窗口 | protocol/result/负结果可复现 | 保留分散 benchmark；candidate 不晋级 |
@@ -982,9 +995,34 @@ PRAXIS-2 或 `old/**` 历史工作树；不得暂存/提交任何不在本阶段
 
 ## 11. Phase 17：PRAXIS Virtual Cell Brain
 
-**当前 gate：** `CONTRACT_ONLY ELIGIBLE / NOT_COMPLETE`。P16E 已完成，但 P14–P16
-仍少于两个 exact-scope `production_promoted` capabilities；因此 P17 只可实施
-DAG/schema/abstain 的 contract-only 工程，不得运行或宣称真实多模型编排。
+**当前状态：**
+`P17_CONTRACT_COMPLETE_REAL_MULTI_MODEL_ACCEPTANCE_PENDING_P18_ELIGIBLE`。P17 已完成
+DAG/schema/abstain 的 contract-only 工程。当前 registry 有 5 个 releases、0 个 native
+release、0 个 `production_promoted` capability；因此没有真实多模型执行或科学验收，
+所有真实 P17 direct-v2 请求均确定性 abstain。
+
+### P17 完成快照（`CONTRACT_COMPLETE`）
+
+P17 以 `ff525a0611901df422161a7143ebfe9d1e051008` 为 actual starting SHA，在
+`codex/p17-virtual-cell-brain` 以 code SHA
+`16636f1b2c36e0a0fabb782a662b5b3b934891e0`、tree
+`321a59eed44c45bf2bb8798714352b3303b92e58` 完成：direct exact
+`vc.request.v2` Pack-aware 入口、immutable Brain、deterministic DAG/decision、复用
+CapabilityRegistry/ModelBroker/ExecutionPlan 的 plan-only Broker、非权威 LLM candidate
+compiler/gates、step/edge identity 和 JobStore v3 Brain/DAG job binding。legacy 入口保留。
+Danio rerio（NCBITaxon:7955）第五 taxon 只存在于测试临时目录，从未进入生产 registry。
+engineering contracts、tests 与 artifact-ready packaging 均已收口。
+
+验证记录：P17 tests `41 passed`；adjacent `377 passed / 1 skipped`；safe gate
+`1487 passed / 48 skipped / 387 deselected`；Ruff passed。exact code commit 的两次
+clean-archive wheel byte-identical，均为 `1,118,410` bytes、SHA-256
+`bd3752b90a6d8e4d7a825b2f4925d00eb7e5204021fef3404b67e88f7a0e23bd`、
+`366` entries、`14` React entries、`0` tests、`0` AppleDouble，且包含 Brain 模块。
+official strict build 仍因 offline cache 缺 `packaging==26.2` fail closed。science
+`NOT_RUN`，policy `NO_NEW_DECISION`；未运行 P14R/P15R/P16R/B，未 push、release、deploy
+或 version bump。工程边界见 [ADR-0014](ADR-0014-virtual-cell-brain.md)、
+[P17 runbook](runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md) 和
+[P17 completion report](../reports/phase17/PHASE17_COMPLETION.md)。
 
 ### 目标
 
@@ -1027,7 +1065,7 @@ Scientific Question
 - 至少两个 P14–P16 exact-scope、production-promoted 能力完成一项确有必要的组合
   任务，否则 P17 只能收口合同。
 
-### 可复制授权提示词
+### 已履行的 contract-only 授权提示词（历史留存）
 
 ```text
 授权以 `<从 Git history 读取的 P16E actual docs-closure SHA>` 作为 Phase 17
@@ -1051,6 +1089,10 @@ community。本地 commit 仅在本阶段精确授权明确为 yes 时允许；�
 ```
 
 ## 12. Phase 18：Multi-omics Virtual Cell
+
+**当前 gate：** `CONTRACT_ONLY ELIGIBLE / NOT_COMPLETE`。P17 engineering contract 已
+完成；P18 可先冻结 typed multi-omics 输入、alignment、join/missingness 和 abstain
+合同。真实 dataset/model/benchmark、training、science evidence 和 promotion 仍需独立授权。
 
 ### 目标
 
@@ -2173,10 +2215,14 @@ P16E 已从 P15E docs-closure
 contract-only 工程。P16R 与 P16B 仍分别为 `AUTHORIZATION_REQUIRED / NOT_RUN` 和
 `NOT_RUN`；science 未运行，policy 无新决定。
 
-持续本地授权下的下一 eligible gate 是 P17 contract-only；它尚未完成，实际
-starting SHA 必须在 P16E docs-closure 后从 Git history 读取并重新生成动态保护
-清单。在少于两个 production-promoted capabilities 时，P17 不得越界为真实
-多模型 orchestration。
+P17 已从 `ff525a0611901df422161a7143ebfe9d1e051008` 开始，以 completion code SHA
+`16636f1b2c36e0a0fabb782a662b5b3b934891e0` 和 tree
+`321a59eed44c45bf2bb8798714352b3303b92e58` 完成 contract-only 工程。当前 registry
+为 5 releases / 0 native / 0 promoted；所有真实 P17 direct-v2 请求 abstain，science `NOT_RUN`、
+policy `NO_NEW_DECISION`，真实多模型验收仍 pending。
+
+持续本地授权下的下一 eligible gate 是 P18 contract-only；它尚未完成，actual
+starting SHA 必须在 P17 docs-closure 后从 Git history 读取并重新生成动态保护清单。
 
 当前持续本地授权不覆盖 P14R、P14B、P15R、P15B、P16R 或 P16B。没有逐项 exact
 assets/output root/run window 授权时，不得读取或运行真实资产、产生科学
