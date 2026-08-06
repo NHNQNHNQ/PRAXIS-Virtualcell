@@ -230,5 +230,7 @@ Official strict script 在 network-denied 环境中因 locked `packaging==26.2` 
 - v3 identity 可用 schema downgrade 绕过；
 - 发起 network、promotion、push、release、deploy、`.53` 或服务操作。
 
-P17 engineering artifact ready 不等于 published/released。下一 eligible work unit 仅为 P18
-contract-only multi-omics；真实 multi-model acceptance 继续 pending。
+P17 engineering artifact ready 不等于 published/released。在 P17 completion 当时，下一
+eligible work unit 是 P18 contract-only multi-omics；真实 multi-model acceptance 继续
+pending。P18 后续完成状态及当前 next gate 以 [P18 completion report](../../reports/phase18/PHASE18_COMPLETION.md)
+和 [document index](../INDEX.md) 为准。

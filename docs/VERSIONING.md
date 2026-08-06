@@ -1,11 +1,11 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `P17_CONTRACT_COMPLETE_REAL_MULTI_MODEL_ACCEPTANCE_PENDING_P18_ELIGIBLE — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
+> Status: `P18_CONTRACT_COMPLETE_REAL_MULTIOMICS_MODEL_ACCEPTANCE_PENDING — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
-> Local baseline: branch `codex/p17-virtual-cell-brain`; P17 starting SHA
-> `ff525a0611901df422161a7143ebfe9d1e051008`; code SHA
-> `16636f1b2c36e0a0fabb782a662b5b3b934891e0`; tree
-> `321a59eed44c45bf2bb8798714352b3303b92e58`
+> Local baseline: branch `codex/p18-multiomics-cell-state`; P18 starting SHA
+> `f253664239e4b1c9665301cf1bdf4e117a3e9c31`; code SHA
+> `626c71ffd1ce18a5adc200f6a6e376e57b269beb`; tree
+> `2b570398caff6cf955d789c3cb4a7a77dc13a082`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -23,6 +23,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P15E yeast deletion-fitness contract work unit | start `0ff6870a70a04d71098a16875e633f909e31cc5a`; code `62480a3951173a2aa7b006403af9b169521db138`; tree `64906691c4c989a843df4da97f0a93f32cd65ad2` | immutable local Git history plus `reports/phase15e/PHASE15E_COMPLETION.md` | contract engineering complete and P16E-eligible; P15R authorization required/not run; P15B not run; no real deletion screen/model/GEM, science, policy, release or version bump |
 | P16E K562 Golden delta contract work unit | start `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2`; code `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`; tree `098cd563e3d865e080a0d121727b987e2d40ed18` | immutable local Git history plus P16E closure evidence | contract engineering complete and P17 contract-only eligible; P16R authorization required/not run; P16B not run; no real checkpoint/data/science, policy, release or version bump; local wheel `1,108,165` bytes / `d333180996a4...` / `365` entries / `14` React entries |
 | P17 Virtual Cell Brain work unit | start `ff525a0611901df422161a7143ebfe9d1e051008`; code `16636f1b2c36e0a0fabb782a662b5b3b934891e0`; tree `321a59eed44c45bf2bb8798714352b3303b92e58` | immutable local Git history plus `reports/phase17/PHASE17_COMPLETION.md` | deterministic contract complete and P18 contract-only eligible; real multi-model acceptance pending because registry is 5 releases / 0 native / 0 promoted; science not run, no new policy/release/version bump; local complete wheel `1,118,410` bytes / `bd3752b90a6d...` / `366` entries / `14` React entries |
+| P18 multi-omics model-input work unit | start `f253664239e4b1c9665301cf1bdf4e117a3e9c31`; code `626c71ffd1ce18a5adc200f6a6e376e57b269beb`; tree `2b570398caff6cf955d789c3cb4a7a77dc13a082` | immutable local Git history plus `reports/phase18/PHASE18_COMPLETION.md` | strict joint-input contract complete; real multi-omics model acceptance pending; registry unchanged at 5/0/0, science not run, no policy/release/version bump; local complete wheel `1,132,811` bytes / `015724a90656...` / `367` entries / `14` React entries |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -45,6 +46,8 @@ The repository historically mixed product release tags, package metadata, API/ru
 | model feature contract | `vc.model-feature-contract.v1` | `praxis_virtualcell/data_packs/feature_alignment.py` | exact model/taxon/assembly/modality/namespace/ordered-feature input contract plus explicit reorder/drop/fill and mapping-asset identity; its SHA-256 fingerprint is not a model weight or performance claim |
 | feature mapping asset | `vc.feature-mapping.v1` + mapping ID/version/SHA-256 | Pack-declared JSON asset consumed by `feature_alignment.py` | explicit alias and `sum`/`mean` aggregate rules only; bytes or version changes alter Pack and contract identity when their references are updated |
 | feature alignment report | `vc.alignment-report.v1` | `praxis_virtualcell/data_packs/feature_alignment.py` | records source/target order and every applied alias/aggregate/drop/fill/reorder; proves contract transformation only, not model execution or scientific validation |
+| multi-omics input/slot contracts | `vc.multiomics-input-contract.v1`, `vc.multiomics-modality-slot.v1` + canonical JSON SHA-256 | `praxis_virtualcell/multiomics_input.py` | binds ordered required/optional modalities, exact feature contracts, join/missingness policy, target modality and adapter-owned input identity; contract validity is not model acceptance |
+| multi-omics layer/model input | `vc.multiomics-layer-input.v1`, `vc.multiomics-model-input.v1` + canonical JSON SHA-256 | `praxis_virtualcell/multiomics_input.py` | binds Pack/view/adapter, real observation membership, alignment and runtime matrix content while remaining non-executable contract-only abstain |
 | strict model card | `vc.model-card.v1` + canonical JSON SHA-256 | `model_zoo/capability_registry.py`, `model_zoo/registry.yaml` | binds taxon/modality/assay/domain/perturbation/task/output/namespace/representation/assets/resources/uncertainty/OOD and wrapper revision; card presence is not execution or validation |
 | model artifact identity | `vc.model-artifact.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds relative cache key, size/hash, media type, licence/source and safe-load declaration; identity or `artifact_ready` is not safe execution or validation |
 | model environment identity | `vc.model-environment.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds PEP 503 distribution+version requirements, architecture, lock/image identity, resources/accelerators and adapter fingerprints; distribution names are not import-module probes |
@@ -172,6 +175,19 @@ engineering artifacts, not a release. See [ADR-0014](ADR-0014-virtual-cell-brain
 [P17 runbook](runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md), and the
 [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md).
 
+P18 adds the strict multi-omics slot/input/layer/model-input schemas above without changing product
+SemVer (`1.6.0`), API/runtime protocols, release tags, registry or promotion policy. Its exact code
+commit is `626c71ffd1ce18a5adc200f6a6e376e57b269beb`. Ordered modalities, Pack/view/adapter identity,
+real observation joins or explicit masks, alignment reports and runtime matrix fingerprints are
+contract properties; no Broker execution step or real model acceptance is implied. Two clean
+offline archive wheels are byte-identical at `1,132,811` bytes, SHA-256
+`015724a90656706c0441e4f4f873ee51f8db87dfaae9de35a3e841e7c70b2b7c`, with `367` entries,
+`14` React entries, no tests or AppleDouble. The registry remains 5/0/0; science is `NOT_RUN`,
+policy is `NO_NEW_DECISION`, and there was no execution, release, push or deploy. See
+[ADR-0015](ADR-0015-multiomics-model-input.md), the
+[P18 runbook](runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md), and the
+[P18 completion report](../reports/phase18/PHASE18_COMPLETION.md).
+
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
 ## Namespace contract
@@ -223,7 +239,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented history through the current P17 contract-complete bytes:
+Implemented history through the current P18 contract-complete bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -284,6 +300,14 @@ Implemented history through the current P17 contract-complete bytes:
     deploy is created. The exact full wheel identity is `1,118,410` bytes /
     `bd3752b90a6d8e4d7a825b2f4925d00eb7e5204021fef3404b67e88f7a0e23bd` / `366` entries /
     `14` React entries and is not a published release.
+24. P18 code `626c71ffd1ce18a5adc200f6a6e376e57b269beb` adds strict ordered joint
+    multi-omics input contracts, exact join/missingness identities, adapter ownership and
+    content-bound runtime matrices inside the same unpublished candidate. It does not zero-fill,
+    impute, normalize, create an execution step or accept a real model. Registry 5/0/0 is unchanged;
+    science is `NOT_RUN`, policy is `NO_NEW_DECISION`, and no product/API/runtime version bump,
+    release, tag, push or deploy is created. Two clean offline archive wheels are byte-identical at
+    `1,132,811` bytes / `015724a90656706c0441e4f4f873ee51f8db87dfaae9de35a3e841e7c70b2b7c` /
+    `367` entries / `14` React entries, with no tests or AppleDouble.
 
 ## Release invariants
 

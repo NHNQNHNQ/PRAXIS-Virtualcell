@@ -4,7 +4,7 @@
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前已完成工程 work unit：`Phase 17`
+> 当前已完成工程 work unit：`Phase 18`
 >
 > DOCS-CLOSURE completion：`b19c896202bea56f894d0ad540501331af42a40c`
 >
@@ -34,7 +34,14 @@
 > `321a59eed44c45bf2bb8798714352b3303b92e58`；状态
 > `P17_CONTRACT_COMPLETE_REAL_MULTI_MODEL_ACCEPTANCE_PENDING_P18_ELIGIBLE`
 >
-> 下一 eligible 本地工程 gate：`P18 CONTRACT_ONLY`；`ELIGIBLE / NOT_COMPLETE`
+> 已完成 work unit：`Phase 18 — Multi-omics Virtual Cell contract`；starting SHA
+> `f253664239e4b1c9665301cf1bdf4e117a3e9c31`；branch
+> `codex/p18-multiomics-cell-state`；completion code SHA
+> `626c71ffd1ce18a5adc200f6a6e376e57b269beb`；tree
+> `2b570398caff6cf955d789c3cb4a7a77dc13a082`；状态
+> `P18_CONTRACT_COMPLETE_REAL_MULTIOMICS_MODEL_ACCEPTANCE_PENDING`
+>
+> 下一 eligible 本地工程 gate：`P19 CONTRACT_ONLY`；`ELIGIBLE / NOT_COMPLETE`
 >
 > 当前 Phase 11 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
@@ -55,13 +62,14 @@
 → 完成记录
 ```
 
-本文自身不授权实施任何 Phase。P12、P13、P14E、P15E、P16E 和 P17 已在持续本地授权内完成；该授权仍不包含
+本文自身不授权实施任何 Phase。P12、P13、P14E、P15E、P16E、P17 和 P18 已在持续本地授权内完成；该授权仍不包含
 外置数据或权重、network、push、GitHub main/tag、`.53`、服务、发布、部署或真实
 科学运行。P14E 已独立收口；P14R 仍需逐资产/窗口授权，P14B 仍只能在
 正科学结果后由具名 operator 决定。P15E 已独立收口；P15R 仍需逐资产/窗口授权，
 P15B 仍只能在正科学结果后由具名 operator 决定。P16E 已独立收口；P16R 仍需
 逐资产/窗口授权，P16B 仍只能在正科学结果后由具名 operator 决定。P17 已完成
-contract-only 工程闭包；真实多模型验收仍需至少两个 promoted capabilities。阶段 scope、
+contract-only 工程闭包；真实多模型验收仍需至少两个 promoted capabilities。P18 已完成
+typed multi-omics 输入合同；真实 Broker/Registry 兼容、模型执行与科学验收仍 pending。阶段 scope、
 资产清单和可复制授权句仍以
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)为准。
 
@@ -184,8 +192,18 @@ work-unit 执行状态机使用以下状态；总进度表可另用 `NOT_STARTED
 - 当前 registry 有 5 个 release、0 个 native release、0 个 promoted capability；因此
   P17 science 为 `NOT_RUN`、policy 为 `NO_NEW_DECISION`，所有真实 P17 direct-v2 请求均 abstain，
   real multi-model acceptance 仍 pending；
-- P18 contract-only 是当前持续本地授权下的下一 eligible 本地 gate；它尚未完成，
-  开始前须从 P17 docs-closure 后的 actual Git SHA 和现场动态保护清单重新核对；
+- Phase 18 已从 P17 docs-closure actual SHA
+  `f253664239e4b1c9665301cf1bdf4e117a3e9c31` 开始，在
+  `codex/p18-multiomics-cell-state` 以 code SHA
+  `626c71ffd1ce18a5adc200f6a6e376e57b269beb`（tree
+  `2b570398caff6cf955d789c3cb4a7a77dc13a082`）完成 exact Pack v0.3、typed
+  modality slots、per-layer alignment、observation join/missingness、semantic identity 与
+  matrix content/storage snapshot 合同；
+- P18 只编译 contract-only abstention；caller-declared adapter identity 未经 Broker 或
+  Registry 解析，未运行 wrapper/model/science，registry 保持 5 releases / 0 native /
+  0 promoted，science `NOT_RUN`、policy `NO_NEW_DECISION`；
+- P19 contract-only 是当前持续本地授权下的下一 eligible 本地 gate；开始前须从 P18
+  docs-closure 后的 actual Git SHA 和现场动态保护清单重新核对；
 - P14R/P14B、P15R/P15B 与 P16R/P16B 均保持各自的 exact external/operator 授权门，一个外部门
   不阻塞无依赖的 eligible 本地 E work unit。
 
@@ -234,8 +252,8 @@ flowchart TD
 | P16R | `AUTHORIZATION_REQUIRED` | `NOT_RUN` | `NOT_APPLICABLE` | exact checkpoint/data/assets/output root/run window 后才可真实运行 |
 | P16B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | 仅在正科学结果后由具名 operator 决定 |
 | P17 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | deterministic Virtual Experiment DAG/Brain 与 fail-closed abstain；completion `16636f1b...`；真实多模型验收 pending |
-| P18 | `ELIGIBLE — CONTRACT_ONLY / NOT_COMPLETE` | `NOT_RUN` | `NOT_APPLICABLE` | 下一本地 gate：typed multi-omics input；真实能力独立过门 |
-| P19 | `NOT_STARTED` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | receipt 到 RegisteredPack，不训练 |
+| P18 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | typed multi-omics input、exact join/missingness/alignment 与 immutable runtime snapshots；completion `626c71ff...`；真实模型验收 pending |
+| P19 | `ELIGIBLE — CONTRACT_ONLY / NOT_COMPLETE` | `NOT_APPLICABLE` | `NOT_APPLICABLE` | 下一本地 gate：receipt 到 RegisteredPack，不训练 |
 | P20 | `NOT_STARTED` | `CONTRACT_ONLY` | `NOT_APPLICABLE` | training contracts 和 tiny dry-run |
 | P21A | `NOT_STARTED` | `SYSTEM_ONLY` | `NOT_APPLICABLE` | benchmark/evidence system |
 | P21B | `NOT_STARTED` | `NOT_RUN` | `NOT_APPLICABLE` | per-candidate run-only evidence |
@@ -844,28 +862,28 @@ version bump。
 
 ### Phase 18 — Multi-omics Virtual Cell
 
-**状态：** `ELIGIBLE — CONTRACT_ONLY / NOT_COMPLETE`
+**状态：** `P18_CONTRACT_COMPLETE_REAL_MULTIOMICS_MODEL_ACCEPTANCE_PENDING`
 
 **目标：** 在保持 `vc.pack.v0.3` 语义的前提下建立真正的 typed multi-omics 模型输入。
 
 **交付物**
 
-- [ ] `vc.multiomics-model-input.v1` 或等价版本化合同；
-- [ ] ordered required/optional modality slots；
-- [ ] 每层独立 feature alignment 和 report；
-- [ ] observation membership、join 和 missingness policy；
-- [ ] target modality 和 typed bundle identity；
-- [ ] paired/partially-paired conformance fixtures；
-- [ ] optional modality 缺失行为由 model card/adapter 显式声明；
+- [x] `vc.multiomics-model-input.v1` 版本化合同；
+- [x] ordered required/optional modality slots；
+- [x] 每层独立 feature alignment 和 report；
+- [x] observation membership、join 和 missingness policy；
+- [x] target modality 和 typed bundle identity；
+- [x] paired/partially-paired conformance fixtures；
+- [x] optional modality 缺失行为由 exact input contract/adapter identity 显式声明；
 - [ ] 如另获资产授权：单组学 baseline、multi-omics candidate、ablation 和 OOD protocol。
 
 **验收**
 
-- [ ] required slots 缺任一项时无 execution step；
-- [ ] 不用任一 modality 交集放行 required slots；
-- [ ] 不造 observation、不补零、不 impute、不静默 normalization；
-- [ ] partially-paired 只使用真实 shared rows 或显式 missingness mask；
-- [ ] modality order、namespace、feature order、join/missingness 进入 fingerprint；
+- [x] required slots 缺任一项时无 execution step；
+- [x] 不用任一 modality 交集放行 required slots；
+- [x] 不造 observation、不补零、不 impute、不静默 normalization；
+- [x] partially-paired 只使用真实 shared rows 或显式 missingness mask；
+- [x] modality order、namespace、feature order、join/missingness 进入 fingerprint；
 - [ ] real candidate 未胜单组学 baseline/CI/external gate 时只保留数据合同。
 
 **完成判定**
@@ -873,11 +891,34 @@ version bump。
 - 合同可 `COMPLETE`；
 - 真实 multi-omics 科学能力可独立为负结果，不能反向否定合同完成，也不能生成 promotion。
 
+P18 已按第一种状态完成。exact code commit 为
+`626c71ffd1ce18a5adc200f6a6e376e57b269beb`，tree 为
+`2b570398caff6cf955d789c3cb4a7a77dc13a082`。合同把 exact request、Pack v0.3
+manifest、ordered slots、observation semantics、view/join/missingness、per-layer alignment、
+matrix content/storage 和 caller-declared adapter identity 交叉绑定；request 保留 Pack 源
+target，只允许 identity 或显式一对一 alias 证明模型 feature identity，drop/aggregate
+均 fail closed。Prepared runtime 使用 byte-backed defensive snapshots；矩阵本体不进入
+JSON，但 shape/storage/content fingerprint 在消费边界重新核对。
+
+工程证据：focused `44 passed`；adjacent `259 passed`；safe gate
+`1531 passed / 48 skipped / 387 deselected`；Ruff、format、py_compile 和 diff checks
+通过。两次 offline clean-archive wheel byte-identical：`1,132,811` bytes、SHA-256
+`015724a90656706c0441e4f4f873ee51f8db87dfaae9de35a3e841e7c70b2b7c`、`367`
+entries、`14` React entries、`0` tests、`0` AppleDouble。可选 MuData suite 因本地未安装
+`mudata` 无法 collect；global `pip check` 受共享环境既有 invalid distributions/conflicts
+污染，均未被误报为通过。详见 [ADR-0015](ADR-0015-multiomics-model-input.md)、
+[P18 runbook](runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md) 和
+[P18 completion report](../reports/phase18/PHASE18_COMPLETION.md)。
+
+P18 没有调用 Broker、CapabilityRegistry、wrapper 或 model，没有训练、GPU、外置资产、
+Golden/GEM/Norman science、evidence、promotion、push、release 或 deploy；science
+`NOT_RUN`，policy `NO_NEW_DECISION`，真实 multi-omics model acceptance 仍 pending。
+
 ---
 
 ### Phase 19 — 受控 Pack Factory
 
-**状态：** `NOT_STARTED`
+**状态：** `ELIGIBLE — CONTRACT_ONLY / NOT_COMPLETE`
 
 **唯一闭环：**
 
@@ -1434,8 +1475,8 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | P16R | `AUTHORIZATION_REQUIRED` | `NOT_RUN` | `N/A` | — | unchanged | exact checkpoint/data/assets/output root/run window 未授权 |
 | P16B | `NOT_RUN` | `READ_ONLY` | `NOT_RUN` | — | unchanged | 仅在正科学结果与具名 operator 决定后可运行 |
 | P17 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | `ff525a0611901df422161a7143ebfe9d1e051008` | `16636f1b2c36e0a0fabb782a662b5b3b934891e0` | tree `321a59ee...`; report `reports/phase17/PHASE17_COMPLETION.md`; wheel `1,118,410` bytes / `bd3752b90a6d...` / `366` entries; real multi-model acceptance pending |
-| P18 | `ELIGIBLE — CONTRACT_ONLY / NOT_COMPLETE` | `NOT_RUN` | `N/A` | P17 docs-closure 后从 Git history 读取 | — | next local gate；typed multi-omics contract |
-| P19 | `NOT_STARTED` | `N/A` | `N/A` | — | — | — |
+| P18 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | `f253664239e4b1c9665301cf1bdf4e117a3e9c31` | `626c71ffd1ce18a5adc200f6a6e376e57b269beb` | tree `2b570398...`; report `reports/phase18/PHASE18_COMPLETION.md`; wheel `1,132,811` bytes / `015724a90656...` / `367` entries; real multi-omics model acceptance pending |
+| P19 | `ELIGIBLE — CONTRACT_ONLY / NOT_COMPLETE` | `N/A` | `N/A` | P18 docs-closure 后从 Git history 读取 | — | next local gate；controlled Pack factory |
 | P20 | `NOT_STARTED` | `CONTRACT_ONLY` | `N/A` | — | — | — |
 | P21A | `NOT_STARTED` | `SYSTEM_ONLY` | `N/A` | — | — | — |
 | P21B | `NOT_STARTED` | `NOT_RUN` | `N/A` | — | unchanged | — |
@@ -1560,8 +1601,14 @@ P17 已从 P16E docs-closure `ff525a0611901df422161a7143ebfe9d1e051008`
 registry 为 5 releases / 0 native / 0 promoted，故所有真实 P17 direct-v2 请求 abstain，science
 `NOT_RUN`、policy `NO_NEW_DECISION`，真实多模型验收仍 pending。
 
-持续本地授权下的下一 eligible gate 是 P18 contract-only；它尚未完成，实际 starting
-SHA 必须在 P17 docs-closure 后从 Git history 读取。外置资产、
+P18 已从 P17 docs-closure `f253664239e4b1c9665301cf1bdf4e117a3e9c31`
+开始，以 completion code SHA `626c71ffd1ce18a5adc200f6a6e376e57b269beb` 和 tree
+`2b570398caff6cf955d789c3cb4a7a77dc13a082` 完成 contract-only typed multi-omics
+输入工程收口。真实 Broker/Registry/model/science 未运行，science `NOT_RUN`、policy
+`NO_NEW_DECISION`，真实 multi-omics model acceptance 仍 pending。
+
+持续本地授权下的下一 eligible gate 是 P19 contract-only；其实际 starting SHA 必须在
+P18 docs-closure 后从 Git history 读取。外置资产、
 真实模型/训练、network、push、
 发布、部署和 operator promotion 仍不在授权范围；这些外部门不阻塞无依赖的 eligible
 本地工程 gate。

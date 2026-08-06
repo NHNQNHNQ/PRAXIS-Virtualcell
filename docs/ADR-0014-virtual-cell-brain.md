@@ -148,5 +148,7 @@ Golden/GEM/Norman science，未创建 evidence 或 operator decision，未修改
 生产 registry 或默认 adapter。P14R/P15R/P16R 与相应 B 阶段仍未运行。
 
 真实 multi-model acceptance 仍待至少两个被明确 policy promotion 的 capability，以及后续
-执行、冲突、partial failure 与科学验收授权。下一 eligible local work unit 是 P18
-contract-only multi-omics cell-state；它不能继承 P17 尚不存在的真实执行或科学证据。
+执行、冲突、partial failure 与科学验收授权。在 P17 completion 当时，下一 eligible local
+work unit 是 P18 contract-only multi-omics cell-state；它不能继承 P17 尚不存在的真实执行或
+科学证据。P18 后续完成状态及当前 next gate 以 [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md)
+和 [document index](INDEX.md) 为准。

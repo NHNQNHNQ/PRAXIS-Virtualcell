@@ -1,16 +1,51 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P17 分支 `codex/p17-virtual-cell-brain`；唯一起始 SHA
-> `ff525a0611901df422161a7143ebfe9d1e051008`
+> 当前文档基线：P18 分支 `codex/p18-multiomics-cell-state`；唯一起始 SHA
+> `f253664239e4b1c9665301cf1bdf4e117a3e9c31`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：`P17_CONTRACT_COMPLETE_REAL_MULTI_MODEL_ACCEPTANCE_PENDING_P18_ELIGIBLE`；
-> completion code SHA `16636f1b2c36e0a0fabb782a662b5b3b934891e0`；tree
-> `321a59eed44c45bf2bb8798714352b3303b92e58`。下述 P4.3–P16E 和 CI 数字仍只绑定
-> 各自 exact SHA/日期；P17 本地工程结果不构成真实多模型验收、科学验证、operator
-> policy、发布或远程证据。
+> 状态：`P18_CONTRACT_COMPLETE_REAL_MULTIOMICS_MODEL_ACCEPTANCE_PENDING`；
+> completion code SHA `626c71ffd1ce18a5adc200f6a6e376e57b269beb`；tree
+> `2b570398caff6cf955d789c3cb4a7a77dc13a082`。下述 P4.3–P17 和 CI 数字仍只绑定
+> 各自 exact SHA/日期；P18 本地工程结果不构成真实 multi-omics model acceptance、
+> 科学验证、operator policy、发布或远程证据。
+
+## Phase 18 `CONTRACT_COMPLETE` 本地证据
+
+P18 新增 strict joint multi-omics model-input compiler，绑定 ordered required/optional slots、
+exact feature alignment、真实 observation join 或 explicit mask、Pack/view/adapter/matrix
+identity。它拒绝补零、插补、静默归一化、single-tensor adapter 授权、tamper/replay 与
+non-finite runtime matrix；固定不创建 Broker execution step，并输出 contract-only abstain。
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_multiomics_model_input.py
+
+python -m pytest -o addopts='' -q praxis_virtualcell/tests \
+  --ignore=praxis_virtualcell/tests/test_mudata_alignment.py \
+  -k 'not golden and not gem and not norman'
+~~~
+
+| Gate | 结果 |
+|---|---|
+| P18 contract | `44 passed` |
+| adjacent directed | `259 passed` |
+| safe Python gate | `1531 passed / 48 skipped / 387 deselected` |
+| authoritative Ruff / format / `py_compile` / `git diff --check` | PASS |
+
+当前解释器缺可选 `mudata`，因此未运行依赖它的 H5MU 测试；global `pip check` 受宿主环境
+既有污染影响，不作为依赖完整性证据。两个 clean offline archive 的完整 wheel
+byte-identical：`1,132,811` bytes，SHA-256
+`015724a90656706c0441e4f4f873ee51f8db87dfaae9de35a3e841e7c70b2b7c`，`367` entries，
+其中 React `14`、tests `0`、AppleDouble `0`。
+
+Registry 保持 5 releases / 0 native / 0 promoted；science `NOT_RUN`，policy
+`NO_NEW_DECISION`，没有执行、release、push 或 deploy。真实 multi-omics model acceptance
+仍 pending。完整边界见 [ADR-0015](ADR-0015-multiomics-model-input.md)、
+[P18 runbook](runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md)和
+[P18 完成报告](../reports/phase18/PHASE18_COMPLETION.md)。
 
 ## Phase 17 `CONTRACT_COMPLETE` 本地证据
 
@@ -65,7 +100,7 @@ python -m pytest -o addopts='' -q praxis_virtualcell/tests \
 当前 registry 是 5 releases / 0 native / 0 promoted；因此 P17 real multi-model acceptance
 仍 pending，所有真实 direct-v2 请求 abstain，science `NOT_RUN`，policy
 `NO_NEW_DECISION`。测试内 `Danio rerio / NCBITaxon:7955` 只在临时 fixture 中存在，未注册。
-下一 eligible 本地 gate 是尚未完成的 P18 contract-only multi-omics。完整边界见
+其后 P18 已仅在 contract-only multi-omics 边界完成；P17 完整边界见
 [ADR-0014](ADR-0014-virtual-cell-brain.md)、
 [P17 runbook](runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md)和
 [P17 完成报告](../reports/phase17/PHASE17_COMPLETION.md)。

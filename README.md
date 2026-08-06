@@ -30,17 +30,22 @@ perturbation→delta-expression 工程合同，当前收口状态为
 `16636f1b2c36e0a0fabb782a662b5b3b934891e0`（tree
 `321a59eed44c45bf2bb8798714352b3303b92e58`）完成 deterministic Virtual Cell Brain
 合同，状态为 `P17_CONTRACT_COMPLETE_REAL_MULTI_MODEL_ACCEPTANCE_PENDING_P18_ELIGIBLE`。
+Phase 18 从 P17 docs-closure `f253664239e4b1c9665301cf1bdf4e117a3e9c31`
+开始，在 `626c71ffd1ce18a5adc200f6a6e376e57b269beb`（tree
+`2b570398caff6cf955d789c3cb4a7a77dc13a082`）完成 strict joint multi-omics
+model-input 合同，状态为 `P18_CONTRACT_COMPLETE_REAL_MULTIOMICS_MODEL_ACCEPTANCE_PENDING`。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
 [P14E 完成报告](reports/phase14e/PHASE14E_COMPLETION.md)及
 [P15E 完成报告](reports/phase15e/PHASE15E_COMPLETION.md)和
 [P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md)及
-[P17 完成报告](reports/phase17/PHASE17_COMPLETION.md)。P14R、P15R 与 P16R 的真实
+[P17 完成报告](reports/phase17/PHASE17_COMPLETION.md)和
+[P18 完成报告](reports/phase18/PHASE18_COMPLETION.md)。P14R、P15R 与 P16R 的真实
 asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B、P15B 与 P16B 均为
 `NOT_RUN`。当前 registry 有 5 个 release、0 个 native、0 个 production-promoted
-capability，因此 P17 没有真实多模型执行或验收，所有 direct-v2 Virtual Experiment
-保持 abstain；下一 eligible 本地 gate 是尚未完成的 contract-only `P18 — Multi-omics`。
+capability；P18 没有真实 multi-omics model execution/acceptance，science 为 `NOT_RUN`，
+policy 为 `NO_NEW_DECISION`。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -248,6 +253,16 @@ species route。当前 0 promoted capabilities，所以真实请求仍是空 DAG
 [P17 runbook](docs/runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md)和
 [P17 完成报告](reports/phase17/PHASE17_COMPLETION.md)。
 
+P18 新增 strict、content-addressed joint multi-omics model-input compiler：ordered required/
+optional slots、exact feature alignment、真实 observation join 或 explicit mask、Pack/view/
+adapter/matrix identity 均 fail closed。它不补零、不插补、不静默归一化，不复用 single-tensor
+adapter contract 授权联合输入，也不创建 Broker execution step；输出固定为 contract-only
+abstain。当前 registry 仍为 5 releases / 0 native / 0 promoted，且环境缺可选 `mudata`，所以
+真实 multi-omics model acceptance 仍 pending。设计、操作和完成边界见
+[P18 ADR](docs/ADR-0015-multiomics-model-input.md)、
+[P18 runbook](docs/runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md)和
+[P18 完成报告](reports/phase18/PHASE18_COMPLETION.md)。
+
 P8 产品化收口随发行物提供三个合成、微型、可审计 Pack：
 `p8-human-tiny`、`p8-mouse-tiny`、`p8-bacteria-tiny`。它们覆盖
 `EnsemblGene` 与 `NCBIGene` 两种 feature namespace，均通过同一个既有
@@ -380,7 +395,10 @@ CI=1 npm run e2e
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P17 边界和跨项目集成 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P18 边界和跨项目集成 |
+| [P18 完成报告](reports/phase18/PHASE18_COMPLETION.md) | exact code/tree、44 focused tests、reproducible wheel 与真实 multi-omics model acceptance 未完成边界 |
+| [P18 Multi-omics Model Input ADR](docs/ADR-0015-multiomics-model-input.md) | ordered slots、join/missingness、Pack/view/adapter/matrix identity 与 contract-only abstain |
+| [P18 Multi-omics Model Input runbook](docs/runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md) | strict contract 审计、tamper/replay 检查与 fail-closed 解读 |
 | [P17 完成报告](reports/phase17/PHASE17_COMPLETION.md) | exact code/tree、deterministic contract 验证、reproducible wheel 与真实多模型验收未完成边界 |
 | [P17 Virtual Cell Brain ADR](docs/ADR-0014-virtual-cell-brain.md) | authoritative DAG/Brain/decision、candidate isolation 与 JobStore v3 identity |
 | [P17 Virtual Experiment DAG runbook](docs/runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md) | direct-v2 contract 审计、tamper/downgrade 检查与 fail-closed 解读 |
@@ -415,7 +433,7 @@ CI=1 npm run e2e
 
 唯一允许的流向是：本地 feature branch → GitHub branch/CI → 审批合入 GitHub `main` → 本地 `main` fast-forward → `.53` 从同一 GitHub SHA fast-forward → 三端 SHA 核对。不要在 `.53` 直接开发，也不要把本地 tag 当成已发布 tag。
 
-本轮 P17 contract/docs closure 窗口未刷新 GitHub 或 `.53`。规范工作树是
+本轮 P18 contract/docs closure 窗口未刷新 GitHub 或 `.53`。规范工作树是
 `/Volumes/T7/PRAXIS-virtualcell`，Git metadata 是
 `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`；任何远程数字只有带日期和 exact
 identity 的只读记录意义。
