@@ -13,7 +13,10 @@ import json
 import math
 import re
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from copy import deepcopy
+from dataclasses import fields as dataclass_fields
+from dataclasses import is_dataclass
 from typing import Any, ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, ValidationError, field_validator, model_validator
@@ -21,6 +24,8 @@ from pydantic import BaseModel, ConfigDict, ValidationError, field_validator, mo
 from praxis_virtualcell.core.request_v2 import VirtualCellRequestV2, _freeze_json, _json_value
 from praxis_virtualcell.data_packs.feature_alignment import (
     AlignmentReport,
+    AlignmentStep,
+    MappingAssetRef,
     ModelFeatureContract,
 )
 from praxis_virtualcell.model_zoo.registry_v2 import AdapterIdentity
@@ -46,8 +51,114 @@ class AdapterContractError(ValueError):
     """An adapter identity, input, or output failed its strict contract."""
 
 
+def _reject_undeclared_model_fields(
+    value: Any,
+    path: str,
+    seen: set[int] | None = None,
+) -> None:
+    seen = set() if seen is None else seen
+    traversable = isinstance(value, (BaseModel, dict, list, tuple, set, frozenset)) or (
+        is_dataclass(value) and not isinstance(value, type)
+    )
+    if traversable:
+        marker = id(value)
+        if marker in seen:
+            return
+        seen.add(marker)
+    if isinstance(value, BaseModel):
+        declared = type(value).model_fields
+        unexpected = set(value.__dict__).difference(declared)
+        pydantic_extra = getattr(value, "__pydantic_extra__", None)
+        if pydantic_extra:
+            unexpected.update(pydantic_extra)
+        if unexpected:
+            raise AdapterContractError(
+                f"{path} contains unknown fields: {sorted(unexpected)}"
+            )
+        for name in declared:
+            _reject_undeclared_model_fields(
+                getattr(value, name), f"{path}.{name}", seen
+            )
+    elif is_dataclass(value) and not isinstance(value, type):
+        declared = {field.name for field in dataclass_fields(value)}
+        unexpected = set(getattr(value, "__dict__", {})).difference(declared)
+        if unexpected:
+            raise AdapterContractError(
+                f"{path} contains unknown fields: {sorted(unexpected)}"
+            )
+        for name in declared:
+            _reject_undeclared_model_fields(
+                getattr(value, name), f"{path}.{name}", seen
+            )
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            _reject_undeclared_model_fields(item, f"{path}.{key}", seen)
+    elif isinstance(value, (list, tuple, set, frozenset)):
+        for index, item in enumerate(value):
+            _reject_undeclared_model_fields(item, f"{path}[{index}]", seen)
+
+
+def _reject_model_type_drift(
+    observed: Any,
+    normalized: Any,
+    path: str,
+    seen: set[tuple[int, int]] | None = None,
+) -> None:
+    seen = set() if seen is None else seen
+    pair = (id(observed), id(normalized))
+    if pair in seen:
+        return
+    seen.add(pair)
+    if isinstance(normalized, BaseModel):
+        if isinstance(observed, Mapping):
+            for name in type(normalized).model_fields:
+                if name in observed:
+                    _reject_model_type_drift(
+                        observed[name],
+                        getattr(normalized, name),
+                        f"{path}.{name}",
+                        seen,
+                    )
+            return
+        if type(observed) is not type(normalized):
+            raise AdapterContractError(f"{path} has a non-canonical model type")
+        for name in type(normalized).model_fields:
+            _reject_model_type_drift(
+                getattr(observed, name),
+                getattr(normalized, name),
+                f"{path}.{name}",
+                seen,
+            )
+    elif is_dataclass(normalized) and not isinstance(normalized, type):
+        if type(observed) is not type(normalized):
+            raise AdapterContractError(f"{path} has a non-canonical dataclass type")
+        for field in dataclass_fields(normalized):
+            _reject_model_type_drift(
+                getattr(observed, field.name),
+                getattr(normalized, field.name),
+                f"{path}.{field.name}",
+                seen,
+            )
+    elif isinstance(normalized, Mapping):
+        if not isinstance(observed, Mapping):
+            raise AdapterContractError(f"{path} has a non-canonical mapping type")
+        for key, value in normalized.items():
+            if key in observed:
+                _reject_model_type_drift(
+                    observed[key], value, f"{path}.{key}", seen
+                )
+    elif isinstance(normalized, (list, tuple)):
+        if not isinstance(observed, (list, tuple)) or len(observed) != len(normalized):
+            raise AdapterContractError(f"{path} has a non-canonical sequence type")
+        for index, (before, after) in enumerate(zip(observed, normalized, strict=True)):
+            _reject_model_type_drift(
+                before, after, f"{path}[{index}]", seen
+            )
+
+
 def _canonical_value(value: Any) -> Any:
     if isinstance(value, BaseModel):
+        _reject_undeclared_model_fields(value, type(value).__name__)
         return _canonical_value(value.model_dump(mode="json"))
     if isinstance(value, AlignmentReport):
         return _canonical_value(value.to_dict())
@@ -137,7 +248,8 @@ class _Contract(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True, arbitrary_types_allowed=True)
 
     def to_dict(self) -> dict[str, Any]:
-        return self.model_dump(mode="json")
+        _reject_undeclared_model_fields(self, type(self).__name__)
+        return self.model_dump(mode="json", serialize_as_any=True)
 
     def fingerprint(self) -> str:
         return _fingerprint(self.to_dict())
@@ -542,12 +654,17 @@ class VirtualCellModelAdapter(ABC):
         """Validate one normalized output against this adapter's exact contract."""
         if not isinstance(envelope, AdapterOutputEnvelope):
             raise TypeError("envelope must be AdapterOutputEnvelope")
+        _reject_undeclared_model_fields(envelope, "adapter output envelope")
         try:
+            observed_envelope = envelope
             fields = AdapterOutputEnvelope.model_fields
             if set(envelope.__dict__).difference(fields):
                 raise AdapterContractError("adapter output envelope has unknown fields")
             envelope = AdapterOutputEnvelope.model_validate(
-                {field: getattr(envelope, field) for field in fields}
+                envelope.model_dump(mode="python", serialize_as_any=True)
+            )
+            _reject_model_type_drift(
+                observed_envelope, envelope, "adapter output envelope"
             )
         except (TypeError, ValueError) as exc:
             raise AdapterContractError("invalid adapter output envelope") from exc
@@ -590,6 +707,7 @@ class VirtualCellModelAdapter(ABC):
         """Validate an immutable prepared input against this adapter's declaration."""
         if not isinstance(prepared, PreparedAdapterInput):
             raise TypeError("prepared must be PreparedAdapterInput")
+        _reject_undeclared_model_fields(prepared, "prepared input")
         contract = self.input_contract
         if (
             prepared.adapter_fingerprint != self.fingerprint()
@@ -658,7 +776,9 @@ class VirtualCellModelAdapter(ABC):
         data["model_input"] = deepcopy(_canonical_value(prepared.model_input))
         data["values"] = normalized_values
         try:
-            return PreparedAdapterInput.model_validate(data)
+            normalized = PreparedAdapterInput.model_validate(data)
+            _reject_model_type_drift(prepared, normalized, "prepared input")
+            return normalized
         except (TypeError, ValueError) as exc:
             raise AdapterContractError("prepared input cannot be normalized") from exc
 
@@ -718,6 +838,16 @@ class VirtualCellModelAdapter(ABC):
         if envelope.abstain or envelope.values is None:
             raise AdapterContractError("cannot project an abstaining adapter output")
         return {envelope.output: _canonical_value(envelope.values)}
+
+    def project_prepared_output(
+        self,
+        prepared: PreparedAdapterInput,
+        envelope: AdapterOutputEnvelope,
+    ) -> dict[str, Any]:
+        """Project only after binding an envelope to its exact prepared input."""
+        return self.project_output(
+            self.validate_prepared_envelope(prepared, envelope)
+        )
 
 
 class AdapterRegistry:
@@ -793,10 +923,30 @@ def _alignment_binding(
     feature_contract: ModelFeatureContract | None,
     alignment_report: AlignmentReport | None,
 ) -> str | None:
+    _reject_undeclared_model_fields(feature_contract, "feature contract")
+    _reject_undeclared_model_fields(alignment_report, "alignment report")
     if (feature_contract is None) != (alignment_report is None):
         raise AdapterContractError("feature contract and alignment report must be provided together")
     if feature_contract is None:
         return None
+    if type(feature_contract) is not ModelFeatureContract:
+        raise AdapterContractError("feature contract has the wrong type")
+    if type(alignment_report) is not AlignmentReport:
+        raise AdapterContractError("alignment report has the wrong type")
+    if any(type(step) is not AlignmentStep for step in alignment_report.steps):
+        raise AdapterContractError("alignment report step has the wrong type")
+    for mapping_asset in (
+        feature_contract.mapping_asset,
+        alignment_report.mapping_asset,
+    ):
+        if mapping_asset is not None and type(mapping_asset) is not MappingAssetRef:
+            raise AdapterContractError("mapping asset has the wrong type")
+    try:
+        ModelFeatureContract.model_validate(
+            feature_contract.model_dump(mode="python", serialize_as_any=True)
+        )
+    except (TypeError, ValidationError, ValueError) as exc:
+        raise AdapterContractError("feature contract is invalid") from exc
     fingerprint = feature_contract.fingerprint()
     if alignment_report.contract_fingerprint != fingerprint:
         raise AdapterContractError("alignment contract fingerprint drift")
@@ -855,6 +1005,15 @@ class DeltaExpressionReferenceAdapter(VirtualCellModelAdapter):
     ) -> PreparedAdapterInput:
         if not isinstance(request, VirtualCellRequestV2):
             raise TypeError("request must be VirtualCellRequestV2")
+        try:
+            observed_request = request
+            _reject_undeclared_model_fields(request, "request")
+            request = VirtualCellRequestV2.model_validate(
+                request.model_dump(mode="python", serialize_as_any=True)
+            )
+            _reject_model_type_drift(observed_request, request, "request")
+        except (TypeError, ValidationError, ValueError) as exc:
+            raise AdapterContractError("invalid request") from exc
         outputs = request.task.requested_outputs or (request.output_modality.name,)
         if (
             request.task.task_type != self.input_contract.task
@@ -1188,8 +1347,12 @@ def run_adapter_conformance(
     )
     deterministic = first.to_dict() == second.to_dict() and first.fingerprint() == second.fingerprint()
     if not first.abstain:
-        first_projection = adapter.validate_projection(adapter.project_output(first))
-        second_projection = adapter.validate_projection(adapter.project_output(second))
+        first_projection = adapter.validate_projection(
+            adapter.project_prepared_output(prepared, first)
+        )
+        second_projection = adapter.validate_projection(
+            adapter.project_prepared_output(prepared, second)
+        )
         if first_projection != second_projection:
             deterministic = False
     if not deterministic:

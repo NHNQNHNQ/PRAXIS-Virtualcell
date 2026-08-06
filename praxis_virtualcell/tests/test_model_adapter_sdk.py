@@ -6,9 +6,9 @@ from copy import deepcopy
 from dataclasses import replace
 
 import pytest
-from pydantic import ValidationError
+from pydantic import Field, ValidationError
 
-from praxis_virtualcell.core.request_v2 import VirtualCellRequestV2
+from praxis_virtualcell.core.request_v2 import SpeciesRef, VirtualCellRequestV2
 from praxis_virtualcell.data_packs.feature_alignment import (
     AlignmentReport,
     ModelFeatureContract,
@@ -20,6 +20,7 @@ from praxis_virtualcell.model_zoo.adapter_sdk import (
     AdapterOutputContract,
     AdapterOutputEnvelope,
     AdapterRegistry,
+    AdapterUncertainty,
     DeltaExpressionReferenceAdapter,
     PreparedAdapterInput,
     VirtualCellModelAdapter,
@@ -220,6 +221,21 @@ def test_prepare_input_binds_request_pack_report_and_exact_feature_alignment():
     assert prepared.alignment_report is report
     assert prepared.model_input["targets"] == ("TP53",)
     assert len(prepared.fingerprint()) == 64
+
+
+def test_prepare_input_rejects_nested_request_subclass_fields():
+    class PromotedSpeciesRef(SpeciesRef):
+        production_promoted: bool = Field(exclude=True)
+
+    adapter = DeltaExpressionReferenceAdapter()
+    request = _request()
+    species = PromotedSpeciesRef(
+        **request.species.model_dump(mode="python"),
+        production_promoted=True,
+    )
+    forged = request.model_copy(update={"species": species})
+    with pytest.raises(AdapterContractError, match="invalid request"):
+        adapter.prepare_input(forged)
 
 
 @pytest.mark.parametrize(
@@ -478,6 +494,25 @@ def test_output_envelope_is_canonical_deterministic_and_does_not_touch_science_p
     assert len(report.fingerprint()) == 64
 
 
+def test_conformance_uses_prepared_bound_projection_hook(monkeypatch):
+    adapter = DeltaExpressionReferenceAdapter()
+    prepared = _prepared(adapter)
+    calls = []
+
+    def prepared_projection(bound, envelope):
+        calls.append(bound.fingerprint())
+        return VirtualCellModelAdapter.project_output(adapter, envelope)
+
+    def reject_standalone(_envelope):
+        raise AssertionError("conformance must not call standalone projection")
+
+    monkeypatch.setattr(adapter, "project_prepared_output", prepared_projection)
+    monkeypatch.setattr(adapter, "project_output", reject_standalone)
+
+    assert run_adapter_conformance(adapter, prepared, _raw()).deterministic is True
+    assert calls == [prepared.fingerprint(), prepared.fingerprint()]
+
+
 @pytest.mark.parametrize(
     ("field", "value"),
     [
@@ -496,6 +531,92 @@ def test_output_envelope_itself_rejects_shape_and_nonfinite_values(field, value)
 def test_output_envelope_json_dict_round_trips_through_strict_validation():
     envelope = DeltaExpressionReferenceAdapter().adapt_output(_prepared(), _raw())
     assert AdapterOutputEnvelope.model_validate(envelope.to_dict()) == envelope
+
+
+@pytest.mark.parametrize(
+    ("field", "extra"),
+    [
+        ("uncertainty", "scientifically_validated"),
+        ("ood", "promotion_eligible"),
+        ("provenance", "production_promoted"),
+    ],
+)
+def test_nested_envelope_model_copy_extras_fail_closed(field, extra):
+    adapter = DeltaExpressionReferenceAdapter()
+    prepared = _prepared(adapter)
+    envelope = adapter.adapt_output(prepared, _raw())
+    nested = getattr(envelope, field).model_copy(update={extra: True})
+    forged = envelope.model_copy(update={field: nested})
+    with pytest.raises(AdapterContractError, match="unknown fields"):
+        adapter.validate_prepared_envelope(prepared, forged)
+
+
+def test_nested_envelope_declared_subclass_fields_fail_closed():
+    class ScientificUncertainty(AdapterUncertainty):
+        scientifically_validated: bool = Field(exclude=True)
+
+    adapter = DeltaExpressionReferenceAdapter()
+    prepared = _prepared(adapter)
+    envelope = adapter.adapt_output(prepared, _raw())
+    uncertainty = ScientificUncertainty(
+        **envelope.uncertainty.model_dump(mode="python"),
+        scientifically_validated=True,
+    )
+    forged = envelope.model_copy(update={"uncertainty": uncertainty})
+    with pytest.raises(AdapterContractError, match="invalid adapter output envelope"):
+        adapter.validate_prepared_envelope(prepared, forged)
+
+
+def test_alignment_report_nested_model_copy_extras_fail_closed():
+    class PromotedFeatureContract(ModelFeatureContract):
+        production_promoted: bool
+
+    adapter = DeltaExpressionReferenceAdapter()
+    contract = _feature_contract(
+        mapping_asset={
+            "asset_id": "p13-test-mapping",
+            "path": "mappings/p13.json",
+            "version": "1.0.0",
+            "sha256": "3" * 64,
+        }
+    )
+    report = _alignment(contract)
+    forged_report = replace(
+        report,
+        mapping_asset=report.mapping_asset.model_copy(
+            update={"scientifically_validated": True}
+        ),
+    )
+    with pytest.raises(AdapterContractError, match="unknown fields"):
+        adapter.prepare_input(
+            _request(),
+            values=[[1.0, 2.0]],
+            feature_contract=contract,
+            alignment_report=forged_report,
+        )
+
+    prepared = adapter.prepare_input(
+        _request(),
+        values=[[1.0, 2.0]],
+        feature_contract=contract,
+        alignment_report=report,
+    ).model_copy(update={"alignment_report": forged_report})
+    with pytest.raises(AdapterContractError, match="unknown fields"):
+        adapter.validate_prepared_input(prepared)
+
+    promoted_contract = PromotedFeatureContract.model_validate(
+        {
+            **contract.model_dump(mode="python"),
+            "production_promoted": True,
+        }
+    )
+    with pytest.raises(AdapterContractError, match="wrong type"):
+        adapter.prepare_input(
+            _request(),
+            values=[[1.0, 2.0]],
+            feature_contract=promoted_contract,
+            alignment_report=_alignment(promoted_contract),
+        )
 
 
 def test_envelope_validation_returns_normalized_nested_contract_objects():
