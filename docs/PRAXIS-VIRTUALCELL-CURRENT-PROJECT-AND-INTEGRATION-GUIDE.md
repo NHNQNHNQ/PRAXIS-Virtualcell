@@ -6,7 +6,7 @@
 >
 > 当前本地仓库：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前完成分支：`codex/p19-controlled-pack-factory`
+> 当前完成分支：`codex/p20-training-pipeline`
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
@@ -55,12 +55,20 @@
 > `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`；状态
 > `P19_CONTRACT_COMPLETE_REAL_EXTERNAL_FIXTURE_OPERATOR_SCIENCE_POLICY_NOT_RUN`
 >
+> 已完成 work unit：`P20 — Virtual Cell Training Pipeline contract`；starting SHA
+> `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`；completion code SHA
+> `a4003704b70f06eb65297ddd32e0695ae8ee146b`；tree
+> `d12d64a7c8d013d8d299272eea88a4ce0431ccab`；source date epoch `1786040663`；状态
+> `COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`
+>
 > 工作树保护清单：不在本文固定；每轮从现场 `git status --short` 动态重建，任何
 > 新 staged/modified/deleted/untracked 路径默认受保护
 >
 > 当前 Cell-first 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
-> 当前下一 work unit：`P20 — Virtual Cell Training Pipeline`；`ELIGIBLE / CONTRACT_ONLY / NOT_COMPLETE`
+> 当前下一 work unit：`P21A — Virtual Cell Benchmark System`；`SYSTEM_ONLY / NOT_COMPLETE`；
+> starting SHA `FINAL_P20_DOCUMENTATION_CLOSURE_SHA`；P21B/P21C
+> `AUTHORIZATION_REQUIRED / NOT_RUN`
 
 本文是一份面向其他项目、开发团队、科研合作者和后续智能体的独立项目说明。它回答四个问题：
 
@@ -89,6 +97,8 @@ PRAXIS-VirtualCell 是一个以显式合同、确定性运行、可审计证据�
   joint model input，同时保持明确 abstention；
 - 将 P7 quarantine receipt 经显式 candidate、完整 review、strict validation 和
   registration-only operator decision 登记为可追溯的 factory-registered Pack；
+- 将 exact P19 factory registration 冻结为 strict、可重放的 contract-only training job，
+  通过固定 `-I -S` tiny worker 生成 safe checkpoint/result/candidate-only model identity；
 - 保存请求、报告、trace、provenance 和 execution identity；
 - 在缺数据、缺模型、不兼容、环境不满足或超出科学范围时明确 abstain；
 - 使用可选 LLM 做自然语言解析和文字解释，但不让 LLM 参与数值预测或最终裁决。
@@ -101,6 +111,7 @@ PRAXIS-VirtualCell 是一个以显式合同、确定性运行、可审计证据�
 - 已完成真实多模型科学验收的 Virtual Cell Brain；
 - 已完成真实 multi-omics 模型、Broker/Registry resolution 或科学验收的平台；
 - 上传任意文件后自动推断 taxon、清洗数据、生成 Pack 或获得模型能力的平台；
+- 已运行真实 candidate training、test/external benchmark 或科学验证的平台；
 - 由 LLM 直接生成生物学数值结论的问答系统；
 - 已经实现的 Community world model 或 Host–Microbiome digital twin。
 
@@ -400,7 +411,35 @@ P19 没有 training、checkpoint、model card、benchmark、evidence 或 promoti
 [P19 runbook](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md) 和
 [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md)。
 
-### 1.9 代码与外部资产许可
+### 1.9 Phase 20 完成边界
+
+P20 从 P19 docs-closure `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`
+开始，在 `codex/p20-training-pipeline` 以 completion code
+`a4003704b70f06eb65297ddd32e0695ae8ee146b` / tree
+`d12d64a7c8d013d8d299272eea88a4ce0431ccab`（source date epoch `1786040663`）完成
+contract-only Virtual Cell Training Pipeline。
+
+入口只接受 explicit absolute `vc.pack-index.v2` 所引用、可由 P19 append-only store 完整
+重放的 committed registration。Stored P19 full candidate tree 是历史 provenance；live
+open/validation 只覆盖 exact manifest、split，以及 leakage audit 通过后 job 冻结且实际
+消费的 train feature/label bytes。Validation/test/external、uploaded code 和其他未消费
+assets 从不打开。
+
+训练 job 双向绑定 Pack、feature/alignment、split/leakage、trainer/code/environment、seed、
+hyperparameters、resource limits 和 candidate model identity。固定 trusted tiny worker 从私有
+临时副本以 Python `-I -S` 运行；这是依赖/导入隔离和 source-hash 边界，不是 OS sandbox
+声明。Checkpoint 是 canonical safe JSON，经 write-new staging、size/hash/cross-binding 重验和
+atomic no-replace commit 后才成为 candidate-only bundle；失败、cancel、timeout 和发布竞态均
+fail closed。
+
+P20 只运行 repository tiny fixtures，没有真实 candidate training、test/external read、GPU、
+network、benchmark/evidence、registry promotion、release 或 deploy。Science `NOT_RUN`，policy
+`NO_NEW_DECISION`；candidate/cataloged 不等于 scientifically validated、promotion eligible 或
+production promoted。完整边界见 [ADR-0017](ADR-0017-virtual-cell-training-pipeline.md)、
+[P20 runbook](runbooks/VIRTUALCELL-TRAINING-PIPELINE.md) 和
+[P20 completion report](../reports/phase20/PHASE20_COMPLETION.md)。
+
+### 1.10 代码与外部资产许可
 
 仓库源码在 `pyproject.toml` 中声明为 MIT License。公共数据集、数据库下载、模型权重、checkpoint 和其他外置科研资产保留各自的许可、引用和使用限制；不能因为仓库代码使用 MIT，就推定这些外部资产也可按 MIT 再分发。
 
@@ -668,8 +707,8 @@ LLM 位于科学执行链之外。
 | Compatibility report | Pack × request × model × environment × adapter × evidence × policy 检查结果 | v1 保留；Pack-aware v2 工程完成 |
 | Execution plan | 可执行步骤及其 fingerprint | v1 保留；Pack-aware v2 工程完成 |
 | Job execution identity | 本次运行绑定的 Pack、release、artifact、environment、adapter、evidence、policy 和 compatibility identity | v1 保留；v2 工程完成 |
+| Training job/result/checkpoint | exact P19 registration、split/leakage、feature、code/environment 和 candidate artifact 的 contract-only identity | P20 工程完成；只验证 tiny deterministic runner，不是 science evidence |
 | Persistent Virtual Cell | cell + dataset + Pack + model 的持久化产品对象 | 尚未实现 |
-| Training job | 上传数据到训练、评估和 promotion 的合同 | 尚未实现 |
 | Community model runtime | 多成员动态和交换预测 | 只有抽象合同，尚无真实模型 |
 
 ---
@@ -718,10 +757,12 @@ P18 继续复用 Pack v0.3、feature alignment 和 Adapter identity，完成 typ
 合同；它没有把 caller-declared marker 改写成 Broker/Registry compatibility 或真实模型能力。
 P19 在更早的数据接入边界增加受控 registration provenance；registration-only operator
 decision 不是 P12 model operator policy，也不能生成 evidence/promotion。
+P20 在该 committed registration 上冻结 contract-only training job/checkpoint/result/candidate
+identities；candidate/cataloged 仍不是 benchmark、science evidence 或 production policy。
 
 ---
 
-## 8. P0–P19 已完成工程工作
+## 8. P0–P20 已完成工程工作
 
 ### Phase 0：可信边界和确定性基线
 
@@ -1024,8 +1065,29 @@ Final code/tree 是 `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` /
 `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`；focused `23 passed / 1 skipped`，combined
 focused+adjacent `108 passed / 1 skipped`，safe `1,554/49/387`，legacy `1,143/58/105`；
 reproducible wheel `1,154,421` bytes / `1231f948e6f5...` / `368` entries。Real external
-fixture/output root/operator/science/policy 未运行。当前下一 eligible 本地 work unit 是 P20 contract-only Training Pipeline；其
-starting SHA 必须从 P19 docs-closure 后的 Git history 读取。
+fixture/output root/operator/science/policy 未运行。
+
+### Phase 20：Virtual Cell Training Pipeline（`COMPLETE — CONTRACT_ONLY`）
+
+P20 从 P19 docs-closure SHA `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`
+开始，以 `a4003704b70f06eb65297ddd32e0695ae8ee146b`、tree
+`d12d64a7c8d013d8d299272eea88a4ce0431ccab` 完成：
+
+- exact P19 registration → frozen strict training job 与 pre-label leakage audit；
+- live read 只限 manifest/split/audit 后实际 train-consumed bytes，其他 Pack assets 不打开；
+- fixed hash-bound `python -I -S` worker，不执行 uploaded code，也不声称 OS sandbox；
+- canonical safe-JSON checkpoint/result 与双向绑定 candidate artifact/card/model identity；
+- write-new staging、atomic no-replace publish、race/cancel/failure/timeout cleanup；
+- 所有 benchmark/science/promotion booleans 保持 false，product policy 为 `NO_NEW_DECISION`。
+
+Focused `56 passed`；P19+P20 `99 passed / 1 skipped`；safe `1,610/49/387`；legacy
+`1,147/58/105`；static clean。Wheel `1,178,805` bytes / SHA-256
+`2273ee71fb58fef543eae358d3df2aefccec42e80fe72a23380200718c223d79` / `370` entries /
+`14` React / `0` tests / `0` AppleDouble。Real candidate training、test/external、science
+均 `NOT_RUN`，policy `NO_NEW_DECISION`。该 wheel 只证明 exact local source/toolchain 可复现，
+不是 pinned dependency closure 或 clean-install evidence。下一 gate 仅为 P21A
+`SYSTEM_ONLY / NOT_COMPLETE`，starting SHA 保留
+`FINAL_P20_DOCUMENTATION_CLOSURE_SHA`。
 
 ---
 
@@ -1167,14 +1229,34 @@ artifact SHA-256
 - `vc.pack-supersession.v1`
 - `vc.pack-factory-store.v1`（exact `.factory-store.json` bytes：`{"schema_version":"vc.pack-factory-store.v1"}\n`）
 - `vc.pack-factory-catalog.v1`
+- `vc.training-environment.v1`
+- `vc.training-resource-limits.v1`
+- `vc.training-resource-observation.v1`
+- `vc.training-asset-binding.v1`
+- `vc.training-split.v1`
+- `vc.training-leakage-overlap.v1`
+- `vc.training-leakage-audit.v1`
+- `vc.training-hyperparameter.v1`
+- `vc.training-job.v1`
+- `vc.candidate-checkpoint.v1`
+- `vc.training-metric.v1`
+- `vc.training-result.v1`
+- `vc.candidate-model-artifact.v1`
+- `vc.candidate-model-card.v1`
+- `vc.training-candidate-model.v1`
+- `vc.training-model-identity.v1`（fingerprint payload）
+- `vc.tiny-json-checkpoint.v1`（safe data-only checkpoint payload）
+- `vc.training-candidate-bundle.v1`
+- `vc.training-run-bundle.v1`
 - `vc.community-pack.v1`
 
 其他项目应按 `schema_version` 路由解析器，不能依靠字段形状猜测版本。
-以上 P12/P13/P14E/P15E/P16E/P17/P18/P19 新增 schema 属于本地 engineering-complete work units；
+以上 P12/P13/P14E/P15E/P16E/P17/P18/P19/P20 新增 schema 属于本地 engineering-complete work units；
 它们尚未发布，外部项目不应仅凭本地 completion 把它们当作已发布协议或
 真实科学能力。P14E/P15E/P16E 的 validation protocols、synthetic fixtures、P17
-contract-only DAG、P18 joint input 与 P19 factory registration 尤其不能被解析为 P12
-validation evidence、真实多模型验收、真实 multi-omics 模型能力或 product promotion。
+contract-only DAG、P18 joint input、P19 factory registration 与 P20 candidate bundle 尤其不能
+被解析为 P12 validation evidence、真实多模型验收、真实 multi-omics 模型能力、科学训练结果
+或 product promotion。
 
 ---
 
@@ -1558,6 +1640,20 @@ praxis-vc pack run \
 ```
 
 如果没有可执行模型，命令应诚实返回 abstain，而不是生成 mock 结果。
+
+### 13.5 P20 contract-only training dry-run
+
+```bash
+praxis-vc training dry-run \
+  --job /absolute/training-job.json \
+  --index /absolute/pack-index.json \
+  --output-root /absolute/write-new-output
+```
+
+该命令只接受 exact P19 factory registration-bound job、explicit absolute index 和当时不存在的
+canonical output root。它不自动选数据、训练真实 candidate、读取 test/external、运行 benchmark
+或生成 evidence/promotion；任何手工 output root 仍需独立 exact 授权。P20 完成证据只使用
+pytest `tmp_path`，不能据此推导一个可复用的外部 output root。
 
 ---
 
@@ -2195,7 +2291,30 @@ completion report，不能把受污染或非 hash-locked 环境改写成 release
 版本仍为 `1.6.0`，没有 release/version bump。完整记录见
 `reports/phase16e/PHASE16E_COMPLETION.md`。
 
-### 24.8 Skip 和 deselect 的含义
+### 24.8 P20 完成状态
+
+P20 starting SHA 为 `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`，completion code
+SHA 为 `a4003704b70f06eb65297ddd32e0695ae8ee146b`，tree 为
+`d12d64a7c8d013d8d299272eea88a4ce0431ccab`，source date epoch 为 `1786040663`。
+Focused P20 为 `56 passed`；P19+P20 为 `99 passed, 1 skipped`；safe gate 为
+`1610 passed, 49 skipped, 387 deselected`；legacy 为
+`1147 passed, 58 skipped, 105 deselected`；static checks clean。
+
+Reproducible wheel 为 `1,178,805` bytes，SHA-256
+`2273ee71fb58fef543eae358d3df2aefccec42e80fe72a23380200718c223d79`，包含 `370`
+entries、`14` React entries、`0` test entries、`0` AppleDouble。Training pipeline source/wheel
+SHA-256 都是 `dd7dbe480c3f000e5345b35fc6358fe2cc1b4377b035c31809d584ce3c869134`；fixed
+worker source/wheel SHA-256 都是
+`4de1ba3b67a67ea24c16b7664058939ae3a634e06cf11601a528aca4c465f02b`。
+这些 bytes 只证明 exact local source/toolchain 可复现，不是 pinned dependency closure 或
+clean-install evidence。
+
+这些 gate 只使用 repository tiny fixtures 和 pytest `tmp_path`。它们没有运行真实 candidate、
+读取 test/external、访问 network/GPU、生成 benchmark/scientific evidence 或作出 product
+policy；science `NOT_RUN`，policy `NO_NEW_DECISION`。完整记录见
+`reports/phase20/PHASE20_COMPLETION.md`。
+
+### 24.9 Skip 和 deselect 的含义
 
 skip/deselect 不能写成：
 
@@ -2216,6 +2335,8 @@ skip/deselect 不能写成：
 - Cell preset 不是持久化 Virtual Cell；
 - 当前 React Chat 不绑定 Pack identity；
 - Pack Factory 只有本地 contract-only CLI/library 和只读 API/UI；没有公共 authoring/write UI；
+- Training Pipeline 只有本地 synchronous contract-only CLI/library；没有真实 candidate service、
+  scheduler、GPU queue 或 benchmark UI；
 - 没有 operator approval UI；
 - 没有持久化 VirtualCell registry；
 - 没有服务器数据安装工作流；
@@ -2245,6 +2366,8 @@ skip/deselect 不能写成：
 - P12 adapter identity 与 P13 executable adapter SDK 已完成接线，但没有新增生产
   growth/fitness adapter、真实模型或 task-scoped science evidence；
 - P12 v2 identities 和 Pack-aware gate 工程完成，但没有新增真实科学 evidence/policy；
+- P20 candidate checkpoint/card/model 只证明 exact tiny contract replay，不是训练质量、真实模型
+  capability、scientific evidence 或 production registry entry；
 - custom-path 低层 ModelZooRegistry 保留显式 v1 compatibility mode，不能称 v2 fully
   governed 产品路径；
 - 当前部署/本地默认环境没有完整真实权重生态；
@@ -2262,6 +2385,8 @@ skip/deselect 不能写成：
 - P16E 没有读取 H5AD 或运行 candidate/additive ridge，没有新的 MSE、paired CI、
   contamination、external K562/platform、real OOD 或 scientific validation；
 - 没有多物种科学能力同时通过的证据；
+- P20 没有真实 candidate training、test/external evaluation、benchmark、external replication
+  或 scientific validation；
 - 少于两个 capability 拥有 exact positive evidence 与 named-operator
   `production_promoted`；P17 contract 已完成，但不能声称真实多模型执行或科学验收；
 - 没有真实 Community model；
@@ -2272,7 +2397,7 @@ skip/deselect 不能写成：
 ### 工程限制
 
 - 当前版本字符串存在发布漂移；
-- P13 Adapter SDK、P14E/P15E/P16E narrow contracts 与 P17 Brain/DAG contract 仅在
+- P13 Adapter SDK、P14E/P15E/P16E narrow contracts、P17 Brain/DAG、P18/P19/P20 contracts 仅在
   本地工程完成，尚未发布；
 - P14E 尚无任意未来 GEM loader 为 `data_only` 的类型级证明；
 - JobStore 是本地文件系统；
@@ -2419,9 +2544,10 @@ artifact hash
 
 ## 28. 后续路线图 P12–P30
 
-P12/P13/P14E/P15E/P16E/P17/P18/P19 行记录已完成的工程 work units；P14R/P14B、
-P15R/P15B 与 P16R/P16B 仍未运行。下一 eligible 本地合同工程是 P20；真实科学或 policy
-窗口不能当作当前能力。
+P12/P13/P14E/P15E/P16E/P17/P18/P19/P20 行记录已完成的工程 work units；P14R/P14B、
+P15R/P15B 与 P16R/P16B 仍未运行。下一 eligible 本地工程仅为 P21A
+`SYSTEM_ONLY / NOT_COMPLETE`；P21B/P21C 未授权、未运行，真实科学或 policy 窗口不能
+当作当前能力。
 
 | 阶段 | 目标 |
 |---|---|
@@ -2439,10 +2565,10 @@ P15R/P15B 与 P16R/P16B 仍未运行。下一 eligible 本地合同工程是 P20
 | P17 | `COMPLETE / CONTRACT_ONLY`：deterministic Virtual Cell Brain DAG/Brain/decision；real multi-model acceptance pending |
 | P18 | `COMPLETE / CONTRACT_ONLY`：typed multi-omics model input；real model acceptance pending |
 | P19 | `COMPLETE / CONTRACT_ONLY`：受控 receipt→RegisteredPack；real fixture/operator/science/policy NOT_RUN |
-| P20 | `ELIGIBLE / CONTRACT_ONLY / NOT_COMPLETE`：training job/result、checkpoint/model identity 和 tiny dry-run |
-| P21A | 冻结 Benchmark System、运行合同和 append-only evidence ledger |
-| P21B | 每个 candidate 的独立 run-only evidence 窗口 |
-| P21C | 每个 exact scope 的独立 operator-only policy 窗口 |
+| P20 | `COMPLETE / CONTRACT_ONLY`：exact P19-bound training job/result、safe checkpoint/model identity 和 tiny dry-run；science `NOT_RUN`；policy `NO_NEW_DECISION` |
+| P21A | `SYSTEM_ONLY / NOT_COMPLETE`：下一 gate；从 `FINAL_P20_DOCUMENTATION_CLOSURE_SHA` 冻结 Benchmark System、运行合同和 append-only evidence ledger |
+| P21B | `AUTHORIZATION_REQUIRED / NOT_RUN`：每个 candidate 的独立 run-only evidence 窗口 |
+| P21C | `AUTHORIZATION_REQUIRED / NOT_RUN`：每个 exact scope 的独立 operator-only policy 窗口 |
 | P22 | Curated Virtual Cell Registry；只导入已有 evidence/policy |
 | P23A | Cell interaction evidence score |
 | P23B | 可选 receiver response；需独立干预数据和授权 |
@@ -2494,8 +2620,11 @@ P17 deterministic Virtual Cell Brain DAG/Brain contract 已完成。当前 regis
 P17 direct-v2 请求必须 fail closed 或 abstain。P18 contract-only typed multi-omics
 model input 也已完成，但 caller-declared adapter marker 未经 Broker/Registry 解析，真实
 数据/模型/science 仍未运行。P19 controlled Pack Factory 已完成本地受控 registration
-合同；真实 external fixture/output root/operator/science/policy 仍未运行。当前下一 eligible
-技术闭环是 P20 contract-only Training Pipeline。
+合同；真实 external fixture/output root/operator/science/policy 仍未运行。P20 Training
+Pipeline 也已在 exact P19-bound、repository tiny、contract-only 边界完成；真实 candidate、
+test/external、benchmark/science 均未运行，policy 为 `NO_NEW_DECISION`。当前下一 eligible 技术闭环仅为 P21A
+Benchmark System/protocol freeze，starting SHA 为未来 P20 文档闭包提交
+`FINAL_P20_DOCUMENTATION_CLOSURE_SHA`；P21B/P21C 未授权、未运行。
 
 在进入更大世界模型之前，最重要的闭环仍然是：
 
@@ -2504,6 +2633,9 @@ model input 也已完成，但 caller-declared adapter marker 未经 Broker/Regi
 → 明确 metadata 和 feature mapping
 → strict Pack validate
 → operator-approved register
+→ 冻结 P20 training job/checkpoint/candidate identity
+→ P21A 先冻结 benchmark protocol
+→ 仅在独立授权的 P21B 窗口训练/评估 exact candidate
 → 绑定真实 ModelCard、权重和 adapter
 → 在 held-out biological groups 上比较预声明 baseline
 → 通过后形成 scientific evidence
@@ -2543,10 +2675,11 @@ model input 也已完成，但 caller-declared adapter marker 未经 Broker/Regi
 16. [P17 Completion Report](../reports/phase17/PHASE17_COMPLETION.md)
 17. [P18 Completion Report](../reports/phase18/PHASE18_COMPLETION.md)
 18. [P19 Completion Report](../reports/phase19/PHASE19_COMPLETION.md)
-19. 本当前项目与集成指南
-20. [Repository Layout](REPOSITORY-LAYOUT.md)
-21. [Installation Guide](INSTALL.md)
-22. 当前 work unit 的 ADR、runbook、contracts、代码和测试
+19. [P20 Completion Report](../reports/phase20/PHASE20_COMPLETION.md)
+20. 本当前项目与集成指南
+21. [Repository Layout](REPOSITORY-LAYOUT.md)
+22. [Installation Guide](INSTALL.md)
+23. 当前 work unit 的 ADR、runbook、contracts、代码和测试
 
 关键 ADR：
 
@@ -2566,6 +2699,7 @@ model input 也已完成，但 caller-declared adapter marker 未经 Broker/Regi
 - [P17 Virtual Cell Brain](ADR-0014-virtual-cell-brain.md)
 - [P18 Multi-omics Model Input](ADR-0015-multiomics-model-input.md)
 - [P19 Controlled Pack Factory](ADR-0016-controlled-pack-factory.md)
+- [P20 Virtual Cell Training Pipeline](ADR-0017-virtual-cell-training-pipeline.md)
 
 关键 runbook：
 
@@ -2583,6 +2717,7 @@ model input 也已完成，但 caller-declared adapter marker 未经 Broker/Regi
 - [P17 Virtual Experiment DAG](runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md)
 - [P18 Multi-omics Model Input](runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md)
 - [P19 Controlled Pack Factory](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md)
+- [P20 Virtual Cell Training Pipeline](runbooks/VIRTUALCELL-TRAINING-PIPELINE.md)
 - [External Disk Git Maintenance](runbooks/EXTERNAL-DISK-GIT-MAINTENANCE.md)
 
 ---
@@ -2628,7 +2763,13 @@ NO_NEW_DECISION，真实 Broker/Registry/model acceptance pending。P19 随后�
 validation→registration contract、v2 index、explicit store/index 和 read-only projection；
 completion code/tree 是 42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5 /
 b4bd63833adc89bd1e30e9595d2cb6b38a3e005f。真实 external fixture/output
-root/operator/science/policy 未运行。下一 eligible 本地 work unit 是 P20 contract-only。
+root/operator/science/policy 未运行。P20 从
+f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a 起步，以
+a4003704b70f06eb65297ddd32e0695ae8ee146b（tree
+d12d64a7c8d013d8d299272eea88a4ce0431ccab）完成 exact P19-bound Training Pipeline
+contract；engineering COMPLETE — CONTRACT_ONLY，science NOT_RUN，policy NO_NEW_DECISION。
+下一 eligible 本地 work unit 仅为 P21A SYSTEM_ONLY / NOT_COMPLETE，starting SHA 保留
+FINAL_P20_DOCUMENTATION_CLOSURE_SHA；P21B/P21C 未授权、未运行。
 
 当前 UI 是：
 选择 Cell Context → Chat → 自动解析/运行 → Report/Abstain，
@@ -2655,6 +2796,10 @@ P18 复用 Pack v0.3 和 alignment contracts 形成 typed joint input；adapter/
 只是未解析 identity marker，不代表 registry compatibility 或 model execution。
 P19 把 P7 receipt 与 exact reviewed/validated candidate chain 绑定到 factory registration；
 P7 species 仍只作 routing hint，factory registration 也不代表 model compatibility/execution。
+P20 把 exact committed registration 绑定到 frozen training job、pre-label leakage audit、fixed
+-I -S worker、safe checkpoint/result 和 candidate-only model identity；stored P19 full tree 只作
+历史 provenance；exact P19 store-chain 与 trusted repository source 另行重验。Pack-root live bytes
+只包括 audit 前的 manifest/split 和 audit 后实际 train-consumed feature/label，且不声明 OS sandbox。
 
 P12 legacy migration 不创建 evidence/policy/promotion；无法精确绑定的 P8/P9
 结果保持 unbound/incomplete。registry lifecycle 是 append-only，Pack list/API 只
@@ -2665,7 +2810,8 @@ P13 同样没有真实模型、数据、权重、science run 或新 operator dec
 evidence/policy；P16E 也没有读取 H5AD、运行 candidate/additive comparator 或生成
 MSE/CI/external evidence/policy。P17 同样没有运行真实多模型 science、P14R/P15R/P16R/B
 或生成 promotion；P18 也没有读取外置 multi-omics assets、调用 model/Broker/Registry、
-运行训练/benchmark 或生成 evidence/policy；contract conformance 只证明工程确定性。
+运行训练/benchmark 或生成 evidence/policy；P20 也没有真实 candidate、test/external、
+benchmark/science evidence，policy 保持 `NO_NEW_DECISION`；contract conformance 只证明工程确定性。
 
 数据存在不等于 Pack；Pack、registry、per-request compatibility/executable、
 scientific evidence 和 product policy 是五个独立层次。只有 exact

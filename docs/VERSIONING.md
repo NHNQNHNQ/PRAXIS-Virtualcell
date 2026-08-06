@@ -1,11 +1,12 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: `P19_CONTRACT_COMPLETE_REAL_EXTERNAL_FIXTURE_OPERATOR_SCIENCE_POLICY_NOT_RUN — LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
+> Status: P20 `COMPLETE — CONTRACT_ONLY`; science `NOT_RUN`; policy `NO_NEW_DECISION`;
+> P21A `SYSTEM_ONLY / NOT_COMPLETE` — `LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
-> Local baseline: branch `codex/p19-controlled-pack-factory`; P19 starting SHA
-> `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be`; completion code SHA/tree
-> `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5` /
-> `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`
+> Local baseline: branch `codex/p20-training-pipeline`; P20 starting SHA
+> `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`; completion code SHA/tree
+> `a4003704b70f06eb65297ddd32e0695ae8ee146b` /
+> `d12d64a7c8d013d8d299272eea88a4ce0431ccab`; source date epoch `1786040663`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -25,6 +26,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P17 Virtual Cell Brain work unit | start `ff525a0611901df422161a7143ebfe9d1e051008`; code `16636f1b2c36e0a0fabb782a662b5b3b934891e0`; tree `321a59eed44c45bf2bb8798714352b3303b92e58` | immutable local Git history plus `reports/phase17/PHASE17_COMPLETION.md` | deterministic contract complete and P18 contract-only eligible; real multi-model acceptance pending because registry is 5 releases / 0 native / 0 promoted; science not run, no new policy/release/version bump; local complete wheel `1,118,410` bytes / `bd3752b90a6d...` / `366` entries / `14` React entries |
 | P18 multi-omics model-input work unit | start `f253664239e4b1c9665301cf1bdf4e117a3e9c31`; code `626c71ffd1ce18a5adc200f6a6e376e57b269beb`; tree `2b570398caff6cf955d789c3cb4a7a77dc13a082` | immutable local Git history plus `reports/phase18/PHASE18_COMPLETION.md` | strict joint-input contract complete; real multi-omics model acceptance pending; registry unchanged at 5/0/0, science not run, no policy/release/version bump; local complete wheel `1,132,811` bytes / `015724a90656...` / `367` entries / `14` React entries |
 | P19 Controlled Pack Factory work unit | start `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be`; code `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5`; tree `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f` | immutable local Git history plus `reports/phase19/PHASE19_COMPLETION.md` | contract-only receipt→registration complete; v2 index reads v1, path-only register retired, public projection read-only; real external fixture/output root/operator/science/policy not run; no version/release bump; reproducible wheel `1,154,421` bytes / `1231f948e6f5...` / `368` entries |
+| P20 Virtual Cell Training Pipeline work unit | start `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`; code `a4003704b70f06eb65297ddd32e0695ae8ee146b`; tree `d12d64a7c8d013d8d299272eea88a4ce0431ccab`; epoch `1786040663` | immutable local Git history plus `reports/phase20/PHASE20_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY`; exact RegisteredPack-bound job/audit/checkpoint/result/candidate chain; success `candidate_cataloged_contract_only`; science `NOT_RUN`, policy `NO_NEW_DECISION`; no real training/test/external/benchmark/evidence/promotion or version/release bump; P21A system-only eligible; exact-local-source/toolchain wheel `1,178,805` bytes / `2273ee71fb58...` / `370` entries, not pinned dependency closure |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -100,6 +102,9 @@ The repository historically mixed product release tags, package metadata, API/ru
 | local Pack index | `vc.pack-index.v2` write, compatible v1/v2 read + Pack/factory fingerprints | `pack_product.py`, `PRAXIS_VC_PACK_INDEX` | v2 binds exact factory registration/store provenance; legacy v1 remains readable with null factory provenance; every use revalidates bytes, semantics and committed store chain |
 | Controlled Pack Factory lifecycle/store | `vc.pack-candidate.v1`, `vc.pack-metadata-review.v1`, `vc.pack-validation-report.v1`, `vc.pack-operator-decision.v1`, `vc.factory-registered-pack.v1`, `vc.pack-supersession.v1` + canonical SHA-256; exact `.factory-store.json` bytes `{"schema_version":"vc.pack-factory-store.v1"}\n` | `pack_factory.py` | append-only receipt→registration identities in an explicitly initialized write-new store; named registration decision is not model policy, evidence, compatibility or execution |
 | Pack Factory public catalog | `vc.pack-factory-catalog.v1` | `pack_factory.py`, `GET /api/pack-factory` | root-free read-only lifecycle projection with reviewer/operator raw IDs, rationale and reason redacted; `write_api_enabled=false`, model compatibility not evaluated, execution false |
+| training job/environment/split/audit | `vc.training-environment.v1`, `vc.training-resource-limits.v1`, `vc.training-hyperparameter.v1`, `vc.training-asset-binding.v1`, `vc.training-split-asset.v1`, `vc.training-split.v1`, `vc.training-leakage-overlap.v1`, `vc.training-leakage-audit.v1`, `vc.training-job.v1` + canonical SHA-256 | `model_zoo/training/pipeline.py` | exact P19 registration, environment, trainer/code, allowlisted train assets and audit-before-label binding; declared lock digest is not authenticated environment truth |
+| training worker/checkpoint/result | `vc.tiny-training-features.v1`, `vc.tiny-training-labels.v1`, `vc.tiny-trainer-input.v1`, `vc.tiny-json-checkpoint.v1`, `vc.candidate-checkpoint.v1`, `vc.training-metric.v1`, `vc.training-resource-observation.v1`, `vc.training-result.v1` + canonical SHA-256 | `model_zoo/training/pipeline.py`, `model_zoo/training/tiny_worker.py` | fixed trusted `python -I -S` worker and safe JSON checkpoint/result; isolation is not an OS syscall sandbox and tiny metrics are not benchmark evidence |
+| training candidate/run bundles | `vc.training-model-identity.v1`, `vc.candidate-model-artifact.v1`, `vc.candidate-model-card.v1`, `vc.training-candidate-model.v1`, `vc.training-run-bundle.v1`, `vc.training-candidate-bundle.v1` + canonical SHA-256 | `model_zoo/training/pipeline.py` | candidate-only bidirectional identities; `candidate_cataloged_contract_only` is not registry insertion, scientific validation, promotion eligibility or production promotion |
 | Pack compatibility surface | `vc.pack-compatibility-surface.v1` | `pack_product.py`, `/api/packs/compatibility` | public path-redacted projection of v1/v2 execution plans; planning is read-only and is not execution evidence |
 | job execution identity | `vc.job-execution-identity.v1`, `.v2`, or `.v3` + canonical JSON SHA-256 | `io/job_store.py` | v1 remains parseable; v2 locks request/report/outcome and Pack/release/component/evidence/policy state; v3 additionally binds Brain/DAG and contract-only report semantics; companion-backed load recomputes identity without rewriting historical bytes |
 | public data catalog | `vc.data-catalog.v1` | `praxis_virtualcell/catalogs/data_catalog.yaml`, `praxis_vc_api/services/data_portal_service.py` | strict public metadata plus source terms and external-file size/hash allowlist; catalog/file availability does not imply Pack/model/scientific status |
@@ -211,6 +216,37 @@ See [ADR-0016](ADR-0016-controlled-pack-factory.md), the
 [P19 runbook](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md), and the
 [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md).
 
+P20 adds the RegisteredPack-bound synchronous training contracts inside the same unpublished
+`1.6.0` candidate. It starts at P19 docs-closure
+`f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a` and completes at code/tree
+`a4003704b70f06eb65297ddd32e0695ae8ee146b` /
+`d12d64a7c8d013d8d299272eea88a4ce0431ccab` with source date epoch `1786040663`.
+The runner replays exact P19 registration provenance and verifies trusted repository sources. Within
+the Pack-root asset-byte boundary it reads the current manifest and split metadata before audit, then
+opens train-consumed feature/label bytes only after audit; the stored P19 tree remains historical
+provenance, and test/external/unconsumed/uploaded code-like assets are never opened. Its fixed trusted
+worker is an isolated `python -I -S` subprocess, not an OS syscall sandbox. Environment identity
+separates the caller-declared lock digest from the observed installed-distribution digest and makes
+no authentication claim.
+
+Success is exactly `candidate_cataloged_contract_only`. Focused P20 is `56 passed`; P19+P20 adjacent
+is `99 passed / 1 skipped`; safe is `1,610 passed / 49 skipped / 387 deselected`; legacy is
+`1,147 passed / 58 skipped / 105 deselected`. Ruff lint, targeted format, `py_compile` and diff
+checks pass. Two
+offline exact-code wheels are byte-identical at `1,178,805` bytes /
+`2273ee71fb58fef543eae358d3df2aefccec42e80fe72a23380200718c223d79` / `370` entries / `14`
+React entries, with no tests or AppleDouble; source/wheel hashes match for `pipeline.py`
+(`dd7dbe480c3f000e5345b35fc6358fe2cc1b4377b035c31809d584ce3c869134`) and `tiny_worker.py`
+(`4de1ba3b67a67ea24c16b7664058939ae3a634e06cf11601a528aca4c465f02b`). Builds used cached
+`npm ci --offline` and the already-installed Python frontend with no isolation or dependency check;
+they are not pinned dependency-closure or clean-install evidence. This changes no product SemVer,
+API/runtime protocol, release or publication. Real training, test/external evaluation,
+benchmark, science, evidence, registry promotion, push and deploy remain not run; policy is
+`NO_NEW_DECISION`. Next eligible work is P21A system-only; P21B/P21C are unauthorized and not run.
+See [ADR-0017](ADR-0017-virtual-cell-training-pipeline.md), the
+[P20 runbook](runbooks/VIRTUALCELL-TRAINING-PIPELINE.md), and the
+[P20 completion report](../reports/phase20/PHASE20_COMPLETION.md).
+
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
 ## Namespace contract
@@ -244,6 +280,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | execution step/plan schema + plan ID | explicit `vc.execution-plan.v1`, or `vc.execution-step.v2` and `vc.execution-plan.v2` with content-derived `plan_*` | canonical step/report/wrapper/agent binding or plan identity semantics change incompatibly | plan creation proves prediction correctness, scientific validation or promotion |
 | Pack product record/catalog/index schemas | explicit `vc.pack-record.v1`, `vc.pack-catalog.v1`, v1-readable/`vc.pack-index.v2`-written index; catalog may nest `vc.model-registry-catalog.v2` | incompatible public metadata, index-field, identity binding or registry projection semantics | legacy readability or registration proves per-request compatibility or scientific validity |
 | Pack Factory lifecycle/store/catalog schemas + fingerprints | explicit `vc.pack-candidate.v1`, `vc.pack-metadata-review.v1`, `vc.pack-validation-report.v1`, `vc.pack-operator-decision.v1`, `vc.factory-registered-pack.v1`, `vc.pack-supersession.v1`, exact `.factory-store.json` marker bytes `{"schema_version":"vc.pack-factory-store.v1"}\n` and `vc.pack-factory-catalog.v1` plus canonical JSON SHA-256 | receipt/candidate/review/validation/decision/registration/supersession identity, initialized-store ownership or public redaction semantics change incompatibly | an arbitrary directory is a store, or factory registration is model compatibility, execution, evidence, scientific validation or product policy |
+| training pipeline schemas + fingerprints | explicit P20 job/environment/split/audit, worker/checkpoint/result and candidate/run schema literals listed above plus canonical JSON SHA-256 | job/environment/split/audit/checkpoint/result/candidate identity or serialization semantics change incompatibly | contract-only dry-run is real training, benchmark evidence, scientific validation, registry insertion or promotion policy |
 | Pack compatibility surface schema | explicit `vc.pack-compatibility-surface.v1` | incompatible path-redaction or public execution-plan projection | a compatibility response proves successful execution |
 | job execution identity schema + fingerprint | explicit `vc.job-execution-identity.v1`, `vc.job-execution-identity.v2` or `vc.job-execution-identity.v3` and content identity | incompatible request/report/outcome/Pack/release/component/evidence/policy identity-lock semantics; v3 also binds Brain/DAG and companion-backed contract-only report semantics | read-only loading may rewrite old bytes, schema downgrade may bypass current bindings, or immutable provenance proves model quality/validation/promotion |
 | public data catalog schema | explicit `vc.data-catalog.v1` | incompatible metadata, source/terms, identity or file-verification semantics | file availability, Pack validity, model compatibility or scientific validity |
@@ -263,7 +300,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented history through the current P19 contract-complete bytes:
+Implemented history through the current P20 contract-complete bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -272,7 +309,7 @@ Implemented history through the current P19 contract-complete bytes:
 5. `/api/health` separately exposes product, API protocol, runtime protocol, and injected build SHA while retaining `runtime_version="v0.3"`.
 6. The UI consumes backend `product_version` and `git_sha`; an E2E mock with product `9.9.9` proves that it does not invent this truth from frontend metadata.
 7. `npm version 1.6.0 --no-git-tag-version` synchronized the private package and lock root as a generated mirror. Neither is manually authoritative.
-8. The full release wheel is built with hash-locked Python 3.13 build dependencies and contains the packaged React UI; clean-install verification reads the installed distribution metadata rather than the checkout.
+8. The normative full-release workflow requires hash-locked Python 3.13 build dependencies, packaged React UI, and clean-install verification against installed distribution metadata. P20's contract-closure wheel is narrower exact-local-source/toolchain evidence and did not satisfy this release gate.
 9. The release container installs that same wheel into `/opt/venv`, injects `GIT_SHA` into both its OCI revision label and health response, and never infers identity from an image tag or embedded `.git` directory.
 10. W4B donor adapters use a checkpoint-content identity as their per-call model version and validate the expected slot/class before loading weights. Other ML callers retain their existing explicit or class fallback, so this must not be generalized to every registry model.
 11. P7 adds backward-compatible `vc.api.v1` endpoints and a user-visible data-resource page inside the still-unpublished `1.6.0` minor candidate. It adds independent `vc.data-catalog.v1` and `vc.upload-receipt.v1` contracts; no product tag or API/runtime protocol bump is inferred.
@@ -345,6 +382,16 @@ Implemented history through the current P19 contract-complete bytes:
     `1231f948e6f5...` / `368` entries. No product/API/runtime version bump, release, tag, training,
     checkpoint, evidence, push or deploy is created; network, external fixture/output root and real
     operator/science/policy remain not run.
+26. P20 starts at P19 docs-closure `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`
+    and adds an exact RegisteredPack-bound frozen job, pre-label leakage audit, fixed trusted tiny
+    worker, safe JSON checkpoint/result and candidate-only identity chain. Final code/tree are
+    `a4003704b70f06eb65297ddd32e0695ae8ee146b` /
+    `d12d64a7c8d013d8d299272eea88a4ce0431ccab`; its exact-local-source/toolchain wheel is
+    reproducible at `1,178,805` bytes / `2273ee71fb58...` / `370` entries, but is not pinned
+    dependency-closure or clean-install evidence. Success is only
+    `candidate_cataloged_contract_only`; science is `NOT_RUN`, policy is `NO_NEW_DECISION`, and no
+    real training/test/external/benchmark/evidence/promotion, product/API/runtime version bump,
+    release, tag, push or deploy is created. P21A system-only is next eligible; P21B/P21C are not run.
 
 ## Release invariants
 
@@ -413,7 +460,20 @@ domain/bundle schemas, `vc.pack-record.v1`, `vc.pack-catalog.v1`,
 `vc.pack-operator-decision.v1`, `vc.factory-registered-pack.v1`,
 `vc.pack-supersession.v1`, `vc.pack-factory-store.v1`, `vc.pack-factory-catalog.v1`,
 `vc.pack-compatibility-surface.v1`,
+`vc.training-environment.v1`, `vc.training-resource-limits.v1`,
+`vc.training-hyperparameter.v1`, `vc.training-asset-binding.v1`,
+`vc.training-split-asset.v1`, `vc.training-split.v1`,
+`vc.training-leakage-overlap.v1`, `vc.training-leakage-audit.v1`,
+`vc.training-job.v1`, `vc.tiny-training-features.v1`,
+`vc.tiny-training-labels.v1`, `vc.tiny-trainer-input.v1`,
+`vc.tiny-json-checkpoint.v1`, `vc.candidate-checkpoint.v1`,
+`vc.training-metric.v1`, `vc.training-resource-observation.v1`,
+`vc.training-result.v1`, `vc.training-model-identity.v1`,
+`vc.candidate-model-artifact.v1`, `vc.candidate-model-card.v1`,
+`vc.training-candidate-model.v1`, `vc.training-run-bundle.v1`,
+`vc.training-candidate-bundle.v1`,
 `vc.job-execution-identity.v1`, `vc.job-execution-identity.v2`,
+`vc.job-execution-identity.v3`,
 `vc.data-catalog.v1`, `vc.upload-receipt.v1`,
 `vc.golden-norman.v1`, `vc.golden-baseline.v1`,
 `vc.golden-evaluation.v1`, `vc.golden-artifact-manifest.v1`,

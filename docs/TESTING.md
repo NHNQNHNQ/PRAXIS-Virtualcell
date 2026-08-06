@@ -1,16 +1,96 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P19 分支 `codex/p19-controlled-pack-factory`；唯一起始 SHA
-> `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be`
+> 当前文档基线：P20 分支 `codex/p20-training-pipeline`；唯一起始 SHA
+> `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：`P19_CONTRACT_COMPLETE_REAL_EXTERNAL_FIXTURE_OPERATOR_SCIENCE_POLICY_NOT_RUN`；
-> completion code SHA `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5`；tree
-> `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`；source date epoch `1786034362`。
-> 下述 P4.3–P18 和 CI 数字仍只绑定各自 exact SHA/日期；P19 本地工程结果不构成真实
-> external ingestion、operator acceptance、科学验证、product policy、发布或远程证据。
+> 状态：P20 `COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`；policy
+> `NO_NEW_DECISION`；completion code SHA
+> `a4003704b70f06eb65297ddd32e0695ae8ee146b`；tree
+> `d12d64a7c8d013d8d299272eea88a4ce0431ccab`；source date epoch `1786040663`。
+> 下述 P4.3–P19 和 CI 数字仍只绑定各自 exact SHA/日期；P20 本地工程结果不构成真实
+> candidate training、test/external evaluation、benchmark、科学验证、product policy、
+> promotion、发布或远程证据。下一 gate 仅为 `P21A SYSTEM_ONLY / NOT_COMPLETE`；
+> P21B/P21C 未授权、未运行。
+
+## Phase 20 `COMPLETE — CONTRACT_ONLY` 本地证据
+
+P20 新增 exact P19 RegisteredPack→冻结 training job→pre-label leakage audit→固定 tiny
+worker→safe JSON checkpoint/result→candidate-only model identity 的同步本地链。成功状态固定为
+`candidate_cataloged_contract_only`；job、audit、checkpoint、result、artifact、card 和
+candidate model 双向绑定，不写 production registry、benchmark 或 evidence ledger。
+
+runner 在打开 train label 前完成 audit。在 Pack-root asset-byte 边界内，current manifest 与
+split metadata 在 audit 前读取，train-consumed feature/label bytes 只在 audit 通过后打开；
+stored P19 tree 只是历史 provenance。Test/external、未消费或上传的 code-like asset 从未打开。
+Exact P19 store-chain replay 与受信 repository source verification 仍独立执行。固定可信 worker 以隔离的
+`python -I -S` subprocess 运行，但不是 OS syscall sandbox。environment 同时记录调用方声明的
+lock digest 与实际观察到的 installed-distribution digest，不声称认证调用方声明。
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_training_pipeline.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -ra \
+  praxis_virtualcell/tests/test_training_pipeline.py \
+  praxis_virtualcell/tests/test_pack_factory.py \
+  praxis_virtualcell/tests/test_pack_product.py
+
+python -m pytest -o addopts='' -q praxis_virtualcell/tests \
+  --ignore=praxis_virtualcell/tests/test_mudata_alignment.py \
+  -k 'not golden and not gem and not norman'
+
+python -m ruff check \
+  praxis_virtualcell/cli.py \
+  praxis_virtualcell/data_packs/manifest.py \
+  praxis_virtualcell/model_zoo/training \
+  praxis_virtualcell/pack_product.py \
+  praxis_virtualcell/tests/test_training_pipeline.py
+
+python -m ruff format --check \
+  praxis_virtualcell/model_zoo/training/pipeline.py \
+  praxis_virtualcell/model_zoo/training/tiny_worker.py \
+  praxis_virtualcell/tests/test_training_pipeline.py
+
+python -m py_compile \
+  praxis_virtualcell/cli.py \
+  praxis_virtualcell/data_packs/manifest.py \
+  praxis_virtualcell/model_zoo/training/__init__.py \
+  praxis_virtualcell/model_zoo/training/pipeline.py \
+  praxis_virtualcell/model_zoo/training/tiny_worker.py \
+  praxis_virtualcell/pack_product.py
+
+git diff --check
+~~~
+
+| Gate | 结果 |
+|---|---|
+| P20 focused | `56 passed / 158.74s` |
+| P19 + P20 adjacent | `99 passed / 1 skipped / 180.33s` |
+| safe Python gate | `1,610 passed / 49 skipped / 387 deselected / 290.17s` |
+| legacy gate | `1,147 passed / 58 skipped / 105 deselected / 62.44s` |
+| Ruff lint / targeted format / `py_compile` / diff | PASS |
+| reproducible packaging / ZIP integrity | PASS；wheel `1,178,805` bytes；SHA-256 `2273ee71fb58fef543eae358d3df2aefccec42e80fe72a23380200718c223d79`；`370` entries |
+
+P19+P20 gate 的一个 skip 是本地未安装 `mudata`；没有联网补装，也没有记为 pass。两个
+exact-code offline build byte-identical，React `14`、tests `0`、AppleDouble `0`；
+source/wheel `pipeline.py` SHA-256 均为
+`dd7dbe480c3f000e5345b35fc6358fe2cc1b4377b035c31809d584ce3c869134`，source/wheel
+`tiny_worker.py` SHA-256 均为
+`4de1ba3b67a67ea24c16b7664058939ae3a634e06cf11601a528aca4c465f02b`。
+构建使用 Node `25.8.2` / npm `11.11.1` 和 Python `3.13.12` / build `1.5.0` /
+setuptools `70.2.0`；由于本地没有 exact pinned backend wheels，Python build 明确使用
+`--no-isolation --skip-dependency-check`。因此该证据不声称 pinned dependency closure 或 clean install。
+
+所有成功 training-run artifact 和 test output 只位于 pytest `tmp_path`；wheel 仅写入独立
+`/tmp` packaging roots。没有授权 manual/external training output root，也没有真实 training、
+test/external read、network、GPU、remote、benchmark、science 或 evidence；policy 为
+`NO_NEW_DECISION`，promotion 为 false，也没有 version bump、release、push 或 deploy。完整边界见
+[ADR-0017](ADR-0017-virtual-cell-training-pipeline.md)、
+[P20 runbook](runbooks/VIRTUALCELL-TRAINING-PIPELINE.md) 和
+[P20 completion report](../reports/phase20/PHASE20_COMPLETION.md)。
 
 ## Phase 19 `CONTRACT_COMPLETE` 本地证据
 
@@ -1047,6 +1127,6 @@ C4 的 build budget 实测 initial JavaScript aggregate 为 226,046 bytes（gzip
 首次修复后的 candidate `ee36d7948047f346f55a02d62ccaac84391e3c20` 经精确授权快进发布。对应 [run 29971566980](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/actions/runs/29971566980) 的实际结果为 Python core、frontend/Playwright、reproducible wheel、Linux release container **PASS**；legacy **FAIL**，汇总 `1 failed / 1135 passed / 59 skipped / 105 deselected`。唯一失败 `test_huge_output_capped_not_ooming` 是 Linux dash 派生的 `cat` 在直接 shell 被 kill 后仍持有 pipe；详见 [D1a retry report](status/PHASE-D1A-CI-RETRY-2026-07-23.md)。本地修复 `6a81987` 还关闭了 pipe 提前关闭绕过 timeout 与上层取消遗留进程组两个同源缺口。
 
 “存在 run”不等于 CI 全绿，也不证明这些 job 是 branch-protection required checks。
-以上 D1a 指令和 SHA 只属于当时的发布窗口，已不构成当前行动授权。P13 窗口未读取
+以上 D1a 指令和 SHA 只属于当时的发布窗口，已不构成当前行动授权。当前 P20 窗口未读取
 或修改 GitHub `main`/tag、`.53` 或任何远程状态；未来 CI、push、发布和部署仍须以
 届时现场 HEAD 获得独立精确授权。

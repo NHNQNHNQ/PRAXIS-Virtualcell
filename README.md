@@ -39,6 +39,14 @@ Phase 19 从 P18 docs-closure
 `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5`（tree
 `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f`）完成 Controlled Pack Factory 工程合同，
 状态为 `P19_CONTRACT_COMPLETE_REAL_EXTERNAL_FIXTURE_OPERATOR_SCIENCE_POLICY_NOT_RUN`。
+Phase 20 从 P19 docs-closure `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`
+开始，在分支 `codex/p20-training-pipeline` 的
+`a4003704b70f06eb65297ddd32e0695ae8ee146b`（tree
+`d12d64a7c8d013d8d299272eea88a4ce0431ccab`，source date epoch `1786040663`）
+完成 RegisteredPack-bound Virtual Cell Training Pipeline 工程合同，状态为
+`COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`，policy `NO_NEW_DECISION`。下一可进入 gate
+仅为 `P21A SYSTEM_ONLY / NOT_COMPLETE`；P21B/P21C 未授权、未运行；没有 product/API/runtime
+version bump、release 或 push。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
@@ -47,12 +55,18 @@ exact 验证与克制的科学/policy 边界见
 [P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md)及
 [P17 完成报告](reports/phase17/PHASE17_COMPLETION.md)和
 [P18 完成报告](reports/phase18/PHASE18_COMPLETION.md)及
-[P19 完成报告](reports/phase19/PHASE19_COMPLETION.md)。P14R、P15R 与 P16R 的真实
+[P19 完成报告](reports/phase19/PHASE19_COMPLETION.md)和
+[P20 完成报告](reports/phase20/PHASE20_COMPLETION.md)。P14R、P15R 与 P16R 的真实
 asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B、P15B 与 P16B 均为
 `NOT_RUN`。当前 registry 有 5 个 release、0 个 native、0 个 production-promoted
 capability；P18 没有真实 multi-omics model execution/acceptance，science 为 `NOT_RUN`，
 policy 为 `NO_NEW_DECISION`。P19 的 Git 外 real fixture/output root、真实 operator、
 science 与 policy 也未运行；factory registration 不等于模型兼容、执行或 promotion。
+P20 的成功 literal 仅为 `candidate_cataloged_contract_only`：它不是真实 candidate
+training、benchmark、evidence、registry 或 promotion。在 Pack-root asset-byte 边界内，current
+manifest 与 split metadata 在 audit 前读取，train-consumed feature/label bytes 只在 audit
+通过后打开；stored P19 tree 仅作历史 provenance，test/external、未消费或上传的 code-like
+asset 从未打开。Exact P19 store-chain replay 与受信 repository source verification 仍独立执行。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -434,7 +448,10 @@ CI=1 npm run e2e
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P19 边界和跨项目集成 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P20 边界和跨项目集成 |
+| [P20 完成报告](reports/phase20/PHASE20_COMPLETION.md) | exact training-contract closure、reproducible local-toolchain wheel 与真实 training/test/external/science 非运行、policy `NO_NEW_DECISION` |
+| [P20 Training Pipeline ADR](docs/ADR-0017-virtual-cell-training-pipeline.md) | RegisteredPack binding、audit-before-label、fixed worker 与 candidate-only artifact 边界 |
+| [P20 Training Pipeline runbook](docs/runbooks/VIRTUALCELL-TRAINING-PIPELINE.md) | local contract gates、read ordering、atomic artifact publish/cleanup 与 P21A handoff |
 | [P19 完成报告](reports/phase19/PHASE19_COMPLETION.md) | controlled registration、v2 index/read-only catalog 与 real fixture/operator/science/policy 非运行边界 |
 | [P19 Controlled Pack Factory ADR](docs/ADR-0016-controlled-pack-factory.md) | receipt→registration identities、explicit store/index 与 pending→committed fail-closed |
 | [P19 Controlled Pack Factory runbook](docs/runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md) | local CLI migration、store marker、validation/public projection 审计 |
@@ -458,7 +475,7 @@ CI=1 npm run e2e
 | [P13 Model Adapter SDK runbook](docs/runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md) | adapter 注册、conformance、运行时审计和定向验证 |
 | [P12 Model Zoo v2 ADR](docs/ADR-0009-virtualcell-model-zoo-v2.md) | 当前分层 identity、迁移、fail-closed 和安全加载边界 |
 | [P12 Model Zoo v2 runbook](docs/runbooks/VIRTUALCELL-MODEL-ZOO-V2.md) | 当前只读操作、验证命令和状态解释 |
-| [P12–P30 顺序总提示词](docs/PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md) | 当前状态机、动态 work-unit 选择和授权纪律 |
+| [P12–P30 顺序总提示词](docs/PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md) | superseded 历史状态机/授权材料；不是当前 action authority |
 | [P12–P30 执行路线](docs/PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) | 详细 scope、硬门和条件式授权模板 |
 | [P12–P30 完成清单](docs/PHASE12-30-DETAILED-COMPLETION-CHECKLIST.md) | 工程、科学和 policy 分离的验收台账 |
 | [P12–P30 协调提示词](docs/PHASE12-30-MASTER-PROMPT.md) | 长期协调边界；不得替代现场 Git 证据 |
@@ -475,7 +492,7 @@ CI=1 npm run e2e
 
 唯一允许的流向是：本地 feature branch → GitHub branch/CI → 审批合入 GitHub `main` → 本地 `main` fast-forward → `.53` 从同一 GitHub SHA fast-forward → 三端 SHA 核对。不要在 `.53` 直接开发，也不要把本地 tag 当成已发布 tag。
 
-本轮 P19 contract/docs closure 窗口未刷新 GitHub 或 `.53`。规范工作树是
+本轮 P20 contract/docs closure 窗口未刷新 GitHub 或 `.53`。规范工作树是
 `/Volumes/T7/PRAXIS-virtualcell`，Git metadata 是
 `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`；任何远程数字只有带日期和 exact
 identity 的只读记录意义。
