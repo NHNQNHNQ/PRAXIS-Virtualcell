@@ -2,7 +2,7 @@
 
 > Audited: 2026-08-07
 >
-> Status: `CURRENT_DOCUMENT_MAP — P22 COMPLETE — CONTRACT_ONLY; SCIENCE NOT_RUN; POLICY NO_NEW_DECISION`
+> Status: `CURRENT_DOCUMENT_MAP — P23A COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE; SCIENCE NOT_RUN; POLICY NO_NEW_DECISION`
 
 This is the navigation authority for the repository. It does not make every linked document current: each section explicitly distinguishes live truth, frozen evidence, active plans, drafts, and history.
 
@@ -11,8 +11,8 @@ This is the navigation authority for the repository. It does not make every link
 When documents disagree, use this order:
 
 1. Exact local bytes, `git rev-parse` identity, immutable artifacts and the current work-unit completion report.
-2. [README](../README.md), the [P22 completion report](../reports/phase22/PHASE22_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md), [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md), [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md), [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
-3. The latest completed phase ADR/runbook—P22 uses [ADR-0019](ADR-0019-curated-virtual-cell-registry.md) and the [Curated Registry runbook](runbooks/VIRTUALCELL-CURATED-REGISTRY.md); P21A remains documented by [ADR-0018](ADR-0018-virtual-cell-benchmark-system.md) and the [Benchmark System runbook](runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md)—for implemented contract and validation boundaries.
+2. [README](../README.md), the [P23A completion report](../reports/phase23a/PHASE23A_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P22 completion report](../reports/phase22/PHASE22_COMPLETION.md), [P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md), [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md), [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md), [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
+3. The latest completed phase ADR/runbook—P23A uses [ADR-0020](ADR-0020-cell-interaction-evidence-contract.md) and the [Cell Interaction Evidence runbook](runbooks/CELL-INTERACTION-EVIDENCE.md); P22 remains documented by [ADR-0019](ADR-0019-curated-virtual-cell-registry.md) and the [Curated Registry runbook](runbooks/VIRTUALCELL-CURATED-REGISTRY.md)—for implemented contract and validation boundaries.
 4. [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) for frozen scientific capability and claim boundaries.
 5. [Three-Way Sync State](status/SYNC-STATE.md) only for its dated local/GitHub/`.53` observations; it is not fresh remote authorization.
 6. Dated plans, handoffs, findings, papers, release notes and [Project State 2026-07-18](status/PROJECT-STATE-2026-07-18.md) as historical evidence for their stated commit/date only.
@@ -75,15 +75,41 @@ independently persisted checkpoint authorize and anchor the log; verification an
 reauthorizes every suffix record. Until a revoke/supersede tail is externally checkpointed, rollback
 to the prior checkpoint remains possible. Hashes are not issuer authentication. The default curated
 store/catalog is absent or empty, public query is Python-only/redacted/non-executable, and no real
-lifecycle, HTTP/UI/runtime/install/execution, release or deploy occurred. P23A is the next eligible
-local contract-only work unit; it is evidence-only and cannot produce receiver response or causal claims.
+lifecycle, HTTP/UI/runtime/install/execution, release or deploy occurred.
+P23A then completed from P22 docs-closure
+`2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4` at code
+`2b894966cd00b2af2fafbf8f009566dd69f393a7` / tree
+`00bd98b0fd14091f4528115dcc66730264d5803a` with source date epoch `1786061504`.
+It adds a strict P13-shaped evidence-only contract for one directed sender/receiver pair and a supplied
+unit-interval synthetic fixture. The sole projection is `interaction_evidence_score`; receiver response,
+effect size, causal language, legacy co-culture payloads and unbound output are rejected. No real release
+state, paired evidence, scorer/model, baseline/CI/OOD science gate or execution was verified or run; no
+default adapter registration or registry mutation occurred. Engineering is
+`COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`, science `NOT_RUN`, policy
+`NO_NEW_DECISION`. P21B/P21C and optional P23B remain
+`AUTHORIZATION_REQUIRED / NOT_RUN`. P24 is the next sequential phase but the First Real Community
+Adapter requires separately authorized exact real assets/model/output window; it is
+`AUTHORIZATION_REQUIRED / NOT_RUN`, with no eligible fake contract-only scaffold.
+
+P23A validation is focused `107 passed / 41.71s`, affected `495 passed / 1 skipped / 116.55s`,
+safe `1,787 passed / 49 skipped / 387 deselected / 367.11s` and legacy
+`1,147 passed / 58 skipped / 105 deselected / 57.38s`. The source/wheel module SHA-256 is
+`d1ba8d8054bf91c4a54a215c331fef65557df3954dba730998821ea9f70743cd`; two wheels are
+byte-identical at `1,226,514` bytes /
+`e78f40f0f4fe7354e3c660d6612a8ee60a1b2dd61af2fc606a67d01e67ac601e` / `373`
+entries / `14` React entries / no tests or AppleDouble. Toolchain: Python `3.13.12`, build `1.5.0`,
+setuptools `70.2.0`, packaging `26.0`, Node `25.8.2`, npm `11.11.1`, Vite `8.1.2`.
+This is exact local source/toolchain reproducibility, not dependency-closure, clean-install or release proof.
 
 ## Current state
 
 | Document | Authority |
 |---|---|
-| [README](../README.md) | current product promise, P22 contract boundary and primary operator entry points |
-| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13–P22 boundary |
+| [README](../README.md) | current product promise, P23A evidence-only boundary and primary operator entry points |
+| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13–P23A boundary |
+| [P23A Completion Report](../reports/phase23a/PHASE23A_COMPLETION.md) | exact P23A closure ledger, local synthetic conformance/package evidence, real data/model/science/policy non-runs and P23B/P24 authorization gates |
+| [P23A Cell Interaction Evidence ADR](ADR-0020-cell-interaction-evidence-contract.md) | directed endpoint/linkage/scorer identities, P13 prepared-envelope reuse, exact score-only projection and non-claim decision |
+| [P23A Cell Interaction Evidence Runbook](runbooks/CELL-INTERACTION-EVIDENCE.md) | local contract/negative/abstain audit, exact real-input gate and P24 authorization boundary |
 | [P22 Completion Report](../reports/phase22/PHASE22_COMPLETION.md) | exact P22 closure ledger, local conformance/package evidence, default-deny trust/checkpoint boundary and all real lifecycle/science/policy non-runs |
 | [P22 Curated Registry ADR](ADR-0019-curated-virtual-cell-registry.md) | exact One-Pack/P21B release composition, immutable science/policy boundary, append-only lifecycle and external checkpoint decision |
 | [P22 Curated Registry Runbook](runbooks/VIRTUALCELL-CURATED-REGISTRY.md) | local import/decision/query audit, suffix reauthorization, checkpoint advancement and rollback limitation |
@@ -166,6 +192,7 @@ local contract-only work unit; it is evidence-only and cannot produce receiver r
 | [Virtual Cell Training Pipeline](runbooks/VIRTUALCELL-TRAINING-PIPELINE.md) | P20 RegisteredPack-bound job/audit/checkpoint/candidate contract, local gates and no-real-training boundary |
 | [Virtual Cell Benchmark System](runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md) | P21A exact benchmark contract/bundle audit, out-of-band P21B execution trust, negative-ledger checks and no-real-benchmark boundary |
 | [Curated Virtual Cell Registry](runbooks/VIRTUALCELL-CURATED-REGISTRY.md) | P22 exact One-Pack release import/lifecycle/query audit, external trust/checkpoint workflow and no-real-lifecycle boundary |
+| [Cell Interaction Evidence](runbooks/CELL-INTERACTION-EVIDENCE.md) | P23A directed-pair identity, synthetic score-only conformance, fail-closed abstention and separately authorized real-input/execution boundary |
 
 The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` files describe the older PRAXIS-2 classroom/deployment system, including `.40/.53` service topology. They are not VirtualCell current-user entry points.
 
@@ -197,8 +224,9 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Virtual Cell Training Pipeline ADR](ADR-0017-virtual-cell-training-pipeline.md) | P20 exact RegisteredPack binding, audit-before-label, trusted fixed worker, safe candidate artifacts and no-promotion boundary |
 | [Virtual Cell Benchmark System ADR](ADR-0018-virtual-cell-benchmark-system.md) | P21A exact protocol/run/result/evidence derivation, independent composite execution-trust boundary and negative-only ledger semantics |
 | [Curated Virtual Cell Registry ADR](ADR-0019-curated-virtual-cell-registry.md) | P22 exact One-Pack/P21B composition, quarantine-first append-only lifecycle, default-deny trust and external checkpoint semantics |
+| [Cell Interaction Evidence Contract ADR](ADR-0020-cell-interaction-evidence-contract.md) | P23A strict sender/receiver, same-experiment and untrusted scorer bindings; P13-shaped supplied-fixture conformance; score-only non-causal projection |
 | [Community Readiness Checklist](COMMUNITY-READINESS-CHECKLIST.md) | P10 model-free CommunityPack gates, two tiny microbial Packs, fail-closed planning and explicitly missing experimental validation |
-| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | historical P0–P16E implementation/status matrix; current P22 state is carried by this index and its completion report |
+| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | historical P0–P16E implementation/status matrix; current P23A state is carried by this index and its completion report |
 | [VirtualCellPack Multiomics Runbook](runbooks/VIRTUALCELLPACK-MULTIOMICS.md) | tiny RNA+protein fixture generation, hash binding, P5 tests and asset-update rules |
 | [VirtualCellPack Capability Runtime Runbook](runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md) | local model card/cache/Pack assembly, execution-plan audit and fail-closed reason handling |
 | [VirtualCellPack Data Portal Runbook](runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) | external public-file inventory, service configuration, upload quarantine and operator review boundary |
@@ -216,6 +244,7 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Virtual Cell Training Pipeline Runbook](runbooks/VIRTUALCELL-TRAINING-PIPELINE.md) | P20 local contract verification, audit/read ordering, staging cleanup and P21A handoff |
 | [Virtual Cell Benchmark System Runbook](runbooks/VIRTUALCELL-BENCHMARK-SYSTEM.md) | P21A local contract verification, default-negative bundles, ledger tamper/truncation handling and P22 handoff |
 | [Curated Virtual Cell Registry Runbook](runbooks/VIRTUALCELL-CURATED-REGISTRY.md) | P22 local contract verification, exact allowlists, suffix reauthorization, checkpoint persistence and evidence-only P23A handoff |
+| [Cell Interaction Evidence Runbook](runbooks/CELL-INTERACTION-EVIDENCE.md) | P23A local contract/projection/abstain verification, synthetic non-evidence interpretation and exact P23B/P24 authorization boundary |
 | [Provenance](../PROVENANCE.md) | repository derivation from PRAXIS-2 and bootstrap evidence |
 
 ## Release and version history
@@ -243,6 +272,7 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 
 | Report | Scope |
 |---|---|
+| [P23A Completion Report](../reports/phase23a/PHASE23A_COMPLETION.md) | exact contract-only/synthetic-conformance closure at code `2b894966…` / tree `00bd98b0…`; focused `107`, affected `495/1`, safe `1,787/49/387`, legacy `1,147/58/105`; reproducible exact-local-toolchain `1,226,514`-byte wheel / `e78f40f0…` / `373` entries, not dependency-closure, clean-install or release proof; real release/data/model/execution/science/policy non-runs |
 | [P22 Completion Report](../reports/phase22/PHASE22_COMPLETION.md) | exact contract-only closure; focused `35`, affected `289/1`, safe `1,680/49/387`, legacy `1,147/58/105`; reproducible exact-local-toolchain `1,217,155`-byte wheel, not clean-install proof; real lifecycle/science/policy/promotion non-runs |
 | [P21A Completion Report](../reports/phase21a/PHASE21A_COMPLETION.md) | exact system-only closure; focused `35`, affected `238`, safe `1,645/49/387`, legacy `1,147/58/105`; reproducible exact-local-toolchain `1,202,180`-byte wheel, not clean-install proof; real benchmark/science/policy/promotion non-runs |
 | [P20 Completion Report](../reports/phase20/PHASE20_COMPLETION.md) | exact contract closure; focused `56`, P19-adjacent `99/1`, safe `1,610/49/387`, legacy `1,147/58/105`; reproducible exact-local-toolchain `1,178,805`-byte wheel, not clean-install proof; real training/test/external/science non-runs; policy `NO_NEW_DECISION` |
@@ -258,7 +288,7 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 | [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | frozen local C5 gate: Python 3.13 core 965, Gate A adapter seam, honest 2-test remote pending, asset/claim classification |
 | [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | frozen C4 gate: Python 3.13 core 957, Playwright 56+1, reproducible full wheel, and Linux-container smoke |
 | [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen C3 gate: core 947, Playwright 54+1, theme acceptance, mutation evidence, and then-remaining C4/C5 ownership |
-| [Testing Guide](TESTING.md) | current P22 local commands and counts; preserves prior exact-SHA and historical CI/Linux evidence plus remote scientific-validation boundaries |
+| [Testing Guide](TESTING.md) | current P23A local commands and counts; preserves prior exact-SHA and historical CI/Linux evidence plus remote scientific-validation boundaries |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | capability gate plus `.53` evidence and remaining remote backlog |
 | [Phase 10 Summary](../reports/phase10/PHASE10_SUMMARY.md) | `952 tests = 912 passed + 40 skipped` for the non-LLM package scope; 9 LLM tests are deselected in the `912/40/9` reporting style |
 | [Phase 10 UI E2E](../reports/phase10/PHASE10_UI_E2E.md) | three structural Playwright specs; explicitly excludes CSS/pixel and deep abstain assertions |

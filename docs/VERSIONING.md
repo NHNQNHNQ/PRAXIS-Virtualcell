@@ -1,15 +1,15 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: P22 `COMPLETE — CONTRACT_ONLY`; science `NOT_RUN`; policy `NO_NEW_DECISION`;
-> real import/catalog/revoke/supersede `NOT_RUN`; P21B/P21C
-> `AUTHORIZATION_REQUIRED / NOT_RUN`; P23A is the next eligible local contract-only work unit —
+> Status: P23A `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`; science `NOT_RUN`;
+> policy `NO_NEW_DECISION`; P21B/P21C and optional P23B
+> `AUTHORIZATION_REQUIRED / NOT_RUN`; P24 First Real Community Adapter
+> `AUTHORIZATION_REQUIRED / NOT_RUN` —
 > `LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
-> Local baseline: branch `codex/p22-virtual-cell-registry`; P22 docs starting SHA
-> `09792e13e29a76b5e4434507f3334eefb947789c`; P21A prerequisite code SHA
-> `20ecc12542e5df40c90d1fc367dbe86b563478b8`; completion code SHA/tree
-> `bca5ad661856e8d9aa832c47f23c6ad7179ee0c9` /
-> `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`; source date epoch `1786056220`
+> Local baseline: branch `codex/p23-cell-interaction`; starting SHA
+> `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4`; completion code SHA/tree
+> `2b894966cd00b2af2fafbf8f009566dd69f393a7` /
+> `00bd98b0fd14091f4528115dcc66730264d5803a`; source date epoch `1786061504`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -31,7 +31,8 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P19 Controlled Pack Factory work unit | start `871c5a8a4265f5b8fe5c2c6e35d418644bf1c4be`; code `42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5`; tree `b4bd63833adc89bd1e30e9595d2cb6b38a3e005f` | immutable local Git history plus `reports/phase19/PHASE19_COMPLETION.md` | contract-only receipt→registration complete; v2 index reads v1, path-only register retired, public projection read-only; real external fixture/output root/operator/science/policy not run; no version/release bump; reproducible wheel `1,154,421` bytes / `1231f948e6f5...` / `368` entries |
 | P20 Virtual Cell Training Pipeline work unit | start `f53e29e5722a8fe48aa2eb6fe63be01f61b5cc9a`; code `a4003704b70f06eb65297ddd32e0695ae8ee146b`; tree `d12d64a7c8d013d8d299272eea88a4ce0431ccab`; epoch `1786040663` | immutable local Git history plus `reports/phase20/PHASE20_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY`; exact RegisteredPack-bound job/audit/checkpoint/result/candidate chain; success `candidate_cataloged_contract_only`; science `NOT_RUN`, policy `NO_NEW_DECISION`; no real training/test/external/benchmark/evidence/promotion or version/release bump; P21A system-only eligible; exact-local-source/toolchain wheel `1,178,805` bytes / `2273ee71fb58...` / `370` entries, not pinned dependency closure |
 | P21A Virtual Cell Benchmark System work unit | start `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`; code `20ecc12542e5df40c90d1fc367dbe86b563478b8`; tree `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`; epoch `1786050825` | immutable local Git history plus `reports/phase21a/PHASE21A_COMPLETION.md` | `COMPLETE — SYSTEM_ONLY`; exact protocol/run/result/evidence and negative-ledger contracts; P21B exact authorization+run+result execution trust remains out of band; science `NOT_RUN`, policy `NO_NEW_DECISION`, P21B/P21C authorization required/not run; no real benchmark/promotion or version/release bump; P22 contract-only eligible; exact-local-source/toolchain wheel `1,202,180` bytes / `ee98d4b3c689...` / `371` entries, not pinned dependency closure |
-| P22 Curated Virtual Cell Registry work unit | docs start `09792e13e29a76b5e4434507f3334eefb947789c`; prerequisite `20ecc12542e5df40c90d1fc367dbe86b563478b8`; code `bca5ad661856e8d9aa832c47f23c6ad7179ee0c9`; tree `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`; epoch `1786056220` | immutable local Git history plus `reports/phase22/PHASE22_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY`; exact One-Pack/P21B composition, quarantine-first append-only lifecycle, default-deny external trust and independently persisted checkpoint; science `NOT_RUN`, policy `NO_NEW_DECISION`, real lifecycle not run; no HTTP/UI/runtime/install/execute or version/release bump; P23A contract-only is next eligible; exact-local-source/toolchain wheel `1,217,155` bytes / `3f978e9f3eb0...` / `372` entries, not pinned dependency closure |
+| P22 Curated Virtual Cell Registry work unit | docs start `09792e13e29a76b5e4434507f3334eefb947789c`; prerequisite `20ecc12542e5df40c90d1fc367dbe86b563478b8`; code `bca5ad661856e8d9aa832c47f23c6ad7179ee0c9`; tree `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`; epoch `1786056220` | immutable local Git history plus `reports/phase22/PHASE22_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY`; exact One-Pack/P21B composition, quarantine-first append-only lifecycle, default-deny external trust and independently persisted checkpoint; science `NOT_RUN`, policy `NO_NEW_DECISION`, real lifecycle not run; no HTTP/UI/runtime/install/execute or version/release bump; P23A contract-only was then eligible and subsequently completed; exact-local-source/toolchain wheel `1,217,155` bytes / `3f978e9f3eb0...` / `372` entries, not pinned dependency closure |
+| P23A Cell Interaction Evidence work unit | start `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4`; code `2b894966cd00b2af2fafbf8f009566dd69f393a7`; tree `00bd98b0fd14091f4528115dcc66730264d5803a`; epoch `1786061504` | immutable local Git history plus `reports/phase23a/PHASE23A_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`; strict directed release/Pack/context/P18/same-experiment/scorer identities and P13-shaped score-only fixture projection; science `NOT_RUN`, policy `NO_NEW_DECISION`; no real release/data/model/baseline/CI/OOD execution; P23B and P24 authorization required/not run; exact-local-source/toolchain wheel `1,226,514` bytes / `e78f40f0f4fe...` / `373` entries, not dependency closure, clean-install or release proof |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -318,10 +319,52 @@ The default curated store/catalog is absent or empty; public projection is a red
 non-executable Python library surface with installed/compatibility unknown. P22 adds no HTTP/UI,
 Data Center/chat, runtime planning, asset installation/execution, real lifecycle, science, policy,
 promotion, product/API/runtime version bump, release, push or deploy. P21B/P21C remain
-`AUTHORIZATION_REQUIRED / NOT_RUN`; P23A is the next eligible local evidence-only contract work unit.
-Real release/data/execution inputs remain separately gated. See [ADR-0019](ADR-0019-curated-virtual-cell-registry.md),
+`AUTHORIZATION_REQUIRED / NOT_RUN`; P23A subsequently completed contract-only. See
+[ADR-0019](ADR-0019-curated-virtual-cell-registry.md),
 the [P22 runbook](runbooks/VIRTUALCELL-CURATED-REGISTRY.md), and the
 [P22 completion report](../reports/phase22/PHASE22_COMPLETION.md).
+
+P23A adds the Cell Interaction Evidence contracts inside the same unpublished `1.6.0` candidate.
+It starts at P22 docs-closure `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4` and completes at
+code/tree `2b894966cd00b2af2fafbf8f009566dd69f393a7` /
+`00bd98b0fd14091f4528115dcc66730264d5803a` with source date epoch `1786061504`.
+Strict identities bind one directed sender and receiver to exact P22 release/Pack/context references,
+typed but explicitly unverified P18 endpoint references, one indivisible same-experiment evidence
+record and an explicitly untrusted P20/P21 scorer fixture. The adapter reuses P13 prepared input,
+envelope and provenance shapes but is not added to the default registry.
+
+The only public projection is `{"interaction_evidence_score": [x]}` on the unit interval with
+`association_evidence_only` semantics. A `synthetic_conformance` projection normalizes a caller-supplied fixture; it
+does not calculate a biological score or execute a model. Receiver response, effect size, causal
+claim, legacy co-culture payload, extra output fields, unbound envelopes and abstaining projection
+all fail closed. Missing paired evidence, failed baseline gate, unsupported/OOD scope, unauthorized
+execution or unverified curated state produce exact abstention. Real data/model execution, paired
+linkage, registry state, baseline comparison, paired CI and calibrated uncertainty remain false or
+not available.
+
+Focused P23A is `107 passed / 41.71s`; affected is
+`495 passed / 1 skipped / 116.55s`; safe is
+`1,787 passed / 49 skipped / 387 deselected / 367.11s`; legacy is
+`1,147 passed / 58 skipped / 105 deselected / 57.38s`; static checks pass. Two exact-code wheels
+are byte-identical at `1,226,514` bytes /
+`e78f40f0f4fe7354e3c660d6612a8ee60a1b2dd61af2fc606a67d01e67ac601e` / `373`
+entries / `14` React entries, with no tests or AppleDouble. Source/wheel
+`praxis_virtualcell/model_zoo/cell_interaction_evidence_contract.py` SHA-256 is
+`d1ba8d8054bf91c4a54a215c331fef65557df3954dba730998821ea9f70743cd`.
+The toolchain is Python `3.13.12`, build `1.5.0`, setuptools `70.2.0`, packaging `26.0`, Node
+`25.8.2`, npm `11.11.1` and Vite `8.1.2`; offline npm plus Python
+`--no-isolation --skip-dependency-check` make this exact local source/toolchain reproducibility,
+not dependency-closure, clean-install or release proof.
+
+P23A performs no real asset read, model/baseline/benchmark/CI/OOD execution, science, operator
+policy, promotion, product/API/runtime version bump, release, push or deploy. Engineering is
+`COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`; science is `NOT_RUN`; policy is
+`NO_NEW_DECISION`. Optional P23B is `AUTHORIZATION_REQUIRED / NOT_RUN`. P24 is the next
+sequential phase, but the First Real Community Adapter requires a separately authorized exact real
+asset/model/output window and remains `AUTHORIZATION_REQUIRED / NOT_RUN`; no fake contract-only
+scaffold is eligible. See [ADR-0020](ADR-0020-cell-interaction-evidence-contract.md), the
+[P23A runbook](runbooks/CELL-INTERACTION-EVIDENCE.md), and the
+[P23A completion report](../reports/phase23a/PHASE23A_COMPLETION.md).
 
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
@@ -359,6 +402,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | training pipeline schemas + fingerprints | explicit P20 job/environment/split/audit, worker/checkpoint/result and candidate/run schema literals listed above plus canonical JSON SHA-256 | job/environment/split/audit/checkpoint/result/candidate identity or serialization semantics change incompatibly | contract-only dry-run is real training, benchmark evidence, scientific validation, registry insertion or promotion policy |
 | benchmark system schemas + fingerprints | explicit `vc.benchmark-*.v1`, `vc.p21b-execution-identity.v1`, `vc.benchmark-evidence-ledger.v1` and canonical JSON SHA-256 | protocol/run/result/measurement/evidence/bundle, independent P21B execution-trust lookup or negative-ledger identity/serialization semantics change incompatibly | a self-asserted authorization/content hash is authenticated, a synthetic passing fixture is science, evidence grants operator policy, or the ledger has an external rollback anchor |
 | curated Virtual Cell release/registry schemas + fingerprints | explicit `vc.virtual-cell-context.v1`, `vc.virtual-cell-wrapper-approval.v1`, `vc.virtual-cell-release.v1`, `vc.curated-virtual-cell-import-identity.v1`, `vc.curated-registry-decision.v1`, `vc.curated-registry-entry.v1`, `vc.curated-registry-head.v1`, `vc.curated-registry-trust.v1`, `vc.curated-registry-authorization-reference.v1`, `vc.curated-release-state.v1`, exact marker `{"schema_version":"vc.curated-virtual-cell-registry.v1"}\n`, `vc.curated-virtual-cell-catalog.v1` and `vc.curated-release-dependency-graph.v1` | exact One-Pack composition, import/lifecycle/log/trust/checkpoint/public-projection/dependency semantics change incompatibly | a content hash authenticates its issuer, curated metadata creates science/policy, catalog means installed/compatible/executable, or a local head replaces an external checkpoint |
+| cell-interaction evidence schemas + fingerprints | explicit `vc.p23-p18-endpoint-identity.v1`, `vc.interaction-endpoint.v1`, `vc.same-experiment-interaction-evidence.v1`, `vc.interaction-scorer-fixture.v1`, `vc.cell-interaction-evidence-input.v1`, `vc.interaction-evidence-adapter-input-contract.v1` and `vc.interaction-evidence-adapter-output-contract.v1` plus canonical JSON SHA-256 | directed endpoint/release/Pack/context/P18 identity, indivisible same-experiment linkage, ligand/receptor/evidence mapping, untrusted scorer fixture, score scale or projection semantics change incompatibly | a declared release/evidence/scorer is verified, a supplied fixture is model output or science, receiver response/effect/causality exists, or conformance grants policy/promotion |
 | Pack compatibility surface schema | explicit `vc.pack-compatibility-surface.v1` | incompatible path-redaction or public execution-plan projection | a compatibility response proves successful execution |
 | job execution identity schema + fingerprint | explicit `vc.job-execution-identity.v1`, `vc.job-execution-identity.v2` or `vc.job-execution-identity.v3` and content identity | incompatible request/report/outcome/Pack/release/component/evidence/policy identity-lock semantics; v3 also binds Brain/DAG and companion-backed contract-only report semantics | read-only loading may rewrite old bytes, schema downgrade may bypass current bindings, or immutable provenance proves model quality/validation/promotion |
 | public data catalog schema | explicit `vc.data-catalog.v1` | incompatible metadata, source/terms, identity or file-verification semantics | file availability, Pack validity, model compatibility or scientific validity |
@@ -378,7 +422,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented history through the current P22 contract-complete bytes:
+Implemented history through the current P23A contract-complete bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -387,7 +431,7 @@ Implemented history through the current P22 contract-complete bytes:
 5. `/api/health` separately exposes product, API protocol, runtime protocol, and injected build SHA while retaining `runtime_version="v0.3"`.
 6. The UI consumes backend `product_version` and `git_sha`; an E2E mock with product `9.9.9` proves that it does not invent this truth from frontend metadata.
 7. `npm version 1.6.0 --no-git-tag-version` synchronized the private package and lock root as a generated mirror. Neither is manually authoritative.
-8. The normative full-release workflow requires hash-locked Python 3.13 build dependencies, packaged React UI, and clean-install verification against installed distribution metadata. P22's contract-closure wheel is narrower exact-local-source/toolchain evidence and did not satisfy this release gate.
+8. The normative full-release workflow requires hash-locked Python 3.13 build dependencies, packaged React UI, and clean-install verification against installed distribution metadata. P23A's contract-closure wheel is narrower exact-local-source/toolchain evidence and did not satisfy this release gate.
 9. The release container installs that same wheel into `/opt/venv`, injects `GIT_SHA` into both its OCI revision label and health response, and never infers identity from an image tag or embedded `.git` directory.
 10. W4B donor adapters use a checkpoint-content identity as their per-call model version and validate the expected slot/class before loading weights. Other ML callers retain their existing explicit or class fallback, so this must not be generalized to every registry model.
 11. P7 adds backward-compatible `vc.api.v1` endpoints and a user-visible data-resource page inside the still-unpublished `1.6.0` minor candidate. It adds independent `vc.data-catalog.v1` and `vc.upload-receipt.v1` contracts; no product tag or API/runtime protocol bump is inferred.
@@ -493,7 +537,19 @@ Implemented history through the current P22 contract-complete bytes:
     `NOT_RUN`. Default-deny external trust and an independently persisted checkpoint remain caller
     responsibilities; hashes do not authenticate issuers. No product/API/runtime version bump,
     HTTP/UI/runtime/install/execution, release, tag, push or deploy is created. Product version stays
-    `1.6.0`; P23A contract-only is next eligible, while real release/data/execution remains gated.
+    `1.6.0`; P23A contract-only subsequently completed, while real release/data/execution remains gated.
+29. P23A starts at P22 docs-closure `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4`
+    and adds strict directed endpoint, same-experiment evidence and untrusted P20/P21 scorer-fixture
+    identities plus a local P13-shaped adapter. Final code/tree are
+    `2b894966cd00b2af2fafbf8f009566dd69f393a7` /
+    `00bd98b0fd14091f4528115dcc66730264d5803a`; its exact-local-source/toolchain wheel is
+    byte-identical at `1,226,514` bytes / `e78f40f0f4fe...` / `373` entries, but is not dependency-
+    closure, clean-install or release evidence. The sole non-abstaining projection is the supplied
+    synthetic fixture `interaction_evidence_score`; no biological scoring, real release/data/model
+    verification, baseline/CI/OOD execution, receiver response or causal claim exists. Engineering is
+    `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`, science is `NOT_RUN`, policy is
+    `NO_NEW_DECISION`; P23B and P24 are authorization-required/not-run. No product/API/runtime
+    version bump, release identity, tag, push or deploy is created. Product version remains `1.6.0`.
 
 ## Release invariants
 
@@ -581,6 +637,11 @@ domain/bundle schemas, `vc.pack-record.v1`, `vc.pack-catalog.v1`,
 `vc.curated-registry-authorization-reference.v1`, `vc.curated-release-state.v1`,
 `vc.curated-virtual-cell-registry.v1`, `vc.curated-virtual-cell-catalog.v1`,
 `vc.curated-release-dependency-graph.v1`,
+`vc.p23-p18-endpoint-identity.v1`, `vc.interaction-endpoint.v1`,
+`vc.same-experiment-interaction-evidence.v1`, `vc.interaction-scorer-fixture.v1`,
+`vc.cell-interaction-evidence-input.v1`,
+`vc.interaction-evidence-adapter-input-contract.v1`,
+`vc.interaction-evidence-adapter-output-contract.v1`,
 `vc.job-execution-identity.v1`, `vc.job-execution-identity.v2`,
 `vc.job-execution-identity.v3`,
 `vc.data-catalog.v1`, `vc.upload-receipt.v1`,

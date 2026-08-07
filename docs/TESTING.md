@@ -1,21 +1,99 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P22 分支 `codex/p22-virtual-cell-registry`；docs 起始 SHA
-> `09792e13e29a76b5e4434507f3334eefb947789c`；P21A prerequisite code SHA
-> `20ecc12542e5df40c90d1fc367dbe86b563478b8`
+> 当前文档基线：P23A 分支 `codex/p23-cell-interaction`；起始 SHA
+> `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：P22 `COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`；policy
+> 状态：P23A `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`；science `NOT_RUN`；policy
 > `NO_NEW_DECISION`；completion code SHA
-> `bca5ad661856e8d9aa832c47f23c6ad7179ee0c9`；tree
-> `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`；source date epoch `1786056220`。
-> 下述 P4.3–P21A 和 CI 数字仍只绑定各自 exact SHA/日期；P22 本地工程结果不构成真实
-> registry import/catalog/revoke/supersede、candidate execution、benchmark、test/external
-> evaluation、科学验证、product policy、promotion、发布或远程证据。P21B/P21C 为
-> `AUTHORIZATION_REQUIRED / NOT_RUN`；P23A 是下一 eligible 本地 contract-only 阶段，
-> 仅可实现 sender→receiver evidence score，真实 release/data/execution 仍受 exact gate 约束。
+> `2b894966cd00b2af2fafbf8f009566dd69f393a7`；tree
+> `00bd98b0fd14091f4528115dcc66730264d5803a`；source date epoch `1786061504`。
+> 下述 P4.3–P22 和 CI 数字仍只绑定各自 exact SHA/日期；P23A 本地工程结果不构成真实
+> release/registry-state verification、paired/co-culture/spatial data read、fixed-model
+> execution、baseline/CI/OOD science gate、科学验证、product policy、promotion、发布或
+> 远程证据。P21B/P21C 与可选 P23B 为 `AUTHORIZATION_REQUIRED / NOT_RUN`；P24 First
+> Real Community Adapter 是下一顺序阶段，但依赖另行授权的 exact real assets/model/output
+> window，当前为 `AUTHORIZATION_REQUIRED / NOT_RUN`，不得用 fake contract-only scaffold
+> 替代。
+
+## Phase 23A `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE` 本地证据
+
+P23A 新增一个 strict、local-only、evidence-only P13 adapter contract。它精确绑定两个
+P22 release/Pack/context、typed P18 endpoint identity、同实验 donor/sample/well/
+condition/dose/time、ligand/receptor/evidence namespace 与 mapping，以及声明但未验证的
+P20/P21 scorer identity。公开投影唯一允许
+`{"interaction_evidence_score": [x]}`；receiver response、effect size、causal claim、
+额外 prediction 字段及 legacy co-culture payload 均 fail closed。
+
+adapter 不读取资产、不计算生物分数、不运行模型、不修改 registry，也不进入 default adapter
+registry。`synthetic_conformance` fixture 固定标记 `synthetic_conformance_not_evidence`，其 score 是调用方
+提供的 unit-interval contract fixture，不是模型结果；real data/model execution、paired
+linkage、baseline comparison、paired CI、calibrated uncertainty 与 sender/receiver registry
+state 均明确为 false/not available。缺失 paired evidence、baseline gate 未过、unsupported
+scope/OOD、execution 未授权或 registry state 未验证时只能 abstain，且无法投影。
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_cell_interaction_evidence_contract.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -ra \
+  praxis_virtualcell/tests/test_cell_interaction_evidence_contract.py \
+  praxis_virtualcell/tests/test_model_adapter_sdk.py \
+  praxis_virtualcell/tests/test_multiomics_model_input.py \
+  praxis_virtualcell/tests/test_curated_registry.py \
+  praxis_virtualcell/tests/test_model_registry_v2.py \
+  praxis_virtualcell/tests/test_benchmark_system.py \
+  praxis_virtualcell/tests/test_pack_factory.py \
+  praxis_virtualcell/tests/test_pack_product.py \
+  praxis_virtualcell/tests/test_capability_runtime.py \
+  praxis_virtualcell/tests/test_virtual_experiment.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -ra praxis_virtualcell/tests \
+  --ignore=praxis_virtualcell/tests/test_mudata_alignment.py \
+  -k 'not golden and not gem and not norman'
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -ra tests \
+  -m 'not (integration or llm or remote)'
+
+python -m ruff check . --extend-exclude old --no-cache
+
+python -m ruff format --check \
+  praxis_virtualcell/model_zoo/cell_interaction_evidence_contract.py \
+  praxis_virtualcell/tests/test_cell_interaction_evidence_contract.py
+
+python -m py_compile \
+  praxis_virtualcell/model_zoo/cell_interaction_evidence_contract.py \
+  praxis_virtualcell/tests/test_cell_interaction_evidence_contract.py
+
+git diff --check
+~~~
+
+| Gate | 结果 |
+|---|---|
+| P23A focused | `107 passed / 41.71s` |
+| P23A affected regression gate | `495 passed / 1 skipped / 116.55s` |
+| safe Python gate | `1,787 passed / 49 skipped / 387 deselected / 367.11s` |
+| legacy gate | `1,147 passed / 58 skipped / 105 deselected / 57.38s` |
+| Ruff excluding `old` / targeted format / `py_compile` / diff | PASS |
+| reproducible packaging / ZIP integrity | PASS；wheel `1,226,514` bytes；SHA-256 `e78f40f0f4fe7354e3c660d6612a8ee60a1b2dd61af2fc606a67d01e67ac601e`；`373` entries |
+
+两次 exact-code wheel byte-identical，React `14`、tests `0`、AppleDouble `0`，ZIP
+integrity PASS；source/wheel
+`praxis_virtualcell/model_zoo/cell_interaction_evidence_contract.py` SHA-256 均为
+`d1ba8d8054bf91c4a54a215c331fef65557df3954dba730998821ea9f70743cd`。工具链为
+Python `3.13.12`、build `1.5.0`、setuptools `70.2.0`、packaging `26.0`、Node
+`25.8.2`、npm `11.11.1`、Vite `8.1.2`。前端使用 `npm ci --offline`，Python build 使用
+`--no-isolation --skip-dependency-check`；因此这只是 exact local source/toolchain
+reproducibility，不是 pinned dependency closure、clean-install 证明或 release。
+
+本轮未读任何真实 interaction asset，未运行真实 candidate/baseline/benchmark/CI/OOD，未
+联网、使用 GPU、远程执行、作 science/operator-policy 决策、promotion、version bump、
+release、push 或 deploy。完整边界见
+[ADR-0020](ADR-0020-cell-interaction-evidence-contract.md)、
+[P23A runbook](runbooks/CELL-INTERACTION-EVIDENCE.md) 和
+[P23A completion report](../reports/phase23a/PHASE23A_COMPLETION.md)。
 
 ## Phase 22 `COMPLETE — CONTRACT_ONLY` 本地证据
 

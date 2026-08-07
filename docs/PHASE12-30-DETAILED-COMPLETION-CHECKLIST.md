@@ -4,7 +4,7 @@
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前已完成工程 work unit：`Phase 20`
+> 当前已完成工程 work unit：`Phase 23A`
 >
 > DOCS-CLOSURE completion：`b19c896202bea56f894d0ad540501331af42a40c`
 >
@@ -70,10 +70,17 @@
 > `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`；source date epoch `1786056220`；
 > engineering `COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`
 >
-> 下一 eligible 本地 work unit 是 P23A contract-only：仅实现 sender→receiver
-> `interaction_evidence_score` 与 synthetic conformance，不输出 receiver response 或 causal
-> claim；真实 release/data/asset/execution 仍须满足 exact 输入/授权门；P21B/P21C 仍
-> `AUTHORIZATION_REQUIRED / NOT_RUN`
+> 已完成 work unit：`Phase 23A — Cell Interaction Evidence contract`；actual starting
+> P22 docs-closure SHA `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4`；branch
+> `codex/p23-cell-interaction`；completion code SHA
+> `2b894966cd00b2af2fafbf8f009566dd69f393a7`；tree
+> `00bd98b0fd14091f4528115dcc66730264d5803a`；source date epoch `1786061504`；
+> engineering `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`；science `NOT_RUN`；
+> policy `NO_NEW_DECISION`
+>
+> P23B 是独立可选窗口，保持 `AUTHORIZATION_REQUIRED / NOT_RUN`。P24 被定义为真实
+> Community adapter，没有可与真实资产/固定模型分离并计作 P24 完成的本地
+> contract-only work unit；当前为 `AUTHORIZATION_REQUIRED / NOT_RUN`
 >
 > 当前 Phase 11 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
@@ -94,7 +101,8 @@
 → 完成记录
 ```
 
-本文自身不授权实施任何 Phase。P12、P13、P14E、P15E、P16E、P17、P18、P19 和 P20 已在持续本地授权内完成；该授权仍不包含
+本文自身不授权实施任何 Phase。P12、P13、P14E、P15E、P16E、P17、P18、P19、P20、
+P21A、P22 和 P23A 已在持续本地授权内完成；该授权仍不包含
 外置数据或权重、network、push、GitHub main/tag、`.53`、服务、发布、部署或真实
 科学运行。P14E 已独立收口；P14R 仍需逐资产/窗口授权，P14B 仍只能在
 正科学结果后由具名 operator 决定。P15E 已独立收口；P15R 仍需逐资产/窗口授权，
@@ -268,7 +276,21 @@ work-unit 执行状态机使用以下状态；总进度表可另用 `NOT_STARTED
   `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`、source date epoch `1786056220`
   完成 curated registry contract；engineering `COMPLETE — CONTRACT_ONLY`，science
   `NOT_RUN`，policy `NO_NEW_DECISION`。没有真实 release import/catalog/revoke/supersede，
-  默认 P22 registry 不存在或为空；P23A contract-only 是下一 eligible 本地 work unit；
+  默认 P22 registry 不存在或为空；
+- Phase 23A 已从 P22 docs-closure
+  `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4` 开始，在
+  `codex/p23-cell-interaction` 以 code SHA
+  `2b894966cd00b2af2fafbf8f009566dd69f393a7`（tree
+  `00bd98b0fd14091f4528115dcc66730264d5803a`；source date epoch `1786061504`）完成
+  directed sender/receiver strict identity、same-experiment evidence identity、P13 adapter 和
+  evidence-only projection contract；全部运行仅为 synthetic conformance；
+- P23A 的 P22 release active/non-revoked state 与 exact P18 observation membership 明确
+  未验证，真实 paired evidence/mapping、trusted P20/P21 bundle/artifact/execution、baseline
+  comparison、paired CI、calibrated uncertainty 和 held-out OOD 均 `NOT_RUN`；science
+  `NOT_RUN`，policy `NO_NEW_DECISION`；
+- P23B 保持独立可选 `AUTHORIZATION_REQUIRED / NOT_RUN`；P24 是 real-only Community
+  adapter work unit，缺少 exact assets/model/run authorization，故为
+  `AUTHORIZATION_REQUIRED / NOT_RUN`，没有下一 eligible 的 P24 contract-only 子阶段；
 - P14R/P14B、P15R/P15B 与 P16R/P16B 均保持各自的 exact external/operator 授权门，一个外部门
   不阻塞无依赖的 eligible 本地 E work unit。
 
@@ -324,9 +346,9 @@ flowchart TD
 | P21B | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_APPLICABLE` | per-candidate run-only evidence |
 | P21C | `AUTHORIZATION_REQUIRED / NOT_RUN` | `READ_ONLY / NOT_RUN` | `NOT_RUN` | per-scope operator-only policy |
 | P22 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | exact One-Pack/P21B release closure、default-deny trust、append-only lifecycle、checkpoint 与 redacted Python projection；start `09792e13...`；completion `bca5ad66...`；默认 registry empty |
-| P23A | `NEXT_ELIGIBLE — CONTRACT_ONLY / NOT_STARTED` | `NOT_RUN` | `NO_NEW_DECISION` | 仅 sender→receiver evidence score；real release/data/execution 另行 gated；禁止 receiver response/causal claim |
-| P23B | `OPTIONAL_NOT_RUN` | `NOT_RUN` | `NOT_RUN` | 可选 receiver response |
-| P24 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | 第一个真实 Community adapter |
+| P23A | `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE` | `NOT_RUN` | `NO_NEW_DECISION` | strict directed endpoint/same-experiment identities、P13 adapter、evidence-only projection；completion `2b894966...`；real registry/P18/data/model/baseline/CI/uncertainty/OOD gates 未运行 |
+| P23B | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | 可选 receiver response；独立授权，不是 P23A 自动下一步 |
+| P24 | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | 第一个真实 Community adapter；没有独立 P24 contract-only work unit |
 | P25 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | 定义群落的唯一 primary endpoint |
 | P26 | `BLOCKED` | `NOT_RUN` | `NOT_RUN` | matching host/community 均 validated + promoted |
 | P27A | `NOT_STARTED` | `REPLAY_NOT_RUN` | `NOT_APPLICABLE` | experiment-design software/replay |
@@ -1242,9 +1264,12 @@ checkpoint 必须在 registry 外独立持久化；suffix 会按 stable authoriz
 
 ### Phase 23 — Cell Interaction Model
 
-**状态：** `NEXT_ELIGIBLE — CONTRACT_ONLY / NOT_STARTED`。本地 schema、evidence-only
-scoring contract 和 synthetic conformance 可直接推进；真实 sender/receiver curated release、
-Pack/context、interaction evidence/data、asset 或执行仍须满足各自 exact 输入与授权门。
+**状态：** `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`；science `NOT_RUN`；
+policy `NO_NEW_DECISION`。Completion code SHA/tree/epoch 为
+`2b894966cd00b2af2fafbf8f009566dd69f393a7` /
+`00bd98b0fd14091f4528115dcc66730264d5803a` / `1786061504`。这只收口本地 strict
+schema、P13 adapter 和 evidence-only synthetic conformance；不证明任何真实
+sender/receiver release、Pack/context、interaction evidence/data、asset 或执行。
 
 #### P23A — interaction evidence
 
@@ -1253,26 +1278,62 @@ sender cell → receiver cell
 → interaction_evidence_score
 ```
 
-- [ ] P22 sender/receiver release identity；
-- [ ] 固定模型来自 P20/P21 流程；
-- [ ] 真实同实验 paired/co-culture/spatial evidence 获得精确资产授权；
-- [ ] sender/receiver release、Pack 和 context identity；
-- [ ] 同实验 donor/sample/well、condition、dose/time 和 role；
-- [ ] ligand/receptor/evidence namespace 和 mapping；
-- [ ] 不把无关 dataset 的 sender/receiver 静默配对；
-- [ ] no-interaction、receiver-only 和 coexpression baseline；
-- [ ] sender、receiver、ligand、donor、platform 和 dose/time OOD；
-- [ ] 输出只限 evidence score；
-- [ ] 不输出 receiver response、effect size 或因果结论。
+**已完成的本地合同与 synthetic conformance**
+
+- [x] strict、frozen、direction-sensitive sender/receiver schema 绑定 P22 release closure、
+  Pack/context fingerprint 和显式 P18 typed identity reference；
+- [x] indivisible same-experiment identity 冻结 dataset/platform/evidence、donor/sample/well、
+  condition、dose/time、role、ligand/receptor/evidence namespace 与 mapping fingerprint，且
+  schema 不提供跨 dataset 静默配对字段；
+- [x] 复用 P13 prepared-input/output/projection contract；未建立平行 runtime，也未注册到
+  default adapter registry；
+- [x] scorer fixture 冻结 no-interaction、receiver-only、LR-coexpression baseline 名称和
+  sender/receiver/ligand/donor/dataset/platform/dose-time OOD axes，但全部真实验证 gate 固定
+  为 false；
+- [x] projection 仅允许 unit-interval `interaction_evidence_score`；receiver response、effect
+  size、causal claim、legacy co-culture payload 和额外字段全部 fail closed；
+- [x] `synthetic_conformance` projection/abstain、identity drift、non-finite score、OOD、provenance 和 no-I/O
+  negative conformance 通过；synthetic record role 明确为
+  `synthetic_conformance_not_evidence`。
+
+**未运行的真实输入、执行与科学门**
+
+- [ ] 在 active、non-revoked P22 registry state 中重验 sender/receiver release；当前合同值
+  `registry_state_verified=false`；
+- [ ] 对 P18 model input/view 的 exact observation membership 做真实验证；当前
+  `p18_contract_verified=false`、`observation_membership_verified=false`；
+- [ ] 获得并校验真实同实验 paired/co-culture/spatial evidence 与 ligand/receptor/evidence
+  mapping asset；当前 asset/linkage verification 为 false；
+- [ ] 绑定并重验 trusted P20/P21 bundle、固定 model artifact 与 P21B execution；当前相关
+  trust/execution/authorization flags 全为 false；
+- [ ] 执行 no-interaction、receiver-only、LR-coexpression baseline comparison、paired CI、
+  calibrated uncertainty 和 held-out sender/receiver/ligand/donor/dataset/platform/dose-time OOD；
+- [ ] 产生任何 scientific evidence、promotion eligibility 或 product policy decision。
+
+**本地验证与 packaging evidence**
+
+- focused：`107 passed` / `41.71s`；affected：`495 passed, 1 skipped` / `116.55s`；
+  safe：`1,787 passed, 49 skipped, 387 deselected` / `367.11s`；legacy：
+  `1,147 passed, 58 skipped, 105 deselected` / `57.38s`；static checks `PASS`；
+- module/test SHA-256：
+  `d1ba8d8054bf91c4a54a215c331fef65557df3954dba730998821ea9f70743cd` /
+  `269c387423a41864031bb54fbbc692b84da0cbae5137db9fd6cbc077302d3081`；
+- 两个独立 Git archive build 的 wheel byte-identical；`1,226,514` bytes；SHA-256
+  `e78f40f0f4fe7354e3c660d6612a8ee60a1b2dd61af2fc606a67d01e67ac601e`；`373`
+  entries / `14` React / `0` tests / `0` AppleDouble；ZIP 和 source/wheel source-hash
+  checks `PASS`；
+- exact local toolchain：Python `3.13.12`、build `1.5.0`、setuptools `70.2.0`、
+  packaging `26.0`、Node `25.8.2`、npm `11.11.1`、Vite `8.1.2`。该证据不等于
+  dependency closure、clean install、release 或真实 science run。
 
 #### P23B — receiver response，可选且独立
 
-- [ ] P23A 已完成；
+- [x] P23A contract-only 已完成；
 - [ ] 另有干预数据；
 - [ ] estimand、assumptions、confounder policy 和 causal-language policy 冻结；
 - [ ] baseline、metric/CI 和 external gate 冻结；
 - [ ] 未满足 assumptions 或任一 gate 时 `prediction=null/abstain`；
-- [ ] P23A evidence 不能冒充 P23B response。
+- [x] P23A output contract 已禁止把 evidence 冒充 P23B response；真实 P23B 仍未授权。
 
 **完成判定**
 
@@ -1283,12 +1344,16 @@ sender cell → receiver cell
 
 ### Phase 24 — First Real Community Adapter
 
-**状态：** `NOT_STARTED`
+**状态：** `AUTHORIZATION_REQUIRED / NOT_RUN`。P24 的定义交付物是真实双成员
+Community adapter；P10 v1 regression 本身只是其验收保护，不构成独立 P24
+contract-only work unit。没有 exact real assets、trusted fixed model 和 run window
+授权时，不得把 P24 标为 next eligible 本地实现。
 
 **前置**
 
-- [ ] 明确使用 P23A completion SHA，或在已单独完成可选 P23B 时使用 P23B SHA；
-- [ ] 不使用模糊的“P23 完成 SHA”；
+- [x] 默认 starting baseline 已明确为 P23A completion code SHA
+  `2b894966cd00b2af2fafbf8f009566dd69f393a7`；只有另行完成可选 P23B 才可改用其 SHA；
+- [x] 不使用模糊的“P23 完成 SHA”；
 - [ ] P10 v1 no-model regression 已冻结；
 - [ ] 固定模型来自 P20/P21，真实双成员资产另有精确授权。
 
@@ -1621,9 +1686,9 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | P21B | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `N/A` | — | unchanged | exact candidate/assets/protocol/output authorization absent |
 | P21C | `AUTHORIZATION_REQUIRED / NOT_RUN` | `READ_ONLY / NOT_RUN` | `NOT_RUN` | — | unchanged | exact evidence/scope/named-operator authorization absent |
 | P22 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | `09792e13e29a76b5e4434507f3334eefb947789c` | `bca5ad661856e8d9aa832c47f23c6ad7179ee0c9` | tree `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`；epoch `1786056220`；report `reports/phase22/PHASE22_COMPLETION.md`；focused `35 passed`；affected `289 passed / 1 skipped`；safe `1,680/49/387`；legacy `1,147/58/105`；wheel `1,217,155` bytes / `3f978e9f3eb06ea17017c1838002762f28ae717ee08d987cfb8ea059162a2485` / `372` entries；source `9678b2460aff6738935a2728e12abf398985c4475d66be96d37a721a21bf62ff`；default registry empty；synthetic conformance only |
-| P23A | `NEXT_ELIGIBLE — CONTRACT_ONLY / NOT_STARTED` | `NOT_RUN` | `NO_NEW_DECISION` | — | unchanged | evidence-only local contract 可推进；real release/data/execution gated；禁止 receiver response/causal claim |
-| P23B | `OPTIONAL_NOT_RUN` | `NOT_RUN` | `NOT_RUN` | — | unchanged or separate | — |
-| P24 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
+| P23A | `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE` | `NOT_RUN` | `NO_NEW_DECISION` | `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4` | `2b894966cd00b2af2fafbf8f009566dd69f393a7` | tree `00bd98b0fd14091f4528115dcc66730264d5803a`；epoch `1786061504`；focused `107 passed`；affected `495 passed / 1 skipped`；safe `1,787/49/387`；legacy `1,147/58/105`；wheel `1,226,514` bytes / `e78f40f0f4fe7354e3c660d6612a8ee60a1b2dd61af2fc606a67d01e67ac601e` / `373` entries；module/test SHA-256 `d1ba8d8054bf91c4a54a215c331fef65557df3954dba730998821ea9f70743cd` / `269c387423a41864031bb54fbbc692b84da0cbae5137db9fd6cbc077302d3081`；synthetic only |
+| P23B | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | — | unchanged or separate | optional receiver-response window；independent authorization absent |
+| P24 | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | `2b894966cd00b2af2fafbf8f009566dd69f393a7`（default baseline） | unchanged | real-only Community adapter；exact assets/model/run authorization absent；no independent contract-only work unit |
 | P25 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
 | P26 | `BLOCKED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
 | P27A | `NOT_STARTED` | `REPLAY_NOT_RUN` | `N/A` | — | — | — |
@@ -1770,10 +1835,21 @@ P22 已从 P21A docs-closure `09792e13e29a76b5e4434507f3334eefb947789c`
 `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`、epoch `1786056220` 完成 contract-only
 curated registry。它只组合并重验既有 immutable P19/P12/P21 evidence/policy identity；
 没有真实 import/catalog/revoke/supersede，默认 registry empty，science `NOT_RUN`，policy
-`NO_NEW_DECISION`。下一 eligible 本地 work unit 是 P23A contract-only；真实
-sender/receiver curated release、Pack/context 与 interaction evidence/data 尚未提供，因此只能做
-evidence-only schema/scoring conformance，不得产生 receiver response 或 causal claim。P21B/P21C、外置
-资产、真实模型/训练、GPU、network、push、发布、部署和 operator promotion 仍不在授权范围。
+`NO_NEW_DECISION`。
+
+P23A 已从 P22 docs-closure `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4`
+开始，以 code SHA `2b894966cd00b2af2fafbf8f009566dd69f393a7`、tree
+`00bd98b0fd14091f4528115dcc66730264d5803a`、epoch `1786061504` 完成 directed
+sender/receiver identity、same-experiment evidence identity、P13 adapter 和 evidence-only projection 的
+strict contract/synthetic conformance。真实 active/non-revoked P22 state、exact P18 membership、
+paired evidence/mapping、trusted P20/P21 bundle/artifact/execution、baseline/paired CI、真实
+uncertainty 和 held-out OOD 均未运行；science `NOT_RUN`、policy `NO_NEW_DECISION`。
+
+P23B 仍是独立可选 `AUTHORIZATION_REQUIRED / NOT_RUN`。P24 的定义是 first real
+Community adapter；P10 no-model regression 不是独立 contract-only work unit，因此 P24 在
+exact assets/model/run window 缺失时为 `AUTHORIZATION_REQUIRED / NOT_RUN`，不是下一
+eligible 本地 contract-only 实现。P21B/P21C、外置资产、真实模型/训练、GPU、network、
+push、发布、部署和 operator promotion 仍不在授权范围。
 
 可直接跨对话使用的顺序推进提示词见：
 

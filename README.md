@@ -56,10 +56,17 @@ P21A docs-closure `09792e13e29a76b5e4434507f3334eefb947789c` 开始，以 P21A c
 （tree `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`，source date epoch
 `1786056220`）完成 Curated Virtual Cell Registry 工程合同，状态为
 `COMPLETE — CONTRACT_ONLY`；science `NOT_RUN`，policy `NO_NEW_DECISION`，真实
-import/catalog/revoke/supersede lifecycle 为 `NOT_RUN`。P21B/P21C 均为
-`AUTHORIZATION_REQUIRED / NOT_RUN`；P23A 是下一 eligible 本地 contract-only work unit，
-只能建立 sender→receiver `interaction_evidence_score`，不得输出 receiver response 或 causal
-claim；真实 release、interaction data 与执行仍须满足各自 exact 输入/授权门。没有
+import/catalog/revoke/supersede lifecycle 为 `NOT_RUN`。Phase 23A 从 P22 docs-closure
+`2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4` 开始，在分支
+`codex/p23-cell-interaction` 的 `2b894966cd00b2af2fafbf8f009566dd69f393a7`
+（tree `00bd98b0fd14091f4528115dcc66730264d5803a`，source date epoch
+`1786061504`）完成 sender→receiver Cell Interaction Evidence 本地工程合同，状态为
+`COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`；science `NOT_RUN`，policy
+`NO_NEW_DECISION`。输出只允许 `interaction_evidence_score`，不得输出 receiver response、
+effect size 或 causal claim。P21B/P21C 与可选 P23B 均为
+`AUTHORIZATION_REQUIRED / NOT_RUN`；P24 是下一顺序阶段，但其 First Real Community
+Adapter 必须有另行授权的 exact real assets、固定模型和 write-new execution window，当前为
+`AUTHORIZATION_REQUIRED / NOT_RUN`，不存在可替代它的 fake contract-only scaffold。没有
 product/API/runtime version bump、release 或 push。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
@@ -72,7 +79,8 @@ exact 验证与克制的科学/policy 边界见
 [P19 完成报告](reports/phase19/PHASE19_COMPLETION.md)和
 [P20 完成报告](reports/phase20/PHASE20_COMPLETION.md)以及
 [P21A 完成报告](reports/phase21a/PHASE21A_COMPLETION.md)与
-[P22 完成报告](reports/phase22/PHASE22_COMPLETION.md)。P14R、P15R 与 P16R 的真实
+[P22 完成报告](reports/phase22/PHASE22_COMPLETION.md)和
+[P23A 完成报告](reports/phase23a/PHASE23A_COMPLETION.md)。P14R、P15R 与 P16R 的真实
 asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B、P15B 与 P16B 均为
 `NOT_RUN`。当前 P12 `ModelRegistryV2` 有 5 个 legacy release、0 个 native、0 个 production-promoted
 capability；P18 没有真实 multi-omics model execution/acceptance，science 为 `NOT_RUN`，
@@ -114,6 +122,21 @@ compatibility 均为 unknown；没有 HTTP/API、UI、Data Center、chat、runti
 asset installation 或 execution 接线。设计和运维边界见
 [P22 ADR](docs/ADR-0019-curated-virtual-cell-registry.md)与
 [P22 runbook](docs/runbooks/VIRTUALCELL-CURATED-REGISTRY.md)。
+
+P23A 复用 P13 prepared-input/output/provenance 形状，并用独立 strict schema 绑定两个
+P22 release/Pack/context、typed P18 endpoint identity、同实验 donor/sample/well/
+condition/dose/time、ligand/receptor/evidence namespace 与 mapping，以及声明但未验证的
+P20/P21 scorer identity。它没有资产 loader、生物 scoring formula、模型 runtime、registry
+mutation、默认 adapter registration 或 legacy co-culture 接线。`synthetic_conformance` projection 只是把调用方
+提供的 unit-interval contract fixture 规范化为唯一公开投影
+`{"interaction_evidence_score": [x]}`；元数据明确记录 real data/model execution、paired
+linkage、baseline comparison、paired CI 与 registry state 均未验证或未运行。缺失 paired
+evidence、baseline gate 失败、unsupported/OOD、execution 未授权或 registry state 未验证时
+只能 abstain，且不能投影。设计和运维边界见
+[P23A ADR](docs/ADR-0020-cell-interaction-evidence-contract.md)与
+[P23A runbook](docs/runbooks/CELL-INTERACTION-EVIDENCE.md)。真实 paired/co-culture/spatial
+输入、真实 curated release state、固定模型执行、baseline/CI/OOD science gate 仍须另行 exact
+授权；合成 conformance 不是 interaction evidence、scientific validation 或 promotion。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -489,16 +512,28 @@ npm run build
 CI=1 npm run e2e
 ```
 
-当前 P22 精确本地结果为 focused `35 passed`（`43.55s`）、affected `289 passed / 1 skipped`
-（`64.94s`）、safe `1,680 passed / 49 skipped / 387 deselected`（`334.23s`）、legacy
-`1,147 passed / 58 skipped / 105 deselected`（`60.48s`），静态门通过。完整命令、用时、skip/deselect
+当前 P23A 精确本地结果为 focused `107 passed`（`41.71s`）、affected
+`495 passed / 1 skipped`（`116.55s`）、safe
+`1,787 passed / 49 skipped / 387 deselected`（`367.11s`）、legacy
+`1,147 passed / 58 skipped / 105 deselected`（`57.38s`），静态门通过。两次 exact-code wheel
+byte-identical：`1,226,514` bytes，SHA-256
+`e78f40f0f4fe7354e3c660d6612a8ee60a1b2dd61af2fc606a67d01e67ac601e`，`373`
+entries、React `14`、tests `0`、AppleDouble `0`；source/wheel
+`praxis_virtualcell/model_zoo/cell_interaction_evidence_contract.py` SHA-256 均为
+`d1ba8d8054bf91c4a54a215c331fef65557df3954dba730998821ea9f70743cd`。工具链为
+Python `3.13.12`、build `1.5.0`、setuptools `70.2.0`、packaging `26.0`、Node
+`25.8.2`、npm `11.11.1`、Vite `8.1.2`。这是 exact local source/toolchain reproducibility，
+不是 pinned dependency closure、clean-install 证明或 release。完整命令、用时、skip/deselect
 含义、显式外部门和 GitHub CI 状态见 [测试指南](docs/TESTING.md)。普通测试默认不访问固定私网服务；`integration`、`llm`、`remote` 分别需要 `--run-integration`、`--run-llm`、`--run-remote`，一个测试拥有多个 marker 时必须同时满足对应门。
 
 ## 文档入口
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P22 边界和跨项目集成 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P23A 边界和跨项目集成 |
+| [P23A 完成报告](reports/phase23a/PHASE23A_COMPLETION.md) | exact evidence-only contract closure、synthetic conformance、reproducible local-toolchain wheel 与真实 data/model/science/policy 非运行边界 |
+| [P23A Cell Interaction Evidence ADR](docs/ADR-0020-cell-interaction-evidence-contract.md) | directed endpoint/same-experiment/scorer identity、P13 envelope、唯一 score projection 与 non-claim 决策 |
+| [P23A Cell Interaction Evidence runbook](docs/runbooks/CELL-INTERACTION-EVIDENCE.md) | local contract audit、negative/abstain 检查、真实输入/执行授权门与 P24 handoff |
 | [P22 完成报告](reports/phase22/PHASE22_COMPLETION.md) | exact curated-registry closure、default-deny external trust/checkpoint、reproducible local-toolchain wheel 与真实 lifecycle/science/policy 非运行边界 |
 | [P22 Curated Registry ADR](docs/ADR-0019-curated-virtual-cell-registry.md) | exact One-Pack/P21B release composition、append-only lifecycle、stable authorization reference 与外置 checkpoint 边界 |
 | [P22 Curated Registry runbook](docs/runbooks/VIRTUALCELL-CURATED-REGISTRY.md) | local import/decision/query 审计、suffix reauthorization、checkpoint 推进与 rollback 限制 |
@@ -548,7 +583,7 @@ CI=1 npm run e2e
 
 唯一允许的流向是：本地 feature branch → GitHub branch/CI → 审批合入 GitHub `main` → 本地 `main` fast-forward → `.53` 从同一 GitHub SHA fast-forward → 三端 SHA 核对。不要在 `.53` 直接开发，也不要把本地 tag 当成已发布 tag。
 
-本轮 P22 contract/docs closure 窗口未刷新 GitHub 或 `.53`。规范工作树是
+本轮 P23A contract/docs closure 窗口未刷新 GitHub 或 `.53`。规范工作树是
 `/Volumes/T7/PRAXIS-virtualcell`，Git metadata 是
 `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`；任何远程数字只有带日期和 exact
 identity 的只读记录意义。
