@@ -1895,9 +1895,11 @@ schema/version 和独立 evidence；不得复用 v1 名称改变语义。
 ### 可复制授权提示词
 
 ```text
-授权默认以 `2b894966cd00b2af2fafbf8f009566dd69f393a7` 作为 Phase 24（First Real Community Adapter）
-唯一起始基线；只有明确决定纳入可选 P23B 时才改用 `<P23B 完成代码 SHA>`，不得写
-模糊的“Phase 23 完成 SHA”。创建 `codex/p24-community-adapter`，保留 P10
+授权以授权时现场只读核验得到的 `ACTIVE_BASELINE_SHA` 作为 Phase 24（First Real Community
+Adapter）唯一起始基线；引用 P23A prerequisite code
+`2b894966cd00b2af2fafbf8f009566dd69f393a7` 和 P25E/P10-regression prerequisite code
+`039393e6be897b3014bb0b657d0a439d879578b6`，但不得 checkout/revert 到这些历史 SHA、丢失
+后续本地 work units，或写模糊的“Phase 23 完成 SHA”。创建 `codex/p24-community-adapter`，保留 P10
 `vc.community-pack.v1` 和固定 no-model abstain 语义，仅为一个预先限定的双成员、
 well-mixed、medium/abundance/time 任务新增独立版本的真实 CommunityModelAdapter
 和 v2/独立 schema 的

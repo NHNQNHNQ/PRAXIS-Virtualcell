@@ -581,8 +581,7 @@ Implemented history through the current P25E contract-complete bytes:
     closure, clean-install or release evidence. The sole non-abstaining projection is the supplied
     synthetic fixture `interaction_evidence_score`; no biological scoring, real release/data/model
     verification, baseline/CI/OOD execution, receiver response or causal claim exists. Engineering is
-    `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`, fixture evidence is
-    `SYNTHETIC_CONFORMANCE_ONLY`, science is `NOT_RUN`, policy is
+    `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`, science is `NOT_RUN`, policy is
     `NO_NEW_DECISION`; P23B and P24 are authorization-required/not-run. No product/API/runtime
     version bump, release identity, tag, push or deploy is created. Product version remains `1.6.0`.
 30. P25E starts from observed active baseline `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`
@@ -591,9 +590,10 @@ Implemented history through the current P25E contract-complete bytes:
     `039393e6be897b3014bb0b657d0a439d879578b6` /
     `b53e542940bf39fd44965fe55416798211ab580b`; two local-toolchain wheels are byte-identical
     at `1,234,438` bytes / `c8529477974c...` / `374` entries. All execution bindings remain absent,
-    plans/results abstain, science is `NOT_RUN`, policy is `NO_NEW_DECISION`, and P24/P25R remain
-    authorization-required/not-run. No product/API/runtime version bump, release identity, tag, push
-    or deploy is created. Product version remains `1.6.0`.
+    plans/results abstain. Engineering is `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`, fixture
+    evidence is `SYNTHETIC_CONFORMANCE_ONLY`, science is `NOT_RUN`, policy is `NO_NEW_DECISION`, and
+    P24/P25R remain authorization-required/not-run. No product/API/runtime version bump, release
+    identity, tag, push or deploy is created. Product version remains `1.6.0`.
 
 ## Release invariants
 

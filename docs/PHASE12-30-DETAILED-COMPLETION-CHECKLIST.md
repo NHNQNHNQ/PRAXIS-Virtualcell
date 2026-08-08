@@ -1364,10 +1364,12 @@ contract-only work unit。没有 exact real assets、trusted fixed model 和 run
 
 **前置**
 
-- [x] 默认 starting baseline 已明确为 P23A completion code SHA
-  `2b894966cd00b2af2fafbf8f009566dd69f393a7`；只有另行完成可选 P23B 才可改用其 SHA；
+- [ ] 授权时重新只读核验并绑定现场 `ACTIVE_BASELINE_SHA`，不得回退历史 P23/P24 SHA；
+- [x] P23A prerequisite code 固定为 `2b894966cd00b2af2fafbf8f009566dd69f393a7`；
+- [x] P25E/P10-regression prerequisite code 固定为
+  `039393e6be897b3014bb0b657d0a439d879578b6`；
 - [x] 不使用模糊的“P23 完成 SHA”；
-- [ ] P10 v1 no-model regression 已冻结；
+- [x] P10 v1 no-model regression 已冻结；
 - [ ] 固定模型来自 P20/P21，真实双成员资产另有精确授权。
 
 **唯一任务：**
@@ -1724,7 +1726,7 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | P22 | `COMPLETE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | `09792e13e29a76b5e4434507f3334eefb947789c` | `bca5ad661856e8d9aa832c47f23c6ad7179ee0c9` | tree `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`；epoch `1786056220`；report `reports/phase22/PHASE22_COMPLETION.md`；focused `35 passed`；affected `289 passed / 1 skipped`；safe `1,680/49/387`；legacy `1,147/58/105`；wheel `1,217,155` bytes / `3f978e9f3eb06ea17017c1838002762f28ae717ee08d987cfb8ea059162a2485` / `372` entries；source `9678b2460aff6738935a2728e12abf398985c4475d66be96d37a721a21bf62ff`；default registry empty；synthetic conformance only |
 | P23A | `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE` | `NOT_RUN` | `NO_NEW_DECISION` | `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4` | `2b894966cd00b2af2fafbf8f009566dd69f393a7` | tree `00bd98b0fd14091f4528115dcc66730264d5803a`；epoch `1786061504`；focused `107 passed`；affected `495 passed / 1 skipped`；safe `1,787/49/387`；legacy `1,147/58/105`；wheel `1,226,514` bytes / `e78f40f0f4fe7354e3c660d6612a8ee60a1b2dd61af2fc606a67d01e67ac601e` / `373` entries；module/test SHA-256 `d1ba8d8054bf91c4a54a215c331fef65557df3954dba730998821ea9f70743cd` / `269c387423a41864031bb54fbbc692b84da0cbae5137db9fd6cbc077302d3081`；synthetic only |
 | P23B | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | — | unchanged or separate | optional receiver-response window；independent authorization absent |
-| P24 | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | `2b894966cd00b2af2fafbf8f009566dd69f393a7`（default baseline） | unchanged | real-only Community adapter；exact assets/model/run authorization absent；no independent contract-only work unit |
+| P24 | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | authorization-time `ACTIVE_BASELINE_SHA`；P23A prerequisite `2b894966...`；P25E/P10 prerequisite `039393e6...`；never revert | unchanged | real-only Community adapter；exact assets/model/run authorization absent；no independent contract-only work unit |
 | P25E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | `ae5e93571783cb3cf49a6e0fab531a89e963f7ec` | `039393e6be897b3014bb0b657d0a439d879578b6` | tree `b53e542940bf39fd44965fe55416798211ab580b`；epoch `1786171049`；focused `21`、P25E+P10 adjacent `60`；safe `1,809/49/387`；legacy `1,147/58/105`；wheel `1,234,438` bytes / `c8529477974c6379f75bee05e4b0b589e3a03ed70302617ab46461954915d77e` / `374` entries；fixture `SYNTHETIC_CONFORMANCE_ONLY`；P10 v1 preserved；all results abstain |
 | P25R | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `N/A` | — | unchanged | exact real assets/model/mapping/protocol/output authorization absent |
 | P25 policy / P21C | `AUTHORIZATION_REQUIRED / NOT_RUN` | `READ_ONLY / NOT_RUN` | `NOT_RUN` | — | unchanged | exact positive evidence and named-operator authorization absent |
