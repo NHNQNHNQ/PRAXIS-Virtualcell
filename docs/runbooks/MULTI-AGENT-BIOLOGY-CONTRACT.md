@@ -121,6 +121,8 @@ Do not describe P28E as multi-model execution, conflict recovery, scientific com
 or production orchestration. Real P28 requires three exact-request executable, scientifically validated, and
 production-promoted model modules plus frozen comparison/ablation evidence.
 
-The next local work unit is P29E strict connected-subgraph contract plus authoritative empty-graph/value-free
-abstention. A real connected biological subgraph remains unavailable and must not be replaced with advisory
-or synthetic nodes.
+At P28E closure, the next local work unit was P29E strict connected-subgraph contract plus authoritative
+empty-graph/value-free abstention. P29E subsequently completed at
+`471767e5f38f9866fbe396f39836369d943f6657` with `empty_not_connected`, zero nodes/edges and no
+placeholder scale chain. A real connected biological subgraph remains unavailable; P30A local RC closure is
+now next.

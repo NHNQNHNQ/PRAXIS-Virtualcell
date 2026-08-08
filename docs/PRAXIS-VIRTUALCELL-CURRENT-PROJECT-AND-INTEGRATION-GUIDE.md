@@ -116,19 +116,28 @@
 > `SYNTHETIC_CONFORMANCE_ONLY`；real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；
 > science `NOT_RUN`；policy `NO_NEW_DECISION`
 >
+> 已完成 work unit：`P29E — Limited Biological World Model contract`；actual P28E
+> docs-closure starting SHA `90990c198c40d0e6655aedaad101a783cde003aa`；completion code SHA
+> `471767e5f38f9866fbe396f39836369d943f6657`；tree
+> `d1dec19f06ec88f563406b45f2b544effabad915`；source date epoch `1786187523`；branch
+> `codex/p25e-virtual-microbiome`；状态
+> `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture
+> `SYNTHETIC_CONFORMANCE_ONLY`；real candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；
+> science `NOT_RUN`；policy `NO_NEW_DECISION`
+>
 > 工作树保护清单：不在本文固定；每轮从现场 `git status --short` 动态重建，任何
 > 新 staged/modified/deleted/untracked 路径默认受保护
 >
 > 当前 Cell-first 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
 > 下一步：P24 real adapter 与 P25R 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`；其 gate 未被
-> P25E/P26E/P27A-E/P28E 绕过。P26R 为 `BLOCKED_EXTERNAL / NOT_RUN`。P27B 为
+> P25E/P26E/P27A-E/P28E/P29E 绕过。P26R 为 `BLOCKED_EXTERNAL / NOT_RUN`。P27B 为
 > `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`，P27C 为
 > `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。P28E 已完成 authoritative empty DAG/trace、
 > value-free abstention；真实 P28 acceptance 仍为
-> `BLOCKED / 0_OF_3_QUALIFYING_MODULES`。下一 eligible local work unit 是 P29E strict
-> connected-subgraph contract plus authoritative empty-graph/value-free abstention；真实 P29
-> candidate 当前为 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`。
+> `BLOCKED / 0_OF_3_QUALIFYING_MODULES`。P29E 已完成 `empty_not_connected`、zero-node、
+> value-free closure；真实 P29 candidate 仍为 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`。
+> 下一 eligible local work unit 是 P30A local RC closure；P30B1–B4 仍需独立授权。
 
 本文是一份面向其他项目、开发团队、科研合作者和后续智能体的独立项目说明。它回答四个问题：
 
@@ -2668,7 +2677,34 @@ Engineering `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；real acceptan
 `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；science `NOT_RUN`；policy `NO_NEW_DECISION`。完整记录见
 `reports/phase28e/PHASE28E_COMPLETION.md`。
 
-### 24.15 Skip 和 deselect 的含义
+### 24.15 P29E 完成状态
+
+P29E 从 P28E docs closure `90990c198c40d0e6655aedaad101a783cde003aa` 开始，在
+code/tree `471767e5f38f9866fbe396f39836369d943f6657` /
+`d1dec19f06ec88f563406b45f2b544effabad915` 完成；epoch `1786187523`。
+
+Focused 为 `51 passed`；P28+P29 adjacent 为 `89 passed`；exact affected eleven-test-file suite 为
+`390 passed`；safe 为 `1,934 passed, 49 skipped, 387 deselected in 427.59s`；legacy 为
+`1,147 passed, 58 skipped, 105 deselected in 58.07s`；packaging/versioning 为 `18 passed`。
+Two independent archive-built wheels are byte-identical at `1,263,199` bytes，SHA-256
+`368a66a438c036a3b9c24f1093fc478886885fbefaecfea52bb50ad616206c01`，共 `378`
+entries、`14` React、无 tests/AppleDouble；source/wheel module SHA-256 exact match
+`b730220099b36df99f7ba706be7dea6174b1c41329b62526dc45bda475c155ae`。
+
+P29E 只消费 exact recursively revalidated P28 compilation，生成 strict
+state/action/observation/time requirement、connected-typed-subgraph status 与 authoritative
+compilation。所有真实 state/action/observation/time/data/model/environment/adapter/compute/benchmark/
+evidence/policy/result/tool identities 均为 `null`；graph 精确为 `empty_not_connected`，nodes/edges/
+scales 均为空且 count 为 `0`，未定义 placeholder node/edge class。Standalone replay 仅经 P28
+identity 间接绑定并明确 `request_bound=false`。Content hash 是 canonical identity，不是 signature、
+issuer authentication 或 attestation。
+
+Engineering `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture
+`SYNTHETIC_CONFORMANCE_ONLY`；real P29 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；science
+`NOT_RUN`；policy `NO_NEW_DECISION`。没有 real data/model/benchmark、训练、执行、release、push
+或 deploy。完整记录见 `reports/phase29e/PHASE29E_COMPLETION.md`。
+
+### 24.16 Skip 和 deselect 的含义
 
 skip/deselect 不能写成：
 
@@ -2728,6 +2764,8 @@ skip/deselect 不能写成：
   schema 虽要求 2–3 members，但当前没有 third-member conformance Pack，更没有 real community release；
 - P26E 没有 host/community model、mapping、runtime 或 partial-result path；P22 audit 只到 context，
   P25E contract 不是 community release，DAG 只是 topology，所有 compilation values 均为 `null`；
+- P29E 没有 biological nodes/edges、state/action/observation/time scope、data、model、environment、
+  adapter、compute、benchmark 或 runtime；`empty_not_connected` 是 fail-closed 状态，不是 world model；
 - custom-path 低层 ModelZooRegistry 保留显式 v1 compatibility mode，不能称 v2 fully
   governed 产品路径；
 - 当前部署/本地默认环境没有完整真实权重生态；
@@ -2757,13 +2795,13 @@ skip/deselect 不能写成：
   `production_promoted`；P17 contract 已完成，但不能声称真实多模型执行或科学验收；
 - 没有真实 Community model；
 - 没有 Host–Microbiome model；
-- 没有 biological world model；
+- 没有 biological world model；P29E 的 zero-node empty graph 不构成科学 capability；
 - 不能把 routing、规则建议或 LLM narrative 当作预测。
 
 ### 工程限制
 
 - 当前版本字符串存在发布漂移；
-- P13 Adapter SDK、P14E/P15E/P16E narrow contracts、P17 Brain/DAG、P18/P19/P20/P23A/P25E/P26E contracts
+- P13 Adapter SDK、P14E/P15E/P16E narrow contracts、P17 Brain/DAG、P18/P19/P20/P23A/P25E/P26E/P29E contracts
   仅在本地工程完成，尚未发布；
 - P14E 尚无任意未来 GEM loader 为 `data_only` 的类型级证明；
 - JobStore 是本地文件系统；
@@ -2910,7 +2948,7 @@ artifact hash
 
 ## 28. 后续路线图 P12–P30
 
-P12/P13/P14E/P15E/P16E/P17/P18/P19/P20/P21A/P22/P23A/P25E/P26E/P27A-E/P28E 行记录已完成的工程 work units；
+P12/P13/P14E/P15E/P16E/P17/P18/P19/P20/P21A/P22/P23A/P25E/P26E/P27A-E/P28E/P29E 行记录已完成的工程 work units；
 P14R/P14B、P15R/P15B 与 P16R/P16B 仍未运行。P21B/P21C 未授权、未运行，真实科学或
 policy 窗口不能当作当前能力。P23A contract-only 已完成；真实 sender/receiver curated release、
 Pack/context 与 interaction evidence/data/execution 仍未提供。P23B 可选且需独立授权；P24 是
@@ -2922,8 +2960,9 @@ P27A-E 已完成 exact-request-derived value-free design 与 synthetic rank-then
 接入 ActiveLearningAgent/runtime/LLM candidate，也没有运行 canonical historical replay。P27A-R 为
 `REPLAY_NOT_RUN / ASSET_PENDING`。P28E 已完成 advisory-only role、typed value-free handoff、
 deterministic DAG/hash-chain trace 与 authoritative empty compilation；真实 P28 acceptance 仍为
-`0/3` qualifying modules。下一 eligible local work unit 是 P29E strict connected-subgraph contract
-plus authoritative empty-graph/value-free abstention；真实 P29 qualified biological nodes 为 `0`。
+`0/3` qualifying modules。P29E 已完成 strict null requirement、`empty_not_connected` graph 与
+authoritative value-free compilation；真实 P29 qualified biological nodes 为 `0`。下一 eligible local
+work unit 是 P30A local RC closure；P30B1–B4 仍为独立授权窗口。
 
 | 阶段 | 目标 |
 |---|---|
@@ -2960,9 +2999,9 @@ plus authoritative empty-graph/value-free abstention；真实 P29 qualified biol
 | P27C | `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`：可选 prospective pilot |
 | P28E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`：start `971f812f...`；completion `da4bfc04...`；empty authoritative DAG/trace、`0/3`、all values null；science `NOT_RUN`；policy `NO_NEW_DECISION` |
 | P28 real acceptance | `BLOCKED / 0_OF_3_QUALIFYING_MODULES`：需要三个 exact-request executable + scientifically validated + production-promoted model modules；rule/advisory/synthetic 不计数 |
-| P29E | `NEXT ELIGIBLE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`：strict connected-subgraph contract plus authoritative empty-graph fail-closed compilation |
+| P29E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`：start `90990c19...`；completion `471767e5...`；`empty_not_connected`、zero nodes/edges、all authority/value slots null；science `NOT_RUN`；policy `NO_NEW_DECISION` |
 | P29 real candidate | `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`：有限域 real connected typed biological subgraph/data/model/benchmark absent |
-| P30A | Local RC |
+| P30A | `NEXT ELIGIBLE — LOCAL RC`：clean dependency/SBOM/license/artifact/release-doc gates pending |
 | P30B1 | Push + exact-SHA CI |
 | P30B2 | Main/tag/artifact release |
 | P30B3 | Immutable staging |
@@ -3032,8 +3071,11 @@ rank-then-reveal harness。P27A-R historical replay 仍是 `REPLAY_NOT_RUN / ASS
 `da4bfc042d96f830e2a7e8cdc62ba227c7ace949`（tree
 `e6f18371f5061c810b2cb87d9a278cfa6d6ac46b`）完成 immutable advisory contracts 和
 authoritative empty orchestration compilation；真实 P28 门为 `0/3`，不能用
-rule/advisory/synthetic 补足。当前最早 eligible 本地闭环是 P29E strict connected-subgraph
-contract plus authoritative empty-graph/value-free abstention；真实 P29 qualified node 为 `0`。
+rule/advisory/synthetic 补足。P29E 随后从 `90990c198c40d0e6655aedaad101a783cde003aa`
+开始，以 `471767e5f38f9866fbe396f39836369d943f6657`（tree
+`d1dec19f06ec88f563406b45f2b544effabad915`）完成 null requirement、
+`empty_not_connected` graph 与 value-free compilation；真实 P29 qualified node 为 `0`。当前最早
+eligible 本地闭环是 P30A local RC closure。
 
 在进入更大世界模型之前，最重要的闭环仍然是：
 
@@ -3093,10 +3135,11 @@ contract plus authoritative empty-graph/value-free abstention；真实 P29 quali
 24. [P26E Completion Report](../reports/phase26e/PHASE26E_COMPLETION.md)
 25. [P27A-E Completion Report](../reports/phase27ae/PHASE27AE_COMPLETION.md)
 26. [P28E Completion Report](../reports/phase28e/PHASE28E_COMPLETION.md)
-27. 本当前项目与集成指南
-28. [Repository Layout](REPOSITORY-LAYOUT.md)
-29. [Installation Guide](INSTALL.md)
-30. 当前 work unit 的 ADR、runbook、contracts、代码和测试
+27. [P29E Completion Report](../reports/phase29e/PHASE29E_COMPLETION.md)
+28. 本当前项目与集成指南
+29. [Repository Layout](REPOSITORY-LAYOUT.md)
+30. [Installation Guide](INSTALL.md)
+31. 当前 work unit 的 ADR、runbook、contracts、代码和测试
 
 关键 ADR：
 
@@ -3124,6 +3167,7 @@ contract plus authoritative empty-graph/value-free abstention；真实 P29 quali
 - [P26E Host–Microbiome](ADR-0022-host-microbiome-contract.md)
 - [P27A-E Agentic Experiment Design](ADR-0023-agentic-experiment-design-contract.md)
 - [P28E Multi-Agent Virtual Biology](ADR-0024-multi-agent-biology-contract.md)
+- [P29E Limited Biological World Model](ADR-0025-limited-biological-world-model-contract.md)
 
 关键 runbook：
 
@@ -3149,6 +3193,7 @@ contract plus authoritative empty-graph/value-free abstention；真实 P29 quali
 - [P26E Host–Microbiome](runbooks/HOST-MICROBIOME-CONTRACT.md)
 - [P27A-E Agentic Experiment Design](runbooks/AGENTIC-EXPERIMENT-DESIGN.md)
 - [P28E Multi-Agent Virtual Biology](runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md)
+- [P29E Limited Biological World Model](runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md)
 - [External Disk Git Maintenance](runbooks/EXTERNAL-DISK-GIT-MAINTENANCE.md)
 
 ---
@@ -3228,8 +3273,11 @@ P27C 是 AUTHORIZATION_REQUIRED / PILOT_NOT_RUN。P28E 从
 da4bfc042d96f830e2a7e8cdc62ba227c7ace949（tree
 e6f18371f5061c810b2cb87d9a278cfa6d6ac46b）完成 advisory-only role/handoff/DAG/trace
 contracts 和 authoritative empty value-free compilation；real acceptance 仍为 0/3，science NOT_RUN，
-policy NO_NEW_DECISION。下一 eligible local work unit 是 P29E strict connected-subgraph contract
-plus authoritative empty-graph/value-free abstention；真实 P29 qualified biological node 为 0。
+policy NO_NEW_DECISION。P29E 从 90990c198c40d0e6655aedaad101a783cde003aa 起步，以
+471767e5f38f9866fbe396f39836369d943f6657（tree
+d1dec19f06ec88f563406b45f2b544effabad915）完成 strict null requirement、
+empty_not_connected/zero-node graph 与 authoritative value-free compilation；real P29 仍 blocked，
+science NOT_RUN，policy NO_NEW_DECISION。下一 eligible local work unit 是 P30A local RC closure。
 
 当前 UI 是：
 选择 Cell Context → Chat → 自动解析/运行 → Report/Abstain，

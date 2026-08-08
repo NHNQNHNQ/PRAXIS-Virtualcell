@@ -70,6 +70,7 @@ authoritative compilation and from real P28 acceptance.
 - No legacy bus, default runtime, API, registry-positive path, LLM, network, asset, or device integration was
   added.
 
-P29E may next define only a strict connected-subgraph contract plus authoritative empty-graph/value-free
-abstention. With zero qualified biological nodes it must not draw placeholder molecule, protein, cell,
-community, or organism edges. A real P29 candidate remains separately gated.
+At P28E closure, P29E was the next local unit and could define only a strict connected-subgraph contract plus
+authoritative empty-graph/value-free abstention. P29E subsequently completed at
+`471767e5f38f9866fbe396f39836369d943f6657` with `empty_not_connected`, zero nodes/edges and no
+placeholder scale chain. Real P29 remains separately gated; P30A local RC closure is now next.

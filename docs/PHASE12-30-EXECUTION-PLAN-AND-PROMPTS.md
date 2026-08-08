@@ -121,9 +121,18 @@
 > `codex/p25e-virtual-microbiome`；engineering
 > `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；
 > real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；science `NOT_RUN`；policy
-> `NO_NEW_DECISION`；下一 eligible local unit 为 P29E strict connected-subgraph contract plus
-> authoritative empty-graph/value-free abstention；
+> `NO_NEW_DECISION`；在 P28E closure 时下一 eligible local unit 为 P29E strict connected-subgraph
+> contract plus authoritative empty-graph/value-free abstention；该 unit 随后已完成；
 > real P29 candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`
+>
+> 已完成 work unit：`P29E — Limited Biological World Model contract`；actual P28E
+> docs-closure starting SHA `90990c198c40d0e6655aedaad101a783cde003aa`；completion code SHA
+> `471767e5f38f9866fbe396f39836369d943f6657`；tree
+> `d1dec19f06ec88f563406b45f2b544effabad915`；source date epoch `1786187523`；branch
+> `codex/p25e-virtual-microbiome`；engineering
+> `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；
+> real candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；science `NOT_RUN`；policy
+> `NO_NEW_DECISION`；下一 eligible local unit 为 P30A local RC closure
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
@@ -214,7 +223,9 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | P27A-E source date epoch / 完成分支 | `1786180822` / `codex/p25e-virtual-microbiome` |
 | P28E actual starting SHA / completion code/tree | `971f812faae09fa833dc66741e86ec9ffe97947c` / `da4bfc042d96f830e2a7e8cdc62ba227c7ace949` / `e6f18371f5061c810b2cb87d9a278cfa6d6ac46b` |
 | P28E source date epoch / 完成分支 | `1786184568` / `codex/p25e-virtual-microbiome` |
-| 当前 work-unit 状态 | P28E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；science `NOT_RUN`；policy `NO_NEW_DECISION`；P29E `NEXT ELIGIBLE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；real P29 candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C/P21B/P21C 均保持各自 authorization gate |
+| P29E actual starting SHA / completion code/tree | `90990c198c40d0e6655aedaad101a783cde003aa` / `471767e5f38f9866fbe396f39836369d943f6657` / `d1dec19f06ec88f563406b45f2b544effabad915` |
+| P29E source date epoch / 完成分支 | `1786187523` / `codex/p25e-virtual-microbiome` |
+| 当前 work-unit 状态 | P29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；real P29 candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；science `NOT_RUN`；policy `NO_NEW_DECISION`；P30A `NEXT ELIGIBLE — LOCAL RC`；P28 real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C/P21B/P21C 均保持各自 authorization gate |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -2359,7 +2370,32 @@ fail-closed compilation；真实 P29 candidate 当前为
 不得把 P14–P16 contract、P23 interaction score、P25/P26 topology-only contract 或 P28
 advisory role 伪装成 biological node/edge，也不得补造 molecule→organism placeholder chain。
 
-### 依次实施
+### P29E 实际完成与真实 candidate 分离
+
+P29E 从 P28E docs closure `90990c198c40d0e6655aedaad101a783cde003aa` 开始，完成于
+code `471767e5f38f9866fbe396f39836369d943f6657`、tree
+`d1dec19f06ec88f563406b45f2b544effabad915`、source date epoch `1786187523`。
+实现只包含三个 strict public records 与一个 closed compiler：
+
+- `vc.state-action-observation-time-requirement.v1`：所有真实 scope/state/action/observation/time/
+  longitudinal/intervention identities 固定为 null，`contract_complete=false`；
+- `vc.connected-typed-subgraph.v1`：nodes、edges、scales 为空，count 为 `0`，状态固定
+  `empty_not_connected`，不创建 placeholder node/edge class；
+- `vc.limited-world-model-compilation.v1`：只绑定 exact recursively revalidated P28 compilation，
+  data/weight/model/environment/adapter/compute/benchmark/evidence/policy/result/tool/prediction 均为 null，
+  execution/science/promotion/external 均 false 并明确 abstain；
+- standalone replay 只通过 P28 fingerprint 间接绑定，明确 `request_bound=false`；
+- content hash 只作 canonical identity，不是 signature、issuer authentication 或 attestation。
+
+工程状态为 `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`，fixture evidence 为
+`SYNTHETIC_CONFORMANCE_ONLY`；真实 P29 candidate 仍为
+`BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`，science `NOT_RUN`，policy `NO_NEW_DECISION`。
+Focused `51 passed`、affected `390 passed`、safe `1,934/49/387`、legacy `1,147/58/105`、
+packaging/versioning `18 passed`；两份 exact-code wheel byte-identical：`1,263,199` bytes、
+SHA-256 `368a66a438c036a3b9c24f1093fc478886885fbefaecfea52bb50ad616206c01`、`378`
+entries。没有 real data/model/benchmark、训练、执行、science、policy、release、push 或 deploy。
+
+### 真实 candidate 原计划（仍未运行）
 
 1. 在选择 architecture 前冻结 state/action/observation/time contract；
 2. 只定义当前场景真实存在的最小 connected typed subgraph；molecule、protein、
@@ -2388,11 +2424,11 @@ advisory role 伪装成 biological node/edge，也不得补造 molecule→organi
 
 以下提示词只适用于未来真实 P29 candidate/data/model/benchmark 窗口，不是 P29E 本地
 empty-graph contract 授权。使用时必须以授权时现场 `ACTIVE_BASELINE_SHA` 为代码基线，
-把 P28E completion identity 作为 prerequisite，且不得回退或丢弃随后完成的本地 work unit。
+把 P29E completion identity 作为 prerequisite，且不得回退或丢弃随后完成的本地 work unit。
 
 ```text
 授权以授权时现场 `<ACTIVE_BASELINE_SHA>` 作为 Phase 29（Limited Biological World Model
-Candidate）唯一起始基线，并引用 `<P28E completion SHA>` 与任何后续 prerequisite，创建
+Candidate）唯一起始基线，并引用 `<P29E completion SHA>` 与任何后续 prerequisite，创建
 `codex/p29-biological-world-model-candidate`，
 仅为一个预先指定的有限场景冻结 state/action/observation/time 和实际存在的最小
 connected typed subgraph、namespace/unit/time-scale/conservation；不得为了完整
@@ -2740,9 +2776,12 @@ P27C 为 `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。在 P27A-E closure 时，下
 unit 是 standing authorization 下的 P28E contract-only orchestrator/typed handoff/trace/abstention；
 该 work unit 随后已在 code `da4bfc042d96f830e2a7e8cdc62ba227c7ace949` 完成，authoritative output 为空
 DAG/trace、value-free 且 `0/3`。真实 P28 acceptance 因 qualifying module count `0/3` 而保持
-blocked；comparison/ablation 未运行。当前下一 eligible local work unit 是 P29E strict
-connected-subgraph contract plus authoritative empty-graph/value-free abstention；真实 P29 candidate
-因 qualified biological nodes 为 `0` 而保持 blocked。
+blocked；comparison/ablation 未运行。P29E 随后从 P28E docs closure
+`90990c198c40d0e6655aedaad101a783cde003aa` 开始，在 code
+`471767e5f38f9866fbe396f39836369d943f6657` 完成 strict null requirement、
+`empty_not_connected` graph 与 authoritative value-free compilation。真实 P29 candidate 因
+qualified biological nodes 为 `0` 而保持 blocked。当前下一 eligible local work unit 是 P30A
+local RC closure；P30B1–B4 保持独立授权门。
 
 当前持续本地授权不覆盖 P14R、P14B、P15R、P15B、P16R 或 P16B。没有逐项 exact
 assets/output root/run window 授权时，不得读取或运行真实资产、产生科学

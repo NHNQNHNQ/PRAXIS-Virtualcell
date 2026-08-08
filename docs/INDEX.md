@@ -2,7 +2,7 @@
 
 > Audited: 2026-08-08
 >
-> Status: `CURRENT_DOCUMENT_MAP — P28E COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION; REAL P28 0/3; SCIENCE NOT_RUN; POLICY NO_NEW_DECISION; P29E NEXT LOCAL`
+> Status: `CURRENT_DOCUMENT_MAP — P29E COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION; REAL P29 0 NODES; SCIENCE NOT_RUN; POLICY NO_NEW_DECISION; P30A NEXT LOCAL`
 
 This is the navigation authority for the repository. It does not make every linked document current: each section explicitly distinguishes live truth, frozen evidence, active plans, drafts, and history.
 
@@ -11,8 +11,8 @@ This is the navigation authority for the repository. It does not make every link
 When documents disagree, use this order:
 
 1. Exact local bytes, `git rev-parse` identity, immutable artifacts and the current work-unit completion report.
-2. [README](../README.md), the [P28E completion report](../reports/phase28e/PHASE28E_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P27A-E completion report](../reports/phase27ae/PHASE27AE_COMPLETION.md), [P26E completion report](../reports/phase26e/PHASE26E_COMPLETION.md), [P25E completion report](../reports/phase25e/PHASE25E_COMPLETION.md), [P23A completion report](../reports/phase23a/PHASE23A_COMPLETION.md), [P22 completion report](../reports/phase22/PHASE22_COMPLETION.md), [P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md), [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md), [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md), [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
-3. The latest completed phase ADR/runbook—P28E uses [ADR-0024](ADR-0024-multi-agent-biology-contract.md) and the [Multi-Agent Biology runbook](runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md); P27A-E remains documented by [ADR-0023](ADR-0023-agentic-experiment-design-contract.md) and the [Agentic Experiment Design runbook](runbooks/AGENTIC-EXPERIMENT-DESIGN.md)—for implemented contract and validation boundaries.
+2. [README](../README.md), the [P29E completion report](../reports/phase29e/PHASE29E_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P28E completion report](../reports/phase28e/PHASE28E_COMPLETION.md), [P27A-E completion report](../reports/phase27ae/PHASE27AE_COMPLETION.md), [P26E completion report](../reports/phase26e/PHASE26E_COMPLETION.md), [P25E completion report](../reports/phase25e/PHASE25E_COMPLETION.md), [P23A completion report](../reports/phase23a/PHASE23A_COMPLETION.md), [P22 completion report](../reports/phase22/PHASE22_COMPLETION.md), [P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md), [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md), [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md), [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
+3. The latest completed phase ADR/runbook—P29E uses [ADR-0025](ADR-0025-limited-biological-world-model-contract.md) and the [Limited Biological World Model runbook](runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md); P28E remains documented by [ADR-0024](ADR-0024-multi-agent-biology-contract.md) and the [Multi-Agent Biology runbook](runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md)—for implemented contract and validation boundaries.
 4. [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) for frozen scientific capability and claim boundaries.
 5. [Three-Way Sync State](status/SYNC-STATE.md) only for its dated local/GitHub/`.53` observations; it is not fresh remote authorization.
 6. Dated plans, handoffs, findings, papers, release notes and [Project State 2026-07-18](status/PROJECT-STATE-2026-07-18.md) as historical evidence for their stated commit/date only.
@@ -177,16 +177,36 @@ P28E validation is focused `38 passed`, affected `339 passed`, safe
 archive-built wheels are byte-identical at
 `1,259,255` bytes / `0358bf4df9e929be7c520e93f7c95dccc351895e7926773b53de8febf7eaec9f` /
 `377` entries / `14` React entries / no tests or AppleDouble. Real P28 remains blocked at `0/3`.
-The next eligible unit is P29E strict connected-subgraph contract plus authoritative empty-graph/value-free
-abstention; real P29 has zero
-qualified biological nodes and may not use placeholder edges.
+At P28E closure, the next eligible unit was P29E strict connected-subgraph contract plus authoritative
+empty-graph/value-free abstention; real P29 had zero qualified biological nodes and placeholder edges were
+forbidden. P29E subsequently completed as recorded below.
+
+P29E then completed from P28E docs closure
+`90990c198c40d0e6655aedaad101a783cde003aa` at code/tree
+`471767e5f38f9866fbe396f39836369d943f6657` /
+`d1dec19f06ec88f563406b45f2b544effabad915` with source date epoch `1786187523`.
+Its state/action/observation/time identities are unavailable, its authoritative typed graph is
+`empty_not_connected` with zero nodes and edges, and every execution/data/model/evidence/policy/result slot
+is null. Engineering is `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evidence is
+`SYNTHETIC_CONFORMANCE_ONLY`; science `NOT_RUN`, policy `NO_NEW_DECISION`; real P29 remains
+`BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`. Content hashes identify canonical bytes but do not authenticate
+an issuer. Focused validation is `51 passed`, affected `390 passed`, safe
+`1,934 passed / 49 skipped / 387 deselected / 427.59s`, and legacy
+`1,147 passed / 58 skipped / 105 deselected / 58.07s`; packaging/versioning is `18 passed`. Two
+archive-built wheels are byte-identical at `1,263,199` bytes /
+`368a66a438c036a3b9c24f1093fc478886885fbefaecfea52bb50ad616206c01` /
+`378` entries / `14` React entries / no tests or AppleDouble. P30A local RC closure is next; it does
+not authorize any P30B release or deployment window.
 
 ## Current state
 
 | Document | Authority |
 |---|---|
-| [README](../README.md) | current product promise, P28E value-free/0-of-3 boundary and primary operator entry points |
-| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13–P28E boundary |
+| [README](../README.md) | current product promise, P29E empty-not-connected/zero-node boundary and primary operator entry points |
+| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13–P29E boundary |
+| [P29E Completion Report](../reports/phase29e/PHASE29E_COMPLETION.md) | exact P29E empty-graph closure, package evidence, real P29/science/policy non-runs and P30A handoff |
+| [P29E Limited World Model ADR](ADR-0025-limited-biological-world-model-contract.md) | null requirement identities, empty typed graph, authority ceiling and zero-node abstention decision |
+| [P29E Limited World Model Runbook](runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md) | exact P28 input, empty graph, null authority and reproducible package verification |
 | [P28E Completion Report](../reports/phase28e/PHASE28E_COMPLETION.md) | exact P28E closure, role/DAG/trace identities, package evidence, real P28/comparison/science/policy non-runs and P29E handoff |
 | [P28E Multi-Agent Biology ADR](ADR-0024-multi-agent-biology-contract.md) | advisory authority ceiling, exact DAG/trace closure and authoritative 0/3 abstention decision |
 | [P28E Multi-Agent Biology Runbook](runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md) | role/handoff/DAG/trace verification, real three-module gate and P29E empty-graph handoff |
@@ -323,8 +343,9 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Host–Microbiome Contract ADR](ADR-0022-host-microbiome-contract.md) | P26E full-host-request/P22-context separation, typed missing releases/interface, time-forward topology and immutable null output |
 | [Agentic Experiment Design ADR](ADR-0023-agentic-experiment-design-contract.md) | P27A-E exact request-derived empty action space, synthetic rank-then-reveal harness and maturity ceiling |
 | [Multi-Agent Biology Contract ADR](ADR-0024-multi-agent-biology-contract.md) | P28E advisory-only role/handoff/DAG/trace contracts, exact cross-binding and authoritative 0/3 abstention |
+| [Limited Biological World Model ADR](ADR-0025-limited-biological-world-model-contract.md) | P29E exact P28 identity, null state/action/observation/time requirements, empty-not-connected graph and value-free abstention |
 | [Community Readiness Checklist](COMMUNITY-READINESS-CHECKLIST.md) | P10 model-free CommunityPack gates, two tiny microbial Packs, fail-closed planning and explicitly missing experimental validation |
-| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | historical P0–P16E implementation/status matrix; current P28E state is carried by this index and its completion report |
+| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | historical P0–P16E implementation/status matrix; current P29E state is carried by this index and its completion report |
 | [VirtualCellPack Multiomics Runbook](runbooks/VIRTUALCELLPACK-MULTIOMICS.md) | tiny RNA+protein fixture generation, hash binding, P5 tests and asset-update rules |
 | [VirtualCellPack Capability Runtime Runbook](runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md) | local model card/cache/Pack assembly, execution-plan audit and fail-closed reason handling |
 | [VirtualCellPack Data Portal Runbook](runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) | external public-file inventory, service configuration, upload quarantine and operator review boundary |
@@ -346,7 +367,8 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Virtual Microbiome Contract Runbook](runbooks/VIRTUAL-MICROBIOME-CONTRACT.md) | P25E local identity/P10 regression/abstain verification, P25R gate and P26E contract-only handoff |
 | [Host–Microbiome Contract Runbook](runbooks/HOST-MICROBIOME-CONTRACT.md) | P26E local freeze/P22 audit/P25 byte replay/DAG/abstain verification, P26R gate and historical P27A-E handoff |
 | [Agentic Experiment Design Runbook](runbooks/AGENTIC-EXPERIMENT-DESIGN.md) | P27A-E request/design/action/replay verification, P27A-R/P27B/P27C gates and historical P28E handoff |
-| [Multi-Agent Biology Contract Runbook](runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md) | P28E advisory policy/handoff/DAG/trace verification, real 0/3 gate and P29E empty-graph handoff |
+| [Multi-Agent Biology Contract Runbook](runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md) | P28E advisory policy/handoff/DAG/trace verification, real 0/3 gate and historical P29E handoff |
+| [Limited Biological World Model Runbook](runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md) | P29E exact upstream identity, empty-not-connected graph, null authority slots and P30A handoff |
 | [Provenance](../PROVENANCE.md) | repository derivation from PRAXIS-2 and bootstrap evidence |
 
 ## Release and version history
@@ -374,6 +396,7 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 
 | Report | Scope |
 |---|---|
+| [P29E Completion Report](../reports/phase29e/PHASE29E_COMPLETION.md) | exact empty-not-connected/value-free closure at code `471767e5…` / tree `d1dec19f…`; focused `51`, affected `390`, safe `1,934/49/387`, legacy `1,147/58/105`, packaging/versioning `18`; byte-identical `1,263,199`-byte wheels / `368a66a4…` / `378` entries; real data/model/benchmark/science/policy non-runs |
 | [P28E Completion Report](../reports/phase28e/PHASE28E_COMPLETION.md) | exact value-free 0/3 closure at code `da4bfc04…` / tree `e6f18371…`; focused `38`, affected `339`, safe `1,883/49/387`, legacy `1,147/58/105`, packaging/versioning `18`; byte-identical `1,259,255`-byte wheels / `0358bf4d…` / `377` entries; real execution/comparison/ablation/science/policy non-runs |
 | [P27A-E Completion Report](../reports/phase27ae/PHASE27AE_COMPLETION.md) | exact design/replay closure at code `5875571b…`; focused `28`, affected `301`, safe `1,845/49/387`, legacy `1,147/58/105`; historical replay/shadow/prospective/science/policy non-runs |
 | [P26E Completion Report](../reports/phase26e/PHASE26E_COMPLETION.md) | exact value-free closure at code `5bd3e502…` / tree `b3d7303c…`; focused `8`, affected `144`, safe `1,817/49/387`, legacy `1,147/58/105`; two byte-identical `1,242,422`-byte wheels / `69700bb6…` / `375` entries; P22 full-request binding, releases, mapping, execution, science and policy absent |
@@ -394,7 +417,7 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 | [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | frozen local C5 gate: Python 3.13 core 965, Gate A adapter seam, honest 2-test remote pending, asset/claim classification |
 | [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | frozen C4 gate: Python 3.13 core 957, Playwright 56+1, reproducible full wheel, and Linux-container smoke |
 | [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen C3 gate: core 947, Playwright 54+1, theme acceptance, mutation evidence, and then-remaining C4/C5 ownership |
-| [Testing Guide](TESTING.md) | current P28E local commands/counts and truthful `pip check` failure; preserves prior exact-SHA and historical CI/Linux evidence plus remote scientific-validation boundaries |
+| [Testing Guide](TESTING.md) | current P29E local commands/counts and truthful `pip check` failure; preserves prior exact-SHA and historical CI/Linux evidence plus remote scientific-validation boundaries |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | capability gate plus `.53` evidence and remaining remote backlog |
 | [Phase 10 Summary](../reports/phase10/PHASE10_SUMMARY.md) | `952 tests = 912 passed + 40 skipped` for the non-LLM package scope; 9 LLM tests are deselected in the `912/40/9` reporting style |
 | [Phase 10 UI E2E](../reports/phase10/PHASE10_UI_E2E.md) | three structural Playwright specs; explicitly excludes CSS/pixel and deep abstain assertions |

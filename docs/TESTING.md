@@ -1,17 +1,21 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P28E 分支 `codex/p25e-virtual-microbiome`；active baseline
-> `971f812faae09fa833dc66741e86ec9ffe97947c`
+> 当前文档基线：P29E 分支 `codex/p25e-virtual-microbiome`；active baseline
+> `90990c198c40d0e6655aedaad101a783cde003aa`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：P28E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；umbrella
+> 状态：P29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；umbrella
 > `ENGINEERING_COMPLETE_SCIENCE_PENDING`；science `NOT_RUN`；policy
 > `NO_NEW_DECISION`；completion code SHA
-> `da4bfc042d96f830e2a7e8cdc62ba227c7ace949`；tree
-> `e6f18371f5061c810b2cb87d9a278cfa6d6ac46b`；source date epoch `1786184568`。
-> 下述 P4.3–P27A-E 和 CI 数字仍只绑定各自 exact SHA/日期。P28E 只证明 strict
+> `471767e5f38f9866fbe396f39836369d943f6657`；tree
+> `d1dec19f06ec88f563406b45f2b544effabad915`；source date epoch `1786187523`。
+> 下述 P4.3–P28E 和 CI 数字仍只绑定各自 exact SHA/日期。P29E 只证明 strict
+> state/action/observation/time requirement、empty-not-connected typed graph 与 value-free
+> compilation；fixture evidence 为 `SYNTHETIC_CONFORMANCE_ONLY`。真实 P29 为
+> `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`，science `NOT_RUN`，policy `NO_NEW_DECISION`。
+> P28E 只证明 strict
 > advisory policy、typed value-free handoff/DAG、hash-bound no-run trace 与 authoritative 0/3 abstention；
 > fixture evidence 为 `SYNTHETIC_CONFORMANCE_ONLY`。真实 P28 为
 > `BLOCKED / 0_OF_3_QUALIFYING_MODULES`，comparison/ablation `NOT_RUN`。
@@ -21,9 +25,82 @@
 > `REPLAY_NOT_RUN / ASSET_PENDING`；P27B 为 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`；
 > P27C 为 `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。P21B/P21C、P23B、P24、P25R 和所有
 > real asset/model/output 窗口均未授权或未运行；P26R 仍为 `BLOCKED_EXTERNAL / NOT_RUN`。
-> 下一 eligible local unit 是 standing local authorization 下的 P29E strict connected-subgraph
-> contract plus authoritative empty-graph/value-free abstention；
-> 真实 P29 当前有 `0` qualified biological nodes。
+> 下一 eligible local unit 是 standing local authorization 下的 P30A local RC closure；它不授权
+> push、tag、artifact publication、staging 或 production。
+
+## Phase 29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` 本地证据
+
+P29E adds three strict public records for the state/action/observation/time requirement, connected-typed-
+subgraph status, and authoritative compilation. The sole compiler input is an exact recursively revalidated
+P28 compilation. Current biological identities are unavailable, the graph is exactly `empty_not_connected`
+with zero nodes and edges, and every data/model/environment/adapter/compute/benchmark/evidence/policy/result/
+tool/prediction slot is null. No placeholder scale chain, node/edge input, registry, asset, path, candidate or
+LLM surface exists. Standalone replay remains explicitly not request-bound. Content fingerprints identify
+canonical bytes but do not authenticate an issuer.
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_limited_world_model.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -rA \
+  praxis_virtualcell/tests/test_limited_world_model.py \
+  praxis_virtualcell/tests/test_multi_agent_biology.py \
+  praxis_virtualcell/tests/test_virtual_experiment.py \
+  praxis_virtualcell/tests/test_experiment_design_replay.py \
+  praxis_virtualcell/tests/test_request_v2.py \
+  praxis_virtualcell/tests/test_capability_runtime.py \
+  praxis_virtualcell/tests/test_benchmark_system.py \
+  praxis_virtualcell/tests/test_model_adapter_sdk.py \
+  praxis_virtualcell/tests/test_active_learning_agent.py \
+  praxis_virtualcell/tests/test_runtime_active_learning.py \
+  praxis_virtualcell/tests/test_report_active_learning_request.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_packaging.py \
+  praxis_virtualcell/tests/test_versioning.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -rA \
+  praxis_virtualcell/tests \
+  --ignore=praxis_virtualcell/tests/test_mudata_alignment.py \
+  -k 'not golden and not gem and not norman'
+
+python -m ruff check . --extend-exclude old --no-cache
+python -m ruff format --check \
+  praxis_virtualcell/limited_world_model.py \
+  praxis_virtualcell/tests/test_limited_world_model.py
+python -m py_compile \
+  praxis_virtualcell/limited_world_model.py \
+  praxis_virtualcell/tests/test_limited_world_model.py
+
+npm --prefix praxis_vc_react run typecheck
+npm --prefix praxis_vc_react run lint
+npm --prefix praxis_vc_react run build
+
+python -m pip check
+git diff --check
+~~~
+
+| Gate | Result |
+|---|---|
+| P29E focused | `51 passed` |
+| P28E + P29E adjacent | `89 passed` |
+| P29E affected (exact eleven-test-file suite above) | `390 passed` |
+| safe local suite | `1,934 passed / 49 skipped / 387 deselected / 427.59s` |
+| legacy suite | `1,147 passed / 58 skipped / 105 deselected / 58.07s` |
+| post-commit P27/P28/P29 directed | `117 passed` |
+| packaging + versioning | `18 passed` |
+| Ruff / targeted format / compile / diff | PASS |
+| React typecheck / lint / build / bundle budget | PASS |
+| `pip check` | FAIL: missing `python-magic` + pre-existing `vcbench` pin conflicts in shared environment; no environment mutation |
+| reproducible local packaging | PASS: two byte-identical wheels; `1,263,199` bytes / `368a66a4…6c01` / `378` entries |
+
+The first broad test attempt without the documented `test_mudata_alignment.py` exclusion was rejected during
+collection because optional `mudata` is absent; it is not reported as a passing gate. Negative coverage includes
+closed compiler arguments, P28 nested/type/fingerprint drift, re-signed connected/nonempty graphs, placeholder
+scales, authority/data/model/result injection, standalone replay request-binding elevation, secret/path echo and
+science/policy/execution elevation. See [ADR-0025](ADR-0025-limited-biological-world-model-contract.md), the
+[P29E runbook](runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md), and the
+[P29E completion report](../reports/phase29e/PHASE29E_COMPLETION.md).
 
 ## Phase 28E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` 本地证据
 

@@ -102,6 +102,17 @@ advisory role policy、typed value-free handoff/DAG、hash-bound no-run trace �
 仅为 `SYNTHETIC_CONFORMANCE_ONLY`，science `NOT_RUN`，policy `NO_NEW_DECISION`。真实 P28
 仍为 `BLOCKED / 0_OF_3_QUALIFYING_MODULES`，comparison/ablation `NOT_RUN`；legacy
 MessageBus/AgentMessage、runtime/API/LLM/registry positive path 均未接线。
+P29E 从 P28E docs-closure `90990c198c40d0e6655aedaad101a783cde003aa` 开始，在同一分支的
+`471767e5f38f9866fbe396f39836369d943f6657`（tree
+`d1dec19f06ec88f563406b45f2b544effabad915`，source date epoch `1786187523`）完成 strict
+state/action/observation/time requirement、authoritative empty typed subgraph 与 value-free
+compilation。状态为 `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture evidence
+仅为 `SYNTHETIC_CONFORMANCE_ONLY`，science `NOT_RUN`，policy `NO_NEW_DECISION`。图状态精确为
+`empty_not_connected`，biological nodes/edges 均为 `0`，所有 data/weight/model/environment/
+adapter/compute/benchmark/evidence/policy/result/tool/prediction identities 均为 `null`。真实 P29
+仍为 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；content hash 是 identity，不是 signer 或
+attestation。P30A 本地 RC 收口成为下一 eligible local work unit，但仍须满足独立 release-candidate
+工程门，且不授权 push、tag、发布或部署。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
@@ -118,7 +129,8 @@ exact 验证与克制的科学/policy 边界见
 [P25E 完成报告](reports/phase25e/PHASE25E_COMPLETION.md)与
 [P26E 完成报告](reports/phase26e/PHASE26E_COMPLETION.md)以及
 [P27A-E 完成报告](reports/phase27ae/PHASE27AE_COMPLETION.md)以及
-[P28E 完成报告](reports/phase28e/PHASE28E_COMPLETION.md)。P14R、P15R 与 P16R 的真实
+[P28E 完成报告](reports/phase28e/PHASE28E_COMPLETION.md)以及
+[P29E 完成报告](reports/phase29e/PHASE29E_COMPLETION.md)。P14R、P15R 与 P16R 的真实
 asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B、P15B 与 P16B 均为
 `NOT_RUN`。当前 P12 `ModelRegistryV2` 有 5 个 legacy release、0 个 native、0 个 production-promoted
 capability；P18 没有真实 multi-omics model execution/acceptance，science 为 `NOT_RUN`，
@@ -218,9 +230,14 @@ output 为 `null`，0/3 并 abstain；synthetic advisory records 永不计为真
 P27 experiment 同 request；P27 replay-result 只绑定 standalone exact fingerprint，
 因 `ReplayResultV1` 没有 request/experiment link，不称 request-matched replay。设计和操作边界见
 [P28E ADR](docs/ADR-0024-multi-agent-biology-contract.md)与
-[P28E runbook](docs/runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md)。下一 eligible local work unit 是 P29E
-strict connected-subgraph contract plus authoritative empty-graph/value-free abstention；当前 qualified biological nodes 为 0，真实 P29
-blocked，不得补造 molecule→organism placeholder chain。
+[P28E runbook](docs/runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md)。P29E 随后只消费 exact P28
+compilation identity，新增三个 strict records，并固定 requirement identities 为 null、graph 为
+`empty_not_connected`、nodes/edges 为 `0`、prediction/result/tool output 为 `null`。它没有定义
+node/edge 占位类，没有接入 runtime/API/LLM/registry，也不把 standalone replay 称为
+request-bound。设计和操作边界见
+[P29E ADR](docs/ADR-0025-limited-biological-world-model-contract.md)与
+[P29E runbook](docs/runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md)。真实 P29 仍 blocked，
+不得补造 molecule→organism placeholder chain；下一 eligible local work unit 是 P30A local RC closure。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -596,15 +613,15 @@ npm run build
 CI=1 npm run e2e
 ```
 
-当前 P28E 精确本地结果为 focused `38 passed`、affected `339 passed`、safe
-`1,883 passed / 49 skipped / 387 deselected`（`419.19s`）、legacy
-`1,147 passed / 58 skipped / 105 deselected`（`51.29s`）、packaging/versioning `18 passed`，
+当前 P29E 精确本地结果为 focused `51 passed`、P28+P29 adjacent `89 passed`、affected
+`390 passed`、safe `1,934 passed / 49 skipped / 387 deselected`（`427.59s`）、legacy
+`1,147 passed / 58 skipped / 105 deselected`（`58.07s`）、packaging/versioning `18 passed`，
 静态门与前端 bundle budget 通过。
-两次 completion-SHA archive wheel byte-identical：`1,259,255` bytes，SHA-256
-`0358bf4df9e929be7c520e93f7c95dccc351895e7926773b53de8febf7eaec9f`，`377`
+两次 completion-SHA archive wheel byte-identical：`1,263,199` bytes，SHA-256
+`368a66a438c036a3b9c24f1093fc478886885fbefaecfea52bb50ad616206c01`，`378`
 entries、React `14`、tests `0`、AppleDouble `0`；source/wheel
-`praxis_virtualcell/multi_agent_biology.py` SHA-256 均为
-`aadb8fba6efb943799cfa8d9f296f2a7e03f27d45d52d22ce3e1b67b94b160ca`。工具链为
+`praxis_virtualcell/limited_world_model.py` SHA-256 均为
+`b730220099b36df99f7ba706be7dea6174b1c41329b62526dc45bda475c155ae`。工具链为
 Python `3.13.12`、build `1.5.0`、setuptools `70.2.0`、packaging `26.0`、Node
 `25.8.2`、npm `11.11.1`、Vite `8.1.2`。这是 exact local source/toolchain reproducibility，
 不是 pinned dependency closure、clean-install 证明、historical/scientific evidence 或 release。完整命令、用时、skip/deselect
@@ -614,7 +631,10 @@ Python `3.13.12`、build `1.5.0`、setuptools `70.2.0`、packaging `26.0`、Node
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P28E 边界和跨项目集成 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P29E 边界和跨项目集成 |
+| [P29E 完成报告](reports/phase29e/PHASE29E_COMPLETION.md) | exact empty-not-connected/value-free closure、package evidence 与真实 data/model/benchmark/science/policy non-runs |
+| [P29E Limited World Model ADR](docs/ADR-0025-limited-biological-world-model-contract.md) | null requirement identities、empty typed graph、content-hash trust ceiling 与 0-node abstention 决策 |
+| [P29E Limited World Model runbook](docs/runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md) | exact P28 input、empty graph、authority-null 与 artifact reproducibility 核验 |
 | [P28E 完成报告](reports/phase28e/PHASE28E_COMPLETION.md) | exact 0/3 value-free closure、typed DAG/trace identities、package evidence 与真实 comparison/science/policy non-runs |
 | [P28E Multi-Agent Biology ADR](docs/ADR-0024-multi-agent-biology-contract.md) | advisory authority ceiling、exact handoff/DAG/trace closure 与 authoritative empty graph 决策 |
 | [P28E Multi-Agent Biology runbook](docs/runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md) | role/handoff/DAG/trace 核验、real 3-module gate 与 P29E empty-graph handoff |

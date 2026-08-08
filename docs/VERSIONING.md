@@ -1,19 +1,19 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: P28E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evidence
+> Status: P29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evidence
 > `SYNTHETIC_CONFORMANCE_ONLY`; umbrella `ENGINEERING_COMPLETE_SCIENCE_PENDING`; science
-> `NOT_RUN`; policy `NO_NEW_DECISION`; the authoritative P28 compilation has an empty
-> value-free DAG/trace because real P28 acceptance is blocked at `0/3` qualifying modules.
+> `NOT_RUN`; policy `NO_NEW_DECISION`; the authoritative P29 graph is `empty_not_connected`
+> with zero nodes/edges because real P29 has zero qualifying biological nodes.
 > P27A-R historical replay remains
 > `REPLAY_NOT_RUN / ASSET_PENDING`; P27B `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`;
-> P27C `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`; P29E is the next eligible local
-> contract-only work unit —
+> P27C `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`; P30A local RC closure is the next eligible
+> local work unit —
 > `LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
 > Local baseline: branch `codex/p25e-virtual-microbiome`; starting SHA
-> `971f812faae09fa833dc66741e86ec9ffe97947c`; completion code SHA/tree
-> `da4bfc042d96f830e2a7e8cdc62ba227c7ace949` /
-> `e6f18371f5061c810b2cb87d9a278cfa6d6ac46b`; source date epoch `1786184568`
+> `90990c198c40d0e6655aedaad101a783cde003aa`; completion code SHA/tree
+> `471767e5f38f9866fbe396f39836369d943f6657` /
+> `d1dec19f06ec88f563406b45f2b544effabad915`; source date epoch `1786187523`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -40,7 +40,8 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P25E Virtual Microbiome contract work unit | active baseline `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`; code `039393e6be897b3014bb0b657d0a439d879578b6`; tree `b53e542940bf39fd44965fe55416798211ab580b`; epoch `1786171049` | immutable local Git history plus `reports/phase25e/PHASE25E_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evidence `SYNTHETIC_CONFORMANCE_ONLY`; independent fixed 2–3-member scope/endpoint/adapter-requirement/request/plan/result identities; P10 v1 bytes/semantics preserved; all adapter/model/environment/mapping/protocol/evidence/policy bindings absent and all results abstain; science `NOT_RUN`, policy `NO_NEW_DECISION`; P24/P25R authorization required/not run; exact-local-source/toolchain wheel `1,234,438` bytes / `c8529477974c...` / `374` entries; no product/API/runtime version or release bump |
 | P26E Host–Microbiome contract work unit | active baseline `6bd02231449b6969e22aeb5bea6798fd334daef6`; code `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4`; tree `b3d7303cafb5b874c8b5a441b53e32ff77ef2c54`; epoch `1786176771` | immutable local Git history plus `reports/phase26e/PHASE26E_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; exact host request/P25 contract, typed missing interface, topology-only DAG, P22 context-only audit and immutable negative compilation; fixture evidence `SYNTHETIC_CONFORMANCE_ONLY`; science `NOT_RUN`, policy `NO_NEW_DECISION`; P26R blocked external; exact-local-source/toolchain wheel `1,242,422` bytes / `69700bb63445...` / `375` entries; at P26 closure P27A-E was standing-local eligible and has subsequently completed; no product/API/runtime version or release bump |
 | P27A-E Agentic Experiment Design work unit | active baseline `a12cf4f4b71efb653f8128afcb1f468211fdb837`; code `5875571bf9d8b518dc7a857feb935206f756de59`; tree `a7c65e7b30f51832660e66323b5946acbddcbf18`; epoch `1786180822` | immutable local Git history plus `reports/phase27ae/PHASE27AE_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY`; exact request-derived value-free experiment design, structurally separated selection/outcome records, deterministic rank-then-reveal receipts, one primary strategy plus four baselines; historical replay `REPLAY_NOT_RUN / ASSET_PENDING`, science `NOT_RUN`, policy `NO_NEW_DECISION`; exact-local-source/toolchain wheel `1,251,560` bytes / `4bd584bdae75...` / `376` entries; P28E subsequently completed; no product/API/runtime version or release bump |
-| P28E Multi-Agent Biology contract work unit | docs baseline `971f812faae09fa833dc66741e86ec9ffe97947c`; code `da4bfc042d96f830e2a7e8cdc62ba227c7ace949`; tree `e6f18371f5061c810b2cb87d9a278cfa6d6ac46b`; epoch `1786184568` | immutable local Git history plus `reports/phase28e/PHASE28E_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; six public typed role/handoff/DAG/trace/compilation records plus two non-public fingerprint payload versions; synthetic conformance only; real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`, science `NOT_RUN`, policy `NO_NEW_DECISION`; local wheel `1,259,255` bytes / `0358bf4df9e9...` / `377` entries; P29E contract-only is next; no product/API/runtime version or release bump |
+| P28E Multi-Agent Biology contract work unit | docs baseline `971f812faae09fa833dc66741e86ec9ffe97947c`; code `da4bfc042d96f830e2a7e8cdc62ba227c7ace949`; tree `e6f18371f5061c810b2cb87d9a278cfa6d6ac46b`; epoch `1786184568` | immutable local Git history plus `reports/phase28e/PHASE28E_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; six public typed role/handoff/DAG/trace/compilation records plus two non-public fingerprint payload versions; synthetic conformance only; real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`, science `NOT_RUN`, policy `NO_NEW_DECISION`; local wheel `1,259,255` bytes / `0358bf4df9e9...` / `377` entries; P29E subsequently completed; no product/API/runtime version or release bump |
+| P29E Limited Biological World Model contract work unit | docs baseline `90990c198c40d0e6655aedaad101a783cde003aa`; code `471767e5f38f9866fbe396f39836369d943f6657`; tree `d1dec19f06ec88f563406b45f2b544effabad915`; epoch `1786187523` | immutable local Git history plus `reports/phase29e/PHASE29E_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; three public strict requirement/subgraph/compilation records; graph `empty_not_connected`, biological nodes/edges `0`, all authority/value slots null; synthetic conformance only; real P29 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`, science `NOT_RUN`, policy `NO_NEW_DECISION`; local wheel `1,263,199` bytes / `368a66a438c0...` / `378` entries; P30A local RC closure is next; no product/API/runtime version or release bump |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -136,6 +137,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P26E Host–Microbiome contracts | `vc.host-microbiome-interface-requirement.v1`, `vc.host-microbiome-dag.v1`, `vc.host-microbiome-contract.v1`, `vc.host-release-audit-snapshot.v1`, `vc.host-microbiome-compilation.v1` plus canonical `vc.host-microbiome-joint-scope.v1` fingerprint payload | `host_microbiome.py` | exact host/P25 requirement closure and value-free abstention; joint scope is not a sixth public model, P22 context match is not full-request binding, and schema/DAG existence does not imply releases, mapping, execution, science, policy or causality |
 | P27A-E experiment-design/replay contracts | `vc.experiment-action.v1`, `vc.virtual-experiment.v1`, `vc.replay-selection-row.v1`, `vc.replay-selection-view.v1`, `vc.replay-outcome-row.v1`, `vc.replay-outcome-ledger.v1`, `vc.replay-protocol.v1`, `vc.replay-selection-receipt.v1`, `vc.replay-strategy-summary.v1`, `vc.replay-result.v1` plus canonical `vc.replay-outcome-contract.v1` fingerprint payload | `experiment_design.py` | request-derived value-free design and deterministic synthetic rank-then-reveal closure; outcome-contract is not an eleventh public model, and contracts/synthetic utility do not imply a historical replay, information gain, validated action domain, science, policy, shadow review, prospective pilot or execution |
 | P28E Multi-Agent Biology contracts | `vc.multi-agent-role-policy.v1`, `vc.multi-agent-handoff.v1`, `vc.multi-agent-dag.v1`, `vc.multi-agent-trace-event.v1`, `vc.multi-agent-trace.v1`, `vc.multi-agent-biology-compilation.v1` plus canonical `vc.multi-agent-value-free-handoff.v1` and `vc.multi-agent-trace-root.v1` fingerprint payloads | `multi_agent_biology.py` | strict typed advisory handoffs bind only immutable identities; the authoritative compilation is value-free and empty because it has zero qualifying modules, not because it represents a connected biological subgraph; synthetic conformance does not imply real orchestration, model execution, evidence, science, policy or promotion |
+| P29E Limited Biological World Model contracts | `vc.state-action-observation-time-requirement.v1`, `vc.connected-typed-subgraph.v1`, `vc.limited-world-model-compilation.v1` | `limited_world_model.py` | exact P28 identity closes a null requirement record, an `empty_not_connected` zero-node/zero-edge graph and value-free compilation; content hashes identify canonical bytes but do not authenticate an issuer; synthetic conformance does not imply a connected biological model, data/model execution, benchmark, science, policy or promotion |
 | memory frontmatter schema | `1` | `brains/_common/memory/rules/*.md` | inherited memory-content schema |
 | governance feature schema | `v0.3.0` | `governance/learned_reliability.py` and artifact JSON | frozen learned-governance feature contract |
 | governance models | `reliability_v0.3.0`, `abstain_v0.3.0` | `governance/artifacts/*.json` | immutable model revisions paired with content SHA-256 |
@@ -503,9 +505,36 @@ Engineering is `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evi
 acceptance is `BLOCKED / 0_OF_3_QUALIFYING_MODULES`; science is `NOT_RUN`; policy is
 `NO_NEW_DECISION`. No LLM/tool/model execution, data/weight access, benchmark, comparison/ablation,
 operator decision, release, push or deploy occurred. P29E limited-world-model contract-only work is
-next eligible. See [ADR-0024](ADR-0024-multi-agent-biology-contract.md), the
+the historical handoff and subsequently completed. See [ADR-0024](ADR-0024-multi-agent-biology-contract.md), the
 [P28E runbook](runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md), and the
 [P28E completion report](../reports/phase28e/PHASE28E_COMPLETION.md).
+
+P29E adds three public limited-world-model records inside the same unpublished `1.6.0` candidate. It starts
+from P28 docs closure `90990c198c40d0e6655aedaad101a783cde003aa` and completes at code/tree
+`471767e5f38f9866fbe396f39836369d943f6657` /
+`d1dec19f06ec88f563406b45f2b544effabad915`. The compiler accepts only an exact recursively
+revalidated P28 compilation. State/action/observation/time and all data/model/environment/adapter/compute/
+benchmark/evidence/policy/result/tool identities remain unavailable; the authoritative graph is exactly
+`empty_not_connected` with zero nodes and edges, and no placeholder molecule-to-organism chain exists.
+Standalone replay is inherited only through the P28 identity and remains explicitly not request-bound.
+Content fingerprints bind canonical bytes; they are not a signature or issuer attestation.
+
+Focused P29E is `51 passed`; P28+P29 adjacent is `89 passed`; the exact eleven-test-file affected suite is
+`390 passed`; safe is `1,934 passed / 49 skipped / 387 deselected / 427.59s`; legacy is
+`1,147 passed / 58 skipped / 105 deselected / 58.07s`; packaging/versioning is `18 passed`; Ruff and
+static/frontend checks pass. Two independent archive-built wheels are byte-identical at `1,263,199` bytes /
+`368a66a438c036a3b9c24f1093fc478886885fbefaecfea52bb50ad616206c01` /
+`378` entries / `14` React entries, with no tests or AppleDouble. The P29 module source/wheel bytes match at
+SHA-256 `b730220099b36df99f7ba706be7dea6174b1c41329b62526dc45bda475c155ae`.
+
+Engineering is `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evidence is
+`SYNTHETIC_CONFORMANCE_ONLY`; umbrella status is `ENGINEERING_COMPLETE_SCIENCE_PENDING`; real P29 is
+`BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`; science is `NOT_RUN`; policy is `NO_NEW_DECISION`.
+No real data/model/benchmark, execution, operator decision, release, push or deployment occurred. P30A local
+RC closure is next but must independently satisfy clean dependency, SBOM/license, artifact and release-document
+gates. See [ADR-0025](ADR-0025-limited-biological-world-model-contract.md), the
+[P29E runbook](runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md), and the
+[P29E completion report](../reports/phase29e/PHASE29E_COMPLETION.md).
 
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
@@ -556,6 +585,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | P26E Host–Microbiome schemas + fingerprints | five public strict interface/DAG/contract/host-audit/compilation records plus one canonical joint-scope fingerprint payload | incompatible host/P25/interface/DAG/audit/negative-compilation meaning changes; future executable community or matching releases require independent new schemas | a P22 context match binds the full request, P25E is a community release, topology is execution/causality, or synthetic conformance grants science/policy |
 | P27A-E experiment-design/replay schemas + fingerprints | ten public strict action/design/selection/outcome/protocol/receipt/summary/result records plus one canonical outcome-contract fingerprint payload | incompatible request-derived design, domain/feasibility, selector/outcome separation, receipt, group, failure or result semantics change; use a new schema version | synthetic utility is information gain, historical replay ran, a validated action domain exists, or science/policy/shadow/prospective/execution was granted |
 | P28E Multi-Agent Biology schemas + fingerprints | six public strict role-policy/handoff/DAG/trace-event/trace/compilation records plus canonical value-free-handoff and trace-root fingerprint payloads | incompatible role permissions, immutable binding, handoff/DAG/trace canonicalization, or value-free abstention semantics change; use a new schema version | advisory or empty authoritative records create a biological subgraph, model execution, evidence, scientific validation, policy or promotion |
+| P29E Limited Biological World Model schemas + fingerprints | three public strict state/action/observation/time-requirement, connected-typed-subgraph and compilation records | incompatible upstream binding, requirement availability, graph connectivity, authority-null or abstention semantics change; use a new schema version | an empty graph is connected, a content hash authenticates its issuer, or synthetic conformance creates data/model execution, benchmark, science, policy or promotion |
 | `memory_schema_version` | integer/content-schema identifier | memory frontmatter/content contract change | product release cadence |
 | `feature_schema_version` | existing SemVer-like artifact contract | retraining/migrating the feature vector contract | UI/package version |
 | governance `model_version` + SHA | immutable named revision plus content hash | genuinely regenerated/retrained artifact | product release cadence |
@@ -567,7 +597,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented history through the current P28E contract-complete bytes:
+Implemented history through the current P29E contract-complete bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -746,8 +776,20 @@ Implemented history through the current P28E contract-complete bytes:
     a connected biological subgraph and cannot execute models or create evidence/policy. Engineering is
     `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`, fixture evidence is
     `SYNTHETIC_CONFORMANCE_ONLY`, science is `NOT_RUN`, policy is `NO_NEW_DECISION`, and real P28 is
-    `BLOCKED / 0_OF_3_QUALIFYING_MODULES`. P29E is next eligible; no product/API/runtime version bump,
+    `BLOCKED / 0_OF_3_QUALIFYING_MODULES`. P29E subsequently completed; no product/API/runtime version bump,
     release identity, tag, push or deploy is created. Product version remains `1.6.0`.
+34. P29E starts at P28 docs closure `90990c198c40d0e6655aedaad101a783cde003aa` and adds three
+    public requirement/subgraph/compilation records. Final code/tree are
+    `471767e5f38f9866fbe396f39836369d943f6657` /
+    `d1dec19f06ec88f563406b45f2b544effabad915`; two exact-code wheels are byte-identical at
+    `1,263,199` bytes / `368a66a438c036a3b9c24f1093fc478886885fbefaecfea52bb50ad616206c01` /
+    `378` entries. The requirement identities remain null, the graph is `empty_not_connected` with zero
+    nodes/edges, and every execution/science/policy/value slot remains unavailable or false. Content hashes
+    are identity, not signature/attestation. Engineering is
+    `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`, fixture evidence is
+    `SYNTHETIC_CONFORMANCE_ONLY`, science is `NOT_RUN`, policy is `NO_NEW_DECISION`, and real P29 is
+    `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`. P30A local RC closure is next; no product/API/runtime
+    version bump, release identity, tag, push or deploy is created. Product version remains `1.6.0`.
 
 ## Release invariants
 
@@ -856,6 +898,8 @@ the P28E `vc.multi-agent-role-policy.v1`, `vc.multi-agent-handoff.v1`,
 `vc.multi-agent-dag.v1`, `vc.multi-agent-trace-event.v1`, `vc.multi-agent-trace.v1`,
 `vc.multi-agent-biology-compilation.v1` schemas and canonical
 `vc.multi-agent-value-free-handoff.v1` and `vc.multi-agent-trace-root.v1` fingerprint payloads,
+the P29E `vc.state-action-observation-time-requirement.v1`,
+`vc.connected-typed-subgraph.v1` and `vc.limited-world-model-compilation.v1` schemas,
 runtime/API protocol identifiers, memory schema,
 `feature_schema_v0.3.0`, governance model versions, registry model revisions, and
 artifact hashes. CI should validate their format/integrity and compatibility, not
