@@ -1,10 +1,10 @@
 # PRAXIS-VirtualCell Phase 12–30 详细完成计划与验收对照表
 
-> 文档状态：`OPERATIONAL_CHECKLIST — PLANNING_ONLY`
+> 文档状态：`OPERATIONAL_CHECKLIST — ACTIVE ENGINEERING/SCIENCE/POLICY LEDGER`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前已完成工程 work unit：`Phase 23A`
+> 当前已完成工程 work unit：`Phase 25E`
 >
 > DOCS-CLOSURE completion：`b19c896202bea56f894d0ad540501331af42a40c`
 >
@@ -82,11 +82,19 @@
 > Community adapter，没有可与真实资产/固定模型分离并计作 P24 完成的本地
 > contract-only work unit；当前为 `AUTHORIZATION_REQUIRED / NOT_RUN`
 >
+> 已完成 work unit：`Phase 25E — Virtual Microbiome fixed-scope contract`；observed active
+> baseline `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`；branch
+> `codex/p25e-virtual-microbiome`；completion code SHA
+> `039393e6be897b3014bb0b657d0a439d879578b6`；tree
+> `b53e542940bf39fd44965fe55416798211ab580b`；source date epoch `1786171049`；
+> engineering `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture evidence
+> `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`
+>
 > 当前 Phase 11 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
-> 当前状态核对日期：2026-08-07
+> 当前状态核对日期：2026-08-08
 
 本文是一份可以在整个项目周期中逐项对照的执行清单。它把
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)转换为：
@@ -102,7 +110,7 @@
 ```
 
 本文自身不授权实施任何 Phase。P12、P13、P14E、P15E、P16E、P17、P18、P19、P20、
-P21A、P22 和 P23A 已在持续本地授权内完成；该授权仍不包含
+P21A、P22、P23A 和 P25E 已在持续本地授权内完成；该授权仍不包含
 外置数据或权重、network、push、GitHub main/tag、`.53`、服务、发布、部署或真实
 科学运行。P14E 已独立收口；P14R 仍需逐资产/窗口授权，P14B 仍只能在
 正科学结果后由具名 operator 决定。P15E 已独立收口；P15R 仍需逐资产/窗口授权，
@@ -114,6 +122,8 @@ P19 已完成受控 registration 工程合同，但 Git 外真实 fixture、新 
 operator/science/policy 均未运行；factory registration 不是模型兼容、执行或 promotion。阶段 scope、
 P20 已完成 exact P19 registration-bound Training Pipeline contract，但只运行 repository tiny
 fixtures；真实 candidate training、test/external read、benchmark/science/policy 均未运行。
+P25E 只完成 fixed-scope/value-free contract，P24/P25R 仍未授权、未运行；下一 eligible
+local unit 是 P26E contract/DAG/matching/abstain software，P26R 仍受 promoted prerequisites 阻塞。
 阶段 scope、资产清单和可复制授权句仍以
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)为准。
 
@@ -349,8 +359,11 @@ flowchart TD
 | P23A | `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE` | `NOT_RUN` | `NO_NEW_DECISION` | strict directed endpoint/same-experiment identities、P13 adapter、evidence-only projection；completion `2b894966...`；real registry/P18/data/model/baseline/CI/uncertainty/OOD gates 未运行 |
 | P23B | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | 可选 receiver response；独立授权，不是 P23A 自动下一步 |
 | P24 | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | 第一个真实 Community adapter；没有独立 P24 contract-only work unit |
-| P25 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | 定义群落的唯一 primary endpoint |
-| P26 | `BLOCKED` | `NOT_RUN` | `NOT_RUN` | matching host/community 均 validated + promoted |
+| P25E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | exact 2–3-member schema、唯一 positive 2-member synthetic freeze fixture、typed missing bindings、value-free abstain；completion `039393e6...` |
+| P25R | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_APPLICABLE` | real assets、P24/P20/P21 model/mapping/protocol、write-new benchmark window 均未授权 |
+| P25 policy / P21C | `AUTHORIZATION_REQUIRED / NOT_RUN` | `READ_ONLY / NOT_RUN` | `NOT_RUN` | 只可引用 exact immutable positive evidence 由具名 operator 决定 |
+| P26E | `NEXT ELIGIBLE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | 只允许 contract/DAG/matching/abstain；不得伪造 promoted host/community release |
+| P26R | `BLOCKED` | `NOT_RUN` | `NOT_RUN` | matching host/community 均 validated + promoted 且 matching release 存在 |
 | P27A | `NOT_STARTED` | `REPLAY_NOT_RUN` | `NOT_APPLICABLE` | experiment-design software/replay |
 | P27B | `OPTIONAL_NOT_RUN` | `SHADOW_NOT_RUN` | `NOT_APPLICABLE` | 可选具名专家 blind review |
 | P27C | `OPTIONAL_NOT_RUN` | `PILOT_NOT_RUN` | `NOT_APPLICABLE` | 可选 prospective pilot |
@@ -1392,7 +1405,19 @@ contract-only work unit。没有 exact real assets、trusted fixed model 和 run
 
 ### Phase 25 — Virtual Microbiome Prototype
 
-**状态：** `NOT_STARTED`
+**分层状态（2026-08-08）：**
+
+```text
+P25E engineering: COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION
+fixture evidence: SYNTHETIC_CONFORMANCE_ONLY
+P25R science: AUTHORIZATION_REQUIRED / NOT_RUN
+P25 product policy: NO_NEW_DECISION（独立 P21C）
+completion code: 039393e6be897b3014bb0b657d0a439d879578b6
+```
+
+P25E 根据持续本地授权先冻结 scope/schema/endpoint/typed missing bindings 和 fail-closed
+software；它不绕过 P24 real-only gate，也不使 P25 science complete。下列真实 asset/model/
+benchmark 项仍属于 P25R。
 
 **唯一任务：**
 
@@ -1403,13 +1428,19 @@ contract-only work unit。没有 exact real assets、trusted fixed model 和 run
 
 **交付物**
 
+- [x] 独立 `vc.virtual-microbiome-*.v1` scope/endpoint/adapter-requirement/request/plan/result；
+- [x] ordered 2–3 member Pack/taxonomy/assembly/strain/abundance/medium/time identity；
+- [x] 一个且仅一个 primary end-time abundance endpoint，secondary 不得救门；
+- [x] P24 adapter/model/environment/mapping/protocol/evidence/policy typed missing closure；
+- [x] exact request、Pack bytes 或 scope 漂移时 value-free abstain；
+- [x] P10 `vc.community-*.v1` source bytes、golden fingerprints 和 no-model semantics 回归保护；
 - [ ] strain-resolved member Pack、initial abundance、medium、compartment 和 time；
 - [ ] 标准 metabolite namespace/version/unit/mapping；
 - [ ] mono/co-culture、growth/biomass 和 extracellular metabolomics；
 - [ ] 复用 P24 adapter/model identity；
 - [ ] biological-group train/validation/test split；
 - [ ] persistence、independent monoculture 和 no-interaction baseline；
-- [ ] 一个且仅一个 primary abundance endpoint；
+- [x] 一个且仅一个 primary abundance endpoint contract；
 - [ ] secondary metabolite/SCFA 的 assay、LOD、unit、mapping 和 multiplicity policy；
 - [ ] mass/element/charge、solver、calibration 和 OOD；
 - [ ] 独立 condition/batch 零适配验证。
@@ -1418,8 +1449,8 @@ contract-only work unit。没有 exact real assets、trusted fixed model 和 run
 
 - [ ] primary endpoint 对 baseline 的 paired CI 通过；
 - [ ] 独立批次或条件复现；
-- [ ] secondary 不能挽救失败的 primary；
-- [ ] member/medium/abundance/time 域外 abstain；
+- [x] contract/result 层 secondary 不能挽救失败的 primary；
+- [x] member/medium/abundance/time 域外或 stale identity abstain；
 - [ ] 失败不改写 P24 窄能力；
 - [ ] 不称人类微生物组、空间模型或通用 community world model；
 - [ ] 通过也只生成 promotion-eligible evidence，policy 另用 P21C。
@@ -1428,7 +1459,11 @@ contract-only work unit。没有 exact real assets、trusted fixed model 和 run
 
 ### Phase 26 — Host–Microbiome Virtual Cell
 
-**状态：** `BLOCKED`（前置 capability 尚未形成）
+**分层状态：** `P26E NEXT ELIGIBLE — CONTRACT_ONLY`；`P26R BLOCKED`（前置 capability
+尚未形成）
+
+P26E 只允许完成 contract、time-unrolled DAG、exact matching requirement 和 abstain software。
+没有下列硬前置时不得产生 execution steps、prediction、science evidence 或 policy。
 
 #### P26 前置能力循环（不是新 Phase 编号）
 
@@ -1455,7 +1490,8 @@ P19  制作并注册 matching host Pack
 - [ ] exact-scope P25 community capability `scientifically_validated=true`；
 - [ ] exact-scope P25 community capability `production_promoted=true`；
 - [ ] 所需宿主是问题相关 cell/Pack，不能用 K562 等无关 context 替代；
-- [ ] 任一项缺失时 P26 保持 `BLOCKED`，不得开始实现。
+- [x] 任一项缺失时 P26E 必须 non-executable/abstain；
+- [ ] 任一项缺失时 P26R 保持 `BLOCKED`，不得开始真实 execution。
 
 **交付物**
 
@@ -1689,8 +1725,11 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | P23A | `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE` | `NOT_RUN` | `NO_NEW_DECISION` | `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4` | `2b894966cd00b2af2fafbf8f009566dd69f393a7` | tree `00bd98b0fd14091f4528115dcc66730264d5803a`；epoch `1786061504`；focused `107 passed`；affected `495 passed / 1 skipped`；safe `1,787/49/387`；legacy `1,147/58/105`；wheel `1,226,514` bytes / `e78f40f0f4fe7354e3c660d6612a8ee60a1b2dd61af2fc606a67d01e67ac601e` / `373` entries；module/test SHA-256 `d1ba8d8054bf91c4a54a215c331fef65557df3954dba730998821ea9f70743cd` / `269c387423a41864031bb54fbbc692b84da0cbae5137db9fd6cbc077302d3081`；synthetic only |
 | P23B | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | — | unchanged or separate | optional receiver-response window；independent authorization absent |
 | P24 | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | `2b894966cd00b2af2fafbf8f009566dd69f393a7`（default baseline） | unchanged | real-only Community adapter；exact assets/model/run authorization absent；no independent contract-only work unit |
-| P25 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
-| P26 | `BLOCKED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
+| P25E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | `ae5e93571783cb3cf49a6e0fab531a89e963f7ec` | `039393e6be897b3014bb0b657d0a439d879578b6` | tree `b53e542940bf39fd44965fe55416798211ab580b`；epoch `1786171049`；focused `21`、P25E+P10 adjacent `60`；safe `1,809/49/387`；legacy `1,147/58/105`；wheel `1,234,438` bytes / `c8529477974c6379f75bee05e4b0b589e3a03ed70302617ab46461954915d77e` / `374` entries；fixture `SYNTHETIC_CONFORMANCE_ONLY`；P10 v1 preserved；all results abstain |
+| P25R | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `N/A` | — | unchanged | exact real assets/model/mapping/protocol/output authorization absent |
+| P25 policy / P21C | `AUTHORIZATION_REQUIRED / NOT_RUN` | `READ_ONLY / NOT_RUN` | `NOT_RUN` | — | unchanged | exact positive evidence and named-operator authorization absent |
+| P26E | `NEXT ELIGIBLE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | P25E docs closure | pending | contract/DAG/matching/abstain only |
+| P26R | `BLOCKED` | `NOT_RUN` | `NOT_RUN` | — | — | exact validated+promoted host/community and matching release absent |
 | P27A | `NOT_STARTED` | `REPLAY_NOT_RUN` | `N/A` | — | — | — |
 | P27B | `OPTIONAL_NOT_RUN` | `SHADOW_NOT_RUN` | `N/A` | — | unchanged | — |
 | P27C | `OPTIONAL_NOT_RUN` | `PILOT_NOT_RUN` | `N/A` | — | unchanged | — |

@@ -67,7 +67,15 @@ effect size 或 causal claim。P21B/P21C 与可选 P23B 均为
 `AUTHORIZATION_REQUIRED / NOT_RUN`；P24 是下一顺序阶段，但其 First Real Community
 Adapter 必须有另行授权的 exact real assets、固定模型和 write-new execution window，当前为
 `AUTHORIZATION_REQUIRED / NOT_RUN`，不存在可替代它的 fake contract-only scaffold。没有
-product/API/runtime version bump、release 或 push。
+改变该事实的前提下，持续本地授权将 P25 拆为 E/R/policy 窗口：P25E 从现场 active baseline
+`ae5e93571783cb3cf49a6e0fab531a89e963f7ec` 开始，在分支
+`codex/p25e-virtual-microbiome` 的 `039393e6be897b3014bb0b657d0a439d879578b6`
+（tree `b53e542940bf39fd44965fe55416798211ab580b`，source date epoch
+`1786171049`）完成 fixed 2–3-member Virtual Microbiome contract、唯一 primary endpoint 与
+value-free abstention，状态为 `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture
+evidence 仅为 `SYNTHETIC_CONFORMANCE_ONLY`，science `NOT_RUN`，policy `NO_NEW_DECISION`。
+P24/P25R 均未运行，P25E 没有 adapter/model/mapping/
+benchmark/evidence/prediction。没有 product/API/runtime version bump、release 或 push。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
@@ -80,7 +88,8 @@ exact 验证与克制的科学/policy 边界见
 [P20 完成报告](reports/phase20/PHASE20_COMPLETION.md)以及
 [P21A 完成报告](reports/phase21a/PHASE21A_COMPLETION.md)与
 [P22 完成报告](reports/phase22/PHASE22_COMPLETION.md)和
-[P23A 完成报告](reports/phase23a/PHASE23A_COMPLETION.md)。P14R、P15R 与 P16R 的真实
+[P23A 完成报告](reports/phase23a/PHASE23A_COMPLETION.md)以及
+[P25E 完成报告](reports/phase25e/PHASE25E_COMPLETION.md)。P14R、P15R 与 P16R 的真实
 asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B、P15B 与 P16B 均为
 `NOT_RUN`。当前 P12 `ModelRegistryV2` 有 5 个 legacy release、0 个 native、0 个 production-promoted
 capability；P18 没有真实 multi-omics model execution/acceptance，science 为 `NOT_RUN`，
@@ -137,6 +146,18 @@ evidence、baseline gate 失败、unsupported/OOD、execution 未授权或 regis
 [P23A runbook](docs/runbooks/CELL-INTERACTION-EVIDENCE.md)。真实 paired/co-culture/spatial
 输入、真实 curated release state、固定模型执行、baseline/CI/OOD science gate 仍须另行 exact
 授权；合成 conformance 不是 interaction evidence、scientific validation 或 promotion。
+
+P25E 以独立 `vc.virtual-microbiome-*.v1` schemas 冻结 ordered member Pack/taxonomy/
+assembly/strain identity、initial abundance、medium/compartment、time 和 well-mixed scope，唯一
+primary output 是 exact end time 的 ordered strain abundance fraction vector。Adapter requirement
+明确把 P24 adapter、model、environment、metabolite mapping、P21 benchmark protocol、evidence
+和 policy identities 固定为 missing；因此 exact request 仍是 empty plan、`prediction=null`。
+P10 `vc.community-*.v1` source bytes 与 canonical no-model fingerprints 由 golden regression
+保护，toy exchange balance 不能成为 P25 science。设计和操作边界见
+[P25E ADR](docs/ADR-0021-virtual-microbiome-contract.md)与
+[P25E runbook](docs/runbooks/VIRTUAL-MICROBIOME-CONTRACT.md)。下一 eligible local work unit 是
+P26E contract/DAG/matching/abstain software；没有 exact validated+promoted host/community release
+和 matching release 时仍必须 fail closed，且不得用 K562 替代宿主。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确

@@ -1,15 +1,16 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: P23A `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`; science `NOT_RUN`;
+> Status: P25E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evidence
+> `SYNTHETIC_CONFORMANCE_ONLY`; science `NOT_RUN`;
 > policy `NO_NEW_DECISION`; P21B/P21C and optional P23B
-> `AUTHORIZATION_REQUIRED / NOT_RUN`; P24 First Real Community Adapter
-> `AUTHORIZATION_REQUIRED / NOT_RUN` —
+> `AUTHORIZATION_REQUIRED / NOT_RUN`; P24 First Real Community Adapter and P25R
+> `AUTHORIZATION_REQUIRED / NOT_RUN`; P26E contract-only is next locally eligible —
 > `LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
-> Local baseline: branch `codex/p23-cell-interaction`; starting SHA
-> `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4`; completion code SHA/tree
-> `2b894966cd00b2af2fafbf8f009566dd69f393a7` /
-> `00bd98b0fd14091f4528115dcc66730264d5803a`; source date epoch `1786061504`
+> Local baseline: branch `codex/p25e-virtual-microbiome`; starting SHA
+> `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`; completion code SHA/tree
+> `039393e6be897b3014bb0b657d0a439d879578b6` /
+> `b53e542940bf39fd44965fe55416798211ab580b`; source date epoch `1786171049`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -33,6 +34,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P21A Virtual Cell Benchmark System work unit | start `5f3fc2d88c20e8083fb66a4c3399c5fe148241be`; code `20ecc12542e5df40c90d1fc367dbe86b563478b8`; tree `ffcd261dd7d506d0ad852023afcba0f5c97a2d72`; epoch `1786050825` | immutable local Git history plus `reports/phase21a/PHASE21A_COMPLETION.md` | `COMPLETE — SYSTEM_ONLY`; exact protocol/run/result/evidence and negative-ledger contracts; P21B exact authorization+run+result execution trust remains out of band; science `NOT_RUN`, policy `NO_NEW_DECISION`, P21B/P21C authorization required/not run; no real benchmark/promotion or version/release bump; P22 contract-only eligible; exact-local-source/toolchain wheel `1,202,180` bytes / `ee98d4b3c689...` / `371` entries, not pinned dependency closure |
 | P22 Curated Virtual Cell Registry work unit | docs start `09792e13e29a76b5e4434507f3334eefb947789c`; prerequisite `20ecc12542e5df40c90d1fc367dbe86b563478b8`; code `bca5ad661856e8d9aa832c47f23c6ad7179ee0c9`; tree `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`; epoch `1786056220` | immutable local Git history plus `reports/phase22/PHASE22_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY`; exact One-Pack/P21B composition, quarantine-first append-only lifecycle, default-deny external trust and independently persisted checkpoint; science `NOT_RUN`, policy `NO_NEW_DECISION`, real lifecycle not run; no HTTP/UI/runtime/install/execute or version/release bump; P23A contract-only was then eligible and subsequently completed; exact-local-source/toolchain wheel `1,217,155` bytes / `3f978e9f3eb0...` / `372` entries, not pinned dependency closure |
 | P23A Cell Interaction Evidence work unit | start `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4`; code `2b894966cd00b2af2fafbf8f009566dd69f393a7`; tree `00bd98b0fd14091f4528115dcc66730264d5803a`; epoch `1786061504` | immutable local Git history plus `reports/phase23a/PHASE23A_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`; strict directed release/Pack/context/P18/same-experiment/scorer identities and P13-shaped score-only fixture projection; science `NOT_RUN`, policy `NO_NEW_DECISION`; no real release/data/model/baseline/CI/OOD execution; P23B and P24 authorization required/not run; exact-local-source/toolchain wheel `1,226,514` bytes / `e78f40f0f4fe...` / `373` entries, not dependency closure, clean-install or release proof |
+| P25E Virtual Microbiome contract work unit | active baseline `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`; code `039393e6be897b3014bb0b657d0a439d879578b6`; tree `b53e542940bf39fd44965fe55416798211ab580b`; epoch `1786171049` | immutable local Git history plus `reports/phase25e/PHASE25E_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evidence `SYNTHETIC_CONFORMANCE_ONLY`; independent fixed 2–3-member scope/endpoint/adapter-requirement/request/plan/result identities; P10 v1 bytes/semantics preserved; all adapter/model/environment/mapping/protocol/evidence/policy bindings absent and all results abstain; science `NOT_RUN`, policy `NO_NEW_DECISION`; P24/P25R authorization required/not run; exact-local-source/toolchain wheel `1,234,438` bytes / `c8529477974c...` / `374` entries; no product/API/runtime version or release bump |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -124,6 +126,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | CommunityPack contract | `vc.community-pack.v1` + canonical JSON SHA-256 | `community_packs/contracts.py` | binds exact member Pack fingerprints, abundance, medium, compartment, time/well-mixed space, shared metabolite namespace and evidence; not a community model or scientific validation |
 | Community exchange contracts | `vc.community-exchange-ledger.v1`, `vc.community-exchange-validation.v1` | `community_packs/contracts.py` | exact declared-amount conservation for a toy ledger; not flux, elemental, thermodynamic or experimental validation |
 | Community plan/result contracts | `vc.community-execution-plan.v1`, `vc.community-run-result.v1` | `community_packs/contracts.py` | no-model plan and honest abstention; neither schema implies a real adapter, executable model, prediction or validation |
+| P25E Virtual Microbiome contracts | `vc.virtual-microbiome-scope.v1`, `vc.virtual-microbiome-primary-endpoint.v1`, `vc.virtual-microbiome-adapter-requirement.v1`, `vc.virtual-microbiome-contract.v1`, `vc.virtual-microbiome-request.v1`, `vc.virtual-microbiome-plan.v1`, `vc.virtual-microbiome-result.v1` + canonical JSON SHA-256 | `community_packs/virtual_microbiome.py` | exact fixed-scope identities and value-free abstention; schema or synthetic fixture existence does not imply P24/P25R execution, prediction, science, evidence, policy or promotion |
 | memory frontmatter schema | `1` | `brains/_common/memory/rules/*.md` | inherited memory-content schema |
 | governance feature schema | `v0.3.0` | `governance/learned_reliability.py` and artifact JSON | frozen learned-governance feature contract |
 | governance models | `reliability_v0.3.0`, `abstain_v0.3.0` | `governance/artifacts/*.json` | immutable model revisions paired with content SHA-256 |
@@ -366,6 +369,36 @@ scaffold is eligible. See [ADR-0020](ADR-0020-cell-interaction-evidence-contract
 [P23A runbook](runbooks/CELL-INTERACTION-EVIDENCE.md), and the
 [P23A completion report](../reports/phase23a/PHASE23A_COMPLETION.md).
 
+P25E adds seven independently named `vc.virtual-microbiome-*.v1` schemas inside the same
+unpublished `1.6.0` candidate. It starts from the observed active baseline
+`ae5e93571783cb3cf49a6e0fab531a89e963f7ec` and completes at code/tree
+`039393e6be897b3014bb0b657d0a439d879578b6` /
+`b53e542940bf39fd44965fe55416798211ab580b`. It does not change P10
+`vc.community-*.v1`, product SemVer, API/runtime protocols, the default adapter registry or any
+published identity.
+
+The schemas freeze an ordered 2–3-member Pack/taxonomy/assembly/strain/abundance/medium/time scope,
+one end-time abundance endpoint and a typed negative adapter requirement. P24 adapter, model,
+environment, mapping, benchmark protocol, evidence and policy fingerprints are null by construction;
+every plan is non-executable and every result is value-free abstention. The synthetic fixture and
+frozen fingerprints prove only local deterministic conformance.
+
+Focused P25E is `21 passed`; adjacent P25E+P10 is `60 passed`; safe is
+`1,809 passed / 49 skipped / 387 deselected / 449.43s`;
+legacy is `1,147 passed / 58 skipped / 105 deselected / 57.14s`; static/frontend checks pass. Two
+completion-code wheels are byte-identical at `1,234,438` bytes /
+`c8529477974c6379f75bee05e4b0b589e3a03ed70302617ab46461954915d77e` / `374`
+entries / `14` React entries, with no tests or AppleDouble. `pip check` remains a recorded failure
+because the shared host environment has pre-existing dependency conflicts; no dependency was changed.
+
+P25E performs no external asset read, P24/P25R execution, model/baseline/benchmark/CI/OOD run,
+science, operator policy, promotion, product/API/runtime version bump, release, push or deploy.
+Engineering is `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evidence is
+`SYNTHETIC_CONFORMANCE_ONLY`; science is `NOT_RUN`; policy is
+`NO_NEW_DECISION`. See [ADR-0021](ADR-0021-virtual-microbiome-contract.md), the
+[P25E runbook](runbooks/VIRTUAL-MICROBIOME-CONTRACT.md), and the
+[P25E completion report](../reports/phase25e/PHASE25E_COMPLETION.md).
+
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
 ## Namespace contract
@@ -411,6 +444,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | Golden baseline/evaluation/inventory schemas + hashes | explicit `vc.golden-*.v1` and per-file identities | incompatible artifact semantics or regenerated bytes | lower MSE, executable runtime, or an inventory entry implies `scientifically_validated=true` |
 | CommunityPack schema + fingerprint | explicit `vc.community-pack.v1` plus canonical JSON SHA-256 | incompatible member/reference/ecology-metadata semantics change | a valid contract supplies a community model or experimental truth |
 | Community exchange/plan/result schemas | explicit `vc.community-*.v1` identities | incompatible ledger, conservation, planning or abstention semantics change | toy balance proves biological feasibility, or an empty plan proves execution |
+| P25E Virtual Microbiome schemas + fingerprints | seven explicit `vc.virtual-microbiome-*.v1` scope/endpoint/adapter-requirement/contract/request/plan/result identities | incompatible ordered member/scope/endpoint/missing-binding/abstention semantics change; use a new schema version | a two-member synthetic fixture or valid schema proves a real adapter, prediction, science, evidence, policy or promotion |
 | `memory_schema_version` | integer/content-schema identifier | memory frontmatter/content contract change | product release cadence |
 | `feature_schema_version` | existing SemVer-like artifact contract | retraining/migrating the feature vector contract | UI/package version |
 | governance `model_version` + SHA | immutable named revision plus content hash | genuinely regenerated/retrained artifact | product release cadence |
@@ -422,7 +456,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented history through the current P23A contract-complete bytes:
+Implemented history through the current P25E contract-complete bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -547,9 +581,19 @@ Implemented history through the current P23A contract-complete bytes:
     closure, clean-install or release evidence. The sole non-abstaining projection is the supplied
     synthetic fixture `interaction_evidence_score`; no biological scoring, real release/data/model
     verification, baseline/CI/OOD execution, receiver response or causal claim exists. Engineering is
-    `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`, science is `NOT_RUN`, policy is
+    `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`, fixture evidence is
+    `SYNTHETIC_CONFORMANCE_ONLY`, science is `NOT_RUN`, policy is
     `NO_NEW_DECISION`; P23B and P24 are authorization-required/not-run. No product/API/runtime
     version bump, release identity, tag, push or deploy is created. Product version remains `1.6.0`.
+30. P25E starts from observed active baseline `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`
+    and adds independent virtual-microbiome scope/endpoint/negative-adapter/request/plan/result schemas
+    while preserving P10 CommunityPack v1 bytes and no-model semantics. Final code/tree are
+    `039393e6be897b3014bb0b657d0a439d879578b6` /
+    `b53e542940bf39fd44965fe55416798211ab580b`; two local-toolchain wheels are byte-identical
+    at `1,234,438` bytes / `c8529477974c...` / `374` entries. All execution bindings remain absent,
+    plans/results abstain, science is `NOT_RUN`, policy is `NO_NEW_DECISION`, and P24/P25R remain
+    authorization-required/not-run. No product/API/runtime version bump, release identity, tag, push
+    or deploy is created. Product version remains `1.6.0`.
 
 ## Release invariants
 
@@ -648,6 +692,7 @@ domain/bundle schemas, `vc.pack-record.v1`, `vc.pack-catalog.v1`,
 `vc.golden-norman.v1`, `vc.golden-baseline.v1`,
 `vc.golden-evaluation.v1`, `vc.golden-artifact-manifest.v1`,
 `vc.community-pack.v1`, the `vc.community-*.v1` exchange/plan/result schemas,
+the seven `vc.virtual-microbiome-*.v1` scope/endpoint/adapter-requirement/contract/request/plan/result schemas,
 runtime/API protocol identifiers, memory schema,
 `feature_schema_v0.3.0`, governance model versions, registry model revisions, and
 artifact hashes. CI should validate their format/integrity and compatibility, not

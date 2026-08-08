@@ -2,11 +2,11 @@
 
 > 文档状态：`CURRENT_PROJECT_AND_INTEGRATION_GUIDE`
 >
-> 核对日期：2026-08-07
+> 核对日期：2026-08-08
 >
 > 当前本地仓库：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前完成分支：`codex/p23-cell-interaction`
+> 当前完成分支：`codex/p25e-virtual-microbiome`
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
 >
@@ -82,15 +82,23 @@
 > `codex/p23-cell-interaction`；状态 `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`；science `NOT_RUN`；policy
 > `NO_NEW_DECISION`
 >
+> 已完成 work unit：`P25E — Virtual Microbiome contract and abstention`；observed active
+> baseline `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`；completion code SHA
+> `039393e6be897b3014bb0b657d0a439d879578b6`；tree
+> `b53e542940bf39fd44965fe55416798211ab580b`；source date epoch `1786171049`；branch
+> `codex/p25e-virtual-microbiome`；状态
+> `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture evidence
+> `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`
+>
 > 工作树保护清单：不在本文固定；每轮从现场 `git status --short` 动态重建，任何
 > 新 staged/modified/deleted/untracked 路径默认受保护
 >
 > 当前 Cell-first 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
-> 下一步：没有可用 fake/no-asset scaffold 继续自动推进。可选 P23B 与真实 P24 均为
-> `AUTHORIZATION_REQUIRED / NOT_RUN`；P23B 需要 intervention/estimand/assumptions，P24 需要
-> exact real community assets、fixed P20/P21 model 和 write-new output window；P21B/P21C 仍为
-> `AUTHORIZATION_REQUIRED / NOT_RUN`
+> 下一步：P24 real adapter 与 P25R 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`；其 gate 未被
+> P25E 绕过。P26E contract/DAG/matching/abstain software 是下一 eligible local work unit；没有
+> exact validated+promoted host/community release 和 matching release 时必须 non-executable，
+> P26R 保持 blocked。P21B/P21C 仍为 `AUTHORIZATION_REQUIRED / NOT_RUN`
 
 本文是一份面向其他项目、开发团队、科研合作者和后续智能体的独立项目说明。它回答四个问题：
 
@@ -124,6 +132,9 @@ PRAXIS-VirtualCell 是一个以显式合同、确定性运行、可审计证据�
 - 将两个 exact P22/P19 release/Pack closures、typed unverified P18 identities、单一
   same-experiment identity 和 declared P20/P21 scorer references 编译为 P23A evidence-only
   prepared input，并对 synthetic fixture 只投影 `interaction_evidence_score`；
+- 将 exact ordered 2–3-member Pack/strain/abundance/medium/time requirement、唯一 primary
+  end-time abundance endpoint 和全部 missing execution bindings 冻结为 P25E contract，并只返回
+  value-free abstention；
 - 保存请求、报告、trace、provenance 和 execution identity；
 - 在缺数据、缺模型、不兼容、环境不满足或超出科学范围时明确 abstain；
 - 使用可选 LLM 做自然语言解析和文字解释，但不让 LLM 参与数值预测或最终裁决。
@@ -2537,7 +2548,27 @@ provenance fail closed。所有真实 registry/P18/asset/linkage/P20/P21/executi
 均为 false；没有真实 I/O/runtime/default registration。Science `NOT_RUN`，policy
 `NO_NEW_DECISION`。完整记录见 `reports/phase23a/PHASE23A_COMPLETION.md`。
 
-### 24.11 Skip 和 deselect 的含义
+### 24.11 P25E 完成状态
+
+P25E observed active baseline 为 `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`；completion
+code/tree 为 `039393e6be897b3014bb0b657d0a439d879578b6` /
+`b53e542940bf39fd44965fe55416798211ab580b`，epoch `1786171049`。
+
+P25E focused 为 `21 passed`；P25E+P10 adjacent 为 `60 passed`；safe 为
+`1,809 passed, 49 skipped, 387 deselected`；legacy 为
+`1,147 passed, 58 skipped, 105 deselected`。Two independent completion-SHA wheels are
+byte-identical at `1,234,438` bytes, SHA-256
+`c8529477974c6379f75bee05e4b0b589e3a03ed70302617ab46461954915d77e`, with `374`
+entries, `14` React, no tests and no AppleDouble. Source/wheel module SHA-256 is
+`747808c002ff36e5ac00076da50c5a07cb8d4716596e18a1fd8665e8c7a26d61`.
+
+这些结果只证明 fixed scope、唯一 primary endpoint、identity closure、P10 v1 regression 和
+value-free abstention。P25E 没有 non-abstaining projection；fixture evidence 只能标为
+`SYNTHETIC_CONFORMANCE_ONLY`。P24 adapter、model、environment、mapping、benchmark protocol、
+evidence 和 policy 全部 absent，science `NOT_RUN`，policy `NO_NEW_DECISION`。完整记录见
+`reports/phase25e/PHASE25E_COMPLETION.md`。
+
+### 24.12 Skip 和 deselect 的含义
 
 skip/deselect 不能写成：
 
@@ -2593,6 +2624,8 @@ skip/deselect 不能写成：
   capability、scientific evidence 或 production registry entry；
 - P23A adapter 是 local、non-default、synthetic pass-through contract；它不计算 score，不读取
   sender/receiver data/model，不验证 P22 registry 或 P18 membership，也不提供 receiver response；
+- P25E 没有 adapter runtime 或 prediction path；它只有 exact two-member positive freeze fixture，
+  schema 虽要求 2–3 members，但当前没有 third-member conformance Pack，更没有 real community release；
 - custom-path 低层 ModelZooRegistry 保留显式 v1 compatibility mode，不能称 v2 fully
   governed 产品路径；
 - 当前部署/本地默认环境没有完整真实权重生态；
@@ -2614,6 +2647,8 @@ skip/deselect 不能写成：
   或 scientific validation；
 - P23A 没有真实 paired/co-culture/spatial evidence、baseline comparison、paired CI 或 OOD science；
   supplied fixture score 不是 scientific evidence；
+- P25E 没有真实 mono/co-culture、growth/biomass、metabolomics、mapping、model、baseline、paired
+  CI、independent condition/batch 或 scientific validation；所有 result 都 value-free abstain；
 - 少于两个 capability 拥有 exact positive evidence 与 named-operator
   `production_promoted`；P17 contract 已完成，但不能声称真实多模型执行或科学验收；
 - 没有真实 Community model；
@@ -2624,7 +2659,7 @@ skip/deselect 不能写成：
 ### 工程限制
 
 - 当前版本字符串存在发布漂移；
-- P13 Adapter SDK、P14E/P15E/P16E narrow contracts、P17 Brain/DAG、P18/P19/P20/P23A contracts
+- P13 Adapter SDK、P14E/P15E/P16E narrow contracts、P17 Brain/DAG、P18/P19/P20/P23A/P25E contracts
   仅在本地工程完成，尚未发布；
 - P14E 尚无任意未来 GEM loader 为 `data_only` 的类型级证明；
 - JobStore 是本地文件系统；
@@ -2771,11 +2806,14 @@ artifact hash
 
 ## 28. 后续路线图 P12–P30
 
-P12/P13/P14E/P15E/P16E/P17/P18/P19/P20/P21A/P22/P23A 行记录已完成的工程 work units；
+P12/P13/P14E/P15E/P16E/P17/P18/P19/P20/P21A/P22/P23A/P25E 行记录已完成的工程 work units；
 P14R/P14B、P15R/P15B 与 P16R/P16B 仍未运行。P21B/P21C 未授权、未运行，真实科学或
 policy 窗口不能当作当前能力。P23A contract-only 已完成；真实 sender/receiver curated release、
 Pack/context 与 interaction evidence/data/execution 仍未提供。P23B 可选且需独立授权；P24 是
 First Real Community Adapter，也需 exact real assets/model/output window，不能用 fake scaffold 推进。
+P25E 的独立 contract-only closure 不改变 P24 状态；P25R 仍未授权、未运行。P26E 可继续
+contract/DAG/matching/abstain software，但 P26R 在 exact promoted host/community 和 matching
+release 形成前保持 blocked。
 
 | 阶段 | 目标 |
 |---|---|
@@ -2801,8 +2839,11 @@ First Real Community Adapter，也需 exact real assets/model/output window，�
 | P23A | `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`：start `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4`；completion `2b894966cd00b2af2fafbf8f009566dd69f393a7`；evidence-only synthetic conformance；real release/data/execution `NOT_RUN`；禁止 receiver response/causal claim |
 | P23B | `OPTIONAL / AUTHORIZATION_REQUIRED / NOT_RUN`：receiver response；需 intervention data、estimand、assumptions 和 exact P21B identity |
 | P24 | `AUTHORIZATION_REQUIRED / NOT_RUN`：First Real Community Adapter；需 exact real assets、fixed P20/P21 model 和 write-new output window；无 fake contract-only scaffold |
-| P25 | Virtual Microbiome prototype |
-| P26 | Host–Microbiome coupled system |
+| P25E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`：baseline `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`；completion `039393e6be897b3014bb0b657d0a439d879578b6`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION` |
+| P25R | `BLOCKED_EXTERNAL / AUTHORIZATION_REQUIRED / NOT_RUN`：P24 adapter、real assets/model/mapping/protocol/output window absent |
+| P25 policy / P21C | `NOT_RUN / NO-GO UNTIL POSITIVE P25R` |
+| P26E | `NEXT ELIGIBLE — CONTRACT_ONLY`：contract/time-unrolled DAG/matching/abstain only |
+| P26R | `BLOCKED`：exact validated+promoted host/community releases and matching release absent |
 | P27A | Experiment Design historical offline replay |
 | P27B | 可选具名专家 shadow review |
 | P27C | 可选 prospective pilot |

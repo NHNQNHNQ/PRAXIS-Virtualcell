@@ -184,5 +184,10 @@ contract-only scaffold 自动推进：它是 First Real Community Adapter，必�
 mono/co-culture assets、mapping、fixed P20/P21 model 和 write-new output window 的授权。当前两者均为
 `AUTHORIZATION_REQUIRED / NOT_RUN`。
 
+2026-08-08 follow-on：后续持续本地授权把 P25 拆为 E/R/policy 窗口，并允许独立 P25E
+contract-only engineering。P25E 已完成 value-free abstention，但没有冒充或完成 P24，也没有
+授权 P25R；P24/P25R 仍为 `AUTHORIZATION_REQUIRED / NOT_RUN`。当前下一 eligible local unit 是
+同样只能 fail closed 的 P26E contract/DAG/matching/abstain software。
+
 操作边界见 [P23A runbook](runbooks/CELL-INTERACTION-EVIDENCE.md)，完整证据见
 [P23A completion report](../reports/phase23a/PHASE23A_COMPLETION.md)。

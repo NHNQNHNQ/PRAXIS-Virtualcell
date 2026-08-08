@@ -1,22 +1,78 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P23A 分支 `codex/p23-cell-interaction`；起始 SHA
-> `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4`
+> 当前文档基线：P25E 分支 `codex/p25e-virtual-microbiome`；active baseline
+> `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：P23A `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`；science `NOT_RUN`；policy
+> 状态：P25E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture evidence
+> `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy
 > `NO_NEW_DECISION`；completion code SHA
-> `2b894966cd00b2af2fafbf8f009566dd69f393a7`；tree
-> `00bd98b0fd14091f4528115dcc66730264d5803a`；source date epoch `1786061504`。
-> 下述 P4.3–P22 和 CI 数字仍只绑定各自 exact SHA/日期；P23A 本地工程结果不构成真实
+> `039393e6be897b3014bb0b657d0a439d879578b6`；tree
+> `b53e542940bf39fd44965fe55416798211ab580b`；source date epoch `1786171049`。
+> 下述 P4.3–P23A 和 CI 数字仍只绑定各自 exact SHA/日期；P25E 本地工程结果不构成真实
 > release/registry-state verification、paired/co-culture/spatial data read、fixed-model
 > execution、baseline/CI/OOD science gate、科学验证、product policy、promotion、发布或
 > 远程证据。P21B/P21C 与可选 P23B 为 `AUTHORIZATION_REQUIRED / NOT_RUN`；P24 First
-> Real Community Adapter 是下一顺序阶段，但依赖另行授权的 exact real assets/model/output
-> window，当前为 `AUTHORIZATION_REQUIRED / NOT_RUN`，不得用 fake contract-only scaffold
-> 替代。
+> Real Community Adapter 与 P25R 都依赖另行授权的 exact real assets/model/output window，
+> 当前为 `AUTHORIZATION_REQUIRED / NOT_RUN`。下一 eligible local unit 是仅能 fail closed 的
+> P26E contract/DAG/matching/abstain software。
+
+## Phase 25E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` 本地证据
+
+P25E adds independent `vc.virtual-microbiome-*.v1` contracts around the byte-preserved P10
+CommunityPack surface. It binds exact ordered 2–3 members, Pack/taxonomy/assembly/strain identities,
+initial abundance, medium/compartment, time, one primary end-time abundance endpoint, ordered baseline
+names and OOD axes. Adapter/model/environment/mapping/benchmark/evidence/policy identities remain
+explicitly absent, so every exact request has empty steps and value-free abstention.
+
+~~~bash
+pytest -q \
+  praxis_virtualcell/tests/test_virtual_microbiome_contract.py \
+  praxis_virtualcell/tests/test_community_packs.py
+
+python -m ruff check . --extend-exclude old --no-cache
+
+python -m ruff format --check \
+  praxis_virtualcell/community_packs/virtual_microbiome.py \
+  praxis_virtualcell/community_packs/__init__.py \
+  praxis_virtualcell/tests/test_virtual_microbiome_contract.py \
+  praxis_virtualcell/tests/test_community_packs.py
+
+npm --prefix praxis_vc_react run typecheck
+npm --prefix praxis_vc_react run lint
+npm --prefix praxis_vc_react run build
+
+python -m pip check
+git diff --check
+~~~
+
+| Gate | Result |
+|---|---|
+| P25E focused | `21 passed` |
+| P25E + P10 adjacent | `60 passed` |
+| safe local suite | `1,809 passed / 49 skipped / 387 deselected / 449.43s` |
+| legacy suite | `1,147 passed / 58 skipped / 105 deselected / 57.14s` |
+| Ruff / targeted format / compile / diff | PASS |
+| React typecheck / lint / build / bundle budget | PASS |
+| `pip check` | FAIL：pre-existing shared-environment dependency conflicts; no environment mutation performed |
+| reproducible packaging | PASS：two byte-identical wheels; `1,234,438` bytes; SHA-256 `c8529477974c6379f75bee05e4b0b589e3a03ed70302617ab46461954915d77e`; `374` entries |
+
+Wheel contents include 14 React entries, zero tests and zero AppleDouble entries. Source/wheel module
+SHA-256 is exactly
+`747808c002ff36e5ac00076da50c5a07cb8d4716596e18a1fd8665e8c7a26d61`. Builds used two
+independent completion-SHA archives, npm offline, and the installed Python toolchain with
+`--no-isolation --skip-dependency-check`; they do not prove a pinned dependency closure, clean install,
+publication or release.
+
+Negative/adversarial coverage includes bad/stale hashes, re-signed scope drift, Pack byte drift before
+freeze and planning, non-microbial relabeling, missing strain semantics, request identity drift, missing
+adapter/model/environment/mapping/protocol/evidence/policy, baseline/OOD reorder, in-memory
+`model_copy` bypass, prediction/secondary injection and frozen P10 v1 fingerprints. No real asset/model
+or scientific run occurred. See [ADR-0021](ADR-0021-virtual-microbiome-contract.md), the
+[P25E runbook](runbooks/VIRTUAL-MICROBIOME-CONTRACT.md) and
+[P25E completion report](../reports/phase25e/PHASE25E_COMPLETION.md).
 
 ## Phase 23A `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE` 本地证据
 

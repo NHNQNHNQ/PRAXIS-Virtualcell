@@ -220,4 +220,9 @@ First Real Community Adapter，不存在可先做的无资产 fake contract-only
 `AUTHORIZATION_REQUIRED / NOT_RUN`。唯一合并授权草案见
 [P23A completion report](../../reports/phase23a/PHASE23A_COMPLETION.md#后续唯一合并授权草案)。
 
+2026-08-08 follow-on：后续持续本地授权已允许并完成独立 P25E contract-only/value-free
+abstention work unit。它不改变本手册的 P24 real-only 边界，也不授权 P25R。当前 P24/P25R
+仍未运行；P26E 只可继续 contract/DAG/matching/abstain software，不能执行 host–microbiome
+模型或生成 prediction。
+
 设计理由见 [ADR-0020](../ADR-0020-cell-interaction-evidence-contract.md)。

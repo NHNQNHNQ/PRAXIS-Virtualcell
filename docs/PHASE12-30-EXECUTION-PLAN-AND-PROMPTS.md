@@ -88,13 +88,21 @@
 > `AUTHORIZATION_REQUIRED / NOT_RUN`；
 > P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN`
 >
+> 已完成 work unit：`P25E — Virtual Microbiome fixed-scope contract`；observed active
+> baseline `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`；completion code SHA
+> `039393e6be897b3014bb0b657d0a439d879578b6`；tree
+> `b53e542940bf39fd44965fe55416798211ab580b`；source date epoch `1786171049`；branch
+> `codex/p25e-virtual-microbiome`；工程 `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；
+> fixture evidence `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`；
+> P24/P25R `AUTHORIZATION_REQUIRED / NOT_RUN`；P26E `NEXT_ELIGIBLE — CONTRACT_ONLY`
+>
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
 > 历史误命名恢复 ref：`codex/p12-cell-first-baseline`（名称不再代表 Phase 12 状态）
 >
 > 已记录部署锚点：`http://10.102.106.53:18080`
 >
-> 当前状态核对日期：2026-08-07
+> 当前状态核对日期：2026-08-08
 >
 > P20 completion identity 已冻结；exact code/tree、validation 与 packaging evidence
 > 见 [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md)
@@ -169,7 +177,9 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | P23A actual starting SHA | `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4`（P22 docs-closure） |
 | P23A completion code SHA / tree | `2b894966cd00b2af2fafbf8f009566dd69f393a7` / `00bd98b0fd14091f4528115dcc66730264d5803a` |
 | P23A source date epoch / 完成分支 | `1786061504` / `codex/p23-cell-interaction` |
-| 当前 work-unit 状态 | P23A `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`；science `NOT_RUN`；policy `NO_NEW_DECISION`；P23B `AUTHORIZATION_REQUIRED / NOT_RUN`；P24 real-only `AUTHORIZATION_REQUIRED / NOT_RUN`，没有下一 eligible P24 contract-only 子阶段；P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN`；P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；P16B `NOT_RUN` |
+| P25E observed baseline / completion code/tree | `ae5e93571783cb3cf49a6e0fab531a89e963f7ec` / `039393e6be897b3014bb0b657d0a439d879578b6` / `b53e542940bf39fd44965fe55416798211ab580b` |
+| P25E source date epoch / 完成分支 | `1786171049` / `codex/p25e-virtual-microbiome` |
+| 当前 work-unit 状态 | P25E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`；P24/P25R `AUTHORIZATION_REQUIRED / NOT_RUN`；P26E `NEXT_ELIGIBLE — CONTRACT_ONLY`；P26R `BLOCKED`；P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN` |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -1914,6 +1924,27 @@ member/mapping/model/result hash、
 
 ## 19. Phase 25：Virtual Microbiome Prototype
 
+### 当前分层状态（2026-08-08）
+
+P25E 已在 observed active baseline `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`
+上完成，completion code/tree 为
+`039393e6be897b3014bb0b657d0a439d879578b6` /
+`b53e542940bf39fd44965fe55416798211ab580b`：
+
+```text
+P25 umbrella: ENGINEERING_COMPLETE_SCIENCE_PENDING
+P25E: COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION
+fixture evidence: SYNTHETIC_CONFORMANCE_ONLY
+P24 real adapter: AUTHORIZATION_REQUIRED / NOT_RUN
+P25R: BLOCKED_EXTERNAL / AUTHORIZATION_REQUIRED / NOT_RUN
+P25 policy / P21C: NOT_RUN / NO-GO UNTIL POSITIVE P25R
+```
+
+P25E 仅冻结 exact 2–3-member schema、唯一 primary endpoint、P24/P20/P21 typed missing
+bindings 和 value-free abstention；当前 positive freeze fixture 只有 exact E. coli + yeast 两个
+checked-in synthetic members。下文真实数据、adapter/model、baseline、CI、OOD 和 evidence
+步骤均属于 P25R，不能从 P25E 的 engineering completion 推导。
+
 ### 最小科学目标
 
 从 P24 双成员社区扩展到一个许可清晰、组成固定的 2–3 成员定义群落。第一版只选择
@@ -1962,8 +1993,9 @@ metabolite/SCFA 作为 secondary endpoint；必须预声明 multiplicity policy�
 ### 可复制授权提示词
 
 ```text
-授权以 `<Phase 24 完成 SHA>` 作为 Phase 25（Virtual Microbiome Prototype）
-唯一起始基线，创建 `codex/p25-virtual-microbiome`，仅实现一个明确 2–3 成员定义
+授权以授权时现场 `ACTIVE_BASELINE_SHA` 作为 P25R（Virtual Microbiome Prototype real
+science window）唯一起始基线，并引用 P25E prerequisite code
+`039393e6be897b3014bb0b657d0a439d879578b6`；不得回退到历史 P24/P23 SHA。仅运行一个明确 2–3 成员定义
 群落、固定 medium/diet component 和 time window 下的 abundance dynamics，以及
 预声明的 secondary metabolite/SCFA output；必须冻结一个且仅一个 primary abundance
 endpoint、metric、方向和 threshold。secondary 必须冻结 multiplicity policy，并
@@ -1987,6 +2019,14 @@ P21C operator-decision 授权句。
 
 ## 20. Phase 26：Host–Microbiome Virtual Cell
 
+### E/R 分层
+
+当前持续本地授权允许 `P26E — contract/DAG/matching/abstain software` 在没有正科学
+prerequisite 时继续；它只能生成 typed missing requirements、empty execution steps 和
+value-free abstention。`P26R` 仍受下列硬前置门约束。P26E 不得把 P25E contract/scope/
+community fingerprint 冒充 multi-Pack promoted release；当前 P12/P22 release v1 都只支持
+one Pack，future P25R community release 必须使用独立新 schema/version。
+
 ### 最小科学目标
 
 只完成一个明确宿主 cell type、一个定义群落、一个 compartment 和一个任务的联合
@@ -1995,7 +2035,8 @@ P21C operator-decision 授权句。
 P26 有硬前置门：宿主 capability 与 P25 community capability 都必须在本任务 exact
 scope 内拥有 `scientifically_validated=true` 和独立 P21C
 `production_promoted` policy。
-“有数据”“可执行”或“可审计”不能替代该门；不满足时 P26 不开始实现。
+“有数据”“可执行”或“可审计”不能替代该门；不满足时 P26R 不开始真实执行，P26E
+保持 non-executable/abstain。
 
 ### 依次实施
 
@@ -2022,8 +2063,9 @@ scope 内拥有 `scientifically_validated=true` 和独立 P21C
 ### 可复制授权提示词
 
 ```text
-授权以 `<Phase 25 完成 SHA>` 作为 Phase 26（Host–Microbiome Virtual Cell v1）
-唯一起始基线，创建 `codex/p26-host-microbiome`，仅实现一个与问题相符的宿主
+授权以授权时现场 `ACTIVE_BASELINE_SHA` 作为 P26R（Host–Microbiome Virtual Cell v1
+real execution）唯一起始基线，并引用 exact P26E prerequisite code；不得回退历史 SHA。
+仅运行一个与问题相符的宿主
 cell type/Pack、一个 P25 定义群落、一个 compartment/time window 和一个预声明
 host–microbiome task。开始前必须列出宿主与 community 的 exact-scope
 scientifically_validated evidence 和独立 P21C production_promoted decision；
@@ -2562,6 +2604,12 @@ P23B 独立可选，保持 `AUTHORIZATION_REQUIRED / NOT_RUN`。P24 是 real-onl
 adapter；P10 no-model regression 只是验收保护，不构成可单独收口的 P24 contract-only
 work unit，因此 P24 当前 `AUTHORIZATION_REQUIRED / NOT_RUN`，没有下一 eligible P24
 本地 contract-only 子阶段。
+
+后续 standing local authorization 允许独立 P25E contract-only work；它已在 code
+`039393e6be897b3014bb0b657d0a439d879578b6` 完成 value-free abstention，没有改变 P24
+状态或授权 P25R。当前下一 eligible local work unit 是 P26E
+contract/DAG/matching/abstain software；P26R 仍因 exact validated+promoted host/community 和
+matching release 缺失而 blocked。
 
 当前持续本地授权不覆盖 P14R、P14B、P15R、P15B、P16R 或 P16B。没有逐项 exact
 assets/output root/run window 授权时，不得读取或运行真实资产、产生科学
