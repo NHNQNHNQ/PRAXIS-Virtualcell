@@ -1,16 +1,18 @@
 # PRAXIS-VirtualCell Versioning Contract
 
-> Status: P25E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evidence
+> Status: P26E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evidence
 > `SYNTHETIC_CONFORMANCE_ONLY`; science `NOT_RUN`;
 > policy `NO_NEW_DECISION`; P21B/P21C and optional P23B
 > `AUTHORIZATION_REQUIRED / NOT_RUN`; P24 First Real Community Adapter and P25R
-> `AUTHORIZATION_REQUIRED / NOT_RUN`; P26E contract-only is next locally eligible —
+> `AUTHORIZATION_REQUIRED / NOT_RUN`; P26R `BLOCKED_EXTERNAL / NOT_RUN`; P27A-E local strict
+> contracts/rank-then-reveal harness is next eligible, while P27A-R historical replay is
+> `REPLAY_NOT_RUN / ASSET_PENDING` and P27B/P27C remain separate external windows —
 > `LOCAL_REPORT_1.6.0_WITH_KNOWN_TAG_DRIFT`
 >
 > Local baseline: branch `codex/p25e-virtual-microbiome`; starting SHA
-> `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`; completion code SHA/tree
-> `039393e6be897b3014bb0b657d0a439d879578b6` /
-> `b53e542940bf39fd44965fe55416798211ab580b`; source date epoch `1786171049`
+> `6bd02231449b6969e22aeb5bea6798fd334daef6`; completion code SHA/tree
+> `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4` /
+> `b3d7303cafb5b874c8b5a441b53e32ff77ef2c54`; source date epoch `1786176771`
 >
 > Workspace: `/Volumes/T7/PRAXIS-virtualcell`; Git metadata:
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -35,6 +37,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P22 Curated Virtual Cell Registry work unit | docs start `09792e13e29a76b5e4434507f3334eefb947789c`; prerequisite `20ecc12542e5df40c90d1fc367dbe86b563478b8`; code `bca5ad661856e8d9aa832c47f23c6ad7179ee0c9`; tree `f78476ac1dbe2f865e3c1bcdc71ecc512dbad22a`; epoch `1786056220` | immutable local Git history plus `reports/phase22/PHASE22_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY`; exact One-Pack/P21B composition, quarantine-first append-only lifecycle, default-deny external trust and independently persisted checkpoint; science `NOT_RUN`, policy `NO_NEW_DECISION`, real lifecycle not run; no HTTP/UI/runtime/install/execute or version/release bump; P23A contract-only was then eligible and subsequently completed; exact-local-source/toolchain wheel `1,217,155` bytes / `3f978e9f3eb0...` / `372` entries, not pinned dependency closure |
 | P23A Cell Interaction Evidence work unit | start `2b5c28ac152857dfa1109de41ed5d5ddc7ab06a4`; code `2b894966cd00b2af2fafbf8f009566dd69f393a7`; tree `00bd98b0fd14091f4528115dcc66730264d5803a`; epoch `1786061504` | immutable local Git history plus `reports/phase23a/PHASE23A_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE`; strict directed release/Pack/context/P18/same-experiment/scorer identities and P13-shaped score-only fixture projection; science `NOT_RUN`, policy `NO_NEW_DECISION`; no real release/data/model/baseline/CI/OOD execution; P23B and P24 authorization required/not run; exact-local-source/toolchain wheel `1,226,514` bytes / `e78f40f0f4fe...` / `373` entries, not dependency closure, clean-install or release proof |
 | P25E Virtual Microbiome contract work unit | active baseline `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`; code `039393e6be897b3014bb0b657d0a439d879578b6`; tree `b53e542940bf39fd44965fe55416798211ab580b`; epoch `1786171049` | immutable local Git history plus `reports/phase25e/PHASE25E_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evidence `SYNTHETIC_CONFORMANCE_ONLY`; independent fixed 2–3-member scope/endpoint/adapter-requirement/request/plan/result identities; P10 v1 bytes/semantics preserved; all adapter/model/environment/mapping/protocol/evidence/policy bindings absent and all results abstain; science `NOT_RUN`, policy `NO_NEW_DECISION`; P24/P25R authorization required/not run; exact-local-source/toolchain wheel `1,234,438` bytes / `c8529477974c...` / `374` entries; no product/API/runtime version or release bump |
+| P26E Host–Microbiome contract work unit | active baseline `6bd02231449b6969e22aeb5bea6798fd334daef6`; code `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4`; tree `b3d7303cafb5b874c8b5a441b53e32ff77ef2c54`; epoch `1786176771` | immutable local Git history plus `reports/phase26e/PHASE26E_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; exact host request/P25 contract, typed missing interface, topology-only DAG, P22 context-only audit and immutable negative compilation; fixture evidence `SYNTHETIC_CONFORMANCE_ONLY`; science `NOT_RUN`, policy `NO_NEW_DECISION`; P26R blocked external; exact-local-source/toolchain wheel `1,242,422` bytes / `69700bb63445...` / `375` entries; P27A-E standing-local eligible, P27A-R asset-pending; no product/API/runtime version or release bump |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.6.0` | `pyproject.toml` `[project].version` | these local bytes differ from the historical annotated `v1.6.0`; known version drift, not release identity |
@@ -127,6 +130,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | Community exchange contracts | `vc.community-exchange-ledger.v1`, `vc.community-exchange-validation.v1` | `community_packs/contracts.py` | exact declared-amount conservation for a toy ledger; not flux, elemental, thermodynamic or experimental validation |
 | Community plan/result contracts | `vc.community-execution-plan.v1`, `vc.community-run-result.v1` | `community_packs/contracts.py` | no-model plan and honest abstention; neither schema implies a real adapter, executable model, prediction or validation |
 | P25E Virtual Microbiome contracts | `vc.virtual-microbiome-scope.v1`, `vc.virtual-microbiome-primary-endpoint.v1`, `vc.virtual-microbiome-adapter-requirement.v1`, `vc.virtual-microbiome-contract.v1`, `vc.virtual-microbiome-request.v1`, `vc.virtual-microbiome-plan.v1`, `vc.virtual-microbiome-result.v1` + canonical JSON SHA-256 | `community_packs/virtual_microbiome.py` | exact fixed-scope identities and value-free abstention; schema or synthetic fixture existence does not imply P24/P25R execution, prediction, science, evidence, policy or promotion |
+| P26E Host–Microbiome contracts | `vc.host-microbiome-interface-requirement.v1`, `vc.host-microbiome-dag.v1`, `vc.host-microbiome-contract.v1`, `vc.host-release-audit-snapshot.v1`, `vc.host-microbiome-compilation.v1` plus canonical `vc.host-microbiome-joint-scope.v1` fingerprint payload | `host_microbiome.py` | exact host/P25 requirement closure and value-free abstention; joint scope is not a sixth public model, P22 context match is not full-request binding, and schema/DAG existence does not imply releases, mapping, execution, science, policy or causality |
 | memory frontmatter schema | `1` | `brains/_common/memory/rules/*.md` | inherited memory-content schema |
 | governance feature schema | `v0.3.0` | `governance/learned_reliability.py` and artifact JSON | frozen learned-governance feature contract |
 | governance models | `reliability_v0.3.0`, `abstain_v0.3.0` | `governance/artifacts/*.json` | immutable model revisions paired with content SHA-256 |
@@ -399,6 +403,36 @@ Engineering is `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evi
 [P25E runbook](runbooks/VIRTUAL-MICROBIOME-CONTRACT.md), and the
 [P25E completion report](../reports/phase25e/PHASE25E_COMPLETION.md).
 
+P26E adds five public `vc.host-microbiome-*.v1`/host-audit records and one canonical
+`vc.host-microbiome-joint-scope.v1` fingerprint payload inside the same unpublished `1.6.0`
+candidate. It starts from `6bd02231449b6969e22aeb5bea6798fd334daef6` and completes at code/tree
+`5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4` /
+`b3d7303cafb5b874c8b5a441b53e32ff77ef2c54`. It does not change P22/P25 schemas,
+product SemVer, API/runtime protocols, registry state or any published identity.
+
+The contract binds the complete host request, a P22-shaped context, exact P25E community identity,
+typed missing interface and topology-only DAG. P22 v1 cannot bind the complete host request; community
+release, matching release, mapping and source/target contract identities are null. Every compilation has
+empty steps and null prediction/host/community/mediator values. K562 substitution and LLM/candidate
+authority are rejected. These are conformance properties, not host–microbiome science.
+
+Focused P26E is `8 passed`; affected P26E+P25E/P10+P22/P17 is `144 passed`; safe is
+`1,817 passed / 49 skipped / 387 deselected / 387.09s`; legacy is
+`1,147 passed / 58 skipped / 105 deselected`; static/frontend checks pass. Two independent
+archive-built wheels are byte-identical at
+`1,242,422` bytes / `69700bb63445864a457cb651037e69dddd93d5be4b184c55a34c3f9332de265a` /
+`375` entries / `14` React entries, with no tests or AppleDouble. Source/wheel P26E module SHA-256
+matches exactly. `pip check` remains a recorded pre-existing shared-environment failure.
+
+Engineering is `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evidence is
+`SYNTHETIC_CONFORMANCE_ONLY`; science is `NOT_RUN`; policy is `NO_NEW_DECISION`; P26R is
+`BLOCKED_EXTERNAL / NOT_RUN`. Standing local authorization makes P27A-E strict contracts and the
+rank-then-reveal synthetic harness the next eligible work unit. No canonical local historical replay pool
+exists, so P27A-R historical replay is `REPLAY_NOT_RUN / ASSET_PENDING`; P27B/P27C remain external. See
+[ADR-0022](ADR-0022-host-microbiome-contract.md), the
+[P26E runbook](runbooks/HOST-MICROBIOME-CONTRACT.md), and the
+[P26E completion report](../reports/phase26e/PHASE26E_COMPLETION.md).
+
 The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a release debt. Do not move or recreate the `v1.5.0` tag to conceal it.
 
 ## Namespace contract
@@ -445,6 +479,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | CommunityPack schema + fingerprint | explicit `vc.community-pack.v1` plus canonical JSON SHA-256 | incompatible member/reference/ecology-metadata semantics change | a valid contract supplies a community model or experimental truth |
 | Community exchange/plan/result schemas | explicit `vc.community-*.v1` identities | incompatible ledger, conservation, planning or abstention semantics change | toy balance proves biological feasibility, or an empty plan proves execution |
 | P25E Virtual Microbiome schemas + fingerprints | seven explicit `vc.virtual-microbiome-*.v1` scope/endpoint/adapter-requirement/contract/request/plan/result identities | incompatible ordered member/scope/endpoint/missing-binding/abstention semantics change; use a new schema version | a two-member synthetic fixture or valid schema proves a real adapter, prediction, science, evidence, policy or promotion |
+| P26E Host–Microbiome schemas + fingerprints | five public strict interface/DAG/contract/host-audit/compilation records plus one canonical joint-scope fingerprint payload | incompatible host/P25/interface/DAG/audit/negative-compilation meaning changes; future executable community or matching releases require independent new schemas | a P22 context match binds the full request, P25E is a community release, topology is execution/causality, or synthetic conformance grants science/policy |
 | `memory_schema_version` | integer/content-schema identifier | memory frontmatter/content contract change | product release cadence |
 | `feature_schema_version` | existing SemVer-like artifact contract | retraining/migrating the feature vector contract | UI/package version |
 | governance `model_version` + SHA | immutable named revision plus content hash | genuinely regenerated/retrained artifact | product release cadence |
@@ -456,7 +491,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 
 `pyproject.toml` `[project].version` is the only manually editable product-version source.
 
-Implemented history through the current P25E contract-complete bytes:
+Implemented history through the current P26E contract-complete bytes:
 
 1. C2's compatible cleanup candidate was `1.5.1`. C3 then accepted and committed user-visible theme, result, input, and workflow-state improvements, so the local candidate is now the required minor version `1.6.0`; `1.5.1` was never published.
 2. `importlib.metadata.version("praxis-virtualcell")` is exposed as `praxis_virtualcell.__version__`; an uninstalled source import returns the honest fallback `0+unknown`.
@@ -594,6 +629,20 @@ Implemented history through the current P25E contract-complete bytes:
     evidence is `SYNTHETIC_CONFORMANCE_ONLY`, science is `NOT_RUN`, policy is `NO_NEW_DECISION`, and
     P24/P25R remain authorization-required/not-run. No product/API/runtime version bump, release
     identity, tag, push or deploy is created. Product version remains `1.6.0`.
+31. P26E starts from observed active baseline `6bd02231449b6969e22aeb5bea6798fd334daef6`
+    and adds exact host-request/P25 community closure, typed missing interface requirements, a fixed
+    time-forward DAG, negative P22 audit and value-free compilation. Final code/tree are
+    `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4` /
+    `b3d7303cafb5b874c8b5a441b53e32ff77ef2c54`; the local wheel is `1,242,422` bytes /
+    `69700bb63445...` / `375` entries. P22 context match remains full-request-binding-insufficient;
+    community/matching releases and interface mappings remain absent, all values remain null, and K562
+    cannot substitute for the requested host. Engineering is
+    `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`, fixture evidence is
+    `SYNTHETIC_CONFORMANCE_ONLY`, science is `NOT_RUN`, policy is `NO_NEW_DECISION`, and P26R is
+    `BLOCKED_EXTERNAL / NOT_RUN`. P27A-E contract/harness is standing-local eligible; P27A-R historical replay is
+    `REPLAY_NOT_RUN / ASSET_PENDING`, and P27B/P27C remain external. No
+    product/API/runtime version bump, release identity, tag, push or deploy is created. Product version
+    remains `1.6.0`.
 
 ## Release invariants
 

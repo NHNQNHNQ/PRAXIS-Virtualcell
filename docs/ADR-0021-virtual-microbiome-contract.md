@@ -93,9 +93,13 @@ P25E engineering 可以独立收口，但 P25 scientific capability 仍不存在
 `ENGINEERING_COMPLETE_SCIENCE_PENDING`。P24 和 P25R 都需要
 exact external asset/run authorization；positive evidence 后仍须独立 P21C operator decision。
 
-P26E 可以继续完成 contract/DAG/matching/abstain software，但只有 exact host/community
-capabilities 都 scientifically validated、production promoted，且 matching release 存在时，真实
-P26 execution 才可开始。不得用 K562 替代缺失的 host capability。
+P26E 随后已在 code `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4` 完成
+contract/DAG/matching/abstain software；它只把 P25E identity 作为 typed missing community
+prerequisite，未把它升级为 release、science 或 policy。只有 exact host/community capabilities
+都 scientifically validated、production promoted，且独立 matching release 存在时，真实 P26
+execution 才可开始。不得用 K562 替代缺失的 host capability。
 
 操作边界见 [P25E runbook](runbooks/VIRTUAL-MICROBIOME-CONTRACT.md)，完整 frozen evidence 见
-[P25E completion report](../reports/phase25e/PHASE25E_COMPLETION.md)。
+[P25E completion report](../reports/phase25e/PHASE25E_COMPLETION.md)。P26E 的后续决策见
+[ADR-0022](ADR-0022-host-microbiome-contract.md)与
+[P26E completion report](../reports/phase26e/PHASE26E_COMPLETION.md)。

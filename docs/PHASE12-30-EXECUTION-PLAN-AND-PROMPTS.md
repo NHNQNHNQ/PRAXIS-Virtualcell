@@ -94,7 +94,17 @@
 > `b53e542940bf39fd44965fe55416798211ab580b`；source date epoch `1786171049`；branch
 > `codex/p25e-virtual-microbiome`；工程 `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；
 > fixture evidence `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`；
-> P24/P25R `AUTHORIZATION_REQUIRED / NOT_RUN`；P26E `NEXT_ELIGIBLE — CONTRACT_ONLY`
+> P24/P25R `AUTHORIZATION_REQUIRED / NOT_RUN`
+>
+> 已完成 work unit：`P26E — Host–Microbiome contract/DAG/matching/abstention`；observed
+> active baseline `6bd02231449b6969e22aeb5bea6798fd334daef6`；completion code SHA
+> `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4`；tree
+> `b3d7303cafb5b874c8b5a441b53e32ff77ef2c54`；source date epoch `1786176771`；branch
+> `codex/p25e-virtual-microbiome`；工程 `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；
+> fixture `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`；P26R
+> `BLOCKED_EXTERNAL / NOT_RUN`；下一 eligible local unit 是 `P27A-E — strict experiment-design
+> contracts + rank-then-reveal replay harness + SYNTHETIC_CONFORMANCE_ONLY`；P27A-R historical replay
+> `REPLAY_NOT_RUN / ASSET_PENDING`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
@@ -179,7 +189,9 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | P23A source date epoch / 完成分支 | `1786061504` / `codex/p23-cell-interaction` |
 | P25E observed baseline / completion code/tree | `ae5e93571783cb3cf49a6e0fab531a89e963f7ec` / `039393e6be897b3014bb0b657d0a439d879578b6` / `b53e542940bf39fd44965fe55416798211ab580b` |
 | P25E source date epoch / 完成分支 | `1786171049` / `codex/p25e-virtual-microbiome` |
-| 当前 work-unit 状态 | P25E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`；P24/P25R `AUTHORIZATION_REQUIRED / NOT_RUN`；P26E `NEXT_ELIGIBLE — CONTRACT_ONLY`；P26R `BLOCKED`；P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN` |
+| P26E observed baseline / completion code/tree | `6bd02231449b6969e22aeb5bea6798fd334daef6` / `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4` / `b3d7303cafb5b874c8b5a441b53e32ff77ef2c54` |
+| P26E source date epoch / 完成分支 | `1786176771` / `codex/p25e-virtual-microbiome` |
+| 当前 work-unit 状态 | P26E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`；P24/P25R `AUTHORIZATION_REQUIRED / NOT_RUN`；P26R `BLOCKED_EXTERNAL / NOT_RUN`；P27A-E `NEXT ELIGIBLE — LOCAL CONTRACT/HARNESS / SYNTHETIC_CONFORMANCE_ONLY`；P27A-R historical replay `REPLAY_NOT_RUN / ASSET_PENDING`；P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN` |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -2027,11 +2039,16 @@ P21C operator-decision 授权句。
 
 ### E/R 分层
 
-当前持续本地授权允许 `P26E — contract/DAG/matching/abstain software` 在没有正科学
-prerequisite 时继续；它只能生成 typed missing requirements、empty execution steps 和
+P26E 已在持续本地授权下完成；它只生成 typed missing requirements、empty execution steps 和
 value-free abstention。`P26R` 仍受下列硬前置门约束。P26E 不得把 P25E contract/scope/
 community fingerprint 冒充 multi-Pack promoted release；当前 P12/P22 release v1 都只支持
 one Pack，future P25R community release 必须使用独立新 schema/version。
+
+P26E completion identity 是 code `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4` / tree
+`b3d7303cafb5b874c8b5a441b53e32ff77ef2c54`。P22 context match 仍不足以绑定完整 host
+request；community/matching release 与 interface mapping 均缺失。Engineering 为
+`COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`，science `NOT_RUN`，policy
+`NO_NEW_DECISION`，P26R `BLOCKED_EXTERNAL / NOT_RUN`。
 
 ### 最小科学目标
 
@@ -2099,11 +2116,14 @@ privacy/evidence/model/result identity、科学边界和下一授权句。
 让 Agent 生成可审查的 hypothesis、Virtual Experiment 和验证实验建议；本阶段不
 授权机器人实验、实验室操作或无人监督的外部动作。
 
-### 三个独立成熟度等级
+### 独立成熟度与授权窗口
 
-P27A、P27B、P27C 必须分别授权，后一级失败不改写前一级结果：
+P27A-E、P27A-R historical run、P27B、P27C 必须分层，后一级失败不改写前一级结果：
 
-- P27A：软件合同与 historical offline replay；
+- P27A-E：standing local authorization 下完成 strict software contracts、rank-then-reveal
+  replay harness 和 `SYNTHETIC_CONFORMANCE_ONLY`；当前无 canonical local historical replay pool；
+- P27A-R historical run：只有 exact canonical asset manifest、license 和 outcome-separation identity
+  齐备后才可运行；当前 `REPLAY_NOT_RUN / ASSET_PENDING`，若资产在 Git 外则另行授权；
 - P27B：shadow mode 与具名专家盲评；
 - P27C：预注册 prospective pilot，必须另有 operator、ethics、biosafety、人员和
   外部动作授权。
@@ -2117,7 +2137,8 @@ P27A、P27B、P27C 必须分别授权，后一级失败不改写前一级结果�
 4. 候选实验只能位于已验证模型域内；
 5. 设计器不得读取冻结 test outcome 选择实验；
 6. 比较 random、uncertainty-only、diversity 和专家规则 baseline；
-7. P27A 第一门：历史 pool 的 offline replay；
+7. P27A-E 先以 synthetic fixture 验证 rank-then-reveal harness；真实 historical pool replay
+   必须等待 canonical asset manifest/license/outcome separation；
 8. P27B 第二门：shadow mode 的专家盲评；
 9. P27C 第三门：独立授权、预注册、人工批准的小规模 prospective pilot；
 10. 报告 information gain、cost、failed experiments 和不确定性。
@@ -2130,19 +2151,21 @@ P27A、P27B、P27C 必须分别授权，后一级失败不改写前一级结果�
 - prospective pilot 前不得称 autonomous experiment；
 - 无外部消息、设备控制、采购或 wet-lab 写操作。
 
-### P27A 可复制授权提示词：软件与 replay
+### P27A-E standing-local 执行边界：合同与 replay harness
 
 ```text
-授权以 `<Phase 26 完成 SHA>` 作为 Phase 27A（Agentic Experiment Design：
-software/replay）唯一起始基线，创建 `codex/p27-experiment-design`，仅实现版本化
+以现场 P26E documentation-closure HEAD 作为 P27A-E（Agentic Experiment Design engineering）
+起始基线；standing local authorization 已覆盖本地实现，无需逐 Phase 再授权。仅实现版本化
 Virtual Experiment/hypothesis/protocol 建议合同、ActiveLearning action/cost/batch/
-control/feasibility 扩展、确定性单位/约束/安全验证、offline replay benchmark、
-人工审批状态、ADR、runbook 和测试。LLM 只能起草和解释，
+control/feasibility 扩展、确定性单位/约束/安全验证、rank-then-reveal replay harness、
+synthetic conformance、人工审批状态、ADR、runbook 和测试。LLM 只能起草和解释，
 不能修改 action space、模型数值、不确定性、OOD、安全门或最终裁决；不得读取
-test outcome 选实验。必须比较 random、uncertainty-only、diversity 和专家规则，
-只完成历史 replay；shadow/expert review 和 prospective pilot 分别需要 P27B/P27C
-授权。本阶段不得发送消息、控制设备、采购、操作实验室或宣称 autonomous
-scientist，不实施 multi-agent/world model。本地 commit 仅在本阶段精确授权明确为 yes 时允许；不新增外置权重，
+hidden outcome 选实验。必须为 random、uncertainty-only、diversity 和专家规则预留 strict
+baseline contracts，但当前没有 canonical local historical replay pool，P27A-R historical replay 必须保持
+`REPLAY_NOT_RUN / ASSET_PENDING`。只有 exact canonical asset manifest、license 和 outcome
+separation 齐备后才可运行；若资产在 Git 外，先请求完整资产窗口。Shadow/expert review 和
+prospective pilot 分别需要 P27B/P27C 授权。本阶段不得发送消息、控制设备、采购、操作实验室
+或宣称 autonomous scientist，不实施 multi-agent/world model。不新增外置权重，
 无另行授权不操作 .53，不 push，不修改 GitHub main/tag、PRAXIS-2 或 `old/**` 历史工作树，
 不得暂存/提交任何不在本阶段 exact allowlist 内的 staged/modified/deleted/untracked 文件；授权必须逐项填写现场保护路径（若无则写 none）。阶段结束报告 exact HEAD、design/replay
 identity、安全负例和 P27B 授权句。
@@ -2613,9 +2636,15 @@ work unit，因此 P24 当前 `AUTHORIZATION_REQUIRED / NOT_RUN`，没有下一 
 
 后续 standing local authorization 允许独立 P25E contract-only work；它已在 code
 `039393e6be897b3014bb0b657d0a439d879578b6` 完成 value-free abstention，没有改变 P24
-状态或授权 P25R。当前下一 eligible local work unit 是 P26E
-contract/DAG/matching/abstain software；P26R 仍因 exact validated+promoted host/community 和
-matching release 缺失而 blocked。
+状态或授权 P25R。P26E 随后已在 code
+`5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4` 完成 host–microbiome contract、topology-only DAG、
+typed missing matching/interface requirements 和 value-free abstention；P26R 仍因 exact
+validated+promoted host/community、full-request bindings、interface 与 matching release 缺失而
+`BLOCKED_EXTERNAL / NOT_RUN`。当前下一 eligible local work unit 是 standing authorization 下的
+`P27A-E — strict experiment-design contracts + rank-then-reveal replay harness +
+SYNTHETIC_CONFORMANCE_ONLY`。资产审计未发现 canonical local historical replay pool，因此真实
+P27A-R historical replay 保持 `REPLAY_NOT_RUN / ASSET_PENDING`；只有 manifest/license/outcome separation
+齐备后才可运行，Git 外资产另行授权。P27B/P27C 仍为独立外部窗口。
 
 当前持续本地授权不覆盖 P14R、P14B、P15R、P15B、P16R 或 P16B。没有逐项 exact
 assets/output root/run window 授权时，不得读取或运行真实资产、产生科学

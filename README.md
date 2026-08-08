@@ -76,6 +76,15 @@ value-free abstention，状态为 `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTE
 evidence 仅为 `SYNTHETIC_CONFORMANCE_ONLY`，science `NOT_RUN`，policy `NO_NEW_DECISION`。
 P24/P25R 均未运行，P25E 没有 adapter/model/mapping/
 benchmark/evidence/prediction。没有 product/API/runtime version bump、release 或 push。
+P26E 从现场 active baseline `6bd02231449b6969e22aeb5bea6798fd334daef6` 开始，在同一分支
+`codex/p25e-virtual-microbiome` 的 `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4`
+（tree `b3d7303cafb5b874c8b5a441b53e32ff77ef2c54`，source date epoch
+`1786176771`）完成 host–microbiome contract、typed missing interface、time-unrolled DAG、
+P22 context-only host audit 与 value-free abstention。状态为
+`COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture evidence 仅为
+`SYNTHETIC_CONFORMANCE_ONLY`，science `NOT_RUN`，policy `NO_NEW_DECISION`。P26R 因 exact
+validated+promoted host/community releases、完整 request binding、matching release 和跨域 mapping
+均缺失而 `BLOCKED_EXTERNAL / NOT_RUN`；P22 context match、P25E contract 或 K562 都不能补足该门。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
@@ -89,7 +98,8 @@ exact 验证与克制的科学/policy 边界见
 [P21A 完成报告](reports/phase21a/PHASE21A_COMPLETION.md)与
 [P22 完成报告](reports/phase22/PHASE22_COMPLETION.md)和
 [P23A 完成报告](reports/phase23a/PHASE23A_COMPLETION.md)以及
-[P25E 完成报告](reports/phase25e/PHASE25E_COMPLETION.md)。P14R、P15R 与 P16R 的真实
+[P25E 完成报告](reports/phase25e/PHASE25E_COMPLETION.md)与
+[P26E 完成报告](reports/phase26e/PHASE26E_COMPLETION.md)。P14R、P15R 与 P16R 的真实
 asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B、P15B 与 P16B 均为
 `NOT_RUN`。当前 P12 `ModelRegistryV2` 有 5 个 legacy release、0 个 native、0 个 production-promoted
 capability；P18 没有真实 multi-omics model execution/acceptance，science 为 `NOT_RUN`，
@@ -155,9 +165,22 @@ primary output 是 exact end time 的 ordered strain abundance fraction vector�
 P10 `vc.community-*.v1` source bytes 与 canonical no-model fingerprints 由 golden regression
 保护，toy exchange balance 不能成为 P25 science。设计和操作边界见
 [P25E ADR](docs/ADR-0021-virtual-microbiome-contract.md)与
-[P25E runbook](docs/runbooks/VIRTUAL-MICROBIOME-CONTRACT.md)。下一 eligible local work unit 是
-P26E contract/DAG/matching/abstain software；没有 exact validated+promoted host/community release
-和 matching release 时仍必须 fail closed，且不得用 K562 替代宿主。
+[P25E runbook](docs/runbooks/VIRTUAL-MICROBIOME-CONTRACT.md)。
+
+P26E 新增五个 strict public record schemas 和一个 canonical joint-scope fingerprint payload，
+把 exact host request、P25E community contract、typed missing interface 与固定
+`community_state_t0→mediator_state_t1→host_state_t2→community_state_t3` 拓扑绑定起来。
+P22 v1 只能审计较粗的 host context，不能验证完整 P26 request；community/matching release、
+mapping 和 output/input contracts 全部保持 `null`。因此 compilation 固定 empty steps、
+`prediction=null`、无 host/community/mediator result，并按序记录缺少 host release、community
+release、matching release、interface 与 P26R authorization。设计和操作边界见
+[P26E ADR](docs/ADR-0022-host-microbiome-contract.md)与
+[P26E runbook](docs/runbooks/HOST-MICROBIOME-CONTRACT.md)。下一 eligible local work unit 是
+standing local authorization 下的 `P27A-E — strict experiment-design contracts + rank-then-reveal
+replay harness + SYNTHETIC_CONFORMANCE_ONLY`。当前没有 canonical local historical replay pool，
+因此 P27A-R historical replay 保持 `REPLAY_NOT_RUN / ASSET_PENDING`；只有 exact asset manifest、license
+和 outcome separation 齐备后才可运行，Git 外资产另行授权。P27B shadow review 和 P27C
+prospective pilot 仍需各自独立外部授权。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确

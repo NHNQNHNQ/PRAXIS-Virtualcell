@@ -110,7 +110,7 @@
 ```
 
 本文自身不授权实施任何 Phase。P12、P13、P14E、P15E、P16E、P17、P18、P19、P20、
-P21A、P22、P23A 和 P25E 已在持续本地授权内完成；该授权仍不包含
+P21A、P22、P23A、P25E 和 P26E 已在持续本地授权内完成；该授权仍不包含
 外置数据或权重、network、push、GitHub main/tag、`.53`、服务、发布、部署或真实
 科学运行。P14E 已独立收口；P14R 仍需逐资产/窗口授权，P14B 仍只能在
 正科学结果后由具名 operator 决定。P15E 已独立收口；P15R 仍需逐资产/窗口授权，
@@ -122,8 +122,11 @@ P19 已完成受控 registration 工程合同，但 Git 外真实 fixture、新 
 operator/science/policy 均未运行；factory registration 不是模型兼容、执行或 promotion。阶段 scope、
 P20 已完成 exact P19 registration-bound Training Pipeline contract，但只运行 repository tiny
 fixtures；真实 candidate training、test/external read、benchmark/science/policy 均未运行。
-P25E 只完成 fixed-scope/value-free contract，P24/P25R 仍未授权、未运行；下一 eligible
-local unit 是 P26E contract/DAG/matching/abstain software，P26R 仍受 promoted prerequisites 阻塞。
+P25E 只完成 fixed-scope/value-free contract，P24/P25R 仍未授权、未运行。P26E 已完成
+exact host/P25 identity、typed missing interface、time-unrolled DAG、P22 context-only audit 和
+value-free abstention；P26R 仍受 promoted prerequisites 阻塞。下一 eligible local unit 是
+standing local authorization 下的 P27A-E strict contracts/rank-then-reveal harness synthetic
+conformance；P27A-R historical replay 为 `REPLAY_NOT_RUN / ASSET_PENDING`，P27B/P27C 仍需独立外部授权。
 阶段 scope、资产清单和可复制授权句仍以
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)为准。
 
@@ -362,9 +365,9 @@ flowchart TD
 | P25E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | exact 2–3-member schema、唯一 positive 2-member synthetic freeze fixture、typed missing bindings、value-free abstain；completion `039393e6...` |
 | P25R | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `NOT_APPLICABLE` | real assets、P24/P20/P21 model/mapping/protocol、write-new benchmark window 均未授权 |
 | P25 policy / P21C | `AUTHORIZATION_REQUIRED / NOT_RUN` | `READ_ONLY / NOT_RUN` | `NOT_RUN` | 只可引用 exact immutable positive evidence 由具名 operator 决定 |
-| P26E | `NEXT ELIGIBLE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | 只允许 contract/DAG/matching/abstain；不得伪造 promoted host/community release |
-| P26R | `BLOCKED` | `NOT_RUN` | `NOT_RUN` | matching host/community 均 validated + promoted 且 matching release 存在 |
-| P27A | `NOT_STARTED` | `REPLAY_NOT_RUN` | `NOT_APPLICABLE` | experiment-design software/replay |
+| P26E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | completion `5bd3e502...`；exact host/P25 contract、typed missing interface、topology-only DAG、P22 full-request-binding-insufficient audit；all values null |
+| P26R | `BLOCKED_EXTERNAL / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | matching host/community 均 validated + promoted、full-request bindings 与 matching release 均 absent |
+| P27A-E | `NEXT ELIGIBLE — LOCAL CONTRACT/HARNESS / SYNTHETIC_CONFORMANCE_ONLY` | `REPLAY_NOT_RUN / ASSET_PENDING` | `NOT_APPLICABLE` | standing local authorization；无 canonical local historical pool；P27B/P27C 不在该授权内 |
 | P27B | `OPTIONAL_NOT_RUN` | `SHADOW_NOT_RUN` | `NOT_APPLICABLE` | 可选具名专家 blind review |
 | P27C | `OPTIONAL_NOT_RUN` | `PILOT_NOT_RUN` | `NOT_APPLICABLE` | 可选 prospective pilot |
 | P28 | `NOT_STARTED` | `NOT_RUN` | `NOT_APPLICABLE` | 至少三个 executable + promoted 模型模块 |
@@ -1461,11 +1464,11 @@ benchmark 项仍属于 P25R。
 
 ### Phase 26 — Host–Microbiome Virtual Cell
 
-**分层状态：** `P26E NEXT ELIGIBLE — CONTRACT_ONLY`；`P26R BLOCKED`（前置 capability
-尚未形成）
+**分层状态：** `P26E COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；science
+`NOT_RUN`；policy `NO_NEW_DECISION`；`P26R BLOCKED_EXTERNAL / NOT_RUN`。
 
-P26E 只允许完成 contract、time-unrolled DAG、exact matching requirement 和 abstain software。
-没有下列硬前置时不得产生 execution steps、prediction、science evidence 或 policy。
+P26E 已完成 contract、time-unrolled topology、exact missing matching requirements 和 abstain
+software。没有下列硬前置时仍不得产生 execution steps、prediction、science evidence 或 policy。
 
 #### P26 前置能力循环（不是新 Phase 编号）
 
@@ -1491,9 +1494,22 @@ P19  制作并注册 matching host Pack
 - [ ] exact-scope host capability `production_promoted=true`；
 - [ ] exact-scope P25 community capability `scientifically_validated=true`；
 - [ ] exact-scope P25 community capability `production_promoted=true`；
+- [ ] 存在绑定 exact host、community、完整 request 和 cross-domain interface 的 matching release；
 - [ ] 所需宿主是问题相关 cell/Pack，不能用 K562 等无关 context 替代；
 - [x] 任一项缺失时 P26E 必须 non-executable/abstain；
-- [ ] 任一项缺失时 P26R 保持 `BLOCKED`，不得开始真实 execution。
+- [ ] 任一项缺失时 P26R 保持 `BLOCKED_EXTERNAL / NOT_RUN`，不得开始真实 execution。
+
+**P26E 本地工程交付物**
+
+- [x] 完整 `VirtualCellRequestV2` 与 P25E community contract/scope 分别 fingerprint-bound；
+- [x] P22-shaped host context 可审计，但完整 request binding 明确 unavailable；
+- [x] typed interface 绑定 medium/compartment/time/entity kinds/directions，mapping 与 source/target contracts 为 `null`；
+- [x] 固定 `community_t0→mediator_t1→host_t2→community_t3` topology-only DAG；
+- [x] P25 member bytes、P22 checkpoint/lifecycle 与 exact host context 每次重验；
+- [x] K562、tissue drift、stale P25 bytes、LLM/candidate/step/prediction injection fail closed；
+- [x] empty steps、prediction/host/community/mediator `null` 与 canonical ordered abstain reasons；
+- [x] focused `8`、P26E+P25E/P10+P22/P17 affected `144`、safe `1,817/49/387`、legacy `1,147/58/105`；
+- [x] two byte-identical local wheels `1,242,422` bytes / `69700bb63445...` / `375` entries。
 
 **交付物**
 
@@ -1522,9 +1538,10 @@ P19  制作并注册 matching host Pack
 
 ### Phase 27 — Agentic Experiment Design
 
-**状态：** `NOT_STARTED`
+**状态：** `P27A-E NEXT ELIGIBLE — LOCAL CONTRACT/HARNESS / SYNTHETIC_CONFORMANCE_ONLY`；
+P27A-R historical replay `REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C 分别为 external authorization windows。
 
-#### P27A — software / historical replay
+#### P27A-E — software / rank-then-reveal harness
 
 - [ ] `vc.virtual-experiment.v1`；
 - [ ] question、hypothesis、scope、perturbation、control、replicate、batch、endpoint、
@@ -1534,7 +1551,9 @@ P19  制作并注册 matching host Pack
 - [ ] 候选实验限于已验证模型域；
 - [ ] 不读取 test outcome 选实验；
 - [ ] random、uncertainty-only、diversity 和 expert-rule baseline；
-- [ ] historical offline replay；
+- [ ] synthetic rank-then-reveal conformance；
+- [ ] exact canonical historical asset manifest、license 和 hidden-outcome separation；
+- [ ] P27A-R historical offline replay（当前 `REPLAY_NOT_RUN / ASSET_PENDING`；Git 外资产另行授权）；
 - [ ] human approval required 状态。
 
 #### P27B — shadow expert review
@@ -1730,9 +1749,10 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | P25E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | `ae5e93571783cb3cf49a6e0fab531a89e963f7ec` | `039393e6be897b3014bb0b657d0a439d879578b6` | tree `b53e542940bf39fd44965fe55416798211ab580b`；epoch `1786171049`；focused `21`、P25E+P10 adjacent `60`；safe `1,809/49/387`；legacy `1,147/58/105`；wheel `1,234,438` bytes / `c8529477974c6379f75bee05e4b0b589e3a03ed70302617ab46461954915d77e` / `374` entries；fixture `SYNTHETIC_CONFORMANCE_ONLY`；P10 v1 preserved；all results abstain |
 | P25R | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NOT_RUN` | `N/A` | — | unchanged | exact real assets/model/mapping/protocol/output authorization absent |
 | P25 policy / P21C | `AUTHORIZATION_REQUIRED / NOT_RUN` | `READ_ONLY / NOT_RUN` | `NOT_RUN` | — | unchanged | exact positive evidence and named-operator authorization absent |
-| P26E | `NEXT ELIGIBLE — CONTRACT_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | P25E docs closure | pending | contract/DAG/matching/abstain only |
-| P26R | `BLOCKED` | `NOT_RUN` | `NOT_RUN` | — | — | exact validated+promoted host/community and matching release absent |
-| P27A | `NOT_STARTED` | `REPLAY_NOT_RUN` | `N/A` | — | — | — |
+| P26E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | `6bd02231449b6969e22aeb5bea6798fd334daef6` | `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4` | tree `b3d7303c...`; epoch `1786176771`; focused `8`; P26E+P25E/P10+P22/P17 affected `144`; safe `1,817/49/387`; legacy `1,147/58/105`; two byte-identical wheels `1,242,422` bytes / `69700bb63445864a457cb651037e69dddd93d5be4b184c55a34c3f9332de265a` / `375` entries; all outputs null |
+| P26R | `BLOCKED_EXTERNAL / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | — | — | exact validated+promoted host/community, full-request bindings, interface and matching release absent |
+| P27A-E | `NEXT ELIGIBLE — LOCAL CONTRACT/HARNESS / SYNTHETIC_CONFORMANCE_ONLY` | `REPLAY_NOT_RUN / ASSET_PENDING` | `N/A` | actual P26E docs-closure HEAD | — | standing local authorization；无 canonical local pool；P27B/P27C remain external |
+| P27A-R | `ASSET_PENDING / NOT_RUN` | `REPLAY_NOT_RUN` | `N/A` | exact P27A-E completion + canonical asset manifest/license/outcome separation | — | Git 外资产需独立授权；不得用 synthetic fixture 冒充 historical replay |
 | P27B | `OPTIONAL_NOT_RUN` | `SHADOW_NOT_RUN` | `N/A` | — | unchanged | — |
 | P27C | `OPTIONAL_NOT_RUN` | `PILOT_NOT_RUN` | `N/A` | — | unchanged | — |
 | P28 | `NOT_STARTED` | `NOT_RUN` | `N/A` | — | — | — |

@@ -1,23 +1,80 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P25E 分支 `codex/p25e-virtual-microbiome`；active baseline
-> `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`
+> 当前文档基线：P26E 分支 `codex/p25e-virtual-microbiome`；active baseline
+> `6bd02231449b6969e22aeb5bea6798fd334daef6`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：P25E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture evidence
+> 状态：P26E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture evidence
 > `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy
 > `NO_NEW_DECISION`；completion code SHA
-> `039393e6be897b3014bb0b657d0a439d879578b6`；tree
-> `b53e542940bf39fd44965fe55416798211ab580b`；source date epoch `1786171049`。
-> 下述 P4.3–P23A 和 CI 数字仍只绑定各自 exact SHA/日期；P25E 本地工程结果不构成真实
-> release/registry-state verification、paired/co-culture/spatial data read、fixed-model
+> `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4`；tree
+> `b3d7303cafb5b874c8b5a441b53e32ff77ef2c54`；source date epoch `1786176771`。
+> 下述 P4.3–P25E 和 CI 数字仍只绑定各自 exact SHA/日期；P26E 本地工程结果不构成真实
+> host/community release verification、paired/intervention data read、cross-domain mapping、fixed-model
 > execution、baseline/CI/OOD science gate、科学验证、product policy、promotion、发布或
 > 远程证据。P21B/P21C 与可选 P23B 为 `AUTHORIZATION_REQUIRED / NOT_RUN`；P24 First
 > Real Community Adapter 与 P25R 都依赖另行授权的 exact real assets/model/output window，
-> 当前为 `AUTHORIZATION_REQUIRED / NOT_RUN`。下一 eligible local unit 是仅能 fail closed 的
-> P26E contract/DAG/matching/abstain software。
+> 当前为 `AUTHORIZATION_REQUIRED / NOT_RUN`。P26R 为 `BLOCKED_EXTERNAL / NOT_RUN`。下一
+> eligible local unit 是 standing local authorization 下的 P27A-E strict experiment-design contracts
+> 与 rank-then-reveal replay harness，fixture 只能是 `SYNTHETIC_CONFORMANCE_ONLY`。当前没有
+> canonical local historical replay pool，P27A-R historical replay 为 `REPLAY_NOT_RUN / ASSET_PENDING`；
+> P27B/P27C 仍需独立外部授权。
+
+## Phase 26E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` 本地证据
+
+P26E binds one exact host request, one P25E community contract, typed missing interface identities and
+the topology-only `community_t0→mediator_t1→host_t2→community_t3` DAG. P22 v1 remains
+full-request-binding-insufficient; host/community/matching releases and interface mappings are absent, so
+every compilation has empty steps and null prediction/host/community/mediator values.
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_host_microbiome.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -ra \
+  praxis_virtualcell/tests/test_host_microbiome.py \
+  praxis_virtualcell/tests/test_virtual_microbiome_contract.py \
+  praxis_virtualcell/tests/test_community_packs.py \
+  praxis_virtualcell/tests/test_curated_registry.py \
+  praxis_virtualcell/tests/test_virtual_experiment.py
+
+python -m ruff check . --extend-exclude old --no-cache
+python -m ruff format --check \
+  praxis_virtualcell/host_microbiome.py \
+  praxis_virtualcell/tests/test_host_microbiome.py
+
+npm --prefix praxis_vc_react run typecheck
+npm --prefix praxis_vc_react run lint
+npm --prefix praxis_vc_react run build
+
+python -m pip check
+git diff --check
+~~~
+
+| Gate | Result |
+|---|---|
+| P26E focused | `8 passed` |
+| P26E + P25E/P10 + P22/P17 affected | `144 passed` |
+| safe local suite | `1,817 passed / 49 skipped / 387 deselected / 387.09s` |
+| legacy suite | `1,147 passed / 58 skipped / 105 deselected` |
+| Ruff / targeted format / compile / diff | PASS |
+| React typecheck / lint / build / bundle budget | PASS |
+| `pip check` | FAIL：pre-existing shared-environment dependency conflicts; no environment mutation performed |
+| reproducible local packaging | PASS：two byte-identical wheels; `1,242,422` bytes; SHA-256 `69700bb63445864a457cb651037e69dddd93d5be4b184c55a34c3f9332de265a`; `375` entries |
+
+Wheel contents include 14 React entries, zero tests and zero AppleDouble entries. Source/wheel P26E module
+SHA-256 is exactly `94f421afabbc2932f574bd11d0d3b3a7e2a67d5b3c271528dafc52b2ee8b2c54`.
+This is exact-local-source/toolchain package evidence, not clean-install, dependency-closure, publication,
+release or science evidence.
+
+Negative coverage includes same-P22-context/full-request drift, K562 substitution, missing or stale P22
+checkpoint/lifecycle, P25 member-byte drift, nested-model and LLM authority injection, closed candidate API,
+and re-signed step/prediction/community-release injection. See
+[ADR-0022](ADR-0022-host-microbiome-contract.md), the
+[P26E runbook](runbooks/HOST-MICROBIOME-CONTRACT.md) and
+[P26E completion report](../reports/phase26e/PHASE26E_COMPLETION.md).
 
 ## Phase 25E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` 本地证据
 

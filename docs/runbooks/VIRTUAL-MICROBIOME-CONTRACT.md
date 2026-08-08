@@ -134,11 +134,15 @@ boundary and rollback.
 Positive promotion-eligible evidence still does not create product policy; that requires an independent
 named-operator P21C decision.
 
-## 9. P26E handoff
+## 9. P26E handoff（已完成）
 
-P26E may consume only immutable P25E contract identity as a typed missing prerequisite. It must not mark
-the community executable, scientifically validated or production promoted. Real host–microbiome execution
-requires exact promoted host and community releases plus an exact matching release; K562 is not a valid
-substitute for a missing host context.
+P26E 在 code `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4` 只消费 immutable P25E contract
+identity 作为 typed missing prerequisite；community release/science/policy 仍为 `null`。真实
+host–microbiome execution 继续要求 exact promoted host/community releases 和独立 matching release；
+K562 不能替代缺失 host context。核验流程见
+[P26E runbook](HOST-MICROBIOME-CONTRACT.md)，完整结果见
+[P26E completion report](../../reports/phase26e/PHASE26E_COMPLETION.md)。下一 standing-local work unit
+是 P27A-E strict contracts/rank-then-reveal harness 的 synthetic conformance；P27A-R historical replay 为
+`REPLAY_NOT_RUN / ASSET_PENDING`。P27B/P27C 仍需独立外部授权。
 
 Design rationale: [ADR-0021](../ADR-0021-virtual-microbiome-contract.md).
