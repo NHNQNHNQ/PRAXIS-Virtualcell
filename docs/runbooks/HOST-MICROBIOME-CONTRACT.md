@@ -131,13 +131,16 @@ network boundary 和 rollback。
 任一项缺失即 No-Go。P26E contract、P22 context match、P25E fixture、K562 或 synthetic registry row 都
 不能授权 P26R。
 
-## 9. P27A-E handoff
+## 9. P27A-E historical handoff 与后续状态
 
-Standing local authorization 下下一 work unit 是 `P27A-E — strict experiment-design contracts +
-rank-then-reveal replay harness + SYNTHETIC_CONFORMANCE_ONLY`，从实际 P26E docs-closure HEAD 开始。
-资产审计未发现 canonical local historical replay pool，因此 P27A-R historical replay 保持
-`REPLAY_NOT_RUN / ASSET_PENDING`；只有 exact asset manifest、license 和 outcome separation 齐备后
-才可运行，Git 外资产另行授权。P27B shadow review 与 P27C prospective pilot 仍需分别授权。
+这是 P26E 完成时的 handoff：P27A-E 应从实际 P26E docs-closure HEAD 开始。它随后已从
+`a12cf4f4b71efb653f8128afcb1f468211fdb837` 开始，在 code
+`5875571bf9d8b518dc7a857feb935206f756de59` 完成 strict experiment-design contracts 与
+rank-then-reveal synthetic harness。P27A-R historical replay 仍为
+`REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C 分别为
+`AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN` 与 `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。
+当前下一本地 work unit 是 P28E contract-only orchestrator/typed handoff/trace/abstention；真实
+P28 acceptance 为 `0/3`。
 
 Design rationale: [ADR-0022](../ADR-0022-host-microbiome-contract.md). Frozen evidence:
 [P26E completion report](../../reports/phase26e/PHASE26E_COMPLETION.md).

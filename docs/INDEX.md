@@ -2,7 +2,7 @@
 
 > Audited: 2026-08-08
 >
-> Status: `CURRENT_DOCUMENT_MAP — P26E COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION; SCIENCE NOT_RUN; POLICY NO_NEW_DECISION; P27A-E NEXT LOCAL`
+> Status: `CURRENT_DOCUMENT_MAP — P27A-E COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY; HISTORICAL REPLAY ASSET_PENDING; SCIENCE NOT_RUN; POLICY NO_NEW_DECISION; P28E NEXT LOCAL`
 
 This is the navigation authority for the repository. It does not make every linked document current: each section explicitly distinguishes live truth, frozen evidence, active plans, drafts, and history.
 
@@ -11,8 +11,8 @@ This is the navigation authority for the repository. It does not make every link
 When documents disagree, use this order:
 
 1. Exact local bytes, `git rev-parse` identity, immutable artifacts and the current work-unit completion report.
-2. [README](../README.md), the [P26E completion report](../reports/phase26e/PHASE26E_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P25E completion report](../reports/phase25e/PHASE25E_COMPLETION.md), [P23A completion report](../reports/phase23a/PHASE23A_COMPLETION.md), [P22 completion report](../reports/phase22/PHASE22_COMPLETION.md), [P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md), [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md), [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md), [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
-3. The latest completed phase ADR/runbook—P26E uses [ADR-0022](ADR-0022-host-microbiome-contract.md) and the [Host–Microbiome Contract runbook](runbooks/HOST-MICROBIOME-CONTRACT.md); P25E remains documented by [ADR-0021](ADR-0021-virtual-microbiome-contract.md) and the [Virtual Microbiome Contract runbook](runbooks/VIRTUAL-MICROBIOME-CONTRACT.md)—for implemented contract and validation boundaries.
+2. [README](../README.md), the [P27A-E completion report](../reports/phase27ae/PHASE27AE_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P26E completion report](../reports/phase26e/PHASE26E_COMPLETION.md), [P25E completion report](../reports/phase25e/PHASE25E_COMPLETION.md), [P23A completion report](../reports/phase23a/PHASE23A_COMPLETION.md), [P22 completion report](../reports/phase22/PHASE22_COMPLETION.md), [P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md), [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md), [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md), [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
+3. The latest completed phase ADR/runbook—P27A-E uses [ADR-0023](ADR-0023-agentic-experiment-design-contract.md) and the [Agentic Experiment Design runbook](runbooks/AGENTIC-EXPERIMENT-DESIGN.md); P26E remains documented by [ADR-0022](ADR-0022-host-microbiome-contract.md) and the [Host–Microbiome Contract runbook](runbooks/HOST-MICROBIOME-CONTRACT.md)—for implemented contract and validation boundaries.
 4. [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) for frozen scientific capability and claim boundaries.
 5. [Three-Way Sync State](status/SYNC-STATE.md) only for its dated local/GitHub/`.53` observations; it is not fresh remote authorization.
 6. Dated plans, handoffs, findings, papers, release notes and [Project State 2026-07-18](status/PROJECT-STATE-2026-07-18.md) as historical evidence for their stated commit/date only.
@@ -138,16 +138,40 @@ P26E validation is focused `8 passed`, affected P26E+P25E/P10+P22/P17 `144 passe
 `1,242,422` bytes /
 `69700bb63445864a457cb651037e69dddd93d5be4b184c55a34c3f9332de265a` /
 `375` entries / `14` React entries / no tests or AppleDouble. This is engineering package evidence only.
-The next eligible unit is P27A-E strict contracts/rank-then-reveal harness under standing local
-authorization. No canonical local historical replay pool exists, so P27A-R historical replay remains
-`REPLAY_NOT_RUN / ASSET_PENDING`; P27B/P27C remain separate external windows.
+At that historical closure P27A-E was next locally eligible; it has since completed.
+
+P27A-E then completed from P26E docs-closure
+`a12cf4f4b71efb653f8128afcb1f468211fdb837` at code/tree
+`5875571bf9d8b518dc7a857feb935206f756de59` /
+`a7c65e7b30f51832660e66323b5946acbddcbf18` with source date epoch `1786180822`.
+It adds an exact request-derived empty product design and a synthetic-only rank-then-reveal harness with
+separate selection/outcome contracts, five deterministic strategies, recomputed pre-outcome receipts and
+explicit failed/unavailable preservation. Raw request metadata/constraints do not enter public design bytes;
+model/Pack/evidence/policy/action catalog remain absent and human approval remains required. Engineering is
+`COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY`; P27A-R is
+`REPLAY_NOT_RUN / ASSET_PENDING`, science `NOT_RUN`, policy `NO_NEW_DECISION`; P27B is
+`AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN` and P27C is
+`AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`.
+
+P27A-E validation is focused `28 passed`, affected `301 passed`, safe
+`1,845 passed / 49 skipped / 387 deselected / 453.03s`, and legacy
+`1,147 passed / 58 skipped / 105 deselected / 61.21s`. Two independent archive-built wheels are
+byte-identical at `1,251,560` bytes /
+`4bd584bdae75888b4e09d8cfb2211e002cb509155ca834adb7d00a6106abec99` /
+`376` entries / `14` React entries / no tests or AppleDouble. This is engineering package evidence only.
+The next eligible unit is P28E contract-only orchestrator/typed-handoff/trace/value-free abstention.
+Real P28 acceptance remains blocked at `0/3` qualifying exact-request executable + scientifically validated +
+production-promoted model modules.
 
 ## Current state
 
 | Document | Authority |
 |---|---|
-| [README](../README.md) | current product promise, P26E value-free boundary and primary operator entry points |
-| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13–P26E boundary |
+| [README](../README.md) | current product promise, P27A-E synthetic/historical boundary and primary operator entry points |
+| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13–P27A-E boundary |
+| [P27A-E Completion Report](../reports/phase27ae/PHASE27AE_COMPLETION.md) | exact P27A-E closure, design/replay identities, package evidence, P27A-R/P27B/P27C non-runs and P28E handoff |
+| [P27A-E Agentic Experiment Design ADR](ADR-0023-agentic-experiment-design-contract.md) | exact request/public identity boundary, synthetic action ceiling and rank-then-reveal decision |
+| [P27A-E Agentic Experiment Design Runbook](runbooks/AGENTIC-EXPERIMENT-DESIGN.md) | design freeze, selector/reveal verification, asset gate and P28E handoff |
 | [P26E Completion Report](../reports/phase26e/PHASE26E_COMPLETION.md) | exact P26E closure, missing release/interface identities, topology-only DAG, package evidence and P26R non-run |
 | [P26E Host–Microbiome ADR](ADR-0022-host-microbiome-contract.md) | full-request/P22-context separation, typed missing matching/interface requirements and value-free compilation |
 | [P26E Host–Microbiome Runbook](runbooks/HOST-MICROBIOME-CONTRACT.md) | freeze/audit/compile verification, K562 no-substitution, P26R gate and P27A-E handoff |
@@ -277,7 +301,7 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Virtual Microbiome Contract ADR](ADR-0021-virtual-microbiome-contract.md) | P25E exact member/abundance/medium/time scope, sole primary endpoint, typed missing execution bindings and value-free abstention |
 | [Host–Microbiome Contract ADR](ADR-0022-host-microbiome-contract.md) | P26E full-host-request/P22-context separation, typed missing releases/interface, time-forward topology and immutable null output |
 | [Community Readiness Checklist](COMMUNITY-READINESS-CHECKLIST.md) | P10 model-free CommunityPack gates, two tiny microbial Packs, fail-closed planning and explicitly missing experimental validation |
-| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | historical P0–P16E implementation/status matrix; current P26E state is carried by this index and its completion report |
+| [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | historical P0–P16E implementation/status matrix; current P27A-E state is carried by this index and its completion report |
 | [VirtualCellPack Multiomics Runbook](runbooks/VIRTUALCELLPACK-MULTIOMICS.md) | tiny RNA+protein fixture generation, hash binding, P5 tests and asset-update rules |
 | [VirtualCellPack Capability Runtime Runbook](runbooks/VIRTUALCELLPACK-CAPABILITY-RUNTIME.md) | local model card/cache/Pack assembly, execution-plan audit and fail-closed reason handling |
 | [VirtualCellPack Data Portal Runbook](runbooks/VIRTUALCELLPACK-DATA-PORTAL.md) | external public-file inventory, service configuration, upload quarantine and operator review boundary |
@@ -297,7 +321,8 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Curated Virtual Cell Registry Runbook](runbooks/VIRTUALCELL-CURATED-REGISTRY.md) | P22 local contract verification, exact allowlists, suffix reauthorization, checkpoint persistence and evidence-only P23A handoff |
 | [Cell Interaction Evidence Runbook](runbooks/CELL-INTERACTION-EVIDENCE.md) | P23A local contract/projection/abstain verification, synthetic non-evidence interpretation and exact P23B/P24 authorization boundary |
 | [Virtual Microbiome Contract Runbook](runbooks/VIRTUAL-MICROBIOME-CONTRACT.md) | P25E local identity/P10 regression/abstain verification, P25R gate and P26E contract-only handoff |
-| [Host–Microbiome Contract Runbook](runbooks/HOST-MICROBIOME-CONTRACT.md) | P26E local freeze/P22 audit/P25 byte replay/DAG/abstain verification, P26R gate and P27A-E handoff |
+| [Host–Microbiome Contract Runbook](runbooks/HOST-MICROBIOME-CONTRACT.md) | P26E local freeze/P22 audit/P25 byte replay/DAG/abstain verification, P26R gate and historical P27A-E handoff |
+| [Agentic Experiment Design Runbook](runbooks/AGENTIC-EXPERIMENT-DESIGN.md) | P27A-E request/design/action/replay verification, P27A-R/P27B/P27C gates and P28E handoff |
 | [Provenance](../PROVENANCE.md) | repository derivation from PRAXIS-2 and bootstrap evidence |
 
 ## Release and version history
@@ -343,7 +368,7 @@ Other files under [superpowers/plans](superpowers/plans/) and top-level `PLAN-*`
 | [Phase C5 Scientific Gate](status/PHASE-C5-GATE-2026-07-18.md) | frozen local C5 gate: Python 3.13 core 965, Gate A adapter seam, honest 2-test remote pending, asset/claim classification |
 | [Phase C4 Completion Gate](status/PHASE-C4-GATE-2026-07-18.md) | frozen C4 gate: Python 3.13 core 957, Playwright 56+1, reproducible full wheel, and Linux-container smoke |
 | [Phase C3 Completion Gate](status/PHASE-C3-GATE-2026-07-18.md) | frozen C3 gate: core 947, Playwright 54+1, theme acceptance, mutation evidence, and then-remaining C4/C5 ownership |
-| [Testing Guide](TESTING.md) | current P26E local commands/counts and truthful `pip check` failure; preserves prior exact-SHA and historical CI/Linux evidence plus remote scientific-validation boundaries |
+| [Testing Guide](TESTING.md) | current P27A-E local commands/counts and truthful `pip check` failure; preserves prior exact-SHA and historical CI/Linux evidence plus remote scientific-validation boundaries |
 | [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) | capability gate plus `.53` evidence and remaining remote backlog |
 | [Phase 10 Summary](../reports/phase10/PHASE10_SUMMARY.md) | `952 tests = 912 passed + 40 skipped` for the non-LLM package scope; 9 LLM tests are deselected in the `912/40/9` reporting style |
 | [Phase 10 UI E2E](../reports/phase10/PHASE10_UI_E2E.md) | three structural Playwright specs; explicitly excludes CSS/pixel and deep abstain assertions |

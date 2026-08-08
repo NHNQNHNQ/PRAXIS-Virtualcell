@@ -85,6 +85,15 @@ P22 context-only host audit 与 value-free abstention。状态为
 `SYNTHETIC_CONFORMANCE_ONLY`，science `NOT_RUN`，policy `NO_NEW_DECISION`。P26R 因 exact
 validated+promoted host/community releases、完整 request binding、matching release 和跨域 mapping
 均缺失而 `BLOCKED_EXTERNAL / NOT_RUN`；P22 context match、P25E contract 或 K562 都不能补足该门。
+P27A-E 从 P26E docs-closure `a12cf4f4b71efb653f8128afcb1f468211fdb837` 开始，在同一分支的
+`5875571bf9d8b518dc7a857feb935206f756de59`（tree
+`a7c65e7b30f51832660e66323b5946acbddcbf18`，source date epoch `1786180822`）完成 strict
+experiment-design contracts 与 synthetic rank-then-reveal harness。状态为
+`COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY`；product action space 为空并 value-free
+abstain，P27A-R 为 `REPLAY_NOT_RUN / ASSET_PENDING`，science `NOT_RUN`，policy
+`NO_NEW_DECISION`，P27B/P27C 分别为 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN` 与
+`AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。没有接入 legacy ActiveLearningAgent/runtime 或 LLM
+candidate；question/hypothesis prose 不具有 numeric/action-space/verdict authority。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
@@ -99,7 +108,8 @@ exact 验证与克制的科学/policy 边界见
 [P22 完成报告](reports/phase22/PHASE22_COMPLETION.md)和
 [P23A 完成报告](reports/phase23a/PHASE23A_COMPLETION.md)以及
 [P25E 完成报告](reports/phase25e/PHASE25E_COMPLETION.md)与
-[P26E 完成报告](reports/phase26e/PHASE26E_COMPLETION.md)。P14R、P15R 与 P16R 的真实
+[P26E 完成报告](reports/phase26e/PHASE26E_COMPLETION.md)以及
+[P27A-E 完成报告](reports/phase27ae/PHASE27AE_COMPLETION.md)。P14R、P15R 与 P16R 的真实
 asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B、P15B 与 P16B 均为
 `NOT_RUN`。当前 P12 `ModelRegistryV2` 有 5 个 legacy release、0 个 native、0 个 production-promoted
 capability；P18 没有真实 multi-omics model execution/acceptance，science 为 `NOT_RUN`，
@@ -175,12 +185,23 @@ mapping 和 output/input contracts 全部保持 `null`。因此 compilation 固�
 `prediction=null`、无 host/community/mediator result，并按序记录缺少 host release、community
 release、matching release、interface 与 P26R authorization。设计和操作边界见
 [P26E ADR](docs/ADR-0022-host-microbiome-contract.md)与
-[P26E runbook](docs/runbooks/HOST-MICROBIOME-CONTRACT.md)。下一 eligible local work unit 是
-standing local authorization 下的 `P27A-E — strict experiment-design contracts + rank-then-reveal
-replay harness + SYNTHETIC_CONFORMANCE_ONLY`。当前没有 canonical local historical replay pool，
-因此 P27A-R historical replay 保持 `REPLAY_NOT_RUN / ASSET_PENDING`；只有 exact asset manifest、license
-和 outcome separation 齐备后才可运行，Git 外资产另行授权。P27B shadow review 和 P27C
-prospective pilot 仍需各自独立外部授权。
+[P26E runbook](docs/runbooks/HOST-MICROBIOME-CONTRACT.md)。
+
+P27A-E 新增 strict `vc.virtual-experiment.v1` 与 synthetic action/replay contracts。Product design 只从
+exact `VirtualCellRequestV2` 派生 public identities，不回显 raw metadata/constraint bytes；由于没有
+exact-request executable + scientifically validated + production-promoted action domain，
+model/Pack/evidence/policy/action catalog 仍为 `null`，control/replicate/
+cost 不可用，selected actions 为空并要求人工批准。Synthetic harness 把 selection view 与 outcome ledger
+结构分离，固定五个 deterministic strategies（一个 primary + 四个 baselines），先冻结全部 receipts 后
+reveal；重签 selection、wrong group、
+scope/unit drift 和 missing outcomes 均 fail closed。设计和操作边界见
+[P27A-E ADR](docs/ADR-0023-agentic-experiment-design-contract.md)与
+[P27A-E runbook](docs/runbooks/AGENTIC-EXPERIMENT-DESIGN.md)。当前没有 canonical local historical replay
+pool，因此 P27A-R 保持 `REPLAY_NOT_RUN / ASSET_PENDING`；P27B 为
+`AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`，P27C 为
+`AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。下一 eligible
+local work unit 是 P28E contract-only orchestrator、typed handoff、trace 与 value-free abstention；真实 P28
+acceptance 仍需至少三个 exact-request executable + scientifically validated + production-promoted 模型模块。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -556,25 +577,27 @@ npm run build
 CI=1 npm run e2e
 ```
 
-当前 P23A 精确本地结果为 focused `107 passed`（`41.71s`）、affected
-`495 passed / 1 skipped`（`116.55s`）、safe
-`1,787 passed / 49 skipped / 387 deselected`（`367.11s`）、legacy
-`1,147 passed / 58 skipped / 105 deselected`（`57.38s`），静态门通过。两次 exact-code wheel
-byte-identical：`1,226,514` bytes，SHA-256
-`e78f40f0f4fe7354e3c660d6612a8ee60a1b2dd61af2fc606a67d01e67ac601e`，`373`
+当前 P27A-E 精确本地结果为 focused `28 passed`、affected `301 passed`、safe
+`1,845 passed / 49 skipped / 387 deselected`（`453.03s`）、legacy
+`1,147 passed / 58 skipped / 105 deselected`（`61.21s`），静态门与前端 bundle budget 通过。
+两次 completion-SHA archive wheel byte-identical：`1,251,560` bytes，SHA-256
+`4bd584bdae75888b4e09d8cfb2211e002cb509155ca834adb7d00a6106abec99`，`376`
 entries、React `14`、tests `0`、AppleDouble `0`；source/wheel
-`praxis_virtualcell/model_zoo/cell_interaction_evidence_contract.py` SHA-256 均为
-`d1ba8d8054bf91c4a54a215c331fef65557df3954dba730998821ea9f70743cd`。工具链为
+`praxis_virtualcell/experiment_design.py` SHA-256 均为
+`ffa647094f117ef45adb726559ee23bcb0bd20427c87681ab6675522fa26f55f`。工具链为
 Python `3.13.12`、build `1.5.0`、setuptools `70.2.0`、packaging `26.0`、Node
 `25.8.2`、npm `11.11.1`、Vite `8.1.2`。这是 exact local source/toolchain reproducibility，
-不是 pinned dependency closure、clean-install 证明或 release。完整命令、用时、skip/deselect
+不是 pinned dependency closure、clean-install 证明、historical/scientific evidence 或 release。完整命令、用时、skip/deselect
 含义、显式外部门和 GitHub CI 状态见 [测试指南](docs/TESTING.md)。普通测试默认不访问固定私网服务；`integration`、`llm`、`remote` 分别需要 `--run-integration`、`--run-llm`、`--run-remote`，一个测试拥有多个 marker 时必须同时满足对应门。
 
 ## 文档入口
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P23A 边界和跨项目集成 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P27A-E 边界和跨项目集成 |
+| [P27A-E 完成报告](reports/phase27ae/PHASE27AE_COMPLETION.md) | exact design/replay closure、synthetic conformance、P27A-R/P27B/P27C non-runs、package evidence 与 P28E handoff |
+| [P27A-E Agentic Experiment Design ADR](docs/ADR-0023-agentic-experiment-design-contract.md) | request/public identity、empty product action space、rank-then-reveal 与 maturity ceiling 决策 |
+| [P27A-E Agentic Experiment Design runbook](docs/runbooks/AGENTIC-EXPERIMENT-DESIGN.md) | design/action/selector/reveal 核验、historical asset gate 与 P28E handoff |
 | [P23A 完成报告](reports/phase23a/PHASE23A_COMPLETION.md) | exact evidence-only contract closure、synthetic conformance、reproducible local-toolchain wheel 与真实 data/model/science/policy 非运行边界 |
 | [P23A Cell Interaction Evidence ADR](docs/ADR-0020-cell-interaction-evidence-contract.md) | directed endpoint/same-experiment/scorer identity、P13 envelope、唯一 score projection 与 non-claim 决策 |
 | [P23A Cell Interaction Evidence runbook](docs/runbooks/CELL-INTERACTION-EVIDENCE.md) | local contract audit、negative/abstain 检查、真实输入/执行授权门与 P24 handoff |

@@ -1,26 +1,104 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P26E 分支 `codex/p25e-virtual-microbiome`；active baseline
-> `6bd02231449b6969e22aeb5bea6798fd334daef6`
+> 当前文档基线：P27A-E 分支 `codex/p25e-virtual-microbiome`；active baseline
+> `a12cf4f4b71efb653f8128afcb1f468211fdb837`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：P26E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture evidence
-> `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy
+> 状态：P27A-E `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY`；umbrella
+> `ENGINEERING_COMPLETE_SCIENCE_PENDING`；science `NOT_RUN`；policy
 > `NO_NEW_DECISION`；completion code SHA
-> `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4`；tree
-> `b3d7303cafb5b874c8b5a441b53e32ff77ef2c54`；source date epoch `1786176771`。
-> 下述 P4.3–P25E 和 CI 数字仍只绑定各自 exact SHA/日期；P26E 本地工程结果不构成真实
-> host/community release verification、paired/intervention data read、cross-domain mapping、fixed-model
-> execution、baseline/CI/OOD science gate、科学验证、product policy、promotion、发布或
-> 远程证据。P21B/P21C 与可选 P23B 为 `AUTHORIZATION_REQUIRED / NOT_RUN`；P24 First
-> Real Community Adapter 与 P25R 都依赖另行授权的 exact real assets/model/output window，
-> 当前为 `AUTHORIZATION_REQUIRED / NOT_RUN`。P26R 为 `BLOCKED_EXTERNAL / NOT_RUN`。下一
-> eligible local unit 是 standing local authorization 下的 P27A-E strict experiment-design contracts
-> 与 rank-then-reveal replay harness，fixture 只能是 `SYNTHETIC_CONFORMANCE_ONLY`。当前没有
-> canonical local historical replay pool，P27A-R historical replay 为 `REPLAY_NOT_RUN / ASSET_PENDING`；
-> P27B/P27C 仍需独立外部授权。
+> `5875571bf9d8b518dc7a857feb935206f756de59`；tree
+> `a7c65e7b30f51832660e66323b5946acbddcbf18`；source date epoch `1786180822`。
+> 下述 P4.3–P26E 和 CI 数字仍只绑定各自 exact SHA/日期。P27A-E 只证明 strict
+> experiment-design contracts 与 deterministic rank-then-reveal harness 的 synthetic conformance；
+> authoritative product action space 仍为空并 value-free abstain。P27A-R historical replay 为
+> `REPLAY_NOT_RUN / ASSET_PENDING`；P27B 为 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`；
+> P27C 为 `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。P21B/P21C、P23B、P24、P25R 和所有
+> real asset/model/output 窗口均未授权或未运行；P26R 仍为 `BLOCKED_EXTERNAL / NOT_RUN`。
+> 下一 eligible local unit 是 standing local authorization 下的 P28E contract-only
+> orchestrator/typed-handoff/trace/abstention 工程；真实 P28 验收当前为 `0/3` qualifying modules。
+
+## Phase 27A-E `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY` 本地证据
+
+P27A-E 新增十个 public strict schemas，以及一个仅用于 canonical fingerprint payload 的
+`vc.replay-outcome-contract.v1` identity。`vc.virtual-experiment.v1` 由 exact
+`VirtualCellRequestV2` 派生，但公开序列化不回显 request metadata、secret、path 或 raw
+constraints。当前无 exact-request executable + scientifically validated + production-promoted action
+domain，因此 control/replicate/batch/cost/model/Pack/
+evidence/policy/action catalog 均为空或 null，human approval 保持 required，不产生 prediction，
+`executable`/`execution_performed` 均为 false。
+
+Synthetic replay harness 固定一条 primary `active_heuristic` 和四条 baseline（`random`、
+`uncertainty_only`、`diversity`、`expert_rule`），先冻结全部 selection receipts，再 reveal outcome。
+selector 不接受 outcome 参数；evaluator 重算 canonical receipts，并闭合 exact catalog、action→group、
+endpoint/unit/cost/feasibility 与 ledger action set。failed/unavailable 保留为空，不补零、不删除。
+`synthetic_realized_utility` 不是 real information gain、historical replay 或科学 evidence。
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_experiment_design_replay.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -rA \
+  praxis_virtualcell/tests/test_experiment_design_replay.py \
+  praxis_virtualcell/tests/test_virtual_experiment.py \
+  praxis_virtualcell/tests/test_request_v2.py \
+  praxis_virtualcell/tests/test_capability_runtime.py \
+  praxis_virtualcell/tests/test_benchmark_system.py \
+  praxis_virtualcell/tests/test_model_adapter_sdk.py \
+  praxis_virtualcell/tests/test_active_learning_agent.py \
+  praxis_virtualcell/tests/test_runtime_active_learning.py \
+  praxis_virtualcell/tests/test_report_active_learning_request.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -rA praxis_virtualcell/tests \
+  --ignore=praxis_virtualcell/tests/test_mudata_alignment.py \
+  -k 'not golden and not gem and not norman'
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -rA tests \
+  -m 'not (integration or llm or remote)'
+
+python -m ruff check . --extend-exclude old --no-cache
+python -m ruff format --check \
+  praxis_virtualcell/experiment_design.py \
+  praxis_virtualcell/tests/test_experiment_design_replay.py
+python -m py_compile \
+  praxis_virtualcell/experiment_design.py \
+  praxis_virtualcell/tests/test_experiment_design_replay.py
+
+npm --prefix praxis_vc_react run typecheck
+npm --prefix praxis_vc_react run lint
+npm --prefix praxis_vc_react run build
+
+python -m pip check
+git diff --check
+~~~
+
+| Gate | Result |
+|---|---|
+| P27A-E focused | `28 passed` |
+| P27A-E affected (exact nine files above) | `301 passed` |
+| safe local suite | `1,845 passed / 49 skipped / 387 deselected / 453.03s` |
+| legacy suite | `1,147 passed / 58 skipped / 105 deselected / 61.21s` |
+| Ruff / targeted format / compile / diff | PASS |
+| React typecheck / lint / build / bundle budget | PASS |
+| `pip check` | FAIL：known polluted shared environment (`python-magic` missing and vcbench pin conflicts); no environment mutation |
+| reproducible local packaging | PASS：two byte-identical wheels; `1,251,560` bytes; SHA-256 `4bd584bdae75888b4e09d8cfb2211e002cb509155ca834adb7d00a6106abec99`; `376` entries |
+
+Wheel contents include 14 React entries, zero tests and zero AppleDouble entries. Source/wheel module
+SHA-256 is exactly `ffa647094f117ef45adb726559ee23bcb0bd20427c87681ab6675522fa26f55f`;
+test SHA-256 is `99679162bea1d9cd6b5a7432b9694841d1fcd5f4e15e64645227cf3688c4a62b`.
+Builds used two independent exact-code Git archives, `npm ci --offline`, and the installed Python toolchain
+with `--no-isolation --skip-dependency-check`; this is not a clean dependency closure, publication or release.
+
+Negative coverage includes secret/path non-echo, valid core unit preservation, recursively revalidated exact
+request identity, unknown candidate/action rejection, cross-domain comparator drift, missing feasibility or
+unknown synthetic units, re-signed receipt changes, wrong action→group and non-exact ledger sets, outcome
+structural holdout, deterministic strategy parity, failed/unavailable preservation, and re-signed attempts to
+elevate historical/science/policy/P27B/P27C/autonomous/external status. No ActiveLearningAgent, runtime, LLM
+candidate, real asset or historical replay was wired. See [ADR-0023](ADR-0023-agentic-experiment-design-contract.md),
+the [P27A-E runbook](runbooks/AGENTIC-EXPERIMENT-DESIGN.md) and
+[P27A-E completion report](../reports/phase27ae/PHASE27AE_COMPLETION.md).
 
 ## Phase 26E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` 本地证据
 

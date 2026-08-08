@@ -4,9 +4,9 @@
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前已完成工程 work unit：`Phase 25E`
+> 当前已完成工程 work unit：`Phase 27A-E`
 >
-> DOCS-CLOSURE completion：`b19c896202bea56f894d0ad540501331af42a40c`
+> P11B DOCS-CLOSURE / P12 starting SHA：`b19c896202bea56f894d0ad540501331af42a40c`
 >
 > 已完成 work unit：`Phase 14E — E. coli K-12 knockout→growth contract`；
 > starting SHA `0b193310009d6e4d2ebc0fc8abf95da20a56acdb`；shared-SDK prerequisite
@@ -90,6 +90,23 @@
 > engineering `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture evidence
 > `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`
 >
+> 已完成 work unit：`Phase 26E — Host–Microbiome contract`；observed active baseline
+> `6bd02231449b6969e22aeb5bea6798fd334daef6`；branch
+> `codex/p25e-virtual-microbiome`；completion code SHA
+> `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4`；tree
+> `b3d7303cafb5b874c8b5a441b53e32ff77ef2c54`；source date epoch `1786176771`；
+> engineering `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture evidence
+> `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`
+>
+> 已完成 work unit：`Phase 27A-E — Agentic Experiment Design contract/harness`；actual
+> P26E docs-closure starting SHA `a12cf4f4b71efb653f8128afcb1f468211fdb837`；branch
+> `codex/p25e-virtual-microbiome`；completion code SHA
+> `5875571bf9d8b518dc7a857feb935206f756de59`；tree
+> `a7c65e7b30f51832660e66323b5946acbddcbf18`；source date epoch `1786180822`；
+> engineering `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY`；umbrella
+> `ENGINEERING_COMPLETE_SCIENCE_PENDING`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；science
+> `NOT_RUN`；policy `NO_NEW_DECISION`
+>
 > 当前 Phase 11 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
 > DOCS-CLOSURE parent：`b02d21985bcde50cf0758d339b05b13bb3e200a2`
@@ -110,7 +127,7 @@
 ```
 
 本文自身不授权实施任何 Phase。P12、P13、P14E、P15E、P16E、P17、P18、P19、P20、
-P21A、P22、P23A、P25E 和 P26E 已在持续本地授权内完成；该授权仍不包含
+P21A、P22、P23A、P25E、P26E 和 P27A-E 已在持续本地授权内完成；该授权仍不包含
 外置数据或权重、network、push、GitHub main/tag、`.53`、服务、发布、部署或真实
 科学运行。P14E 已独立收口；P14R 仍需逐资产/窗口授权，P14B 仍只能在
 正科学结果后由具名 operator 决定。P15E 已独立收口；P15R 仍需逐资产/窗口授权，
@@ -124,9 +141,12 @@ P20 已完成 exact P19 registration-bound Training Pipeline contract，但只�
 fixtures；真实 candidate training、test/external read、benchmark/science/policy 均未运行。
 P25E 只完成 fixed-scope/value-free contract，P24/P25R 仍未授权、未运行。P26E 已完成
 exact host/P25 identity、typed missing interface、time-unrolled DAG、P22 context-only audit 和
-value-free abstention；P26R 仍受 promoted prerequisites 阻塞。下一 eligible local unit 是
-standing local authorization 下的 P27A-E strict contracts/rank-then-reveal harness synthetic
-conformance；P27A-R historical replay 为 `REPLAY_NOT_RUN / ASSET_PENDING`，P27B/P27C 仍需独立外部授权。
+value-free abstention；P26R 仍受 promoted prerequisites 阻塞。P27A-E 已完成 exact-request-derived
+value-free design contracts 与 synthetic rank-then-reveal harness；没有运行 historical replay，
+没有接入 ActiveLearningAgent/runtime/LLM candidate。P27A-R 为 `REPLAY_NOT_RUN / ASSET_PENDING`；
+P27B 为 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`；P27C 为
+`AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。下一 eligible local unit 是 standing local authorization
+下的 P28E contract-only orchestrator/typed handoff/trace/abstention；真实 P28 验收为 `0/3`。
 阶段 scope、资产清单和可复制授权句仍以
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)为准。
 
@@ -367,10 +387,11 @@ flowchart TD
 | P25 policy / P21C | `AUTHORIZATION_REQUIRED / NOT_RUN` | `READ_ONLY / NOT_RUN` | `NOT_RUN` | 只可引用 exact immutable positive evidence 由具名 operator 决定 |
 | P26E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | completion `5bd3e502...`；exact host/P25 contract、typed missing interface、topology-only DAG、P22 full-request-binding-insufficient audit；all values null |
 | P26R | `BLOCKED_EXTERNAL / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | matching host/community 均 validated + promoted、full-request bindings 与 matching release 均 absent |
-| P27A-E | `NEXT ELIGIBLE — LOCAL CONTRACT/HARNESS / SYNTHETIC_CONFORMANCE_ONLY` | `REPLAY_NOT_RUN / ASSET_PENDING` | `NOT_APPLICABLE` | standing local authorization；无 canonical local historical pool；P27B/P27C 不在该授权内 |
-| P27B | `OPTIONAL_NOT_RUN` | `SHADOW_NOT_RUN` | `NOT_APPLICABLE` | 可选具名专家 blind review |
-| P27C | `OPTIONAL_NOT_RUN` | `PILOT_NOT_RUN` | `NOT_APPLICABLE` | 可选 prospective pilot |
-| P28 | `NOT_STARTED` | `NOT_RUN` | `NOT_APPLICABLE` | 至少三个 executable + promoted 模型模块 |
+| P27A-E | `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | completion `5875571b...`；authoritative action space empty/value-free；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING` |
+| P27B | `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN` | `SHADOW_NOT_RUN` | `NOT_APPLICABLE` | 可选具名专家 blind review；未授权、未运行 |
+| P27C | `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN` | `PILOT_NOT_RUN` | `NOT_APPLICABLE` | 可选 prospective pilot；未授权、未运行 |
+| P28E | `NEXT ELIGIBLE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | standing local authorization；orchestrator/typed handoff/trace/abstention；真实验收 `0/3` |
+| P28 real acceptance | `BLOCKED / 0_OF_3_QUALIFYING_MODULES` | `NOT_RUN` | `NOT_RUN` | 至少三个 exact-request executable + scientifically validated + production-promoted 模型模块；rule/advisory/synthetic 不计数 |
 | P29 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | 有限 typed biological subgraph |
 | P30A | `NOT_STARTED` | `SEPARATE_BADGES` | `NOT_APPLICABLE` | 本地 RC |
 | P30B1–B4 | `NOT_STARTED` | `SEPARATE_BADGES` | `RELEASE_WINDOWS` | CI、发布、staging、cutover/rollback |
@@ -1538,23 +1559,29 @@ P19  制作并注册 matching host Pack
 
 ### Phase 27 — Agentic Experiment Design
 
-**状态：** `P27A-E NEXT ELIGIBLE — LOCAL CONTRACT/HARNESS / SYNTHETIC_CONFORMANCE_ONLY`；
-P27A-R historical replay `REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C 分别为 external authorization windows。
+**状态：** P27A-E `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY`；umbrella
+`ENGINEERING_COMPLETE_SCIENCE_PENDING`；P27A-R historical replay
+`REPLAY_NOT_RUN / ASSET_PENDING`；P27B `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`；P27C
+`AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。
 
 #### P27A-E — software / rank-then-reveal harness
 
-- [ ] `vc.virtual-experiment.v1`；
-- [ ] question、hypothesis、scope、perturbation、control、replicate、batch、endpoint、
-  cost、constraint 和 evidence；
-- [ ] LLM 只起草，确定性代码验证单位、变量、对照、资源和安全；
-- [ ] ActiveLearning action/cost/batch/control/feasibility 合同；
-- [ ] 候选实验限于已验证模型域；
-- [ ] 不读取 test outcome 选实验；
-- [ ] random、uncertainty-only、diversity 和 expert-rule baseline；
-- [ ] synthetic rank-then-reveal conformance；
+- [x] `vc.virtual-experiment.v1` 与九个配套 strict public schemas；
+- [x] caller question/hypothesis prose + exact request-derived scope/perturbation/endpoint identities，
+  以及 value-free absent action/control/replicate/batch/cost/evidence closure；
+- [x] LLM/candidate API closed；question/hypothesis prose 不得创建数值、action space 或 verdict；
+- [x] isolated action/cost/batch/control/feasibility contract（未接入 legacy ActiveLearningAgent）；
+- [x] 缺 exact-request executable + scientifically validated + production-promoted domain 时 action
+  catalog 必为空并 abstain；
+- [x] selector API 不接受 outcome；全部 strategy receipts 冻结后才 reveal；
+- [x] one primary `active_heuristic` + random、uncertainty-only、diversity、expert-rule 四个 baseline；
+- [x] synthetic rank-then-reveal conformance；failed/unavailable 不补零、不删除；
 - [ ] exact canonical historical asset manifest、license 和 hidden-outcome separation；
 - [ ] P27A-R historical offline replay（当前 `REPLAY_NOT_RUN / ASSET_PENDING`；Git 外资产另行授权）；
-- [ ] human approval required 状态。
+- [x] human approval required/not granted；execution/external/shadow/prospective/autonomous 固定 false。
+
+Planned-vs-actual：本地工程采用隔离 deterministic harness；没有改动 legacy ActiveLearning queue，
+没有接入 runtime 或 LLM candidate，也没有把 checked-in synthetic fixture 包装成 historical replay。
 
 #### P27B — shadow expert review
 
@@ -1585,7 +1612,8 @@ P27A-R historical replay `REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C 分别为 
 
 ### Phase 28 — Multi-Agent Virtual Biology
 
-**状态：** `NOT_STARTED`
+**状态：** P28E `NEXT ELIGIBLE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；真实验收
+`BLOCKED / 0_OF_3_QUALIFYING_MODULES`
 
 **硬前置门**
 
@@ -1751,11 +1779,12 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | P25 policy / P21C | `AUTHORIZATION_REQUIRED / NOT_RUN` | `READ_ONLY / NOT_RUN` | `NOT_RUN` | — | unchanged | exact positive evidence and named-operator authorization absent |
 | P26E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | `6bd02231449b6969e22aeb5bea6798fd334daef6` | `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4` | tree `b3d7303c...`; epoch `1786176771`; focused `8`; P26E+P25E/P10+P22/P17 affected `144`; safe `1,817/49/387`; legacy `1,147/58/105`; two byte-identical wheels `1,242,422` bytes / `69700bb63445864a457cb651037e69dddd93d5be4b184c55a34c3f9332de265a` / `375` entries; all outputs null |
 | P26R | `BLOCKED_EXTERNAL / NOT_RUN` | `NOT_RUN` | `NOT_RUN` | — | — | exact validated+promoted host/community, full-request bindings, interface and matching release absent |
-| P27A-E | `NEXT ELIGIBLE — LOCAL CONTRACT/HARNESS / SYNTHETIC_CONFORMANCE_ONLY` | `REPLAY_NOT_RUN / ASSET_PENDING` | `N/A` | actual P26E docs-closure HEAD | — | standing local authorization；无 canonical local pool；P27B/P27C remain external |
-| P27A-R | `ASSET_PENDING / NOT_RUN` | `REPLAY_NOT_RUN` | `N/A` | exact P27A-E completion + canonical asset manifest/license/outcome separation | — | Git 外资产需独立授权；不得用 synthetic fixture 冒充 historical replay |
-| P27B | `OPTIONAL_NOT_RUN` | `SHADOW_NOT_RUN` | `N/A` | — | unchanged | — |
-| P27C | `OPTIONAL_NOT_RUN` | `PILOT_NOT_RUN` | `N/A` | — | unchanged | — |
-| P28 | `NOT_STARTED` | `NOT_RUN` | `N/A` | — | — | — |
+| P27A-E | `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY` | `NOT_RUN` | `NO_NEW_DECISION` | `a12cf4f4b71efb653f8128afcb1f468211fdb837` | `5875571bf9d8b518dc7a857feb935206f756de59` | tree `a7c65e7b...`; epoch `1786180822`; focused `28`; affected `301`; safe `1,845/49/387`; legacy `1,147/58/105`; wheel `1,251,560` bytes / `4bd584bdae75888b4e09d8cfb2211e002cb509155ca834adb7d00a6106abec99` / `376` entries；action space empty/value-free |
+| P27A-R | `REPLAY_NOT_RUN / ASSET_PENDING` | `NOT_RUN` | `NO_NEW_DECISION` | exact P27A-E completion + canonical asset manifest/license/outcome separation | — | Git 外资产需独立授权；不得用 synthetic fixture 冒充 historical replay |
+| P27B | `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN` | `SHADOW_NOT_RUN` | `N/A` | exact P27A identity + frozen shadow protocol | unchanged |具名专家 blind review 未授权、未运行 |
+| P27C | `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN` | `PILOT_NOT_RUN` | `N/A` | exact P27A/P27B identities + ethics/biosafety/operator/personnel/actions | unchanged | prospective pilot 未授权、未运行 |
+| P28E | `NEXT ELIGIBLE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | P27A-E docs-closure HEAD | — | standing local authorization；typed orchestrator/handoff/trace；real acceptance 另算 |
+| P28 real acceptance | `BLOCKED / 0_OF_3_QUALIFYING_MODULES` | `NOT_RUN` | `NOT_RUN` | three exact-request executable + scientifically validated + production-promoted modules | — | current qualifying count `0/3`; rule/advisory/synthetic 不计数 |
 | P29 | `NOT_STARTED` | `NOT_RUN` | `NOT_RUN` | — | — | — |
 | P30A | `NOT_STARTED` | `SEPARATE` | `N/A` | — | — | RC digest |
 | P30B1 | `NOT_STARTED` | `SEPARATE` | `RELEASE_WINDOW` | — | unchanged | exact-SHA CI |
@@ -1911,6 +1940,24 @@ Community adapter；P10 no-model regression 不是独立 contract-only work unit
 exact assets/model/run window 缺失时为 `AUTHORIZATION_REQUIRED / NOT_RUN`，不是下一
 eligible 本地 contract-only 实现。P21B/P21C、外置资产、真实模型/训练、GPU、network、
 push、发布、部署和 operator promotion 仍不在授权范围。
+
+P25E 已从 observed baseline `ae5e93571783cb3cf49a6e0fab531a89e963f7ec`
+开始，以 code SHA `039393e6be897b3014bb0b657d0a439d879578b6`、tree
+`b53e542940bf39fd44965fe55416798211ab580b` 完成 fixed-scope/value-free contracts；P24/P25R
+仍为 `AUTHORIZATION_REQUIRED / NOT_RUN`。P26E 随后从 `6bd02231449b6969e22aeb5bea6798fd334daef6`
+开始，以 code SHA `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4`、tree
+`b3d7303cafb5b874c8b5a441b53e32ff77ef2c54` 完成 exact host/P25 closure 与 value-free
+abstention；P26R 为 `BLOCKED_EXTERNAL / NOT_RUN`。
+
+P27A-E 已从 P26E docs closure `a12cf4f4b71efb653f8128afcb1f468211fdb837`
+开始，以 code SHA `5875571bf9d8b518dc7a857feb935206f756de59`、tree
+`a7c65e7b30f51832660e66323b5946acbddcbf18`、epoch `1786180822` 完成 strict
+experiment-design 与 synthetic rank-then-reveal harness。Authoritative action space 为空且
+value-free；P27A-R 是 `REPLAY_NOT_RUN / ASSET_PENDING`，science `NOT_RUN`，policy
+`NO_NEW_DECISION`。P27B 是 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`；P27C 是
+`AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。下一 eligible local work unit 是 P28E
+contract-only orchestrator/typed handoff/trace/abstention；真实 P28 接受门仍为 `0/3` qualifying
+exact-request executable + scientifically validated + production-promoted modules。
 
 可直接跨对话使用的顺序推进提示词见：
 

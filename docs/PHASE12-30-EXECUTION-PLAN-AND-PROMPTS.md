@@ -102,9 +102,18 @@
 > `b3d7303cafb5b874c8b5a441b53e32ff77ef2c54`；source date epoch `1786176771`；branch
 > `codex/p25e-virtual-microbiome`；工程 `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；
 > fixture `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`；P26R
-> `BLOCKED_EXTERNAL / NOT_RUN`；下一 eligible local unit 是 `P27A-E — strict experiment-design
-> contracts + rank-then-reveal replay harness + SYNTHETIC_CONFORMANCE_ONLY`；P27A-R historical replay
-> `REPLAY_NOT_RUN / ASSET_PENDING`
+> `BLOCKED_EXTERNAL / NOT_RUN`
+>
+> 已完成 work unit：`P27A-E — Agentic Experiment Design contract/harness`；actual P26E
+> docs-closure starting SHA `a12cf4f4b71efb653f8128afcb1f468211fdb837`；completion code SHA
+> `5875571bf9d8b518dc7a857feb935206f756de59`；tree
+> `a7c65e7b30f51832660e66323b5946acbddcbf18`；source date epoch `1786180822`；branch
+> `codex/p25e-virtual-microbiome`；engineering
+> `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY`；umbrella
+> `ENGINEERING_COMPLETE_SCIENCE_PENDING`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；science
+> `NOT_RUN`；policy `NO_NEW_DECISION`；P27B `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`；P27C
+> `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`；下一 eligible local unit 为 P28E contract-only
+> orchestration，真实 P28 验收 `0/3`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
@@ -191,7 +200,9 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | P25E source date epoch / 完成分支 | `1786171049` / `codex/p25e-virtual-microbiome` |
 | P26E observed baseline / completion code/tree | `6bd02231449b6969e22aeb5bea6798fd334daef6` / `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4` / `b3d7303cafb5b874c8b5a441b53e32ff77ef2c54` |
 | P26E source date epoch / 完成分支 | `1786176771` / `codex/p25e-virtual-microbiome` |
-| 当前 work-unit 状态 | P26E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；science `NOT_RUN`；policy `NO_NEW_DECISION`；P24/P25R `AUTHORIZATION_REQUIRED / NOT_RUN`；P26R `BLOCKED_EXTERNAL / NOT_RUN`；P27A-E `NEXT ELIGIBLE — LOCAL CONTRACT/HARNESS / SYNTHETIC_CONFORMANCE_ONLY`；P27A-R historical replay `REPLAY_NOT_RUN / ASSET_PENDING`；P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN` |
+| P27A-E actual starting SHA / completion code/tree | `a12cf4f4b71efb653f8128afcb1f468211fdb837` / `5875571bf9d8b518dc7a857feb935206f756de59` / `a7c65e7b30f51832660e66323b5946acbddcbf18` |
+| P27A-E source date epoch / 完成分支 | `1786180822` / `codex/p25e-virtual-microbiome` |
+| 当前 work-unit 状态 | P27A-E `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；science `NOT_RUN`；policy `NO_NEW_DECISION`；P27B `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`；P27C `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`；P28E `NEXT ELIGIBLE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；P28 real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；P21B/P21C `AUTHORIZATION_REQUIRED / NOT_RUN` |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -536,7 +547,7 @@ unit，现已由 §7 的 P13 completion snapshot 取代。
 - validation evidence 尚未精确绑定 Pack×model×environment×adapter×protocol；
 - `scientifically_validated` 在 P6 compatibility 中固定 false。
 
-### 依次实施
+### 原计划（第 3、10 项的实际偏差见下节）
 
 1. 先写 Model Registry v2 ADR 和状态迁移表；
 2. 保持 `vc.model-card.v1` 兼容，只有不兼容字段才新建 schema；
@@ -2120,8 +2131,9 @@ privacy/evidence/model/result identity、科学边界和下一授权句。
 
 P27A-E、P27A-R historical run、P27B、P27C 必须分层，后一级失败不改写前一级结果：
 
-- P27A-E：standing local authorization 下完成 strict software contracts、rank-then-reveal
-  replay harness 和 `SYNTHETIC_CONFORMANCE_ONLY`；当前无 canonical local historical replay pool；
+- P27A-E：已在 standing local authorization 下完成 strict software contracts、rank-then-reveal
+  replay harness 和 `SYNTHETIC_CONFORMANCE_ONLY`；code
+  `5875571bf9d8b518dc7a857feb935206f756de59`；当前无 canonical local historical replay pool；
 - P27A-R historical run：只有 exact canonical asset manifest、license 和 outcome-separation identity
   齐备后才可运行；当前 `REPLAY_NOT_RUN / ASSET_PENDING`，若资产在 Git 外则另行授权；
 - P27B：shadow mode 与具名专家盲评；
@@ -2143,6 +2155,21 @@ P27A-E、P27A-R historical run、P27B、P27C 必须分层，后一级失败不�
 9. P27C 第三门：独立授权、预注册、人工批准的小规模 prospective pilot；
 10. 报告 information gain、cost、failed experiments 和不确定性。
 
+### P27A-E 实际完成与计划偏差
+
+P27A-E 从 P26E docs closure `a12cf4f4b71efb653f8128afcb1f468211fdb837` 开始，完成于
+code/tree `5875571bf9d8b518dc7a857feb935206f756de59` /
+`a7c65e7b30f51832660e66323b5946acbddcbf18`。工程状态为
+`COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY`；P27A-R 仍是
+`REPLAY_NOT_RUN / ASSET_PENDING`，science `NOT_RUN`，policy `NO_NEW_DECISION`。
+
+实际实现有意采用隔离的 deterministic harness，而未复用/修改 legacy ActiveLearningAgent、
+未接入 runtime，也未增加 LLM candidate API。Exact request-derived authoritative design 在缺少
+exact-request executable + scientifically validated + production-promoted model domain 时保持空 action
+space/value-free abstain；question/hypothesis 只是无数值权限的 prose。五个 deterministic strategies
+是一条 primary `active_heuristic` 加四条 baselines；`synthetic_realized_utility` 不称 information gain。
+上述偏差缩小了 authority surface，不改变 P27A-R/P27B/P27C 的独立外部门。
+
 ### 验收门
 
 - LLM 不能决定数值真相、最终安全裁决或扩大 action space；
@@ -2152,6 +2179,8 @@ P27A-E、P27A-R historical run、P27B、P27C 必须分层，后一级失败不�
 - 无外部消息、设备控制、采购或 wet-lab 写操作。
 
 ### P27A-E standing-local 执行边界：合同与 replay harness
+
+下列文本是已执行窗口的历史边界；当前不得据此重跑或把 synthetic fixture 改称 historical replay。
 
 ```text
 以现场 P26E documentation-closure HEAD 作为 P27A-E（Agentic Experiment Design engineering）
@@ -2211,6 +2240,11 @@ P28，不 push/发布/部署，除非
 把 Cell、Metabolism、Microbiome、Drug、MD 和 Literature 等能力组织成有权限、
 有 schema、有预算、可重放的专业角色；没有真实模型证据的角色只能提供 advisory。
 
+当前拆分为：P28E 在 standing local authorization 下只完成 contract-only orchestrator、typed
+handoff、hash-bound trace、conflict/partial-failure/abstention 与 synthetic conformance；真实 P28
+acceptance 当前为 `BLOCKED / 0_OF_3_QUALIFYING_MODULES`。P28E 不得用 rule/advisory/synthetic
+record 补足真实三模块门，也不得产生 prediction、science 或 promotion。
+
 ### 依次实施
 
 1. 定义 agent role/tool capability contract；
@@ -2232,8 +2266,9 @@ P28 只能消费 P27 实际达到的等级：若只通过 P27A，就只能使用
 
 ### 验收门
 
-- 选择确实需要至少三个 exact-task、exact-scope、实际可执行且
-  `production_promoted` 的模型模块；model card、规则和 advisory 不计数；
+- 选择确实需要至少三个 exact-request、exact-task、exact-scope、实际 executable、
+  `scientifically_validated` 且 `production_promoted` 的模型模块；model card、规则、synthetic
+  conformance 和 advisory 不计数；
 - 科学能力必须在预注册主指标上优于简单编排；非劣只适用于另有预注册工程收益的
   orchestration claim，不能用“更慢/更贵但差不多”过门；
 - 完整 trace 可 replay；
@@ -2242,6 +2277,9 @@ P28 只能消费 P27 实际达到的等级：若只通过 P27A，就只能使用
 - 不控制外部实验设备。
 
 ### 可复制授权提示词
+
+本提示词只适用于未来真实 P28 acceptance/run 窗口，不是 P28E 本地 contract-only 授权；使用时
+必须以授权时现场 `ACTIVE_BASELINE_SHA` 为代码基线，不得回退或丢弃随后完成的本地 work unit。
 
 ```text
 授权以 `<P27A code SHA>`、`<P27A replay fingerprint>`、`<如有则填写 P27B
@@ -2640,11 +2678,15 @@ work unit，因此 P24 当前 `AUTHORIZATION_REQUIRED / NOT_RUN`，没有下一 
 `5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4` 完成 host–microbiome contract、topology-only DAG、
 typed missing matching/interface requirements 和 value-free abstention；P26R 仍因 exact
 validated+promoted host/community、full-request bindings、interface 与 matching release 缺失而
-`BLOCKED_EXTERNAL / NOT_RUN`。当前下一 eligible local work unit 是 standing authorization 下的
-`P27A-E — strict experiment-design contracts + rank-then-reveal replay harness +
-SYNTHETIC_CONFORMANCE_ONLY`。资产审计未发现 canonical local historical replay pool，因此真实
+`BLOCKED_EXTERNAL / NOT_RUN`。P27A-E 随后已从 P26E docs closure
+`a12cf4f4b71efb653f8128afcb1f468211fdb837` 开始，在 code
+`5875571bf9d8b518dc7a857feb935206f756de59` 完成 strict experiment-design contracts 与
+rank-then-reveal synthetic harness。资产审计未发现 canonical local historical replay pool，因此真实
 P27A-R historical replay 保持 `REPLAY_NOT_RUN / ASSET_PENDING`；只有 manifest/license/outcome separation
-齐备后才可运行，Git 外资产另行授权。P27B/P27C 仍为独立外部窗口。
+齐备后才可运行，Git 外资产另行授权。P27B 为 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`，
+P27C 为 `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。当前下一 eligible local work unit 是 standing
+authorization 下的 P28E contract-only orchestrator/typed handoff/trace/abstention；真实 P28 acceptance
+因 qualifying module count `0/3` 而保持 blocked。
 
 当前持续本地授权不覆盖 P14R、P14B、P15R、P15B、P16R 或 P16B。没有逐项 exact
 assets/output root/run window 授权时，不得读取或运行真实资产、产生科学

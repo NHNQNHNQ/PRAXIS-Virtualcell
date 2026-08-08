@@ -103,11 +103,13 @@ P26E engineering 独立收口，P26 umbrella 状态为
 release、community release、完整 request bindings、matching release、cross-domain interface 和独立授权
 全部存在。P26E 没有运行真实数据、模型、baseline、CI、OOD、privacy/consent 或 co-simulation。
 
-Standing local authorization 下下一 eligible work unit 是 P27A-E strict experiment-design contracts、
-rank-then-reveal replay harness 与 `SYNTHETIC_CONFORMANCE_ONLY`。当前没有 canonical local historical
-replay pool，P27A-R historical replay 为 `REPLAY_NOT_RUN / ASSET_PENDING`；只有 exact manifest、license 和
-outcome separation 齐备后才可运行，Git 外资产另行授权。P27B shadow review 与 P27C prospective
-pilot 仍分别需要独立外部授权。
+在 P26E 收口时，standing local authorization 下下一 eligible work unit 是 P27A-E；该 follow-on
+随后已从 P26E docs closure `a12cf4f4b71efb653f8128afcb1f468211fdb837` 开始，并在 code
+`5875571bf9d8b518dc7a857feb935206f756de59` 完成 strict experiment-design contracts 与
+rank-then-reveal synthetic harness。P27A-R historical replay 仍为
+`REPLAY_NOT_RUN / ASSET_PENDING`；P27B 为 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`，P27C 为
+`AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。当前下一本地 work unit 是 P28E contract-only
+orchestrator/typed handoff/trace/abstention，真实 P28 acceptance 为 `0/3`。
 
 操作边界见 [P26E runbook](runbooks/HOST-MICROBIOME-CONTRACT.md)，完整 frozen evidence 见
 [P26E completion report](../reports/phase26e/PHASE26E_COMPLETION.md)。
