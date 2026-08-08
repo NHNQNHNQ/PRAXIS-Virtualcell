@@ -16,6 +16,19 @@ from praxis_virtualcell.community_packs.contracts import (
     tiny_microbial_pack_roots,
     validate_toy_exchange,
 )
+from praxis_virtualcell.community_packs.virtual_microbiome import (
+    VirtualMicrobiomeAdapterRequirementV1,
+    VirtualMicrobiomeContractError,
+    VirtualMicrobiomeContractV1,
+    VirtualMicrobiomePlanV1,
+    VirtualMicrobiomePrimaryEndpointV1,
+    VirtualMicrobiomeRequestV1,
+    VirtualMicrobiomeResultV1,
+    VirtualMicrobiomeScopeV1,
+    freeze_virtual_microbiome_contract,
+    plan_virtual_microbiome,
+    run_virtual_microbiome,
+)
 
 __all__ = [
     "CommunityContractError",
@@ -32,4 +45,15 @@ __all__ = [
     "single_member_equivalent",
     "tiny_microbial_pack_roots",
     "validate_toy_exchange",
+    "VirtualMicrobiomeAdapterRequirementV1",
+    "VirtualMicrobiomeContractError",
+    "VirtualMicrobiomeContractV1",
+    "VirtualMicrobiomePlanV1",
+    "VirtualMicrobiomePrimaryEndpointV1",
+    "VirtualMicrobiomeRequestV1",
+    "VirtualMicrobiomeResultV1",
+    "VirtualMicrobiomeScopeV1",
+    "freeze_virtual_microbiome_contract",
+    "plan_virtual_microbiome",
+    "run_virtual_microbiome",
 ]

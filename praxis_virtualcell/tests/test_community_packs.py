@@ -498,6 +498,21 @@ def test_no_community_model_only_plans_or_abstains():
     assert "Mock" not in str(result.to_dict())
 
 
+def test_p10_v1_canonical_fingerprints_are_frozen():
+    _, community = _registered_community()
+    ledger = ToyExchangeLedger.from_dict(_ledger_raw(community.fingerprint))
+    validation = validate_toy_exchange(community, ledger)
+    plan = plan_community(community)
+    result = run_community(community)
+
+    assert community.manifest.fingerprint() == "03babc6f574097eaeaa511ed7eae201938e991e22ba41314897ddf9c9af96ec0"
+    assert ledger.fingerprint() == "dc5fc14a23ed501b3725aae86f247ee50664741004c8087562da9e610bbea654"
+    assert validation.fingerprint() == "829dcd877b7e535003435e80316f8eaf396b0e79344857232d0ec35ec07d48fc"
+    assert plan.plan_id == "community_plan_813cc094d6d2f90d552f1a45"
+    assert plan.fingerprint() == "e4cada5ad70cb94e0e816c7d83b3eee3fe61c492a31e69ec1963d2b890372b60"
+    assert result.fingerprint() == "208406cf43548d0b6b2f20388328e142df6320a17f99746ff0337306925a47c4"
+
+
 @pytest.mark.parametrize(
     "contract,field,value",
     [
