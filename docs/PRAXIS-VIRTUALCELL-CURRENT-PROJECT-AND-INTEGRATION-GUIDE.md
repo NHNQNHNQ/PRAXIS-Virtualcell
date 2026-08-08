@@ -107,17 +107,28 @@
 > `ENGINEERING_COMPLETE_SCIENCE_PENDING`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；science
 > `NOT_RUN`；policy `NO_NEW_DECISION`
 >
+> 已完成 work unit：`P28E — Multi-Agent Virtual Biology contract`；actual P27A-E
+> docs-closure starting SHA `971f812faae09fa833dc66741e86ec9ffe97947c`；completion code SHA
+> `da4bfc042d96f830e2a7e8cdc62ba227c7ace949`；tree
+> `e6f18371f5061c810b2cb87d9a278cfa6d6ac46b`；source date epoch `1786184568`；branch
+> `codex/p25e-virtual-microbiome`；状态
+> `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture
+> `SYNTHETIC_CONFORMANCE_ONLY`；real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；
+> science `NOT_RUN`；policy `NO_NEW_DECISION`
+>
 > 工作树保护清单：不在本文固定；每轮从现场 `git status --short` 动态重建，任何
 > 新 staged/modified/deleted/untracked 路径默认受保护
 >
 > 当前 Cell-first 产品代码锚点：`bf44aac25b993e49d0146ccd52dddad5c2fa14de`
 >
 > 下一步：P24 real adapter 与 P25R 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`；其 gate 未被
-> P25E/P26E/P27A-E 绕过。P26R 为 `BLOCKED_EXTERNAL / NOT_RUN`。P27B 为
+> P25E/P26E/P27A-E/P28E 绕过。P26R 为 `BLOCKED_EXTERNAL / NOT_RUN`。P27B 为
 > `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`，P27C 为
-> `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。下一 eligible local work unit 是 standing
-> authorization 下的 P28E contract-only orchestrator/typed handoff/trace/abstention；真实 P28
-> acceptance 当前为 `BLOCKED / 0_OF_3_QUALIFYING_MODULES`。
+> `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。P28E 已完成 authoritative empty DAG/trace、
+> value-free abstention；真实 P28 acceptance 仍为
+> `BLOCKED / 0_OF_3_QUALIFYING_MODULES`。下一 eligible local work unit 是 P29E strict
+> connected-subgraph contract plus authoritative empty-graph/value-free abstention；真实 P29
+> candidate 当前为 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`。
 
 本文是一份面向其他项目、开发团队、科研合作者和后续智能体的独立项目说明。它回答四个问题：
 
@@ -2630,7 +2641,34 @@ strategy 是一条 primary 和四条 baselines，`synthetic_realized_utility` �
 P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`，science `NOT_RUN`，policy `NO_NEW_DECISION`。
 完整记录见 `reports/phase27ae/PHASE27AE_COMPLETION.md`。
 
-### 24.14 Skip 和 deselect 的含义
+### 24.14 P28E 完成状态
+
+P28E 从 P27A-E docs closure `971f812faae09fa833dc66741e86ec9ffe97947c` 开始，在
+code/tree `da4bfc042d96f830e2a7e8cdc62ba227c7ace949` /
+`e6f18371f5061c810b2cb87d9a278cfa6d6ac46b` 完成；epoch `1786184568`。
+
+Focused 为 `38 passed`；exact affected ten-test-file suite 为 `339 passed`；safe 为
+`1,883 passed, 49 skipped, 387 deselected in 419.19s`；legacy 为
+`1,147 passed, 58 skipped, 105 deselected in 51.29s`；packaging/versioning 为 `18 passed`。Two
+independent archive-built wheels are
+byte-identical at `1,259,255` bytes，SHA-256
+`0358bf4df9e929be7c520e93f7c95dccc351895e7926773b53de8febf7eaec9f`，共 `377`
+entries、`14` React、无 tests/AppleDouble；source/wheel module SHA-256 exact match
+`aadb8fba6efb943799cfa8d9f296f2a7e03f27d45d52d22ce3e1b67b94b160ca`。
+
+这些结果只证明 immutable advisory role policy、typed value-free handoff、deterministic acyclic
+DAG、hash-chain trace 与 authoritative empty orchestration compilation。Compiler 只消费同一 exact
+request 的 P17 compilation/P27 experiment，并另行绑定 standalone exact replay-result fingerprint；
+`ReplayResultV1` 不含 request/experiment link，因此不称 request-matched replay。它不接受 caller
+role/module/registry/candidate/LLM authority。
+Authoritative output 是 empty DAG/trace、qualifying modules `0/3`、prediction/result/tool output
+`null`、execution/science/promotion false，并固定 abstain。Synthetic roles/handoffs/trace 只作
+`SYNTHETIC_CONFORMANCE_ONLY`；没有运行 comparison、ablation、真实 model dispatch 或外部动作。
+Engineering `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；real acceptance
+`BLOCKED / 0_OF_3_QUALIFYING_MODULES`；science `NOT_RUN`；policy `NO_NEW_DECISION`。完整记录见
+`reports/phase28e/PHASE28E_COMPLETION.md`。
+
+### 24.15 Skip 和 deselect 的含义
 
 skip/deselect 不能写成：
 
@@ -2872,7 +2910,7 @@ artifact hash
 
 ## 28. 后续路线图 P12–P30
 
-P12/P13/P14E/P15E/P16E/P17/P18/P19/P20/P21A/P22/P23A/P25E/P26E/P27A-E 行记录已完成的工程 work units；
+P12/P13/P14E/P15E/P16E/P17/P18/P19/P20/P21A/P22/P23A/P25E/P26E/P27A-E/P28E 行记录已完成的工程 work units；
 P14R/P14B、P15R/P15B 与 P16R/P16B 仍未运行。P21B/P21C 未授权、未运行，真实科学或
 policy 窗口不能当作当前能力。P23A contract-only 已完成；真实 sender/receiver curated release、
 Pack/context 与 interaction evidence/data/execution 仍未提供。P23B 可选且需独立授权；P24 是
@@ -2882,8 +2920,10 @@ contract/topology-only DAG/typed missing matching/interface/abstain software，�
 promoted host/community、full-request bindings、interface 和 matching release 形成前保持 blocked。
 P27A-E 已完成 exact-request-derived value-free design 与 synthetic rank-then-reveal harness；没有
 接入 ActiveLearningAgent/runtime/LLM candidate，也没有运行 canonical historical replay。P27A-R 为
-`REPLAY_NOT_RUN / ASSET_PENDING`。下一 eligible local work unit 是 P28E contract-only
-orchestrator/typed handoff/trace/abstention；真实 P28 acceptance 为 `0/3` qualifying modules。
+`REPLAY_NOT_RUN / ASSET_PENDING`。P28E 已完成 advisory-only role、typed value-free handoff、
+deterministic DAG/hash-chain trace 与 authoritative empty compilation；真实 P28 acceptance 仍为
+`0/3` qualifying modules。下一 eligible local work unit 是 P29E strict connected-subgraph contract
+plus authoritative empty-graph/value-free abstention；真实 P29 qualified biological nodes 为 `0`。
 
 | 阶段 | 目标 |
 |---|---|
@@ -2918,9 +2958,10 @@ orchestrator/typed handoff/trace/abstention；真实 P28 acceptance 为 `0/3` qu
 | P27A-R historical replay | `REPLAY_NOT_RUN / ASSET_PENDING`：无 canonical local pool；需 exact manifest/license/outcome separation，Git 外资产另行授权 |
 | P27B | `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`：可选具名专家 shadow review |
 | P27C | `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`：可选 prospective pilot |
-| P28E | `NEXT ELIGIBLE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`：typed orchestrator/handoff/trace/abstain；standing local authorization |
+| P28E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`：start `971f812f...`；completion `da4bfc04...`；empty authoritative DAG/trace、`0/3`、all values null；science `NOT_RUN`；policy `NO_NEW_DECISION` |
 | P28 real acceptance | `BLOCKED / 0_OF_3_QUALIFYING_MODULES`：需要三个 exact-request executable + scientifically validated + production-promoted model modules；rule/advisory/synthetic 不计数 |
-| P29 | 有限域、typed biological world-model candidate |
+| P29E | `NEXT ELIGIBLE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`：strict connected-subgraph contract plus authoritative empty-graph fail-closed compilation |
+| P29 real candidate | `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`：有限域 real connected typed biological subgraph/data/model/benchmark absent |
 | P30A | Local RC |
 | P30B1 | Push + exact-SHA CI |
 | P30B2 | Main/tag/artifact release |
@@ -2986,8 +3027,13 @@ P25E 与 P26E 已分别完成 virtual-microbiome 和 host–microbiome 的 contr
 `a7c65e7b30f51832660e66323b5946acbddcbf18`）完成 exact request-derived design 与 synthetic
 rank-then-reveal harness。P27A-R historical replay 仍是 `REPLAY_NOT_RUN / ASSET_PENDING`；P27B 是
 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`，P27C 是
-`AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。当前最早 eligible 本地闭环是 P28E contract-only orchestrator/typed handoff/trace/
-abstention；真实 P28 门为 `0/3`，不能用 rule/advisory/synthetic 补足。
+`AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。P28E 随后从
+`971f812faae09fa833dc66741e86ec9ffe97947c` 开始，以
+`da4bfc042d96f830e2a7e8cdc62ba227c7ace949`（tree
+`e6f18371f5061c810b2cb87d9a278cfa6d6ac46b`）完成 immutable advisory contracts 和
+authoritative empty orchestration compilation；真实 P28 门为 `0/3`，不能用
+rule/advisory/synthetic 补足。当前最早 eligible 本地闭环是 P29E strict connected-subgraph
+contract plus authoritative empty-graph/value-free abstention；真实 P29 qualified node 为 `0`。
 
 在进入更大世界模型之前，最重要的闭环仍然是：
 
@@ -3046,10 +3092,11 @@ abstention；真实 P28 门为 `0/3`，不能用 rule/advisory/synthetic 补足�
 23. [P25E Completion Report](../reports/phase25e/PHASE25E_COMPLETION.md)
 24. [P26E Completion Report](../reports/phase26e/PHASE26E_COMPLETION.md)
 25. [P27A-E Completion Report](../reports/phase27ae/PHASE27AE_COMPLETION.md)
-26. 本当前项目与集成指南
-27. [Repository Layout](REPOSITORY-LAYOUT.md)
-28. [Installation Guide](INSTALL.md)
-29. 当前 work unit 的 ADR、runbook、contracts、代码和测试
+26. [P28E Completion Report](../reports/phase28e/PHASE28E_COMPLETION.md)
+27. 本当前项目与集成指南
+28. [Repository Layout](REPOSITORY-LAYOUT.md)
+29. [Installation Guide](INSTALL.md)
+30. 当前 work unit 的 ADR、runbook、contracts、代码和测试
 
 关键 ADR：
 
@@ -3076,6 +3123,7 @@ abstention；真实 P28 门为 `0/3`，不能用 rule/advisory/synthetic 补足�
 - [P25E Virtual Microbiome](ADR-0021-virtual-microbiome-contract.md)
 - [P26E Host–Microbiome](ADR-0022-host-microbiome-contract.md)
 - [P27A-E Agentic Experiment Design](ADR-0023-agentic-experiment-design-contract.md)
+- [P28E Multi-Agent Virtual Biology](ADR-0024-multi-agent-biology-contract.md)
 
 关键 runbook：
 
@@ -3100,6 +3148,7 @@ abstention；真实 P28 门为 `0/3`，不能用 rule/advisory/synthetic 补足�
 - [P25E Virtual Microbiome](runbooks/VIRTUAL-MICROBIOME-CONTRACT.md)
 - [P26E Host–Microbiome](runbooks/HOST-MICROBIOME-CONTRACT.md)
 - [P27A-E Agentic Experiment Design](runbooks/AGENTIC-EXPERIMENT-DESIGN.md)
+- [P28E Multi-Agent Virtual Biology](runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md)
 - [External Disk Git Maintenance](runbooks/EXTERNAL-DISK-GIT-MAINTENANCE.md)
 
 ---
@@ -3174,8 +3223,13 @@ P27A-E 从 a12cf4f4b71efb653f8128afcb1f468211fdb837 起步，以
 a7c65e7b30f51832660e66323b5946acbddcbf18）完成 strict experiment-design 和 synthetic
 rank-then-reveal harness。Authoritative action space 为空；P27A-R REPLAY_NOT_RUN / ASSET_PENDING，
 science NOT_RUN，policy NO_NEW_DECISION；P27B 是 AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN，
-P27C 是 AUTHORIZATION_REQUIRED / PILOT_NOT_RUN。下一 eligible local work unit
-是 P28E contract-only orchestration；真实 P28 acceptance 是 0/3。
+P27C 是 AUTHORIZATION_REQUIRED / PILOT_NOT_RUN。P28E 从
+971f812faae09fa833dc66741e86ec9ffe97947c 起步，以
+da4bfc042d96f830e2a7e8cdc62ba227c7ace949（tree
+e6f18371f5061c810b2cb87d9a278cfa6d6ac46b）完成 advisory-only role/handoff/DAG/trace
+contracts 和 authoritative empty value-free compilation；real acceptance 仍为 0/3，science NOT_RUN，
+policy NO_NEW_DECISION。下一 eligible local work unit 是 P29E strict connected-subgraph contract
+plus authoritative empty-graph/value-free abstention；真实 P29 qualified biological node 为 0。
 
 当前 UI 是：
 选择 Cell Context → Chat → 自动解析/运行 → Report/Abstain，
@@ -3213,7 +3267,9 @@ P21A 冻结 benchmark/evidence system，P22 冻结 curated release/store/trust/p
 P20/P21 references，只允许 supplied fixture 的 `interaction_evidence_score`；它不进入默认 registry，
 也不执行真实 interaction model。P25E/P26E 只定义 fixed-scope/value-free community/host contracts；
 P27A-E 只定义 request-derived value-free design 与 synthetic replay harness，没有接入 legacy
-ActiveLearningAgent、runtime 或 LLM candidate，也没有执行 historical replay。
+ActiveLearningAgent、runtime 或 LLM candidate，也没有执行 historical replay。P28E 只定义
+immutable advisory role、typed value-free handoff、deterministic DAG/hash-chain trace 和
+authoritative empty compilation；没有真实 model module、comparison、ablation 或 execution。
 
 P12 legacy migration 不创建 evidence/policy/promotion；无法精确绑定的 P8/P9
 结果保持 unbound/incomplete。registry lifecycle 是 append-only，Pack list/API 只
@@ -3226,8 +3282,9 @@ MSE/CI/external evidence/policy。P17 同样没有运行真实多模型 science�
 或生成 promotion；P18 也没有读取外置 multi-omics assets、调用 model/Broker/Registry、
 运行训练/benchmark 或生成 evidence/policy；P20 也没有真实 candidate、test/external、
 benchmark/science evidence；P21A/P22/P23A 也没有真实 benchmark run、curated import、paired evidence、
-model execution、receiver response 或 causal claim；P25E/P26E/P27A-E 也没有 real adapter/release、
-historical replay、shadow review 或 prospective pilot。Policy 保持 `NO_NEW_DECISION`；contract
+model execution、receiver response 或 causal claim；P25E/P26E/P27A-E/P28E 也没有 real adapter/release、
+historical replay、shadow review、prospective pilot、multi-agent model dispatch 或 comparison/ablation。
+Policy 保持 `NO_NEW_DECISION`；contract
 conformance 只证明工程确定性。
 
 数据存在不等于 Pack；Pack、registry、per-request compatibility/executable、

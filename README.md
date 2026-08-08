@@ -94,6 +94,14 @@ abstain，P27A-R 为 `REPLAY_NOT_RUN / ASSET_PENDING`，science `NOT_RUN`，poli
 `NO_NEW_DECISION`，P27B/P27C 分别为 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN` 与
 `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。没有接入 legacy ActiveLearningAgent/runtime 或 LLM
 candidate；question/hypothesis prose 不具有 numeric/action-space/verdict authority。
+P28E 从 P27A-E docs-closure `971f812faae09fa833dc66741e86ec9ffe97947c` 开始，在同一分支的
+`da4bfc042d96f830e2a7e8cdc62ba227c7ace949`（tree
+`e6f18371f5061c810b2cb87d9a278cfa6d6ac46b`，source date epoch `1786184568`）完成 strict
+advisory role policy、typed value-free handoff/DAG、hash-bound no-run trace 与 authoritative
+0/3 abstention。状态为 `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture evidence
+仅为 `SYNTHETIC_CONFORMANCE_ONLY`，science `NOT_RUN`，policy `NO_NEW_DECISION`。真实 P28
+仍为 `BLOCKED / 0_OF_3_QUALIFYING_MODULES`，comparison/ablation `NOT_RUN`；legacy
+MessageBus/AgentMessage、runtime/API/LLM/registry positive path 均未接线。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
@@ -109,7 +117,8 @@ exact 验证与克制的科学/policy 边界见
 [P23A 完成报告](reports/phase23a/PHASE23A_COMPLETION.md)以及
 [P25E 完成报告](reports/phase25e/PHASE25E_COMPLETION.md)与
 [P26E 完成报告](reports/phase26e/PHASE26E_COMPLETION.md)以及
-[P27A-E 完成报告](reports/phase27ae/PHASE27AE_COMPLETION.md)。P14R、P15R 与 P16R 的真实
+[P27A-E 完成报告](reports/phase27ae/PHASE27AE_COMPLETION.md)以及
+[P28E 完成报告](reports/phase28e/PHASE28E_COMPLETION.md)。P14R、P15R 与 P16R 的真实
 asset/science run 均为 `AUTHORIZATION_REQUIRED / NOT_RUN`，P14B、P15B 与 P16B 均为
 `NOT_RUN`。当前 P12 `ModelRegistryV2` 有 5 个 legacy release、0 个 native、0 个 production-promoted
 capability；P18 没有真实 multi-omics model execution/acceptance，science 为 `NOT_RUN`，
@@ -199,9 +208,19 @@ scope/unit drift 和 missing outcomes 均 fail closed。设计和操作边界见
 [P27A-E runbook](docs/runbooks/AGENTIC-EXPERIMENT-DESIGN.md)。当前没有 canonical local historical replay
 pool，因此 P27A-R 保持 `REPLAY_NOT_RUN / ASSET_PENDING`；P27B 为
 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`，P27C 为
-`AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。下一 eligible
-local work unit 是 P28E contract-only orchestrator、typed handoff、trace 与 value-free abstention；真实 P28
-acceptance 仍需至少三个 exact-request executable + scientifically validated + production-promoted 模型模块。
+`AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。
+
+P28E 新增六个 strict public records：role policy、typed handoff、deterministic advisory DAG、trace event、
+trace 与 authoritative compilation。Role permissions/budget/timeout/retry/cancellation/resource limits 固定；
+external schema 必须绑定 exact P17/P27/replay fingerprint，internal handoff 必须绑定 declared predecessor，
+trace 必须覆盖 exact DAG handoff set。Authoritative roles/handoffs/events/steps 为空，prediction/result/tool
+output 为 `null`，0/3 并 abstain；synthetic advisory records 永不计为真实模型。P17 compilation 与
+P27 experiment 同 request；P27 replay-result 只绑定 standalone exact fingerprint，
+因 `ReplayResultV1` 没有 request/experiment link，不称 request-matched replay。设计和操作边界见
+[P28E ADR](docs/ADR-0024-multi-agent-biology-contract.md)与
+[P28E runbook](docs/runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md)。下一 eligible local work unit 是 P29E
+strict connected-subgraph contract plus authoritative empty-graph/value-free abstention；当前 qualified biological nodes 为 0，真实 P29
+blocked，不得补造 molecule→organism placeholder chain。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -577,14 +596,15 @@ npm run build
 CI=1 npm run e2e
 ```
 
-当前 P27A-E 精确本地结果为 focused `28 passed`、affected `301 passed`、safe
-`1,845 passed / 49 skipped / 387 deselected`（`453.03s`）、legacy
-`1,147 passed / 58 skipped / 105 deselected`（`61.21s`），静态门与前端 bundle budget 通过。
-两次 completion-SHA archive wheel byte-identical：`1,251,560` bytes，SHA-256
-`4bd584bdae75888b4e09d8cfb2211e002cb509155ca834adb7d00a6106abec99`，`376`
+当前 P28E 精确本地结果为 focused `38 passed`、affected `339 passed`、safe
+`1,883 passed / 49 skipped / 387 deselected`（`419.19s`）、legacy
+`1,147 passed / 58 skipped / 105 deselected`（`51.29s`）、packaging/versioning `18 passed`，
+静态门与前端 bundle budget 通过。
+两次 completion-SHA archive wheel byte-identical：`1,259,255` bytes，SHA-256
+`0358bf4df9e929be7c520e93f7c95dccc351895e7926773b53de8febf7eaec9f`，`377`
 entries、React `14`、tests `0`、AppleDouble `0`；source/wheel
-`praxis_virtualcell/experiment_design.py` SHA-256 均为
-`ffa647094f117ef45adb726559ee23bcb0bd20427c87681ab6675522fa26f55f`。工具链为
+`praxis_virtualcell/multi_agent_biology.py` SHA-256 均为
+`aadb8fba6efb943799cfa8d9f296f2a7e03f27d45d52d22ce3e1b67b94b160ca`。工具链为
 Python `3.13.12`、build `1.5.0`、setuptools `70.2.0`、packaging `26.0`、Node
 `25.8.2`、npm `11.11.1`、Vite `8.1.2`。这是 exact local source/toolchain reproducibility，
 不是 pinned dependency closure、clean-install 证明、historical/scientific evidence 或 release。完整命令、用时、skip/deselect
@@ -594,7 +614,10 @@ Python `3.13.12`、build `1.5.0`、setuptools `70.2.0`、packaging `26.0`、Node
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P27A-E 边界和跨项目集成 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P28E 边界和跨项目集成 |
+| [P28E 完成报告](reports/phase28e/PHASE28E_COMPLETION.md) | exact 0/3 value-free closure、typed DAG/trace identities、package evidence 与真实 comparison/science/policy non-runs |
+| [P28E Multi-Agent Biology ADR](docs/ADR-0024-multi-agent-biology-contract.md) | advisory authority ceiling、exact handoff/DAG/trace closure 与 authoritative empty graph 决策 |
+| [P28E Multi-Agent Biology runbook](docs/runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md) | role/handoff/DAG/trace 核验、real 3-module gate 与 P29E empty-graph handoff |
 | [P27A-E 完成报告](reports/phase27ae/PHASE27AE_COMPLETION.md) | exact design/replay closure、synthetic conformance、P27A-R/P27B/P27C non-runs、package evidence 与 P28E handoff |
 | [P27A-E Agentic Experiment Design ADR](docs/ADR-0023-agentic-experiment-design-contract.md) | request/public identity、empty product action space、rank-then-reveal 与 maturity ceiling 决策 |
 | [P27A-E Agentic Experiment Design runbook](docs/runbooks/AGENTIC-EXPERIMENT-DESIGN.md) | design/action/selector/reveal 核验、historical asset gate 与 P28E handoff |

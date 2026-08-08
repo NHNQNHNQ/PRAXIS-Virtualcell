@@ -140,3 +140,12 @@ acceptance；synthetic、rule 或 advisory 模块不计数。
 
 Design rationale: [ADR-0023](../ADR-0023-agentic-experiment-design-contract.md). Frozen evidence:
 [P27A-E completion report](../../reports/phase27ae/PHASE27AE_COMPLETION.md).
+
+## 10. 2026-08-08 follow-on
+
+P28E subsequently completed as contract-only/value-free engineering at
+`da4bfc042d96f830e2a7e8cdc62ba227c7ace949`; real P28 remains blocked at `0/3` qualifying modules.
+Section 9 is the historical P27 handoff, not a current assertion that P28 is still unstarted. The next local
+unit is P29E strict connected-subgraph contract plus authoritative empty-graph/value-free abstention; no
+biological placeholder nodes are allowed.
+See the [P28E runbook](MULTI-AGENT-BIOLOGY-CONTRACT.md).

@@ -112,3 +112,12 @@ production-promoted 的模型模块；rule/advisory/synthetic 模块不计数。
 
 操作边界见 [P27A-E runbook](runbooks/AGENTIC-EXPERIMENT-DESIGN.md)，frozen evidence 见
 [P27A-E completion report](../reports/phase27ae/PHASE27AE_COMPLETION.md)。
+
+## 2026-08-08 follow-on
+
+P28E subsequently completed at code `da4bfc042d96f830e2a7e8cdc62ba227c7ace949` as an isolated,
+value-free contract surface. It consumed only P27's actual synthetic maturity, kept authoritative roles and
+handoffs empty, and left real P28 at `0/3`. The paragraph above is preserved as the historical P27 handoff;
+the current next local unit is P29E strict connected-subgraph contract plus authoritative
+empty-graph/value-free abstention. See
+[ADR-0024](ADR-0024-multi-agent-biology-contract.md).

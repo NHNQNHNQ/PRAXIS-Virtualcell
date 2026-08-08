@@ -108,8 +108,10 @@ release、community release、完整 request bindings、matching release、cross
 `5875571bf9d8b518dc7a857feb935206f756de59` 完成 strict experiment-design contracts 与
 rank-then-reveal synthetic harness。P27A-R historical replay 仍为
 `REPLAY_NOT_RUN / ASSET_PENDING`；P27B 为 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`，P27C 为
-`AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。当前下一本地 work unit 是 P28E contract-only
-orchestrator/typed handoff/trace/abstention，真实 P28 acceptance 为 `0/3`。
+`AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。在 P27A-E closure 时下一本地 work unit 是 P28E；
+它随后在 code `da4bfc042d96f830e2a7e8cdc62ba227c7ace949` 完成 contract-only/value-free
+orchestrator/handoff/DAG/trace，真实 P28 acceptance 仍为 `0/3`。当前下一本地 work unit 是
+P29E strict connected-subgraph contract plus authoritative empty-graph/value-free abstention。
 
 操作边界见 [P26E runbook](runbooks/HOST-MICROBIOME-CONTRACT.md)，完整 frozen evidence 见
 [P26E completion report](../reports/phase26e/PHASE26E_COMPLETION.md)。

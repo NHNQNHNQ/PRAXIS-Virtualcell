@@ -1,24 +1,94 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P27A-E 分支 `codex/p25e-virtual-microbiome`；active baseline
-> `a12cf4f4b71efb653f8128afcb1f468211fdb837`
+> 当前文档基线：P28E 分支 `codex/p25e-virtual-microbiome`；active baseline
+> `971f812faae09fa833dc66741e86ec9ffe97947c`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
 >
-> 状态：P27A-E `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY`；umbrella
+> 状态：P28E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；umbrella
 > `ENGINEERING_COMPLETE_SCIENCE_PENDING`；science `NOT_RUN`；policy
 > `NO_NEW_DECISION`；completion code SHA
-> `5875571bf9d8b518dc7a857feb935206f756de59`；tree
-> `a7c65e7b30f51832660e66323b5946acbddcbf18`；source date epoch `1786180822`。
-> 下述 P4.3–P26E 和 CI 数字仍只绑定各自 exact SHA/日期。P27A-E 只证明 strict
+> `da4bfc042d96f830e2a7e8cdc62ba227c7ace949`；tree
+> `e6f18371f5061c810b2cb87d9a278cfa6d6ac46b`；source date epoch `1786184568`。
+> 下述 P4.3–P27A-E 和 CI 数字仍只绑定各自 exact SHA/日期。P28E 只证明 strict
+> advisory policy、typed value-free handoff/DAG、hash-bound no-run trace 与 authoritative 0/3 abstention；
+> fixture evidence 为 `SYNTHETIC_CONFORMANCE_ONLY`。真实 P28 为
+> `BLOCKED / 0_OF_3_QUALIFYING_MODULES`，comparison/ablation `NOT_RUN`。
+> P27A-E 只证明 strict
 > experiment-design contracts 与 deterministic rank-then-reveal harness 的 synthetic conformance；
 > authoritative product action space 仍为空并 value-free abstain。P27A-R historical replay 为
 > `REPLAY_NOT_RUN / ASSET_PENDING`；P27B 为 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`；
 > P27C 为 `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。P21B/P21C、P23B、P24、P25R 和所有
 > real asset/model/output 窗口均未授权或未运行；P26R 仍为 `BLOCKED_EXTERNAL / NOT_RUN`。
-> 下一 eligible local unit 是 standing local authorization 下的 P28E contract-only
-> orchestrator/typed-handoff/trace/abstention 工程；真实 P28 验收当前为 `0/3` qualifying modules。
+> 下一 eligible local unit 是 standing local authorization 下的 P29E strict connected-subgraph
+> contract plus authoritative empty-graph/value-free abstention；
+> 真实 P29 当前有 `0` qualified biological nodes。
+
+## Phase 28E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` 本地证据
+
+P28E adds six strict public records for role policy, typed handoff, deterministic DAG, trace event, trace,
+and authoritative compilation. The compiler accepts an exact same-request P17 compilation/P27 experiment and
+separately binds an exact standalone P27 replay-result fingerprint; `ReplayResultV1` has no request/experiment
+binding and is not called request-matched. It has no caller role, module, registry, candidate, tool or LLM input.
+The authoritative graph and trace are empty, qualifying modules
+are `0/3`, and prediction/result/tool output are null. Synthetic advisory records are conformance only and do
+not count toward real acceptance. Legacy `AgentMessage`/`MessageBus` and default runtime/API wiring are unchanged.
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_multi_agent_biology.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q -rA \
+  praxis_virtualcell/tests/test_multi_agent_biology.py \
+  praxis_virtualcell/tests/test_virtual_experiment.py \
+  praxis_virtualcell/tests/test_experiment_design_replay.py \
+  praxis_virtualcell/tests/test_request_v2.py \
+  praxis_virtualcell/tests/test_capability_runtime.py \
+  praxis_virtualcell/tests/test_benchmark_system.py \
+  praxis_virtualcell/tests/test_model_adapter_sdk.py \
+  praxis_virtualcell/tests/test_active_learning_agent.py \
+  praxis_virtualcell/tests/test_runtime_active_learning.py \
+  praxis_virtualcell/tests/test_report_active_learning_request.py
+
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts='' -q \
+  praxis_virtualcell/tests/test_packaging.py \
+  praxis_virtualcell/tests/test_versioning.py
+
+python -m ruff check . --extend-exclude old --no-cache
+python -m ruff format --check \
+  praxis_virtualcell/multi_agent_biology.py \
+  praxis_virtualcell/tests/test_multi_agent_biology.py
+python -m py_compile \
+  praxis_virtualcell/multi_agent_biology.py \
+  praxis_virtualcell/tests/test_multi_agent_biology.py
+
+npm --prefix praxis_vc_react run typecheck
+npm --prefix praxis_vc_react run lint
+npm --prefix praxis_vc_react run build
+
+python -m pip check
+git diff --check
+~~~
+
+| Gate | Result |
+|---|---|
+| P28E focused | `38 passed` |
+| P28E affected (exact ten-test-file suite above) | `339 passed` |
+| safe local suite | `1,883 passed / 49 skipped / 387 deselected / 419.19s` |
+| legacy suite | `1,147 passed / 58 skipped / 105 deselected / 51.29s` |
+| packaging + versioning | `18 passed` |
+| Ruff / targeted format / compile / diff | PASS |
+| React typecheck / lint / build / bundle budget | PASS |
+| `pip check` | FAIL: missing `python-magic` + pre-existing `vcbench` pin conflicts in shared environment; no environment mutation |
+| reproducible local packaging | PASS: two byte-identical wheels; `1,259,255` bytes / `0358bf4d…ec9f` / `377` entries |
+
+Negative coverage includes external schema/fingerprint mismatch, missing internal predecessor, undeclared or
+duplicate roles, cycles, budget overflow, payload/value/evidence/policy injection, re-signed foreign trace,
+nested type drift, synthetic-module laundering, status elevation, secret/path echo, and closed candidate/module
+inputs. See [ADR-0024](ADR-0024-multi-agent-biology-contract.md), the
+[P28E runbook](runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md), and the
+[P28E completion report](../reports/phase28e/PHASE28E_COMPLETION.md).
 
 ## Phase 27A-E `COMPLETE — CONTRACT_ONLY / SYNTHETIC_CONFORMANCE_ONLY` 本地证据
 
