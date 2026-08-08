@@ -1802,8 +1802,9 @@ packaging 证据不是 dependency closure、clean install、release 或 science 
 ### P23A 真实数据/执行窗口可复制授权提示词
 
 ```text
-授权以 `2b894966cd00b2af2fafbf8f009566dd69f393a7` 作为 Phase 23A 真实数据/执行窗口
-唯一代码基线，继续使用 `codex/p23-cell-interaction`，仅为一个有方向的
+授权以授权时现场只读核验的 `ACTIVE_BASELINE_SHA` 作为 Phase 23A 真实数据/执行窗口
+唯一代码基线，并引用 `2b894966cd00b2af2fafbf8f009566dd69f393a7` 作为 P23A prerequisite
+code；不得 checkout/revert 到该历史 SHA 或丢失后续本地 work units。仅为一个有方向的
 sender→receiver interaction task 实现明确授权的真实数据/固定模型接线，严格绑定两个
 Virtual Cell release/Pack、
 同实验 donor/sample/well、condition/dose/time、ligand/receptor namespace、
@@ -1824,8 +1825,11 @@ evidence/result hash、科学边界和下一授权句。
 ### P23B 可复制授权提示词：receiver response（独立可选）
 
 ```text
-授权以 `2b894966cd00b2af2fafbf8f009566dd69f393a7`、`<冻结的 receiver-response protocol fingerprint>` 和
-`<exact P21B candidate/evidence identity>` 作为 Phase 23B 唯一输入，创建
+授权以授权时现场只读核验的 `ACTIVE_BASELINE_SHA` 作为 Phase 23B 唯一代码基线，并引用
+`2b894966cd00b2af2fafbf8f009566dd69f393a7` 作为 P23A prerequisite code；不得
+checkout/revert 到该历史 SHA 或丢失后续本地 work units。另以
+`<冻结的 receiver-response protocol fingerprint>` 和 `<exact P21B candidate/evidence identity>`
+作为 Phase 23B immutable science inputs，创建
 `codex/p23b-receiver-response`，只为一个预声明
 sender intervention → receiver_response_delta 任务实现严格 interaction contract/
 adapter/Broker/report 接线、直接相关测试、ADR 和 runbook；本地 commit 仅在本阶段
