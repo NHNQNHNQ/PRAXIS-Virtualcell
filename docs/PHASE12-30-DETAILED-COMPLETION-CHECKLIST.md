@@ -168,10 +168,11 @@ handoff、deterministic DAG、hash-chain trace 与 authoritative empty orchestra
 真实 P28 验收仍为 `BLOCKED / 0_OF_3_QUALIFYING_MODULES`，没有运行 single-agent/monolithic/
 multi-agent comparison 或 ablation。P29E 已完成 strict null requirement、`empty_not_connected`
 typed graph 与 value-free compilation；真实 P29 仍为
-`BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`。P30A-E1 release-contract hardening 与 P30A-E2a
-clean-SHA offline preflight 均已完成；E2a 为 `COMPLETE_NEGATIVE`，下一 eligible local unit 是
-P30A-E2b artifact-aware trusted finalizer。formal P30A 仍 `LOCAL_RC_INCOMPLETE`；它不授权
-P30B1–B4。
+`BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`。P30A-E1 release-contract hardening、P30A-E2a
+clean-SHA offline preflight 与 P30A-E2b archive-only runner 均已完成；E2a/E2b 均为
+`COMPLETE_NEGATIVE`。formal P30A 仍 `LOCAL_RC_INCOMPLETE`；下一 eligible local unit 是 P16R
+local authorization-preflight identity bridge，真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`，且不
+授权 P30B1–B4。
 阶段 scope、资产清单和可复制授权句仍以
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)为准。
 
@@ -421,7 +422,8 @@ flowchart TD
 | P29 real candidate | `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES` | `NOT_RUN` | `NOT_RUN` | 真实 connected adjacent-scale subgraph/data/model/benchmark 均 absent |
 | P30A-E1 | `ENGINEERING_COMPLETE` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | release-contract tooling、governance、wheel/source probes complete; not a formal RC |
 | P30A-E2a | `COMPLETE_NEGATIVE` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | clean-SHA offline dependency preflight; `6cb91031…9019`; no install/build/OCI/full gate or RC result |
-| P30A-E2b | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | artifact-aware trusted finalizer must create one frozen evidence bundle; formal P30A remains `LOCAL_RC_INCOMPLETE` |
+| P30A-E2b | `COMPLETE_NEGATIVE` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | source-stable archive-only record `72459a3b…63d2`; tracked unsupported link safely failed both archive attempts; formal P30A remains `LOCAL_RC_INCOMPLETE` |
+| P16R local authorization-preflight identity bridge | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT` | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NO_NEW_DECISION` | local identity/authorization preparation only; no P16R real asset, candidate, comparator, evidence or promotion action |
 | P30B1–B4 | `NOT_AUTHORIZED / NOT_RUN` | `SEPARATE_BADGES` | `RELEASE_WINDOWS` | CI、发布、staging、cutover/rollback；B3/B4 `NOT_DEPLOYED` |
 
 ---
@@ -1727,9 +1729,10 @@ Planned-vs-actual：本地工程采用隔离 deterministic harness；没有改�
 
 ### Phase 30 — Foundation Platform Release
 
-**状态：** P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a `COMPLETE_NEGATIVE`; P30A-E2b
-`NEXT_ELIGIBLE_LOCAL_WORK_UNIT`; formal P30A `LOCAL_RC_INCOMPLETE`; science
-`NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; policy `NO_NEW_DECISION`。
+**状态：** P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a/E2b `COMPLETE_NEGATIVE`; formal P30A
+`LOCAL_RC_INCOMPLETE`; science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; policy `NO_NEW_DECISION`。
+下一 eligible local unit 是 P16R local authorization-preflight identity bridge；真实 P16R 仍
+`AUTHORIZATION_REQUIRED / NOT_RUN`。
 
 P30 把 Software GA 和 science-qualified capability badge 分开。以下每个发布窗口都需要
 独立授权，前一个窗口不能自动授权后一个。
@@ -1751,8 +1754,11 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
   `964b62214f346b15ec2d3f2a622b33f632dde466` / tree
   `eac19455bc9241e5347de27782a99942e3591cab` / epoch `1786338523`；`55 passed`；
   `PRECHECK_ONLY_NOT_EXECUTED`，不是 formal RC；
-- [ ] P30A-E2b：artifact-aware trusted finalizer independently constructs one frozen clean-source
-  evidence bundle rather than accepting caller-supplied artifact/test claims；
+- [x] P30A-E2b：artifact-aware source-archive runner 在 code
+  `12ad93d57e4f4e7438d2110b5ac9848c6b17ea33` / tree
+  `14fe604111c18c558048bc282d23da936ac57088` / epoch `1786343459` 生成 record
+  `72459a3b…63d2`（nested preflight `064a479f…fec4`）；source stable、两次 archive 因 tracked
+  unsupported link 安全失败、`SOURCE_ARCHIVE_ONLY_NOT_FULL_RC`，不是 formal RC；
 - [ ] clean runtime install、exact-SHA core/legacy gate、OCI double-build/container smoke、SBOM、license
   inventory、dependency audit、`SHA256SUMS` 与 accepted release manifest；当前离线 runtime cache 缺
   `pyjwt==2.13.0`/`pyyaml==6.0.3`，Linux/arm64 还缺 `cffi`/`cryptography`/`pydantic-core`/`rpds-py`；
@@ -1855,7 +1861,8 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | P29 real candidate | `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES` | `NOT_RUN` | `NOT_RUN` | real connected adjacent-scale subgraph/data/model/benchmark | — | P28 qualifying modules `0/3`; no molecule→organism placeholder chain |
 | P30A-E1 | `ENGINEERING_COMPLETE` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4` scope / `d808735ebfd649df6a4c932b95140387aa412c7d` entrypoint baseline | `0a4d72b0825d9ec0ff3b7776bbc4f1f0023336f9` | tree `ba701d4...`; epoch `1786335170`; focused `47`; entrypoint `148`; probes only, no final RC |
 | P30A-E2a | `COMPLETE_NEGATIVE` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | `40f433fef8704381de34aeb32d45399b6595c472` | `964b62214f346b15ec2d3f2a622b33f632dde466` | tree `eac19455...`; epoch `1786338523`; `55 passed`; record `6cb91031…9019`; no install/build/OCI/full gate |
-| P30A-E2b | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | P30A-E2a exact negative evidence | — | artifact-aware trusted finalizer; formal P30A `LOCAL_RC_INCOMPLETE`; dependency inputs remain absent |
+| P30A-E2b | `COMPLETE_NEGATIVE` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | E2a negative evidence / exact clean source | `12ad93d57e4f4e7438d2110b5ac9848c6b17ea33` | tree `14fe6041...`; epoch `1786343459`; runner `72459a3b…63d2`; nested preflight `064a479f…fec4`; archive-only safely failed, no formal RC |
+| P16R local authorization-preflight identity bridge | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT` | `AUTHORIZATION_REQUIRED / NOT_RUN` | `NO_NEW_DECISION` | P16E + P30 negative ledgers | — | local-only bridge; real P16R candidate/comparator/asset/benchmark window remains externally gated |
 | P30B1 | `NOT_AUTHORIZED / NOT_RUN` | `SEPARATE` | `RELEASE_WINDOW` | — | unchanged | exact-SHA CI |
 | P30B2 | `NOT_AUTHORIZED / NOT_RUN` | `SEPARATE` | `RELEASE_WINDOW` | — | main/tag SHA | release digest |
 | P30B3 | `NOT_AUTHORIZED / NOT_DEPLOYED` | `SEPARATE` | `RELEASE_WINDOW` | — | unchanged | staging identity |
@@ -2040,9 +2047,10 @@ state/action/observation/time requirement、`empty_not_connected` typed graph �
 value-free compilation。Engineering 为 `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`，
 fixture 为 `SYNTHETIC_CONFORMANCE_ONLY`；真实 P29 candidate 仍为
 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`，science `NOT_RUN`，policy `NO_NEW_DECISION`。
-P30A-E1 release-contract hardening 与 P30A-E2a clean-SHA offline preflight 已完成；下一
-eligible local work unit 是 P30A-E2b artifact-aware trusted finalizer。formal P30A 仍
-`LOCAL_RC_INCOMPLETE`；P30B1–B4 仍为独立授权窗口。
+P30A-E1 release-contract hardening、P30A-E2a clean-SHA offline preflight 与 P30A-E2b archive-only
+runner 已完成；E2b 是 `COMPLETE_NEGATIVE`，formal P30A 仍 `LOCAL_RC_INCOMPLETE`。下一 eligible
+local work unit 是 P16R local authorization-preflight identity bridge；P30B1–B4 仍为独立授权窗口，
+真实 P16R 也仍需其独立科学授权窗口。
 
 可直接跨对话使用的顺序推进提示词见：
 

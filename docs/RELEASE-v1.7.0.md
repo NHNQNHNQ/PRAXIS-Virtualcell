@@ -1,11 +1,11 @@
 # PRAXIS-VirtualCell 1.7.0 — Local RC Contract (Unpublished)
 
-> Status: P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a `COMPLETE_NEGATIVE`; P30A-E2b
-> `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`; formal P30A `LOCAL_RC_INCOMPLETE / UNPUBLISHED`.
+> Status: P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a/E2b `COMPLETE_NEGATIVE`; formal P30A
+> `LOCAL_RC_INCOMPLETE / UNPUBLISHED`; P16R local authorization-preflight identity bridge next.
 >
 > P30A is local-only. Completed release-contract hardening and reproducibility probes do not yet
-> prove a complete RC artifact set. P30A-E2b must use a trusted finalizer rather than
-> accept caller-supplied test or artifact claims. This document does not publish an artifact,
+> prove a complete RC artifact set. P30A-E2b used a controlled archive-only runner and retained a
+> negative result rather than accept caller-supplied test or artifact claims. This document does not publish an artifact,
 > complete a remote CI gate, create or move a tag, promote a biological capability, or authorize
 > deployment.
 >
@@ -17,6 +17,9 @@
 > `eac19455bc9241e5347de27782a99942e3591cab`, source-date epoch `1786338523`; its write-new
 > preflight record is `6cb91031…9019`. These are negative-preflight/probe identities, not a final
 > candidate identity or a substitute for an immutable `release-manifest.json`.
+> P30A-E2b code evidence is `12ad93d57e4f4e7438d2110b5ac9848c6b17ea33`, tree
+> `14fe604111c18c558048bc282d23da936ac57088`, source-date epoch `1786343459`; its runner record
+> is `72459a3b…63d2` and nested preflight is `064a479f…fec4`. These remain negative evidence only.
 
 ## Product promise
 
@@ -130,7 +133,7 @@ entries; ZIP integrity passed. The archive probe is an exact-HEAD projection and
 links and AppleDouble entries. Neither probe is a retained clean-install-qualified artifact bundle,
 an accepted release manifest, an SBOM, a licence inventory or a published artifact.
 
-## P30A-E2a negative preflight and P30A-E2b formal-RC gates
+## P30A-E2a/E2b negative records and formal-RC gates
 
 P30A-E2a independently rechecked clean source SHA/tree/epoch before and after an offline
 dependency-coverage preflight. Its `praxis.local-rc-finalizer-preflight.v1` record is
@@ -145,13 +148,19 @@ The exact dependency blockers are `offline_wheel_cache_incomplete` for
 runtime install, artifact build, OCI double-build/container smoke, complete SBOM/licence inventory,
 dependency audit, `SHA256SUMS` or accepted release manifest was generated.
 
-`P30A-E2b — artifact-aware trusted finalizer / frozen source × clean install × full gate evidence
-bundle` is the next eligible local work unit. It must construct the evidence bundle itself and
-independently revalidate source, locks, artifacts and tests; it cannot promote this preflight record
-or caller-supplied assertions. `pip check` in the shared environment remains disqualified because
-`python-magic` is absent and unrelated pre-existing `vcbench` pins conflict. If the exact inputs
-remain unavailable after E2b engineering, formal P30A remains blocked on external dependency input;
-that does not convert E2b implementation into an external action.
+P30A-E2b subsequently ran its source-stable, exact-HEAD archive-only runner at
+`12ad93d57e4f4e7438d2110b5ac9848c6b17ea33` / tree
+`14fe604111c18c558048bc282d23da936ac57088` / epoch `1786343459`. Its runner record
+`72459a3b51ba243d747ee2c0159d4105a30ba47d191b99ea05960343bbae63d2` and nested preflight
+`064a479fd35deba3b08d70e999171577b9171133873d5bc7a3d9968a57aafec4` are both negative: the
+source archives safely failed on a tracked unsupported link, while the two offline wheelhouse profiles
+remain incomplete. No clean install, OCI build, full gate, SBOM, licence inventory, dependency audit,
+`SHA256SUMS` or accepted release manifest was generated.
+
+Formal P30A therefore remains incomplete. The next independent local unit is the P16R local
+authorization-preflight identity bridge; it does not access real P16R inputs or create science/policy.
+`pip check` in the shared environment remains disqualified because `python-magic` is absent and
+unrelated pre-existing `vcbench` pins conflict.
 
 ## Compatibility and migration from the local 1.6.0 candidate
 
@@ -181,8 +190,8 @@ No repository data migration or implicit registry promotion is required. Consume
 - Dependency hash locking proves identity, not absence of vulnerabilities.
 - Platform claims outside the exact recorded Python 3.13 artifact/test environment remain
   unqualified.
-- There is no formal local RC artifact yet: P30A-E2b must still finalize one trusted immutable
-  evidence bundle, and its dependency-input gates remain unresolved.
+- There is no formal local RC artifact yet: E2b retained only negative archive-only evidence, and clean
+  dependency/install/OCI/SBOM/license/manifest gates remain unresolved.
 
 ## P30B authorization state
 

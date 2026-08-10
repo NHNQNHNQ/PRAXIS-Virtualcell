@@ -132,9 +132,9 @@
 > `codex/p25e-virtual-microbiome`；engineering
 > `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；
 > real candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；science `NOT_RUN`；policy
-> `NO_NEW_DECISION`；P30A-E1 与 P30A-E2a 已完成；P30A-E2a 是 `COMPLETE_NEGATIVE`；下一
-> eligible local unit 为 P30A-E2b artifact-aware trusted finalizer；formal P30A 仍
-> `LOCAL_RC_INCOMPLETE`
+> `NO_NEW_DECISION`；P30A-E1、P30A-E2a 与 P30A-E2b 已完成；E2a/E2b 均为
+> `COMPLETE_NEGATIVE`；formal P30A 仍 `LOCAL_RC_INCOMPLETE`；下一 eligible local unit 为 P16R
+> local authorization-preflight identity bridge，真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
@@ -227,7 +227,7 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | P28E source date epoch / 完成分支 | `1786184568` / `codex/p25e-virtual-microbiome` |
 | P29E actual starting SHA / completion code/tree | `90990c198c40d0e6655aedaad101a783cde003aa` / `471767e5f38f9866fbe396f39836369d943f6657` / `d1dec19f06ec88f563406b45f2b544effabad915` |
 | P29E source date epoch / 完成分支 | `1786187523` / `codex/p25e-virtual-microbiome` |
-| 当前 work-unit 状态 | P29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；real P29 candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；P30A-E1 `ENGINEERING_COMPLETE`；P30A-E2a `COMPLETE_NEGATIVE`；P30A-E2b `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`；formal P30A `LOCAL_RC_INCOMPLETE`；science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`；policy `NO_NEW_DECISION`；P28 real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C/P21B/P21C 均保持各自 authorization gate |
+| 当前 work-unit 状态 | P29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；real P29 candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；P30A-E1 `ENGINEERING_COMPLETE`；P30A-E2a/E2b `COMPLETE_NEGATIVE`；formal P30A `LOCAL_RC_INCOMPLETE`；P16R local authorization-preflight identity bridge `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`；actual P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`；policy `NO_NEW_DECISION`；P28 real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C/P21B/P21C 均保持各自 authorization gate |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -2464,9 +2464,12 @@ community capability”只决定科学资格徽章，不能被平台名称自动
 reproducible but are not a formal RC. P30A-E2a completed a clean-SHA offline preflight at
 `964b62214f346b15ec2d3f2a622b33f632dde466` / tree
 `eac19455bc9241e5347de27782a99942e3591cab` / epoch `1786338523`; record `6cb91031…9019` is
-`COMPLETE_NEGATIVE`, not a full gate execution. P30A-E2b artifact-aware trusted finalizer is next;
-formal P30A remains `LOCAL_RC_INCOMPLETE`. Science is `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` and
-policy is `NO_NEW_DECISION`.
+`COMPLETE_NEGATIVE`, not a full gate execution. P30A-E2b archive-only runner subsequently completed
+negative at `12ad93d57e4f4e7438d2110b5ac9848c6b17ea33` / tree
+`14fe604111c18c558048bc282d23da936ac57088`, with source stable but safely failed archive attempts.
+Formal P30A remains `LOCAL_RC_INCOMPLETE`. The next local unit is the P16R authorization-preflight
+identity bridge; actual P16R remains `AUTHORIZATION_REQUIRED / NOT_RUN`. Science is
+`NOT_RUN / SCIENCE_BADGE_INELIGIBLE` and policy is `NO_NEW_DECISION`.
 
 发布动作拆为五个独立授权窗口。每个窗口都可以停止；后一个窗口不能由前一个窗口的
 授权推导。
@@ -2478,8 +2481,8 @@ numbered plan below. It proved local wheel/source reproducibility (`1,264,708` b
 `44e5e905e706f87c9b43574a5f02afd41c7b37d9079a0e91956b511bca422303`; `8,055,078` bytes /
 `ba5e5d0dbe387575049f5603f8011af3359d4f99583f4856233be48dc796e642`) but not a completed
 artifact set. P30A-E2a independently checked offline coverage and retained the exact negative
-record, but ran no install/build/OCI/full gate. P30A-E2b must independently finalise one trusted
-clean-source evidence bundle; it cannot elevate caller-supplied probes or the E2a record. Missing
+record; P30A-E2b then bound it to a source-stable archive-only runner, whose two source archives
+safely failed on a tracked unsupported link. Neither record may elevate caller-supplied probes. Missing
 offline inputs (`pyjwt==2.13.0`, `pyyaml==6.0.3`, and Linux/arm64 `cffi`, `cryptography`,
 `pydantic-core`, `rpds-py`) remain explicit gates, not permission to download or bypass them.
 
@@ -2562,9 +2565,10 @@ offline inputs (`pyjwt==2.13.0`, `pyyaml==6.0.3`, and Linux/arm64 `cffi`, `crypt
 
 ### 可复制 P30A 授权提示词（历史模板）
 
-The active continuous-local authorization supersedes this historical template for P30A-E2b local
-work only. It does not authorize P30B1–P30B4 or any network, remote, publication or deployment
-action.
+The active continuous-local authorization continues to cover the P16R local authorization-preflight
+identity bridge. It does not authorize P30B1–P30B4 or any network, remote, publication or deployment
+action, nor actual P16R asset access, candidate execution, benchmark, evidence, or policy. Actual P16R
+remains a separate external window.
 
 ```text
 授权以 `<Phase 29 完成 SHA>` 作为 Phase 30A（Foundation Platform 本地 Release
@@ -2809,8 +2813,9 @@ blocked；comparison/ablation 未运行。P29E 随后从 P28E docs closure
 `471767e5f38f9866fbe396f39836369d943f6657` 完成 strict null requirement、
 `empty_not_connected` graph 与 authoritative value-free compilation。真实 P29 candidate 因
 qualified biological nodes 为 `0` 而保持 blocked。P30A-E1 local release-contract hardening 与
-P30A-E2a clean-SHA offline preflight 已完成；当前下一 eligible local work unit 是 P30A-E2b
-artifact-aware trusted finalizer；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P30B1–B4 保持独立授权门。
+P30A-E2a clean-SHA offline preflight 与 P30A-E2b archive-only runner 已完成，均为
+`COMPLETE_NEGATIVE`；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。当前下一 eligible local work unit 是
+P16R local authorization-preflight identity bridge；P30B1–B4 与真实 P16R 保持独立授权门。
 
 当前持续本地授权不覆盖 P14R、P14B、P15R、P15B、P16R 或 P16B。没有逐项 exact
 assets/output root/run window 授权时，不得读取或运行真实资产、产生科学

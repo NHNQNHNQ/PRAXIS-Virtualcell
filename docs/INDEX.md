@@ -2,7 +2,7 @@
 
 > Audited: 2026-08-10
 >
-> Status: `CURRENT_DOCUMENT_MAP — P29E COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION; REAL P29 0 NODES; P30A-E1 ENGINEERING_COMPLETE; P30A-E2a COMPLETE_NEGATIVE; P30A-E2b NEXT_ELIGIBLE_LOCAL_WORK_UNIT; FORMAL P30A LOCAL_RC_INCOMPLETE; SCIENCE NOT_RUN / SCIENCE_BADGE_INELIGIBLE; POLICY NO_NEW_DECISION`
+> Status: `CURRENT_DOCUMENT_MAP — P29E COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION; REAL P29 0 NODES; P30A-E1 ENGINEERING_COMPLETE; P30A-E2a/E2b COMPLETE_NEGATIVE; FORMAL P30A LOCAL_RC_INCOMPLETE; P16R LOCAL AUTHORIZATION-PREFLIGHT IDENTITY BRIDGE NEXT; P16R SCIENCE AUTHORIZATION_REQUIRED / NOT_RUN; SCIENCE NOT_RUN / SCIENCE_BADGE_INELIGIBLE; POLICY NO_NEW_DECISION`
 
 This is the navigation authority for the repository. It does not make every linked document current: each section explicitly distinguishes live truth, frozen evidence, active plans, drafts, and history.
 
@@ -11,7 +11,7 @@ This is the navigation authority for the repository. It does not make every link
 When documents disagree, use this order:
 
 1. Exact local bytes, `git rev-parse` identity, immutable artifacts and the current work-unit completion report.
-2. [README](../README.md), the [P30A-E2a preflight negative report](../reports/phase30a/PHASE30A_E2A_PREFLIGHT.md), the [P30A-E1 engineering completion report](../reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md), the [P29E completion report](../reports/phase29e/PHASE29E_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P28E completion report](../reports/phase28e/PHASE28E_COMPLETION.md), [P27A-E completion report](../reports/phase27ae/PHASE27AE_COMPLETION.md), [P26E completion report](../reports/phase26e/PHASE26E_COMPLETION.md), [P25E completion report](../reports/phase25e/PHASE25E_COMPLETION.md), [P23A completion report](../reports/phase23a/PHASE23A_COMPLETION.md), [P22 completion report](../reports/phase22/PHASE22_COMPLETION.md), [P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md), [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md), [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md), [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
+2. [README](../README.md), the [P30A-E2b archive-runner negative report](../reports/phase30a/PHASE30A_E2B_ARCHIVE_RUNNER.md), the frozen [P30A-E2a preflight negative report](../reports/phase30a/PHASE30A_E2A_PREFLIGHT.md), the [P30A-E1 engineering completion report](../reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md), the [P29E completion report](../reports/phase29e/PHASE29E_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P28E completion report](../reports/phase28e/PHASE28E_COMPLETION.md), [P27A-E completion report](../reports/phase27ae/PHASE27AE_COMPLETION.md), [P26E completion report](../reports/phase26e/PHASE26E_COMPLETION.md), [P25E completion report](../reports/phase25e/PHASE25E_COMPLETION.md), [P23A completion report](../reports/phase23a/PHASE23A_COMPLETION.md), [P22 completion report](../reports/phase22/PHASE22_COMPLETION.md), [P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md), [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md), [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md), [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
 3. The latest completed phase ADR/runbook—P29E uses [ADR-0025](ADR-0025-limited-biological-world-model-contract.md) and the [Limited Biological World Model runbook](runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md); P28E remains documented by [ADR-0024](ADR-0024-multi-agent-biology-contract.md) and the [Multi-Agent Biology runbook](runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md)—for implemented contract and validation boundaries.
 4. [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) for frozen scientific capability and claim boundaries.
 5. [Three-Way Sync State](status/SYNC-STATE.md) only for its dated local/GitHub/`.53` observations; it is not fresh remote authorization.
@@ -196,17 +196,21 @@ an issuer. Focused validation is `51 passed`, affected `390 passed`, safe
 archive-built wheels are byte-identical at `1,263,199` bytes /
 `368a66a438c036a3b9c24f1093fc478886885fbefaecfea52bb50ad616206c01` /
 `378` entries / `14` React entries / no tests or AppleDouble. P30A-E1 release-contract hardening and
-P30A-E2a clean-SHA offline preflight subsequently completed. The preflight is `COMPLETE_NEGATIVE`,
-not a full gate run; P30A-E2b artifact-aware trusted finalizer is next. Formal P30A remains
-`LOCAL_RC_INCOMPLETE` and neither status authorizes a P30B release or deployment window.
+P30A-E2a clean-SHA offline preflight and P30A-E2b archive-only runner subsequently completed as
+`COMPLETE_NEGATIVE`. E2b observed a stable source but retained only safely failed source-archive
+attempts and negative wheelhouse coverage; it is not a formal RC. Formal P30A remains
+`LOCAL_RC_INCOMPLETE` and neither status authorizes a P30B release or deployment window. The next
+eligible local unit is the P16R local authorization-preflight identity bridge; actual P16R remains
+`AUTHORIZATION_REQUIRED / NOT_RUN`.
 
 ## Current state
 
 | Document | Authority |
 |---|---|
 | [README](../README.md) | current product promise, P29E empty-not-connected/zero-node boundary and primary operator entry points |
-| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13–P30A-E2b boundary |
-| [P30A-E2a Preflight Negative Report](../reports/phase30a/PHASE30A_E2A_PREFLIGHT.md) | clean-SHA offline dependency preflight, write-new negative record and P30A-E2b handoff |
+| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths, P30A-E2b result and P16R preflight boundary |
+| [P30A-E2b Archive Runner Negative Report](../reports/phase30a/PHASE30A_E2B_ARCHIVE_RUNNER.md) | source-stable archive-only negative result, formal RC non-claim and P16R preflight handoff |
+| [P30A-E2a Preflight Negative Report](../reports/phase30a/PHASE30A_E2A_PREFLIGHT.md) | frozen clean-SHA offline dependency preflight evidence |
 | [P30A-E1 Engineering Completion Report](../reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md) | P30 scope/entrypoint baselines, fail-closed release-tool probes and unresolved artifact gates |
 | [Formal Prediction Entrypoint ADR](ADR-0026-formal-prediction-entrypoint.md) | formal no-Pack V2 zero-step abstention; legacy mock/case harness exclusion |
 | [P29E Completion Report](../reports/phase29e/PHASE29E_COMPLETION.md) | exact P29E empty-graph closure, package evidence, real P29/science/policy non-runs and P30A handoff |

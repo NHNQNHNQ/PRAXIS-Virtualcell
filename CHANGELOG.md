@@ -2,7 +2,7 @@
 
 本文件记录面向发布的产品变化。科学能力声明仍以 `reports/phase10/PHASE10_GATE.md` 为准；本地版本或 tag 不等于已在 GitHub 发布。
 
-## 1.7.0 — P30A-E1/E2a local RC engineering, unpublished (`LOCAL_RC_INCOMPLETE`)
+## 1.7.0 — P30A-E1/E2a/E2b local RC engineering, unpublished (`LOCAL_RC_INCOMPLETE`)
 
 - 把 P12–P29 的 versioned model/adapter/environment/evidence/policy、Pack factory、training、benchmark、registry、experiment-design、multi-agent 与 limited-world-model 工程合同收口为本地 Software RC；没有把 contract、catalog 或 synthetic conformance 提升为科学事实。
 - 默认产品承诺保持 fail-closed：只有 exact request × Pack × model × environment × adapter × evidence × policy 全部满足才执行，否则 abstain。
@@ -13,10 +13,13 @@
   SBOM、license inventory、dependency audit、`SHA256SUMS` 或 release manifest。
 - P30A-E2a 在 clean SHA `964b62214f346b15ec2d3f2a622b33f632dde466` 完成 offline
   preflight negative record（`praxis.local-rc-finalizer-preflight.v1` /
-  `6cb91031…9019`）：macOS/arm64 与 Linux/arm64 hash-locked wheel coverage 均不足。它没有
-  install、build、OCI、full gate 或 release result；P30A-E2b artifact-aware trusted finalizer 是
-  下一 eligible local work unit。formal P30A 仍为 `LOCAL_RC_INCOMPLETE`，不得以 shared-env
-  `pip check` 取代 clean-install gate。
+  `6cb91031…9019`）：macOS/arm64 与 Linux/arm64 hash-locked wheel coverage 均不足。
+- P30A-E2b 在 `12ad93d57e4f4e7438d2110b5ac9848c6b17ea33` 完成 artifact-aware archive-only runner
+  negative record（`praxis.local-rc-artifact-aware-runner.v1` / `72459a3b…63d2`）：source stable，
+  但两个 source-archive attempts 因 tracked unsupported link 安全失败，且没有 install、network、OCI、
+  full gate 或 release result。formal P30A 仍为 `LOCAL_RC_INCOMPLETE`，不得以 shared-env `pip check`
+  取代 clean-install gate；下一 eligible local work unit 是 P16R local authorization-preflight
+  identity bridge，真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`。
 - P30 没有产生科学进展：science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`，policy
   `NO_NEW_DECISION`。push、main、tag、artifact publication、staging、production 和 rollback 仍分别
   需要 P30B1–B4 独立授权。

@@ -4,8 +4,11 @@
 > 铁律:所有预测/治理决策由**后端确定性 runtime**完成;LLM 只做自然语言解析、路由建议、critic 复核、报告润色,**绝不**碰 prediction / hard-rule / learned-reliability 终决 / provenance。默认 `offline`(零 LLM)。
 > `1.7.0` 当前只是本地、未发布的 release-engineering source identity；P30A-E1 已完成。
 > **E2a follow-on（2026-08-10）：** P30A-E2a clean-SHA offline preflight 为
-> `COMPLETE_NEGATIVE`，未运行 install、build、OCI 或 full gate；下一 eligible local work unit 是
-> P30A-E2b artifact-aware trusted finalizer。formal P30A 仍 `LOCAL_RC_INCOMPLETE`，science 为
+> `COMPLETE_NEGATIVE`，未运行 install、build、OCI 或 full gate。
+> **E2b follow-on（2026-08-10）：** P30A-E2b archive-only runner 也是
+> `COMPLETE_NEGATIVE`：source stable，但两个 source archives 因 tracked unsupported link 安全失败；
+> formal P30A 仍 `LOCAL_RC_INCOMPLETE`。下一 eligible local work unit 是 P16R local
+> authorization-preflight identity bridge；真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`，science 为
 > `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`，policy 为 `NO_NEW_DECISION`。任何预测必须同时匹配 exact request × Pack × model × environment × adapter × evidence × policy；任一门缺失、失配、OOD 或超出 scope 都必须 `abstain`。
 
 ## 1. 命令行(CLI)
@@ -31,9 +34,9 @@ P12 V2 零步骤计划并 `abstain`，不会调用 mock 或 case runner。可治
 
 当一个 exact release wheel 已成功构建时，它会包含 `praxis_vc_web/app.py`，`web`
 子命令会使用打包后的绝对路径；运行仍需安装 `.[web]`。P30A-E1 的 wheel probes 已验证
-该打包路径，但它们不是 clean-install-qualified formal RC artifact；P30A-E2a 的离线预检为
-`COMPLETE_NEGATIVE`，下一为 P30A-E2b artifact-aware trusted finalizer。发行门尚未启动完整
-Streamlit server，推荐使用下方 React 同源页面。
+该打包路径，但它们不是 clean-install-qualified formal RC artifact；P30A-E2a/E2b 均为
+`COMPLETE_NEGATIVE`，formal P30A 仍 incomplete。发行门尚未启动完整 Streamlit server，推荐使用
+下方 React 同源页面。
 
 ## 2. 本地网页流程
 

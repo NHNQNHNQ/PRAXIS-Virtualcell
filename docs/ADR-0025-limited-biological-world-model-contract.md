@@ -61,8 +61,15 @@ At P29E closure, P30A local RC closure was the next eligible local work unit. P3
 release-contract hardening subsequently completed.
 
 **E2a follow-on (2026-08-10):** P30A-E2a clean-SHA offline preflight completed
-`COMPLETE_NEGATIVE`; it ran no install, build, OCI, or full gate. The current next eligible local
-work unit is P30A-E2b artifact-aware trusted finalizer, while formal P30A remains
-`LOCAL_RC_INCOMPLETE`, science remains `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`, and policy remains
+`COMPLETE_NEGATIVE`; it ran no install, build, OCI, or full gate. At E2a closure, the next eligible local
+work unit was P30A-E2b artifact-aware trusted finalizer, while formal P30A remained
+`LOCAL_RC_INCOMPLETE`, science remained `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`, and policy remained
 `NO_NEW_DECISION`. P30 may classify P29 as unsupported/experimental; it cannot infer a
 science-qualified capability badge from this contract-only result.
+
+**E2b follow-on (2026-08-10):** P30A-E2b archive-only runner completed
+`COMPLETE_NEGATIVE`: source was stable, but both source archives safely failed on a tracked
+unsupported link and wheelhouse coverage remains incomplete. Formal P30A remains
+`LOCAL_RC_INCOMPLETE`; the current next local unit is the P16R authorization-preflight identity
+bridge. Actual P16R remains `AUTHORIZATION_REQUIRED / NOT_RUN`; P29 remains contract-only and
+cannot imply a science-qualified capability badge.

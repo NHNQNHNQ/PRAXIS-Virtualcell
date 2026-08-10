@@ -7,9 +7,10 @@
 > P27A-R historical replay remains
 > `REPLAY_NOT_RUN / ASSET_PENDING`; P27B `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`;
 > P27C `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`; P30A-E1 release-contract hardening is
-> `ENGINEERING_COMPLETE`; P30A-E2a clean-SHA offline preflight is `COMPLETE_NEGATIVE`; P30A-E2b
-> artifact-aware trusted finalizer is the next eligible local work unit. Formal P30A remains
-> `LOCAL_RC_INCOMPLETE`; science is
+> `ENGINEERING_COMPLETE`; P30A-E2a clean-SHA offline preflight and P30A-E2b archive-only runner are
+> `COMPLETE_NEGATIVE`. Formal P30A remains `LOCAL_RC_INCOMPLETE`; the next eligible local work unit
+> is the P16R local authorization-preflight identity bridge, while actual P16R remains
+> `AUTHORIZATION_REQUIRED / NOT_RUN`; science is
 > `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; policy is `NO_NEW_DECISION`.
 >
 > Local baseline: branch `codex/p25e-virtual-microbiome`; starting SHA
@@ -46,11 +47,12 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P29E Limited Biological World Model contract work unit | docs baseline `90990c198c40d0e6655aedaad101a783cde003aa`; code `471767e5f38f9866fbe396f39836369d943f6657`; tree `d1dec19f06ec88f563406b45f2b544effabad915`; epoch `1786187523` | immutable local Git history plus `reports/phase29e/PHASE29E_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; three public strict requirement/subgraph/compilation records; graph `empty_not_connected`, biological nodes/edges `0`, all authority/value slots null; synthetic conformance only; real P29 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`, science `NOT_RUN`, policy `NO_NEW_DECISION`; local wheel `1,263,199` bytes / `368a66a438c0...` / `378` entries; P30A-E1 subsequently completed; no product/API/runtime version or release bump |
 | P30A-E1 release-contract hardening | P30 scope baseline `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4`; post-entrypoint baseline `d808735ebfd649df6a4c932b95140387aa412c7d`; code `0a4d72b0825d9ec0ff3b7776bbc4f1f0023336f9`; tree `ba701d4ee6033e86a2d8abecc7e6ff25c1a05c14`; epoch `1786335170` | immutable local Git history plus `reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md` | `ENGINEERING_COMPLETE`; release-contract tooling and local probes only. Wheel probe `1,264,708` bytes / `44e5e905e706...2303`; source archive `8,055,078` bytes / `ba5e5d0dbe38...e642`; no formal RC artifact, clean install, OCI, SBOM, licence inventory, dependency audit, manifest, science or policy result |
 | P30A-E2a offline preflight | start `40f433fef8704381de34aeb32d45399b6595c472`; code `964b62214f346b15ec2d3f2a622b33f632dde466`; tree `eac19455bc9241e5347de27782a99942e3591cab`; epoch `1786338523` | immutable local Git history plus `reports/phase30a/PHASE30A_E2A_PREFLIGHT.md` and out-of-tree record `6cb91031…9019` | `COMPLETE_NEGATIVE`; clean source stable, offline wheelhouse coverage insufficient for macOS/arm64 and Linux/arm64; no install/build/OCI/full gate/RC result, science or policy change |
-| P30A-E2b artifact-aware trusted finalizer | active local work unit | current exact worktree plus E2a negative record | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`; must independently construct and validate frozen-source artifacts/tests. Formal P30A remains `LOCAL_RC_INCOMPLETE`; no external action is implied |
+| P30A-E2b archive-only runner | code `12ad93d57e4f4e7438d2110b5ac9848c6b17ea33`; tree `14fe604111c18c558048bc282d23da936ac57088`; epoch `1786343459` | immutable local Git history plus `reports/phase30a/PHASE30A_E2B_ARCHIVE_RUNNER.md`, runner record `72459a3b…63d2`, nested preflight `064a479f…fec4` | `COMPLETE_NEGATIVE`; source stable, two source-archive attempts safely failed on a tracked unsupported link, both wheelhouse profiles remain incomplete; no install/network/OCI/full gate/RC/science/policy result |
+| P16R local authorization-preflight identity bridge | active local work unit | current exact worktree and frozen P16E/P30A negative ledgers | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`; local authorization/identity preparation only. Actual P16R remains `AUTHORIZATION_REQUIRED / NOT_RUN`; no real asset/model/benchmark/science/policy action is implied |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.7.0` | `pyproject.toml` `[project].version` | P30A-E1 local source identity; it is not a released version or a completed RC identity |
-| Python distribution | `1.6.0` | installed `praxis-virtualcell` metadata in the shared environment | stale shared environment; P30A-E2b clean-install gate must not infer the `1.7.0` product identity from it |
+| Python distribution | `1.6.0` | installed `praxis-virtualcell` metadata in the shared environment | stale shared environment; no clean-install gate may infer the `1.7.0` product identity from it |
 | inherited `praxis2.__version__` | `1.6.0` | compatibility alias | aliases `praxis_virtualcell.__version__`; no second literal |
 | main package export | `1.6.0` | `praxis_virtualcell.__version__` | derived from installed distribution metadata |
 | CLI | `praxis-vc 1.6.0` | installed `praxis-vc --version` | derived from the main package export |
@@ -536,9 +538,10 @@ Engineering is `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evi
 `SYNTHETIC_CONFORMANCE_ONLY`; umbrella status is `ENGINEERING_COMPLETE_SCIENCE_PENDING`; real P29 is
 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`; science is `NOT_RUN`; policy is `NO_NEW_DECISION`.
 No real data/model/benchmark, execution, operator decision, release, push or deployment occurred. P30A-E1
-release-contract hardening and P30A-E2a clean-SHA offline preflight subsequently completed; P30A-E2b
-artifact-aware trusted finalizer is next and must independently satisfy clean dependency, SBOM/license,
-artifact and release-document gates. See
+release-contract hardening, P30A-E2a clean-SHA offline preflight and P30A-E2b archive-only runner
+subsequently completed. Formal P30A remains incomplete after E2b's safely failed archive attempts and
+missing wheelhouse inputs; the next independent local work is the P16R authorization-preflight identity
+bridge. See
 [ADR-0025](ADR-0025-limited-biological-world-model-contract.md), the
 [P29E runbook](runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md), and the
 [P29E completion report](../reports/phase29e/PHASE29E_COMPLETION.md).
@@ -795,9 +798,9 @@ Implemented history through the current P29E contract-complete bytes:
     are identity, not signature/attestation. Engineering is
     `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`, fixture evidence is
     `SYNTHETIC_CONFORMANCE_ONLY`, science is `NOT_RUN`, policy is `NO_NEW_DECISION`, and real P29 is
-    `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`. P30A-E1 and P30A-E2a subsequently completed;
-    P30A-E2b artifact-aware trusted finalizer is next. No P30 release identity, tag, push or deploy is
-    created.
+    `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`. P30A-E1, P30A-E2a and P30A-E2b subsequently
+    completed; E2b is `COMPLETE_NEGATIVE`, and P16R authorization-preflight identity bridge is next.
+    No P30 release identity, tag, push or deploy is created.
 
 ## Release invariants
 
@@ -925,9 +928,10 @@ force them to equal the product release.
 
 ## Required candidate verification
 
-This is the P30A-E2b artifact-aware finalization target, not evidence that it has completed. P30A-E2a
-recorded clean-SHA offline coverage as incomplete; the clean-install and OCI commands below have not
-been run for a formal RC.
+The commands below remain a future formal-P30A finalization target, not evidence that it has completed.
+P30A-E2a recorded clean-SHA offline coverage as incomplete; P30A-E2b then recorded stable source but
+safely failed archive attempts and no clean-install/OCI/full-gate execution. Formal P30A remains
+`LOCAL_RC_INCOMPLETE`.
 
 ```bash
 PYTHON_BIN=python3.13 scripts/build_release_wheel.sh /tmp/release-one

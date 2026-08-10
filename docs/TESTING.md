@@ -25,13 +25,13 @@
 > `REPLAY_NOT_RUN / ASSET_PENDING`；P27B 为 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`；
 > P27C 为 `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。P21B/P21C、P23B、P24、P25R 和所有
 > real asset/model/output 窗口均未授权或未运行；P26R 仍为 `BLOCKED_EXTERNAL / NOT_RUN`。
-> P30A-E1 release-contract hardening 与 P30A-E2a clean-SHA offline preflight 均已完成；E2a 为
-> `COMPLETE_NEGATIVE`，不是 full gate execution。下一 eligible local unit 是 standing local
-> authorization 下的 P30A-E2b artifact-aware trusted finalizer。formal P30A 仍
-> `LOCAL_RC_INCOMPLETE`。P30A-E1、E2a 或 E2b 都不授权 push、tag、artifact publication、
-> staging 或 production。
+> P30A-E1 release-contract hardening、P30A-E2a clean-SHA offline preflight 与 P30A-E2b
+> archive-only runner 均已完成；E2a/E2b 均为 `COMPLETE_NEGATIVE`，不是 full gate execution。
+> formal P30A 仍 `LOCAL_RC_INCOMPLETE`。下一 eligible local unit 是 P16R local
+> authorization-preflight identity bridge；真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`。
+> P30A-E1、E2a 或 E2b 都不授权 push、tag、artifact publication、staging 或 production。
 
-## P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a `COMPLETE_NEGATIVE`; P30A-E2b next
+## P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a/E2b `COMPLETE_NEGATIVE`; P16R bridge next
 
 P30 scope baseline is `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4`; the post-formal-entrypoint
 engineering baseline is `d808735ebfd649df6a4c932b95140387aa412c7d`. The completed E1 probe code is
@@ -61,14 +61,24 @@ E2a-finalizer tests); the write-new `praxis.local-rc-finalizer-preflight.v1` rec
 source identity, `network_used=false`, `full_gate_execution=PRECHECK_ONLY_NOT_EXECUTED` and
 `software_rc_gates_passed=false`.
 
-The actual negative blockers are `offline_wheel_cache_incomplete` for both `macos_arm64_cp313`
+The actual E2a negative blockers are `offline_wheel_cache_incomplete` for both `macos_arm64_cp313`
 (`pyjwt==2.13.0`, `pyyaml==6.0.3`) and `linux_arm64_cp313` (those two plus `cffi==2.1.0`,
 `cryptography==49.0.0`, `pydantic-core==2.46.4`, `rpds-py==2026.6.3`). No install, artifact build,
 OCI build, core/legacy/frontend/Ruff/packaging full gate, SBOM, manifest or release occurred. E2a
-is therefore `COMPLETE_NEGATIVE`; P30A-E2b must independently construct the artifact-aware trusted
-evidence bundle rather than accept this record as an RC result. Formal P30A remains
-`LOCAL_RC_INCOMPLETE`; science is `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` and policy is
-`NO_NEW_DECISION`.
+is therefore `COMPLETE_NEGATIVE`.
+
+P30A-E2b subsequently completed at exact SHA
+`12ad93d57e4f4e7438d2110b5ac9848c6b17ea33` / tree
+`14fe604111c18c558048bc282d23da936ac57088` / epoch `1786343459`. Its write-new
+`praxis.local-rc-artifact-aware-runner.v1` record is SHA-256
+`72459a3b51ba243d747ee2c0159d4105a30ba47d191b99ea05960343bbae63d2`; the controlled nested
+preflight record is `064a479fd35deba3b08d70e999171577b9171133873d5bc7a3d9968a57aafec4`. Source
+was stable, but both source-archive attempts safely failed on a tracked unsupported link. The runner
+therefore records `SOURCE_ARCHIVE_ONLY_NOT_FULL_RC`, `software_rc_gates_passed=false`, no
+publication/sign/tag/deploy or policy decision, and the same two wheelhouse blockers. No install,
+network, OCI or full gate occurred. Formal P30A remains `LOCAL_RC_INCOMPLETE`; science is
+`NOT_RUN / SCIENCE_BADGE_INELIGIBLE` and policy is `NO_NEW_DECISION`. The next local work is the
+P16R authorization-preflight identity bridge, not a P16R scientific run.
 
 ## Phase 29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` 本地证据
 
