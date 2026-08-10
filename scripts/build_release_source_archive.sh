@@ -80,11 +80,23 @@ esac
 
 TAR_PATH=""
 ARCHIVE_TMP=""
+LINK_PROBE=""
+LINK_PROBE_LINK=""
 cleanup() {
+  [[ -z "${LINK_PROBE_LINK}" ]] || rm -f -- "${LINK_PROBE_LINK}"
+  [[ -z "${LINK_PROBE}" ]] || rm -f -- "${LINK_PROBE}"
   [[ -z "${TAR_PATH}" ]] || rm -f -- "${TAR_PATH}"
   [[ -z "${ARCHIVE_TMP}" ]] || rm -f -- "${ARCHIVE_TMP}"
 }
 trap cleanup EXIT
+
+LINK_PROBE="$(mktemp "${OUTPUT_DIR}/.${ARCHIVE_NAME}.link-probe.XXXXXX")"
+LINK_PROBE_LINK="${LINK_PROBE}.link"
+ln -- "${LINK_PROBE}" "${LINK_PROBE_LINK}" >/dev/null 2>&1 \
+  || fail "source archive output directory lacks required hard-link no-replace support"
+rm -f -- "${LINK_PROBE_LINK}" "${LINK_PROBE}"
+LINK_PROBE_LINK=""
+LINK_PROBE=""
 
 TAR_PATH="$(mktemp "${OUTPUT_DIR}/.${ARCHIVE_NAME}.tar.XXXXXX")"
 ARCHIVE_TMP="$(mktemp "${OUTPUT_DIR}/.${ARCHIVE_NAME}.tmp.XXXXXX")"

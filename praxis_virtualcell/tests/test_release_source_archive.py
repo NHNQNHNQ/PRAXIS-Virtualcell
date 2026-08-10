@@ -201,3 +201,21 @@ def test_source_archive_omits_export_ignored_escaping_symlink(tmp_path: Path) ->
     assert result.returncode == 0
     with tarfile.open(output, "r:gz") as archive:
         assert "praxis-virtualcell-1.7.0/praxis_virtualcell/escaping_symlink" not in archive.getnames()
+
+
+def test_source_archive_rejects_output_directory_without_hardlink_support(tmp_path: Path) -> None:
+    repo = _repository(tmp_path)
+    output = tmp_path / "out" / "praxis-virtualcell-1.7.0.tar.gz"
+    output.parent.mkdir()
+    fake_bin = tmp_path / "no-hardlinks"
+    fake_bin.mkdir()
+    fake_link = fake_bin / "ln"
+    fake_link.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+    fake_link.chmod(0o755)
+
+    result = _build(repo, output, extra_env={"PATH": f"{fake_bin}{os.pathsep}{os.environ['PATH']}"})
+
+    assert result.returncode != 0
+    assert "lacks required hard-link no-replace support" in result.stderr
+    assert not output.exists()
+    assert not list(output.parent.glob(".praxis-virtualcell-1.7.0.tar.gz.link-probe.*"))
