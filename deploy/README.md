@@ -1,5 +1,7 @@
 # PRAXIS-2 Deployment Guide
 
+> **历史文档，非 P30 权威部署路径。** 本文保留的 PRAXIS-2 命令不适用于 PRAXIS-VirtualCell `1.7.0` 本地、未发布的 RC 候选版本。不得执行下文任何 push、tag、`.53`、staging 或 production 命令；P30B1–P30B4 均需独立精确授权，当前未授权。
+
 > 总纲 §6⑤(`deploy/` 脚本)+ §6⑦(切换判据)+ §11.1(多 worker)+ §11.7(HPC 节点拓扑)
 
 ## 三阶段命令清单

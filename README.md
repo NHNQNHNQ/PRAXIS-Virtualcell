@@ -247,7 +247,8 @@ abstain。
 
 ## 安装与本地页面
 
-要求 Python 3.11+（项目 CI 使用 3.13）以及 Linux 或 macOS。以下命令在源码仓库根目录执行：
+源码开发的最低元数据要求是 Python 3.11；P30A 的离线 artifact path 则严格要求
+CPython 3.13。两者都不等于当前候选已经完成发布验收。以下命令在源码仓库根目录执行：
 
 ```bash
 git clone https://github.com/NHNQNHNQ/PRAXIS-Virtualcell.git
@@ -270,18 +271,19 @@ praxis-vc serve
 
 浏览器打开 `http://127.0.0.1:8000`。安装自检脚本 `bash deploy/vc/check_install.sh` 仍是源码 checkout 专用；独立 wheel 与容器路径见 [安装指南](docs/INSTALL.md)。
 
-完整 release wheel 由 `scripts/build_release_wheel.sh` 构建，内含 React 静态资源、CLI/API 代码、`praxis_vc_web/app.py` 和经过许可审查的默认 gene-set 数据；从 wheel 启动 `praxis-vc serve` 不依赖源码 checkout 或外置 `dist/`。`praxis-vc web` 的入口文件已打包，但运行 Streamlit 仍需安装 `web` extra；当前发行门只验证其打包和绝对路径接线，不声称完整 Streamlit server smoke。
+当且仅当 `scripts/build_release_wheel.sh` 从 clean exact HEAD 成功生成候选时，该完整
+wheel 才内含 React 静态资源、CLI/API 代码、`praxis_vc_web/app.py` 和经过许可审查的默认
+gene-set 数据；从该 wheel 启动 `praxis-vc serve` 不依赖源码 checkout 或外置 `dist/`。
+当前尚无完成的 P30A wheel artifact。`praxis-vc web` 的入口文件会被打包，但运行
+Streamlit 仍需安装 `web` extra；当前发行门只验证其打包和绝对路径接线，不声称完整
+Streamlit server smoke。
 
-发布容器从同一完整 wheel 安装，不复制源码到最终镜像。构建时必须注入候选 commit 和 epoch：
-
-```bash
-scripts/build_release_container.sh praxis-virtualcell:local
-docker run --rm -p 127.0.0.1:8000:8000 \
-  -v praxis-vc-runs:/var/lib/praxis-vc/runs \
-  praxis-virtualcell:local
-```
-
-构建脚本拒绝把未提交的 tracked 内容或未知 untracked 文件标成当前 HEAD；受保护且已被 Docker context 排除的 `.claude/` 与 `string.jpeg` 不影响候选身份。容器以 UID/GID 10001 非 root 运行，在 `/api/health` 暴露产品版本与注入的 Git SHA，并同源提供打包后的 React 页面。完整构建首次仍需网络取得 npm 与 hash-locked Python wheels；最终安装阶段和运行时不访问包索引。
+P30 OCI 候选（尚未形成）只能由 `scripts/build_release_oci.sh` 从同一 exact wheel、
+out-of-tree Linux/arm64 wheelhouse 和 pinned local base image 以 `--network none` 构建；
+它必须注入候选 commit 和 epoch。历史 `scripts/build_release_container.sh` / `deploy/vc/Dockerfile`
+不是 P30 artifact 证据，不能替代这个合同。若未来 P30 OCI 构建成功，最终镜像才会以
+UID/GID 10001 非 root 运行、在 `/api/health` 暴露产品版本和注入的 Git SHA，并同源提供
+打包后的 React 页面。
 
 ## 快速开始
 

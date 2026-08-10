@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use PRAXIS-VirtualCell, cite this software and the exact release or commit used."
+title: "PRAXIS-VirtualCell"
+type: software
+authors:
+  - name: "PRAXIS-VirtualCell contributors"
+version: 1.7.0
+repository-code: "https://github.com/NHNQNHNQ/PRAXIS-Virtualcell"
+license: MIT

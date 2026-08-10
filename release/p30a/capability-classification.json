@@ -1,0 +1,794 @@
+{
+  "schema_version": "praxis.release-capability-classification.v1",
+  "product_version": "1.7.0",
+  "baseline_sha": "694af3eebfca0e99ca07a6ecd8639b522b8ec3d4",
+  "authoritative_for_execution": false,
+  "release_class_semantics": "software_release_exposure_only_not_scientific_validation_or_production_promoted_policy",
+  "scope_catalog": {
+    "adapter_sdk": {
+      "scope_ref": "praxis-capability://P13/model-adapter-sdk/exact-task-output-contracts",
+      "scope_fingerprint": "a8de5a19a2c5deb92a0b251ac0c1a0a1f24d6e453a815e128c49ac7b29714317"
+    },
+    "benchmark_system": {
+      "scope_ref": "praxis-capability://P21A/frozen-benchmark-protocol-and-evidence-ledger",
+      "scope_fingerprint": "5523d2848c544f52e296bf2361a016536e81fc29189c2626e13b192fc3165f20"
+    },
+    "cell_interaction_evidence_contract": {
+      "scope_ref": "praxis-capability://P23A/sender-to-receiver/interaction-evidence-score/no-response-claim",
+      "scope_fingerprint": "a1f8a4a156da03405d8fe973831604c6a76a122b0327e511331372dd0c4324e7"
+    },
+    "controlled_pack_factory": {
+      "scope_ref": "praxis-capability://P19/receipt-candidate-review-validate-register/no-training",
+      "scope_fingerprint": "c94bb836a41efe58d9129eb71c00d58ce3a4147aa01229330240ae42dbcc6e35"
+    },
+    "curated_virtual_cell_registry": {
+      "scope_ref": "praxis-capability://P22/one-pack-p21b-release/append-only-lifecycle",
+      "scope_fingerprint": "f92ae98aa35d750672a689a3650d47357a2a85dfb5b099bcc17965bd9c7c2bd2"
+    },
+    "ecoli_k12_knockout_growth_prediction": {
+      "scope_ref": "praxis-capability://P14/ecoli-k12-mg1655/GCF_000005845.2/knockout-to-growth-ratio/exact-medium-condition",
+      "scope_fingerprint": "518dfb6f9043719f2744b8ef6e8482fa3350ea180e0e927a0af54ffde1befba0"
+    },
+    "ecoli_knockout_growth_contract": {
+      "scope_ref": "praxis-capability://P14E/ecoli-k12-mg1655/GCF_000005845.2/knockout-to-growth-ratio/contract-only",
+      "scope_fingerprint": "2e68efa2aad8dec0e627cdf5c0b163bc9e893625ff734c641cb6269cc4e17d48"
+    },
+    "experiment_design_replay_harness": {
+      "scope_ref": "praxis-capability://P27A-E/rank-then-reveal/synthetic-conformance-only",
+      "scope_fingerprint": "3c499cae21385f692bccb9e14d00fe8587439cf87137b34a88b0892291bde351"
+    },
+    "expert_shadow_review": {
+      "scope_ref": "praxis-capability://P27B/named-expert/blind-shadow-review",
+      "scope_fingerprint": "6cb873d776e27da276ccaeff81c9c074f134ee8734fbf743aff1112537b8d961"
+    },
+    "historical_experiment_design_replay": {
+      "scope_ref": "praxis-capability://P27A-R/canonical-historical-offline-replay",
+      "scope_fingerprint": "1b0d9b365a8592f179aa349afce99d88bdc4af01200da9c09d9f4e0d61236e86"
+    },
+    "host_microbiome_contract": {
+      "scope_ref": "praxis-capability://P26E/time-unrolled-host-microbiome/contract-only/value-free",
+      "scope_fingerprint": "7068c73ca21d2c79cc02b6a97ab2254d51ba51825d5cff68835d408c824d403c"
+    },
+    "host_microbiome_coupled_response_prediction": {
+      "scope_ref": "praxis-capability://P26R/exact-host-community-matching-release/coupled-response",
+      "scope_fingerprint": "568776751bba342202f68c68d62e1dfa561400170f0c3f6e0c88d20730d1b41c"
+    },
+    "k562_delta_expression_contract": {
+      "scope_ref": "praxis-capability://P16E/homo-sapiens-k562-CVCL_0004/perturbation-to-delta-expression/contract-only",
+      "scope_fingerprint": "39f5fe23b8e49f4a09cee166659e8c9de8eaf4b4c7f1d4c944093616c1e7fbaf"
+    },
+    "k562_perturbation_delta_expression_prediction": {
+      "scope_ref": "praxis-capability://P16/homo-sapiens-k562-CVCL_0004/perturbation-to-delta-expression/exact-split",
+      "scope_fingerprint": "869a3c829d03fdcb8bcee03197a94f32be25e3907a7b75d8b0380aa507ebf032"
+    },
+    "limited_biological_world_model_contract": {
+      "scope_ref": "praxis-capability://P29E/limited-world-model/empty-not-connected/zero-nodes",
+      "scope_fingerprint": "dcba1b6a6014cd6f839fd4dc6c238b93ca176e057e50411e10b6219cb3cc757c"
+    },
+    "limited_biological_world_model_execution": {
+      "scope_ref": "praxis-capability://P29/limited-world-model/real-connected-adjacent-scale-subgraph",
+      "scope_fingerprint": "113e25e4bc661d15e4e8ba0483b6ac329e1ea6d9b792e0a2c91c7acba420193d"
+    },
+    "model_zoo_identity_and_fail_closed_matching": {
+      "scope_ref": "praxis-capability://P12/model-zoo-v2/exact-request-pack-model-environment-adapter-evidence-policy",
+      "scope_fingerprint": "87650435684122899067bc375813db63e800220e1f3cfb681258895d935bb5f4"
+    },
+    "multi_agent_biology_contract": {
+      "scope_ref": "praxis-capability://P28E/typed-advisory-handoff/value-free/zero-of-three-modules",
+      "scope_fingerprint": "663fb74487c0024defa31ae5260a23897904b8e88db34fd391a42f252f0df812"
+    },
+    "multi_agent_biology_execution": {
+      "scope_ref": "praxis-capability://P28/three-exact-executable-validated-promoted-model-modules",
+      "scope_fingerprint": "7ec49bb94f461fc506e9b03010bb1eefb00e8e2c9572bbe27b92a1b11d26a1ba"
+    },
+    "multiomics_input_contract": {
+      "scope_ref": "praxis-capability://P18/ordered-modalities/alignment-join-missingness/no-imputation",
+      "scope_fingerprint": "eb89d6a837da7fc0403b69a1e2d093b1b8755b28e3387bf616b6aab953a350d7"
+    },
+    "prospective_experiment_design_pilot": {
+      "scope_ref": "praxis-capability://P27C/prospective-pilot/ethics-biosafety-operator-personnel-gated",
+      "scope_fingerprint": "ddf6f82dabc322a5adcf090c0769f58803ce053022f338862777c15c0767b81c"
+    },
+    "receiver_response_prediction": {
+      "scope_ref": "praxis-capability://P23B/receiver-response/intervention-data/estimand/assumptions/frozen-protocol/p21b-candidate-evidence-identity/independent-external-science-window/not-run",
+      "scope_fingerprint": "b6a4d70ac2f9e392e05b2a4a5a46b43d0325f0ecba8a85784d71f3605b44aed9"
+    },
+    "single_candidate_benchmark_evidence_and_policy": {
+      "scope_ref": "praxis-capability://P21B-P21C/exact-candidate-scope-protocol-evidence-named-operator",
+      "scope_fingerprint": "3e606eacc41c85f7ac79182ac64587b0f99dfe6f9848504273ade6a14245d53c"
+    },
+    "training_pipeline": {
+      "scope_ref": "praxis-capability://P20/training-job-result-checkpoint-split/tiny-dry-run-only",
+      "scope_fingerprint": "58814485e9af5c2b495d4d70117863d8078dc16868293463ce1cd976503963be"
+    },
+    "two_member_community_dynamics_prediction": {
+      "scope_ref": "praxis-capability://P24/first-real-community-adapter/two-explicit-members/well-mixed-medium/abundance-time-to-next-state-or-exchange-growth-response/new-adapter-version/v2-or-independent-schema/p10-v1-no-model-preserved/not-run",
+      "scope_fingerprint": "90188f3e9b6b104441ba7060d856b2df1854acb4204ecbf1452d21eea0a82316"
+    },
+    "virtual_experiment_dag": {
+      "scope_ref": "praxis-capability://P17/deterministic-virtual-experiment-dag/registry-gated",
+      "scope_fingerprint": "319c05b1bfb62526d906c8192a7e42ec6a064f6212bbd9580de85e40914be26a"
+    },
+    "virtual_microbiome_abundance_dynamics_prediction": {
+      "scope_ref": "praxis-capability://P25R/two-to-three-members/exact-medium-time/strain-abundance-primary-endpoint",
+      "scope_fingerprint": "5f194ff50a70dcc464516abcfe763e956c8b3eb05106700f917be9748c8802c2"
+    },
+    "virtual_microbiome_contract": {
+      "scope_ref": "praxis-capability://P25E/two-to-three-members/exact-medium-time/strain-abundance/contract-only",
+      "scope_fingerprint": "6c9fd6875f6d772a8444e7d567292ed62ae018edb4e131a27cddeab692e4e9cb"
+    },
+    "yeast_deletion_fitness_contract": {
+      "scope_ref": "praxis-capability://P15E/saccharomyces-cerevisiae-S288C/GCF_000146045.2/deletion-to-fitness/contract-only",
+      "scope_fingerprint": "34d893fe50bf26bb912072dcdca74da3522597bb4de306244c08748566168963"
+    },
+    "yeast_s288c_deletion_fitness_prediction": {
+      "scope_ref": "praxis-capability://P15/saccharomyces-cerevisiae-S288C/GCF_000146045.2/deletion-to-fitness/exact-condition",
+      "scope_fingerprint": "0bf69b05258445a77bdae7e2f1ff7db24c3704021a25c213dcff3c4e7164becb"
+    }
+  },
+  "source_reports": {
+    "P12": {
+      "path": "reports/phase12/PHASE12_COMPLETION.md",
+      "sha256": "f59b462e724ca2b02a7e1774884a4d4cac76f421cfeb84735d0f3ad336ae3183",
+      "conformance_fingerprints": []
+    },
+    "P13": {
+      "path": "reports/phase13/PHASE13_COMPLETION.md",
+      "sha256": "a4e2000f9077ad64bd4cd1e41e05fa66966f01d4734c5151d5e38d1903c6cdf8",
+      "conformance_fingerprints": []
+    },
+    "P14E": {
+      "path": "reports/phase14e/PHASE14E_COMPLETION.md",
+      "sha256": "f5f053f6f0cfefaca3a974f2cba718727b1f53c7ea2731d35ea903231ac50e13",
+      "conformance_fingerprints": []
+    },
+    "P15E": {
+      "path": "reports/phase15e/PHASE15E_COMPLETION.md",
+      "sha256": "c9f45966dfc6862bb6868f934c5e5cf17e11c1d546ed6c0e396a134bdc86404c",
+      "conformance_fingerprints": []
+    },
+    "P16E": {
+      "path": "reports/phase16e/PHASE16E_COMPLETION.md",
+      "sha256": "25f4df1ecec31c3cb31826d6609d92f1c7b82be52a34aaff7aa8250eb6074109",
+      "conformance_fingerprints": []
+    },
+    "P17": {
+      "path": "reports/phase17/PHASE17_COMPLETION.md",
+      "sha256": "95bd5a046136a0e8911e6860dfee847236d7ea9247a921833b30e305612942c6",
+      "conformance_fingerprints": []
+    },
+    "P18": {
+      "path": "reports/phase18/PHASE18_COMPLETION.md",
+      "sha256": "93d97b5d49b6299cf46f49feda5d44ffb1b3a19e773be5a8899a86e62aeb41a2",
+      "conformance_fingerprints": []
+    },
+    "P19": {
+      "path": "reports/phase19/PHASE19_COMPLETION.md",
+      "sha256": "939794dd562ce471293ea3025b5d989fef1855f77d5c1826f9405b161fe18ce3",
+      "conformance_fingerprints": []
+    },
+    "P20": {
+      "path": "reports/phase20/PHASE20_COMPLETION.md",
+      "sha256": "9cae8589d92e78797313ffa12f2bf695c2d92c79c1f8ee282b1ae941971f46c4",
+      "conformance_fingerprints": []
+    },
+    "P21A": {
+      "path": "reports/phase21a/PHASE21A_COMPLETION.md",
+      "sha256": "45013a5b0d8d8eb62f083f8eb68392f5558f0407c5505c4bc8c890b6cf0cade2",
+      "conformance_fingerprints": []
+    },
+    "P22": {
+      "path": "reports/phase22/PHASE22_COMPLETION.md",
+      "sha256": "4f7d5a9757fe346ce485ad336403cf26ffdc5afd5e7da67c0e9bf25fcbbc824a",
+      "conformance_fingerprints": []
+    },
+    "P23A": {
+      "path": "reports/phase23a/PHASE23A_COMPLETION.md",
+      "sha256": "f6e5f46e640a1fdbd22360eab00bfd302152f4c881bc66cba379ae5eccccba61",
+      "conformance_fingerprints": []
+    },
+    "P25E": {
+      "path": "reports/phase25e/PHASE25E_COMPLETION.md",
+      "sha256": "972ca50363581be498219a486648d19d0bf40c00cf6bddae5bab9fcfc77bda8c",
+      "conformance_fingerprints": []
+    },
+    "P26E": {
+      "path": "reports/phase26e/PHASE26E_COMPLETION.md",
+      "sha256": "c5156a8d4919f34966ea557a3290be4689189d5441e140ac677255b9fa5d313e",
+      "conformance_fingerprints": []
+    },
+    "P27A-E": {
+      "path": "reports/phase27ae/PHASE27AE_COMPLETION.md",
+      "sha256": "b3793de76cb67853677685929b79699ed29989b80361c46fcdf68bc93aa5bd64",
+      "conformance_fingerprints": []
+    },
+    "P28E": {
+      "path": "reports/phase28e/PHASE28E_COMPLETION.md",
+      "sha256": "89f3840c2ab06ceed03762474232efa7e49797e4e087aa4b500d908d55ffa889",
+      "conformance_fingerprints": []
+    },
+    "P29E": {
+      "path": "reports/phase29e/PHASE29E_COMPLETION.md",
+      "sha256": "eb8cff7417e14197eb83d31cb850c5bddb6cf7653fe0b2a236b7e7fb1a6216c5",
+      "conformance_fingerprints": [
+        "7953e728f9ff93ebca136639ba194ce7940f92497b26428416715e533672a9d3"
+      ]
+    }
+  },
+  "audited_work_units": [
+    "P12",
+    "P13",
+    "P14E",
+    "P14R",
+    "P14B",
+    "P15E",
+    "P15R",
+    "P15B",
+    "P16E",
+    "P16R",
+    "P16B",
+    "P17",
+    "P18",
+    "P19",
+    "P20",
+    "P21A",
+    "P21B",
+    "P21C",
+    "P22",
+    "P23A",
+    "P23B",
+    "P24",
+    "P25E",
+    "P25R",
+    "P25_POLICY",
+    "P26E",
+    "P26R",
+    "P27A-E",
+    "P27A-R",
+    "P27B",
+    "P27C",
+    "P28E",
+    "P28_REAL",
+    "P29E",
+    "P29_REAL"
+  ],
+  "science_qualified_badge": {
+    "eligible": false,
+    "required_real_species_count": 3,
+    "current_real_species_count": 0,
+    "required_promoted_community_capability": true,
+    "current_promoted_community_capability": false,
+    "evidence_fingerprints": [],
+    "policy_fingerprints": [],
+    "reason_code": "science_qualification_requirements_not_met"
+  },
+  "classes": {
+    "production": [
+      {
+        "capability_id": "model_zoo_identity_and_fail_closed_matching",
+        "work_units": [
+          "P12"
+        ],
+        "capability_kind": "software_infrastructure",
+        "default_enabled": true,
+        "prediction_allowed": false,
+        "engineering_status": "complete",
+        "science_status": "not_applicable_no_science_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "1a5464fb0d2d9e105058f6797d92efd69783e5b2"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "production_software_contract_not_prediction_capability"
+      }
+    ],
+    "preview": [
+      {
+        "capability_id": "adapter_sdk",
+        "work_units": [
+          "P13"
+        ],
+        "capability_kind": "software_infrastructure",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "744d0a28d2cfc13d1b10e85b133b6c13b9426174"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "contract_conformance_only"
+      },
+      {
+        "capability_id": "benchmark_system",
+        "work_units": [
+          "P21A"
+        ],
+        "capability_kind": "software_infrastructure",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_system_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "20ecc12542e5df40c90d1fc367dbe86b563478b8"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "synthetic_conformance_only"
+      },
+      {
+        "capability_id": "controlled_pack_factory",
+        "work_units": [
+          "P19"
+        ],
+        "capability_kind": "software_infrastructure",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "42eabe63ea1a444d8b2ad14cecba6c9d6fa351d5"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "operator_registration_and_external_fixture_not_run"
+      },
+      {
+        "capability_id": "curated_virtual_cell_registry",
+        "work_units": [
+          "P22"
+        ],
+        "capability_kind": "software_infrastructure",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "bca5ad661856e8d9aa832c47f23c6ad7179ee0c9"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "default_registry_empty"
+      },
+      {
+        "capability_id": "multiomics_input_contract",
+        "work_units": [
+          "P18"
+        ],
+        "capability_kind": "software_infrastructure",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "626c71ffd1ce18a5adc200f6a6e376e57b269beb"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "real_multiomics_model_acceptance_pending"
+      },
+      {
+        "capability_id": "training_pipeline",
+        "work_units": [
+          "P20"
+        ],
+        "capability_kind": "software_infrastructure",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "a4003704b70f06eb65297ddd32e0695ae8ee146b"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "tiny_deterministic_dry_run_only"
+      }
+    ],
+    "experimental": [
+      {
+        "capability_id": "cell_interaction_evidence_contract",
+        "work_units": [
+          "P23A"
+        ],
+        "capability_kind": "biological_contract",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "2b894966cd00b2af2fafbf8f009566dd69f393a7"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "synthetic_interaction_score_conformance_only"
+      },
+      {
+        "capability_id": "ecoli_knockout_growth_contract",
+        "work_units": [
+          "P14E"
+        ],
+        "capability_kind": "biological_contract",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "8778e93c31c2dfe1ef0f77f06e7a80a425633736"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "real_assets_and_benchmark_not_run"
+      },
+      {
+        "capability_id": "experiment_design_replay_harness",
+        "work_units": [
+          "P27A-E"
+        ],
+        "capability_kind": "biological_contract",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "5875571bf9d8b518dc7a857feb935206f756de59"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "synthetic_replay_conformance_only"
+      },
+      {
+        "capability_id": "host_microbiome_contract",
+        "work_units": [
+          "P26E"
+        ],
+        "capability_kind": "biological_contract",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "5bd3e502a7a1f1cb0fd1b79ecfd109eeeaf265c4"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "value_free_abstention"
+      },
+      {
+        "capability_id": "k562_delta_expression_contract",
+        "work_units": [
+          "P16E"
+        ],
+        "capability_kind": "biological_contract",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "real_assets_and_benchmark_not_run"
+      },
+      {
+        "capability_id": "limited_biological_world_model_contract",
+        "work_units": [
+          "P29E"
+        ],
+        "capability_kind": "biological_contract",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "471767e5f38f9866fbe396f39836369d943f6657"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "empty_not_connected_zero_nodes"
+      },
+      {
+        "capability_id": "multi_agent_biology_contract",
+        "work_units": [
+          "P28E"
+        ],
+        "capability_kind": "biological_contract",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "da4bfc042d96f830e2a7e8cdc62ba227c7ace949"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "value_free_zero_of_three_modules"
+      },
+      {
+        "capability_id": "virtual_experiment_dag",
+        "work_units": [
+          "P17"
+        ],
+        "capability_kind": "biological_contract",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "16636f1b2c36e0a0fabb782a662b5b3b934891e0"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "real_multimodel_acceptance_pending"
+      },
+      {
+        "capability_id": "virtual_microbiome_contract",
+        "work_units": [
+          "P25E"
+        ],
+        "capability_kind": "biological_contract",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "039393e6be897b3014bb0b657d0a439d879578b6"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "value_free_abstention"
+      },
+      {
+        "capability_id": "yeast_deletion_fitness_contract",
+        "work_units": [
+          "P15E"
+        ],
+        "capability_kind": "biological_contract",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "complete_contract_only",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [
+          "62480a3951173a2aa7b006403af9b169521db138"
+        ],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "real_assets_and_benchmark_not_run"
+      }
+    ],
+    "unsupported": [
+      {
+        "capability_id": "ecoli_k12_knockout_growth_prediction",
+        "work_units": [
+          "P14R",
+          "P14B"
+        ],
+        "capability_kind": "external_science_and_policy_window",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "authorization_required_or_not_run",
+        "science_status": "not_run",
+        "policy_status": "not_run",
+        "completion_shas": [],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "external_assets_run_and_operator_decision_absent"
+      },
+      {
+        "capability_id": "expert_shadow_review",
+        "work_units": [
+          "P27B"
+        ],
+        "capability_kind": "external_science_window",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "authorization_required",
+        "science_status": "shadow_not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "named_expert_blind_review_not_authorized"
+      },
+      {
+        "capability_id": "historical_experiment_design_replay",
+        "work_units": [
+          "P27A-R"
+        ],
+        "capability_kind": "external_science_window",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "asset_pending",
+        "science_status": "not_run",
+        "policy_status": "no_new_decision",
+        "completion_shas": [],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "canonical_historical_asset_and_outcome_separation_absent"
+      },
+      {
+        "capability_id": "host_microbiome_coupled_response_prediction",
+        "work_units": [
+          "P26R"
+        ],
+        "capability_kind": "external_science_window",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "blocked_external",
+        "science_status": "not_run",
+        "policy_status": "not_run",
+        "completion_shas": [],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "validated_promoted_host_community_and_matching_release_absent"
+      },
+      {
+        "capability_id": "k562_perturbation_delta_expression_prediction",
+        "work_units": [
+          "P16R",
+          "P16B"
+        ],
+        "capability_kind": "external_science_and_policy_window",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "authorization_required_or_not_run",
+        "science_status": "not_run",
+        "policy_status": "not_run",
+        "completion_shas": [],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "external_assets_run_and_operator_decision_absent"
+      },
+      {
+        "capability_id": "limited_biological_world_model_execution",
+        "work_units": [
+          "P29_REAL"
+        ],
+        "capability_kind": "external_science_window",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "blocked_zero_qualifying_biological_nodes",
+        "science_status": "not_run",
+        "policy_status": "not_run",
+        "completion_shas": [],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "real_connected_subgraph_data_model_and_benchmark_absent"
+      },
+      {
+        "capability_id": "multi_agent_biology_execution",
+        "work_units": [
+          "P28_REAL"
+        ],
+        "capability_kind": "external_science_window",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "blocked_zero_of_three_modules",
+        "science_status": "not_run",
+        "policy_status": "not_run",
+        "completion_shas": [],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "zero_qualifying_executable_validated_promoted_modules"
+      },
+      {
+        "capability_id": "prospective_experiment_design_pilot",
+        "work_units": [
+          "P27C"
+        ],
+        "capability_kind": "external_science_and_policy_window",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "authorization_required",
+        "science_status": "pilot_not_run",
+        "policy_status": "not_run",
+        "completion_shas": [],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "ethics_biosafety_operator_personnel_and_actions_not_authorized"
+      },
+      {
+        "capability_id": "receiver_response_prediction",
+        "work_units": [
+          "P23B"
+        ],
+        "capability_kind": "external_science_window",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "authorization_required",
+        "science_status": "not_run",
+        "policy_status": "not_run",
+        "completion_shas": [],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "intervention_estimand_and_assumptions_absent"
+      },
+      {
+        "capability_id": "single_candidate_benchmark_evidence_and_policy",
+        "work_units": [
+          "P21B",
+          "P21C"
+        ],
+        "capability_kind": "external_science_and_policy_window",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "authorization_required",
+        "science_status": "not_run",
+        "policy_status": "not_run",
+        "completion_shas": [],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "candidate_run_and_named_operator_decision_absent"
+      },
+      {
+        "capability_id": "two_member_community_dynamics_prediction",
+        "work_units": [
+          "P24"
+        ],
+        "capability_kind": "external_science_window",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "authorization_required",
+        "science_status": "not_run",
+        "policy_status": "not_run",
+        "completion_shas": [],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "real_community_assets_model_adapter_and_run_absent"
+      },
+      {
+        "capability_id": "virtual_microbiome_abundance_dynamics_prediction",
+        "work_units": [
+          "P25R",
+          "P25_POLICY"
+        ],
+        "capability_kind": "external_science_and_policy_window",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "authorization_required",
+        "science_status": "not_run",
+        "policy_status": "not_run",
+        "completion_shas": [],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "real_assets_model_mapping_protocol_and_operator_decision_absent"
+      },
+      {
+        "capability_id": "yeast_s288c_deletion_fitness_prediction",
+        "work_units": [
+          "P15R",
+          "P15B"
+        ],
+        "capability_kind": "external_science_and_policy_window",
+        "default_enabled": false,
+        "prediction_allowed": false,
+        "engineering_status": "authorization_required_or_not_run",
+        "science_status": "not_run",
+        "policy_status": "not_run",
+        "completion_shas": [],
+        "evidence_fingerprints": [],
+        "policy_fingerprints": [],
+        "reason_code": "external_assets_run_and_operator_decision_absent"
+      }
+    ]
+  }
+}

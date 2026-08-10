@@ -1,0 +1,4 @@
+# Release source archives omit the test-only fixture that deliberately exercises
+# a Pack-relative symlink escape. The fixture remains in the repository and is
+# still covered by its tests; it is not safe or useful in a distributable archive.
+praxis_virtualcell/tests/fixtures/data_packs/escaping_symlink export-ignore

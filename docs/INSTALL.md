@@ -1,7 +1,16 @@
 # PRAXIS-VirtualCell 安装指南
 
 > 离线优先：在源码 checkout 中无需任何 API key 即可跑完整 offline demo。`llm_assisted` 才需 `DEEPSEEK_API_KEY`。
-> 要求:Python ≥ 3.11(推荐 3.13)· Ubuntu 22.04/24.04 或 macOS。
+> P30A 发布状态：`1.7.0` 仅是本地、未发布的 RC 候选版本；本文不表示正式 local RC 或 OCI 门已通过，也不授权 P30B push、tag、发布或部署。
+
+## Python 支持矩阵
+
+| Python | 支持层级 | P30A 含义 |
+|---|---|---|
+| 3.13 | exact-locked RC target | `requirements/*-py313.lock` 按版本和 hash 锁定；只有完整本地门通过后才能成为 RC 证据 |
+| 3.11 / 3.12 | metadata-compatible only | 满足 `requires-python >=3.11`，但未经 exact-hash RC 矩阵资格化，不是 `1.7.0` release-qualified runtime |
+
+Ubuntu 22.04/24.04 和 macOS 可用于源码开发；平台可安装不等于该平台已通过 RC 验收。
 
 ## 1. 源码 pip 安装（开发者 / 集成）
 
@@ -18,23 +27,37 @@ praxis-vc --version
 bash deploy/vc/check_install.sh    # 验 python + CLI + 一次 offline demo 产 report.md
 ```
 
-### 完整 release wheel
+### `1.7.0` 候选 wheel（P30A 本地、未发布）
 
 ```bash
 PYTHON_BIN=python3.13 \
+  PRAXIS_RELEASE_OFFLINE=1 \
   scripts/build_release_wheel.sh /tmp/praxis-dist
 PRAXIS_REPO_ROOT="$(pwd)"
+PRAXIS_PIP_CACHE_ROOT="${PRAXIS_PIP_CACHE_ROOT:-$(python3.13 -m pip cache dir)}"
+RC_WHEELHOUSE="$(mktemp -d /tmp/praxis-runtime-wheelhouse.XXXXXX)"
+
+python3.13 "${PRAXIS_REPO_ROOT}/scripts/release_candidate.py" materialize-wheelhouse \
+  --lock "${PRAXIS_REPO_ROOT}/requirements/runtime-py313.lock" \
+  --cache-root "${PRAXIS_PIP_CACHE_ROOT}" \
+  --output "${RC_WHEELHOUSE}" \
+  --source-date-epoch "$(git -C "${PRAXIS_REPO_ROOT}" log -1 --format=%ct)" \
+  --target-profile macos_arm64_cp313
 
 python3.13 -m venv /tmp/praxis-release-venv
 /tmp/praxis-release-venv/bin/python -m pip install \
-  --require-hashes -r requirements/runtime-py313.lock
+  --no-index \
+  --find-links "${RC_WHEELHOUSE}" \
+  --only-binary=:all: \
+  --require-hashes \
+  -r "${PRAXIS_REPO_ROOT}/requirements/runtime-py313.lock"
 /tmp/praxis-release-venv/bin/python -m pip install \
   --no-deps /tmp/praxis-dist/praxis_virtualcell-*.whl
 (cd /tmp && /tmp/praxis-release-venv/bin/python \
   "${PRAXIS_REPO_ROOT}/scripts/verify_release_install.py")
 ```
 
-该脚本拒绝 tracked dirty state，从 `git archive HEAD` 建立全新临时源码树，在其中用 `npm ci && npm run build` 生成 React 产物；随后在临时 Python 3.13 环境按 `requirements/build-py313.lock` 安装 hash-locked build backend，并以 `--no-build-isolation` 构建完整 wheel。这样不会复用 checkout 中旧的 `build/`、egg-info 或 hashed static asset。wheel 内含 CLI/API、React 静态资源、`praxis_vc_web/app.py` 和默认 gene-set 数据，不包含测试包。
+该脚本拒绝任何 dirty state，从 `git archive HEAD` 建立全新临时源码树。P30A 本地流程使用 `PRAXIS_RELEASE_OFFLINE=1`：Python build wheel 必须从现有本地 pip cache 按 `requirements/build-py313.lock` 的 exact hash 物化，React 必须以 `npm ci --offline` 构建；缺任何精确依赖即 fail-closed。随后以 `--no-build-isolation` 构建完整 wheel，不复用 checkout 中旧的 `build/`、egg-info 或 hashed static asset。只有成功生成的 wheel 才内含 CLI/API、React 静态资源、`praxis_vc_web/app.py` 和默认 gene-set 数据，且不包含测试包。
 
 发行 verifier 从源码仓库外运行，覆盖 CLI `run` 的四项产物、API health/job、同源首页与 hashed asset，以及 Streamlit app 内容存在。它没有运行 `praxis-vc ask` 或启动完整 Streamlit server，不能把这些能力写成已验证。
 
@@ -48,24 +71,23 @@ cd ..
 praxis-vc serve
 ```
 
-源码 editable 安装必须在 `dist/` 构建完成后启动 FastAPI，才会把 React 挂到 `/`；没有 `dist/` 时源码服务只提供 API。完整 release wheel 与发布容器使用包内 `praxis_vc_api/static`，不依赖源码目录。
+源码 editable 安装必须在 `dist/` 构建完成后启动 FastAPI，才会把 React 挂到 `/`；没有 `dist/` 时源码服务只提供 API。只有已成功构建的完整 release wheel 或 OCI artifact 才使用包内 `praxis_vc_api/static`，不依赖源码目录。
 
 `praxis-vc web` 是旧 Streamlit 入口。完整 wheel 已包含入口文件并使用包内绝对路径，但仍需安装 `web` extra；当前发行门没有启动 Streamlit server。
 
-## 3. Docker 发布容器
+## 3. OCI 候选构建合同（P30A 尚未验收）
 
-容器使用固定 multi-platform digest 的 Node 24 与 Python 3.13.14 基础镜像。四阶段构建先生成 React、构建同一完整 wheel、在 `--network=none` 的 installer 中从 hash-verified wheelhouse 安装，最终镜像只复制 `/opt/venv`。运行用户为 UID/GID 10001，持久化目录是 `/var/lib/praxis-vc/runs`。
+候选 OCI 合同使用 digest-pinned Python 3.13.14 基础镜像和预先验证的 exact wheelhouse；`deploy/vc/Dockerfile.artifact` 在 `--network=none` 下安装，最终镜像只复制 `/opt/venv`。运行用户为 UID/GID 10001，持久化目录是 `/var/lib/praxis-vc/runs`。合同和 builder 存在不等于 OCI 已构建、双构建已等价或正式 P30A gate 已通过。
 
 构建必须显式注入完整候选 SHA 与 commit epoch；缺少或格式非法时 Dockerfile 会拒绝构建：
 
 ```bash
-scripts/build_release_container.sh praxis-virtualcell:local
-docker run --rm -p 127.0.0.1:8000:8000 \
-  -v praxis-vc-runs:/var/lib/praxis-vc/runs \
-  praxis-virtualcell:local
+scripts/build_release_oci.sh \
+  /absolute/path/to/exact-wheelhouse \
+  /tmp/praxis-virtualcell-1.7.0.oci.tar
 ```
 
-脚本从当前 committed HEAD 取完整 SHA 与 epoch，并拒绝 tracked dirty state 或不在保护清单中的 untracked 文件，防止镜像内容与 OCI/health 身份错配。若直接调用 Dockerfile，同样必须显式提供两项 build arg。
+脚本从当前 clean committed HEAD 取完整 SHA 与 epoch，拒绝复用输出、非本地 Docker endpoint、未命中 pinned digest 的基础镜像以及任何依赖下载。两次 OCI 只能在 manifest、config 和有序 layer 均一致后成为可候选证据；归档 tar 字节本身不是等价判据。
 
 完整 Docker smoke 是显式双门，普通 core 测试只会 skip：
 
@@ -75,7 +97,7 @@ PRAXIS_RUN_DOCKER_SMOKE=1 .venv/bin/python -m pytest \
   --run-integration -o addopts='' -q -ra
 ```
 
-该 smoke 使用每次唯一的 image/container 名和 owner label，只清理本次创建的资源；验证 non-root、health/version/SHA、容器内 CLI、React hashed assets 与 offline API report。Docker Desktop 的 Linux-container 结果不等同于原生 Linux/amd64 或 `.53` 已验证；远端结果必须单列。
+该 smoke 使用每次唯一的 image/container 名和 owner label，只清理本次创建的资源；验证 non-root、health/version/SHA、容器内 CLI、React hashed assets 与 offline API report。它仅在实际执行并保存 exact artifact evidence 时才是当次候选的证据；Docker Desktop 的 Linux-container 结果不等同于原生 Linux/amd64 或 `.53` 已验证，远端结果必须单列。
 
 ## 4. 便携源码目录（无 Docker 的 Linux）
 

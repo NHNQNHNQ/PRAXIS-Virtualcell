@@ -1,5 +1,6 @@
 """打包配置守卫:wheel 必须含 praxis_virtualcell/praxis_vc_api + 运行时数据。
 防 packages.find 回退到只打 praxis2(否则 praxis-vc CLI ImportError)。"""
+
 import json
 import re
 import subprocess
@@ -17,9 +18,7 @@ def test_packages_find_includes_virtualcell():
     assert any(p.startswith("praxis_virtualcell") for p in include), include
     assert any(p.startswith("praxis_vc_api") for p in include), include
     assert any(p.startswith("praxis_vc_web") for p in include), include
-    assert cfg["tool"]["setuptools"]["packages"]["find"]["exclude"] == [
-        "praxis_virtualcell.tests*"
-    ]
+    assert cfg["tool"]["setuptools"]["packages"]["find"]["exclude"] == ["praxis_virtualcell.tests*"]
 
 
 def test_include_package_data_and_manifest():
@@ -34,9 +33,7 @@ def test_include_package_data_and_manifest():
     assert "*.md" in manifest
     assert "*.h5ad" in manifest
     assert "prune praxis_virtualcell/tests" in manifest
-    assert "**/*.h5ad" in cfg["tool"]["setuptools"]["package-data"][
-        "praxis_virtualcell"
-    ]
+    assert "**/*.h5ad" in cfg["tool"]["setuptools"]["package-data"]["praxis_virtualcell"]
 
 
 def test_default_gene_sets_are_licensed_package_resources():
@@ -111,10 +108,40 @@ def test_release_container_uses_pinned_bases_and_locked_wheel_install():
     assert "--no-index" in dockerfile
     assert "USER 10001:10001" in dockerfile
     assert "HEALTHCHECK" in dockerfile
-    assert "org.opencontainers.image.revision=\"${GIT_SHA}\"" in dockerfile
+    assert 'org.opencontainers.image.revision="${GIT_SHA}"' in dockerfile
     assert "ARG GIT_SHA\n" in dockerfile and "GIT_SHA=unknown" not in dockerfile
     assert "ARG SOURCE_DATE_EPOCH\n" in dockerfile and "SOURCE_DATE_EPOCH=315532800" not in dockerfile
     assert "PRAXIS_VC_RUNS=/var/lib/praxis-vc/runs" in dockerfile
+
+
+def test_artifact_oci_assembly_is_network_disabled_and_wheel_first():
+    dockerfile = (_ROOT / "deploy" / "vc" / "Dockerfile.artifact").read_text(encoding="utf-8")
+    script = (_ROOT / "scripts" / "build_release_oci.sh").read_text(encoding="utf-8")
+
+    assert re.search(r"python@sha256:[0-9a-f]{64}", dockerfile)
+    assert "COPY --from=wheelhouse . /wheelhouse" in dockerfile
+    assert dockerfile.count("RUN --network=none") == 2
+    assert "pip download" not in dockerfile
+    assert "npm ci" not in dockerfile
+    assert "--no-index" in dockerfile
+    assert "--require-hashes" in dockerfile
+    assert "USER 10001:10001" in dockerfile
+    assert 'org.opencontainers.image.revision="${GIT_SHA}"' in dockerfile
+
+    assert "status --porcelain=v1 --untracked-files=normal" in script
+    assert "refusing non-local Docker" in script
+    assert "docker image inspect" in script
+    assert "docker buildx ls" in script
+    assert 'row.get("Driver") != "docker"' in script
+    assert 'node.get("Endpoint") != context' in script
+    assert 'target_profile") != "linux_arm64_cp313"' in script
+    assert '--builder "${PRAXIS_BUILDER}"' in script
+    assert "--network none" in script
+    assert "--pull=false" in script
+    assert "--provenance=false" in script
+    assert "--sbom=false" in script
+    assert "type=oci" in script
+    assert "docker push" not in script
 
 
 def test_docker_context_excludes_local_data_and_credentials():
@@ -124,20 +151,41 @@ def test_docker_context_excludes_local_data_and_credentials():
         if line.strip() and not line.lstrip().startswith("#")
     }
 
-    assert {".git", ".env", ".env.*", "data", "runs", "secrets", "**/node_modules"} <= patterns
-    assert {".claude", ".playwright-mcp", "praxis_vc_react/dist", "string.jpeg"} <= patterns
-    assert {"_audit", "reports", "praxis_virtualcell/tests", "**/*.pem", "**/*.key"} <= patterns
+    assert {
+        ".git",
+        ".env",
+        ".env.*",
+        "data",
+        "runs",
+        "secrets",
+        "**/node_modules",
+    } <= patterns
+    assert {
+        ".claude",
+        ".playwright-mcp",
+        "praxis_vc_react/dist",
+        "string.jpeg",
+    } <= patterns
+    assert {
+        "_audit",
+        "reports",
+        "praxis_virtualcell/tests",
+        "**/*.pem",
+        "**/*.key",
+    } <= patterns
 
 
 def test_release_scripts_build_only_committed_candidates():
     wheel_script = (_ROOT / "scripts" / "build_release_wheel.sh").read_text(encoding="utf-8")
-    container_script = (_ROOT / "scripts" / "build_release_container.sh").read_text(
-        encoding="utf-8"
-    )
+    container_script = (_ROOT / "scripts" / "build_release_container.sh").read_text(encoding="utf-8")
 
-    assert "diff --quiet" in wheel_script and "diff --cached --quiet" in wheel_script
+    assert "status --porcelain=v1 --untracked-files=normal" in wheel_script
     assert "archive --format=tar HEAD" in wheel_script
     assert "--no-build-isolation" in wheel_script
+    assert "PRAXIS_RELEASE_OFFLINE" in wheel_script
+    assert "materialize-wheelhouse" in wheel_script
+    assert "--no-index" in wheel_script
+    assert "npm ci --offline --no-audit --no-fund" in wheel_script
     assert "status --porcelain=v1 --untracked-files=normal" in container_script
     assert "GIT_SHA=${PRAXIS_GIT_SHA}" in container_script
     assert "SOURCE_DATE_EPOCH=${PRAXIS_SOURCE_EPOCH}" in container_script
@@ -155,9 +203,7 @@ def test_ci_editable_installs_use_hash_locked_build_backend():
 
 
 def test_playwright_python_can_be_overridden_without_editing_config():
-    config = (_ROOT / "praxis_vc_react" / "playwright.config.ts").read_text(
-        encoding="utf-8"
-    )
+    config = (_ROOT / "praxis_vc_react" / "playwright.config.ts").read_text(encoding="utf-8")
     readme = (_ROOT / "praxis_vc_react" / "README.md").read_text(encoding="utf-8")
 
     assert '"\\${PRAXIS_VC_TEST_PYTHON:-.venv/bin/python}"' in config
@@ -165,9 +211,7 @@ def test_playwright_python_can_be_overridden_without_editing_config():
 
 
 def test_bundle_budget_ignores_appledouble_sidecars():
-    script = (
-        _ROOT / "praxis_vc_react" / "scripts" / "check-bundle-size.mjs"
-    ).read_text(encoding="utf-8")
+    script = (_ROOT / "praxis_vc_react" / "scripts" / "check-bundle-size.mjs").read_text(encoding="utf-8")
 
     assert script.count('!name.startsWith("._")') >= 2
 

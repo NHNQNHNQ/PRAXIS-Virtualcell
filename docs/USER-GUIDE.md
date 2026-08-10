@@ -2,6 +2,7 @@
 
 > 定位:可信虚拟细胞扰动预测。卖点不是"更准",而是**适用性判断 / 拒绝 / 弃权 / 降级 / 溯源 / 不过度承诺**。
 > 铁律:所有预测/治理决策由**后端确定性 runtime**完成;LLM 只做自然语言解析、路由建议、critic 复核、报告润色,**绝不**碰 prediction / hard-rule / learned-reliability 终决 / provenance。默认 `offline`(零 LLM)。
+> `1.7.0` 当前只是本地、未发布的 RC 候选版本。任何预测必须同时匹配 exact request × Pack × model × environment × adapter × evidence × policy；任一门缺失、失配、OOD 或超出 scope 都必须 `abstain`。
 
 ## 1. 命令行(CLI)
 
@@ -20,11 +21,21 @@ praxis-vc serve --host 127.0.0.1 --port 8000     # FastAPI(需 .[api])
 praxis-vc web   --api http://127.0.0.1:8000       # 旧 Streamlit,需 .[web]
 ```
 
-完整 release wheel 已包含 `praxis_vc_web/app.py`，`web` 子命令使用打包后的绝对路径；运行仍需安装 `.[web]`。当前门只验证入口内容与路径接线，尚未启动完整 Streamlit server，推荐使用下方 React 同源页面。
+`praxis-vc run`、`praxis-vc ask --yes` 与旧 Streamlit 都是正式入口：当前没有显式 Pack 时会生成
+P12 V2 零步骤计划并 `abstain`，不会调用 mock 或 case runner。可治理 Pack 执行必须使用
+`praxis-vc pack run --pack-id <id> --pack-version <version>`；不要按物种或 cell preset 推断 Pack。
+
+当一个 exact release wheel 已成功构建时，它会包含 `praxis_vc_web/app.py`，`web`
+子命令会使用打包后的绝对路径；运行仍需安装 `.[web]`。当前 P30A 尚无完成 wheel artifact，
+且发行门只验证入口内容与路径接线，尚未启动完整 Streamlit server，推荐使用下方 React
+同源页面。
 
 ## 2. 本地网页流程
 
-源码 checkout 先执行 `cd praxis_vc_react && npm ci && npm run build && cd ..`，再运行 `praxis-vc serve`。完整 release wheel 和发布容器已内含 React 静态资源，不需要外置源码 `dist/`。浏览器打开 `http://127.0.0.1:8000`。
+源码 checkout 先执行 `cd praxis_vc_react && npm ci && npm run build && cd ..`，再运行
+`praxis-vc serve`。当且仅当 exact release wheel 或 P30 OCI artifact 成功构建时，它们才会
+内含 React 静态资源、不需要外置源码 `dist/`；目前不能把该状态称为已完成。浏览器打开
+`http://127.0.0.1:8000`。
 
 1. **提问（Ask）**：描述扰动实验并选择模式，调用 Parse。
 2. **核对（Review）**：查看解析摘要，确认或修改 species、cell、perturbation、task 等字段。
@@ -55,14 +66,14 @@ praxis-vc web   --api http://127.0.0.1:8000       # 旧 Streamlit,需 .[web]
 
 | verdict | 含义 |
 |---|---|
-| **accept** | 适用且证据足,给预测 |
-| **caution** | 带告警用(如跨物种 ortholog、药物签名噪声) |
-| **downgrade** | 引擎在但数据/证据不足,降级解读不可全信 |
-| **abstain** | 无适用引擎 → 系统正确弃权,不产出预测(治理有效) |
+| **accept** | exact 七门均通过且仍在声明 scope 内，可给预测 |
+| **caution** | 仅用于不改变七门结果的 scope 内信息性告警；不得用它放行 OOD、跨物种推导或证据缺失 |
+| **downgrade** | 历史显示状态，不能覆盖 exact gate；数据、模型或证据不足时仍必须 value-free `abstain` |
+| **abstain** | 任一 exact gate 缺失或失败 → `prediction=null`，保留 reason/provenance |
 
 ## 5. 模式与边界
 
-- `offline`(默认):不调任何 LLM;自然语言用确定性关键词解析。
+- `offline`(默认):不调任何 LLM;自然语言用确定性关键词解析。`offline` 不代表存在可执行模型，也不降低任何 evidence 或 policy 门。
 - `llm_assisted`:需 `DEEPSEEK_API_KEY`;LLM 解析/建议/critic/叙述;失败自动回退确定性。
-- 数值口径:本地 offline 用 mock/可用 predictor 走完整治理流;真 donor 数值预测在远端 A100(见 benchmarks/)。论文口径:所有 benchmark/prediction/reliability 结果在 offline 确定性模式生成、无 LLM 调用。
+- 数值口径:本地 synthetic、tiny、dummy 或 test adapter 只能验证合同、溯源和 fail-closed 行为，不是科学 evidence，也不能作为缺失真实模型时的数值 fallback。只有 exact 七门全部通过的不可变 release 才可生成其声明 scope 内的预测，否则 `prediction=null` 并 `abstain`。
 - UI footer 的产品版本和 build SHA 来自后端 `/api/health`；前端 package 版本不是发布真相。

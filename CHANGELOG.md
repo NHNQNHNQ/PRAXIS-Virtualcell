@@ -2,6 +2,14 @@
 
 本文件记录面向发布的产品变化。科学能力声明仍以 `reports/phase10/PHASE10_GATE.md` 为准；本地版本或 tag 不等于已在 GitHub 发布。
 
+## 1.7.0 — local RC engineering, unpublished (`LOCAL_RC_INCOMPLETE`)
+
+- 把 P12–P29 的 versioned model/adapter/environment/evidence/policy、Pack factory、training、benchmark、registry、experiment-design、multi-agent 与 limited-world-model 工程合同收口为本地 Software RC；没有把 contract、catalog 或 synthetic conformance 提升为科学事实。
+- 默认产品承诺保持 fail-closed：只有 exact request × Pack × model × environment × adapter × evidence × policy 全部满足才执行，否则 abstain。
+- P14R/P15R/P16R/P21B/P23B/P24/P25R/P26R/P27B/P27C 与真实 P28/P29 均未在本地 RC 窗口运行；未通过的能力保持 disabled、experimental 或 unsupported。
+- `1.7.0` 是新的兼容 minor identity；API/runtime 协议和各 schema/artifact identity 独立版本化。历史 `v1.6.0` 不复用、不移动。
+- P30A 只形成本地候选、可复现 artifact、SBOM/license/dependency/governance/release 文档与 digest；push、main、tag、artifact publication、staging、production 和 rollback 仍分别需要 P30B1–B4 独立授权。
+
 ## 1.6.0 — candidate, unreleased
 
 - 将活跃开发副本从受 AppleDouble/磁盘空间风险影响的 ExFAT 仓库迁移到 APFS，并保存 bundle、stash 和受保护工作区资产。

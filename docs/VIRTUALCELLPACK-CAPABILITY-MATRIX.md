@@ -1,4 +1,33 @@
-# VirtualCellPack 能力矩阵（P0–P16E）
+# VirtualCellPack 能力矩阵（P0–P29）
+
+> P30A `1.7.0` 状态：本地、未发布的 RC 候选版本，不表示 formal local RC、OCI、P30B 或任何科学 promotion 已完成。`release/p30a/capability-classification.json` 是对 P12–P29 的四层 software-release exposure 分类，显式 `authoritative_for_execution=false`；它不能创建 compatibility、evidence 或 product policy。
+>
+> 执行规则仍是 exact request × Pack × model × environment × adapter × evidence × policy 全部匹配才可预测，否则 fail-closed `abstain`。当前 science-qualified badge 不合格：真实物种数为 **0/3**，且没有 production-promoted community capability。
+
+## P12–P29 release exposure 摘要
+
+以下四层只描述候选软件的暴露级别：`production` 不等于 `production_promoted`，`preview` / `experimental` 不是科学证据，`unsupported` 必须保持不可执行或弃权。精确 capability ID、scope fingerprint、completion SHA 和 reason code 以 `release/p30a/capability-classification.json` 的当前字节为准。
+
+| Phase / exact work unit | 候选分类 | 工程与科学边界 |
+|---|---|---|
+| P12 Model Zoo v2 | `production` | 仅 model identity 和 fail-closed matching 软件基础设施；`prediction_allowed=false`，无新 policy 决定 |
+| P13 Adapter SDK | `preview` | exact task/output 合同与 deterministic conformance；dummy 不是 evidence |
+| P14E / P14R / P14B | E=`experimental`；R/B=`unsupported` | E. coli exact contract 完成；真实 GEM/benchmark 未运行，未 promotion |
+| P15E / P15R / P15B | E=`experimental`；R/B=`unsupported` | yeast exact contract 完成；真实 deletion-fitness 运行和 operator 决策未完成 |
+| P16E / P16R / P16B | E=`experimental`；R/B=`unsupported` | K562 exact contract 完成；候选 benchmark/evidence/policy 未完成 |
+| P17 Virtual Experiment DAG | `experimental` | deterministic contract-only；不足两个 promoted capability，无真实多模型执行 |
+| P18 Multi-omics | `preview` | ordered modality/alignment/join/missingness 合同完成；不补零、不隐式 impute |
+| P19 Controlled Pack Factory | `preview` | receipt→review→validate→register 软件合同；不训练、不创建 evidence/promotion |
+| P20 Training Pipeline | `preview` | job/result/checkpoint/split 合同和 tiny deterministic dry-run；无真实 candidate 训练 |
+| P21A / P21B / P21C | A=`preview`；B/C=`unsupported` | benchmark system 仅 synthetic conformance；无 single-candidate evidence 或 operator policy |
+| P22 Curated Registry | `preview` | append-only registry 软件；default registry 为空，registry 不创建科学状态 |
+| P23A / P23B | A=`experimental`；B=`unsupported` | A 只是 sender→receiver interaction evidence score 合同；无 receiver response/causal claim |
+| P24 Community execution | `unsupported` | P10 `vc.community-*.v1` 仅 no-model serialization/fingerprint/abstain；无真实 v2 adapter |
+| P25E / P25R / policy | E=`experimental`；R/policy=`unsupported` | 2–3 成员 exact medium/time/primary endpoint 合同完成；真实科学运行未执行 |
+| P26E / P26R | E=`experimental`；R=`unsupported` | host–microbiome value-free 合同；host/community promoted prerequisite 均不满足 |
+| P27A-E / P27A-R / P27B / P27C | A-E=`experimental`；其余=`unsupported` | replay harness 仅 synthetic conformance；无 canonical historical replay、专家 shadow review 或 prospective pilot |
+| P28E / real acceptance | E=`experimental`；real=`unsupported` | typed advisory handoff/value-free abstain；真实模型模块为 0/3 |
+| P29E / real execution | E=`experimental`；real=`unsupported` | `empty_not_connected`、0 nodes；不存在 connected biological subgraph |
 
 P0 基线：`8e0d06348ebdf22e076037e6d661094ae877c5d1`；P8 Golden 起始基线：`09fb1bb3d02adfceed504cbccd7cf36c54a61b69`；P8 产品化收口起始基线：`b6cf226382cb841fb50e70875c82d1804ae5681e`；P9 起始基线：`480706fbf58343565532debeca70c4de093b045f`；P10 起始基线：`b0064fab936f06d09a88eea5292e934410302145`；P12 起始 SHA：`b19c896202bea56f894d0ad540501331af42a40c`，completion code SHA：`1a5464fb0d2d9e105058f6797d92efd69783e5b2`；P13 起始 SHA：`f83c13db386cb552b3ce7a5643e5ffbead0ff573`，completion code SHA：`744d0a28d2cfc13d1b10e85b133b6c13b9426174`，tree：`198e623120688d3704b9312990ddaa93c9a7b0e6`；P14E 起始 SHA：`0b193310009d6e4d2ebc0fc8abf95da20a56acdb`，SDK prerequisite：`c3401450fd79f7829c438d6b55c1902ea2f4cf5f`，completion code SHA：`8778e93c31c2dfe1ef0f77f06e7a80a425633736`，tree：`fa85e049bb36f3fbd8e6d4a7503e4b5837ed7c78`；P15E 起始 SHA：`0ff6870a70a04d71098a16875e633f909e31cc5a`，completion code SHA：`62480a3951173a2aa7b006403af9b169521db138`，tree：`64906691c4c989a843df4da97f0a93f32cd65ad2`。本表是能力与证据边界，不是性能排名；Pack 的 `pack_valid`，registry 的 `cataloged/artifact_ready/revoked/superseded`，逐请求计算的 model/adapter/environment compatibility 与 `executable`，科学 evidence 的 `benchmark_passed/scientifically_validated/promotion_eligible`，以及产品 policy 的 `production_promoted` 必须分开，不能自动递进。
 
@@ -11,10 +40,10 @@ contract engineering；P16R/P16B/science/policy 仍未运行，P17 只能按 con
 | 能力/组件 | 当前实现与真相源 | `pack_valid` | `model_compatible` | `scientifically_validated` | 结论与边界 |
 |---|---|---:|---:|---:|---|
 | 结构化 request | `core/request.py`、`core/request_v2.py`、`agents/request_adapter.py`、`species_schema.py` | N/A | 输入前置 | N/A | 必填字段缺失由 schema fail-closed；v2/domain/bundle nested JSON 验证后递归不可变；不猜测 targets/output |
-| 确定性 runtime | `core/runtime.py`、`workflows/predict_delta_expression.py`、MessageBus | Pack-aware 路径只接受 registry 签发的 `RegisteredPack` | 完整 Pack identity 时由 execution plan 决定；无 Pack 时走显式 legacy adapter | 不自动声称 | OFFLINE 零 LLM；trace、hash、governance 保持确定性；只给半个 Pack identity 在执行前拒绝 |
+| 确定性 runtime | `core/runtime.py`、`workflows/predict_delta_expression.py`、MessageBus | Pack-aware 路径只接受 registry 签发的 `RegisteredPack` | 完整 Pack identity 时由 execution plan 决定；正式无 Pack 路径生成 V2 零步骤计划并弃权 | 不自动声称 | OFFLINE 零 LLM；trace、hash、governance 保持确定性；正式 UI/API/CLI/Streamlit 不自动绑定 Pack，半个 Pack identity 在执行前拒绝 |
 | SpeciesBrain | `agents/species_brain.py` + `brains/virtualcell/**` | N/A | 提供规则上下文，不裁决 | 不提供 | 只读 YAML、登记 rules_referenced；不产数值 |
-| route table | `agents/route_table.py` | N/A | 仅为无 Pack legacy adapter 的声明式条件 | 不提供 | engine/disposition/reason 是兼容能力图，不是 Pack-aware 模型事实源或性能结论 |
-| case dispatch | `predictors/case_dispatch.py`、`case_runner_agent.py` | N/A | 仅为无 Pack legacy adapter 保留；GEARS 仍受 `.53` checkpoint+依赖窄门 | 仅可引用已有、口径匹配的 evidence | Pack-aware plan 不调用 case dispatch，不满足计划条件也不 fallback 到 mock |
+| route table | `agents/route_table.py` | N/A | 仅为明确 legacy compatibility harness 的声明式条件 | 不提供 | engine/disposition/reason 不是 Pack-aware 模型事实源、正式产品路由或性能结论 |
+| case dispatch | `predictors/case_dispatch.py`、`case_runner_agent.py` | N/A | 仅为明确 legacy compatibility harness 保留；GEARS 仍受 `.53` checkpoint+依赖窄门 | 仅可引用已有、口径匹配的 evidence | 正式 UI/API/CLI/Streamlit 与 Pack-aware plan 都不调用 case dispatch；不满足计划条件也不 fallback 到 mock |
 | Strict Model Zoo | `model_zoo/registry.yaml`、`registry.py`、`registry_v2.py`、`capability_registry.py::ModelCard` | registry 不是 Pack | `vc.model-card.v1` 原 fingerprint 兼容；P12 product path 还需 exact v2 release/component bindings | card/provenance/registry presence 都不是验证结果 | v1 strict fields 保持不变；v2 导出副本不能改 registry truth；P12 未增加模型或权重 |
 | CapabilityRegistry | `model_zoo/capability_registry.py` | 只信 `RegisteredPack`，任意 manifest/path 均不能授予 valid | product Pack-aware path 强制 v2，分别计算 model/adapter/environment compatibility；缺任一 exact identity 即 false | 无 evidence 时为 null，不补造 false/true | v2 绑定 full request/Pack/release/artifact/environment/adapter/evidence/policy/lifecycle；低层 custom registry 默认 v1 仅为历史 P8 library compatibility |
 | ModelBroker + ExecutionPlan | `agents/model_broker_agent.py`、`vc.execution-plan.v1`、`vc.execution-plan.v2` | 未注册 Pack 产空 plan | v2 只实例化所有门均通过的 `vc.execution-step.v2`；import/constructor 失败 fail-closed | plan 不授予 | v2 重算 canonical plan ID 并绑定 report/wrapper/agent step；display model_version/runtime path 不入 identity，坏 binding 不回退 mock |

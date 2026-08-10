@@ -1,7 +1,7 @@
 [project]
 name = "praxis-virtualcell"
-version = "1.6.0"
-description = "PRAXIS-2-derived multi-agent framework for virtual-cell prediction"
+version = "1.7.0"
+description = "Contract-governed, abstaining foundation platform for programmable virtual cells"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
