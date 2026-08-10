@@ -132,8 +132,9 @@
 > `codex/p25e-virtual-microbiome`；engineering
 > `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；
 > real candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；science `NOT_RUN`；policy
-> `NO_NEW_DECISION`；P30A-E1 已完成；下一 eligible local unit 为 P30A-E2 trusted
-> local finalizer/orchestrator；formal P30A 仍 `LOCAL_RC_INCOMPLETE`
+> `NO_NEW_DECISION`；P30A-E1 与 P30A-E2a 已完成；P30A-E2a 是 `COMPLETE_NEGATIVE`；下一
+> eligible local unit 为 P30A-E2b artifact-aware trusted finalizer；formal P30A 仍
+> `LOCAL_RC_INCOMPLETE`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
@@ -226,7 +227,7 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | P28E source date epoch / 完成分支 | `1786184568` / `codex/p25e-virtual-microbiome` |
 | P29E actual starting SHA / completion code/tree | `90990c198c40d0e6655aedaad101a783cde003aa` / `471767e5f38f9866fbe396f39836369d943f6657` / `d1dec19f06ec88f563406b45f2b544effabad915` |
 | P29E source date epoch / 完成分支 | `1786187523` / `codex/p25e-virtual-microbiome` |
-| 当前 work-unit 状态 | P29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；real P29 candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；P30A-E1 `ENGINEERING_COMPLETE`；P30A-E2 `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`；formal P30A `LOCAL_RC_INCOMPLETE`；science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`；policy `NO_NEW_DECISION`；P28 real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C/P21B/P21C 均保持各自 authorization gate |
+| 当前 work-unit 状态 | P29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；real P29 candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；P30A-E1 `ENGINEERING_COMPLETE`；P30A-E2a `COMPLETE_NEGATIVE`；P30A-E2b `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`；formal P30A `LOCAL_RC_INCOMPLETE`；science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`；policy `NO_NEW_DECISION`；P28 real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C/P21B/P21C 均保持各自 authorization gate |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -2460,7 +2461,10 @@ community capability”只决定科学资格徽章，不能被平台名称自动
 `d808735ebfd649df6a4c932b95140387aa412c7d`. P30A-E1 release-contract hardening is
 `ENGINEERING_COMPLETE` at `0a4d72b0825d9ec0ff3b7776bbc4f1f0023336f9` / tree
 `ba701d4ee6033e86a2d8abecc7e6ff25c1a05c14` / epoch `1786335170`. Its wheel/source probes are
-reproducible but are not a formal RC. P30A-E2 trusted local finalizer/orchestrator is next;
+reproducible but are not a formal RC. P30A-E2a completed a clean-SHA offline preflight at
+`964b62214f346b15ec2d3f2a622b33f632dde466` / tree
+`eac19455bc9241e5347de27782a99942e3591cab` / epoch `1786338523`; record `6cb91031…9019` is
+`COMPLETE_NEGATIVE`, not a full gate execution. P30A-E2b artifact-aware trusted finalizer is next;
 formal P30A remains `LOCAL_RC_INCOMPLETE`. Science is `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` and
 policy is `NO_NEW_DECISION`.
 
@@ -2473,10 +2477,11 @@ P30A-E1 completed the release-contract, governance, documentation and probe port
 numbered plan below. It proved local wheel/source reproducibility (`1,264,708` bytes /
 `44e5e905e706f87c9b43574a5f02afd41c7b37d9079a0e91956b511bca422303`; `8,055,078` bytes /
 `ba5e5d0dbe387575049f5603f8011af3359d4f99583f4856233be48dc796e642`) but not a completed
-artifact set. P30A-E2 must independently finalise one trusted clean-source evidence bundle; it
-cannot elevate caller-supplied probes. Missing offline inputs (`pyjwt==2.13.0`, `pyyaml==6.0.3`,
-and Linux/arm64 `cffi`, `cryptography`, `pydantic-core`, `rpds-py`) remain explicit gates, not
-permission to download or bypass them.
+artifact set. P30A-E2a independently checked offline coverage and retained the exact negative
+record, but ran no install/build/OCI/full gate. P30A-E2b must independently finalise one trusted
+clean-source evidence bundle; it cannot elevate caller-supplied probes or the E2a record. Missing
+offline inputs (`pyjwt==2.13.0`, `pyyaml==6.0.3`, and Linux/arm64 `cffi`, `cryptography`,
+`pydantic-core`, `rpds-py`) remain explicit gates, not permission to download or bypass them.
 
 1. 审计 P12–P29 evidence ledger 和 operator product-policy ledger；
 2. production、preview、experimental、unsupported 四类能力分开；
@@ -2557,7 +2562,7 @@ permission to download or bypass them.
 
 ### 可复制 P30A 授权提示词（历史模板）
 
-The active continuous-local authorization supersedes this historical template for P30A-E2 local
+The active continuous-local authorization supersedes this historical template for P30A-E2b local
 work only. It does not authorize P30B1–P30B4 or any network, remote, publication or deployment
 action.
 
@@ -2803,9 +2808,9 @@ blocked；comparison/ablation 未运行。P29E 随后从 P28E docs closure
 `90990c198c40d0e6655aedaad101a783cde003aa` 开始，在 code
 `471767e5f38f9866fbe396f39836369d943f6657` 完成 strict null requirement、
 `empty_not_connected` graph 与 authoritative value-free compilation。真实 P29 candidate 因
-qualified biological nodes 为 `0` 而保持 blocked。P30A-E1 local release-contract hardening 已完成；
-当前下一 eligible local work unit 是 P30A-E2 trusted finalizer/orchestrator；formal P30A 仍
-`LOCAL_RC_INCOMPLETE`。P30B1–B4 保持独立授权门。
+qualified biological nodes 为 `0` 而保持 blocked。P30A-E1 local release-contract hardening 与
+P30A-E2a clean-SHA offline preflight 已完成；当前下一 eligible local work unit 是 P30A-E2b
+artifact-aware trusted finalizer；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P30B1–B4 保持独立授权门。
 
 当前持续本地授权不覆盖 P14R、P14B、P15R、P15B、P16R 或 P16B。没有逐项 exact
 assets/output root/run window 授权时，不得读取或运行真实资产、产生科学

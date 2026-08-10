@@ -58,7 +58,11 @@ The implementation is `praxis_virtualcell/limited_world_model.py`
 [the P29E completion report](../reports/phase29e/PHASE29E_COMPLETION.md).
 
 At P29E closure, P30A local RC closure was the next eligible local work unit. P30A-E1
-release-contract hardening subsequently completed; the current next eligible local work unit is
-P30A-E2 trusted finalizer/orchestrator, while formal P30A remains `LOCAL_RC_INCOMPLETE`. P30 may
-classify P29 as unsupported/experimental; it cannot infer a science-qualified capability badge
-from this contract-only result.
+release-contract hardening subsequently completed.
+
+**E2a follow-on (2026-08-10):** P30A-E2a clean-SHA offline preflight completed
+`COMPLETE_NEGATIVE`; it ran no install, build, OCI, or full gate. The current next eligible local
+work unit is P30A-E2b artifact-aware trusted finalizer, while formal P30A remains
+`LOCAL_RC_INCOMPLETE`, science remains `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`, and policy remains
+`NO_NEW_DECISION`. P30 may classify P29 as unsupported/experimental; it cannot infer a
+science-qualified capability badge from this contract-only result.

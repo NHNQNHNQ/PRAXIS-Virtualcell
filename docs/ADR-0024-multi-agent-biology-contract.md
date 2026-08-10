@@ -74,5 +74,9 @@ At P28E closure, P29E was the next local unit and could define only a strict con
 authoritative empty-graph/value-free abstention. P29E subsequently completed at
 `471767e5f38f9866fbe396f39836369d943f6657` with `empty_not_connected`, zero nodes/edges and no
 placeholder scale chain. Real P29 remains separately gated. P30A-E1 release-contract hardening
-subsequently completed; P30A-E2 trusted finalizer/orchestrator is now next, while formal P30A
-remains `LOCAL_RC_INCOMPLETE`.
+subsequently completed.
+
+**E2a follow-on (2026-08-10):** P30A-E2a clean-SHA offline preflight completed
+`COMPLETE_NEGATIVE`; it ran no install, build, OCI, or full gate. P30A-E2b artifact-aware trusted
+finalizer is now next, while formal P30A remains `LOCAL_RC_INCOMPLETE`, science remains
+`NOT_RUN / SCIENCE_BADGE_INELIGIBLE`, and policy remains `NO_NEW_DECISION`.

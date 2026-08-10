@@ -7,8 +7,9 @@
 > P27A-R historical replay remains
 > `REPLAY_NOT_RUN / ASSET_PENDING`; P27B `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`;
 > P27C `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`; P30A-E1 release-contract hardening is
-> `ENGINEERING_COMPLETE`; P30A-E2 trusted local finalizer/orchestrator is the next eligible local
-> work unit. Formal P30A remains `LOCAL_RC_INCOMPLETE`; science is
+> `ENGINEERING_COMPLETE`; P30A-E2a clean-SHA offline preflight is `COMPLETE_NEGATIVE`; P30A-E2b
+> artifact-aware trusted finalizer is the next eligible local work unit. Formal P30A remains
+> `LOCAL_RC_INCOMPLETE`; science is
 > `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; policy is `NO_NEW_DECISION`.
 >
 > Local baseline: branch `codex/p25e-virtual-microbiome`; starting SHA
@@ -44,11 +45,12 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P28E Multi-Agent Biology contract work unit | docs baseline `971f812faae09fa833dc66741e86ec9ffe97947c`; code `da4bfc042d96f830e2a7e8cdc62ba227c7ace949`; tree `e6f18371f5061c810b2cb87d9a278cfa6d6ac46b`; epoch `1786184568` | immutable local Git history plus `reports/phase28e/PHASE28E_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; six public typed role/handoff/DAG/trace/compilation records plus two non-public fingerprint payload versions; synthetic conformance only; real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`, science `NOT_RUN`, policy `NO_NEW_DECISION`; local wheel `1,259,255` bytes / `0358bf4df9e9...` / `377` entries; P29E subsequently completed; no product/API/runtime version or release bump |
 | P29E Limited Biological World Model contract work unit | docs baseline `90990c198c40d0e6655aedaad101a783cde003aa`; code `471767e5f38f9866fbe396f39836369d943f6657`; tree `d1dec19f06ec88f563406b45f2b544effabad915`; epoch `1786187523` | immutable local Git history plus `reports/phase29e/PHASE29E_COMPLETION.md` | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; three public strict requirement/subgraph/compilation records; graph `empty_not_connected`, biological nodes/edges `0`, all authority/value slots null; synthetic conformance only; real P29 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`, science `NOT_RUN`, policy `NO_NEW_DECISION`; local wheel `1,263,199` bytes / `368a66a438c0...` / `378` entries; P30A-E1 subsequently completed; no product/API/runtime version or release bump |
 | P30A-E1 release-contract hardening | P30 scope baseline `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4`; post-entrypoint baseline `d808735ebfd649df6a4c932b95140387aa412c7d`; code `0a4d72b0825d9ec0ff3b7776bbc4f1f0023336f9`; tree `ba701d4ee6033e86a2d8abecc7e6ff25c1a05c14`; epoch `1786335170` | immutable local Git history plus `reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md` | `ENGINEERING_COMPLETE`; release-contract tooling and local probes only. Wheel probe `1,264,708` bytes / `44e5e905e706...2303`; source archive `8,055,078` bytes / `ba5e5d0dbe38...e642`; no formal RC artifact, clean install, OCI, SBOM, licence inventory, dependency audit, manifest, science or policy result |
-| P30A-E2 trusted finalizer/orchestrator | active local work unit | current exact worktree and P30A-E1 report | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`; must independently construct trusted evidence from a frozen clean source. Formal P30A remains `LOCAL_RC_INCOMPLETE`; no external action is implied |
+| P30A-E2a offline preflight | start `40f433fef8704381de34aeb32d45399b6595c472`; code `964b62214f346b15ec2d3f2a622b33f632dde466`; tree `eac19455bc9241e5347de27782a99942e3591cab`; epoch `1786338523` | immutable local Git history plus `reports/phase30a/PHASE30A_E2A_PREFLIGHT.md` and out-of-tree record `6cb91031…9019` | `COMPLETE_NEGATIVE`; clean source stable, offline wheelhouse coverage insufficient for macOS/arm64 and Linux/arm64; no install/build/OCI/full gate/RC result, science or policy change |
+| P30A-E2b artifact-aware trusted finalizer | active local work unit | current exact worktree plus E2a negative record | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`; must independently construct and validate frozen-source artifacts/tests. Formal P30A remains `LOCAL_RC_INCOMPLETE`; no external action is implied |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.7.0` | `pyproject.toml` `[project].version` | P30A-E1 local source identity; it is not a released version or a completed RC identity |
-| Python distribution | `1.6.0` | installed `praxis-virtualcell` metadata in the shared environment | stale shared environment; P30A-E2 clean-install gate must not infer the `1.7.0` product identity from it |
+| Python distribution | `1.6.0` | installed `praxis-virtualcell` metadata in the shared environment | stale shared environment; P30A-E2b clean-install gate must not infer the `1.7.0` product identity from it |
 | inherited `praxis2.__version__` | `1.6.0` | compatibility alias | aliases `praxis_virtualcell.__version__`; no second literal |
 | main package export | `1.6.0` | `praxis_virtualcell.__version__` | derived from installed distribution metadata |
 | CLI | `praxis-vc 1.6.0` | installed `praxis-vc --version` | derived from the main package export |
@@ -534,8 +536,9 @@ Engineering is `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evi
 `SYNTHETIC_CONFORMANCE_ONLY`; umbrella status is `ENGINEERING_COMPLETE_SCIENCE_PENDING`; real P29 is
 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`; science is `NOT_RUN`; policy is `NO_NEW_DECISION`.
 No real data/model/benchmark, execution, operator decision, release, push or deployment occurred. P30A-E1
-release-contract hardening subsequently completed; P30A-E2 trusted finalizer/orchestrator is next and must
-independently satisfy clean dependency, SBOM/license, artifact and release-document gates. See
+release-contract hardening and P30A-E2a clean-SHA offline preflight subsequently completed; P30A-E2b
+artifact-aware trusted finalizer is next and must independently satisfy clean dependency, SBOM/license,
+artifact and release-document gates. See
 [ADR-0025](ADR-0025-limited-biological-world-model-contract.md), the
 [P29E runbook](runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md), and the
 [P29E completion report](../reports/phase29e/PHASE29E_COMPLETION.md).
@@ -792,8 +795,9 @@ Implemented history through the current P29E contract-complete bytes:
     are identity, not signature/attestation. Engineering is
     `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`, fixture evidence is
     `SYNTHETIC_CONFORMANCE_ONLY`, science is `NOT_RUN`, policy is `NO_NEW_DECISION`, and real P29 is
-    `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`. P30A-E1 subsequently completed; P30A-E2 trusted
-    finalizer/orchestrator is next. No P30 release identity, tag, push or deploy is created.
+    `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`. P30A-E1 and P30A-E2a subsequently completed;
+    P30A-E2b artifact-aware trusted finalizer is next. No P30 release identity, tag, push or deploy is
+    created.
 
 ## Release invariants
 
@@ -921,9 +925,9 @@ force them to equal the product release.
 
 ## Required candidate verification
 
-This is the P30A-E2 finalization target, not evidence that it has completed. In particular, the
-runtime and Linux/arm64 wheelhouse inputs named in the P30A-E1 report are unavailable locally, so
-the clean-install and OCI commands below have not been run for a formal RC.
+This is the P30A-E2b artifact-aware finalization target, not evidence that it has completed. P30A-E2a
+recorded clean-SHA offline coverage as incomplete; the clean-install and OCI commands below have not
+been run for a formal RC.
 
 ```bash
 PYTHON_BIN=python3.13 scripts/build_release_wheel.sh /tmp/release-one

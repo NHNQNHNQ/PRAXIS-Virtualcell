@@ -1,10 +1,10 @@
-# PRAXIS-VirtualCell 1.7.0 — Local Release Candidate
+# PRAXIS-VirtualCell 1.7.0 — Local RC Contract (Unpublished)
 
-> Status: P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2
+> Status: P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a `COMPLETE_NEGATIVE`; P30A-E2b
 > `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`; formal P30A `LOCAL_RC_INCOMPLETE / UNPUBLISHED`.
 >
 > P30A is local-only. Completed release-contract hardening and reproducibility probes do not yet
-> prove a complete RC artifact set. The next local unit must use a trusted finalizer rather than
+> prove a complete RC artifact set. P30A-E2b must use a trusted finalizer rather than
 > accept caller-supplied test or artifact claims. This document does not publish an artifact,
 > complete a remote CI gate, create or move a tag, promote a biological capability, or authorize
 > deployment.
@@ -13,8 +13,10 @@
 > Post-formal-entrypoint engineering baseline: `d808735ebfd649df6a4c932b95140387aa412c7d`.
 > P30A-E1 code evidence is `0a4d72b0825d9ec0ff3b7776bbc4f1f0023336f9`, tree
 > `ba701d4ee6033e86a2d8abecc7e6ff25c1a05c14`, source-date epoch `1786335170`.
-> These are probe identities, not a final candidate identity or a substitute for an immutable
-> `release-manifest.json`.
+> P30A-E2a code evidence is `964b62214f346b15ec2d3f2a622b33f632dde466`, tree
+> `eac19455bc9241e5347de27782a99942e3591cab`, source-date epoch `1786338523`; its write-new
+> preflight record is `6cb91031…9019`. These are negative-preflight/probe identities, not a final
+> candidate identity or a substitute for an immutable `release-manifest.json`.
 
 ## Product promise
 
@@ -128,26 +130,28 @@ entries; ZIP integrity passed. The archive probe is an exact-HEAD projection and
 links and AppleDouble entries. Neither probe is a retained clean-install-qualified artifact bundle,
 an accepted release manifest, an SBOM, a licence inventory or a published artifact.
 
-## P30A-E2 and formal-RC gates
+## P30A-E2a negative preflight and P30A-E2b formal-RC gates
 
-`P30A-E2 — trusted local finalizer/orchestrator` is the next eligible local work unit. It must
-construct the evidence bundle from one frozen clean source and independently validate its own
-inputs; the current metadata helper deliberately remains unable to promote caller-supplied test or
-artifact assertions.
+P30A-E2a independently rechecked clean source SHA/tree/epoch before and after an offline
+dependency-coverage preflight. Its `praxis.local-rc-finalizer-preflight.v1` record is
+`LOCAL_RC_INCOMPLETE`, SHA-256 `6cb91031c96b7ebec92e32f7c2eb8af307f48ceae3cbe4aac43c1939a0779019`.
+The targeted post-commit P30 suite passed `55` (`27 + 6 + 14 + 8` across release-candidate,
+source-archive, packaging and E2a-finalizer tests); the record sets `network_used=false`,
+`full_gate_execution=PRECHECK_ONLY_NOT_EXECUTED`, and `software_rc_gates_passed=false`.
 
-Known dependency-input gaps do not authorize downloads and must remain visible to the finalizer:
+The exact dependency blockers are `offline_wheel_cache_incomplete` for
+`macos_arm64_cp313` (`pyjwt==2.13.0`, `pyyaml==6.0.3`) and for `linux_arm64_cp313` (those two plus
+`cffi==2.1.0`, `cryptography==49.0.0`, `pydantic-core==2.46.4`, `rpds-py==2026.6.3`). No clean
+runtime install, artifact build, OCI double-build/container smoke, complete SBOM/licence inventory,
+dependency audit, `SHA256SUMS` or accepted release manifest was generated.
 
-- the offline runtime cache lacks `pyjwt==2.13.0` and `pyyaml==6.0.3`;
-- the Linux/arm64 wheelhouse also lacks the required target inputs for `cffi`, `cryptography`,
-  `pydantic-core` and `rpds-py`;
-- therefore no clean runtime install, OCI double-build/container smoke, complete SBOM/licence
-  inventory, dependency audit, `SHA256SUMS` or accepted release manifest has been generated.
-
-`pip check` in the shared environment failed because `python-magic` is absent and unrelated
-pre-existing `vcbench` pins conflict. It was not used as a clean-install qualification and the
-environment was not mutated. If these inputs remain unavailable after the trusted local finalizer,
-formal P30A remains blocked on external dependency input; they do not convert P30A-E2 itself into
-an external action.
+`P30A-E2b — artifact-aware trusted finalizer / frozen source × clean install × full gate evidence
+bundle` is the next eligible local work unit. It must construct the evidence bundle itself and
+independently revalidate source, locks, artifacts and tests; it cannot promote this preflight record
+or caller-supplied assertions. `pip check` in the shared environment remains disqualified because
+`python-magic` is absent and unrelated pre-existing `vcbench` pins conflict. If the exact inputs
+remain unavailable after E2b engineering, formal P30A remains blocked on external dependency input;
+that does not convert E2b implementation into an external action.
 
 ## Compatibility and migration from the local 1.6.0 candidate
 
@@ -177,7 +181,7 @@ No repository data migration or implicit registry promotion is required. Consume
 - Dependency hash locking proves identity, not absence of vulnerabilities.
 - Platform claims outside the exact recorded Python 3.13 artifact/test environment remain
   unqualified.
-- There is no formal local RC artifact yet: P30A-E2 must still finalize one trusted immutable
+- There is no formal local RC artifact yet: P30A-E2b must still finalize one trusted immutable
   evidence bundle, and its dependency-input gates remain unresolved.
 
 ## P30B authorization state

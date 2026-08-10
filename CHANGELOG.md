@@ -2,7 +2,7 @@
 
 本文件记录面向发布的产品变化。科学能力声明仍以 `reports/phase10/PHASE10_GATE.md` 为准；本地版本或 tag 不等于已在 GitHub 发布。
 
-## 1.7.0 — P30A-E1 local RC engineering, unpublished (`LOCAL_RC_INCOMPLETE`)
+## 1.7.0 — P30A-E1/E2a local RC engineering, unpublished (`LOCAL_RC_INCOMPLETE`)
 
 - 把 P12–P29 的 versioned model/adapter/environment/evidence/policy、Pack factory、training、benchmark、registry、experiment-design、multi-agent 与 limited-world-model 工程合同收口为本地 Software RC；没有把 contract、catalog 或 synthetic conformance 提升为科学事实。
 - 默认产品承诺保持 fail-closed：只有 exact request × Pack × model × environment × adapter × evidence × policy 全部满足才执行，否则 abstain。
@@ -11,9 +11,11 @@
 - P30A-E1 完成 fail-closed release-contract tooling、能力分级、治理/运维文档与 out-of-tree
   wheel/source-archive 可复现 probes；它们不是已接受的 RC artifact bundle，也没有生成完整
   SBOM、license inventory、dependency audit、`SHA256SUMS` 或 release manifest。
-- P30A-E2 trusted local finalizer/orchestrator 是下一 eligible local work unit。formal P30A 仍为
-  `LOCAL_RC_INCOMPLETE`：离线 runtime cache 缺 `pyjwt==2.13.0`、`pyyaml==6.0.3`，Linux/arm64
-  target 还缺 `cffi`、`cryptography`、`pydantic-core`、`rpds-py` 输入；不得以 shared-env
+- P30A-E2a 在 clean SHA `964b62214f346b15ec2d3f2a622b33f632dde466` 完成 offline
+  preflight negative record（`praxis.local-rc-finalizer-preflight.v1` /
+  `6cb91031…9019`）：macOS/arm64 与 Linux/arm64 hash-locked wheel coverage 均不足。它没有
+  install、build、OCI、full gate 或 release result；P30A-E2b artifact-aware trusted finalizer 是
+  下一 eligible local work unit。formal P30A 仍为 `LOCAL_RC_INCOMPLETE`，不得以 shared-env
   `pip check` 取代 clean-install gate。
 - P30 没有产生科学进展：science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`，policy
   `NO_NEW_DECISION`。push、main、tag、artifact publication、staging、production 和 rollback 仍分别

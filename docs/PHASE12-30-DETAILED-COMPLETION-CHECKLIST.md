@@ -4,7 +4,7 @@
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
-> 当前已完成工程 work unit：`Phase 29E`
+> 当前已完成工程 work unit：`P30A-E2a — clean-SHA offline RC preflight (COMPLETE_NEGATIVE)`
 >
 > P11B DOCS-CLOSURE / P12 starting SHA：`b19c896202bea56f894d0ad540501331af42a40c`
 >
@@ -168,9 +168,10 @@ handoff、deterministic DAG、hash-chain trace 与 authoritative empty orchestra
 真实 P28 验收仍为 `BLOCKED / 0_OF_3_QUALIFYING_MODULES`，没有运行 single-agent/monolithic/
 multi-agent comparison 或 ablation。P29E 已完成 strict null requirement、`empty_not_connected`
 typed graph 与 value-free compilation；真实 P29 仍为
-`BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`。P30A-E1 release-contract hardening 已完成；下一
-eligible local unit 是 P30A-E2 trusted finalizer/orchestrator。formal P30A 仍
-`LOCAL_RC_INCOMPLETE`；它不授权 P30B1–B4。
+`BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`。P30A-E1 release-contract hardening 与 P30A-E2a
+clean-SHA offline preflight 均已完成；E2a 为 `COMPLETE_NEGATIVE`，下一 eligible local unit 是
+P30A-E2b artifact-aware trusted finalizer。formal P30A 仍 `LOCAL_RC_INCOMPLETE`；它不授权
+P30B1–B4。
 阶段 scope、资产清单和可复制授权句仍以
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)为准。
 
@@ -419,7 +420,8 @@ flowchart TD
 | P29E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | completion `471767e5...`；strict null requirement + `empty_not_connected` graph + authoritative value-free abstention；fixture `SYNTHETIC_CONFORMANCE_ONLY` |
 | P29 real candidate | `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES` | `NOT_RUN` | `NOT_RUN` | 真实 connected adjacent-scale subgraph/data/model/benchmark 均 absent |
 | P30A-E1 | `ENGINEERING_COMPLETE` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | release-contract tooling、governance、wheel/source probes complete; not a formal RC |
-| P30A-E2 | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | trusted finalizer/orchestrator must create one frozen evidence bundle; formal P30A remains `LOCAL_RC_INCOMPLETE` |
+| P30A-E2a | `COMPLETE_NEGATIVE` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | clean-SHA offline dependency preflight; `6cb91031…9019`; no install/build/OCI/full gate or RC result |
+| P30A-E2b | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | artifact-aware trusted finalizer must create one frozen evidence bundle; formal P30A remains `LOCAL_RC_INCOMPLETE` |
 | P30B1–B4 | `NOT_AUTHORIZED / NOT_RUN` | `SEPARATE_BADGES` | `RELEASE_WINDOWS` | CI、发布、staging、cutover/rollback；B3/B4 `NOT_DEPLOYED` |
 
 ---
@@ -1725,7 +1727,7 @@ Planned-vs-actual：本地工程采用隔离 deterministic harness；没有改�
 
 ### Phase 30 — Foundation Platform Release
 
-**状态：** P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2
+**状态：** P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a `COMPLETE_NEGATIVE`; P30A-E2b
 `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`; formal P30A `LOCAL_RC_INCOMPLETE`; science
 `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; policy `NO_NEW_DECISION`。
 
@@ -1743,8 +1745,14 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
   `ba701d4ee6033e86a2d8abecc7e6ff25c1a05c14` / epoch `1786335170`；
 - [x] P30A-E1：release-tool/source-archive/packaging `47 passed`、formal entrypoint `148 passed`、
   React typecheck/lint/build/bundle budget PASS、wheel/source archive two-build probes；
-- [ ] P30A-E2：trusted finalizer independently constructs one frozen clean-source evidence bundle rather
-  than accepting caller-supplied artifact/test claims；
+- [x] P30A-E2a：clean-SHA offline hash-lock coverage preflight、write-new
+  `praxis.local-rc-finalizer-preflight.v1` negative record
+  `6cb91031c96b7ebec92e32f7c2eb8af307f48ceae3cbe4aac43c1939a0779019`；code
+  `964b62214f346b15ec2d3f2a622b33f632dde466` / tree
+  `eac19455bc9241e5347de27782a99942e3591cab` / epoch `1786338523`；`55 passed`；
+  `PRECHECK_ONLY_NOT_EXECUTED`，不是 formal RC；
+- [ ] P30A-E2b：artifact-aware trusted finalizer independently constructs one frozen clean-source
+  evidence bundle rather than accepting caller-supplied artifact/test claims；
 - [ ] clean runtime install、exact-SHA core/legacy gate、OCI double-build/container smoke、SBOM、license
   inventory、dependency audit、`SHA256SUMS` 与 accepted release manifest；当前离线 runtime cache 缺
   `pyjwt==2.13.0`/`pyyaml==6.0.3`，Linux/arm64 还缺 `cffi`/`cryptography`/`pydantic-core`/`rpds-py`；
@@ -1846,7 +1854,8 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | P29E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | `90990c198c40d0e6655aedaad101a783cde003aa` | `471767e5f38f9866fbe396f39836369d943f6657` | tree `d1dec19f...`; epoch `1786187523`; focused `51`; P28+P29 `89`; affected `390`; safe `1,934/49/387`; legacy `1,147/58/105`; packaging/versioning `18`; wheel `1,263,199` bytes / `368a66a438c036a3b9c24f1093fc478886885fbefaecfea52bb50ad616206c01` / `378` entries；graph `empty_not_connected` / nodes `0` |
 | P29 real candidate | `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES` | `NOT_RUN` | `NOT_RUN` | real connected adjacent-scale subgraph/data/model/benchmark | — | P28 qualifying modules `0/3`; no molecule→organism placeholder chain |
 | P30A-E1 | `ENGINEERING_COMPLETE` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4` scope / `d808735ebfd649df6a4c932b95140387aa412c7d` entrypoint baseline | `0a4d72b0825d9ec0ff3b7776bbc4f1f0023336f9` | tree `ba701d4...`; epoch `1786335170`; focused `47`; entrypoint `148`; probes only, no final RC |
-| P30A-E2 | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | P30A-E1 exact evidence | — | trusted finalizer/orchestrator; formal P30A `LOCAL_RC_INCOMPLETE`; dependency inputs remain absent |
+| P30A-E2a | `COMPLETE_NEGATIVE` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | `40f433fef8704381de34aeb32d45399b6595c472` | `964b62214f346b15ec2d3f2a622b33f632dde466` | tree `eac19455...`; epoch `1786338523`; `55 passed`; record `6cb91031…9019`; no install/build/OCI/full gate |
+| P30A-E2b | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | P30A-E2a exact negative evidence | — | artifact-aware trusted finalizer; formal P30A `LOCAL_RC_INCOMPLETE`; dependency inputs remain absent |
 | P30B1 | `NOT_AUTHORIZED / NOT_RUN` | `SEPARATE` | `RELEASE_WINDOW` | — | unchanged | exact-SHA CI |
 | P30B2 | `NOT_AUTHORIZED / NOT_RUN` | `SEPARATE` | `RELEASE_WINDOW` | — | main/tag SHA | release digest |
 | P30B3 | `NOT_AUTHORIZED / NOT_DEPLOYED` | `SEPARATE` | `RELEASE_WINDOW` | — | unchanged | staging identity |
@@ -2031,9 +2040,9 @@ state/action/observation/time requirement、`empty_not_connected` typed graph �
 value-free compilation。Engineering 为 `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`，
 fixture 为 `SYNTHETIC_CONFORMANCE_ONLY`；真实 P29 candidate 仍为
 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`，science `NOT_RUN`，policy `NO_NEW_DECISION`。
-P30A-E1 release-contract hardening 已完成；下一 eligible local work unit 是 P30A-E2
-trusted finalizer/orchestrator。formal P30A 仍 `LOCAL_RC_INCOMPLETE`；P30B1–B4 仍为独立
-授权窗口。
+P30A-E1 release-contract hardening 与 P30A-E2a clean-SHA offline preflight 已完成；下一
+eligible local work unit 是 P30A-E2b artifact-aware trusted finalizer。formal P30A 仍
+`LOCAL_RC_INCOMPLETE`；P30B1–B4 仍为独立授权窗口。
 
 可直接跨对话使用的顺序推进提示词见：
 

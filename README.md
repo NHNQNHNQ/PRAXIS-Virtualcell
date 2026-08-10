@@ -111,9 +111,10 @@ compilation。状态为 `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；f
 `empty_not_connected`，biological nodes/edges 均为 `0`，所有 data/weight/model/environment/
 adapter/compute/benchmark/evidence/policy/result/tool/prediction identities 均为 `null`。真实 P29
 仍为 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；content hash 是 identity，不是 signer 或
-attestation。P30A-E1 已完成本地 release-contract hardening 与 reproducibility probes；下一
-eligible local work unit 是 P30A-E2 trusted finalizer/orchestrator。formal P30A 仍为
-`LOCAL_RC_INCOMPLETE`，且不授权 push、tag、发布或部署。
+attestation。P30A-E1 已完成本地 release-contract hardening 与 reproducibility probes；P30A-E2a
+已完成 clean-SHA offline preflight 的负结果记录，下一 eligible local work unit 是 P30A-E2b
+artifact-aware trusted finalizer。formal P30A 仍为 `LOCAL_RC_INCOMPLETE`，且不授权 push、tag、
+发布或部署。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
@@ -238,8 +239,9 @@ node/edge 占位类，没有接入 runtime/API/LLM/registry，也不把 standalo
 request-bound。设计和操作边界见
 [P29E ADR](docs/ADR-0025-limited-biological-world-model-contract.md)与
 [P29E runbook](docs/runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md)。真实 P29 仍 blocked，
-不得补造 molecule→organism placeholder chain；P30A-E1 已完成，下一 eligible local work unit
-是 P30A-E2 trusted finalizer/orchestrator；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。
+不得补造 molecule→organism placeholder chain；P30A-E1 已完成，P30A-E2a 已保存 clean-SHA
+offline preflight 的负结果；下一 eligible local work unit 是 P30A-E2b artifact-aware trusted
+finalizer，formal P30A 仍 `LOCAL_RC_INCOMPLETE`。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -278,9 +280,11 @@ wheel 才内含 React 静态资源、CLI/API 代码、`praxis_vc_web/app.py` 和
 gene-set 数据；从该 wheel 启动 `praxis-vc serve` 不依赖源码 checkout 或外置 `dist/`。
 P30A-E1 已从 exact commit `0a4d72b...` 两次生成 byte-identical wheel probe（`1,264,708`
 bytes / `44e5e905…2303`），但它不是 retained clean-install-qualified RC artifact，也没有
-accepted release manifest。P30A-E2 必须以 trusted finalizer 重新冻结完整证据 bundle。`praxis-vc
-web` 的入口文件会被打包，但运行 Streamlit 仍需安装 `web` extra；当前发行门只验证其打包和
-绝对路径接线，不声称完整 Streamlit server smoke。
+accepted release manifest。P30A-E2a 的 clean-SHA offline preflight 记录
+`6cb91031…9019` 只证明 wheelhouse coverage 不足，未构建或安装任何 candidate；P30A-E2b
+必须以 artifact-aware trusted finalizer 重新冻结完整证据 bundle。`praxis-vc web` 的入口文件会被
+打包，但运行 Streamlit 仍需安装 `web` extra；当前发行门只验证其打包和绝对路径接线，不声称完整
+Streamlit server smoke。
 
 P30 OCI 候选（尚未形成）只能由 `scripts/build_release_oci.sh` 从同一 exact wheel、
 out-of-tree Linux/arm64 wheelhouse 和 pinned local base image 以 `--network none` 构建；
@@ -635,18 +639,21 @@ Python `3.13.12`、build `1.5.0`、setuptools `70.2.0`、packaging `26.0`、Node
 不是 pinned dependency closure、clean-install 证明、historical/scientific evidence 或 release。
 P30A-E1 另有 release-tool/source-archive/packaging `47 passed`、formal Pack-aware entrypoint
 `148 passed` 和 React typecheck/lint/production build/bundle budget PASS；two source-archive
-probes are `8,055,078` bytes / `ba5e5d0d…e642`. These probes do not complete P30A: P30A-E2 trusted
-finalizer is next, while the offline runtime cache lacks `pyjwt==2.13.0` and `pyyaml==6.0.3`, and
-the Linux/arm64 wheelhouse lacks `cffi`、`cryptography`、`pydantic-core`、`rpds-py` target inputs.
-Science remains `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; policy remains `NO_NEW_DECISION`. 完整命令、用时、skip/deselect
+probes are `8,055,078` bytes / `ba5e5d0d…e642`。P30A-E2a 的 targeted post-commit P30 suite
+`55 passed`；clean-SHA offline preflight result is `LOCAL_RC_INCOMPLETE` (`6cb91031…9019`): it ran
+no install/build/OCI/full gate;
+macOS/arm64 and Linux/arm64 wheelhouse coverage is incomplete. P30A-E2b artifact-aware trusted
+finalizer is next. Science remains `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; policy remains
+`NO_NEW_DECISION`. 完整命令、用时、skip/deselect
 含义、显式外部门和 GitHub CI 状态见 [测试指南](docs/TESTING.md)。普通测试默认不访问固定私网服务；`integration`、`llm`、`remote` 分别需要 `--run-integration`、`--run-llm`、`--run-remote`，一个测试拥有多个 marker 时必须同时满足对应门。
 
 ## 文档入口
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P30A-E2 边界和跨项目集成 |
-| [P30A-E1 Engineering Completion Report](reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md) | release-contract hardening、probe identities、formal RC non-claim 与 P30A-E2 trusted-finalizer handoff |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P11–P30A-E2b 边界和跨项目集成 |
+| [P30A-E1 Engineering Completion Report](reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md) | release-contract hardening、probe identities 与 formal RC non-claim |
+| [P30A-E2a Preflight Negative Report](reports/phase30a/PHASE30A_E2A_PREFLIGHT.md) | clean-SHA offline wheelhouse preflight、negative record identity 与 P30A-E2b handoff |
 | [P29E 完成报告](reports/phase29e/PHASE29E_COMPLETION.md) | exact empty-not-connected/value-free closure、package evidence 与真实 data/model/benchmark/science/policy non-runs |
 | [P29E Limited World Model ADR](docs/ADR-0025-limited-biological-world-model-contract.md) | null requirement identities、empty typed graph、content-hash trust ceiling 与 0-node abstention 决策 |
 | [P29E Limited World Model runbook](docs/runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md) | exact P28 input、empty graph、authority-null 与 artifact reproducibility 核验 |

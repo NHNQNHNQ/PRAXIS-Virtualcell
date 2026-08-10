@@ -25,12 +25,13 @@
 > `REPLAY_NOT_RUN / ASSET_PENDING`；P27B 为 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`；
 > P27C 为 `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。P21B/P21C、P23B、P24、P25R 和所有
 > real asset/model/output 窗口均未授权或未运行；P26R 仍为 `BLOCKED_EXTERNAL / NOT_RUN`。
-> P30A-E1 release-contract hardening 已完成；下一 eligible local unit 是 standing local
-> authorization 下的 P30A-E2 trusted finalizer/orchestrator。formal P30A 仍
-> `LOCAL_RC_INCOMPLETE`。P30A-E1 或 E2 都不授权 push、tag、artifact publication、staging
-> 或 production。
+> P30A-E1 release-contract hardening 与 P30A-E2a clean-SHA offline preflight 均已完成；E2a 为
+> `COMPLETE_NEGATIVE`，不是 full gate execution。下一 eligible local unit 是 standing local
+> authorization 下的 P30A-E2b artifact-aware trusted finalizer。formal P30A 仍
+> `LOCAL_RC_INCOMPLETE`。P30A-E1、E2a 或 E2b 都不授权 push、tag、artifact publication、
+> staging 或 production。
 
-## P30A-E1 `ENGINEERING_COMPLETE` local evidence; P30A-E2 next
+## P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a `COMPLETE_NEGATIVE`; P30A-E2b next
 
 P30 scope baseline is `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4`; the post-formal-entrypoint
 engineering baseline is `d808735ebfd649df6a4c932b95140387aa412c7d`. The completed E1 probe code is
@@ -49,10 +50,23 @@ engineering baseline is `d808735ebfd649df6a4c932b95140387aa412c7d`. The complete
 The probes are local, write-new and out of tree. They are not a clean-install-qualified artifact
 bundle, an accepted `release-manifest.json`, an OCI artifact, an SBOM, a licence inventory or a
 published release. The shared-environment `pip check` failed because `python-magic` is absent and
-unrelated pre-existing `vcbench` pins conflict; it is not a clean-install gate. The offline runtime
-cache lacks `pyjwt==2.13.0` and `pyyaml==6.0.3`; the Linux/arm64 target also lacks `cffi`,
-`cryptography`, `pydantic-core` and `rpds-py` inputs. P30A-E2 must create a trusted evidence bundle
-from one frozen clean source, not accept caller-supplied assertions. Formal P30A is therefore still
+unrelated pre-existing `vcbench` pins conflict; it is not a clean-install gate.
+
+P30A-E2a then ran its independent preflight from clean exact SHA
+`964b62214f346b15ec2d3f2a622b33f632dde466` / tree
+`eac19455bc9241e5347de27782a99942e3591cab` / epoch `1786338523`. The targeted post-commit P30
+suite passed `55` (`27 + 6 + 14 + 8` across release-candidate, source-archive, packaging and
+E2a-finalizer tests); the write-new `praxis.local-rc-finalizer-preflight.v1` record has SHA-256
+`6cb91031c96b7ebec92e32f7c2eb8af307f48ceae3cbe4aac43c1939a0779019`. It records stable pre/post
+source identity, `network_used=false`, `full_gate_execution=PRECHECK_ONLY_NOT_EXECUTED` and
+`software_rc_gates_passed=false`.
+
+The actual negative blockers are `offline_wheel_cache_incomplete` for both `macos_arm64_cp313`
+(`pyjwt==2.13.0`, `pyyaml==6.0.3`) and `linux_arm64_cp313` (those two plus `cffi==2.1.0`,
+`cryptography==49.0.0`, `pydantic-core==2.46.4`, `rpds-py==2026.6.3`). No install, artifact build,
+OCI build, core/legacy/frontend/Ruff/packaging full gate, SBOM, manifest or release occurred. E2a
+is therefore `COMPLETE_NEGATIVE`; P30A-E2b must independently construct the artifact-aware trusted
+evidence bundle rather than accept this record as an RC result. Formal P30A remains
 `LOCAL_RC_INCOMPLETE`; science is `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` and policy is
 `NO_NEW_DECISION`.
 
