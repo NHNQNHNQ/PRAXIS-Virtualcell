@@ -7,6 +7,7 @@
 prediction / hard-rule / learned reliability / abstain-downgrade-accept 终决 / provenance 全由确定性 runtime 决定。
 冲突:deterministic wins。默认 mode=OFFLINE 时**不调用任何 LLM**。
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -21,14 +22,29 @@ from praxis_virtualcell.core.request import VirtualCellRequest
 SUPPORTED_SPECIES = {"human", "mouse", "yeast", "bacteria"}
 SUPPORTED_PERTURBATION = {"gene", "gene_combination", "drug", "medium", "ligand"}
 SUPPORTED_TASKS = {"predict_delta_expression"}
-ALLOWED_OUTPUTS = {"delta_expression", "pathway_response", "reliability_report",
-                   "growth", "flux", "state", "communication"}
+ALLOWED_OUTPUTS = {
+    "delta_expression",
+    "pathway_response",
+    "reliability_report",
+    "growth",
+    "flux",
+    "state",
+    "communication",
+}
 _REQUIRED = ("species", "perturbation_type", "perturbation_targets", "task_type")
 _STRUCTURED_DESCRIPTION_MARKER = "结构化描述:"
-_STRUCTURED_FIELDS = frozenset({
-    "species", "cell_type", "perturbation_type", "perturbation_targets",
-    "input_modality", "output_modality", "task_type", "requested_outputs",
-})
+_STRUCTURED_FIELDS = frozenset(
+    {
+        "species",
+        "cell_type",
+        "perturbation_type",
+        "perturbation_targets",
+        "input_modality",
+        "output_modality",
+        "task_type",
+        "requested_outputs",
+    }
+)
 _STRUCTURED_MARKER_RE = re.compile(rf"(?m)^{re.escape(_STRUCTURED_DESCRIPTION_MARKER)}")
 
 _LLM_SYS = (
@@ -85,11 +101,7 @@ def _is_json_response_safe(value) -> bool:
 
 
 def _safe_text_list(value) -> list[str]:
-    return [
-        item
-        for item in value
-        if isinstance(item, str) and _is_utf8_safe(item)
-    ] if isinstance(value, list) else []
+    return [item for item in value if isinstance(item, str) and _is_utf8_safe(item)] if isinstance(value, list) else []
 
 
 def _safe_llm_error(value) -> str | None:
@@ -121,8 +133,8 @@ def _extract_structured_description(text: str) -> tuple[str, dict | None, list[s
     if not matches:
         return text, None, []
     marker = matches[-1]
-    natural_text = text[:marker.start()].rstrip()
-    raw = text[marker.end():].strip()
+    natural_text = text[: marker.start()].rstrip()
+    raw = text[marker.end() :].strip()
     if not raw:
         return natural_text, None, ["structured_description_malformed"]
     try:
@@ -131,14 +143,10 @@ def _extract_structured_description(text: str) -> tuple[str, dict | None, list[s
         return natural_text, None, ["structured_description_malformed"]
     if not isinstance(parsed, dict):
         return natural_text, None, ["structured_description_not_object"]
-    errors = (["structured_description_unknown_fields"]
-              if set(parsed) - _STRUCTURED_FIELDS else [])
+    errors = ["structured_description_unknown_fields"] if set(parsed) - _STRUCTURED_FIELDS else []
     if "requested_outputs" in parsed:
         requested_outputs = parsed["requested_outputs"]
-        if (
-            not isinstance(requested_outputs, list)
-            or not all(isinstance(item, str) for item in requested_outputs)
-        ):
+        if not isinstance(requested_outputs, list) or not all(isinstance(item, str) for item in requested_outputs):
             errors.append("invalid_requested_outputs_type")
         elif any(item not in ALLOWED_OUTPUTS for item in requested_outputs):
             errors.append("unsupported_requested_outputs")
@@ -198,8 +206,7 @@ def validate_candidate(cand: dict) -> dict:
     try:
         return _validate_candidate_impl(cand)
     except (TypeError, AttributeError, ValueError, RecursionError):
-        return {"schema_valid": False, "missing_fields": [],
-                "errors": ["candidate_malformed"], "normalized": None}
+        return {"schema_valid": False, "missing_fields": [], "errors": ["candidate_malformed"], "normalized": None}
 
 
 def _validate_candidate_impl(cand: dict) -> dict:
@@ -211,8 +218,7 @@ def _validate_candidate_impl(cand: dict) -> dict:
     try:
         serialized.encode("utf-8")
     except UnicodeEncodeError:
-        return {"schema_valid": False, "missing_fields": [],
-                "errors": ["candidate_not_utf8_safe"], "normalized": None}
+        return {"schema_valid": False, "missing_fields": [], "errors": ["candidate_not_utf8_safe"], "normalized": None}
     species = str(d.get("species", "")).strip().lower()
     # C3 全入口守卫(fresh 复审补漏):cand 来自未受信 LLM JSON —— 只接受 list/dict,
     # 绝不把字符串逐字符拆(perturbation_targets:"AHR" → ['A','H','R'] 会带着
@@ -230,8 +236,7 @@ def _validate_candidate_impl(cand: dict) -> dict:
     # 用户确认后内核真按假基因名跑。**try/except 兜不住这一类**(str() 不抛异常)。
     # 修法跟随 llm_router.py 的值白名单先例:只接受契约内类型(str),其余丢弃 ——
     # 畸形类型全集无需枚举,因为"其余"是补集。
-    targets = ([t.strip() for t in targets if isinstance(t, str) and t.strip()]
-               if isinstance(targets, list) else [])
+    targets = [t.strip() for t in targets if isinstance(t, str) and t.strip()] if isinstance(targets, list) else []
     task = str(d.get("task_type") or d.get("task", "")).strip().lower() or "predict_delta_expression"
     raw_output_modality = d.get("output_modality")
     if raw_output_modality in (None, ""):
@@ -278,20 +283,17 @@ def _validate_candidate_impl(cand: dict) -> dict:
     else:
         errors.append("invalid_metadata_type")
         metadata = {}
-    _raw_outputs = (
-        d.get("requested_outputs")
-        if "requested_outputs" in d
-        else metadata.get("requested_outputs")
-    )
+    _raw_outputs = d.get("requested_outputs") if "requested_outputs" in d else metadata.get("requested_outputs")
     # C4:`o in ALLOWED_OUTPUTS`(set)对 unhashable 元素抛 TypeError → /api/parse 500
     # (main 活 bug)。isinstance 短路在 `in` 之前 → 元素级畸形不再崩;值白名单同时保证
     # 输出 ⊆ ALLOWED_OUTPUTS。
-    outputs = ([o for o in _raw_outputs if isinstance(o, str) and o in ALLOWED_OUTPUTS]
-               if isinstance(_raw_outputs, list) else [])
-    # C4:元素级类型过滤(原 list(x) 元素任意 → dict/list 原样进 normalized.metadata)。
-    _raw_assumptions = (
-        d.get("assumptions") if "assumptions" in d else metadata.get("assumptions")
+    outputs = (
+        [o for o in _raw_outputs if isinstance(o, str) and o in ALLOWED_OUTPUTS]
+        if isinstance(_raw_outputs, list)
+        else []
     )
+    # C4:元素级类型过滤(原 list(x) 元素任意 → dict/list 原样进 normalized.metadata)。
+    _raw_assumptions = d.get("assumptions") if "assumptions" in d else metadata.get("assumptions")
     assumptions = _safe_text_list(_raw_assumptions)
     metadata["requested_outputs"] = outputs
     metadata["assumptions"] = assumptions
@@ -364,10 +366,13 @@ def _validate_candidate_impl(cand: dict) -> dict:
 
     normalized = {
         "request_id": request_id,
-        "species": species, "perturbation_type": ptype, "perturbation_targets": targets,
+        "species": species,
+        "perturbation_type": ptype,
+        "perturbation_targets": targets,
         "input_modality": input_modality,
         "output_modality": output_modality,
-        "task_type": task, "cell_type": cell_type,
+        "task_type": task,
+        "cell_type": cell_type,
         "tissue": tissue,
         "perturbation_dose": perturbation_dose,
         "perturbation_time": perturbation_time,
@@ -376,37 +381,58 @@ def _validate_candidate_impl(cand: dict) -> dict:
         "constraints": constraints,
     }
     schema_valid = not missing and not errors
-    return {"schema_valid": schema_valid, "missing_fields": missing, "errors": errors,
-            "normalized": normalized if schema_valid else None}
+    return {
+        "schema_valid": schema_valid,
+        "missing_fields": missing,
+        "errors": errors,
+        "normalized": normalized if schema_valid else None,
+    }
 
 
 def _deterministic_parse(text: str) -> dict:
     """无 LLM 的关键词 fallback(不臆造:只抓明确信号)。"""
     t = text.lower()
     species = next((s for s in ("human", "mouse", "yeast", "bacteria") if s in t), "")
-    for zh, en in (("人", "human"), ("小鼠", "mouse"), ("酵母", "yeast"), ("细菌", "bacteria"),
-                   ("大肠杆菌", "bacteria"), ("e. coli", "bacteria"), ("e.coli", "bacteria")):
+    for zh, en in (
+        ("人", "human"),
+        ("小鼠", "mouse"),
+        ("酵母", "yeast"),
+        ("细菌", "bacteria"),
+        ("大肠杆菌", "bacteria"),
+        ("e. coli", "bacteria"),
+        ("e.coli", "bacteria"),
+    ):
         if not species and zh in t:
             species = en
     ptype = "drug" if ("drug" in t or "药" in t) else "gene"
     # 抓大写基因符号(2-8 位字母数字,首字母大写)—— 仅从原文
     genes = re.findall(r"\b[A-Z][A-Z0-9]{1,7}\b", text)
     genes = [g for g in genes if g not in ("K562", "T", "DNA", "RNA", "AND", "OR")][:4]
-    return {"species": species, "perturbation_type": ptype, "perturbation_targets": genes,
-            "task_type": "predict_delta_expression", "assumptions": ["deterministic keyword parse"]}
+    return {
+        "species": species,
+        "perturbation_type": ptype,
+        "perturbation_targets": genes,
+        "task_type": "predict_delta_expression",
+        "assumptions": ["deterministic keyword parse"],
+    }
 
 
 def parse_query(text: str, *, config: RuntimeConfig | None = None) -> dict:
     """自然语言 → candidate_request + 校验结果 + parser 元数据。OFFLINE 不调 LLM。"""
     cfg = config or RuntimeConfig.from_env()
-    assert_llm_boundaries(cfg)                # C3 全入口守卫(此前只有 run_query/free-text 覆盖)
+    assert_llm_boundaries(cfg)  # C3 全入口守卫(此前只有 run_query/free-text 覆盖)
     if not _is_utf8_safe(text):
         return {
             "candidate_request": {"perturbation_targets": []},
-            "schema_valid": False, "missing_fields": [],
-            "errors": ["query_not_utf8_safe"], "clarification_required": True,
-            "parser": "deterministic", "llm_used": False, "fallback_used": True,
-            "assumptions": [], "llm_metadata": {},
+            "schema_valid": False,
+            "missing_fields": [],
+            "errors": ["query_not_utf8_safe"],
+            "clarification_required": True,
+            "parser": "deterministic",
+            "llm_used": False,
+            "fallback_used": True,
+            "assumptions": [],
+            "llm_metadata": {},
         }
 
     natural_text, structured_overlay, structured_errors = _extract_structured_description(text)
@@ -416,18 +442,27 @@ def parse_query(text: str, *, config: RuntimeConfig | None = None) -> dict:
     assumptions: list = []
     if cfg.llm_enabled:
         from praxis_virtualcell.agents_llm.llm_client import make_llm_client
+
         client = make_llm_client(cfg)
-        res = client.complete([{"role": "system", "content": _LLM_SYS},
-                               {"role": "user", "content": natural_text}], json_mode=True)
+        res = client.complete(
+            [{"role": "system", "content": _LLM_SYS}, {"role": "user", "content": natural_text}], json_mode=True
+        )
         content = res.get("content")
         content_is_safe = isinstance(content, str) and _is_utf8_safe(content)
-        safe_model = (cfg.deepseek_model if isinstance(cfg.deepseek_model, str)
-                      and _is_utf8_safe(cfg.deepseek_model) else "unknown")
-        llm_metadata = {"provider": "deepseek", "model": safe_model,
-                        "prompt_hash": _hash(_LLM_SYS + natural_text),
-                        "response_hash": _hash(content) if content and content_is_safe else None,
-                        "error": _safe_llm_error(res.get("error")),
-                        "schema_valid": None, "fallback_used": False}
+        safe_model = (
+            cfg.deepseek_model
+            if isinstance(cfg.deepseek_model, str) and _is_utf8_safe(cfg.deepseek_model)
+            else "unknown"
+        )
+        llm_metadata = {
+            "provider": "deepseek",
+            "model": safe_model,
+            "prompt_hash": _hash(_LLM_SYS + natural_text),
+            "response_hash": _hash(content) if content and content_is_safe else None,
+            "error": _safe_llm_error(res.get("error")),
+            "schema_valid": None,
+            "fallback_used": False,
+        }
         if content and content_is_safe:
             try:
                 cand = json.loads(content)
@@ -482,11 +517,15 @@ def parse_query(text: str, *, config: RuntimeConfig | None = None) -> dict:
     raw_candidate = {**cand, "perturbation_targets": cand.get("perturbation_targets", [])}
     result = {
         "candidate_request": v["normalized"] or _response_safe_candidate(raw_candidate),
-        "schema_valid": schema_valid, "missing_fields": v["missing_fields"],
-        "errors": errors, "clarification_required": not schema_valid,
+        "schema_valid": schema_valid,
+        "missing_fields": v["missing_fields"],
+        "errors": errors,
+        "clarification_required": not schema_valid,
         "parser": "llm_with_validator" if llm_used else "deterministic",
-        "llm_used": llm_used, "fallback_used": fallback_used,
-        "assumptions": assumptions, "llm_metadata": llm_metadata,
+        "llm_used": llm_used,
+        "fallback_used": fallback_used,
+        "assumptions": assumptions,
+        "llm_metadata": llm_metadata,
     }
     return result if _is_json_response_safe(result) else _safe_parse_failure()
 
@@ -502,10 +541,11 @@ def run_query(
     model_registry=None,
     model_cache=None,
     environment=None,
+    _include_legacy_predictors: bool = True,
 ) -> dict:
-    """已确认的 request → 离线 runtime 执行 → structured report + trace + provenance + narrative。"""
+    """Compatibility query harness; formal product callers use ``run_formal_query``."""
     cfg = config or RuntimeConfig.from_env()
-    assert_llm_boundaries(cfg)               # 铁律守卫
+    assert_llm_boundaries(cfg)  # 铁律守卫
     from praxis_virtualcell.workflows.predict_delta_expression import build_runtime
 
     rt = build_runtime(
@@ -514,6 +554,7 @@ def run_query(
         model_cache=model_cache,
         pack_registry=pack_registry,
         environment=environment,
+        include_legacy_predictors=_include_legacy_predictors,
     )
     req = dict(request_dict)
     if not req.get("request_id"):
@@ -525,28 +566,70 @@ def run_query(
     )
     _tr = getattr(rt.bus, "trace", None)
     _msgs = _tr() if callable(_tr) else (_tr if isinstance(_tr, list) else getattr(rt.bus, "_trace", []))
-    trace = [{"message_id": m.message_id, "sender": m.sender, "receiver": m.receiver,
-              "message_type": m.message_type, "timestamp": m.timestamp,
-              "schema_version": m.schema_version, "trace_id": m.trace_id,
-              "task_id": m.task_id} for m in _msgs]
+    trace = [
+        {
+            "message_id": m.message_id,
+            "sender": m.sender,
+            "receiver": m.receiver,
+            "message_type": m.message_type,
+            "timestamp": m.timestamp,
+            "schema_version": m.schema_version,
+            "trace_id": m.trace_id,
+            "task_id": m.task_id,
+        }
+        for m in _msgs
+    ]
     return {
         "structured_report": {k: v for k, v in report.items() if k != "narrative"},
         "narrative": report.get("narrative"),
         "trace": trace,
         "provenance": report.get("provenance", {}),
-        "reliability_decision": {"abstain": report.get("abstain"),
-                                 "reliability": report.get("reliability"),
-                                 "learned_reliability": report.get("learned_reliability")},
-        "llm_used_for_prediction": False,        # 恒 False:LLM 不碰预测
-        "mode": cfg.mode.value, "llm_enabled": cfg.llm_enabled,
+        "reliability_decision": {
+            "abstain": report.get("abstain"),
+            "reliability": report.get("reliability"),
+            "learned_reliability": report.get("learned_reliability"),
+        },
+        "llm_used_for_prediction": False,  # 恒 False:LLM 不碰预测
+        "mode": cfg.mode.value,
+        "llm_enabled": cfg.llm_enabled,
     }
 
 
-def run_full_query(text: str, *, config: RuntimeConfig | None = None,
-                   enable_llm_report: bool = False) -> dict:
+def run_formal_query(
+    request_dict: dict,
+    *,
+    config: RuntimeConfig | None = None,
+    enable_llm_report: bool = False,
+    pack_id: str | None = None,
+    pack_version: str | None = None,
+    pack_registry=None,
+    model_registry=None,
+    model_cache=None,
+    environment=None,
+) -> dict:
+    """Formal product entry: unbound requests abstain; legacy predictors stay absent."""
+    return run_query(
+        request_dict,
+        config=config,
+        enable_llm_report=enable_llm_report,
+        pack_id=pack_id,
+        pack_version=pack_version,
+        pack_registry=pack_registry,
+        model_registry=model_registry,
+        model_cache=model_cache,
+        environment=environment,
+        _include_legacy_predictors=False,
+    )
+
+
+def run_full_query(text: str, *, config: RuntimeConfig | None = None, enable_llm_report: bool = False) -> dict:
     """一步式:text → parse → (仅当 schema_valid)run。web 的 confirm 流程用 parse_query + run_query 分离。"""
     parsed = parse_query(text, config=config)
     if not parsed["schema_valid"]:
         return {"stage": "clarification_required", **parsed}
-    out = run_query(parsed["candidate_request"], config=config, enable_llm_report=enable_llm_report)
+    out = run_formal_query(
+        parsed["candidate_request"],
+        config=config,
+        enable_llm_report=enable_llm_report,
+    )
     return {"stage": "done", "parsed": parsed, **out}

@@ -1,4 +1,5 @@
 """组装 offline runtime + 跑一个 request。"""
+
 from __future__ import annotations
 
 from praxis_virtualcell.active_learning.active_learning_agent import ActiveLearningAgent
@@ -38,24 +39,49 @@ def build_runtime(
     pack_registry: PackRegistry | None = None,
     environment: EnvironmentSnapshot | None = None,
     adapter_registry: AdapterRegistry | None = None,
+    include_legacy_predictors: bool = True,
 ) -> AgentRuntime:
+    """Build the legacy-compatible runtime.
+
+    Formal entrypoints pass ``False`` so an unbound request cannot reach mock
+    or legacy CaseRunner predictors.  Pack-bound execution is independently
+    governed by ``ModelBrokerAgent``.
+    """
     cfg = config or RuntimeConfig()
-    rt = AgentRuntime(cfg, bus=MessageBus(), clock=Clock(), idgen=IdGen())
-    for a in (InputInterpreterAgent(), BioObjectNormalizerAgent(), SpeciesBrainAgent(cfg),
-              LegacyModelApplicabilityAdapter(),
-              ModelBrokerAgent(
-                  registry=model_registry,
-                  cache=model_cache,
-                  pack_registry=pack_registry,
-                  environment=environment,
-                  adapter_registry=adapter_registry,
-              ),
-              MockLinearAgent(), MockCPAAgent(), MockGEARSAgent(),
-              CaseRunnerPredictorAgent(),
-              EnsembleCoordinatorAgent(adapter_registry=adapter_registry),
-              ReliabilityAgent(mode=cfg.reliability_mode), CriticAgent(),
-              ProvenanceAgent(), ReportAgent()):
+    rt = AgentRuntime(
+        cfg,
+        bus=MessageBus(),
+        clock=Clock(),
+        idgen=IdGen(),
+        require_pack_aware_execution=not include_legacy_predictors,
+    )
+    for a in (
+        InputInterpreterAgent(),
+        BioObjectNormalizerAgent(),
+        SpeciesBrainAgent(cfg),
+        ModelBrokerAgent(
+            registry=model_registry,
+            cache=model_cache,
+            pack_registry=pack_registry,
+            environment=environment,
+            adapter_registry=adapter_registry,
+        ),
+        EnsembleCoordinatorAgent(adapter_registry=adapter_registry),
+        ReliabilityAgent(mode=cfg.reliability_mode),
+        CriticAgent(),
+        ProvenanceAgent(),
+        ReportAgent(),
+    ):
         rt.register_agent(a)
+    if include_legacy_predictors:
+        for a in (
+            LegacyModelApplicabilityAdapter(),
+            MockLinearAgent(),
+            MockCPAAgent(),
+            MockGEARSAgent(),
+            CaseRunnerPredictorAgent(),
+        ):
+            rt.register_agent(a)
     # Phase 4:module-aware 路由两节点(OFFLINE 也注册 → 产确定性 module_plan,零 LLM)
     for a in (SpeciesContextAgent(), ModuleRouterAgent()):
         rt.register_agent(a)
@@ -63,11 +89,13 @@ def build_runtime(
     for a in (EvidenceLevelAgent(), ActiveLearningAgent()):
         rt.register_agent(a)
     from praxis_virtualcell.agents_llm.llm_client import make_llm_client
+
     client = make_llm_client(cfg)
     # Phase 4:仅 orchestrated 模式 + client enabled 才注册 LLM 编排节点(planner + reasoner)
     if client.enabled and cfg.mode in (Mode.LLM_ORCHESTRATED, Mode.LLM_ORCHESTRATED_STRICT):
         from praxis_virtualcell.llm_orchestration.cross_module_reasoner import LLMCrossModuleReasoner
         from praxis_virtualcell.llm_orchestration.module_planner import LLMModulePlanner
+
         rt.register_agent(LLMModulePlanner(client))
         rt.register_agent(LLMCrossModuleReasoner(client))
     if client.enabled:
@@ -75,8 +103,13 @@ def build_runtime(
         from praxis_virtualcell.agents_llm.llm_input_interpreter import LLMInputInterpreterAgent
         from praxis_virtualcell.agents_llm.llm_report import LLMReportAgent
         from praxis_virtualcell.agents_llm.llm_router import LLMRouterAgent
-        for a in (LLMInputInterpreterAgent(client), LLMRouterAgent(client),
-                  LLMCriticAgent(client), LLMReportAgent(client)):
+
+        for a in (
+            LLMInputInterpreterAgent(client),
+            LLMRouterAgent(client),
+            LLMCriticAgent(client),
+            LLMReportAgent(client),
+        ):
             rt.register_agent(a)
     rt.run_workflow_from_dict = lambda d: rt.run_workflow(VirtualCellRequest.from_dict(d))  # type: ignore[attr-defined]
     return rt

@@ -91,7 +91,7 @@ export default function ReportTab({
 
   return (
     <div style={stackStyle}>
-      {/* §3.5:结果由确定性模型给出,未经语言模型改写;llm_used_for_prediction 如实显示。 */}
+      {/* §3.5:预测或弃权由确定性边界给出；LLM 不改写数值或裁决。 */}
       <div
         style={{
           display: "flex",
@@ -102,7 +102,7 @@ export default function ReportTab({
         }}
       >
         <Badge tone="neutral">
-          结果由确定性模型给出,未经语言模型改写
+          预测或弃权由确定性边界给出,未经语言模型改写
         </Badge>
         <span>
           llm_used_for_prediction:<Mono>{String(report.llm_used_for_prediction)}</Mono>

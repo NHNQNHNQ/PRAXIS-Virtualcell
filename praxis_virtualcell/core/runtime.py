@@ -1,4 +1,5 @@
 """注册 + 派发 + 驱动 workflow。predictor fan-out 也走 bus(no fake multi-agent)。"""
+
 from __future__ import annotations
 
 import hashlib
@@ -22,21 +23,31 @@ from praxis_virtualcell.governance.provenance_hash import check_call_provenance
 
 
 class AgentRuntime:
-    def __init__(self, config: RuntimeConfig, *, bus: MessageBus,
-                 clock: Clock, idgen: IdGen) -> None:
+    def __init__(
+        self,
+        config: RuntimeConfig,
+        *,
+        bus: MessageBus,
+        clock: Clock,
+        idgen: IdGen,
+        require_pack_aware_execution: bool = False,
+    ) -> None:
         self.config = config
         self.bus = bus
         self.clock = clock
         self.idgen = idgen
+        self._require_pack_aware_execution = require_pack_aware_execution
         self._agents: dict[str, BaseAgent] = {}
 
     def register_agent(self, agent: BaseAgent) -> None:
         self._agents[agent.name] = agent
 
-    def mk_message(self, sender: str, receiver: str, message_type: str,
-                   payload: dict, parent_message_id: str | None = None) -> AgentMessage:
-        return AgentMessage(self.idgen.next(), sender, receiver, message_type,
-                            payload, self.clock.now(), parent_message_id)
+    def mk_message(
+        self, sender: str, receiver: str, message_type: str, payload: dict, parent_message_id: str | None = None
+    ) -> AgentMessage:
+        return AgentMessage(
+            self.idgen.next(), sender, receiver, message_type, payload, self.clock.now(), parent_message_id
+        )
 
     def dispatch_message(self, message: AgentMessage) -> None:
         agent = self._agents.get(message.receiver)
@@ -74,26 +85,18 @@ class AgentRuntime:
             or not pack_version
             or pack_version.strip() != pack_version
         ):
-            raise ValueError(
-                "pack_id and pack_version must be non-empty strings "
-                "without surrounding whitespace"
-            )
+            raise ValueError("pack_id and pack_version must be non-empty strings without surrounding whitespace")
         capability_plan = None
         _req_dict = asdict(request)
-        _h = hashlib.sha256(
-            json.dumps(_req_dict, sort_keys=True, ensure_ascii=False).encode("utf-8")
-        ).hexdigest()[:8]
-        self.bus.set_context(trace_id=trace_id or f"trace_{_h}",
-                             task_id=task_id or f"task_{_h}")
-        m = self.mk_message("client", "InputInterpreter", "parse_request",
-                            {"request_dict": _req_dict})
+        _h = hashlib.sha256(json.dumps(_req_dict, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:8]
+        self.bus.set_context(trace_id=trace_id or f"trace_{_h}", task_id=task_id or f"task_{_h}")
+        m = self.mk_message("client", "InputInterpreter", "parse_request", {"request_dict": _req_dict})
         out = self._dispatch_collect(m, "request_parsed")
-        m = self.mk_message(out.sender, "BioObjectNormalizer", "normalize",
-                            out.payload, out.message_id)
+        m = self.mk_message(out.sender, "BioObjectNormalizer", "normalize", out.payload, out.message_id)
         out = self._dispatch_collect(m, "object_normalized")
         m = self.mk_message(out.sender, "SpeciesBrain", "retrieve", out.payload, out.message_id)
         out = self._dispatch_collect(m, "brain_retrieved")
-        if pack_id is None:
+        if pack_id is None and not self._require_pack_aware_execution:
             m = self.mk_message(
                 out.sender,
                 "ModelApplicability",
@@ -108,9 +111,7 @@ class AgentRuntime:
                 "ModelBrokerAgent",
                 "execution_plan_request",
                 {
-                    "request": legacy_request_to_v2(
-                        VirtualCellRequest.from_dict(out.payload["request"])
-                    ).to_dict(),
+                    "request": legacy_request_to_v2(VirtualCellRequest.from_dict(out.payload["request"])).to_dict(),
                     "pack_id": pack_id,
                     "pack_version": pack_version,
                 },
@@ -133,6 +134,7 @@ class AgentRuntime:
                     "rules_hit": [],
                     "capability_plan_id": capability_plan["plan_id"],
                     "legacy_adapter": False,
+                    "pack_required_for_execution": pack_id is None,
                 },
             }
             app = self.mk_message(
@@ -142,9 +144,7 @@ class AgentRuntime:
                 {
                     "request": out.payload["request"],
                     "brain_context": brain_context,
-                    "applicable": [
-                        step["agent_name"] for step in capability_plan["steps"]
-                    ],
+                    "applicable": [step["agent_name"] for step in capability_plan["steps"]],
                     "rejected_candidates": [],
                 },
                 planned.message_id,
@@ -160,28 +160,47 @@ class AgentRuntime:
         if "ModuleRouterAgent" in self._agents and self._is_routable(app):
             module_plan = self._build_module_plan(app)
             if "LLMCrossModuleReasoner" in self._agents and module_plan is not None:
-                xm = self.mk_message("ModuleRouterAgent", "LLMCrossModuleReasoner",
-                                     "cross_module_review", {"module_plan": module_plan},
-                                     app.message_id)
+                xm = self.mk_message(
+                    "ModuleRouterAgent",
+                    "LLMCrossModuleReasoner",
+                    "cross_module_review",
+                    {"module_plan": module_plan},
+                    app.message_id,
+                )
                 llm_cross_module = self._dispatch_collect(xm, "llm_cross_module_notes").payload
         llm_route = None
         if "LLMRouter" in self._agents:
-            rmsg = self.mk_message(app.sender, "LLMRouter", "route_suggest",
-                {"request": app.payload["request"], "brain_context": app.payload["brain_context"],
-                 "applicable": app.payload["applicable"],
-                 "rejected_candidates": app.payload["rejected_candidates"]}, app.message_id)
+            rmsg = self.mk_message(
+                app.sender,
+                "LLMRouter",
+                "route_suggest",
+                {
+                    "request": app.payload["request"],
+                    "brain_context": app.payload["brain_context"],
+                    "applicable": app.payload["applicable"],
+                    "rejected_candidates": app.payload["rejected_candidates"],
+                },
+                app.message_id,
+            )
             llm_route = self._dispatch_collect(rmsg, "llm_route_suggestion").payload
         results = []
         for pname in list(app.payload["applicable"]) + list(app.payload["rejected_candidates"]):
-            pm = self.mk_message(app.sender, pname, "predict",
-                                {"request": app.payload["request"],
-                                 "brain_context": app.payload["brain_context"]}, app.message_id)
+            pm = self.mk_message(
+                app.sender,
+                pname,
+                "predict",
+                {"request": app.payload["request"], "brain_context": app.payload["brain_context"]},
+                app.message_id,
+            )
             r = self._dispatch_collect(pm, "predictor_result")
             results.append(r.payload)
-        m = self.mk_message(app.sender, "EnsembleCoordinator", "ensemble",
-                            {"request": app.payload["request"],
-                             "brain_context": app.payload["brain_context"], "results": results},
-                            app.message_id)
+        m = self.mk_message(
+            app.sender,
+            "EnsembleCoordinator",
+            "ensemble",
+            {"request": app.payload["request"], "brain_context": app.payload["brain_context"], "results": results},
+            app.message_id,
+        )
         ens = self._dispatch_collect(m, "ensemble_done")
         m = self.mk_message(ens.sender, "Reliability", "assess", ens.payload, ens.message_id)
         rel = self._dispatch_collect(m, "reliability_decided")
@@ -199,6 +218,19 @@ class AgentRuntime:
         if capability_plan is not None:
             report.setdefault("provenance", {})["execution_plan"] = capability_plan
             report["provenance"]["compatibility_reports"] = capability_plan["reports"]
+            if any("pack.unregistered" in item.get("reasons", []) for item in capability_plan["reports"]):
+                # No Pack means no executable model input.  A legacy learned-reliability
+                # score would be an unrelated numeric signal, not a property of this plan.
+                report["learned_reliability"] = None
+                reasons = report.setdefault("abstain_reasons", [])
+                if "pack_unregistered" not in reasons:
+                    report["abstain_reasons"] = ["pack_unregistered", *reasons]
+                apply_governance_gate(
+                    report,
+                    "pack_unregistered",
+                    "pack_identity_gate",
+                    {"execution_plan_id": capability_plan["plan_id"]},
+                )
         if llm_route is not None:
             report.setdefault("provenance", {})["llm_route_suggestion"] = llm_route
         if module_plan is not None:
@@ -211,7 +243,7 @@ class AgentRuntime:
         if module_plan is not None:
             violations = check_module_plan(module_plan)
             if violations:
-                reliability_abstain = report.get("abstain", False)   # 原判(override 前捕获)
+                reliability_abstain = report.get("abstain", False)  # 原判(override 前捕获)
                 gate_abstained = not reliability_abstain
                 if gate_abstained:
                     report["abstain"] = True
@@ -227,26 +259,33 @@ class AgentRuntime:
         # P10.C2 Gate A:per-call hash 完整性 fail-closed。models_used 的 per_call 缺
         # name/version/input_hash/output_hash 任一 → 对外 abstain(reliability 裁决数值不变)。
         pch = report.get("provenance", {}).get("per_call_hashes", {})
-        hash_missing = {n: miss for n in report.get("models_used", [])
-                        if (miss := check_call_provenance(pch.get(n, {})))}
+        hash_missing = {
+            n: miss for n in report.get("models_used", []) if (miss := check_call_provenance(pch.get(n, {})))
+        }
         if hash_missing:
-            apply_governance_gate(report, "incomplete_call_provenance",
-                                  "provenance_hash_gate", {"missing": hash_missing})
+            apply_governance_gate(
+                report, "incomplete_call_provenance", "provenance_hash_gate", {"missing": hash_missing}
+            )
         # P10.C2 Gate B:provenance 完整性硬门(防御性类不变量,罕触发)。必需契约缺键 →
         # fail-closed 对外 abstain。字段恒由代码构造,正常不触发;防未来重构漏挂。
         prov_missing = check_report_provenance(report)
         if prov_missing:
-            apply_governance_gate(report, "incomplete_provenance",
-                                  "provenance_completeness_gate", {"missing": prov_missing})
+            apply_governance_gate(
+                report, "incomplete_provenance", "provenance_completeness_gate", {"missing": prov_missing}
+            )
         # P10.C2 Gate C:cell_type 越界 abstain。全部被采纳 predictor 声明 supported_cell_types
         # 且 req cell_type 全越界 → 对外 abstain。reliability 的 downgrade:cell_type 数值语义保留,
         # Gate C 只叠加对外 abstain(不改 reliability)。
         ct_violations = check_cell_type_domain(
-            app.payload["request"], app.payload["brain_context"],
-            report.get("models_used", []), reliability_abstained=reliability_abstained)
+            app.payload["request"],
+            app.payload["brain_context"],
+            report.get("models_used", []),
+            reliability_abstained=reliability_abstained,
+        )
         if ct_violations:
-            apply_governance_gate(report, "cell_type_out_of_domain",
-                                  "cell_type_gate", {"out_of_domain_predictors": ct_violations})
+            apply_governance_gate(
+                report, "cell_type_out_of_domain", "cell_type_gate", {"out_of_domain_predictors": ct_violations}
+            )
         if llm_cross_module is not None:
             report.setdefault("provenance", {})["llm_cross_module_notes"] = llm_cross_module
         # Phase 5:证据等级(插点 C)+ 主动学习(插点 D)旁路挂载。确定性零 LLM,advisory 不碰裁决。
@@ -255,24 +294,29 @@ class AgentRuntime:
         # 不动任何现有键、不改 prediction/裁决。gated:agent 不在册则分支不进(OFFLINE 字节等价)。
         evidence_level = None
         if "EvidenceLevelAgent" in self._agents:
-            em = self.mk_message("Report", "EvidenceLevelAgent",
-                                 "evidence_level_request", {"report": report}, rep.message_id)
+            em = self.mk_message(
+                "Report", "EvidenceLevelAgent", "evidence_level_request", {"report": report}, rep.message_id
+            )
             evidence_level = self._dispatch_collect(em, "evidence_level_ready").payload["evidence_level"]
             report.setdefault("provenance", {})["evidence_level"] = evidence_level
         if "ActiveLearningAgent" in self._agents:
-            am = self.mk_message("EvidenceLevelAgent", "ActiveLearningAgent",
-                                 "learning_queue_request",
-                                 {"report": report, "evidence_level": evidence_level}, rep.message_id)
-            report.setdefault("provenance", {})["learning_queue"] = \
-                self._dispatch_collect(am, "learning_queue_ready").payload["learning_queue"]
+            am = self.mk_message(
+                "EvidenceLevelAgent",
+                "ActiveLearningAgent",
+                "learning_queue_request",
+                {"report": report, "evidence_level": evidence_level},
+                rep.message_id,
+            )
+            report.setdefault("provenance", {})["learning_queue"] = self._dispatch_collect(
+                am, "learning_queue_ready"
+            ).payload["learning_queue"]
         if "LLMCritic" in self._agents:
-            cm = self.mk_message("Report", "LLMCritic", "llm_review", {"report": report},
-                                 rep.message_id)
-            report.setdefault("provenance", {})["llm_critic_notes"] = \
-                self._dispatch_collect(cm, "llm_critic_notes").payload
+            cm = self.mk_message("Report", "LLMCritic", "llm_review", {"report": report}, rep.message_id)
+            report.setdefault("provenance", {})["llm_critic_notes"] = self._dispatch_collect(
+                cm, "llm_critic_notes"
+            ).payload
         if "LLMReport" in self._agents:
-            nm = self.mk_message("Report", "LLMReport", "llm_render", {"report": report},
-                                 rep.message_id)
+            nm = self.mk_message("Report", "LLMReport", "llm_render", {"report": report}, rep.message_id)
             report["narrative"] = self._dispatch_collect(nm, "llm_narrative").payload["narrative"]
             # P10.C3 narrative 一致性 gate:确定性窄门校验 narrative 对 report 的忠实性
             # (仅 abstain 场景生效,见 governance/narrative_consistency.py 的范围与 limitation)。
@@ -282,7 +326,9 @@ class AgentRuntime:
             nv = check_narrative(report, report["narrative"])
             if nv:
                 report.setdefault("provenance", {})["narrative_consistency_gate"] = {
-                    "violations": nv, "original_narrative": report["narrative"]}
+                    "violations": nv,
+                    "original_narrative": report["narrative"],
+                }
                 report["narrative"] = ""
         return report
 
@@ -306,43 +352,49 @@ class AgentRuntime:
         """Phase 4 旁路:SpeciesContext →[LLMModulePlanner?]→ ModuleRouter,产 module_plan(dict)。
         OFFLINE(无 LLMModulePlanner)→ ModuleRouter 走确定性 secondary,零 LLM。"""
         module_req = self._request_to_module_input(app.payload["request"])
-        sm = self.mk_message("ModelApplicability", "SpeciesContextAgent",
-                             "species_context", {"request": module_req}, app.message_id)
+        sm = self.mk_message(
+            "ModelApplicability", "SpeciesContextAgent", "species_context", {"request": module_req}, app.message_id
+        )
         ctx = self._dispatch_collect(sm, "species_context_ready").payload
-        base_payload = {"request": module_req, "module_support": ctx["module_support"],
-                        "mismatch_queries": ctx["mismatch_queries"]}
+        base_payload = {
+            "request": module_req,
+            "module_support": ctx["module_support"],
+            "mismatch_queries": ctx["mismatch_queries"],
+        }
         if "LLMModulePlanner" in self._agents:
-            pm = self.mk_message("SpeciesContextAgent", "LLMModulePlanner",
-                                 "module_plan_request", base_payload, app.message_id)
+            pm = self.mk_message(
+                "SpeciesContextAgent", "LLMModulePlanner", "module_plan_request", base_payload, app.message_id
+            )
             mc = self._dispatch_collect(pm, "module_candidates_llm").payload
-            route_payload = mc                            # 已含 request/module_support/mismatch/module_candidates
+            route_payload = mc  # 已含 request/module_support/mismatch/module_candidates
         else:
-            route_payload = base_payload                  # OFFLINE:无候选 → ModuleRouter 走确定性
-        rm = self.mk_message("SpeciesContextAgent", "ModuleRouterAgent",
-                             "module_route", route_payload, app.message_id)
+            route_payload = base_payload  # OFFLINE:无候选 → ModuleRouter 走确定性
+        rm = self.mk_message("SpeciesContextAgent", "ModuleRouterAgent", "module_route", route_payload, app.message_id)
         return self._dispatch_collect(rm, "module_plan_ready").payload
 
     @staticmethod
     def _request_to_module_input(req: dict) -> dict:
         """委托 agents.request_adapter.request_to_module_input(消重,行为不变)。"""
         from praxis_virtualcell.agents.request_adapter import request_to_module_input
+
         return request_to_module_input(req)
 
     def export_outputs(self, out_dir: str, report: dict) -> None:
         d = Path(out_dir)
         d.mkdir(parents=True, exist_ok=True)
         self.bus.export_trace(str(d / "trace.json"))
-        (d / "prediction_report.json").write_text(
-            json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        (d / "prediction_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
         (d / "provenance.json").write_text(
-            json.dumps(report.get("provenance", {}), ensure_ascii=False, indent=2), encoding="utf-8")
+            json.dumps(report.get("provenance", {}), ensure_ascii=False, indent=2), encoding="utf-8"
+        )
 
     def run_workflow_from_text(self, text: str) -> dict:
         """free-text(仅 llm_assisted+key):LLMInputInterpreter 解析 → run_workflow。"""
         from praxis_virtualcell.core.config import assert_llm_boundaries
         from praxis_virtualcell.core.exceptions import InputValidationError
         from praxis_virtualcell.core.request import VirtualCellRequest
-        assert_llm_boundaries(self.config)       # P10.C3:全入口守卫(与 run_query 入口一致)
+
+        assert_llm_boundaries(self.config)  # P10.C3:全入口守卫(与 run_query 入口一致)
         if "LLMInputInterpreter" not in self._agents:
             raise InputValidationError("free-text 需 llm_assisted + DEEPSEEK_API_KEY")
         # P10.C3:free-text 全程复用同一 trace(修 P10.A 遗留:首条 parse_text 曾因
@@ -355,9 +407,16 @@ class AgentRuntime:
         parsed = self.bus.latest("request_parsed")
         if parsed is None:
             fail = self.bus.latest("llm_input_failed")
-            return {"request_id": None, "abstain": True, "reliability": "low",
-                    "prediction": None, "models_used": [], "models_rejected": [],
-                    "abstain_reasons": ["input_missing"], "critic_violations": [],
-                    "narrative": "", "provenance": {"llm_input_failed": fail.payload if fail else None}}
-        return self.run_workflow(VirtualCellRequest.from_dict(parsed.payload["request"]),
-                                 trace_id=tid, task_id=kid)
+            return {
+                "request_id": None,
+                "abstain": True,
+                "reliability": "low",
+                "prediction": None,
+                "models_used": [],
+                "models_rejected": [],
+                "abstain_reasons": ["input_missing"],
+                "critic_violations": [],
+                "narrative": "",
+                "provenance": {"llm_input_failed": fail.payload if fail else None},
+            }
+        return self.run_workflow(VirtualCellRequest.from_dict(parsed.payload["request"]), trace_id=tid, task_id=kid)

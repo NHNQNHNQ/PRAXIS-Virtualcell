@@ -204,6 +204,7 @@ not authorize any P30B release or deployment window.
 |---|---|
 | [README](../README.md) | current product promise, P29E empty-not-connected/zero-node boundary and primary operator entry points |
 | [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths and P13–P29E boundary |
+| [Formal Prediction Entrypoint ADR](ADR-0026-formal-prediction-entrypoint.md) | formal no-Pack V2 zero-step abstention; legacy mock/case harness exclusion |
 | [P29E Completion Report](../reports/phase29e/PHASE29E_COMPLETION.md) | exact P29E empty-graph closure, package evidence, real P29/science/policy non-runs and P30A handoff |
 | [P29E Limited World Model ADR](ADR-0025-limited-biological-world-model-contract.md) | null requirement identities, empty typed graph, authority ceiling and zero-node abstention decision |
 | [P29E Limited World Model Runbook](runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md) | exact P28 input, empty graph, null authority and reproducible package verification |
@@ -344,6 +345,7 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Agentic Experiment Design ADR](ADR-0023-agentic-experiment-design-contract.md) | P27A-E exact request-derived empty action space, synthetic rank-then-reveal harness and maturity ceiling |
 | [Multi-Agent Biology Contract ADR](ADR-0024-multi-agent-biology-contract.md) | P28E advisory-only role/handoff/DAG/trace contracts, exact cross-binding and authoritative 0/3 abstention |
 | [Limited Biological World Model ADR](ADR-0025-limited-biological-world-model-contract.md) | P29E exact P28 identity, null state/action/observation/time requirements, empty-not-connected graph and value-free abstention |
+| [Formal Prediction Entrypoint ADR](ADR-0026-formal-prediction-entrypoint.md) | P12 formal-entry boundary, Pack identity requirement and legacy harness exclusion |
 | [Community Readiness Checklist](COMMUNITY-READINESS-CHECKLIST.md) | P10 model-free CommunityPack gates, two tiny microbial Packs, fail-closed planning and explicitly missing experimental validation |
 | [VirtualCellPack Capability Matrix](VIRTUALCELLPACK-CAPABILITY-MATRIX.md) | historical P0–P16E implementation/status matrix; current P29E state is carried by this index and its completion report |
 | [VirtualCellPack Multiomics Runbook](runbooks/VIRTUALCELLPACK-MULTIOMICS.md) | tiny RNA+protein fixture generation, hash binding, P5 tests and asset-update rules |

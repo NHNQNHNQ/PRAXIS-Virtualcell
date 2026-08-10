@@ -356,8 +356,10 @@ request×Pack×release×artifact×environment×adapter×evidence×policy 及 lif
 `model_compatible` 只表示 request×Pack×model；`adapter_compatible`、
 `environment_compatible` 和 `executable` 分开计算。任一引用、hash、scope、环境、
 adapter、evidence、policy 或 lifecycle 门缺失即产生空计划并弃权，不会 fallback 到
-mock。`vc.compatibility-report.v1`、`vc.execution-plan.v1` 和无 Pack legacy adapter
-仍可解析，但不是 P12 产品执行授权。
+mock。正式 UI/API/CLI/Streamlit 在没有精确 Pack identity 时同样生成零步骤 V2 计划，
+显式 `pack_unregistered` 并弃权；不会按物种或 cell preset 自动绑定 Pack。历史
+`run_query`、`run_request`、`build_runtime()`、`vc.compatibility-report.v1` 与
+`vc.execution-plan.v1` 仍可用于兼容/回归，但不是 P12 产品执行授权。
 
 v2 compatibility/step 的 canonical identity 排除 runtime path 和公开 display-only
 `model_version`；raw version 仍由 `model_fingerprint` 与 release fingerprint 约束，

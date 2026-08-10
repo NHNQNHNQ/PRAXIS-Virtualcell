@@ -25,6 +25,7 @@ def client(tmp_path, monkeypatch):
     import importlib
 
     import praxis_vc_api.services.runtime_service as rs
+
     importlib.reload(rs)
     return TestClient(app)
 
@@ -81,9 +82,7 @@ def test_parse_surrogate_in_structured_input_returns_safe_clarification(client):
         (["safe"], {"nested": "\ud800"}),
     ],
 )
-def test_parse_llm_metadata_and_assumptions_are_response_safe(
-    client, monkeypatch, assumptions, llm_error
-):
+def test_parse_llm_metadata_and_assumptions_are_response_safe(client, monkeypatch, assumptions, llm_error):
     import praxis_vc_api.services.runtime_service as rs
     import praxis_virtualcell.agents_llm.llm_client as llm_client
     from praxis_virtualcell.core.config import Mode, RuntimeConfig
@@ -98,13 +97,16 @@ def test_parse_llm_metadata_and_assumptions_are_response_safe(
     class StubClient:
         def complete(self, messages, **kwargs):
             return {
-                "content": json.dumps({
-                    "species": "human",
-                    "perturbation_type": "gene",
-                    "perturbation_targets": ["AHR"],
-                    "task_type": "predict_delta_expression",
-                    "assumptions": assumptions,
-                }, ensure_ascii=True),
+                "content": json.dumps(
+                    {
+                        "species": "human",
+                        "perturbation_type": "gene",
+                        "perturbation_targets": ["AHR"],
+                        "task_type": "predict_delta_expression",
+                        "assumptions": assumptions,
+                    },
+                    ensure_ascii=True,
+                ),
                 "error": llm_error,
             }
 
@@ -124,12 +126,14 @@ def test_parse_deep_structured_candidate_is_response_safe(client):
     nested: object = []
     for _ in range(400):
         nested = [nested]
-    structured = json.dumps({
-        "species": "human",
-        "perturbation_type": "gene",
-        "perturbation_targets": nested,
-        "output_modality": "delta_expression",
-    })
+    structured = json.dumps(
+        {
+            "species": "human",
+            "perturbation_type": "gene",
+            "perturbation_targets": nested,
+            "output_modality": "delta_expression",
+        }
+    )
     safe_client = TestClient(app, raise_server_exceptions=False)
     response = safe_client.post(
         "/api/parse",
@@ -160,13 +164,15 @@ def test_parse_llm_huge_integer_dose_returns_safe_clarification(client, monkeypa
     class StubClient:
         def complete(self, messages, **kwargs):
             return {
-                "content": json.dumps({
-                    "species": "human",
-                    "perturbation_type": "drug",
-                    "perturbation_targets": ["geldanamycin"],
-                    "task_type": "predict_delta_expression",
-                    "perturbation_dose": 10**400,
-                }),
+                "content": json.dumps(
+                    {
+                        "species": "human",
+                        "perturbation_type": "drug",
+                        "perturbation_targets": ["geldanamycin"],
+                        "task_type": "predict_delta_expression",
+                        "perturbation_dose": 10**400,
+                    }
+                ),
                 "error": None,
             }
 
@@ -183,9 +189,14 @@ def test_parse_llm_huge_integer_dose_returns_safe_clarification(client, monkeypa
 
 
 def test_job_flow_offline(client):
-    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
-           "input_modality": "scRNA", "output_modality": "delta_expression",
-           "task_type": "predict_delta_expression"}
+    req = {
+        "species": "human",
+        "perturbation_type": "gene",
+        "perturbation_targets": ["AHR"],
+        "input_modality": "scRNA",
+        "output_modality": "delta_expression",
+        "task_type": "predict_delta_expression",
+    }
     j = client.post("/api/jobs", json={"request": req, "mode": "offline"})
     assert j.status_code == 200
     jid = j.json()["job_id"]
@@ -200,10 +211,42 @@ def test_job_flow_offline(client):
     assert pv.status_code == 200 and "provenance" in pv.json()
 
 
+def test_job_flow_without_pack_is_value_free_abstention(client):
+    req = {
+        "species": "human",
+        "perturbation_type": "gene",
+        "perturbation_targets": ["AHR"],
+        "input_modality": "scRNA",
+        "output_modality": "delta_expression",
+        "task_type": "predict_delta_expression",
+    }
+    job = client.post("/api/jobs", json={"request": req, "mode": "offline"})
+    assert job.status_code == 200
+
+    job_id = job.json()["job_id"]
+    report = client.get(f"/api/reports/{job_id}").json()
+    structured = report["structured_report"]
+    assert structured["abstain"] is True
+    assert structured["prediction"] is None
+    assert structured["models_used"] == []
+    assert "pack_unregistered" in structured["abstain_reasons"]
+    assert structured["learned_reliability"] is None
+    trace = client.get(f"/api/reports/{job_id}/trace").json()["trace"]
+    assert all(item["receiver"] not in {"MockLinear", "MockCPA", "MockGEARS", "CaseRunner"} for item in trace)
+    identity = client.get(f"/api/reports/{job_id}/provenance").json()["execution_identity"]
+    assert identity["schema_version"] == "vc.job-execution-identity.v2"
+    assert identity["legacy_adapter"] is False
+
+
 def test_job_endpoint_revalidates_confirmed_request(client):
-    invalid = {"species": "human", "perturbation_type": "gene",
-               "perturbation_targets": ["AHR"], "input_modality": "scRNA",
-               "output_modality": "invented_output", "task_type": "predict_delta_expression"}
+    invalid = {
+        "species": "human",
+        "perturbation_type": "gene",
+        "perturbation_targets": ["AHR"],
+        "input_modality": "scRNA",
+        "output_modality": "invented_output",
+        "task_type": "predict_delta_expression",
+    }
     r = client.post("/api/jobs", json={"request": invalid, "mode": "offline"})
     assert r.status_code == 400
     assert r.json()["detail"] == "invalid_request"
@@ -272,9 +315,14 @@ def test_job_endpoint_normalizes_finite_perturbation_dose(client):
 def test_list_jobs(client):
     # 空 → []
     assert client.get("/api/jobs").json()["jobs"] == []
-    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
-           "input_modality": "scRNA", "output_modality": "delta_expression",
-           "task_type": "predict_delta_expression"}
+    req = {
+        "species": "human",
+        "perturbation_type": "gene",
+        "perturbation_targets": ["AHR"],
+        "input_modality": "scRNA",
+        "output_modality": "delta_expression",
+        "task_type": "predict_delta_expression",
+    }
     client.post("/api/jobs", json={"request": req, "mode": "offline"})
     jobs = client.get("/api/jobs").json()["jobs"]
     assert len(jobs) == 1
@@ -293,9 +341,14 @@ def test_options(client):
 
 
 def test_report_markdown(client):
-    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
-           "input_modality": "scRNA", "output_modality": "delta_expression",
-           "task_type": "predict_delta_expression"}
+    req = {
+        "species": "human",
+        "perturbation_type": "gene",
+        "perturbation_targets": ["AHR"],
+        "input_modality": "scRNA",
+        "output_modality": "delta_expression",
+        "task_type": "predict_delta_expression",
+    }
     jid = client.post("/api/jobs", json={"request": req, "mode": "offline"}).json()["job_id"]
     r = client.get(f"/api/reports/{jid}/markdown")
     assert r.status_code == 200
@@ -325,22 +378,31 @@ def test_modules_catalog(client):
 
 
 def test_module_plan_endpoint(client):
-    # 可路由请求(human + 有 targets)→ 应产 module_plan
-    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": ["AHR"],
-           "input_modality": "scRNA", "output_modality": "delta_expression",
-           "task_type": "predict_delta_expression"}
+    # 无 exact Pack 的正式请求会在模型路由前弃权，因此没有可执行模块路由。
+    req = {
+        "species": "human",
+        "perturbation_type": "gene",
+        "perturbation_targets": ["AHR"],
+        "input_modality": "scRNA",
+        "output_modality": "delta_expression",
+        "task_type": "predict_delta_expression",
+    }
     jid = client.post("/api/jobs", json={"request": req, "mode": "offline"}).json()["job_id"]
     r = client.get(f"/api/reports/{jid}/module-plan")
     assert r.status_code == 200
-    mp = r.json()["module_plan"]
-    assert mp.get("primary") and "entries" in mp and "overall_verdict" in mp
+    assert r.json()["module_plan"] == {}
 
 
 def test_job_endpoint_rejects_missing_targets_before_module_plan(client):
     # 已确认请求仍须经过后端最终校验，不能绕过 Review 直接执行空 targets。
-    req = {"species": "human", "perturbation_type": "gene", "perturbation_targets": [],
-           "input_modality": "scRNA", "output_modality": "delta_expression",
-           "task_type": "predict_delta_expression"}
+    req = {
+        "species": "human",
+        "perturbation_type": "gene",
+        "perturbation_targets": [],
+        "input_modality": "scRNA",
+        "output_modality": "delta_expression",
+        "task_type": "predict_delta_expression",
+    }
     r = client.post("/api/jobs", json={"request": req, "mode": "offline"})
     assert r.status_code == 400
     assert r.json()["detail"] == "invalid_request"

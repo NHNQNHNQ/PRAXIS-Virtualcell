@@ -1,4 +1,5 @@
 """v0.6 P2:API 与核心 runtime/服务层之间的薄适配。所有科学决策仍由确定性 runtime 完成。"""
+
 from __future__ import annotations
 
 import hashlib
@@ -29,7 +30,7 @@ from praxis_virtualcell.workflows.run_virtualcell_query import (
     SUPPORTED_SPECIES,
     SUPPORTED_TASKS,
     parse_query,
-    run_query,
+    run_formal_query,
     validate_candidate,
 )
 
@@ -38,8 +39,18 @@ RUNS_DIR = os.environ.get("PRAXIS_VC_RUNS", "runs")
 # UI 辅助:cell_type 后端不做枚举校验(自由字符串),这里仅给常见示例供前端下拉,
 # 允许自由填写。物种/扰动类型的合法值直接复用 runtime 白名单(单一真相源)。
 _CELL_TYPE_EXAMPLES = [
-    "K562", "HEK293T", "A549", "Jurkat", "HeLa", "THP-1",
-    "iPSC", "T cell", "B cell", "macrophage", "fibroblast", "hepatocyte",
+    "K562",
+    "HEK293T",
+    "A549",
+    "Jurkat",
+    "HeLa",
+    "THP-1",
+    "iPSC",
+    "T cell",
+    "B cell",
+    "macrophage",
+    "fibroblast",
+    "hepatocyte",
 ]
 
 
@@ -73,6 +84,7 @@ def options() -> dict:
     """暴露后端权威枚举供前端下拉(只读)。cell_type 后端不限制,仅给示例可自由填。
     cell_presets 是只读展示层(catalog),不引入新词汇/治理权威。"""
     from praxis_virtualcell.catalogs import load_cell_presets
+
     return {
         "species": sorted(SUPPORTED_SPECIES),
         "perturbation_type": sorted(SUPPORTED_PERTURBATION),
@@ -86,13 +98,19 @@ def options() -> dict:
 def modules() -> dict:
     """八模块目录(只读展示)。单一真相源 = biological_modules.modules,前端 module_context 步消费。"""
     from praxis_virtualcell.biological_modules import modules as M
-    return {"modules": [
-        {"id": mid, "code": M.MODULES[mid]["code"],
-         "display_name": M.MODULES[mid]["display_name"],
-         "engines": list(M.MODULES[mid]["engines"]),
-         "pillars": list(M.MODULES[mid]["pillars"])}
-        for mid in M.MODULE_ORDER
-    ]}
+
+    return {
+        "modules": [
+            {
+                "id": mid,
+                "code": M.MODULES[mid]["code"],
+                "display_name": M.MODULES[mid]["display_name"],
+                "engines": list(M.MODULES[mid]["engines"]),
+                "pillars": list(M.MODULES[mid]["pillars"]),
+            }
+            for mid in M.MODULE_ORDER
+        ]
+    }
 
 
 def _job_id(
@@ -105,9 +123,7 @@ def _job_id(
         "pack_id": pack_id,
         "pack_version": pack_version,
     }
-    h = hashlib.sha256(
-        json.dumps(identity, sort_keys=True, ensure_ascii=False).encode()
-    ).hexdigest()[:8]
+    h = hashlib.sha256(json.dumps(identity, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:8]
     store = JobStore(RUNS_DIR)
     return f"vc_{len(store.list_jobs()) + 1:04d}_{h}"
 
@@ -120,13 +136,8 @@ def run_job(
     pack_version: str | None = None,
 ) -> dict:
     if request.get("schema_version") == "vc.request.v2":
-        if not all(
-            isinstance(value, str) and value and value.strip() == value
-            for value in (pack_id, pack_version)
-        ):
-            raise InputValidationError(
-                "vc.request.v2 requires exact pack_id and pack_version"
-            )
+        if not all(isinstance(value, str) and value and value.strip() == value for value in (pack_id, pack_version)):
+            raise InputValidationError("vc.request.v2 requires exact pack_id and pack_version")
         try:
             validated_request = VirtualCellRequestV2.from_dict(request).to_dict()
         except (TypeError, ValueError) as exc:
@@ -144,15 +155,14 @@ def run_job(
     validation = validate_candidate(request)
     if not validation["schema_valid"]:
         raise InputValidationError(
-            "confirmed_request_invalid:"
-            f"missing={validation['missing_fields']} errors={validation['errors']}"
+            f"confirmed_request_invalid:missing={validation['missing_fields']} errors={validation['errors']}"
         )
     normalized = validation["normalized"]
     # API 运行与落盘只消费 validator normalized 的顶层请求；metadata 响应安全扩展 key
     # 可保留，但 requested_outputs/assumptions 等控制字段已清洗，且不把原始请求混回去。
     validated_request = dict(normalized)
     if pack_id is None:
-        out = run_query(
+        out = run_formal_query(
             validated_request,
             config=cfg,
             enable_llm_report=enable_llm_report,
@@ -216,34 +226,37 @@ def list_jobs() -> list[dict]:
         rep = j.get("report", {}) or {}
         execution_identity = j.get("execution_identity") or {}
         pack_identity = execution_identity.get("pack") or {}
-        out.append({
-            "job_id": jid,
-            "status": j.get("status", "unknown"),
-            "species": req.get("species"),
-            "perturbation_targets": req.get("perturbation_targets", []),
-            "abstain": rep.get("abstain"),
-            "reliability": rep.get("reliability"),
-            "pack_id": pack_identity.get("pack_id"),
-            "pack_version": pack_identity.get("pack_version"),
-            "pack_fingerprint": pack_identity.get("fingerprint"),
-        })
+        out.append(
+            {
+                "job_id": jid,
+                "status": j.get("status", "unknown"),
+                "species": req.get("species"),
+                "perturbation_targets": req.get("perturbation_targets", []),
+                "abstain": rep.get("abstain"),
+                "reliability": rep.get("reliability"),
+                "pack_id": pack_identity.get("pack_id"),
+                "pack_version": pack_identity.get("pack_version"),
+                "pack_fingerprint": pack_identity.get("fingerprint"),
+            }
+        )
     return out
 
 
 def report_markdown(job_id: str) -> str:
     """返回该 job 的确定性 report.md(优先读落盘,缺则现场重渲染)。只读。"""
-    job = JobStore(RUNS_DIR).load(job_id)   # 缺失抛 FileNotFoundError
+    job = JobStore(RUNS_DIR).load(job_id)  # 缺失抛 FileNotFoundError
     md = job.get("report_md")
     if md:
         return md
     from praxis_virtualcell.io.report_markdown import render_report_md
+
     return render_report_md(job)
 
 
 def module_plan(job_id: str) -> dict:
     """从落盘 job 的 structured_report.provenance 提取 module_plan(只读)。
     缺失(abstain/不可路由 job)→ 空 dict,fail-closed 不重算。job 不存在 → FileNotFoundError。"""
-    job = JobStore(RUNS_DIR).load(job_id)   # 缺 → FileNotFoundError
+    job = JobStore(RUNS_DIR).load(job_id)  # 缺 → FileNotFoundError
     report = job.get("report") or {}
     prov = report.get("provenance") or job.get("provenance") or {}
     return {"module_plan": prov.get("module_plan") or {}}

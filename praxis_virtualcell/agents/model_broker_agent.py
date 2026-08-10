@@ -7,6 +7,7 @@
 available=False + reason,fail-closed,绝不 silent accept。gpu 无法静态检测,按声明降级
 (available=False,reason 注明需运行时确认 gpu)。
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -46,11 +47,14 @@ def _dep_available(dep: str) -> bool:
 class ModelBrokerAgent(BaseAgent):
     name = "ModelBrokerAgent"
 
-    def __init__(self, registry: ModelZooRegistry | None = None,
-                 cache: ModelCache | None = None,
-                 pack_registry: PackRegistry | None = None,
-                 environment: EnvironmentSnapshot | None = None,
-                 adapter_registry: AdapterRegistry | None = None) -> None:
+    def __init__(
+        self,
+        registry: ModelZooRegistry | None = None,
+        cache: ModelCache | None = None,
+        pack_registry: PackRegistry | None = None,
+        environment: EnvironmentSnapshot | None = None,
+        adapter_registry: AdapterRegistry | None = None,
+    ) -> None:
         self._reg = registry or ModelZooRegistry()
         self._cache = cache or ModelCache()
         self._packs = pack_registry or PackRegistry()
@@ -69,11 +73,17 @@ class ModelBrokerAgent(BaseAgent):
             return
         model_name = message.payload.get("model_name")
         result = self._resolve(model_name)
-        bus.send(AgentMessage(
-            message_id=message.message_id + ":broker",
-            sender=self.name, receiver="EnsembleCoordinator",
-            message_type="model_broker_result", payload=result,
-            timestamp=message.timestamp, parent_message_id=message.message_id))
+        bus.send(
+            AgentMessage(
+                message_id=message.message_id + ":broker",
+                sender=self.name,
+                receiver="EnsembleCoordinator",
+                message_type="model_broker_result",
+                payload=result,
+                timestamp=message.timestamp,
+                parent_message_id=message.message_id,
+            )
+        )
 
     def plan(
         self,
@@ -91,10 +101,13 @@ class ModelBrokerAgent(BaseAgent):
         request = VirtualCellRequestV2.from_dict(message.payload.get("request"))
         pack_id = message.payload.get("pack_id")
         pack_version = message.payload.get("pack_version")
-        try:
-            pack = self._packs.record(pack_id, pack_version)
-        except PackRegistryError:
+        if pack_id is None or pack_version is None:
             pack = None
+        else:
+            try:
+                pack = self._packs.record(pack_id, pack_version)
+            except PackRegistryError:
+                pack = None
         plan = self.plan(request, pack)
         reports = {report.model_name: report for report in plan.reports}
         prepared = []
@@ -129,36 +142,25 @@ class ModelBrokerAgent(BaseAgent):
                         "environment_compatible": False,
                         "executable": False,
                         "checks": checks,
-                        "reasons": list(report.reasons)
-                        + [reason],
+                        "reasons": list(report.reasons) + [reason],
                     }
                 )
-                revised_reports.append(
-                    type(report).from_dict(revised)
-                )
-            steps = tuple(
-                step for step in plan.steps if step.model_name not in failed
-            )
+                revised_reports.append(type(report).from_dict(revised))
+            steps = tuple(step for step in plan.steps if step.model_name not in failed)
             if isinstance(plan, ExecutionPlanV2):
                 plan = plan.rebuild(
                     reports=tuple(revised_reports),
                     steps=steps,
                 )
             else:
-                identity = (
-                    plan.plan_id
-                    + "|"
-                    + "|".join(sorted(failed))
-                ).encode("utf-8")
+                identity = (plan.plan_id + "|" + "|".join(sorted(failed))).encode("utf-8")
                 revised_plan = plan.to_dict()
                 revised_plan.update(
                     {
                         "plan_id": f"plan_{hashlib.sha256(identity).hexdigest()[:24]}",
                         "executable": bool(steps),
                         "steps": [step.to_dict() for step in steps],
-                        "reports": [
-                            report.to_dict() for report in revised_reports
-                        ],
+                        "reports": [report.to_dict() for report in revised_reports],
                     }
                 )
                 plan = type(plan).from_dict(revised_plan)
@@ -179,8 +181,7 @@ class ModelBrokerAgent(BaseAgent):
         return self._prepared.pop(plan_id, [])
 
     def _resolve(self, model_name: str | None) -> dict:
-        base = {"model_name": model_name, "available": False, "status": "missing",
-                "wrapper": None, "reason": ""}
+        base = {"model_name": model_name, "available": False, "status": "missing", "wrapper": None, "reason": ""}
         # 1) 未知模型 → fail-closed
         try:
             entry = self._reg.get(model_name)
@@ -214,8 +215,10 @@ class ModelBrokerAgent(BaseAgent):
         for a in entry.get("assets", []) or []:
             declared_sha = a.get("sha256")
             if declared_sha is None:
-                base["reason"] = (f"asset requires_manual_fetch: {a.get('filename')} sha256 未登记"
-                                  f"(占位)—— 需按 source_note 手动获取并登记 sha 后方可用")
+                base["reason"] = (
+                    f"asset requires_manual_fetch: {a.get('filename')} sha256 未登记"
+                    f"(占位)—— 需按 source_note 手动获取并登记 sha 后方可用"
+                )
                 return base
             st = self._cache.check(model_name, a["filename"], sha256=declared_sha)
             if not st.available:

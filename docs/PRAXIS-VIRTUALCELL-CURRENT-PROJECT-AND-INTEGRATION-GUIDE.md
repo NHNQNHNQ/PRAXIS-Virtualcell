@@ -697,23 +697,33 @@ data-center
 当前 Chat 前端创建 job 时没有传入 `pack_id + pack_version`。因此：
 
 - Cell preset 只提供 context；
-- 当前聊天走 legacy adapter 路径；
 - 它不会因为 Data Center 中存在同物种 Pack 就自动绑定该 Pack；
-- 后端 API 虽已支持显式 Pack identity，但当前主 UI 尚未使用这一能力。
+- 当前聊天、API、CLI 与 Streamlit 会把无 Pack 请求送入 P12 `ModelBrokerAgent`，生成
+  `vc.execution-plan.v2` 零步骤计划；
+- 该计划中每个 compatibility report 都含 `pack.unregistered`，对外返回
+  `pack_unregistered`、`prediction=null`、空 `models_used` 与 `legacy_adapter=false` 的 V2
+  job identity；不存在 learned-reliability 数值；
+- 后端 API 支持显式 Pack identity，但当前主 UI 尚未收集这一输入。
 
-legacy 路径仍可能枚举明确标记的 `MockLinear`、`MockCPA`、`MockGEARS` 或窄域 case runner。它与 P6 Pack-aware 路径的语义不同：
+正式入口与历史兼容 harness 的边界如下：
 
 ```text
-legacy direct chat
-  可以产生明确标记为 mock/advisory 的演示报告
+formal chat / API / CLI / Streamlit without an exact Pack
+  P12 V2 zero-step plan → explicit abstain
 
-Pack-aware runtime
-  没有可执行模型时不得回退到 mock，必须 abstain
+explicit Pack-aware runtime
+  exact compatibility gates → execute only when every gate passes
+
+run_query / run_request / build_runtime compatibility harness
+  frozen legacy regression only; never formal execution authority
 ```
 
-因此 UI 中的“Report generated”只表示后端完成了一次可审计运行并生成报告，不等于真实模型已经完成科学预测。
+正式 runtime 不注册 `MockLinear`、`MockCPA`、`MockGEARS`、`CaseRunner` 或 legacy applicability
+adapter，且空计划没有 module route。UI 中的“Report generated”只表示后端完成了一次可审计
+abstention/report，不等于真实模型已经完成科学预测。
 
-这也是下一阶段真实模型闭环必须解决的关键接缝。
+未来 Pack UI 必须让用户显式选择 exact Pack，并将自然语言解析与确定性 Pack execution 分开；不能
+按物种、cell 名称或 Data Center 展示猜测 Pack。
 
 ---
 
@@ -1765,7 +1775,8 @@ curl -s \
 JSON
 ```
 
-`pack_id` 和 `pack_version` 必须同时提供或同时省略。
+`pack_id` 和 `pack_version` 必须同时提供或同时省略。两者都省略时正式 API 保留一次
+`vc.execution-plan.v2` 零步骤身份并以 `pack_unregistered` abstain；不会回退到 mock 或 case runner。
 
 ### 12.9 API 安全边界
 
@@ -1898,10 +1909,14 @@ Python 可直接导入，但外部项目应把它视为比 REST schema 更容易
 ```python
 from praxis_virtualcell.workflows.run_virtualcell_query import (
     parse_query,
+    run_formal_query,
     run_full_query,
     run_query,
 )
 ```
+
+`run_formal_query` 是正式无 Pack/P12 fail-closed 路径；`run_full_query` 也调用它。
+`run_query` 仅为冻结 legacy regression harness 保留，不是产品预测 API。
 
 Pack 数据合同公开接口：
 

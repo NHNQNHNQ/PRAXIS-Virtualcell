@@ -12,6 +12,7 @@ React 正式网站(praxis_vc_react/,只读展示,不参与预测/治理决策):
 
 默认 offline;llm-assisted 需 .env 有 DEEPSEEK_API_KEY,否则自动 fallback。
 """
+
 from __future__ import annotations
 
 import argparse
@@ -25,6 +26,7 @@ from praxis_virtualcell import __version__
 
 def _config(mode: str):
     from praxis_virtualcell.core.config import Mode, RuntimeConfig
+
     if mode in ("llm-assisted", "llm_assisted"):
         os.environ["PRAXIS_VIRTUALCELL_MODE"] = "llm_assisted"
         return RuntimeConfig.from_env()
@@ -33,38 +35,66 @@ def _config(mode: str):
 
 def _cmd_run(a) -> int:
     from praxis_virtualcell.io.job_store import JobStore
-    from praxis_virtualcell.workflows.run_virtualcell_query import run_query
+    from praxis_virtualcell.workflows.run_virtualcell_query import run_formal_query
+
     cfg = _config(a.mode)
     req = json.loads(open(a.request, encoding="utf-8").read())
-    out = run_query(req, config=cfg, enable_llm_report=a.llm_report)
+    out = run_formal_query(req, config=cfg, enable_llm_report=a.llm_report)
     if a.out:
         JobStore(os.path.dirname(a.out) or "runs").save(os.path.basename(a.out), request=req, result=out)
-    print(json.dumps({"reliability_decision": out["reliability_decision"],
-                      "llm_used_for_prediction": out["llm_used_for_prediction"],
-                      "mode": out["mode"]}, ensure_ascii=False, indent=2))
+    print(
+        json.dumps(
+            {
+                "reliability_decision": out["reliability_decision"],
+                "llm_used_for_prediction": out["llm_used_for_prediction"],
+                "mode": out["mode"],
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
     return 0
 
 
 def _cmd_ask(a) -> int:
     from praxis_virtualcell.io.job_store import JobStore
-    from praxis_virtualcell.workflows.run_virtualcell_query import parse_query, run_query
+    from praxis_virtualcell.workflows.run_virtualcell_query import (
+        parse_query,
+        run_formal_query,
+    )
+
     cfg = _config(a.mode)
     parsed = parse_query(a.text, config=cfg)
     print("== parsed ==")
-    print(json.dumps({"candidate_request": parsed["candidate_request"], "parser": parsed["parser"],
-                      "schema_valid": parsed["schema_valid"], "missing_fields": parsed["missing_fields"],
-                      "llm_used": parsed["llm_used"], "fallback_used": parsed["fallback_used"]},
-                     ensure_ascii=False, indent=2))
+    print(
+        json.dumps(
+            {
+                "candidate_request": parsed["candidate_request"],
+                "parser": parsed["parser"],
+                "schema_valid": parsed["schema_valid"],
+                "missing_fields": parsed["missing_fields"],
+                "llm_used": parsed["llm_used"],
+                "fallback_used": parsed["fallback_used"],
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
     if not parsed["schema_valid"]:
         print("== clarification_required ==", parsed["missing_fields"] or parsed["errors"])
         return 2
     if not a.yes:
         print("(加 --yes 确认执行;或用 web/API 的确认页)")
         return 0
-    out = run_query(parsed["candidate_request"], config=cfg, enable_llm_report=a.llm_report)
+    out = run_formal_query(
+        parsed["candidate_request"],
+        config=cfg,
+        enable_llm_report=a.llm_report,
+    )
     if a.out:
-        JobStore(os.path.dirname(a.out) or "runs").save(os.path.basename(a.out),
-                 candidate=parsed["candidate_request"], result={**out, "parsed": parsed})
+        JobStore(os.path.dirname(a.out) or "runs").save(
+            os.path.basename(a.out), candidate=parsed["candidate_request"], result={**out, "parsed": parsed}
+        )
     print("== reliability_decision ==")
     print(json.dumps(out["reliability_decision"], ensure_ascii=False, indent=2))
     return 0
@@ -72,6 +102,7 @@ def _cmd_ask(a) -> int:
 
 def _cmd_serve(a) -> int:
     import uvicorn
+
     uvicorn.run("praxis_vc_api.main:app", host=a.host, port=a.port, reload=False)
     return 0
 
@@ -79,9 +110,21 @@ def _cmd_serve(a) -> int:
 def _cmd_web(a) -> int:
     os.environ["PRAXIS_VC_API"] = a.api
     import subprocess
+
     app_path = files("praxis_vc_web").joinpath("app.py")
-    return subprocess.call([sys.executable, "-m", "streamlit", "run",
-                            str(app_path), "--server.address", a.host, "--server.port", str(a.port)])
+    return subprocess.call(
+        [
+            sys.executable,
+            "-m",
+            "streamlit",
+            "run",
+            str(app_path),
+            "--server.address",
+            a.host,
+            "--server.port",
+            str(a.port),
+        ]
+    )
 
 
 def _json_file(path: str) -> dict:
