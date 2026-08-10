@@ -25,7 +25,13 @@ def _run(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(args, cwd=cwd, text=True, capture_output=True, check=True)
 
 
-def _repository(tmp_path: Path, *, apple_double: bool = False, escaping_symlink: bool = False) -> Path:
+def _repository(
+    tmp_path: Path,
+    *,
+    apple_double: bool = False,
+    escaping_symlink: bool = False,
+    export_ignore_escaping_symlink: bool = False,
+) -> Path:
     repo = tmp_path / "source"
     (repo / "scripts").mkdir(parents=True)
     (repo / "praxis_virtualcell").mkdir()
@@ -41,6 +47,11 @@ def _repository(tmp_path: Path, *, apple_double: bool = False, escaping_symlink:
         (repo / "._forbidden").write_bytes(b"AppleDouble")
     if escaping_symlink:
         os.symlink("../outside.txt", repo / "praxis_virtualcell" / "escaping_symlink")
+    if export_ignore_escaping_symlink:
+        (repo / ".gitattributes").write_text(
+            "praxis_virtualcell/escaping_symlink export-ignore\n",
+            encoding="utf-8",
+        )
     _run("git", "init", "-q", cwd=repo)
     _run("git", "config", "user.name", "P30 Test", cwd=repo)
     _run("git", "config", "user.email", "p30@example.invalid", cwd=repo)
@@ -49,6 +60,8 @@ def _repository(tmp_path: Path, *, apple_double: bool = False, escaping_symlink:
         paths.append("._forbidden")
     if escaping_symlink:
         paths.append("praxis_virtualcell/escaping_symlink")
+    if export_ignore_escaping_symlink:
+        paths.append(".gitattributes")
     _run("git", "add", *paths, cwd=repo)
     _run("git", "commit", "-qm", "fixture", cwd=repo)
     return repo
@@ -176,3 +189,15 @@ def test_source_archive_rejects_tracked_escaping_symlink(tmp_path: Path) -> None
     assert result.returncode != 0
     assert "unsupported link" in result.stderr
     assert not output.exists()
+
+
+def test_source_archive_omits_export_ignored_escaping_symlink(tmp_path: Path) -> None:
+    repo = _repository(tmp_path, escaping_symlink=True, export_ignore_escaping_symlink=True)
+    output = tmp_path / "out" / "praxis-virtualcell-1.7.0.tar.gz"
+    output.parent.mkdir()
+
+    result = _build(repo, output)
+
+    assert result.returncode == 0
+    with tarfile.open(output, "r:gz") as archive:
+        assert "praxis-virtualcell-1.7.0/praxis_virtualcell/escaping_symlink" not in archive.getnames()
