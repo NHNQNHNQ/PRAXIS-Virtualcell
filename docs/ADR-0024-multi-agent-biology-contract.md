@@ -94,6 +94,13 @@ Actual P16R remains `AUTHORIZATION_REQUIRED / NOT_RUN`; science and policy remai
 preserves E2b's failure result but records the unreproducible causal attribution and a current
 local export-ignore probe. It is not a formal RC, science result, policy decision, or P16R authorization.
 
+**E2d output-root preflight (2026-08-10):** The append-only
+[output-root preflight](../reports/phase30a/PHASE30A_E2D_OUTPUT_ROOT_PREFLIGHT.md) is
+`COMPLETE — OUTPUT_ROOT_PREFLIGHT_ONLY / NO_RC_CLAIM`: the selected current exFAT output root fails the
+hard-link/no-replace preflight before archive creation and retains no archive or probe. It does not
+explain E2b's historical failure or create a formal RC, science result, policy decision, promotion,
+or actual-P16R authorization.
+
 **P16R-PREFLIGHT follow-on (2026-08-10):** the local authorization-preflight identity bridge
 subsequently completed `COMPLETE — IDENTITY_PREFLIGHT_ONLY` at
 `4f77255f84e33180d7d73b421fc9737ca3a1121d`. It binds declarations only and fixed value-free

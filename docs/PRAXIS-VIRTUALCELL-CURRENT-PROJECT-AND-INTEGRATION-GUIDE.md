@@ -139,7 +139,8 @@
 > value-free closure；真实 P29 candidate 仍为 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`。
 > P30A-E1 release-contract hardening、P30A-E2a clean-SHA offline preflight 与 P30A-E2b
 > archive-only runner 已完成；E2a/E2b 均为 `COMPLETE_NEGATIVE`，formal P30A 仍
-> `LOCAL_RC_INCOMPLETE`；P30A-E2c 仅完成 `RECONCILIATION_ONLY / NO_RC_CLAIM`。P16R local authorization-preflight identity bridge 已完成
+> `LOCAL_RC_INCOMPLETE`；P30A-E2c 仅完成 `RECONCILIATION_ONLY / NO_RC_CLAIM`，P30A-E2d 仅完成
+> `OUTPUT_ROOT_PREFLIGHT_ONLY / NO_RC_CLAIM`。P16R local authorization-preflight identity bridge 已完成
 > `COMPLETE — IDENTITY_PREFLIGHT_ONLY`；真实 P16R 与 P30B1–B4 仍需各自独立授权，当前
 > local queue 为 `BLOCKED_EXTERNAL`。
 
@@ -2982,7 +2983,8 @@ deterministic DAG/hash-chain trace 与 authoritative empty compilation；真实 
 `0/3` qualifying modules。P29E 已完成 strict null requirement、`empty_not_connected` graph 与
 authoritative value-free compilation；真实 P29 qualified biological nodes 为 `0`。本地顺序已从
 P30A-E1 release-contract hardening 推进至 P30A-E2a clean-SHA offline preflight、P30A-E2b
-archive-only runner（均为 `COMPLETE_NEGATIVE`）、P30A-E2c（仅 `RECONCILIATION_ONLY / NO_RC_CLAIM`）和 P16R local authorization-preflight identity
+archive-only runner（均为 `COMPLETE_NEGATIVE`）、P30A-E2c（仅 `RECONCILIATION_ONLY / NO_RC_CLAIM`）、
+P30A-E2d（仅 `OUTPUT_ROOT_PREFLIGHT_ONLY / NO_RC_CLAIM`）和 P16R local authorization-preflight identity
 bridge（`IDENTITY_PREFLIGHT_ONLY`）。formal P30A 仍
 `LOCAL_RC_INCOMPLETE`，current local queue 为 `BLOCKED_EXTERNAL`；P30B1–B4 与真实 P16R 仍为
 独立授权窗口。
@@ -3028,6 +3030,7 @@ bridge（`IDENTITY_PREFLIGHT_ONLY`）。formal P30A 仍
 | P30A-E2a | `COMPLETE_NEGATIVE`：clean-SHA offline preflight record `6cb91031…9019`；no install/build/OCI/full gate or RC result |
 | P30A-E2b | `COMPLETE_NEGATIVE`：source-stable immutable record `72459a3b…63d2`；记录两个 `source_archive_build_failed` attempts；其 tracked-link 因果归因不能由同一 exact tree 的 committed `.gitattributes` / `git archive` 重现（raw stderr 未保留）；formal P30A `LOCAL_RC_INCOMPLETE` |
 | P30A-E2c | `COMPLETE — RECONCILIATION_ONLY / NO_RC_CLAIM`：current exact-source export-ignore double probe preserves E2b immutable failure result；不接受 artifact、不完成 formal RC，且不授权 actual P16R/science/policy/promotion |
+| P30A-E2d | `COMPLETE — OUTPUT_ROOT_PREFLIGHT_ONLY / NO_RC_CLAIM`：selected current exFAT output root 的 hard-link/no-replace preflight 在 archive creation 前失败且不留 archive/probe；不解释 E2b historical failure，不完成 formal RC 或授权 actual P16R/science/policy/promotion |
 | P16R-PREFLIGHT local authorization-preflight identity bridge | `COMPLETE — IDENTITY_PREFLIGHT_ONLY`：code `4f77255f...`；P16/P12/P21 declaration binding and fixed abstain only；真实 P16R `AUTHORIZATION_REQUIRED / NOT_RUN`，不读真实 asset、不跑 candidate/comparator 或 benchmark，不创建 evidence/policy 或 route |
 | Local queue | `BLOCKED_EXTERNAL`：没有新的已登记本地 work unit；exact read-only candidate/asset inventory 与真实 P16R run 均需独立授权 |
 | P30B1 | `NOT_AUTHORIZED / NOT_RUN`：Push + exact-SHA CI |
@@ -3308,7 +3311,7 @@ policy NO_NEW_DECISION。P29E 从 90990c198c40d0e6655aedaad101a783cde003aa 起�
 d1dec19f06ec88f563406b45f2b544effabad915）完成 strict null requirement、
 empty_not_connected/zero-node graph 与 authoritative value-free compilation；real P29 仍 blocked，
 science NOT_RUN，policy NO_NEW_DECISION。P30A-E1、P30A-E2a 与 P30A-E2b 已完成；P30A-E2c 仅为
-`RECONCILIATION_ONLY / NO_RC_CLAIM`；P16R local
+`RECONCILIATION_ONLY / NO_RC_CLAIM`；P30A-E2d 仅为 `OUTPUT_ROOT_PREFLIGHT_ONLY / NO_RC_CLAIM`；P16R local
 authorization-preflight identity bridge 也已完成 `IDENTITY_PREFLIGHT_ONLY`；formal P30A 仍
 `LOCAL_RC_INCOMPLETE`，真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`，local queue 为
 `BLOCKED_EXTERNAL`。

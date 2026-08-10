@@ -2,7 +2,7 @@
 
 本文件记录面向发布的产品变化。科学能力声明仍以 `reports/phase10/PHASE10_GATE.md` 为准；本地版本或 tag 不等于已在 GitHub 发布。
 
-## 1.7.0 — P30A-E1/E2a/E2b local RC engineering, unpublished (`LOCAL_RC_INCOMPLETE`)
+## 1.7.0 — P30A-E1/E2a–E2d local RC engineering, unpublished (`LOCAL_RC_INCOMPLETE`)
 
 - 把 P12–P29 的 versioned model/adapter/environment/evidence/policy、Pack factory、training、benchmark、registry、experiment-design、multi-agent 与 limited-world-model 工程合同收口为本地 Software RC；没有把 contract、catalog 或 synthetic conformance 提升为科学事实。
 - 默认产品承诺保持 fail-closed：只有 exact request × Pack × model × environment × adapter × evidence × policy 全部满足才执行，否则 abstain。
@@ -23,6 +23,9 @@
 - P30A-E2c append-only reconciliation 保留 E2b 的 immutable failure result，同时记录 current exact-source
   export-ignore probe；它没有接受 release artifact、完成 formal RC、创建 science/policy/promotion result，实际
   P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`。
+- P30A-E2d 在 `7bf3fa87e7440f9b0472e75ce558afda78e2d0af` 完成 output-directory hard-link
+  capability preflight：selected local exFAT output root 在 archive creation 前安全失败且不留下 archive/probe；
+  它不解释 E2b historical failure，也不接受 artifact、完成 formal RC 或改变 science/policy/P16R 状态。
 - P16R local authorization-preflight identity bridge 在
   `4f77255f84e33180d7d73b421fc9737ca3a1121d` 完成
   `COMPLETE — IDENTITY_PREFLIGHT_ONLY`：新增
@@ -31,7 +34,7 @@
   value-free abstain。未进行 asset I/O、candidate/model/comparator/benchmark、evidence、policy、
   registry/runtime/API/CLI route、release 或 promotion；真实 P16R 仍
   `AUTHORIZATION_REQUIRED / NOT_RUN`。
-- P16R preflight 后没有新的已登记 local work unit；下一步需要独立精确授权的 read-only
+- P30A-E2d 后没有新的已登记 local work unit；下一步需要独立精确授权的 read-only
   candidate/asset inventory，真实 P16R science run 仍须另一个授权窗口。P30A 仍
   `LOCAL_RC_INCOMPLETE`。
 - P30 没有产生科学进展：science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`，policy

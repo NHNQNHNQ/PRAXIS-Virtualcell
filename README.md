@@ -118,7 +118,8 @@ adapter/compute/benchmark/evidence/policy/result/tool/prediction identities 均�
 仍为 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；content hash 是 identity，不是 signer 或
 attestation。P30A-E1 已完成本地 release-contract hardening 与 reproducibility probes；P30A-E2a
 已完成 clean-SHA offline preflight 负结果，P30A-E2b archive-only runner 也以
-`COMPLETE_NEGATIVE` 收口；P30A-E2c 仅完成 append-only source-archive reconciliation，不能形成 RC。
+`COMPLETE_NEGATIVE` 收口；P30A-E2c 仅完成 append-only source-archive reconciliation，P30A-E2d
+仅完成 output-root capability preflight，二者均不能形成 RC。
 formal P30A 仍为 `LOCAL_RC_INCOMPLETE`，且不授权 push、tag、发布或
 部署。P16R local authorization-preflight identity bridge 已完成；真实 P16R 仍
 `AUTHORIZATION_REQUIRED / NOT_RUN`。没有新的已登记本地 work unit；下一步须是独立授权的
@@ -249,9 +250,9 @@ request-bound。设计和操作边界见
 [P29E ADR](docs/ADR-0025-limited-biological-world-model-contract.md)与
 [P29E runbook](docs/runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md)。真实 P29 仍 blocked，
 不得补造 molecule→organism placeholder chain；P30A-E1 已留下 local engineering probes，P30A-E2a/E2b
-已留下 negative records，P30A-E2c 仅完成 reconciliation；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P16R local
+已留下 negative records，P30A-E2c 仅完成 reconciliation，P30A-E2d 仅完成 output-root preflight；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P16R local
 authorization-preflight identity bridge 已完成且只保留 value-free identity binding；真实 P16R
-仍未获授权或运行。P30A-E2c 后当前没有新的 eligible 本地 work unit，local queue 为 `BLOCKED_EXTERNAL`。
+仍未获授权或运行。P30A-E2d 后当前没有新的 eligible 本地 work unit，local queue 为 `BLOCKED_EXTERNAL`。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -677,6 +678,7 @@ not a P16R scientific run. Science remains `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`;
 | [P30A-E1 Engineering Completion Report](reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md) | release-contract hardening、probe identities 与 formal RC non-claim |
 | [P30A-E2b Archive Runner Negative Report](reports/phase30a/PHASE30A_E2B_ARCHIVE_RUNNER.md) | exact archive-only negative record、formal RC non-claim 与 P16R preflight handoff |
 | [P30A-E2c Source-Archive Reconciliation](reports/phase30a/PHASE30A_E2C_SOURCE_ARCHIVE_RECONCILIATION.md) | E2b immutable failure-result preservation、unreproducible tracked-link attribution 与 current local non-RC probe |
+| [P30A-E2d Output-Root Preflight](reports/phase30a/PHASE30A_E2D_OUTPUT_ROOT_PREFLIGHT.md) | current output-root hard-link capability boundary、no retained artifact/probe 与 formal RC non-claim |
 | [P30A-E2a Preflight Negative Report](reports/phase30a/PHASE30A_E2A_PREFLIGHT.md) | clean-SHA offline wheelhouse preflight 的 frozen negative evidence |
 | [P29E 完成报告](reports/phase29e/PHASE29E_COMPLETION.md) | exact empty-not-connected/value-free closure、package evidence 与真实 data/model/benchmark/science/policy non-runs |
 | [P29E Limited World Model ADR](docs/ADR-0025-limited-biological-world-model-contract.md) | null requirement identities、empty typed graph、content-hash trust ceiling 与 0-node abstention 决策 |

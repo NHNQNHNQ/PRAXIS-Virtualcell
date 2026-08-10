@@ -27,6 +27,12 @@ This runbook verifies `P29E — limited biological world model / exact empty gra
   [source-archive reconciliation](../../reports/phase30a/PHASE30A_E2C_SOURCE_ARCHIVE_RECONCILIATION.md)
   preserves E2b's failure result and records a current local non-RC export-ignore probe; it does
   not authorize actual P16R, science, policy, or release action.
+- **E2d output-root preflight (2026-08-10):** The append-only
+  [output-root preflight](../../reports/phase30a/PHASE30A_E2D_OUTPUT_ROOT_PREFLIGHT.md) is
+  `COMPLETE — OUTPUT_ROOT_PREFLIGHT_ONLY / NO_RC_CLAIM`: the selected current exFAT output root fails the
+  hard-link/no-replace preflight before archive creation and retains no archive or probe. It does
+  not explain E2b's historical failure or authorize a formal RC, actual P16R, science, policy,
+  promotion, or release action.
 - **P16R-PREFLIGHT follow-on (2026-08-10):** the bridge subsequently completed
   `COMPLETE — IDENTITY_PREFLIGHT_ONLY` at `4f77255f84e33180d7d73b421fc9737ca3a1121d`.
   It performs only in-memory identity binding and fixed abstention, without asset I/O, execution,

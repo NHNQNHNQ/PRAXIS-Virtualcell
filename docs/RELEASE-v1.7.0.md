@@ -1,14 +1,14 @@
 # PRAXIS-VirtualCell 1.7.0 — Local RC Contract (Unpublished)
 
 > Status: P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a/E2b `COMPLETE_NEGATIVE`; P30A-E2c
-> `RECONCILIATION_ONLY / NO_RC_CLAIM`; formal P30A
+> `RECONCILIATION_ONLY / NO_RC_CLAIM`; P30A-E2d `OUTPUT_ROOT_PREFLIGHT_ONLY / NO_RC_CLAIM`; formal P30A
 > `LOCAL_RC_INCOMPLETE / UNPUBLISHED`; P16R local authorization-preflight identity bridge
 > `COMPLETE — IDENTITY_PREFLIGHT_ONLY`; actual P16R `AUTHORIZATION_REQUIRED / NOT_RUN`.
 >
 > P30A is local-only. Completed release-contract hardening and reproducibility probes do not yet
 > prove a complete RC artifact set. P30A-E2b used a controlled archive-only runner and retained a
 > negative result rather than accept caller-supplied test or artifact claims; E2c preserves that record
-> without accepting a release artifact. This document does not publish an artifact,
+> without accepting a release artifact, and E2d preflights the current output-root capability only. This document does not publish an artifact,
 > complete a remote CI gate, create or move a tag, promote a biological capability, or authorize
 > deployment.
 >
@@ -136,7 +136,7 @@ entries; ZIP integrity passed. The archive probe is an exact-HEAD projection and
 links and AppleDouble entries. Neither probe is a retained clean-install-qualified artifact bundle,
 an accepted release manifest, an SBOM, a licence inventory or a published artifact.
 
-## P30A-E2a/E2b negative records, E2c reconciliation, and formal-RC gates
+## P30A-E2a/E2b negative records, E2c reconciliation, E2d output-root preflight, and formal-RC gates
 
 P30A-E2a independently rechecked clean source SHA/tree/epoch before and after an offline
 dependency-coverage preflight. Its `praxis.local-rc-finalizer-preflight.v1` record is
@@ -167,6 +167,12 @@ P30A-E2c then preserved that immutable E2b failure result in the append-only
 Its current exact-source export-ignore double probe is local engineering evidence only: no release
 artifact or manifest was accepted and no formal RC, science, policy, promotion, or actual-P16R result
 was created.
+
+P30A-E2d then added a hard-link/no-replace capability preflight for the requested source-archive
+output directory. Its selected local exFAT root safely exits before archive creation and retains no
+archive or probe. This current output-root result is not evidence about E2b's historical cause and is
+not a release artifact, clean install, full gate, formal RC, science, policy, promotion, or actual-P16R
+result. See the append-only [output-root preflight record](../reports/phase30a/PHASE30A_E2D_OUTPUT_ROOT_PREFLIGHT.md).
 
 Formal P30A therefore remains incomplete. The P16R local authorization-preflight identity bridge
 subsequently completed as an in-memory, value-free declaration binder; it does not access real P16R

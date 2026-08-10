@@ -1,9 +1,9 @@
 # PRAXIS-VirtualCell 测试指南
 
 > 历史 P29E 文档基线（非当前 worktree baseline）：分支 `codex/p25e-virtual-microbiome`；active baseline
-> `90990c198c40d0e6655aedaad101a783cde003aa`。当前 E2c code/test baseline 是
-> `f9aa62d669c7bc3d5cbcca101e4e73ffd0bf821a`（`codex/p30-foundation-rc`）；其 reconciliation-only
-> 状态不构成 formal RC。
+> `90990c198c40d0e6655aedaad101a783cde003aa`。当前 E2d code/test baseline 是
+> `7bf3fa87e7440f9b0472e75ce558afda78e2d0af`（`codex/p30-foundation-rc`）；其 output-root
+> preflight-only 状态不构成 formal RC。
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -29,13 +29,13 @@
 > real asset/model/output 窗口均未授权或未运行；P26R 仍为 `BLOCKED_EXTERNAL / NOT_RUN`。
 > P30A-E1 release-contract hardening、P30A-E2a clean-SHA offline preflight 与 P30A-E2b
 > archive-only runner 均已完成；E2a/E2b 均为 `COMPLETE_NEGATIVE`，不是 full gate execution；E2c 仅为
-> `RECONCILIATION_ONLY / NO_RC_CLAIM`。
+> `RECONCILIATION_ONLY / NO_RC_CLAIM`，E2d 仅为 `OUTPUT_ROOT_PREFLIGHT_ONLY / NO_RC_CLAIM`。
 > formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P16R local authorization-preflight identity bridge 已完成
 > `COMPLETE — IDENTITY_PREFLIGHT_ONLY`；真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`，当前
 > local queue 为 `BLOCKED_EXTERNAL`。
-> P30A-E1、E2a 或 E2b 都不授权 push、tag、artifact publication、staging 或 production。
+> P30A-E1、E2a、E2b、E2c 或 E2d 都不授权 push、tag、artifact publication、staging 或 production。
 
-## P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a/E2b `COMPLETE_NEGATIVE`; E2c reconciliation-only; P16R-PREFLIGHT complete
+## P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a/E2b `COMPLETE_NEGATIVE`; E2c reconciliation-only; E2d output-root-preflight-only; P16R-PREFLIGHT complete
 
 P30 scope baseline is `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4`; the post-formal-entrypoint
 engineering baseline is `d808735ebfd649df6a4c932b95140387aa412c7d`. The completed E1 probe code is
@@ -91,6 +91,12 @@ P30A-E2c's current exact-source export-ignore double probe is recorded in the ap
 [reconciliation](../reports/phase30a/PHASE30A_E2C_SOURCE_ARCHIVE_RECONCILIATION.md). It preserves the
 E2b failure result and is not a clean-install/full-gate/formal-RC, science, policy, promotion, or P16R
 execution result.
+
+P30A-E2d's focused source-archive test set is `9 passed`. Its hard-link/no-replace preflight safely
+rejects the selected local exFAT output root before archive creation, with no retained archive or
+probe. That current output-root observation does not establish an E2b historical cause and is not a
+formal-RC, science, policy, promotion, or P16R execution result. See the append-only
+[output-root preflight record](../reports/phase30a/PHASE30A_E2D_OUTPUT_ROOT_PREFLIGHT.md).
 
 ## Phase 29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` 本地证据
 

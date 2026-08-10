@@ -13,6 +13,8 @@
 > `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`，policy 为 `NO_NEW_DECISION`。任何预测必须同时匹配 exact request × Pack × model × environment × adapter × evidence × policy；任一门缺失、失配、OOD 或超出 scope 都必须 `abstain`。
 > [E2c reconciliation](../reports/phase30a/PHASE30A_E2C_SOURCE_ARCHIVE_RECONCILIATION.md) 的 current local
 > export-ignore probe 不是 formal RC、science 或 policy result。
+> [E2d output-root preflight](../reports/phase30a/PHASE30A_E2D_OUTPUT_ROOT_PREFLIGHT.md) 仅确认 selected local
+> exFAT output root 缺少 required hard-link/no-replace support；它不解释 E2b historical failure，也不是 formal RC、science 或 policy result。
 
 ## 1. 命令行(CLI)
 
