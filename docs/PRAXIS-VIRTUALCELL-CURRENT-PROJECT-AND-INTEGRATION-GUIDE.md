@@ -139,8 +139,9 @@
 > value-free closure；真实 P29 candidate 仍为 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`。
 > P30A-E1 release-contract hardening、P30A-E2a clean-SHA offline preflight 与 P30A-E2b
 > archive-only runner 已完成；E2a/E2b 均为 `COMPLETE_NEGATIVE`，formal P30A 仍
-> `LOCAL_RC_INCOMPLETE`。下一 eligible local work unit 是 P16R local authorization-preflight
-> identity bridge；真实 P16R 与 P30B1–B4 仍需各自独立授权。
+> `LOCAL_RC_INCOMPLETE`。P16R local authorization-preflight identity bridge 已完成
+> `COMPLETE — IDENTITY_PREFLIGHT_ONLY`；真实 P16R 与 P30B1–B4 仍需各自独立授权，当前
+> local queue 为 `BLOCKED_EXTERNAL`。
 
 本文是一份面向其他项目、开发团队、科研合作者和后续智能体的独立项目说明。它回答四个问题：
 
@@ -2979,11 +2980,12 @@ P27A-E 已完成 exact-request-derived value-free design 与 synthetic rank-then
 `REPLAY_NOT_RUN / ASSET_PENDING`。P28E 已完成 advisory-only role、typed value-free handoff、
 deterministic DAG/hash-chain trace 与 authoritative empty compilation；真实 P28 acceptance 仍为
 `0/3` qualifying modules。P29E 已完成 strict null requirement、`empty_not_connected` graph 与
-authoritative value-free compilation；真实 P29 qualified biological nodes 为 `0`。下一 eligible local
-work unit 已从 P30A-E1 release-contract hardening 推进至 P30A-E2a clean-SHA offline
-preflight 与 P30A-E2b archive-only runner（均为 `COMPLETE_NEGATIVE`）；下一为 P16R local
-authorization-preflight identity bridge。formal P30A 仍 `LOCAL_RC_INCOMPLETE`，P30B1–B4 与
-真实 P16R 仍为独立授权窗口。
+authoritative value-free compilation；真实 P29 qualified biological nodes 为 `0`。本地顺序已从
+P30A-E1 release-contract hardening 推进至 P30A-E2a clean-SHA offline preflight、P30A-E2b
+archive-only runner（均为 `COMPLETE_NEGATIVE`）和 P16R local authorization-preflight identity
+bridge（`IDENTITY_PREFLIGHT_ONLY`）。formal P30A 仍
+`LOCAL_RC_INCOMPLETE`，current local queue 为 `BLOCKED_EXTERNAL`；P30B1–B4 与真实 P16R 仍为
+独立授权窗口。
 
 | 阶段 | 目标 |
 |---|---|
@@ -3025,7 +3027,8 @@ authorization-preflight identity bridge。formal P30A 仍 `LOCAL_RC_INCOMPLETE`�
 | P30A-E1 | `ENGINEERING_COMPLETE`：release-contract tooling/governance/wheel+source probes；not a formal RC |
 | P30A-E2a | `COMPLETE_NEGATIVE`：clean-SHA offline preflight record `6cb91031…9019`；no install/build/OCI/full gate or RC result |
 | P30A-E2b | `COMPLETE_NEGATIVE`：source-stable archive-only record `72459a3b…63d2`；两个 source archives 因 tracked unsupported link 安全失败；formal P30A `LOCAL_RC_INCOMPLETE` |
-| P16R local authorization-preflight identity bridge | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`：本地 identity/authorization preparation only；真实 P16R `AUTHORIZATION_REQUIRED / NOT_RUN`，不读真实 asset、不跑 candidate/comparator 或 benchmark |
+| P16R-PREFLIGHT local authorization-preflight identity bridge | `COMPLETE — IDENTITY_PREFLIGHT_ONLY`：code `4f77255f...`；P16/P12/P21 declaration binding and fixed abstain only；真实 P16R `AUTHORIZATION_REQUIRED / NOT_RUN`，不读真实 asset、不跑 candidate/comparator 或 benchmark，不创建 evidence/policy 或 route |
+| Local queue | `BLOCKED_EXTERNAL`：没有新的已登记本地 work unit；exact read-only candidate/asset inventory 与真实 P16R run 均需独立授权 |
 | P30B1 | `NOT_AUTHORIZED / NOT_RUN`：Push + exact-SHA CI |
 | P30B2 | `NOT_AUTHORIZED / NOT_RUN`：Main/tag/artifact release |
 | P30B3 | `NOT_AUTHORIZED / NOT_DEPLOYED`：Immutable staging |
@@ -3098,9 +3101,10 @@ authoritative empty orchestration compilation；真实 P28 门为 `0/3`，不能
 rule/advisory/synthetic 补足。P29E 随后从 `90990c198c40d0e6655aedaad101a783cde003aa`
 开始，以 `471767e5f38f9866fbe396f39836369d943f6657`（tree
 `d1dec19f06ec88f563406b45f2b544effabad915`）完成 null requirement、
-`empty_not_connected` graph 与 value-free compilation；真实 P29 qualified node 为 `0`。当前最早
-eligible 本地闭环是 P16R local authorization-preflight identity bridge；P30A-E1、P30A-E2a 与
-P30A-E2b 已完成，formal P30A 仍 `LOCAL_RC_INCOMPLETE`，真实 P16R 仍未获授权。
+`empty_not_connected` graph 与 value-free compilation；真实 P29 qualified node 为 `0`。P16R local
+authorization-preflight identity bridge 随后完成 `IDENTITY_PREFLIGHT_ONLY`；P30A-E1、P30A-E2a 与
+P30A-E2b 已完成，formal P30A 仍 `LOCAL_RC_INCOMPLETE`，真实 P16R 仍未获授权，local queue 为
+`BLOCKED_EXTERNAL`。
 
 在进入更大世界模型之前，最重要的闭环仍然是：
 
@@ -3302,9 +3306,10 @@ policy NO_NEW_DECISION。P29E 从 90990c198c40d0e6655aedaad101a783cde003aa 起�
 471767e5f38f9866fbe396f39836369d943f6657（tree
 d1dec19f06ec88f563406b45f2b544effabad915）完成 strict null requirement、
 empty_not_connected/zero-node graph 与 authoritative value-free compilation；real P29 仍 blocked，
-science NOT_RUN，policy NO_NEW_DECISION。P30A-E1、P30A-E2a 与 P30A-E2b 已完成；下一 eligible
-local work unit 是 P16R local authorization-preflight identity bridge；formal P30A 仍
-`LOCAL_RC_INCOMPLETE`，真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`。
+science NOT_RUN，policy NO_NEW_DECISION。P30A-E1、P30A-E2a 与 P30A-E2b 已完成；P16R local
+authorization-preflight identity bridge 也已完成 `IDENTITY_PREFLIGHT_ONLY`；formal P30A 仍
+`LOCAL_RC_INCOMPLETE`，真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`，local queue 为
+`BLOCKED_EXTERNAL`。
 
 当前 UI 是：
 选择 Cell Context → Chat → 自动解析/运行 → Report/Abstain，

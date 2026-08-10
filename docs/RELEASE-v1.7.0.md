@@ -1,7 +1,8 @@
 # PRAXIS-VirtualCell 1.7.0 — Local RC Contract (Unpublished)
 
 > Status: P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a/E2b `COMPLETE_NEGATIVE`; formal P30A
-> `LOCAL_RC_INCOMPLETE / UNPUBLISHED`; P16R local authorization-preflight identity bridge next.
+> `LOCAL_RC_INCOMPLETE / UNPUBLISHED`; P16R local authorization-preflight identity bridge
+> `COMPLETE — IDENTITY_PREFLIGHT_ONLY`; actual P16R `AUTHORIZATION_REQUIRED / NOT_RUN`.
 >
 > P30A is local-only. Completed release-contract hardening and reproducibility probes do not yet
 > prove a complete RC artifact set. P30A-E2b used a controlled archive-only runner and retained a
@@ -157,8 +158,9 @@ source archives safely failed on a tracked unsupported link, while the two offli
 remain incomplete. No clean install, OCI build, full gate, SBOM, licence inventory, dependency audit,
 `SHA256SUMS` or accepted release manifest was generated.
 
-Formal P30A therefore remains incomplete. The next independent local unit is the P16R local
-authorization-preflight identity bridge; it does not access real P16R inputs or create science/policy.
+Formal P30A therefore remains incomplete. The P16R local authorization-preflight identity bridge
+subsequently completed as an in-memory, value-free declaration binder; it does not access real P16R
+inputs or create science/policy. Actual P16R remains `AUTHORIZATION_REQUIRED / NOT_RUN`.
 `pip check` in the shared environment remains disqualified because `python-magic` is absent and
 unrelated pre-existing `vcbench` pins conflict.
 

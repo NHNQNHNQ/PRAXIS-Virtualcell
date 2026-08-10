@@ -284,6 +284,22 @@ system-site install smoke 的边界由 P16E completion report 单独记录；本
 
 P9 negative result 保持 available=false、scientifically_validated=false，result SHA
 `abd1145c434fd4e48ac9d72e94e8e19d14a5b4011f03d05db4823dd91760da6e`
-不变。下一 eligible 本地 work unit 是 P17 Virtual Cell Brain contract-only engineering；
+不变。在 P16E closure 时，下一 eligible 本地 work unit 是 P17 Virtual Cell Brain contract-only engineering；
 由于当前少于两个 P14–P16 production-promoted capabilities，P17 不得宣称真实多模型
 执行已通过。P16R 与 P16B 保持独立授权窗口。
+
+## P16R-PREFLIGHT follow-on（2026-08-10）
+
+在 P30A-E2b 后，P16R local authorization-preflight identity bridge 于
+`4f77255f84e33180d7d73b421fc9737ca3a1121d`（tree
+`f7aadb7b76a2aa55691d67d9c2948cc7b1e38e95`）完成
+`COMPLETE — IDENTITY_PREFLIGHT_ONLY`。它新增
+`vc.k562-p16r-external-scope-declaration.v1` 与
+`vc.k562-p16r-authorization-preflight.v1`，只在内存中交叉绑定 P16 scope、P12 component 和
+P21 protocol/group declarations，并固定 `assets_verified=false`、`executable=false`、
+`prediction=null` 和 abstain。
+
+这不是 P16R authorization、asset verification、candidate/comparator execution、leakage audit、
+benchmark evidence、operator policy、registry/runtime/API/CLI route、release 或 promotion。actual
+P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`，science `NOT_RUN`，policy `NO_NEW_DECISION`。
+详见 [P16R identity-preflight completion record](../reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md)。

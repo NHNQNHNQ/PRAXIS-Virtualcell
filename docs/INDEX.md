@@ -2,7 +2,7 @@
 
 > Audited: 2026-08-10
 >
-> Status: `CURRENT_DOCUMENT_MAP — P29E COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION; REAL P29 0 NODES; P30A-E1 ENGINEERING_COMPLETE; P30A-E2a/E2b COMPLETE_NEGATIVE; FORMAL P30A LOCAL_RC_INCOMPLETE; P16R LOCAL AUTHORIZATION-PREFLIGHT IDENTITY BRIDGE NEXT; P16R SCIENCE AUTHORIZATION_REQUIRED / NOT_RUN; SCIENCE NOT_RUN / SCIENCE_BADGE_INELIGIBLE; POLICY NO_NEW_DECISION`
+> Status: `CURRENT_DOCUMENT_MAP — P29E COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION; REAL P29 0 NODES; P30A-E1 ENGINEERING_COMPLETE; P30A-E2a/E2b COMPLETE_NEGATIVE; FORMAL P30A LOCAL_RC_INCOMPLETE; P16R-PREFLIGHT COMPLETE — IDENTITY_PREFLIGHT_ONLY; P16R SCIENCE AUTHORIZATION_REQUIRED / NOT_RUN; SCIENCE NOT_RUN / SCIENCE_BADGE_INELIGIBLE; POLICY NO_NEW_DECISION; LOCAL QUEUE BLOCKED_EXTERNAL`
 
 This is the navigation authority for the repository. It does not make every linked document current: each section explicitly distinguishes live truth, frozen evidence, active plans, drafts, and history.
 
@@ -11,7 +11,7 @@ This is the navigation authority for the repository. It does not make every link
 When documents disagree, use this order:
 
 1. Exact local bytes, `git rev-parse` identity, immutable artifacts and the current work-unit completion report.
-2. [README](../README.md), the [P30A-E2b archive-runner negative report](../reports/phase30a/PHASE30A_E2B_ARCHIVE_RUNNER.md), the frozen [P30A-E2a preflight negative report](../reports/phase30a/PHASE30A_E2A_PREFLIGHT.md), the [P30A-E1 engineering completion report](../reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md), the [P29E completion report](../reports/phase29e/PHASE29E_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P28E completion report](../reports/phase28e/PHASE28E_COMPLETION.md), [P27A-E completion report](../reports/phase27ae/PHASE27AE_COMPLETION.md), [P26E completion report](../reports/phase26e/PHASE26E_COMPLETION.md), [P25E completion report](../reports/phase25e/PHASE25E_COMPLETION.md), [P23A completion report](../reports/phase23a/PHASE23A_COMPLETION.md), [P22 completion report](../reports/phase22/PHASE22_COMPLETION.md), [P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md), [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md), [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md), [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
+2. [README](../README.md), the [P16R identity-preflight completion record](../reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md), the [P30A-E2b archive-runner negative report](../reports/phase30a/PHASE30A_E2B_ARCHIVE_RUNNER.md), the frozen [P30A-E2a preflight negative report](../reports/phase30a/PHASE30A_E2A_PREFLIGHT.md), the [P30A-E1 engineering completion report](../reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md), the [P29E completion report](../reports/phase29e/PHASE29E_COMPLETION.md), the [current integration guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md), the preserved [P28E completion report](../reports/phase28e/PHASE28E_COMPLETION.md), [P27A-E completion report](../reports/phase27ae/PHASE27AE_COMPLETION.md), [P26E completion report](../reports/phase26e/PHASE26E_COMPLETION.md), [P25E completion report](../reports/phase25e/PHASE25E_COMPLETION.md), [P23A completion report](../reports/phase23a/PHASE23A_COMPLETION.md), [P22 completion report](../reports/phase22/PHASE22_COMPLETION.md), [P21A completion report](../reports/phase21a/PHASE21A_COMPLETION.md), [P20 completion report](../reports/phase20/PHASE20_COMPLETION.md), [P19 completion report](../reports/phase19/PHASE19_COMPLETION.md), [P18 completion report](../reports/phase18/PHASE18_COMPLETION.md), [P17 completion report](../reports/phase17/PHASE17_COMPLETION.md), [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md), [P15E completion report](../reports/phase15e/PHASE15E_COMPLETION.md), [P14E completion report](../reports/phase14e/PHASE14E_COMPLETION.md), [P13 completion report](../reports/phase13/PHASE13_COMPLETION.md), [P12 completion report](../reports/phase12/PHASE12_COMPLETION.md), and the [P12–P30 execution plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) for current phase selection and boundaries.
 3. The latest completed phase ADR/runbook—P29E uses [ADR-0025](ADR-0025-limited-biological-world-model-contract.md) and the [Limited Biological World Model runbook](runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md); P28E remains documented by [ADR-0024](ADR-0024-multi-agent-biology-contract.md) and the [Multi-Agent Biology runbook](runbooks/MULTI-AGENT-BIOLOGY-CONTRACT.md)—for implemented contract and validation boundaries.
 4. [Phase 10 Gate](../reports/phase10/PHASE10_GATE.md) for frozen scientific capability and claim boundaries.
 5. [Three-Way Sync State](status/SYNC-STATE.md) only for its dated local/GitHub/`.53` observations; it is not fresh remote authorization.
@@ -27,7 +27,11 @@ contract-only, local-registration-only, absent from the default registry and fix
 compatibility `p16r_not_authorized`. P16E read only small checked-in identity manifests and did
 not read H5AD, run a candidate or comparator, establish scientific evidence, make a policy
 decision, publish a release, bump a version or deploy. P16R remains
-`AUTHORIZATION_REQUIRED / NOT_RUN` and P16B remains `NOT_RUN`. P17 contract engineering completed
+`AUTHORIZATION_REQUIRED / NOT_RUN` and P16B remains `NOT_RUN`. The subsequent P16R-PREFLIGHT
+compiler completed at `4f77255f84e33180d7d73b421fc9737ca3a1121d` / tree
+`f7aadb7b76a2aa55691d67d9c2948cc7b1e38e95`: it binds declarations only, emits fixed abstention,
+and does not read assets, execute a model/benchmark, create evidence/policy, or connect a
+registry/runtime/API/CLI route. P17 contract engineering completed
 at code `16636f1b2c36e0a0fabb782a662b5b3b934891e0` / tree
 `321a59eed44c45bf2bb8798714352b3303b92e58`; the registry still has 0 native and 0 promoted
 capabilities, so real multi-model acceptance remains pending and direct-v2 requests abstain.
@@ -199,17 +203,19 @@ archive-built wheels are byte-identical at `1,263,199` bytes /
 P30A-E2a clean-SHA offline preflight and P30A-E2b archive-only runner subsequently completed as
 `COMPLETE_NEGATIVE`. E2b observed a stable source but retained only safely failed source-archive
 attempts and negative wheelhouse coverage; it is not a formal RC. Formal P30A remains
-`LOCAL_RC_INCOMPLETE` and neither status authorizes a P30B release or deployment window. The next
-eligible local unit is the P16R local authorization-preflight identity bridge; actual P16R remains
-`AUTHORIZATION_REQUIRED / NOT_RUN`.
+`LOCAL_RC_INCOMPLETE` and neither status authorizes a P30B release or deployment window. The P16R
+local authorization-preflight identity bridge subsequently completed as `IDENTITY_PREFLIGHT_ONLY`;
+actual P16R remains `AUTHORIZATION_REQUIRED / NOT_RUN`. No further planned local work unit remains:
+the queue is `BLOCKED_EXTERNAL` pending an exact separately authorized inventory/run window.
 
 ## Current state
 
 | Document | Authority |
 |---|---|
 | [README](../README.md) | current product promise, P29E empty-not-connected/zero-node boundary and primary operator entry points |
-| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths, P30A-E2b result and P16R preflight boundary |
-| [P30A-E2b Archive Runner Negative Report](../reports/phase30a/PHASE30A_E2B_ARCHIVE_RUNNER.md) | source-stable archive-only negative result, formal RC non-claim and P16R preflight handoff |
+| [P16R Identity-Preflight Completion Record](../reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md) | exact P16/P12/P21 identity binding, fixed abstention, and actual-P16R external gate |
+| [Current Project and Integration Guide](PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | current project ledger, protected paths, P30A-E2b result and P16R preflight/non-run boundary |
+| [P30A-E2b Archive Runner Negative Report](../reports/phase30a/PHASE30A_E2B_ARCHIVE_RUNNER.md) | source-stable archive-only negative result, formal RC non-claim and historical P16R preflight handoff |
 | [P30A-E2a Preflight Negative Report](../reports/phase30a/PHASE30A_E2A_PREFLIGHT.md) | frozen clean-SHA offline dependency preflight evidence |
 | [P30A-E1 Engineering Completion Report](../reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md) | P30 scope/entrypoint baselines, fail-closed release-tool probes and unresolved artifact gates |
 | [Formal Prediction Entrypoint ADR](ADR-0026-formal-prediction-entrypoint.md) | formal no-Pack V2 zero-step abstention; legacy mock/case harness exclusion |
@@ -250,6 +256,7 @@ eligible local unit is the P16R local authorization-preflight identity bridge; a
 | [P17 Virtual Cell Brain ADR](ADR-0014-virtual-cell-brain.md) | authoritative DAG/Brain/decision identities, candidate isolation and fail-closed direct-v2 boundary |
 | [P17 Virtual Experiment DAG Runbook](runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md) | read-only contract audit, JobStore v3 checks and real-acceptance interpretation |
 | [P16E Completion Report](../reports/phase16e/PHASE16E_COMPLETION.md) | exact P16E code/tree, local contract validation, reproducible wheel and P16R/P16B non-claims |
+| [P16R Identity-Preflight Completion Record](../reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md) | exact local P16 identity-preflight closure; no asset read, execution, evidence, or policy |
 | [P16E K562 Golden Delta Contract ADR](ADR-0013-virtualcell-k562-golden-delta-contract.md) | exact K562/P8 scope, ordered perturbation binding, negative compatibility and local-only registration |
 | [P16E K562 Golden Delta Runbook](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) | local manifest/contract audit, directed validation, P16R authorization gate and fail-closed interpretation |
 | [P15E Completion Report](../reports/phase15e/PHASE15E_COMPLETION.md) | exact P15E code/tree, local contract validation, reproducible wheel and P15R/P15B non-claims |
@@ -306,7 +313,7 @@ eligible local unit is the P16R local authorization-preflight identity bridge; a
 | [Virtual Cell Model Adapter SDK](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md) | P13 delta reference adapter, exact prepared-input/output provenance, conformance and fail-closed runtime interpretation |
 | [E. coli K-12 Growth Contract](runbooks/VIRTUALCELL-ECOLI-K12-GROWTH-CONTRACT.md) | P14E local contract-only adapter, exact prepared binding, P14R authorization prerequisites and default-registry isolation |
 | [S. cerevisiae Deletion-Fitness Contract](runbooks/VIRTUALCELL-YEAST-DELETION-FITNESS-CONTRACT.md) | P15E local contract-only adapter, exact S288C prepared binding, P15R authorization prerequisites and default-registry isolation |
-| [K562 Golden Delta Contract](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) | P16E local contract-only adapter, exact K562/P8 ordered prepared binding, P16R authorization prerequisites and default-registry isolation |
+| [K562 Golden Delta Contract](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) | P16E local adapter plus P16R identity-preflight boundary, exact K562/P8 binding, actual-P16R authorization prerequisites and default-registry isolation |
 | [Virtual Experiment DAG](runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md) | P17 deterministic DAG/Brain, candidate-only LLM boundary, v3 job identity and contract-only abstention audit |
 | [Multi-omics Model Input](runbooks/VIRTUALCELL-MULTIOMICS-MODEL-INPUT.md) | P18 ordered joint-input contract, exact observation/matrix identity and no-fabrication audit |
 | [Controlled Pack Factory](runbooks/VIRTUALCELLPACK-CONTROLLED-PACK-FACTORY.md) | P19 explicit initialized store/index targets, deterministic pending→committed registration provenance, reviewer-bound taxon confirmation and read-only public audit |
@@ -340,7 +347,7 @@ The Chinese `项目说明*`, `项目交接报告`, and `学生使用指南` file
 | [Virtual Cell Model Adapter SDK ADR](ADR-0010-virtualcell-model-adapter-sdk.md) | six versioned SDK contracts, delta-only default registry, strict output envelope and P0-compatible execution flow |
 | [E. coli K-12 Growth Contract ADR](ADR-0011-virtualcell-ecoli-k12-growth-contract.md) | P14E exact scope, typed negative compatibility, prepared-bound projection and contract-only local registration |
 | [S. cerevisiae Deletion-Fitness Contract ADR](ADR-0012-virtualcell-yeast-deletion-fitness-contract.md) | P15E exact S288C scope, typed negative compatibility, prepared-bound scalar fitness and local-only registration |
-| [K562 Golden Delta Contract ADR](ADR-0013-virtualcell-k562-golden-delta-contract.md) | P16E exact K562/P8 scope, separated single/combination records, typed negative compatibility and prepared-bound delta output |
+| [K562 Golden Delta Contract ADR](ADR-0013-virtualcell-k562-golden-delta-contract.md) | P16E exact K562/P8 scope and P16R identity-preflight follow-on; no actual-P16R execution or promotion |
 | [Virtual Cell Brain ADR](ADR-0014-virtual-cell-brain.md) | P17 deterministic authoritative DAG/Brain/decision, plan-only integration, candidate isolation and fail-closed persistence |
 | [Multi-omics Model Input ADR](ADR-0015-multiomics-model-input.md) | P18 strict joint-input identities, real joins/masks, adapter ownership and contract-only abstention |
 | [Controlled Pack Factory ADR](ADR-0016-controlled-pack-factory.md) | P19 explicit initialized store/index ownership, deterministic immutable artifact lifecycle, reviewer-bound exact taxon and redacted read-only projection |

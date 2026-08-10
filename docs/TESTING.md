@@ -27,11 +27,12 @@
 > real asset/model/output 窗口均未授权或未运行；P26R 仍为 `BLOCKED_EXTERNAL / NOT_RUN`。
 > P30A-E1 release-contract hardening、P30A-E2a clean-SHA offline preflight 与 P30A-E2b
 > archive-only runner 均已完成；E2a/E2b 均为 `COMPLETE_NEGATIVE`，不是 full gate execution。
-> formal P30A 仍 `LOCAL_RC_INCOMPLETE`。下一 eligible local unit 是 P16R local
-> authorization-preflight identity bridge；真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`。
+> formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P16R local authorization-preflight identity bridge 已完成
+> `COMPLETE — IDENTITY_PREFLIGHT_ONLY`；真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`，当前
+> local queue 为 `BLOCKED_EXTERNAL`。
 > P30A-E1、E2a 或 E2b 都不授权 push、tag、artifact publication、staging 或 production。
 
-## P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a/E2b `COMPLETE_NEGATIVE`; P16R bridge next
+## P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a/E2b `COMPLETE_NEGATIVE`; P16R-PREFLIGHT complete
 
 P30 scope baseline is `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4`; the post-formal-entrypoint
 engineering baseline is `d808735ebfd649df6a4c932b95140387aa412c7d`. The completed E1 probe code is
@@ -77,8 +78,9 @@ was stable, but both source-archive attempts safely failed on a tracked unsuppor
 therefore records `SOURCE_ARCHIVE_ONLY_NOT_FULL_RC`, `software_rc_gates_passed=false`, no
 publication/sign/tag/deploy or policy decision, and the same two wheelhouse blockers. No install,
 network, OCI or full gate occurred. Formal P30A remains `LOCAL_RC_INCOMPLETE`; science is
-`NOT_RUN / SCIENCE_BADGE_INELIGIBLE` and policy is `NO_NEW_DECISION`. The next local work is the
-P16R authorization-preflight identity bridge, not a P16R scientific run.
+`NOT_RUN / SCIENCE_BADGE_INELIGIBLE` and policy is `NO_NEW_DECISION`. The P16R
+authorization-preflight identity bridge subsequently completed as a value-free local contract, not a
+P16R scientific run.
 
 ## Phase 29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` 本地证据
 
@@ -931,6 +933,42 @@ capabilities，P17 后续只在 contract-only 边界完成，未宣称真实多�
 [ADR-0013](ADR-0013-virtualcell-k562-golden-delta-contract.md)、
 [P16E runbook](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) 和
 [P16E 完成报告](../reports/phase16e/PHASE16E_COMPLETION.md)。
+
+## P16R-PREFLIGHT `COMPLETE — IDENTITY_PREFLIGHT_ONLY`
+
+The local preflight code is `4f77255f84e33180d7d73b421fc9737ca3a1121d` / tree
+`f7aadb7b76a2aa55691d67d9c2948cc7b1e38e95`. It only compiles strict P16/P12/P21 identity
+declarations into a fixed abstention record; it has no asset I/O or execution surface.
+
+~~~bash
+PYTHONDONTWRITEBYTECODE=1 python3.13 -m pytest -q -rA \
+  praxis_virtualcell/tests/test_k562_p16r_preflight.py
+
+PYTHONDONTWRITEBYTECODE=1 python3.13 -m pytest -q -rA \
+  praxis_virtualcell/tests/test_k562_p16r_preflight.py \
+  praxis_virtualcell/tests/test_k562_golden_delta_contract.py \
+  praxis_virtualcell/tests/test_benchmark_system.py \
+  praxis_virtualcell/tests/test_model_registry_v2.py \
+  praxis_virtualcell/tests/test_model_adapter_sdk.py
+
+PYTHONDONTWRITEBYTECODE=1 python3.13 -m pytest -q -rA \
+  praxis_virtualcell/tests/test_release_candidate.py \
+  praxis_virtualcell/tests/test_release_source_archive.py \
+  praxis_virtualcell/tests/test_packaging.py \
+  praxis_virtualcell/tests/test_release_finalizer.py
+~~~
+
+Recorded results are focused `18 passed` and affected `399 passed` (`18 + 231 + 35 + 60 + 55`);
+Ruff check/format and `git diff --check` passed. This is neither asset verification, candidate or
+comparator execution, leakage audit, benchmark evidence, policy, release, nor a registry/runtime/API/CLI
+route. Actual P16R remains `AUTHORIZATION_REQUIRED / NOT_RUN`, science `NOT_RUN`, policy
+`NO_NEW_DECISION`. See the
+[P16R identity-preflight completion record](../reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md).
+
+The shared interpreter's extra package probe is recorded separately: `test_packaging.py` passed `14`,
+but `test_versioning.py` had `4 passed / 1 failed` because installed `praxis-virtualcell` is still
+`1.6.0` while this checkout declares `1.7.0`; `pip check` also failed for the pre-existing missing
+`python-magic` and incompatible `vcbench` pins. No environment mutation was used to conceal that drift.
 
 ## Phase 15E `ENGINEERING_COMPLETE` 本地证据
 

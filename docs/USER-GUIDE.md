@@ -7,8 +7,8 @@
 > `COMPLETE_NEGATIVE`，未运行 install、build、OCI 或 full gate。
 > **E2b follow-on（2026-08-10）：** P30A-E2b archive-only runner 也是
 > `COMPLETE_NEGATIVE`：source stable，但两个 source archives 因 tracked unsupported link 安全失败；
-> formal P30A 仍 `LOCAL_RC_INCOMPLETE`。下一 eligible local work unit 是 P16R local
-> authorization-preflight identity bridge；真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`，science 为
+> formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P16R local authorization-preflight identity bridge 已完成
+> `COMPLETE — IDENTITY_PREFLIGHT_ONLY`，但真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`，science 为
 > `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`，policy 为 `NO_NEW_DECISION`。任何预测必须同时匹配 exact request × Pack × model × environment × adapter × evidence × policy；任一门缺失、失配、OOD 或超出 scope 都必须 `abstain`。
 
 ## 1. 命令行(CLI)

@@ -18,8 +18,18 @@
   negative record（`praxis.local-rc-artifact-aware-runner.v1` / `72459a3b…63d2`）：source stable，
   但两个 source-archive attempts 因 tracked unsupported link 安全失败，且没有 install、network、OCI、
   full gate 或 release result。formal P30A 仍为 `LOCAL_RC_INCOMPLETE`，不得以 shared-env `pip check`
-  取代 clean-install gate；下一 eligible local work unit 是 P16R local authorization-preflight
-  identity bridge，真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`。
+  取代 clean-install gate。
+- P16R local authorization-preflight identity bridge 在
+  `4f77255f84e33180d7d73b421fc9737ca3a1121d` 完成
+  `COMPLETE — IDENTITY_PREFLIGHT_ONLY`：新增
+  `vc.k562-p16r-external-scope-declaration.v1` 与
+  `vc.k562-p16r-authorization-preflight.v1`，只交叉绑定 P16/P12/P21 已声明 identity 并固定
+  value-free abstain。未进行 asset I/O、candidate/model/comparator/benchmark、evidence、policy、
+  registry/runtime/API/CLI route、release 或 promotion；真实 P16R 仍
+  `AUTHORIZATION_REQUIRED / NOT_RUN`。
+- P16R preflight 后没有新的已登记 local work unit；下一步需要独立精确授权的 read-only
+  candidate/asset inventory，真实 P16R science run 仍须另一个授权窗口。P30A 仍
+  `LOCAL_RC_INCOMPLETE`。
 - P30 没有产生科学进展：science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`，policy
   `NO_NEW_DECISION`。push、main、tag、artifact publication、staging、production 和 rollback 仍分别
   需要 P30B1–B4 独立授权。

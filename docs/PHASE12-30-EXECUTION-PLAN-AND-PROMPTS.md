@@ -133,8 +133,9 @@
 > `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；
 > real candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；science `NOT_RUN`；policy
 > `NO_NEW_DECISION`；P30A-E1、P30A-E2a 与 P30A-E2b 已完成；E2a/E2b 均为
-> `COMPLETE_NEGATIVE`；formal P30A 仍 `LOCAL_RC_INCOMPLETE`；下一 eligible local unit 为 P16R
-> local authorization-preflight identity bridge，真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`
+> `COMPLETE_NEGATIVE`；formal P30A 仍 `LOCAL_RC_INCOMPLETE`；P16R local
+> authorization-preflight identity bridge 已完成 `IDENTITY_PREFLIGHT_ONLY`，真实 P16R 仍
+> `AUTHORIZATION_REQUIRED / NOT_RUN`，local queue 为 `BLOCKED_EXTERNAL`
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`
 >
@@ -227,7 +228,7 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | P28E source date epoch / 完成分支 | `1786184568` / `codex/p25e-virtual-microbiome` |
 | P29E actual starting SHA / completion code/tree | `90990c198c40d0e6655aedaad101a783cde003aa` / `471767e5f38f9866fbe396f39836369d943f6657` / `d1dec19f06ec88f563406b45f2b544effabad915` |
 | P29E source date epoch / 完成分支 | `1786187523` / `codex/p25e-virtual-microbiome` |
-| 当前 work-unit 状态 | P29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；real P29 candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；P30A-E1 `ENGINEERING_COMPLETE`；P30A-E2a/E2b `COMPLETE_NEGATIVE`；formal P30A `LOCAL_RC_INCOMPLETE`；P16R local authorization-preflight identity bridge `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`；actual P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`；policy `NO_NEW_DECISION`；P28 real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C/P21B/P21C 均保持各自 authorization gate |
+| 当前 work-unit 状态 | P29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；real P29 candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；P30A-E1 `ENGINEERING_COMPLETE`；P30A-E2a/E2b `COMPLETE_NEGATIVE`；formal P30A `LOCAL_RC_INCOMPLETE`；P16R-PREFLIGHT `COMPLETE — IDENTITY_PREFLIGHT_ONLY`（code `4f77255f...`）；actual P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`；policy `NO_NEW_DECISION`；local queue `BLOCKED_EXTERNAL`；P28 real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C/P21B/P21C 均保持各自 authorization gate |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -1066,6 +1067,24 @@ K562 + gene/gene-combination perturbation
 12. 只有主指标、CI、contamination audit 和 external gate 全过，才产生对应精确
     K562 task/scope 的 promotion-eligible evidence。
 
+### P16R-PREFLIGHT：已完成的 local identity bridge
+
+P16R-PREFLIGHT 从 `25fe60a9450765a9ecf3a2a38d198980ea7a7e15` 开始，在
+`4f77255f84e33180d7d73b421fc9737ca3a1121d`（tree
+`f7aadb7b76a2aa55691d67d9c2948cc7b1e38e95`，epoch `1786347583`）完成
+`COMPLETE — IDENTITY_PREFLIGHT_ONLY`。它新增
+`vc.k562-p16r-external-scope-declaration.v1` 和
+`vc.k562-p16r-authorization-preflight.v1`，只在内存中交叉绑定 frozen P16E scope、P12
+candidate component declarations、P21 protocol/group declarations 和 fixed abstention status。
+
+它没有读取任何 asset、执行 candidate/comparator、运行 benchmark 或 leakage audit、创建 evidence/
+policy、改变 registry/runtime/API/CLI route、promotion、release 或部署。产物固定
+`assets_verified=false`、`record_membership_verified=false`、`benchmark_passed=null`、
+`scientifically_validated=false`、`executable=false`、`prediction=null` 和 `abstain=true`。
+因此 actual P16R 仍为 `AUTHORIZATION_REQUIRED / NOT_RUN`，science `NOT_RUN`，policy
+`NO_NEW_DECISION`。详见
+[P16R identity-preflight completion record](../reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md)。
+
 ### 已冻结 baseline
 
 | Baseline | Golden test MSE |
@@ -1094,9 +1113,10 @@ delta-expression MSE 不可混表。
 ### P16R 可复制授权提示词（当前未授权）
 
 ```text
-授权以 `<从 Git history 读取的 P16E actual docs-closure SHA>` 作为 P16R
-（Human/K562 exact-asset science run）唯一代码基线，并指定 `<exact branch>`
-与 `<exact run window>`。仅运行 P16E 已冻结的 Golden Norman/K562
+授权时以现场只读核验的 `ACTIVE_BASELINE_SHA` 作为 P16R（Human/K562 exact-asset science
+run）唯一代码基线，并指定 `<exact branch>` 与 `<exact run window>`。P16E docs-closure 与
+P16R-PREFLIGHT code `4f77255f84e33180d7d73b421fc9737ca3a1121d` 仅为 prerequisites；不得 reset、
+revert 或丢弃其后的本地工作。仅运行 P16E 已冻结的 Golden Norman/K562
 gene/gene-combination → 5,045-feature delta_expression 任务。
 仅在另行授权用 exact 绝对路径、逐文件 size/SHA-256/license/source 列出 Golden
 Pack、候选 checkpoint/环境和 external dataset，并指定 source 只读、全新 write-new
@@ -2467,9 +2487,11 @@ reproducible but are not a formal RC. P30A-E2a completed a clean-SHA offline pre
 `COMPLETE_NEGATIVE`, not a full gate execution. P30A-E2b archive-only runner subsequently completed
 negative at `12ad93d57e4f4e7438d2110b5ac9848c6b17ea33` / tree
 `14fe604111c18c558048bc282d23da936ac57088`, with source stable but safely failed archive attempts.
-Formal P30A remains `LOCAL_RC_INCOMPLETE`. The next local unit is the P16R authorization-preflight
-identity bridge; actual P16R remains `AUTHORIZATION_REQUIRED / NOT_RUN`. Science is
-`NOT_RUN / SCIENCE_BADGE_INELIGIBLE` and policy is `NO_NEW_DECISION`.
+Formal P30A remains `LOCAL_RC_INCOMPLETE`. The P16R authorization-preflight identity bridge
+subsequently completed as `IDENTITY_PREFLIGHT_ONLY`; actual P16R remains
+`AUTHORIZATION_REQUIRED / NOT_RUN`. Science is `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` and policy is
+`NO_NEW_DECISION`. No further planned local unit remains; exact asset/candidate inventory and the
+real P16R run are separate external authorization windows.
 
 发布动作拆为五个独立授权窗口。每个窗口都可以停止；后一个窗口不能由前一个窗口的
 授权推导。
@@ -2565,8 +2587,8 @@ offline inputs (`pyjwt==2.13.0`, `pyyaml==6.0.3`, and Linux/arm64 `cffi`, `crypt
 
 ### 可复制 P30A 授权提示词（历史模板）
 
-The active continuous-local authorization continues to cover the P16R local authorization-preflight
-identity bridge. It does not authorize P30B1–P30B4 or any network, remote, publication or deployment
+The active continuous-local authorization covered the completed P16R local authorization-preflight
+identity bridge only. It does not authorize P30B1–P30B4 or any network, remote, publication or deployment
 action, nor actual P16R asset access, candidate execution, benchmark, evidence, or policy. Actual P16R
 remains a separate external window.
 
@@ -2814,8 +2836,9 @@ blocked；comparison/ablation 未运行。P29E 随后从 P28E docs closure
 `empty_not_connected` graph 与 authoritative value-free compilation。真实 P29 candidate 因
 qualified biological nodes 为 `0` 而保持 blocked。P30A-E1 local release-contract hardening 与
 P30A-E2a clean-SHA offline preflight 与 P30A-E2b archive-only runner 已完成，均为
-`COMPLETE_NEGATIVE`；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。当前下一 eligible local work unit 是
-P16R local authorization-preflight identity bridge；P30B1–B4 与真实 P16R 保持独立授权门。
+`COMPLETE_NEGATIVE`；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P16R local
+authorization-preflight identity bridge 已完成；当前 local queue 为 `BLOCKED_EXTERNAL`。P30B1–B4
+与真实 P16R 保持独立授权门。
 
 当前持续本地授权不覆盖 P14R、P14B、P15R、P15B、P16R 或 P16B。没有逐项 exact
 assets/output root/run window 授权时，不得读取或运行真实资产、产生科学

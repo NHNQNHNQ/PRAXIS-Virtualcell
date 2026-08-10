@@ -77,12 +77,19 @@ placeholder scale chain. Real P29 remains separately gated. P30A-E1 release-cont
 subsequently completed.
 
 **E2a follow-on (2026-08-10):** P30A-E2a clean-SHA offline preflight completed
-`COMPLETE_NEGATIVE`; it ran no install, build, OCI, or full gate. P30A-E2b artifact-aware trusted
+`COMPLETE_NEGATIVE`; it ran no install, build, OCI, or full gate. P30A-E2b artifact-aware
 finalizer was next at E2a closure, while formal P30A remained `LOCAL_RC_INCOMPLETE`, science remained
 `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`, and policy remained `NO_NEW_DECISION`.
 
 **E2b follow-on (2026-08-10):** P30A-E2b archive-only runner also completed
 `COMPLETE_NEGATIVE`: source was stable, but both source archives safely failed on a tracked
 unsupported link and wheelhouse coverage remains incomplete. Formal P30A remains
-`LOCAL_RC_INCOMPLETE`; the next local unit is the P16R authorization-preflight identity bridge.
+`LOCAL_RC_INCOMPLETE`; at E2b closure, the next local unit was the P16R authorization-preflight identity bridge.
 Actual P16R remains `AUTHORIZATION_REQUIRED / NOT_RUN`; science and policy remain unchanged.
+
+**P16R-PREFLIGHT follow-on (2026-08-10):** the local authorization-preflight identity bridge
+subsequently completed `COMPLETE — IDENTITY_PREFLIGHT_ONLY` at
+`4f77255f84e33180d7d73b421fc9737ca3a1121d`. It binds declarations only and fixed value-free
+abstention; it does not read assets, run a model/benchmark, create evidence or policy, or alter
+runtime/registry exposure. Actual P16R remains `AUTHORIZATION_REQUIRED / NOT_RUN`, science remains
+`NOT_RUN`, policy remains `NO_NEW_DECISION`, and the local queue is `BLOCKED_EXTERNAL`.

@@ -25,7 +25,12 @@ P15E docs-closure `d1e2e37b69784bd2f440cba34f51cfb56dcc00b2` 开始，在
 `9f6b14ea84cb0884b2bde2ed4c67c73aeb5a37e2`（tree
 `098cd563e3d865e080a0d121727b987e2d40ed18`）完成本地 Human/K562 Golden Norman
 perturbation→delta-expression 工程合同，当前收口状态为
-`P16E_ENGINEERING_COMPLETE`。Phase 17 从 P16E docs-closure
+`P16E_ENGINEERING_COMPLETE`。其后 P16R local authorization-preflight identity bridge 在
+`4f77255f84e33180d7d73b421fc9737ca3a1121d`（tree
+`f7aadb7b76a2aa55691d67d9c2948cc7b1e38e95`）完成，状态为
+`COMPLETE — IDENTITY_PREFLIGHT_ONLY`；它不读取资产、不执行模型或 benchmark，也不改变
+P16R science 的 `AUTHORIZATION_REQUIRED / NOT_RUN`、science `NOT_RUN` 或 policy
+`NO_NEW_DECISION`。Phase 17 从 P16E docs-closure
 `ff525a0611901df422161a7143ebfe9d1e051008` 开始，在
 `16636f1b2c36e0a0fabb782a662b5b3b934891e0`（tree
 `321a59eed44c45bf2bb8798714352b3303b92e58`）完成 deterministic Virtual Cell Brain
@@ -114,14 +119,16 @@ adapter/compute/benchmark/evidence/policy/result/tool/prediction identities 均�
 attestation。P30A-E1 已完成本地 release-contract hardening 与 reproducibility probes；P30A-E2a
 已完成 clean-SHA offline preflight 负结果，P30A-E2b archive-only runner 也以
 `COMPLETE_NEGATIVE` 收口。formal P30A 仍为 `LOCAL_RC_INCOMPLETE`，且不授权 push、tag、发布或
-部署。下一 eligible local work unit 是 P16R local authorization-preflight identity bridge；真实
-P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`。
+部署。P16R local authorization-preflight identity bridge 已完成；真实 P16R 仍
+`AUTHORIZATION_REQUIRED / NOT_RUN`。没有新的已登记本地 work unit；下一步须是独立授权的
+candidate/asset inventory，随后才可进入独立 P16R science window。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
 [P14E 完成报告](reports/phase14e/PHASE14E_COMPLETION.md)及
 [P15E 完成报告](reports/phase15e/PHASE15E_COMPLETION.md)和
 [P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md)及
+[P16R identity-preflight 完成记录](reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md)及
 [P17 完成报告](reports/phase17/PHASE17_COMPLETION.md)和
 [P18 完成报告](reports/phase18/PHASE18_COMPLETION.md)及
 [P19 完成报告](reports/phase19/PHASE19_COMPLETION.md)和
@@ -241,8 +248,9 @@ request-bound。设计和操作边界见
 [P29E ADR](docs/ADR-0025-limited-biological-world-model-contract.md)与
 [P29E runbook](docs/runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md)。真实 P29 仍 blocked，
 不得补造 molecule→organism placeholder chain；P30A-E1 已留下 local engineering probes，P30A-E2a/E2b
-已留下 negative records；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。下一 eligible local
-work unit 是 P16R local authorization-preflight identity bridge，真实 P16R 仍未获授权或运行。
+已留下 negative records；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P16R local
+authorization-preflight identity bridge 已完成且只保留 value-free identity binding；真实 P16R
+仍未获授权或运行。当前没有新的已登记本地 work unit。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -443,7 +451,12 @@ candidate/additive ridge、生成 MSE/CI/external evidence、修改 policy、rel
 push 或 deploy。设计、操作和完成边界见
 [P16E ADR](docs/ADR-0013-virtualcell-k562-golden-delta-contract.md)、
 [P16E runbook](docs/runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md)和
-[P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md)。
+[P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md)。后续
+`vc.k562-p16r-external-scope-declaration.v1` 与
+`vc.k562-p16r-authorization-preflight.v1` 只在纯内存中交叉绑定 P16/P12/P21 identity，固定
+`assets_verified=false`、`executable=false`、`prediction=null` 与 abstain；它们不读资产、不接
+registry/runtime/API/CLI route、不创建 evidence/policy。见
+[P16R identity-preflight 完成记录](reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md)。
 
 P17 在不实例化 wrapper、不运行模型、不调用 LLM 的 direct exact `vc.request.v2` + exact
 Pack 路径上编译 deterministic `vc.virtual-experiment-dag.v1`、immutable
@@ -645,16 +658,18 @@ probes are `8,055,078` bytes / `ba5e5d0d…e642`。P30A-E2a 的 targeted post-co
 `55 passed`；clean-SHA offline preflight result is `LOCAL_RC_INCOMPLETE` (`6cb91031…9019`)。P30A-E2b
 archive-only runner result is likewise `LOCAL_RC_INCOMPLETE` (`72459a3b…63d2`): source stable, but
 both source-archive attempts safely failed on a tracked unsupported link and both wheelhouse profiles
-remain incomplete. It ran no install/network/OCI/full gate or release action. Next is the P16R local
-authorization-preflight identity bridge. Science remains `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; policy
-remains `NO_NEW_DECISION`. 完整命令、用时、skip/deselect
+remain incomplete. It ran no install/network/OCI/full gate or release action. The P16R local
+authorization-preflight identity bridge subsequently completed as a value-free local contract; it is
+not a P16R scientific run. Science remains `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; policy remains
+`NO_NEW_DECISION`. 完整命令、用时、skip/deselect
 含义、显式外部门和 GitHub CI 状态见 [测试指南](docs/TESTING.md)。普通测试默认不访问固定私网服务；`integration`、`llm`、`remote` 分别需要 `--run-integration`、`--run-llm`、`--run-remote`，一个测试拥有多个 marker 时必须同时满足对应门。
 
 ## 文档入口
 
 | 文档 | 内容 |
 |---|---|
-| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P30A-E2b negative result 与 P16R preflight 边界 |
+| [当前项目与集成指南](docs/PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md) | 当前产品事实、P30A-E2b negative result 与 P16R preflight/non-run 边界 |
+| [P16R Identity-Preflight Completion Record](reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md) | exact local identity-preflight closure、固定 abstain 与真实 P16R external gate |
 | [P30A-E1 Engineering Completion Report](reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md) | release-contract hardening、probe identities 与 formal RC non-claim |
 | [P30A-E2b Archive Runner Negative Report](reports/phase30a/PHASE30A_E2B_ARCHIVE_RUNNER.md) | exact archive-only negative record、formal RC non-claim 与 P16R preflight handoff |
 | [P30A-E2a Preflight Negative Report](reports/phase30a/PHASE30A_E2A_PREFLIGHT.md) | clean-SHA offline wheelhouse preflight 的 frozen negative evidence |
@@ -689,6 +704,7 @@ remains `NO_NEW_DECISION`. 完整命令、用时、skip/deselect
 | [P17 Virtual Cell Brain ADR](docs/ADR-0014-virtual-cell-brain.md) | authoritative DAG/Brain/decision、candidate isolation 与 JobStore v3 identity |
 | [P17 Virtual Experiment DAG runbook](docs/runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md) | direct-v2 contract 审计、tamper/downgrade 检查与 fail-closed 解读 |
 | [P16E 完成报告](reports/phase16e/PHASE16E_COMPLETION.md) | exact code/tree、本地 contract-only 验证、reproducible wheel 与 P16R/P16B 非运行边界 |
+| [P16R Identity-Preflight Completion Record](reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md) | P16/P12/P21 exact identity binding；不读资产、不运行 benchmark、不能创建 evidence/policy |
 | [P16E K562 Golden delta ADR](docs/ADR-0013-virtualcell-k562-golden-delta-contract.md) | exact K562/P8 scope、ordered perturbation binding、prepared-bound 输出与 local-only adapter |
 | [P16E K562 Golden delta runbook](docs/runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md) | 本地 manifest/合同审计、定向验证、P16R 授权门和 fail-closed 解读 |
 | [P15E 完成报告](reports/phase15e/PHASE15E_COMPLETION.md) | exact code/tree、本地 contract-only 验证、reproducible wheel 与 P15R/P15B 非运行边界 |

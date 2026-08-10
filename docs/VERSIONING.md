@@ -8,9 +8,9 @@
 > `REPLAY_NOT_RUN / ASSET_PENDING`; P27B `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`;
 > P27C `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`; P30A-E1 release-contract hardening is
 > `ENGINEERING_COMPLETE`; P30A-E2a clean-SHA offline preflight and P30A-E2b archive-only runner are
-> `COMPLETE_NEGATIVE`. Formal P30A remains `LOCAL_RC_INCOMPLETE`; the next eligible local work unit
-> is the P16R local authorization-preflight identity bridge, while actual P16R remains
-> `AUTHORIZATION_REQUIRED / NOT_RUN`; science is
+> `COMPLETE_NEGATIVE`. Formal P30A remains `LOCAL_RC_INCOMPLETE`; P16R local
+> authorization-preflight identity bridge is `COMPLETE — IDENTITY_PREFLIGHT_ONLY`, while actual P16R remains
+> `AUTHORIZATION_REQUIRED / NOT_RUN`; local queue is `BLOCKED_EXTERNAL`; science is
 > `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; policy is `NO_NEW_DECISION`.
 >
 > Local baseline: branch `codex/p25e-virtual-microbiome`; starting SHA
@@ -48,7 +48,8 @@ The repository historically mixed product release tags, package metadata, API/ru
 | P30A-E1 release-contract hardening | P30 scope baseline `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4`; post-entrypoint baseline `d808735ebfd649df6a4c932b95140387aa412c7d`; code `0a4d72b0825d9ec0ff3b7776bbc4f1f0023336f9`; tree `ba701d4ee6033e86a2d8abecc7e6ff25c1a05c14`; epoch `1786335170` | immutable local Git history plus `reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md` | `ENGINEERING_COMPLETE`; release-contract tooling and local probes only. Wheel probe `1,264,708` bytes / `44e5e905e706...2303`; source archive `8,055,078` bytes / `ba5e5d0dbe38...e642`; no formal RC artifact, clean install, OCI, SBOM, licence inventory, dependency audit, manifest, science or policy result |
 | P30A-E2a offline preflight | start `40f433fef8704381de34aeb32d45399b6595c472`; code `964b62214f346b15ec2d3f2a622b33f632dde466`; tree `eac19455bc9241e5347de27782a99942e3591cab`; epoch `1786338523` | immutable local Git history plus `reports/phase30a/PHASE30A_E2A_PREFLIGHT.md` and out-of-tree record `6cb91031…9019` | `COMPLETE_NEGATIVE`; clean source stable, offline wheelhouse coverage insufficient for macOS/arm64 and Linux/arm64; no install/build/OCI/full gate/RC result, science or policy change |
 | P30A-E2b archive-only runner | code `12ad93d57e4f4e7438d2110b5ac9848c6b17ea33`; tree `14fe604111c18c558048bc282d23da936ac57088`; epoch `1786343459` | immutable local Git history plus `reports/phase30a/PHASE30A_E2B_ARCHIVE_RUNNER.md`, runner record `72459a3b…63d2`, nested preflight `064a479f…fec4` | `COMPLETE_NEGATIVE`; source stable, two source-archive attempts safely failed on a tracked unsupported link, both wheelhouse profiles remain incomplete; no install/network/OCI/full gate/RC/science/policy result |
-| P16R local authorization-preflight identity bridge | active local work unit | current exact worktree and frozen P16E/P30A negative ledgers | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`; local authorization/identity preparation only. Actual P16R remains `AUTHORIZATION_REQUIRED / NOT_RUN`; no real asset/model/benchmark/science/policy action is implied |
+| P16R-PREFLIGHT local authorization-preflight identity bridge | start `25fe60a9450765a9ecf3a2a38d198980ea7a7e15`; code `4f77255f84e33180d7d73b421fc9737ca3a1121d`; tree `f7aadb7b76a2aa55691d67d9c2948cc7b1e38e95`; epoch `1786347583` | immutable local Git history plus `reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md` | `COMPLETE — IDENTITY_PREFLIGHT_ONLY`; local declarations/fixed abstain only. Actual P16R remains `AUTHORIZATION_REQUIRED / NOT_RUN`; no asset I/O, model/benchmark/evidence/policy or route action is implied |
+| Local queue | `BLOCKED_EXTERNAL` | exact authorization required | no planned local work remains; read-only candidate/asset inventory and P16R science run are separate windows; formal P30A remains `LOCAL_RC_INCOMPLETE` |
 | GitHub published `main` | `8e0d06348ebdf22e076037e6d661094ae877c5d1` | last recorded read-only observation, not refreshed in this window | historical remote fact until separately authorized and refreshed |
 | `.53` code mirror | recorded separately in the integration guide | not refreshed in this window | historical deployment evidence, not current authorization |
 | local product metadata | `1.7.0` | `pyproject.toml` `[project].version` | P30A-E1 local source identity; it is not a released version or a completed RC identity |
@@ -110,6 +111,8 @@ The repository historically mixed product release tags, package metadata, API/ru
 | K562 Golden adapter input | `vc.k562-golden-adapter-input-contract.v1` + canonical JSON SHA-256 | `model_zoo/k562_golden_delta_contract.py` | binds predict_delta_expression/delta_expression, K562 Golden biology, single/combination scopes and all exact identities |
 | K562 Golden adapter output | `vc.k562-golden-adapter-output-contract.v1` + canonical JSON SHA-256 | `model_zoo/k562_golden_delta_contract.py` | one finite ordered `(5045,)` delta vector; uncertainty unavailable and OOD/value-free abstain required |
 | K562 Golden prepared model input | `vc.k562-golden-prepared-model-input.v1` + canonical JSON SHA-256 | `model_zoo/k562_golden_delta_contract.py` | cross-binds request/scope/protocol/perturbation/execution/Pack/compatibility; public projection remains prepared-only |
+| K562 P16R external scope declaration | `vc.k562-p16r-external-scope-declaration.v1` + canonical JSON SHA-256 | `benchmarks/k562_p16r_preflight.py` | binds declared external K562 scope without byte receipt or membership proof; it is not a Pack verification or external result |
+| K562 P16R authorization preflight | `vc.k562-p16r-authorization-preflight.v1` + canonical JSON SHA-256 | `benchmarks/k562_p16r_preflight.py` | binds P16/P12/P21 declarations into fixed `prediction=null` abstention; it is not authorization, execution, benchmark evidence, policy, or promotion |
 | validation evidence identity | `vc.model-validation-evidence.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds exact Pack×model×environment×adapter×protocol, baseline, primary metric and result hash; record existence does not make the evidence pass |
 | operator policy identity | `vc.model-operator-policy.v1` + canonical JSON SHA-256 | `model_zoo/registry_v2.py` | binds one named operator decision to one exact capability and evidence set; P12 creates no new promotion decision |
 | model release/lifecycle identities | `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1` | `model_zoo/registry_v2.py` | release graph plus append-only catalog/readiness/revoke/supersede history; registry state, evidence and product policy remain separate |
@@ -197,6 +200,13 @@ production-promoted capabilities, P17 subsequently completed only contract work.
 [ADR-0013](ADR-0013-virtualcell-k562-golden-delta-contract.md), the
 [P16E runbook](runbooks/VIRTUALCELL-K562-GOLDEN-DELTA-CONTRACT.md), and the
 [P16E completion report](../reports/phase16e/PHASE16E_COMPLETION.md).
+
+P16R-PREFLIGHT subsequently adds the two P16R identity-only schemas above at code
+`4f77255f84e33180d7d73b421fc9737ca3a1121d`. They bind declarations without changing product
+SemVer, API/runtime protocols, default registry, release state, evidence, policy, or execution
+availability. Their only allowed public outcome is fixed value-free abstention; actual P16R stays
+`AUTHORIZATION_REQUIRED / NOT_RUN`. See the
+[P16R identity-preflight completion record](../reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md).
 
 P17 adds the DAG/Brain/candidate-review/compilation schemas and job identity v3 above without
 changing product SemVer (`1.6.0`), API/runtime protocols, release tags, registry releases or
@@ -540,8 +550,8 @@ Engineering is `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`; fixture evi
 No real data/model/benchmark, execution, operator decision, release, push or deployment occurred. P30A-E1
 release-contract hardening, P30A-E2a clean-SHA offline preflight and P30A-E2b archive-only runner
 subsequently completed. Formal P30A remains incomplete after E2b's safely failed archive attempts and
-missing wheelhouse inputs; the next independent local work is the P16R authorization-preflight identity
-bridge. See
+missing wheelhouse inputs. P16R authorization-preflight identity bridge subsequently completed as
+`IDENTITY_PREFLIGHT_ONLY`; actual P16R remains externally authorized/not run. See
 [ADR-0025](ADR-0025-limited-biological-world-model-contract.md), the
 [P29E runbook](runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md), and the
 [P29E completion report](../reports/phase29e/PHASE29E_COMPLETION.md).
@@ -569,7 +579,7 @@ The historical `v1.5.0` source tree declaring Python/frontend `0.0.0` is a relea
 | adapter SDK schemas + fingerprints | explicit `vc.adapter-input-contract.v1`, `vc.prepared-adapter-input.v1`, `vc.adapter-output-contract.v1`, `vc.adapter-execution-provenance.v1`, `vc.adapter-output-envelope.v1`, `vc.adapter-conformance-report.v1` plus canonical JSON SHA-256 | incompatible input/output, binding, envelope, conformance or projection semantics change | conformance is scientific evidence, a model is production-registered, or policy exists |
 | E. coli growth contract schemas + fingerprints | explicit `vc.ecoli-growth-scope.v1`, `vc.ecoli-growth-validation-protocol.v1`, `vc.ecoli-growth-data-binding.v1`, `vc.ecoli-growth-execution-binding.v1`, `vc.ecoli-growth-gene-mapping-binding.v1`, `vc.ecoli-growth-compatibility-binding.v1`, `vc.ecoli-growth-adapter-input-contract.v1`, `vc.ecoli-growth-adapter-output-contract.v1` and `vc.ecoli-growth-prepared-model-input.v1` | exact biological scope, identity binding, protocol, compatibility, input/output or prepared semantics change incompatibly | a real GEM/Pack exists, FBA ran, science passed, the adapter is in the default registry, or policy exists |
 | yeast deletion-fitness contract schemas + fingerprints | explicit `vc.yeast-deletion-fitness-scope.v1`, `vc.yeast-deletion-fitness-validation-protocol.v1`, `vc.yeast-deletion-fitness-data-binding.v1`, `vc.yeast-deletion-fitness-execution-binding.v1`, `vc.yeast-deletion-fitness-gene-mapping-binding.v1`, `vc.yeast-deletion-fitness-compatibility-binding.v1`, `vc.yeast-deletion-fitness-adapter-input-contract.v1`, `vc.yeast-deletion-fitness-adapter-output-contract.v1` and `vc.yeast-deletion-fitness-prepared-model-input.v1` | exact strain/condition/control/assay/platform/mapping/protocol/input/output/prepared semantics change incompatibly | a real deletion screen/model exists, fitness science passed, the adapter is default/runtime-ready, or policy exists |
-| K562 Golden delta contract schemas + fingerprints | explicit `vc.k562-golden-perturbation-scope.v1`, `vc.k562-golden-validation-protocol.v1`, `vc.k562-golden-data-binding.v1`, `vc.k562-golden-perturbation-binding.v1`, `vc.k562-golden-execution-binding.v1`, `vc.k562-golden-compatibility-binding.v1`, `vc.k562-golden-adapter-input-contract.v1`, `vc.k562-golden-adapter-output-contract.v1` and `vc.k562-golden-prepared-model-input.v1` | exact K562/assembly/assay/ordered-feature/condition/perturbation/protocol/input/output/prepared semantics change incompatibly | a checkpoint or large asset was read, K562 science passed, the adapter is default/runtime-ready, or evidence/policy exists |
+| K562 Golden delta and P16R-preflight schemas + fingerprints | explicit `vc.k562-golden-perturbation-scope.v1`, `vc.k562-golden-validation-protocol.v1`, `vc.k562-golden-data-binding.v1`, `vc.k562-golden-perturbation-binding.v1`, `vc.k562-golden-execution-binding.v1`, `vc.k562-golden-compatibility-binding.v1`, `vc.k562-golden-adapter-input-contract.v1`, `vc.k562-golden-adapter-output-contract.v1`, `vc.k562-golden-prepared-model-input.v1`, `vc.k562-p16r-external-scope-declaration.v1` and `vc.k562-p16r-authorization-preflight.v1` | exact K562/assembly/assay/ordered-feature/condition/perturbation/protocol/input/output/prepared/preflight semantics change incompatibly | a checkpoint or large asset was read, authorization was granted, K562 science passed, the adapter is default/runtime-ready, or evidence/policy exists |
 | validation evidence schema + fingerprint | explicit `vc.model-validation-evidence.v1` plus canonical JSON SHA-256 | exact capability/protocol/baseline/metric/result binding changes | evidence exists, passes, generalizes, or grants product policy |
 | operator policy schema + fingerprint | explicit `vc.model-operator-policy.v1` plus canonical JSON SHA-256 | named operator, exact capability/evidence decision or policy version changes | engineering or evidence state can manufacture a promotion decision |
 | model release/lifecycle schemas + fingerprints | explicit `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1` | component graph or append-only lifecycle fact changes | catalog/readiness/revocation/supersession is scientific evidence or product policy |
@@ -799,8 +809,8 @@ Implemented history through the current P29E contract-complete bytes:
     `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`, fixture evidence is
     `SYNTHETIC_CONFORMANCE_ONLY`, science is `NOT_RUN`, policy is `NO_NEW_DECISION`, and real P29 is
     `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`. P30A-E1, P30A-E2a and P30A-E2b subsequently
-    completed; E2b is `COMPLETE_NEGATIVE`, and P16R authorization-preflight identity bridge is next.
-    No P30 release identity, tag, push or deploy is created.
+    completed; E2b is `COMPLETE_NEGATIVE`, and P16R authorization-preflight identity bridge then
+    completed `IDENTITY_PREFLIGHT_ONLY`. No P30 release identity, tag, push or deploy is created.
 
 ## Release invariants
 
@@ -855,6 +865,8 @@ The equality above deliberately excludes `vc.msg.v1`, `vc.request.v2`, all
 `vc.k562-golden-adapter-input-contract.v1`,
 `vc.k562-golden-adapter-output-contract.v1`,
 `vc.k562-golden-prepared-model-input.v1`,
+`vc.k562-p16r-external-scope-declaration.v1`,
+`vc.k562-p16r-authorization-preflight.v1`,
 `vc.model-validation-evidence.v1`, `vc.model-operator-policy.v1`,
 `vc.model-release.v1`, `vc.model-registry-event.v1`, `vc.model-registry-state.v1`,
 `vc.model-registry.v2`, `vc.model-registry-catalog.v2`,

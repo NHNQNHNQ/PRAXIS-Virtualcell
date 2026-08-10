@@ -436,7 +436,22 @@ audit、三 seeds、scope-separated paired CI、independent K562 external 和 OO
 `real_assets_verified=false`、`executable=false`、`scientifically_validated=false` 或
 `production_promoted=false`。
 
-下一 eligible 本地 work unit 是 P17 Virtual Cell Brain contract-only engineering。
+在 P16E closure 时，下一 eligible 本地 work unit 是 P17 Virtual Cell Brain contract-only engineering。
 实际 P17 starting SHA 必须在 P16E docs-closure 后从 Git history 读取，不能在本文件中
 预测。当前少于两个 P14–P16 production-promoted capabilities，因此 P17 可完成合同/DAG
 工程，但不得声称真实多模型执行已通过。P16R/P16B 保持独立授权窗口。
+
+## 12. P16R-PREFLIGHT follow-on（2026-08-10）
+
+P16R local authorization-preflight identity bridge 在 code
+`4f77255f84e33180d7d73b421fc9737ca3a1121d` / tree
+`f7aadb7b76a2aa55691d67d9c2948cc7b1e38e95` 完成
+`COMPLETE — IDENTITY_PREFLIGHT_ONLY`。它只验证纯内存 P16/P12/P21 declarations 的 exact
+identity closure，并把输出锁为 non-evidence abstention。
+
+它不读 H5AD、external dataset、checkpoint、cache 或任何 asset；不执行 candidate/comparator、
+benchmark 或 leakage audit；不创建 evidence/policy；不接入 default registry、runtime、API 或 CLI；
+不 release、promote、push 或 deploy。P16R 的实际科学窗口仍
+`AUTHORIZATION_REQUIRED / NOT_RUN`，science `NOT_RUN`，policy `NO_NEW_DECISION`。详细 code
+identity、negative status 和 future external gate 见
+[P16R identity-preflight completion record](../../reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md)。
