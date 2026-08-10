@@ -10,7 +10,9 @@ This runbook verifies `P29E — limited biological world model / exact empty gra
 - Science: `NOT_RUN`
 - Product policy: `NO_NEW_DECISION`
 - Real P29: `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`
-- Next eligible local work unit: P30A local RC closure
+- At P29E closure, next eligible local work unit: P30A local RC closure; P30A-E1 subsequently
+  completed, and the current next eligible local work unit is P30A-E2 trusted
+  finalizer/orchestrator. Formal P30A remains `LOCAL_RC_INCOMPLETE`.
 
 No real P29 asset, data, model, weight, benchmark, external action, promotion decision, release, push, or
 deployment was performed.

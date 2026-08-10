@@ -1,15 +1,20 @@
 # PRAXIS-VirtualCell 1.7.0 — Local Release Candidate
 
-> Status: `LOCAL_RC_INCOMPLETE / UNPUBLISHED`
+> Status: P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2
+> `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`; formal P30A `LOCAL_RC_INCOMPLETE / UNPUBLISHED`.
 >
-> P30A is local-only. The local engineering and documentation work does not yet prove a complete
-> RC artifact set. This document does not publish an artifact, complete a remote CI gate,
-> create or move a tag, promote a biological capability, or authorize deployment.
+> P30A is local-only. Completed release-contract hardening and reproducibility probes do not yet
+> prove a complete RC artifact set. The next local unit must use a trusted finalizer rather than
+> accept caller-supplied test or artifact claims. This document does not publish an artifact,
+> complete a remote CI gate, create or move a tag, promote a biological capability, or authorize
+> deployment.
 >
-> P30A baseline: branch `codex/p30-foundation-rc`, SHA
-> `d808735ebfd649df6a4c932b95140387aa412c7d`. The final candidate source SHA and artifact
-> digests, when available, are recorded in the out-of-tree `release-manifest.json`; the baseline
-> above is not a substitute for that identity.
+> P30 scope baseline: `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4` (P29E docs closure).
+> Post-formal-entrypoint engineering baseline: `d808735ebfd649df6a4c932b95140387aa412c7d`.
+> P30A-E1 code evidence is `0a4d72b0825d9ec0ff3b7776bbc4f1f0023336f9`, tree
+> `ba701d4ee6033e86a2d8abecc7e6ff25c1a05c14`, source-date epoch `1786335170`.
+> These are probe identities, not a final candidate identity or a substitute for an immutable
+> `release-manifest.json`.
 
 ## Product promise
 
@@ -54,7 +59,8 @@ make a biological capability predictable.
 
 ## Scientific and policy status
 
-There is no science-qualified badge for 1.7.0:
+Scientific status is `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; product policy is
+`NO_NEW_DECISION`. There is no science-qualified badge for 1.7.0:
 
 - required real species capabilities: `3`; current: `0`;
 - promoted community capability required: `true`; current: `false`;
@@ -103,6 +109,46 @@ the test fixture whose purpose is to exercise a Pack-relative symlink escape. Th
 in the repository and its tests; every other archive link or AppleDouble entry causes a build
 failure rather than being silently followed or omitted.
 
+## P30A-E1 completed local engineering evidence
+
+P30A-E1 completed fail-closed release-contract hardening, governance classification and local
+reproducibility probes. It did not finalize a release. The probes below bind only the exact code
+identity stated above and were written new outside the repository.
+
+| Probe | Result |
+|---|---|
+| release-tool, source-archive and packaging tests | `47 passed` (`27 + 6 + 14`) |
+| formal Pack-aware entrypoint regression | `148 passed`; no-Pack requests produce a V2 zero-step `pack_unregistered` abstention |
+| React typecheck, lint, production build and bundle budget | passed |
+| wheel reproducibility probe | two identical `praxis_virtualcell-1.7.0-py3-none-any.whl`: `1,264,708` bytes, SHA-256 `44e5e905e706f87c9b43574a5f02afd41c7b37d9079a0e91956b511bca422303` |
+| source-archive reproducibility probe | two identical `praxis-virtualcell-1.7.0.tar.gz`: `8,055,078` bytes, SHA-256 `ba5e5d0dbe387575049f5603f8011af3359d4f99583f4856233be48dc796e642` |
+
+The wheel probe has `378` ZIP entries, `14` static entries, no test entries and no AppleDouble
+entries; ZIP integrity passed. The archive probe is an exact-HEAD projection and rejects unsafe
+links and AppleDouble entries. Neither probe is a retained clean-install-qualified artifact bundle,
+an accepted release manifest, an SBOM, a licence inventory or a published artifact.
+
+## P30A-E2 and formal-RC gates
+
+`P30A-E2 — trusted local finalizer/orchestrator` is the next eligible local work unit. It must
+construct the evidence bundle from one frozen clean source and independently validate its own
+inputs; the current metadata helper deliberately remains unable to promote caller-supplied test or
+artifact assertions.
+
+Known dependency-input gaps do not authorize downloads and must remain visible to the finalizer:
+
+- the offline runtime cache lacks `pyjwt==2.13.0` and `pyyaml==6.0.3`;
+- the Linux/arm64 wheelhouse also lacks the required target inputs for `cffi`, `cryptography`,
+  `pydantic-core` and `rpds-py`;
+- therefore no clean runtime install, OCI double-build/container smoke, complete SBOM/licence
+  inventory, dependency audit, `SHA256SUMS` or accepted release manifest has been generated.
+
+`pip check` in the shared environment failed because `python-magic` is absent and unrelated
+pre-existing `vcbench` pins conflict. It was not used as a clean-install qualification and the
+environment was not mutated. If these inputs remain unavailable after the trusted local finalizer,
+formal P30A remains blocked on external dependency input; they do not convert P30A-E2 itself into
+an external action.
+
 ## Compatibility and migration from the local 1.6.0 candidate
 
 `1.7.0` is a new compatible minor product identity. It does not reuse or move historical
@@ -131,6 +177,8 @@ No repository data migration or implicit registry promotion is required. Consume
 - Dependency hash locking proves identity, not absence of vulnerabilities.
 - Platform claims outside the exact recorded Python 3.13 artifact/test environment remain
   unqualified.
+- There is no formal local RC artifact yet: P30A-E2 must still finalize one trusted immutable
+  evidence bundle, and its dependency-input gates remain unresolved.
 
 ## P30B authorization state
 

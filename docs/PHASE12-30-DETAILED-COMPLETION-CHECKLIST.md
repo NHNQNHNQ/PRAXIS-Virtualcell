@@ -168,8 +168,9 @@ handoff、deterministic DAG、hash-chain trace 与 authoritative empty orchestra
 真实 P28 验收仍为 `BLOCKED / 0_OF_3_QUALIFYING_MODULES`，没有运行 single-agent/monolithic/
 multi-agent comparison 或 ablation。P29E 已完成 strict null requirement、`empty_not_connected`
 typed graph 与 value-free compilation；真实 P29 仍为
-`BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`。下一 eligible local unit 是 P30A local RC closure；
-它不授权 P30B1–B4。
+`BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`。P30A-E1 release-contract hardening 已完成；下一
+eligible local unit 是 P30A-E2 trusted finalizer/orchestrator。formal P30A 仍
+`LOCAL_RC_INCOMPLETE`；它不授权 P30B1–B4。
 阶段 scope、资产清单和可复制授权句仍以
 [P12–P30 权威执行路线](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md)为准。
 
@@ -417,8 +418,9 @@ flowchart TD
 | P28 real acceptance | `BLOCKED / 0_OF_3_QUALIFYING_MODULES` | `NOT_RUN` | `NOT_RUN` | 至少三个 exact-request executable + scientifically validated + production-promoted 模型模块；rule/advisory/synthetic 不计数 |
 | P29E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | completion `471767e5...`；strict null requirement + `empty_not_connected` graph + authoritative value-free abstention；fixture `SYNTHETIC_CONFORMANCE_ONLY` |
 | P29 real candidate | `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES` | `NOT_RUN` | `NOT_RUN` | 真实 connected adjacent-scale subgraph/data/model/benchmark 均 absent |
-| P30A | `NEXT ELIGIBLE — LOCAL RC` | `SEPARATE_BADGES` | `NOT_APPLICABLE` | 本地 RC；仍须满足 clean dependency/SBOM/license/artifact/release-doc gates |
-| P30B1–B4 | `NOT_STARTED` | `SEPARATE_BADGES` | `RELEASE_WINDOWS` | CI、发布、staging、cutover/rollback |
+| P30A-E1 | `ENGINEERING_COMPLETE` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | release-contract tooling、governance、wheel/source probes complete; not a formal RC |
+| P30A-E2 | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | trusted finalizer/orchestrator must create one frozen evidence bundle; formal P30A remains `LOCAL_RC_INCOMPLETE` |
+| P30B1–B4 | `NOT_AUTHORIZED / NOT_RUN` | `SEPARATE_BADGES` | `RELEASE_WINDOWS` | CI、发布、staging、cutover/rollback；B3/B4 `NOT_DEPLOYED` |
 
 ---
 
@@ -1723,7 +1725,9 @@ Planned-vs-actual：本地工程采用隔离 deterministic harness；没有改�
 
 ### Phase 30 — Foundation Platform Release
 
-**状态：** `NOT_STARTED`
+**状态：** P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2
+`NEXT_ELIGIBLE_LOCAL_WORK_UNIT`; formal P30A `LOCAL_RC_INCOMPLETE`; science
+`NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; policy `NO_NEW_DECISION`。
 
 P30 把 Software GA 和 science-qualified capability badge 分开。以下每个发布窗口都需要
 独立授权，前一个窗口不能自动授权后一个。
@@ -1731,13 +1735,25 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 #### P30A — local RC closure
 
 - [x] P29E completion SHA `471767e5f38f9866fbe396f39836369d943f6657`；真实 P29 candidate 仍 blocked/disabled；
-- [ ] 版本号按 `docs/VERSIONING.md` 更新且不复用 `v1.6.0`；
-- [ ] release notes、migration、SBOM/lock、artifact manifest；
-- [ ] wheel/OCI 等 release artifacts 可重建；
-- [ ] core、legacy、frontend、Ruff、pip check 和 packaging 全通过；
-- [ ] 软件能力和 science-qualified capabilities 分表；
-- [ ] 本地 RC exact SHA 和 digest 记录；
-- [ ] 不 push、不改 main/tag、不部署。
+- [x] P30A-E1：版本号、release notes/migration、capability classification、governance/runbook、
+  fail-closed release tooling 与 source-archive export policy；P30 scope baseline
+  `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4`、post-entrypoint baseline
+  `d808735ebfd649df6a4c932b95140387aa412c7d`；E1 code
+  `0a4d72b0825d9ec0ff3b7776bbc4f1f0023336f9` / tree
+  `ba701d4ee6033e86a2d8abecc7e6ff25c1a05c14` / epoch `1786335170`；
+- [x] P30A-E1：release-tool/source-archive/packaging `47 passed`、formal entrypoint `148 passed`、
+  React typecheck/lint/build/bundle budget PASS、wheel/source archive two-build probes；
+- [ ] P30A-E2：trusted finalizer independently constructs one frozen clean-source evidence bundle rather
+  than accepting caller-supplied artifact/test claims；
+- [ ] clean runtime install、exact-SHA core/legacy gate、OCI double-build/container smoke、SBOM、license
+  inventory、dependency audit、`SHA256SUMS` 与 accepted release manifest；当前离线 runtime cache 缺
+  `pyjwt==2.13.0`/`pyyaml==6.0.3`，Linux/arm64 还缺 `cffi`/`cryptography`/`pydantic-core`/`rpds-py`；
+- [ ] formal P30A exact RC SHA 和 final artifact digests；P30A-E1 probe digests are not final RC
+  digests；
+- [x] 软件能力和 science-qualified capabilities 分表；science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`，
+  policy `NO_NEW_DECISION`；
+- [x] 不 push、不改 main/tag、不部署；P30B1/B2 `NOT_AUTHORIZED / NOT_RUN`，
+  P30B3/B4 `NOT_AUTHORIZED / NOT_DEPLOYED`。
 
 #### P30B1 — push RC and exact-SHA CI
 
@@ -1829,11 +1845,12 @@ P30 把 Software GA 和 science-qualified capability badge 分开。以下每个
 | P28 real acceptance | `BLOCKED / 0_OF_3_QUALIFYING_MODULES` | `NOT_RUN` | `NOT_RUN` | three exact-request executable + scientifically validated + production-promoted modules | — | current qualifying count `0/3`; rule/advisory/synthetic 不计数 |
 | P29E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` | `NOT_RUN` | `NO_NEW_DECISION` | `90990c198c40d0e6655aedaad101a783cde003aa` | `471767e5f38f9866fbe396f39836369d943f6657` | tree `d1dec19f...`; epoch `1786187523`; focused `51`; P28+P29 `89`; affected `390`; safe `1,934/49/387`; legacy `1,147/58/105`; packaging/versioning `18`; wheel `1,263,199` bytes / `368a66a438c036a3b9c24f1093fc478886885fbefaecfea52bb50ad616206c01` / `378` entries；graph `empty_not_connected` / nodes `0` |
 | P29 real candidate | `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES` | `NOT_RUN` | `NOT_RUN` | real connected adjacent-scale subgraph/data/model/benchmark | — | P28 qualifying modules `0/3`; no molecule→organism placeholder chain |
-| P30A | `NEXT ELIGIBLE — LOCAL RC` | `SEPARATE` | `N/A` | P29E docs-closure HEAD | — | clean dependency/SBOM/license/artifact/release-doc gates pending；RC digest pending |
-| P30B1 | `NOT_STARTED` | `SEPARATE` | `RELEASE_WINDOW` | — | unchanged | exact-SHA CI |
-| P30B2 | `NOT_STARTED` | `SEPARATE` | `RELEASE_WINDOW` | — | main/tag SHA | release digest |
-| P30B3 | `NOT_STARTED` | `SEPARATE` | `RELEASE_WINDOW` | — | unchanged | staging identity |
-| P30B4 | `NOT_STARTED` | `SEPARATE` | `RELEASE_WINDOW` | — | unchanged | cutover/rollback evidence |
+| P30A-E1 | `ENGINEERING_COMPLETE` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4` scope / `d808735ebfd649df6a4c932b95140387aa412c7d` entrypoint baseline | `0a4d72b0825d9ec0ff3b7776bbc4f1f0023336f9` | tree `ba701d4...`; epoch `1786335170`; focused `47`; entrypoint `148`; probes only, no final RC |
+| P30A-E2 | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT` | `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` | `NO_NEW_DECISION` | P30A-E1 exact evidence | — | trusted finalizer/orchestrator; formal P30A `LOCAL_RC_INCOMPLETE`; dependency inputs remain absent |
+| P30B1 | `NOT_AUTHORIZED / NOT_RUN` | `SEPARATE` | `RELEASE_WINDOW` | — | unchanged | exact-SHA CI |
+| P30B2 | `NOT_AUTHORIZED / NOT_RUN` | `SEPARATE` | `RELEASE_WINDOW` | — | main/tag SHA | release digest |
+| P30B3 | `NOT_AUTHORIZED / NOT_DEPLOYED` | `SEPARATE` | `RELEASE_WINDOW` | — | unchanged | staging identity |
+| P30B4 | `NOT_AUTHORIZED / NOT_DEPLOYED` | `SEPARATE` | `RELEASE_WINDOW` | — | unchanged | cutover/rollback evidence |
 
 ---
 
@@ -2014,7 +2031,9 @@ state/action/observation/time requirement、`empty_not_connected` typed graph �
 value-free compilation。Engineering 为 `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`，
 fixture 为 `SYNTHETIC_CONFORMANCE_ONLY`；真实 P29 candidate 仍为
 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`，science `NOT_RUN`，policy `NO_NEW_DECISION`。
-下一 eligible local work unit 是 P30A local RC closure；P30B1–B4 仍为独立授权窗口。
+P30A-E1 release-contract hardening 已完成；下一 eligible local work unit 是 P30A-E2
+trusted finalizer/orchestrator。formal P30A 仍 `LOCAL_RC_INCOMPLETE`；P30B1–B4 仍为独立
+授权窗口。
 
 可直接跨对话使用的顺序推进提示词见：
 

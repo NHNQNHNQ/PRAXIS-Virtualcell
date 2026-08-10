@@ -57,5 +57,8 @@ The implementation is `praxis_virtualcell/limited_world_model.py`
 (`43dee397437bf779fdab79726090b2f84538ad331a6bb1bd0abd2b37b844391f`). See
 [the P29E completion report](../reports/phase29e/PHASE29E_COMPLETION.md).
 
-P30A local RC closure is the next eligible local work unit. It may classify P29 as unsupported/experimental;
-it cannot infer a science-qualified capability badge from this contract-only result.
+At P29E closure, P30A local RC closure was the next eligible local work unit. P30A-E1
+release-contract hardening subsequently completed; the current next eligible local work unit is
+P30A-E2 trusted finalizer/orchestrator, while formal P30A remains `LOCAL_RC_INCOMPLETE`. P30 may
+classify P29 as unsupported/experimental; it cannot infer a science-qualified capability badge
+from this contract-only result.

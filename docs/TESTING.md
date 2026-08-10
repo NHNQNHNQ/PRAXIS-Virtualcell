@@ -25,8 +25,36 @@
 > `REPLAY_NOT_RUN / ASSET_PENDING`；P27B 为 `AUTHORIZATION_REQUIRED / SHADOW_NOT_RUN`；
 > P27C 为 `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。P21B/P21C、P23B、P24、P25R 和所有
 > real asset/model/output 窗口均未授权或未运行；P26R 仍为 `BLOCKED_EXTERNAL / NOT_RUN`。
-> 下一 eligible local unit 是 standing local authorization 下的 P30A local RC closure；它不授权
-> push、tag、artifact publication、staging 或 production。
+> P30A-E1 release-contract hardening 已完成；下一 eligible local unit 是 standing local
+> authorization 下的 P30A-E2 trusted finalizer/orchestrator。formal P30A 仍
+> `LOCAL_RC_INCOMPLETE`。P30A-E1 或 E2 都不授权 push、tag、artifact publication、staging
+> 或 production。
+
+## P30A-E1 `ENGINEERING_COMPLETE` local evidence; P30A-E2 next
+
+P30 scope baseline is `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4`; the post-formal-entrypoint
+engineering baseline is `d808735ebfd649df6a4c932b95140387aa412c7d`. The completed E1 probe code is
+`0a4d72b0825d9ec0ff3b7776bbc4f1f0023336f9` / tree
+`ba701d4ee6033e86a2d8abecc7e6ff25c1a05c14` / epoch `1786335170`.
+
+| Gate or probe | Result |
+|---|---|
+| release-tool / source-archive / packaging suite | `47 passed` (`27 + 6 + 14`) |
+| formal Pack-aware entrypoints | `148 passed`; no-Pack is a V2 zero-step `pack_unregistered` abstention |
+| Python release-tool Ruff/format and release-shell syntax | PASS |
+| React typecheck / lint / production build / bundle budget | PASS |
+| two wheel probes | byte-identical: `1,264,708` bytes / `44e5e905e706f87c9b43574a5f02afd41c7b37d9079a0e91956b511bca422303`; `378` ZIP entries, `14` static, zero test/AppleDouble entries, integrity PASS |
+| two source-archive probes | byte-identical: `8,055,078` bytes / `ba5e5d0dbe387575049f5603f8011af3359d4f99583f4856233be48dc796e642`; unsafe links and AppleDouble reject |
+
+The probes are local, write-new and out of tree. They are not a clean-install-qualified artifact
+bundle, an accepted `release-manifest.json`, an OCI artifact, an SBOM, a licence inventory or a
+published release. The shared-environment `pip check` failed because `python-magic` is absent and
+unrelated pre-existing `vcbench` pins conflict; it is not a clean-install gate. The offline runtime
+cache lacks `pyjwt==2.13.0` and `pyyaml==6.0.3`; the Linux/arm64 target also lacks `cffi`,
+`cryptography`, `pydantic-core` and `rpds-py` inputs. P30A-E2 must create a trusted evidence bundle
+from one frozen clean source, not accept caller-supplied assertions. Formal P30A is therefore still
+`LOCAL_RC_INCOMPLETE`; science is `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` and policy is
+`NO_NEW_DECISION`.
 
 ## Phase 29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` 本地证据
 

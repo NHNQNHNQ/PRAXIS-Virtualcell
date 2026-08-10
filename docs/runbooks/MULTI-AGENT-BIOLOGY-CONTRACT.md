@@ -124,5 +124,6 @@ production-promoted model modules plus frozen comparison/ablation evidence.
 At P28E closure, the next local work unit was P29E strict connected-subgraph contract plus authoritative
 empty-graph/value-free abstention. P29E subsequently completed at
 `471767e5f38f9866fbe396f39836369d943f6657` with `empty_not_connected`, zero nodes/edges and no
-placeholder scale chain. A real connected biological subgraph remains unavailable; P30A local RC closure is
-now next.
+placeholder scale chain. A real connected biological subgraph remains unavailable. P30A-E1
+release-contract hardening subsequently completed; P30A-E2 trusted finalizer/orchestrator is now
+next, while formal P30A remains `LOCAL_RC_INCOMPLETE`.

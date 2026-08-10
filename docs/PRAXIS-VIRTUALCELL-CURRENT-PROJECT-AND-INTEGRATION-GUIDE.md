@@ -137,7 +137,8 @@
 > value-free abstention；真实 P28 acceptance 仍为
 > `BLOCKED / 0_OF_3_QUALIFYING_MODULES`。P29E 已完成 `empty_not_connected`、zero-node、
 > value-free closure；真实 P29 candidate 仍为 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`。
-> 下一 eligible local work unit 是 P30A local RC closure；P30B1–B4 仍需独立授权。
+> P30A-E1 release-contract hardening 已完成；下一 eligible local work unit 是 P30A-E2 trusted
+> finalizer/orchestrator；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P30B1–B4 仍需独立授权。
 
 本文是一份面向其他项目、开发团队、科研合作者和后续智能体的独立项目说明。它回答四个问题：
 
@@ -2977,7 +2978,8 @@ P27A-E 已完成 exact-request-derived value-free design 与 synthetic rank-then
 deterministic DAG/hash-chain trace 与 authoritative empty compilation；真实 P28 acceptance 仍为
 `0/3` qualifying modules。P29E 已完成 strict null requirement、`empty_not_connected` graph 与
 authoritative value-free compilation；真实 P29 qualified biological nodes 为 `0`。下一 eligible local
-work unit 是 P30A local RC closure；P30B1–B4 仍为独立授权窗口。
+work unit 已从 P30A-E1 release-contract hardening 推进至 P30A-E2 trusted
+finalizer/orchestrator；formal P30A 仍 `LOCAL_RC_INCOMPLETE`，P30B1–B4 仍为独立授权窗口。
 
 | 阶段 | 目标 |
 |---|---|
@@ -3016,11 +3018,12 @@ work unit 是 P30A local RC closure；P30B1–B4 仍为独立授权窗口。
 | P28 real acceptance | `BLOCKED / 0_OF_3_QUALIFYING_MODULES`：需要三个 exact-request executable + scientifically validated + production-promoted model modules；rule/advisory/synthetic 不计数 |
 | P29E | `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`：start `90990c19...`；completion `471767e5...`；`empty_not_connected`、zero nodes/edges、all authority/value slots null；science `NOT_RUN`；policy `NO_NEW_DECISION` |
 | P29 real candidate | `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`：有限域 real connected typed biological subgraph/data/model/benchmark absent |
-| P30A | `NEXT ELIGIBLE — LOCAL RC`：clean dependency/SBOM/license/artifact/release-doc gates pending |
-| P30B1 | Push + exact-SHA CI |
-| P30B2 | Main/tag/artifact release |
-| P30B3 | Immutable staging |
-| P30B4 | Production + real rollback |
+| P30A-E1 | `ENGINEERING_COMPLETE`：release-contract tooling/governance/wheel+source probes；not a formal RC |
+| P30A-E2 | `NEXT_ELIGIBLE_LOCAL_WORK_UNIT`：trusted finalizer/orchestrator；formal P30A `LOCAL_RC_INCOMPLETE`，clean dependency/SBOM/license/artifact/manifest gates pending |
+| P30B1 | `NOT_AUTHORIZED / NOT_RUN`：Push + exact-SHA CI |
+| P30B2 | `NOT_AUTHORIZED / NOT_RUN`：Main/tag/artifact release |
+| P30B3 | `NOT_AUTHORIZED / NOT_DEPLOYED`：Immutable staging |
+| P30B4 | `NOT_AUTHORIZED / NOT_DEPLOYED`：Production + real rollback |
 
 路线顺序必须保持：
 
@@ -3090,7 +3093,8 @@ rule/advisory/synthetic 补足。P29E 随后从 `90990c198c40d0e6655aedaad101a78
 开始，以 `471767e5f38f9866fbe396f39836369d943f6657`（tree
 `d1dec19f06ec88f563406b45f2b544effabad915`）完成 null requirement、
 `empty_not_connected` graph 与 value-free compilation；真实 P29 qualified node 为 `0`。当前最早
-eligible 本地闭环是 P30A local RC closure。
+eligible 本地闭环是 P30A-E2 trusted finalizer/orchestrator；P30A-E1 已完成，formal P30A 仍
+`LOCAL_RC_INCOMPLETE`。
 
 在进入更大世界模型之前，最重要的闭环仍然是：
 
@@ -3292,7 +3296,8 @@ policy NO_NEW_DECISION。P29E 从 90990c198c40d0e6655aedaad101a783cde003aa 起�
 471767e5f38f9866fbe396f39836369d943f6657（tree
 d1dec19f06ec88f563406b45f2b544effabad915）完成 strict null requirement、
 empty_not_connected/zero-node graph 与 authoritative value-free compilation；real P29 仍 blocked，
-science NOT_RUN，policy NO_NEW_DECISION。下一 eligible local work unit 是 P30A local RC closure。
+science NOT_RUN，policy NO_NEW_DECISION。P30A-E1 已完成；下一 eligible local work unit 是
+P30A-E2 trusted finalizer/orchestrator；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。
 
 当前 UI 是：
 选择 Cell Context → Chat → 自动解析/运行 → Report/Abstain，
