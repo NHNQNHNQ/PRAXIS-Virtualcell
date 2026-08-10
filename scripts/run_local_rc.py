@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import stat
 import subprocess
 import sys
 import tomllib
@@ -89,10 +90,29 @@ def _load_preflight_record(
     *,
     expected_pre_exact: dict[str, Any] | None,
     expected_post_exact: dict[str, Any] | None,
-) -> dict[str, Any]:
+) -> tuple[dict[str, Any], str]:
+    nofollow = getattr(os, "O_NOFOLLOW", None)
+    if nofollow is None:
+        raise LocalRcRunnerError("platform lacks safe no-follow preflight record reading")
     try:
-        raw = release_candidate._load_json(path)
-    except release_candidate.ReleaseContractError as error:
+        record_fd = os.open(path, os.O_RDONLY | nofollow)
+    except OSError as error:
+        raise LocalRcRunnerError("controlled preflight record is unreadable") from error
+    try:
+        with os.fdopen(record_fd, "rb") as stream:
+            descriptor = os.fstat(stream.fileno())
+            if not stat.S_ISREG(descriptor.st_mode):
+                raise LocalRcRunnerError("controlled preflight record is unreadable")
+            raw_bytes = stream.read()
+    except OSError as error:
+        raise LocalRcRunnerError("controlled preflight record is unreadable") from error
+    try:
+        raw = json.loads(
+            raw_bytes.decode("utf-8"),
+            object_pairs_hook=release_candidate._reject_duplicate_keys,
+            parse_constant=release_candidate._reject_nonfinite_json,
+        )
+    except (UnicodeError, json.JSONDecodeError, release_candidate.ReleaseContractError) as error:
         raise LocalRcRunnerError("controlled preflight record is unreadable") from error
     if (
         type(raw) is not dict
@@ -159,7 +179,7 @@ def _load_preflight_record(
         or any(type(item) is not dict or type(item.get("code")) is not str for item in raw["blockers"])
     ):
         raise LocalRcRunnerError("controlled preflight record violates negative invariants")
-    return raw
+    return raw, release_candidate._sha256_bytes(raw_bytes)
 
 
 def _write_new_runner_record(output: Path, record: dict[str, Any]) -> Path:
@@ -344,14 +364,14 @@ def _source_archive_record(
     }
 
 
-def _preflight_summary(record: dict[str, Any], path: Path) -> dict[str, Any]:
+def _preflight_summary(record: dict[str, Any], record_sha256: str) -> dict[str, Any]:
     codes = sorted(
         str(item["code"]) for item in record["blockers"] if type(item) is dict and type(item.get("code")) is str
     )
     return {
         "schema_version": record["schema_version"],
         "status": record["status"],
-        "record_sha256": release_candidate._sha256_file(path),
+        "record_sha256": record_sha256,
         "blocker_codes": codes,
     }
 
@@ -380,7 +400,7 @@ def run_local_rc(
             npm_cache_root=npm_cache_root,
         )
         after_preflight_exact, _ = _exact_identity(repo)
-        preflight_record = _load_preflight_record(
+        preflight_record, preflight_sha256 = _load_preflight_record(
             preflight_path,
             expected_pre_exact=before_exact,
             expected_post_exact=after_preflight_exact,
@@ -404,7 +424,7 @@ def run_local_rc(
             "observed_stable_during_runner": source_stable,
             "future_full_runner_must_reverify": True,
         },
-        "preflight": _preflight_summary(preflight_record, preflight_path),
+        "preflight": _preflight_summary(preflight_record, preflight_sha256),
         "artifacts": {"source_archive": archive},
         "full_gate_execution": "SOURCE_ARCHIVE_ONLY_NOT_FULL_RC",
         "software_rc_gates_passed": False,

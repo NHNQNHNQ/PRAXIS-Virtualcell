@@ -226,6 +226,34 @@ def test_preflight_post_identity_must_match_the_runner_observation(tmp_path: Pat
         )
 
 
+def test_preflight_digest_is_from_the_same_verified_bytes(tmp_path: Path, monkeypatch) -> None:
+    repo = _clean_repo(tmp_path)
+    pip_cache, npm_cache = _empty_caches(tmp_path)
+    _configure(monkeypatch, repo)
+    original = runner._load_preflight_record
+    observed: dict[str, str] = {}
+
+    def read_then_replace(path, **kwargs):
+        record, digest = original(path, **kwargs)
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        raw["published"] = True
+        path.write_text(json.dumps(raw), encoding="utf-8")
+        observed["original_digest"] = digest
+        observed["replacement_digest"] = runner.release_candidate._sha256_file(path)
+        return record, digest
+
+    monkeypatch.setattr(runner, "_load_preflight_record", read_then_replace)
+    record = runner.run_local_rc(
+        output_dir=tmp_path / "local-rc",
+        pip_cache_root=pip_cache,
+        npm_cache_root=npm_cache,
+    )
+
+    assert observed["original_digest"] != observed["replacement_digest"]
+    assert record["preflight"]["record_sha256"] == observed["original_digest"]
+    assert record["software_rc_gates_passed"] is False
+
+
 def test_live_builder_mutation_never_executes_after_head_snapshot(tmp_path: Path, monkeypatch) -> None:
     repo = _clean_repo(tmp_path)
     pip_cache, npm_cache = _empty_caches(tmp_path)

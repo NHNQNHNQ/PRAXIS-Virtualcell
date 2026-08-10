@@ -140,7 +140,10 @@ def _cache_root(
             return None, f"{label} must be an absolute directory"
         candidate = explicit.resolve()
     else:
-        result = subprocess.run(command, capture_output=True, check=False, text=True)
+        try:
+            result = subprocess.run(command, capture_output=True, check=False, text=True)
+        except OSError:
+            return None, f"{label} query failed"
         if result.returncode != 0 or not result.stdout.strip():
             return None, f"{label} query failed"
         candidate = Path(result.stdout.strip()).resolve()

@@ -82,6 +82,17 @@ def test_finalizer_parser_and_callable_are_closed_to_caller_claims() -> None:
         finalizer._parser().parse_args(["--output", "/tmp/praxis-finalizer-output", "--artifact", "/tmp/claimed.whl"])
 
 
+def test_missing_cache_command_is_a_structured_negative_preflight_input() -> None:
+    cache, error = finalizer._cache_root(
+        None,
+        command=("praxis-command-that-does-not-exist",),
+        label="npm cache root",
+    )
+
+    assert cache is None
+    assert error == "npm cache root query failed"
+
+
 def test_finalizer_rejects_in_tree_or_reused_output_without_mutating_source(tmp_path: Path, monkeypatch) -> None:
     repo = _clean_repo(tmp_path)
     monkeypatch.setattr(finalizer, "_FINALIZER_REPO_ROOT", repo)
