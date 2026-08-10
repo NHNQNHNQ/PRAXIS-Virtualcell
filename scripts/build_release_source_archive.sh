@@ -50,7 +50,7 @@ esac
 [[ "$(basename "${OUTPUT_PATH}")" == "${ARCHIVE_NAME}" ]] \
   || fail "source archive filename must be ${ARCHIVE_NAME}"
 OUTPUT_DIR="$(dirname "${OUTPUT_PATH}")"
-if [[ ! -d "${OUTPUT_DIR}" || -L "${OUTPUT_DIR}" ]]; then
+if [[ ! -d "${OUTPUT_DIR}" ]]; then
   fail "source archive output parent must be a real directory"
 fi
 OUTPUT_DIR="$(cd "${OUTPUT_DIR}" && pwd -P)"

@@ -20,7 +20,7 @@ case "${OUTPUT_DIR}" in
   *) echo "release wheel output must be an absolute out-of-tree directory" >&2; exit 1 ;;
 esac
 OUTPUT_PARENT="$(dirname "${OUTPUT_DIR}")"
-if [[ ! -d "${OUTPUT_PARENT}" || -L "${OUTPUT_PARENT}" ]]; then
+if [[ ! -d "${OUTPUT_PARENT}" ]]; then
   echo "release wheel output parent must be a real existing directory" >&2
   exit 1
 fi

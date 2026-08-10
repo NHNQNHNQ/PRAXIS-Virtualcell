@@ -46,7 +46,7 @@ case "${PRAXIS_WHEELHOUSE}" in
   "${PRAXIS_REPO_ROOT}"|"${PRAXIS_REPO_ROOT}"/*) echo "wheelhouse must be outside the source repository" >&2; exit 1 ;;
 esac
 PRAXIS_OCI_PARENT="$(dirname "${PRAXIS_OCI_OUTPUT}")"
-if [[ ! -d "${PRAXIS_OCI_PARENT}" || -L "${PRAXIS_OCI_PARENT}" ]]; then
+if [[ ! -d "${PRAXIS_OCI_PARENT}" ]]; then
   echo "OCI output parent must be a real existing directory" >&2
   exit 1
 fi

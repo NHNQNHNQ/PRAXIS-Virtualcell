@@ -124,6 +124,20 @@ def test_source_archive_requires_an_absolute_out_of_tree_output(tmp_path: Path) 
     assert not (repo / filename).exists()
 
 
+def test_source_archive_resolves_a_safe_output_parent_symlink(tmp_path: Path) -> None:
+    repo = _repository(tmp_path)
+    actual_parent = tmp_path / "actual-output"
+    actual_parent.mkdir()
+    symlink_parent = tmp_path / "symlink-output"
+    os.symlink(actual_parent, symlink_parent)
+    output = symlink_parent / "praxis-virtualcell-1.7.0.tar.gz"
+
+    result = _build(repo, output)
+
+    assert result.returncode == 0
+    assert (actual_parent / output.name).is_file()
+
+
 def test_source_archive_rejects_tracked_appledouble(tmp_path: Path) -> None:
     repo = _repository(tmp_path, apple_double=True)
     output = tmp_path / "out" / "praxis-virtualcell-1.7.0.tar.gz"
