@@ -16,9 +16,13 @@
   `6cb91031…9019`）：macOS/arm64 与 Linux/arm64 hash-locked wheel coverage 均不足。
 - P30A-E2b 在 `12ad93d57e4f4e7438d2110b5ac9848c6b17ea33` 完成 artifact-aware archive-only runner
   negative record（`praxis.local-rc-artifact-aware-runner.v1` / `72459a3b…63d2`）：source stable，
-  但两个 source-archive attempts 因 tracked unsupported link 安全失败，且没有 install、network、OCI、
+  记录两个 `source_archive_build_failed` attempts；其 frozen tracked-unsupported-link 因果归因不能由
+  同一 exact tree 的 committed `.gitattributes` / `git archive` 重现（raw stderr 未保留），且没有 install、network、OCI、
   full gate 或 release result。formal P30A 仍为 `LOCAL_RC_INCOMPLETE`，不得以 shared-env `pip check`
   取代 clean-install gate。
+- P30A-E2c append-only reconciliation 保留 E2b 的 immutable failure result，同时记录 current exact-source
+  export-ignore probe；它没有接受 release artifact、完成 formal RC、创建 science/policy/promotion result，实际
+  P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`。
 - P16R local authorization-preflight identity bridge 在
   `4f77255f84e33180d7d73b421fc9737ca3a1121d` 完成
   `COMPLETE — IDENTITY_PREFLIGHT_ONLY`：新增

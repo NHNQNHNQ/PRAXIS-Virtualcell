@@ -1,7 +1,9 @@
 # PRAXIS-VirtualCell 测试指南
 
-> 当前文档基线：P29E 分支 `codex/p25e-virtual-microbiome`；active baseline
-> `90990c198c40d0e6655aedaad101a783cde003aa`
+> 历史 P29E 文档基线（非当前 worktree baseline）：分支 `codex/p25e-virtual-microbiome`；active baseline
+> `90990c198c40d0e6655aedaad101a783cde003aa`。当前 E2c code/test baseline 是
+> `f9aa62d669c7bc3d5cbcca101e4e73ffd0bf821a`（`codex/p30-foundation-rc`）；其 reconciliation-only
+> 状态不构成 formal RC。
 >
 > 规范工作树：`/Volumes/T7/PRAXIS-virtualcell`；Git metadata：
 > `/Users/mzy/Projects/.PRAXIS-virtualcell-gitdir`
@@ -26,13 +28,14 @@
 > P27C 为 `AUTHORIZATION_REQUIRED / PILOT_NOT_RUN`。P21B/P21C、P23B、P24、P25R 和所有
 > real asset/model/output 窗口均未授权或未运行；P26R 仍为 `BLOCKED_EXTERNAL / NOT_RUN`。
 > P30A-E1 release-contract hardening、P30A-E2a clean-SHA offline preflight 与 P30A-E2b
-> archive-only runner 均已完成；E2a/E2b 均为 `COMPLETE_NEGATIVE`，不是 full gate execution。
+> archive-only runner 均已完成；E2a/E2b 均为 `COMPLETE_NEGATIVE`，不是 full gate execution；E2c 仅为
+> `RECONCILIATION_ONLY / NO_RC_CLAIM`。
 > formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P16R local authorization-preflight identity bridge 已完成
 > `COMPLETE — IDENTITY_PREFLIGHT_ONLY`；真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`，当前
 > local queue 为 `BLOCKED_EXTERNAL`。
 > P30A-E1、E2a 或 E2b 都不授权 push、tag、artifact publication、staging 或 production。
 
-## P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a/E2b `COMPLETE_NEGATIVE`; P16R-PREFLIGHT complete
+## P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a/E2b `COMPLETE_NEGATIVE`; E2c reconciliation-only; P16R-PREFLIGHT complete
 
 P30 scope baseline is `694af3eebfca0e99ca07a6ecd8639b522b8ec3d4`; the post-formal-entrypoint
 engineering baseline is `d808735ebfd649df6a4c932b95140387aa412c7d`. The completed E1 probe code is
@@ -74,13 +77,20 @@ P30A-E2b subsequently completed at exact SHA
 `praxis.local-rc-artifact-aware-runner.v1` record is SHA-256
 `72459a3b51ba243d747ee2c0159d4105a30ba47d191b99ea05960343bbae63d2`; the controlled nested
 preflight record is `064a479fd35deba3b08d70e999171577b9171133873d5bc7a3d9968a57aafec4`. Source
-was stable, but both source-archive attempts safely failed on a tracked unsupported link. The runner
+was stable and the immutable record retains two `source_archive_build_failed` attempts. Its
+contemporary tracked-unsupported-link causal attribution is unreproducible from the same exact
+committed `.gitattributes` / `git archive` inputs because raw stderr was not retained. The runner
 therefore records `SOURCE_ARCHIVE_ONLY_NOT_FULL_RC`, `software_rc_gates_passed=false`, no
 publication/sign/tag/deploy or policy decision, and the same two wheelhouse blockers. No install,
 network, OCI or full gate occurred. Formal P30A remains `LOCAL_RC_INCOMPLETE`; science is
 `NOT_RUN / SCIENCE_BADGE_INELIGIBLE` and policy is `NO_NEW_DECISION`. The P16R
 authorization-preflight identity bridge subsequently completed as a value-free local contract, not a
 P16R scientific run.
+
+P30A-E2c's current exact-source export-ignore double probe is recorded in the append-only
+[reconciliation](../reports/phase30a/PHASE30A_E2C_SOURCE_ARCHIVE_RECONCILIATION.md). It preserves the
+E2b failure result and is not a clean-install/full-gate/formal-RC, science, policy, promotion, or P16R
+execution result.
 
 ## Phase 29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION` 本地证据
 

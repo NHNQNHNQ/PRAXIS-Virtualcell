@@ -133,7 +133,8 @@
 > `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；
 > real candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；science `NOT_RUN`；policy
 > `NO_NEW_DECISION`；P30A-E1、P30A-E2a 与 P30A-E2b 已完成；E2a/E2b 均为
-> `COMPLETE_NEGATIVE`；formal P30A 仍 `LOCAL_RC_INCOMPLETE`；P16R local
+> `COMPLETE_NEGATIVE`；P30A-E2c 仅为 `RECONCILIATION_ONLY / NO_RC_CLAIM`；formal P30A 仍
+> `LOCAL_RC_INCOMPLETE`；P16R local
 > authorization-preflight identity bridge 已完成 `IDENTITY_PREFLIGHT_ONLY`，真实 P16R 仍
 > `AUTHORIZATION_REQUIRED / NOT_RUN`，local queue 为 `BLOCKED_EXTERNAL`
 >
@@ -228,7 +229,7 @@ exact-scope 的 Biological World Model research capability。Phase 编号是路�
 | P28E source date epoch / 完成分支 | `1786184568` / `codex/p25e-virtual-microbiome` |
 | P29E actual starting SHA / completion code/tree | `90990c198c40d0e6655aedaad101a783cde003aa` / `471767e5f38f9866fbe396f39836369d943f6657` / `d1dec19f06ec88f563406b45f2b544effabad915` |
 | P29E source date epoch / 完成分支 | `1786187523` / `codex/p25e-virtual-microbiome` |
-| 当前 work-unit 状态 | P29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；real P29 candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；P30A-E1 `ENGINEERING_COMPLETE`；P30A-E2a/E2b `COMPLETE_NEGATIVE`；formal P30A `LOCAL_RC_INCOMPLETE`；P16R-PREFLIGHT `COMPLETE — IDENTITY_PREFLIGHT_ONLY`（code `4f77255f...`）；actual P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`；policy `NO_NEW_DECISION`；local queue `BLOCKED_EXTERNAL`；P28 real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C/P21B/P21C 均保持各自 authorization gate |
+| 当前 work-unit 状态 | P29E `COMPLETE — CONTRACT_ONLY / VALUE_FREE_ABSTENTION`；fixture `SYNTHETIC_CONFORMANCE_ONLY`；real P29 candidate `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；P30A-E1 `ENGINEERING_COMPLETE`；P30A-E2a/E2b `COMPLETE_NEGATIVE`；P30A-E2c `RECONCILIATION_ONLY / NO_RC_CLAIM`；formal P30A `LOCAL_RC_INCOMPLETE`；P16R-PREFLIGHT `COMPLETE — IDENTITY_PREFLIGHT_ONLY`（code `4f77255f...`）；actual P16R `AUTHORIZATION_REQUIRED / NOT_RUN`；science `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`；policy `NO_NEW_DECISION`；local queue `BLOCKED_EXTERNAL`；P28 real acceptance `BLOCKED / 0_OF_3_QUALIFYING_MODULES`；P27A-R `REPLAY_NOT_RUN / ASSET_PENDING`；P27B/P27C/P21B/P21C 均保持各自 authorization gate |
 | 工作树保护清单 | 不在文档中固定；每轮从现场 `git status --short` 重新生成，任何新路径默认受保护 |
 | `.53` preview | `/home/zkyd/data1/mzy/praxis-virtualcell-preview/p11` |
 | `.53` deploy checkout | `codex/deploy-v1.6.0` at `bf44aac25b993e49d0146ccd52dddad5c2fa14de`；仅 `?? vc_api.log` |
@@ -2503,8 +2504,11 @@ numbered plan below. It proved local wheel/source reproducibility (`1,264,708` b
 `44e5e905e706f87c9b43574a5f02afd41c7b37d9079a0e91956b511bca422303`; `8,055,078` bytes /
 `ba5e5d0dbe387575049f5603f8011af3359d4f99583f4856233be48dc796e642`) but not a completed
 artifact set. P30A-E2a independently checked offline coverage and retained the exact negative
-record; P30A-E2b then bound it to a source-stable archive-only runner, whose two source archives
-safely failed on a tracked unsupported link. Neither record may elevate caller-supplied probes. Missing
+record; P30A-E2b then bound it to a source-stable archive-only runner, whose immutable record retains
+two `source_archive_build_failed` attempts. Its contemporary tracked-link causal attribution is
+unreproducible from the same exact committed `.gitattributes` / `git archive` inputs because raw stderr
+was not retained. P30A-E2c's current local export-ignore reconciliation preserves that historical failure
+result; neither record may elevate caller-supplied probes or form a formal RC. Missing
 offline inputs (`pyjwt==2.13.0`, `pyyaml==6.0.3`, and Linux/arm64 `cffi`, `cryptography`,
 `pydantic-core`, `rpds-py`) remain explicit gates, not permission to download or bypass them.
 
@@ -2836,7 +2840,8 @@ blocked；comparison/ablation 未运行。P29E 随后从 P28E docs closure
 `empty_not_connected` graph 与 authoritative value-free compilation。真实 P29 candidate 因
 qualified biological nodes 为 `0` 而保持 blocked。P30A-E1 local release-contract hardening 与
 P30A-E2a clean-SHA offline preflight 与 P30A-E2b archive-only runner 已完成，均为
-`COMPLETE_NEGATIVE`；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P16R local
+`COMPLETE_NEGATIVE`；P30A-E2c 仅为 `RECONCILIATION_ONLY / NO_RC_CLAIM`；formal P30A 仍
+`LOCAL_RC_INCOMPLETE`。P16R local
 authorization-preflight identity bridge 已完成；当前 local queue 为 `BLOCKED_EXTERNAL`。P30B1–B4
 与真实 P16R 保持独立授权门。
 

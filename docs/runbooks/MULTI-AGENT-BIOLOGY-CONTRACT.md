@@ -133,10 +133,17 @@ finalizer was next at E2a closure, while formal P30A remained `LOCAL_RC_INCOMPLE
 `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`, and policy remained `NO_NEW_DECISION`.
 
 **E2b follow-on (2026-08-10):** P30A-E2b archive-only runner completed
-`COMPLETE_NEGATIVE`: source was stable, but both source archives safely failed on a tracked
-unsupported link and wheelhouse coverage remains incomplete. Formal P30A remains
+`COMPLETE_NEGATIVE`: source was stable and the immutable record retains two
+`source_archive_build_failed` attempts. Its contemporary tracked-unsupported-link attribution is
+unreproducible from the same exact committed `.gitattributes` / `git archive` inputs because raw
+stderr was not retained; wheelhouse coverage remains incomplete. Formal P30A remains
 `LOCAL_RC_INCOMPLETE`; at E2b closure, the next local unit was the P16R authorization-preflight identity bridge. Actual P16R
 remains `AUTHORIZATION_REQUIRED / NOT_RUN`; science and policy remain unchanged.
+
+**E2c reconciliation (2026-08-10):** The append-only
+[source-archive reconciliation](../../reports/phase30a/PHASE30A_E2C_SOURCE_ARCHIVE_RECONCILIATION.md)
+preserves E2b's failure result and records a current local non-RC export-ignore probe; it does not
+authorize actual P16R, science, policy, or release action.
 
 **P16R-PREFLIGHT follow-on (2026-08-10):** the local authorization-preflight identity bridge
 subsequently completed `COMPLETE — IDENTITY_PREFLIGHT_ONLY` at

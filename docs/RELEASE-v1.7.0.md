@@ -1,12 +1,14 @@
 # PRAXIS-VirtualCell 1.7.0 — Local RC Contract (Unpublished)
 
-> Status: P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a/E2b `COMPLETE_NEGATIVE`; formal P30A
+> Status: P30A-E1 `ENGINEERING_COMPLETE`; P30A-E2a/E2b `COMPLETE_NEGATIVE`; P30A-E2c
+> `RECONCILIATION_ONLY / NO_RC_CLAIM`; formal P30A
 > `LOCAL_RC_INCOMPLETE / UNPUBLISHED`; P16R local authorization-preflight identity bridge
 > `COMPLETE — IDENTITY_PREFLIGHT_ONLY`; actual P16R `AUTHORIZATION_REQUIRED / NOT_RUN`.
 >
 > P30A is local-only. Completed release-contract hardening and reproducibility probes do not yet
 > prove a complete RC artifact set. P30A-E2b used a controlled archive-only runner and retained a
-> negative result rather than accept caller-supplied test or artifact claims. This document does not publish an artifact,
+> negative result rather than accept caller-supplied test or artifact claims; E2c preserves that record
+> without accepting a release artifact. This document does not publish an artifact,
 > complete a remote CI gate, create or move a tag, promote a biological capability, or authorize
 > deployment.
 >
@@ -134,7 +136,7 @@ entries; ZIP integrity passed. The archive probe is an exact-HEAD projection and
 links and AppleDouble entries. Neither probe is a retained clean-install-qualified artifact bundle,
 an accepted release manifest, an SBOM, a licence inventory or a published artifact.
 
-## P30A-E2a/E2b negative records and formal-RC gates
+## P30A-E2a/E2b negative records, E2c reconciliation, and formal-RC gates
 
 P30A-E2a independently rechecked clean source SHA/tree/epoch before and after an offline
 dependency-coverage preflight. Its `praxis.local-rc-finalizer-preflight.v1` record is
@@ -153,10 +155,18 @@ P30A-E2b subsequently ran its source-stable, exact-HEAD archive-only runner at
 `12ad93d57e4f4e7438d2110b5ac9848c6b17ea33` / tree
 `14fe604111c18c558048bc282d23da936ac57088` / epoch `1786343459`. Its runner record
 `72459a3b51ba243d747ee2c0159d4105a30ba47d191b99ea05960343bbae63d2` and nested preflight
-`064a479fd35deba3b08d70e999171577b9171133873d5bc7a3d9968a57aafec4` are both negative: the
-source archives safely failed on a tracked unsupported link, while the two offline wheelhouse profiles
-remain incomplete. No clean install, OCI build, full gate, SBOM, licence inventory, dependency audit,
+`064a479fd35deba3b08d70e999171577b9171133873d5bc7a3d9968a57aafec4` are both negative: the immutable
+record retains two `source_archive_build_failed` attempts. Its contemporary tracked-unsupported-link
+causal attribution is unreproducible from the same exact committed `.gitattributes` / `git archive`
+inputs because raw stderr was not retained; the two offline wheelhouse profiles remain incomplete. No
+clean install, OCI build, full gate, SBOM, licence inventory, dependency audit,
 `SHA256SUMS` or accepted release manifest was generated.
+
+P30A-E2c then preserved that immutable E2b failure result in the append-only
+[source-archive reconciliation](../reports/phase30a/PHASE30A_E2C_SOURCE_ARCHIVE_RECONCILIATION.md).
+Its current exact-source export-ignore double probe is local engineering evidence only: no release
+artifact or manifest was accepted and no formal RC, science, policy, promotion, or actual-P16R result
+was created.
 
 Formal P30A therefore remains incomplete. The P16R local authorization-preflight identity bridge
 subsequently completed as an in-memory, value-free declaration binder; it does not access real P16R

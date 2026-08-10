@@ -6,10 +6,13 @@
 > **E2a follow-on（2026-08-10）：** P30A-E2a clean-SHA offline preflight 为
 > `COMPLETE_NEGATIVE`，未运行 install、build、OCI 或 full gate。
 > **E2b follow-on（2026-08-10）：** P30A-E2b archive-only runner 也是
-> `COMPLETE_NEGATIVE`：source stable，但两个 source archives 因 tracked unsupported link 安全失败；
-> formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P16R local authorization-preflight identity bridge 已完成
+> `COMPLETE_NEGATIVE`：source stable，immutable record 记录两个 `source_archive_build_failed` attempts；
+> 其 tracked-unsupported-link 因果归因不能由同一 exact tree 的 committed `.gitattributes` / `git archive`
+> 重现（raw stderr 未保留）。formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P16R local authorization-preflight identity bridge 已完成
 > `COMPLETE — IDENTITY_PREFLIGHT_ONLY`，但真实 P16R 仍 `AUTHORIZATION_REQUIRED / NOT_RUN`，science 为
 > `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`，policy 为 `NO_NEW_DECISION`。任何预测必须同时匹配 exact request × Pack × model × environment × adapter × evidence × policy；任一门缺失、失配、OOD 或超出 scope 都必须 `abstain`。
+> [E2c reconciliation](../reports/phase30a/PHASE30A_E2C_SOURCE_ARCHIVE_RECONCILIATION.md) 的 current local
+> export-ignore probe 不是 formal RC、science 或 policy result。
 
 ## 1. 命令行(CLI)
 

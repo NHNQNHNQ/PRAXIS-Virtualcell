@@ -118,7 +118,8 @@ adapter/compute/benchmark/evidence/policy/result/tool/prediction identities 均�
 仍为 `BLOCKED / 0_QUALIFYING_BIOLOGICAL_NODES`；content hash 是 identity，不是 signer 或
 attestation。P30A-E1 已完成本地 release-contract hardening 与 reproducibility probes；P30A-E2a
 已完成 clean-SHA offline preflight 负结果，P30A-E2b archive-only runner 也以
-`COMPLETE_NEGATIVE` 收口。formal P30A 仍为 `LOCAL_RC_INCOMPLETE`，且不授权 push、tag、发布或
+`COMPLETE_NEGATIVE` 收口；P30A-E2c 仅完成 append-only source-archive reconciliation，不能形成 RC。
+formal P30A 仍为 `LOCAL_RC_INCOMPLETE`，且不授权 push、tag、发布或
 部署。P16R local authorization-preflight identity bridge 已完成；真实 P16R 仍
 `AUTHORIZATION_REQUIRED / NOT_RUN`。没有新的已登记本地 work unit；下一步须是独立授权的
 candidate/asset inventory，随后才可进入独立 P16R science window。
@@ -248,9 +249,9 @@ request-bound。设计和操作边界见
 [P29E ADR](docs/ADR-0025-limited-biological-world-model-contract.md)与
 [P29E runbook](docs/runbooks/LIMITED-BIOLOGICAL-WORLD-MODEL-CONTRACT.md)。真实 P29 仍 blocked，
 不得补造 molecule→organism placeholder chain；P30A-E1 已留下 local engineering probes，P30A-E2a/E2b
-已留下 negative records；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P16R local
+已留下 negative records，P30A-E2c 仅完成 reconciliation；formal P30A 仍 `LOCAL_RC_INCOMPLETE`。P16R local
 authorization-preflight identity bridge 已完成且只保留 value-free identity binding；真实 P16R
-仍未获授权或运行。当前没有新的已登记本地 work unit。
+仍未获授权或运行。P30A-E2c 后当前没有新的 eligible 本地 work unit，local queue 为 `BLOCKED_EXTERNAL`。
 
 准确产品承诺是：任意符合显式合同的数据可以制作成 VirtualCellPack 接入；只有
 存在匹配、可执行且经过验证并获 product policy 批准的模型时才产生预测，否则明确
@@ -291,8 +292,9 @@ P30A-E1 已从 exact commit `0a4d72b...` 两次生成 byte-identical wheel probe
 bytes / `44e5e905…2303`），但它不是 retained clean-install-qualified RC artifact，也没有
 accepted release manifest。P30A-E2a 的 clean-SHA offline preflight 记录
 `6cb91031…9019` 只证明 wheelhouse coverage 不足。P30A-E2b archive-only runner record
-`72459a3b…63d2` 随后安全记录了两个因 tracked unsupported link 而失败的 source-archive attempts；
-它未构建 clean-install-qualified candidate，formal P30A 仍 incomplete。`praxis-vc web` 的入口文件会
+`72459a3b…63d2` 随后记录了两个 `source_archive_build_failed` source-archive attempts；其当时的
+tracked-unsupported-link 因果归因不能由同一 exact tree 的 committed `.gitattributes` / `git archive`
+重现（raw stderr 未保留）。它未构建 clean-install-qualified candidate，formal P30A 仍 incomplete。`praxis-vc web` 的入口文件会
 被打包，但运行 Streamlit 仍需安装 `web` extra；当前发行门只验证其打包和绝对路径接线，不声称完整
 Streamlit server smoke。
 
@@ -656,9 +658,11 @@ P30A-E1 另有 release-tool/source-archive/packaging `47 passed`、formal Pack-a
 `148 passed` 和 React typecheck/lint/production build/bundle budget PASS；two source-archive
 probes are `8,055,078` bytes / `ba5e5d0d…e642`。P30A-E2a 的 targeted post-commit P30 suite
 `55 passed`；clean-SHA offline preflight result is `LOCAL_RC_INCOMPLETE` (`6cb91031…9019`)。P30A-E2b
-archive-only runner result is likewise `LOCAL_RC_INCOMPLETE` (`72459a3b…63d2`): source stable, but
-both source-archive attempts safely failed on a tracked unsupported link and both wheelhouse profiles
-remain incomplete. It ran no install/network/OCI/full gate or release action. The P16R local
+archive-only runner result is likewise `LOCAL_RC_INCOMPLETE` (`72459a3b…63d2`): source stable and the
+immutable record contains two `source_archive_build_failed` attempts, but its contemporary
+tracked-link causal attribution is unreproducible from the same committed tree's `.gitattributes` /
+`git archive` inputs (raw stderr was not retained); both wheelhouse profiles remain incomplete. It ran
+no install/network/OCI/full gate or release action. The P16R local
 authorization-preflight identity bridge subsequently completed as a value-free local contract; it is
 not a P16R scientific run. Science remains `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; policy remains
 `NO_NEW_DECISION`. 完整命令、用时、skip/deselect
@@ -672,6 +676,7 @@ not a P16R scientific run. Science remains `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`;
 | [P16R Identity-Preflight Completion Record](reports/phase16r_preflight/PHASE16R_AUTHORIZATION_PREFLIGHT.md) | exact local identity-preflight closure、固定 abstain 与真实 P16R external gate |
 | [P30A-E1 Engineering Completion Report](reports/phase30a/PHASE30A_ENGINEERING_COMPLETION.md) | release-contract hardening、probe identities 与 formal RC non-claim |
 | [P30A-E2b Archive Runner Negative Report](reports/phase30a/PHASE30A_E2B_ARCHIVE_RUNNER.md) | exact archive-only negative record、formal RC non-claim 与 P16R preflight handoff |
+| [P30A-E2c Source-Archive Reconciliation](reports/phase30a/PHASE30A_E2C_SOURCE_ARCHIVE_RECONCILIATION.md) | E2b immutable failure-result preservation、unreproducible tracked-link attribution 与 current local non-RC probe |
 | [P30A-E2a Preflight Negative Report](reports/phase30a/PHASE30A_E2A_PREFLIGHT.md) | clean-SHA offline wheelhouse preflight 的 frozen negative evidence |
 | [P29E 完成报告](reports/phase29e/PHASE29E_COMPLETION.md) | exact empty-not-connected/value-free closure、package evidence 与真实 data/model/benchmark/science/policy non-runs |
 | [P29E Limited World Model ADR](docs/ADR-0025-limited-biological-world-model-contract.md) | null requirement identities、empty typed graph、content-hash trust ceiling 与 0-node abstention 决策 |
