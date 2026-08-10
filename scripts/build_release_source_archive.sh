@@ -2,8 +2,13 @@
 # Build one deterministic P30A source archive from a clean exact Git HEAD.
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+if [[ -n "${PRAXIS_SOURCE_ARCHIVE_ROOT:-}" ]]; then
+  ROOT_DIR="$(cd "${PRAXIS_SOURCE_ARCHIVE_ROOT}" && pwd -P)"
+else
+  ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+fi
 PYTHON_BIN="${PYTHON_BIN:-python3.13}"
+SOURCE_REF="${PRAXIS_SOURCE_ARCHIVE_REF:-HEAD}"
 
 fail() {
   echo "$*" >&2
@@ -18,10 +23,17 @@ fi
   || fail "source archive builder must run from the repository root"
 [[ -z "$(git -C "${ROOT_DIR}" status --porcelain=v1 --untracked-files=normal)" ]] \
   || fail "source archive requires a clean committed worktree"
+SOURCE_SHA="$(git -C "${ROOT_DIR}" rev-parse HEAD)"
+if [[ "${SOURCE_REF}" == "HEAD" ]]; then
+  SOURCE_REF="${SOURCE_SHA}"
+else
+  [[ "${SOURCE_REF}" =~ ^[0-9a-f]{40}$ ]] || fail "source archive reference must be an exact SHA"
+  [[ "${SOURCE_REF}" == "${SOURCE_SHA}" ]] || fail "source archive reference no longer matches HEAD"
+fi
 
-SOURCE_EPOCH="$(git -C "${ROOT_DIR}" show -s --format=%ct HEAD)"
-[[ "${SOURCE_EPOCH}" =~ ^[0-9]+$ ]] || fail "HEAD commit timestamp is invalid"
-PRODUCT_VERSION="$("${PYTHON_BIN}" - "${ROOT_DIR}" <<'PY'
+SOURCE_EPOCH="$(git -C "${ROOT_DIR}" show -s --format=%ct "${SOURCE_REF}")"
+[[ "${SOURCE_EPOCH}" =~ ^[0-9]+$ ]] || fail "source commit timestamp is invalid"
+PRODUCT_VERSION="$("${PYTHON_BIN}" - "${ROOT_DIR}" "${SOURCE_REF}" <<'PY'
 from __future__ import annotations
 
 import re
@@ -29,13 +41,13 @@ import subprocess
 import sys
 import tomllib
 
-root = sys.argv[1]
+root, source_ref = sys.argv[1:]
 project = tomllib.loads(
-    subprocess.check_output(["git", "-C", root, "show", "HEAD:pyproject.toml"]).decode("utf-8")
+    subprocess.check_output(["git", "-C", root, "show", f"{source_ref}:pyproject.toml"]).decode("utf-8")
 )
 version = project.get("project", {}).get("version")
 if not isinstance(version, str) or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._+-]*", version) is None:
-    raise SystemExit("HEAD pyproject.toml has an unsafe project version")
+    raise SystemExit("source pyproject.toml has an unsafe project version")
 print(version)
 PY
 )"
@@ -77,7 +89,7 @@ trap cleanup EXIT
 TAR_PATH="$(mktemp "${OUTPUT_DIR}/.${ARCHIVE_NAME}.tar.XXXXXX")"
 ARCHIVE_TMP="$(mktemp "${OUTPUT_DIR}/.${ARCHIVE_NAME}.tmp.XXXXXX")"
 PREFIX="praxis-virtualcell-${PRODUCT_VERSION}/"
-git -C "${ROOT_DIR}" archive --format=tar --prefix="${PREFIX}" HEAD > "${TAR_PATH}"
+git -C "${ROOT_DIR}" archive --format=tar --prefix="${PREFIX}" "${SOURCE_REF}" > "${TAR_PATH}"
 
 "${PYTHON_BIN}" - "${TAR_PATH}" "${ARCHIVE_TMP}" "${SOURCE_EPOCH}" "${PREFIX}" <<'PY'
 from __future__ import annotations
@@ -129,6 +141,10 @@ os.utime(archive_path, (epoch, epoch))
 PY
 
 # link(2) publishes without replacing a concurrent or pre-existing target.
+[[ "$(git -C "${ROOT_DIR}" rev-parse HEAD)" == "${SOURCE_REF}" ]] \
+  || fail "source archive reference changed before publish"
+[[ -z "$(git -C "${ROOT_DIR}" status --porcelain=v1 --untracked-files=normal)" ]] \
+  || fail "source archive worktree changed before publish"
 ln -- "${ARCHIVE_TMP}" "${OUTPUT_PATH}" \
   || fail "source archive output already exists or cannot be safely published"
 rm -f -- "${ARCHIVE_TMP}"

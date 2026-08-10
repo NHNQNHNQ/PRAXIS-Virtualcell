@@ -54,13 +54,13 @@ def _repository(tmp_path: Path, *, apple_double: bool = False, escaping_symlink:
     return repo
 
 
-def _build(repo: Path, output: Path) -> subprocess.CompletedProcess[str]:
+def _build(repo: Path, output: Path, *, extra_env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["bash", str(repo / "scripts" / _BUILDER.name), str(output)],
         cwd=repo,
         text=True,
         capture_output=True,
-        env={**os.environ, "PYTHON_BIN": sys.executable},
+        env={**os.environ, "PYTHON_BIN": sys.executable, **(extra_env or {})},
         check=False,
     )
 
@@ -108,6 +108,22 @@ def test_source_archive_rejects_dirty_tree_and_preserves_existing_output(tmp_pat
     assert existing.returncode != 0
     assert "already exists" in existing.stderr
     assert output.read_bytes() == b"do not replace"
+
+
+def test_source_archive_exact_ref_must_match_current_head(tmp_path: Path) -> None:
+    repo = _repository(tmp_path)
+    stale_sha = _run("git", "rev-parse", "HEAD", cwd=repo).stdout.strip()
+    (repo / "README.md").write_text("new committed source\n", encoding="utf-8")
+    _run("git", "add", "README.md", cwd=repo)
+    _run("git", "commit", "-qm", "new source", cwd=repo)
+    output = tmp_path / "out" / "praxis-virtualcell-1.7.0.tar.gz"
+    output.parent.mkdir()
+
+    result = _build(repo, output, extra_env={"PRAXIS_SOURCE_ARCHIVE_REF": stale_sha})
+
+    assert result.returncode != 0
+    assert "reference no longer matches HEAD" in result.stderr
+    assert not output.exists()
 
 
 def test_source_archive_requires_an_absolute_out_of_tree_output(tmp_path: Path) -> None:
