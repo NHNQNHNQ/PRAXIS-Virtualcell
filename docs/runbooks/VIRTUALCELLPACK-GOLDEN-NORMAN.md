@@ -61,15 +61,18 @@ python3.13 -m venv .venv
 在一个新建的外置工作目录执行：
 
 ```bash
+mkdir /absolute/new/norman-source
+cd /absolute/new/norman-source
+
 curl --fail --location --retry 3 \
-  --output NormanWeissman2019_filtered.h5ad.zip \
+  --output Norman2019_simulation_cpa.h5ad.zip \
   https://dataverse.harvard.edu/api/access/datafile/6881912
 
 printf '%s  %s\n' \
   64af382a6af9d129042577a651691d0bdbbdeef2ad973bef77f012b4b209c41f \
-  NormanWeissman2019_filtered.h5ad.zip | sha256sum --check -
+  Norman2019_simulation_cpa.h5ad.zip | sha256sum --check -
 
-unzip NormanWeissman2019_filtered.h5ad.zip \
+unzip Norman2019_simulation_cpa.h5ad.zip \
   Norman2019_simulation_cpa.h5ad
 
 printf '%s  %s\n' \
@@ -79,6 +82,41 @@ printf '%s  %s\n' \
 
 macOS 可用 `shasum -a 256` 或 `openssl dgst -sha256` 独立核对。任一 hash/size
 不符就停止；不得修改 contract 迎合下载内容。
+
+### 4.1 单条真实 held-out 预测
+
+下载与 H5AD 校验完成后，可用一个项目内入口完成 Pack 派生、冻结 baseline 构建、
+formal no-legacy runtime、单条件评分和 write-new receipt：
+
+```bash
+.venv/bin/python -m praxis_virtualcell.benchmarks.golden_norman_run \
+  --source-h5ad /absolute/new/norman-source/Norman2019_simulation_cpa.h5ad \
+  --output-dir /absolute/new/ahr-klf1-run \
+  --condition-id AHR+KLF1
+```
+
+`--source-h5ad` 只接受本地文件；入口不联网、不下载模块、不发现远程模型。
+`--output-dir` 必须是尚不存在的绝对路径，父目录必须已存在。默认条件
+`AHR+KLF1` 是冻结 `test`/source `ood` 组合；训练条件 `AHR+ctrl` 和 validation
+条件都会被拒绝，失败时不会发布最终目录。
+
+输出 `prediction.json` 使用 `vc.golden-condition-run.v1`，保存完整 5,045-feature
+预测、observed truth hash、单条件 full-feature MSE、Pack/model/runtime identities，且固定：
+
+```text
+legacy_predictors_registered=false
+plan_legacy_adapter=false
+benchmark_evidence_created=false
+scientifically_validated=false
+production_promoted=false
+p16r_run=false
+policy_changed=false
+```
+
+P8 v1 卡片只声明 `perturbation: gene`，所以组合在该冻结路径中仍编码为 `gene` 加
+两个 ordered Ensembl target。receipt 会显式记录
+`legacy_perturbation_encoding=gene_with_multiple_ordered_targets`；这不是严格 P16R
+`gene_combination` binding，不能据此修改 P8 卡片或提升科学状态。
 
 ## 5. 派生 Pack
 

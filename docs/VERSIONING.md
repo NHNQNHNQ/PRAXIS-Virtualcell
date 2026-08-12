@@ -141,6 +141,7 @@ The repository historically mixed product release tags, package metadata, API/ru
 | Golden Norman contract | `vc.golden-norman.v1` + canonical JSON SHA-256 | `data/golden/norman_2019/contract.yaml`, `benchmarks/golden_norman.py` | binds one exact public source, source/derived semantics, predefined control/split, metric/bootstrap and simple-baseline definitions; changing any item requires a new identity |
 | Golden baseline artifact | `vc.golden-baseline.v1` + per-file SHA-256 | external `model_cache/norman_*`, checked-in one-card registries | binds Pack fingerprint, ordered feature/target IDs, train conditions and fixed baseline arrays; not a general model revision or scientific validation |
 | Golden evaluation artifact | `vc.golden-evaluation.v1` + file SHA-256 | external `evaluation/evaluation.json` | records all held-out formal-runtime calls, condition losses, paired bootstrap and three separate states; scores do not promote `scientifically_validated` |
+| Golden held-out condition run | `vc.golden-condition-run.v1` + file SHA-256 | `benchmarks/golden_norman_run.py`, external `prediction.json` | one frozen test condition through the formal no-legacy runtime; binds full prediction, truth hash, one-condition MSE and P8 combination encoding while keeping benchmark evidence, P16R, science, policy and promotion false |
 | Golden artifact inventory | `vc.golden-artifact-manifest.v1` | `data/golden/norman_2019/artifact-manifest.json` | records exact external path/size/hash and compact scores; it is not the large data or model content |
 | P9 OOD manifest | `vc.ood-manifest.v1` + canonical JSON SHA-256 | `data/benchmarks/p9/ood-manifest.json`, `benchmarks/ood_validation.py` | freezes eight ordered OOD axes, biological groups, data roles, metrics/CI/seeds, validation-only threshold and promotion gate; fixture groups are not scientific performance |
 | P9 external result | `vc.ood-result.v1` + file SHA-256 | `data/benchmarks/p9/external-validation.json` | binds four public input hashes, exact shared features, predefined grouped split, adaptation-free condition results, selective metrics and fail-closed status; not a model-zoo registration or general validation |
@@ -913,7 +914,8 @@ domain/bundle schemas, `vc.pack-record.v1`, `vc.pack-catalog.v1`,
 `vc.job-execution-identity.v3`,
 `vc.data-catalog.v1`, `vc.upload-receipt.v1`,
 `vc.golden-norman.v1`, `vc.golden-baseline.v1`,
-`vc.golden-evaluation.v1`, `vc.golden-artifact-manifest.v1`,
+`vc.golden-evaluation.v1`, `vc.golden-condition-run.v1`,
+`vc.golden-artifact-manifest.v1`,
 `vc.community-pack.v1`, the `vc.community-*.v1` exchange/plan/result schemas,
 the seven `vc.virtual-microbiome-*.v1` scope/endpoint/adapter-requirement/contract/request/plan/result schemas,
 the P27A-E `vc.experiment-action.v1`, `vc.virtual-experiment.v1`,

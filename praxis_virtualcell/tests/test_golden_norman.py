@@ -12,6 +12,7 @@ import pandas as pd
 import pytest
 from scipy import sparse
 
+import praxis_virtualcell.benchmarks.golden_norman_run as golden_run
 from praxis_virtualcell.benchmarks.golden_norman import (
     GoldenNormanError,
     build_baseline_assets,
@@ -23,6 +24,7 @@ from praxis_virtualcell.benchmarks.golden_norman import (
     predict_from_artifact,
     run_baseline_runtime,
 )
+from praxis_virtualcell.benchmarks.golden_norman_run import run_golden_condition
 from praxis_virtualcell.data_packs.anndata_adapter import load_anndata_view
 from praxis_virtualcell.data_packs.errors import PackAssetHashMismatch
 from praxis_virtualcell.data_packs.registry import PackRegistry
@@ -708,3 +710,129 @@ def test_evaluation_scores_every_held_out_condition_through_formal_runtime(tmp_p
         contract=contract,
     )
     assert second == artifact
+
+
+def test_real_condition_runner_uses_formal_nonlegacy_runtime_and_writes_once(
+    tmp_path,
+    monkeypatch,
+):
+    source, contract = _write_source(tmp_path / "source")
+    monkeypatch.setattr(
+        "praxis_virtualcell.benchmarks.golden_norman.load_contract",
+        lambda: contract,
+    )
+    output = tmp_path / "real-run"
+
+    record = run_golden_condition(source, output, condition_id="A+C")
+
+    assert record == json.loads((output / "prediction.json").read_text(encoding="utf-8"))
+    assert record["schema_version"] == "vc.golden-condition-run.v1"
+    assert record["condition"] == {
+        "id": "A+C",
+        "partition": "test",
+        "evaluation_scope": "combination",
+        "targets": ["ENSG00000000001", "ENSG00000000003"],
+        "legacy_perturbation_encoding": "gene_with_multiple_ordered_targets",
+    }
+    assert record["prediction"]["n_features"] == 3
+    assert record["metric"]["score"] == record["metric"]["condition_loss"]
+    assert record["runtime"]["plan_legacy_adapter"] is False
+    assert record["runtime"]["legacy_predictors_registered"] is False
+    assert record["runtime"]["llm_used_for_prediction"] is False
+    assert record["states"] == {
+        "real_data_used": True,
+        "execution_performed": True,
+        "pack_valid": True,
+        "model_compatible": True,
+        "scientifically_validated": False,
+        "production_promoted": False,
+        "p16r_run": False,
+        "benchmark_evidence_created": False,
+        "policy_changed": False,
+    }
+    with pytest.raises(GoldenNormanError, match="already exists"):
+        run_golden_condition(source, output, condition_id="A+C")
+
+    dangling_target = tmp_path / "must-not-be-created"
+    dangling_output = tmp_path / "dangling-output"
+    dangling_output.symlink_to(dangling_target, target_is_directory=True)
+    with pytest.raises(GoldenNormanError, match="already exists"):
+        run_golden_condition(source, dangling_output, condition_id="A+C")
+    assert dangling_output.is_symlink()
+    assert not dangling_target.exists()
+
+
+@pytest.mark.parametrize("condition_id", ["A+ctrl", "C+ctrl"])
+def test_real_condition_runner_rejects_non_test_conditions_without_publishing(
+    tmp_path,
+    monkeypatch,
+    condition_id,
+):
+    source, contract = _write_source(tmp_path / "source")
+    monkeypatch.setattr(
+        "praxis_virtualcell.benchmarks.golden_norman.load_contract",
+        lambda: contract,
+    )
+    output = tmp_path / "rejected-run"
+
+    with pytest.raises(GoldenNormanError, match="frozen test partition"):
+        run_golden_condition(source, output, condition_id=condition_id)
+
+    assert not output.exists()
+
+
+def test_real_condition_runner_has_no_downloader_or_remote_model_surface():
+    module = (Path(__file__).parents[1] / "benchmarks" / "golden_norman_run.py").read_text(encoding="utf-8")
+
+    assert "import requests" not in module
+    assert "import urllib" not in module
+    assert "GEARS" not in module
+    assert "torch" not in module
+
+
+@pytest.mark.parametrize(
+    "tamper",
+    [
+        "abstain",
+        "llm_used",
+        "trace_receiver",
+        "report_request",
+        "plan_pack",
+        "delta_type",
+    ],
+)
+def test_real_condition_runner_rejects_tampered_formal_results_without_publishing(
+    tmp_path,
+    monkeypatch,
+    tamper,
+):
+    source, contract = _write_source(tmp_path / "source")
+    monkeypatch.setattr(
+        "praxis_virtualcell.benchmarks.golden_norman.load_contract",
+        lambda: contract,
+    )
+    original = golden_run.run_formal_query
+
+    def forged(*args, **kwargs):
+        result = original(*args, **kwargs)
+        if tamper == "abstain":
+            result["structured_report"]["abstain"] = None
+        elif tamper == "llm_used":
+            result["llm_used_for_prediction"] = True
+        elif tamper == "trace_receiver":
+            result["trace"] = [{"sender": "clean", "receiver": "MockCPA"}]
+        elif tamper == "report_request":
+            result["structured_report"]["request"]["perturbation_targets"] = ["FAKE"]
+        elif tamper == "plan_pack":
+            result["structured_report"]["provenance"]["execution_plan"]["pack_id"] = "wrong-pack"
+        else:
+            result["structured_report"]["prediction"]["delta"][0] = "1.5"
+        return result
+
+    monkeypatch.setattr(golden_run, "run_formal_query", forged)
+    output = tmp_path / "tampered-run"
+
+    with pytest.raises(GoldenNormanError):
+        run_golden_condition(source, output, condition_id="A+C")
+
+    assert not output.exists()
