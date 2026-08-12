@@ -8,7 +8,7 @@ import os
 
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.exceptions import InputValidationError
-from praxis_virtualcell.core.request_v2 import VirtualCellRequestV2
+from praxis_virtualcell.core.request_v2 import VirtualCellRequestV2, require_v2_request
 from praxis_virtualcell.io.job_store import JobStore
 from praxis_virtualcell.pack_factory import factory_catalog_payload
 from praxis_virtualcell.pack_product import (
@@ -33,8 +33,14 @@ from praxis_virtualcell.workflows.run_virtualcell_query import (
     run_formal_query,
     validate_candidate,
 )
+from praxis_virtualcell.workflows.runtime_builder import DirectV2RuntimeFactory
+from praxis_virtualcell.workflows.submit_job import (
+    DIRECT_V2_EXECUTION_CONTRACT,
+    submit_direct_v2_job_from_factory,
+)
 
 RUNS_DIR = os.environ.get("PRAXIS_VC_RUNS", "runs")
+_VIRTUAL_EXPERIMENT_SUBMISSION_CONTRACT = "vc.virtual-experiment-compilation.v1"
 
 # UI 辅助:cell_type 后端不做枚举校验(自由字符串),这里仅给常见示例供前端下拉,
 # 允许自由填写。物种/扰动类型的合法值直接复用 runtime 白名单(单一真相源)。
@@ -117,12 +123,16 @@ def _job_id(
     request: dict,
     pack_id: str | None = None,
     pack_version: str | None = None,
+    *,
+    submission_contract: str = _VIRTUAL_EXPERIMENT_SUBMISSION_CONTRACT,
 ) -> str:
     identity = {
         "request": request,
         "pack_id": pack_id,
         "pack_version": pack_version,
     }
+    if submission_contract != _VIRTUAL_EXPERIMENT_SUBMISSION_CONTRACT:
+        identity["submission_contract"] = submission_contract
     h = hashlib.sha256(json.dumps(identity, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:8]
     store = JobStore(RUNS_DIR)
     return f"vc_{len(store.list_jobs()) + 1:04d}_{h}"
@@ -134,7 +144,37 @@ def run_job(
     enable_llm_report: bool,
     pack_id: str | None = None,
     pack_version: str | None = None,
+    *,
+    submission_contract: str = _VIRTUAL_EXPERIMENT_SUBMISSION_CONTRACT,
+    direct_v2_factory: DirectV2RuntimeFactory | None = None,
 ) -> dict:
+    if submission_contract == DIRECT_V2_EXECUTION_CONTRACT:
+        if mode != "offline" or enable_llm_report:
+            raise InputValidationError("direct-v2 execution requires offline mode without an LLM report")
+        if not all(isinstance(value, str) and value and value.strip() == value for value in (pack_id, pack_version)):
+            raise InputValidationError("direct-v2 execution requires exact pack_id and pack_version")
+        try:
+            validated_v2 = require_v2_request(request)
+        except (TypeError, ValueError) as exc:
+            raise InputValidationError("invalid direct-v2 request") from exc
+        job_id = _job_id(
+            validated_v2.to_dict(),
+            pack_id,
+            pack_version,
+            submission_contract=submission_contract,
+        )
+        return submit_direct_v2_job_from_factory(
+            validated_v2,
+            factory=direct_v2_factory,
+            pack_id=pack_id,
+            pack_version=pack_version,
+            job_store=JobStore(RUNS_DIR),
+            job_id=job_id,
+        )
+
+    if submission_contract != _VIRTUAL_EXPERIMENT_SUBMISSION_CONTRACT:
+        raise InputValidationError("unsupported submission_contract")
+
     if request.get("schema_version") == "vc.request.v2":
         if not all(isinstance(value, str) and value and value.strip() == value for value in (pack_id, pack_version)):
             raise InputValidationError("vc.request.v2 requires exact pack_id and pack_version")
@@ -226,12 +266,26 @@ def list_jobs() -> list[dict]:
         rep = j.get("report", {}) or {}
         execution_identity = j.get("execution_identity") or {}
         pack_identity = execution_identity.get("pack") or {}
+        raw_species = req.get("species")
+        species = (
+            raw_species.get("common_name") or raw_species.get("scientific_name") or raw_species.get("taxonomy_id")
+            if isinstance(raw_species, dict)
+            else raw_species
+            if isinstance(raw_species, str)
+            else None
+        )
+        raw_targets = req.get("perturbation_targets")
+        if raw_targets is None and isinstance(req.get("perturbation"), dict):
+            raw_targets = req["perturbation"].get("targets")
+        perturbation_targets = (
+            [target for target in raw_targets if isinstance(target, str)] if isinstance(raw_targets, list) else []
+        )
         out.append(
             {
                 "job_id": jid,
                 "status": j.get("status", "unknown"),
-                "species": req.get("species"),
-                "perturbation_targets": req.get("perturbation_targets", []),
+                "species": species,
+                "perturbation_targets": perturbation_targets,
                 "abstain": rep.get("abstain"),
                 "reliability": rep.get("reliability"),
                 "pack_id": pack_identity.get("pack_id"),

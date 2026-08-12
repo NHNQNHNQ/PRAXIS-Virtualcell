@@ -3405,3 +3405,26 @@ PRAXIS-VirtualCell 的可信度不来自展示了多少物种、多少 cell card
 ```
 
 只有这些问题都有可审计答案时，系统才产生其合同允许的结果。否则，诚实 abstain 就是正确的产品行为。
+
+## U1 本地 direct-v2 发布可验证性补充（未发布）
+
+当前 `codex/p30-foundation-rc` 的 U1 候选增加的是通用 direct-v2 的本地发布前检查，不是 immutable
+upstream release。`vc.direct-v2-execution.v1` 只能由 host 显式提供 `DirectV2RuntimeFactory`；Python、CLI
+和 HTTP 共用 `submit_direct_v2_job_from_factory()`，没有插件自动发现、环境变量 factory 或隐式模型加载。
+
+当 HTTP 收到结构合法的 direct-v2 submission 却没有 factory 时，必须返回
+`503 direct_v2_factory_unconfigured`，并且不创建 JobStore。installed-wheel verifier 用 synthetic request
+检查这一负向边界；它不加载模型、Pack、adapter 或任何领域组件。U1 V2 仍只允许 single-step
+execution；U2 的 write-new V3 只允许带精确、显式注册且 source-fingerprinted generic reducer policy
+的多 step execution。无 policy 以 `output_reducer_required` 收敛为空计划；binding/order/source/output
+drift，或任一步准备/执行失败时，不会返回 subset result：它们分别收敛为空计划或 hard-abstain。V3 的 reducer receipt 绑定全部有序
+step/input/output hash 和 reduced-output hash，V5 JobStore identity 重新核验该公开 receipt；callable、
+source、路径、payload 和数值输入不会进入公开 provenance。direct-v2 wrapper 必须显式声明
+`artifact_snapshot_supported = True`；Broker 在 wrapper construction 前以 no-follow descriptor 一次读取并封存 exact
+artifact bytes，core 不会给未适配 wrapper 回退 artifact path。Runtime 仅接受同一完整 private snapshot handoff，path
+在 handoff 后被替换不会改变执行 bytes。direct-v2 只接受 write-new `vc.environment.v3` +
+`EnvironmentIdentityV2` 的 `vc.artifact-snapshot-budget-policy.v1`，在 snapshot 的 `os.read`、selected-content、adapter
+和 wrapper 前聚合检查 sealed snapshot 的声明 bytes/entries，并声明/绑定 `execution_only` retention scope；它不是 RSS/cgroup/隔离或
+安全擦除保证。Golden research-only release 已精确绑定其三件 artifact 的 4,374,098 bytes/3 entries；该预算不包含
+2.28GB Pack，也不构成 production 容量、并发或部署限制，后者仍是 U1 release gate。此候选未发布，不构成
+GitHub CI、wheel/archive、科学验证或 production promotion。

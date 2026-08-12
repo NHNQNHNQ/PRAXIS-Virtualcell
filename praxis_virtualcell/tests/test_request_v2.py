@@ -239,6 +239,31 @@ def test_non_json_request_fields_fail_closed(field, value):
         VirtualCellRequestV2.from_dict({**REQUEST_V2, field: value})
 
 
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("request_id", "\ud800"),
+        ("metadata", {"nested": "\ud800"}),
+        ("metadata", {"\ud800": "value"}),
+    ],
+)
+def test_non_utf8_json_strings_fail_closed_before_identity_serialization(field, value):
+    with pytest.raises(InputValidationError):
+        VirtualCellRequestV2.from_dict({**REQUEST_V2, field: value})
+
+
+@pytest.mark.parametrize(
+    "cls,payload",
+    [
+        (PerturbationSpec, {**PERTURBATION, "dose_value": 10**10000}),
+        (PredictionBundle, {**PREDICTION, "values": [10**10000, 0.2]}),
+    ],
+)
+def test_overflowing_numeric_inputs_fail_closed(cls, payload):
+    with pytest.raises(InputValidationError):
+        cls.from_dict(payload)
+
+
 def test_validated_domain_objects_are_deeply_immutable():
     payload = json.loads(json.dumps(REQUEST_V2))
     payload["metadata"] = {"nested": {"items": ["original"]}}
@@ -331,35 +356,72 @@ def test_v2_to_legacy_rejects_unrepresentable_context_instead_of_dropping_it():
         v2_request_to_legacy(request)
 
 
+def test_pack_input_selector_is_opt_in_identity_and_cannot_be_dropped_to_legacy():
+    base = VirtualCellRequestV2.from_dict(REQUEST_V2)
+    assert "pack_input" not in base.to_dict()
+
+    selected = VirtualCellRequestV2.from_dict(
+        {
+            **REQUEST_V2,
+            "pack_input": {
+                "schema_version": "vc.pack-input-selector.v1",
+                "record_id": "exact-record-1",
+            },
+        }
+    )
+    assert selected.to_dict()["pack_input"] == {
+        "schema_version": "vc.pack-input-selector.v1",
+        "record_id": "exact-record-1",
+    }
+    with pytest.raises(InputValidationError):
+        VirtualCellRequestV2.from_dict(
+            {
+                **selected.to_dict(),
+                "pack_input": {
+                    "schema_version": "vc.pack-input-selector.v1",
+                    "record_id": "exact-record-1",
+                    "values": [1.0],
+                },
+            }
+        )
+
+    legacy = VirtualCellRequest.from_dict(
+        {
+            "request_id": "legacy-pack-selector",
+            "species": "human",
+            "perturbation_type": "gene",
+            "perturbation_targets": ["AHR"],
+            "input_modality": "scRNA",
+            "output_modality": "delta_expression",
+            "task_type": "predict_delta_expression",
+        }
+    )
+    selected_legacy = VirtualCellRequestV2.from_dict(
+        {
+            **legacy_request_to_v2(legacy).to_dict(),
+            "pack_input": {
+                "schema_version": "vc.pack-input-selector.v1",
+                "record_id": "exact-record-1",
+            },
+        }
+    )
+    with pytest.raises(InputValidationError, match="v2-only context"):
+        v2_request_to_legacy(selected_legacy)
+
+
 def test_request_v2_has_no_h5ad_pack_registry_or_model_dependency():
     import praxis_virtualcell.core.request_v2 as module
 
     tree = ast.parse(Path(module.__file__).read_text(encoding="utf-8"))
-    imports = {
-        alias.name
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Import)
-        for alias in node.names
-    }
-    imports |= {
-        node.module or ""
-        for node in ast.walk(tree)
-        if isinstance(node, ast.ImportFrom)
-    }
-    calls = {
-        node.func.id
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
-    }
+    imports = {alias.name for node in ast.walk(tree) if isinstance(node, ast.Import) for alias in node.names}
+    imports |= {node.module or "" for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)}
+    calls = {node.func.id for node in ast.walk(tree) if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)}
     calls |= {
-        node.func.attr
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+        node.func.attr for node in ast.walk(tree) if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
     }
 
     assert not any(
-        name.startswith(("anndata", "scanpy", "h5py", "praxis_virtualcell.model_zoo"))
-        or "pack_registry" in name
+        name.startswith(("anndata", "scanpy", "h5py", "praxis_virtualcell.model_zoo")) or "pack_registry" in name
         for name in imports
     )
     assert calls.isdisjoint({"open", "read_h5ad", "read_text", "read_bytes"})

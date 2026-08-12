@@ -1,0 +1,72 @@
+{
+  "baseline_context": {
+    "control_assignment_sha256": "8f09650026e297ce0e010120814230bc7de306364ab49316b7c102e836c6e3d5",
+    "matched_control_sha256": "2fc6ba835e3a9353345651b9369abdd189c6017a854932c038b157faa4b378ae",
+    "reference": "matched_split_control_mean_X",
+    "scope_fingerprint": "e4b651d11db29eeaf3055cc1250b2083c5744e0355bbc91151381dffe7f60502",
+    "source_control_condition": "ctrl"
+  },
+  "cell_context": {
+    "attributes": {
+      "assay_id": "EFO:0008913",
+      "assembly_accession": "GCA_000001405.15",
+      "assembly_name": "GRCh38",
+      "cell_identity_id": "CVCL_0004",
+      "evaluation_scope": "combination",
+      "feature_ids_sha256": "ecca6c636629e35ae5f5a0ec6fe84c1a7983e1adb263fbbcaea70a0c5495b2b7",
+      "feature_namespace_version": "Ensembl 84"
+    },
+    "cell_type_id": null,
+    "cell_type_name": "K562",
+    "schema_version": "vc.cell-context.v1",
+    "tissue_id": null,
+    "tissue_name": null
+  },
+  "constraints": {
+    "condition_id": "AHR+KLF1",
+    "execution_scope": "research_only",
+    "partition": "test",
+    "source_real_run_sha256": "fe82a306ff2ecdb42d2da9abc5fb9007c9c46ecf1051734789da5afb0598f52d"
+  },
+  "input_modality": {
+    "feature_namespace": "EnsemblGene",
+    "name": "scRNA",
+    "ontology_id": "EFO:0008913",
+    "schema_version": "vc.modality.v1",
+    "unit": null
+  },
+  "metadata": {},
+  "output_modality": {
+    "feature_namespace": "EnsemblGene",
+    "name": "delta_expression",
+    "ontology_id": "PRAXISOUTPUT:delta_expression",
+    "schema_version": "vc.modality.v1",
+    "unit": null
+  },
+  "perturbation": {
+    "dose_unit": "1",
+    "dose_value": 1.0,
+    "kind": "gene_combination",
+    "schema_version": "vc.perturbation.v1",
+    "targets": [
+      "ENSG00000106546",
+      "ENSG00000105610"
+    ],
+    "timepoint": "5d"
+  },
+  "request_id": "golden-norman-ahr-klf1-research",
+  "schema_version": "vc.request.v2",
+  "species": {
+    "common_name": "human",
+    "schema_version": "vc.species-ref.v1",
+    "scientific_name": "Homo sapiens",
+    "taxonomy_id": "NCBITaxon:9606"
+  },
+  "task": {
+    "requested_outputs": [
+      "delta_expression"
+    ],
+    "schema_version": "vc.task.v1",
+    "task_type": "predict_delta_expression"
+  }
+}

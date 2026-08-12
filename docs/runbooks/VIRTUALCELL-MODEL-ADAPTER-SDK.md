@@ -378,3 +378,22 @@ policy/promotion 均需单独授权。P16E 完成不表示 K562 runtime-ready、
 scientifically validated、released 或 promoted；由于 P14–P16 仍少于两个
 production-promoted capabilities，下一 eligible 本地工程 work unit 仅是
 P17 contract-only。
+
+## U1 本地 direct-v2 发布可验证性补充（未发布）
+
+这是一条通用、单模型的 release-preflight 路径，不改变本 runbook 的 P13 历史结论。通过
+`DirectV2RuntimeFactory` 显式构造 runtime 后，Python、CLI、HTTP 都只能调用
+`submit_direct_v2_job_from_factory()`；host 不会发现或加载 factory、Pack、adapter、wrapper 或领域插件。
+
+对结构合法的 `vc.direct-v2-execution.v1` HTTP submission，未注入 factory 必须得到
+`503 direct_v2_factory_unconfigured`，并且 `PRAXIS_VC_RUNS` 下不得出现 JobStore 写入。已安装的 clean
+wheel verifier 会检查这个负向合同后才运行既有 legacy smoke。U1 V2 不执行多模型：无精确 U2
+`vc.output-reducer-policy.v1` 时，plan 有多个 step 必须以 `output_reducer_required` 生成空计划。U2 V3
+只可用显式、source-fingerprinted generic reducer，所有 step、reducer receipt 和 V5 identity 必须一致；
+任一步失败不得降级为子集结果。direct-v2 wrapper 必须显式声明 `artifact_snapshot_supported = True`；Broker 通过
+no-follow descriptor 封存 exact artifact bytes，core 不提供 path fallback，未适配 wrapper 在构造期为空计划。Runtime
+只接受同一完整 private snapshot handoff。direct-v2 必须使用 write-new `vc.environment.v3` +
+`EnvironmentIdentityV2` 的 `vc.artifact-snapshot-budget-policy.v1`；它只约束 sealed snapshot 的声明 bytes/entries，并声明/绑定
+`execution_only` retention scope，不承诺 RSS/cgroup/隔离。Golden research-only release 已绑定其三件 artifact 的
+4,374,098 bytes/3 entries；该预算不包含 2.28GB Pack，也不决定 production 容量、并发或部署限制。
+以上均为未发布本地验证，不证明 release、科学有效性或 production promotion。

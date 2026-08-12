@@ -103,7 +103,18 @@ def _cmd_ask(a) -> int:
 def _cmd_serve(a) -> int:
     import uvicorn
 
-    uvicorn.run("praxis_vc_api.main:app", host=a.host, port=a.port, reload=False)
+    from praxis_vc_api.main import app, configure_direct_v2_factory
+
+    try:
+        factory = _direct_v2_factory(a)
+    except (OSError, TypeError, ValueError):
+        _print_json({"status": "rejected", "reason": "golden_research_configuration_invalid"})
+        return 2
+    configure_direct_v2_factory(factory)
+    try:
+        uvicorn.run(app, host=a.host, port=a.port, reload=False)
+    finally:
+        configure_direct_v2_factory(None)
     return 0
 
 
@@ -137,6 +148,33 @@ def _json_file(path: str) -> dict:
 
 def _print_json(value: dict) -> None:
     print(json.dumps(value, ensure_ascii=False, indent=2))
+
+
+def _direct_v2_factory(a):
+    supplied = (
+        a.golden_registration_root,
+        a.golden_pack_root,
+        a.golden_model_cache_root,
+    )
+    if any(value is not None for value in supplied):
+        if not all(value is not None for value in supplied) or a.direct_v2_factory is not None:
+            raise ValueError("Golden runtime roots must be supplied together without an injected factory")
+        from praxis_virtualcell.model_zoo.golden_additive_research import (
+            load_golden_additive_research,
+        )
+
+        return load_golden_additive_research(
+            registration_root=a.golden_registration_root,
+            pack_root=a.golden_pack_root,
+            model_cache_root=a.golden_model_cache_root,
+        ).factory()
+    return a.direct_v2_factory
+
+
+def _golden_runtime_arguments(parser) -> None:
+    parser.add_argument("--golden-registration-root")
+    parser.add_argument("--golden-pack-root")
+    parser.add_argument("--golden-model-cache-root")
 
 
 def _cmd_pack_inspect(a) -> int:
@@ -243,6 +281,56 @@ def _cmd_pack_run(a) -> int:
     return 0
 
 
+def _cmd_direct_v2_run(a) -> int:
+    """Submit an explicit direct-v2 job through the injected generic factory."""
+
+    from praxis_virtualcell.core.request_v2 import require_v2_request
+    from praxis_virtualcell.io.job_store import JobStore
+    from praxis_virtualcell.workflows.submit_job import (
+        DirectV2FactoryUnconfigured,
+        submit_direct_v2_job_from_factory,
+    )
+
+    try:
+        factory = _direct_v2_factory(a)
+    except (OSError, TypeError, ValueError):
+        _print_json(
+            {
+                "status": "rejected",
+                "reason": "golden_research_configuration_invalid",
+            }
+        )
+        return 2
+    request = require_v2_request(_json_file(a.request))
+    try:
+        result = submit_direct_v2_job_from_factory(
+            request,
+            factory=factory,
+            pack_id=a.pack_id,
+            pack_version=a.pack_version,
+            job_store=JobStore(os.path.dirname(a.out) or "runs"),
+            job_id=os.path.basename(a.out),
+        )
+    except DirectV2FactoryUnconfigured:
+        _print_json(
+            {
+                "status": "rejected",
+                "reason": "direct_v2_factory_unconfigured",
+            }
+        )
+        return 2
+    except FileExistsError:
+        _print_json(
+            {
+                "status": "rejected",
+                "reason": "job_already_exists",
+            }
+        )
+        return 2
+    _print_json(result)
+    return 0
+
+
 def _cmd_training_dry_run(a) -> int:
     from praxis_virtualcell.model_zoo.training.pipeline import (
         TrainingPipelineError,
@@ -278,7 +366,7 @@ def _pack_identity_arguments(parser) -> None:
     parser.add_argument("--pack-version", required=True)
 
 
-def main(argv=None) -> int:
+def main(argv=None, *, direct_v2_factory=None) -> int:
     p = argparse.ArgumentParser(prog="praxis-vc", description="PRAXIS-VirtualCell 本地科学家界面")
     p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -298,6 +386,7 @@ def main(argv=None) -> int:
     s = sub.add_parser("serve", help="启动 FastAPI 本地服务")
     s.add_argument("--host", default="127.0.0.1")
     s.add_argument("--port", type=int, default=8000)
+    _golden_runtime_arguments(s)
     s.set_defaults(fn=_cmd_serve)
     w = sub.add_parser("web", help="启动 Streamlit 本地网页")
     w.add_argument("--api", default="http://127.0.0.1:8000")
@@ -357,6 +446,24 @@ def main(argv=None) -> int:
         dest="llm_report",
     )
     pack_run_cmd.set_defaults(fn=_cmd_pack_run)
+    direct_v2 = sub.add_parser(
+        "direct-v2",
+        help="经显式注入的 generic direct-v2 factory 提交一个 job",
+    )
+    direct_v2_sub = direct_v2.add_subparsers(dest="direct_v2_cmd", required=True)
+    direct_v2_run = direct_v2_sub.add_parser(
+        "run",
+        help="只接受 vc.request.v2；不自动发现 Pack、模型或领域插件",
+    )
+    direct_v2_run.add_argument("--request", required=True)
+    _pack_identity_arguments(direct_v2_run)
+    direct_v2_run.add_argument(
+        "--out",
+        required=True,
+        help="JobStore 路径，例如 runs/my-direct-v2-job",
+    )
+    _golden_runtime_arguments(direct_v2_run)
+    direct_v2_run.set_defaults(fn=_cmd_direct_v2_run)
     training = sub.add_parser(
         "training",
         help="运行 contract-only 确定性训练 dry-run",
@@ -371,6 +478,7 @@ def main(argv=None) -> int:
     dry_run_cmd.add_argument("--output-root", required=True)
     dry_run_cmd.set_defaults(fn=_cmd_training_dry_run)
     a = p.parse_args(argv)
+    a.direct_v2_factory = direct_v2_factory
     return a.fn(a)
 
 

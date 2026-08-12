@@ -2062,6 +2062,17 @@ select:focus {
   background: #f7f7f8;
 }
 
+.prompt-examples button.registered-research {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 7%, #fff);
+  font-weight: 650;
+}
+
+.prompt-examples button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
 .prompt-examples small {
   display: block;
   margin-top: 9px;

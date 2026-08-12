@@ -60,7 +60,7 @@ function shapeDelta(prediction: unknown, topN = 12): BarDatum[] {
   }
 
   // 形态 B(当前 mock):裸数值数组 → 用序号占位标签,不伪造基因名。
-  const nums = asNumArr(pred.delta);
+  const nums = asNumArr(Array.isArray(pred.delta) ? pred.delta : pred.values);
   const rows: BarDatum[] = nums.map((v, i) => ({ label: `Δ${i + 1}`, value: v }));
   return topByAbs(rows, topN);
 }
@@ -111,6 +111,9 @@ export default function PredictionsTab({ report }: { report: ReportResult }) {
   // 预测缺失:abstain 时后端把 prediction 置 None(见 report.py);此时无预测可画。
   const prediction = g(sr, "prediction");
   const hasPrediction = prediction != null;
+  const predictionRecord = asRecord(prediction);
+  const valueCount = asNumArr(predictionRecord.values).length;
+  const projectionMetadata = asRecord(predictionRecord.projection_metadata);
 
   // 整形(容错):数值不足则各图自带空态,不脑补。
   const deltaData = shapeDelta(prediction);
@@ -163,6 +166,12 @@ export default function PredictionsTab({ report }: { report: ReportResult }) {
         <PredictionBarChart data={deltaData} title="预测变化 Δ（top）" kind="delta" />
         <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: "var(--space-2)" }}>
           柱高为各维度的预测变化量（Δ）；标签为维度序号，非基因名。
+          {valueCount > 0 && (
+            <>
+              {" "}完整输出共 {valueCount.toLocaleString("en-US")} 维；feature identity：
+              <code>{String(projectionMetadata.feature_ids_sha256 ?? "—")}</code>。
+            </>
+          )}
         </div>
       </Card>
 

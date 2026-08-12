@@ -28,6 +28,11 @@ from praxis_virtualcell.data_packs.feature_alignment import (
     MappingAssetRef,
     ModelFeatureContract,
 )
+from praxis_virtualcell.data_packs.selected_content import (
+    PreparedSelectedContentV1,
+    SelectedContentReceiptV1,
+    SelectedContentRequestV1,
+)
 from praxis_virtualcell.model_zoo.registry_v2 import AdapterIdentity
 
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -72,24 +77,16 @@ def _reject_undeclared_model_fields(
         if pydantic_extra:
             unexpected.update(pydantic_extra)
         if unexpected:
-            raise AdapterContractError(
-                f"{path} contains unknown fields: {sorted(unexpected)}"
-            )
+            raise AdapterContractError(f"{path} contains unknown fields: {sorted(unexpected)}")
         for name in declared:
-            _reject_undeclared_model_fields(
-                getattr(value, name), f"{path}.{name}", seen
-            )
+            _reject_undeclared_model_fields(getattr(value, name), f"{path}.{name}", seen)
     elif is_dataclass(value) and not isinstance(value, type):
         declared = {field.name for field in dataclass_fields(value)}
         unexpected = set(getattr(value, "__dict__", {})).difference(declared)
         if unexpected:
-            raise AdapterContractError(
-                f"{path} contains unknown fields: {sorted(unexpected)}"
-            )
+            raise AdapterContractError(f"{path} contains unknown fields: {sorted(unexpected)}")
         for name in declared:
-            _reject_undeclared_model_fields(
-                getattr(value, name), f"{path}.{name}", seen
-            )
+            _reject_undeclared_model_fields(getattr(value, name), f"{path}.{name}", seen)
     elif isinstance(value, dict):
         for key, item in value.items():
             _reject_undeclared_model_fields(item, f"{path}.{key}", seen)
@@ -144,16 +141,12 @@ def _reject_model_type_drift(
             raise AdapterContractError(f"{path} has a non-canonical mapping type")
         for key, value in normalized.items():
             if key in observed:
-                _reject_model_type_drift(
-                    observed[key], value, f"{path}.{key}", seen
-                )
+                _reject_model_type_drift(observed[key], value, f"{path}.{key}", seen)
     elif isinstance(normalized, (list, tuple)):
         if not isinstance(observed, (list, tuple)) or len(observed) != len(normalized):
             raise AdapterContractError(f"{path} has a non-canonical sequence type")
         for index, (before, after) in enumerate(zip(observed, normalized, strict=True)):
-            _reject_model_type_drift(
-                before, after, f"{path}[{index}]", seen
-            )
+            _reject_model_type_drift(before, after, f"{path}[{index}]", seen)
 
 
 def _canonical_value(value: Any) -> Any:
@@ -235,12 +228,26 @@ def _shape_matches(actual: tuple[int, ...], declared: tuple[int | None, ...]) ->
 def _contains_reserved_projection_key(value: Any) -> bool:
     if isinstance(value, dict):
         return any(
-            key in _RESERVED_PROJECTION_KEYS
-            or _contains_reserved_projection_key(item)
-            for key, item in value.items()
+            key in _RESERVED_PROJECTION_KEYS or _contains_reserved_projection_key(item) for key, item in value.items()
         )
     if isinstance(value, (list, tuple)):
         return any(_contains_reserved_projection_key(item) for item in value)
+    return False
+
+
+def _contains_rooted_local_path(value: Any) -> bool:
+    if isinstance(value, str):
+        candidate = value.lstrip()
+        normalized = candidate.casefold()
+        return bool(
+            candidate.startswith(("/", "~/", "~\\", "\\"))
+            or normalized.startswith("file:")
+            or re.match(r"^[A-Za-z]:[\\/]", candidate)
+        )
+    if isinstance(value, dict):
+        return any(_contains_rooted_local_path(key) or _contains_rooted_local_path(item) for key, item in value.items())
+    if isinstance(value, (list, tuple)):
+        return any(_contains_rooted_local_path(item) for item in value)
     return False
 
 
@@ -249,7 +256,10 @@ class _Contract(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         _reject_undeclared_model_fields(self, type(self).__name__)
-        return self.model_dump(mode="json", serialize_as_any=True)
+        value = self.model_dump(mode="json", serialize_as_any=True)
+        if isinstance(self, AdapterOutputEnvelope) and _contains_rooted_local_path(value):
+            raise ValueError("adapter output envelope must not contain rooted local paths")
+        return value
 
     def fingerprint(self) -> str:
         return _fingerprint(self.to_dict())
@@ -412,6 +422,212 @@ class PreparedAdapterInput(_Contract):
         }
 
 
+class AdapterInputReceipt(_Contract):
+    """Public, payload-free identity receipt for one broker-prepared input."""
+
+    schema_version: Literal["vc.adapter-input-receipt.v1"]
+    prepared_input_fingerprint: str
+    adapter_fingerprint: str
+    input_contract_fingerprint: str
+    task: str
+    output: str
+    request_fingerprint: str
+    pack_fingerprint: str | None
+    compatibility_fingerprint: str | None
+    feature_contract_fingerprint: str | None
+    alignment_fingerprint: str | None
+    shape: tuple[int, ...] | None
+    unit: str | None
+
+    @field_validator(
+        "prepared_input_fingerprint",
+        "adapter_fingerprint",
+        "input_contract_fingerprint",
+        "request_fingerprint",
+        mode="before",
+    )
+    @classmethod
+    def _required_fingerprint(cls, value, info):
+        return _strict_fingerprint(value, info.field_name)
+
+    @field_validator(
+        "pack_fingerprint",
+        "compatibility_fingerprint",
+        "feature_contract_fingerprint",
+        "alignment_fingerprint",
+        mode="before",
+    )
+    @classmethod
+    def _optional_fingerprint(cls, value, info):
+        return None if value is None else _strict_fingerprint(value, info.field_name)
+
+    @field_validator("task", "output", mode="before")
+    @classmethod
+    def _text(cls, value, info):
+        return _strict_text(value, info.field_name)
+
+    @field_validator("unit", mode="before")
+    @classmethod
+    def _unit(cls, value):
+        return None if value is None else _strict_text(value, "unit")
+
+    @field_validator("shape", mode="before")
+    @classmethod
+    def _shape(cls, value):
+        return None if value is None else AdapterOutputEnvelope._shape(value)
+
+    @classmethod
+    def from_prepared(cls, prepared: PreparedAdapterInput) -> AdapterInputReceipt:
+        if not isinstance(prepared, PreparedAdapterInput):
+            raise TypeError("prepared must be PreparedAdapterInput")
+        alignment_fingerprint = (
+            None if prepared.alignment_report is None else _fingerprint(prepared.alignment_report.to_dict())
+        )
+        return cls(
+            schema_version="vc.adapter-input-receipt.v1",
+            prepared_input_fingerprint=prepared.fingerprint(),
+            adapter_fingerprint=prepared.adapter_fingerprint,
+            input_contract_fingerprint=prepared.input_contract_fingerprint,
+            task=prepared.task,
+            output=prepared.output,
+            request_fingerprint=prepared.request_fingerprint,
+            pack_fingerprint=prepared.pack_fingerprint,
+            compatibility_fingerprint=prepared.compatibility_fingerprint,
+            feature_contract_fingerprint=prepared.feature_contract_fingerprint,
+            alignment_fingerprint=alignment_fingerprint,
+            shape=prepared.shape,
+            unit=prepared.unit,
+        )
+
+
+class AdapterInputReceiptV2(_Contract):
+    """Write-new public receipt binding one prepared input to Pack-derived values."""
+
+    schema_version: Literal["vc.adapter-input-receipt.v2"]
+    prepared_input_fingerprint: str
+    adapter_fingerprint: str
+    input_contract_fingerprint: str
+    task: str
+    output: str
+    request_fingerprint: str
+    pack_fingerprint: str | None
+    compatibility_fingerprint: str | None
+    feature_contract_fingerprint: str | None
+    alignment_fingerprint: str | None
+    shape: tuple[int, ...] | None
+    unit: str | None
+    selected_content_receipt: SelectedContentReceiptV1
+
+    @field_validator(
+        "prepared_input_fingerprint",
+        "adapter_fingerprint",
+        "input_contract_fingerprint",
+        "request_fingerprint",
+        mode="before",
+    )
+    @classmethod
+    def _required_fingerprint(cls, value, info):
+        return _strict_fingerprint(value, info.field_name)
+
+    @field_validator(
+        "pack_fingerprint",
+        "compatibility_fingerprint",
+        "feature_contract_fingerprint",
+        "alignment_fingerprint",
+        mode="before",
+    )
+    @classmethod
+    def _optional_fingerprint(cls, value, info):
+        return None if value is None else _strict_fingerprint(value, info.field_name)
+
+    @field_validator("task", "output", mode="before")
+    @classmethod
+    def _text(cls, value, info):
+        return _strict_text(value, info.field_name)
+
+    @field_validator("unit", mode="before")
+    @classmethod
+    def _unit(cls, value):
+        return None if value is None else _strict_text(value, "unit")
+
+    @field_validator("shape", mode="before")
+    @classmethod
+    def _shape(cls, value):
+        return None if value is None else AdapterOutputEnvelope._shape(value)
+
+    @model_validator(mode="after")
+    def _selected_content_binding(self):
+        content = self.selected_content_receipt
+        if not (
+            self.pack_fingerprint is not None
+            and self.feature_contract_fingerprint is not None
+            and self.alignment_fingerprint is not None
+            and self.shape is not None
+            and self.unit is not None
+            and content.request_fingerprint == self.request_fingerprint
+            and content.pack_fingerprint == self.pack_fingerprint
+            and content.feature_contract_fingerprint == self.feature_contract_fingerprint
+            and content.alignment_fingerprint == self.alignment_fingerprint
+            and content.unit == self.unit
+            and content.target_shape == self.shape
+        ):
+            raise ValueError("selected-content receipt does not bind this prepared input")
+        return self
+
+    @classmethod
+    def from_prepared(
+        cls,
+        prepared: PreparedAdapterInput,
+        content: PreparedSelectedContentV1,
+    ) -> AdapterInputReceiptV2:
+        if not isinstance(prepared, PreparedAdapterInput) or not isinstance(content, PreparedSelectedContentV1):
+            raise TypeError("selected-content receipt requires prepared input and core content")
+        if not (
+            prepared.values == content.values
+            and prepared.shape == (len(content.values),)
+            and prepared.unit == content.receipt.unit
+            and prepared.model_input == content.model_input
+            and prepared.feature_contract == content.feature_contract
+            and prepared.feature_contract_fingerprint == content.feature_contract.fingerprint()
+            and prepared.alignment_report is not None
+            and prepared.alignment_report.to_dict() == content.alignment_report.to_dict()
+        ):
+            raise AdapterContractError("prepared input drifted from core selected content")
+        base = AdapterInputReceipt.from_prepared(prepared)
+        return cls(
+            schema_version="vc.adapter-input-receipt.v2",
+            prepared_input_fingerprint=base.prepared_input_fingerprint,
+            adapter_fingerprint=base.adapter_fingerprint,
+            input_contract_fingerprint=base.input_contract_fingerprint,
+            task=base.task,
+            output=base.output,
+            request_fingerprint=base.request_fingerprint,
+            pack_fingerprint=base.pack_fingerprint,
+            compatibility_fingerprint=base.compatibility_fingerprint,
+            feature_contract_fingerprint=base.feature_contract_fingerprint,
+            alignment_fingerprint=base.alignment_fingerprint,
+            shape=base.shape,
+            unit=base.unit,
+            selected_content_receipt=content.receipt,
+        )
+
+
+def adapter_input_receipt_from_dict(
+    value: dict[str, Any],
+) -> AdapterInputReceipt | AdapterInputReceiptV2:
+    """Parse an untrusted public receipt without accepting prepared payload."""
+    if not isinstance(value, dict):
+        raise AdapterContractError("adapter input receipt must be a JSON object")
+    try:
+        if value.get("schema_version") == "vc.adapter-input-receipt.v1":
+            return AdapterInputReceipt.model_validate(value)
+        if value.get("schema_version") == "vc.adapter-input-receipt.v2":
+            return AdapterInputReceiptV2.model_validate(value)
+        raise ValueError("unsupported adapter input receipt schema")
+    except (TypeError, ValidationError, ValueError) as exc:
+        raise AdapterContractError("adapter input receipt is invalid") from exc
+
+
 class AdapterUncertainty(_Contract):
     available: bool
     method: str
@@ -447,9 +663,7 @@ class AdapterUncertainty(_Contract):
 
     @model_validator(mode="after")
     def _availability(self):
-        if not self.available and (
-            self.calibrated or self.value is not None or self.sigma is not None
-        ):
+        if not self.available and (self.calibrated or self.value is not None or self.sigma is not None):
             raise ValueError("unavailable uncertainty cannot contain numeric or calibrated claims")
         if self.calibrated and self.value is None and self.sigma is None:
             raise ValueError("calibrated uncertainty requires a numeric value or sigma")
@@ -553,10 +767,7 @@ class AdapterOutputEnvelope(_Contract):
             return None
         if not isinstance(value, (list, tuple)) or not value:
             raise ValueError("shape must be a non-empty array or null")
-        if any(
-            isinstance(item, bool) or not isinstance(item, int) or item <= 0
-            for item in value
-        ):
+        if any(isinstance(item, bool) or not isinstance(item, int) or item <= 0 for item in value):
             raise ValueError("shape dimensions must be positive integers")
         return tuple(value)
 
@@ -586,6 +797,8 @@ class AdapterOutputEnvelope(_Contract):
             raise ValueError("projection_metadata must be an object")
         value = _canonical_value(value)
         _json_value(value, "$.projection_metadata")
+        if _contains_rooted_local_path(value):
+            raise ValueError("projection_metadata must not contain rooted local paths")
         return _freeze_json(value)
 
     @model_validator(mode="after")
@@ -603,6 +816,8 @@ class AdapterOutputEnvelope(_Contract):
                 raise ValueError("adapter output shape does not match its values")
         if self.ood is not None and self.ood.detected and not self.abstain:
             raise ValueError("OOD output must abstain")
+        if _contains_rooted_local_path(self.model_dump(mode="python", serialize_as_any=True)):
+            raise ValueError("adapter output envelope must not contain rooted local paths")
         return self
 
 
@@ -660,19 +875,14 @@ class VirtualCellModelAdapter(ABC):
             fields = AdapterOutputEnvelope.model_fields
             if set(envelope.__dict__).difference(fields):
                 raise AdapterContractError("adapter output envelope has unknown fields")
-            envelope = AdapterOutputEnvelope.model_validate(
-                envelope.model_dump(mode="python", serialize_as_any=True)
-            )
-            _reject_model_type_drift(
-                observed_envelope, envelope, "adapter output envelope"
-            )
+            envelope = AdapterOutputEnvelope.model_validate(envelope.model_dump(mode="python", serialize_as_any=True))
+            _reject_model_type_drift(observed_envelope, envelope, "adapter output envelope")
         except (TypeError, ValueError) as exc:
             raise AdapterContractError("invalid adapter output envelope") from exc
         contract = self.output_contract
         provenance = envelope.provenance
         if (
-            (envelope.task, envelope.output, envelope.unit)
-            != (contract.task, contract.output, contract.unit)
+            (envelope.task, envelope.output, envelope.unit) != (contract.task, contract.output, contract.unit)
             or provenance.adapter_fingerprint != self.fingerprint()
             or provenance.input_contract_fingerprint != self.input_contract.fingerprint()
             or provenance.output_contract_fingerprint != contract.fingerprint()
@@ -680,11 +890,14 @@ class VirtualCellModelAdapter(ABC):
             raise AdapterContractError("adapter output does not match adapter contracts")
         if not provenance.input_fingerprints or not provenance.request_fingerprints:
             raise AdapterContractError("adapter output provenance is missing input bindings")
-        if (
-            envelope.output in envelope.projection_metadata
-            or _contains_reserved_projection_key(envelope.projection_metadata)
+        if envelope.output in envelope.projection_metadata or _contains_reserved_projection_key(
+            envelope.projection_metadata
         ):
             raise AdapterContractError("projection metadata contains reserved contract fields")
+        if _contains_rooted_local_path(
+            envelope.model_dump(mode="python", serialize_as_any=True)
+        ):
+            raise AdapterContractError("adapter output envelope contains rooted local paths")
         if contract.uncertainty_required and envelope.uncertainty is None:
             raise AdapterContractError("output contract requires uncertainty")
         if contract.ood_required and envelope.ood is None:
@@ -741,17 +954,11 @@ class VirtualCellModelAdapter(ABC):
             actual_shape = None
         else:
             normalized_values, actual_shape = _tensor(prepared.values)
-            if prepared.shape != actual_shape or not _shape_matches(
-                actual_shape, contract.shape
-            ):
+            if prepared.shape != actual_shape or not _shape_matches(actual_shape, contract.shape):
                 raise AdapterContractError("prepared values do not match the input contract")
-        if prepared.feature_contract is not None and not isinstance(
-            prepared.feature_contract, ModelFeatureContract
-        ):
+        if prepared.feature_contract is not None and not isinstance(prepared.feature_contract, ModelFeatureContract):
             raise AdapterContractError("prepared feature contract has the wrong type")
-        if prepared.alignment_report is not None and not isinstance(
-            prepared.alignment_report, AlignmentReport
-        ):
+        if prepared.alignment_report is not None and not isinstance(prepared.alignment_report, AlignmentReport):
             raise AdapterContractError("prepared alignment report has the wrong type")
         try:
             feature_fingerprint = _alignment_binding(
@@ -763,9 +970,7 @@ class VirtualCellModelAdapter(ABC):
             raise AdapterContractError("prepared feature alignment is invalid") from exc
         if prepared.feature_contract_fingerprint != feature_fingerprint:
             raise AdapterContractError("prepared feature contract fingerprint drift")
-        if contract.pack_data_required and (
-            prepared.values is None or prepared.pack_fingerprint is None
-        ):
+        if contract.pack_data_required and (prepared.values is None or prepared.pack_fingerprint is None):
             raise AdapterContractError("adapter requires explicit fingerprinted Pack data")
         if contract.alignment_required and feature_fingerprint is None:
             raise AdapterContractError("adapter requires a feature contract and alignment report")
@@ -816,6 +1021,20 @@ class VirtualCellModelAdapter(ABC):
             raise AdapterContractError("adapter output provenance does not match prepared input")
         return envelope
 
+    def select_content(
+        self,
+        request: VirtualCellRequestV2,
+        **kwargs,
+    ) -> SelectedContentRequestV1:
+        """Declare a value-free request for a core-owned v0.4 Pack vector.
+
+        Only adapters whose input contract requires Pack data need to override
+        this.  Returning values, paths, mappings, or an untyped object is not
+        an alternate input route.
+        """
+
+        raise AdapterContractError("adapter does not declare selected content")
+
     @abstractmethod
     def prepare_input(self, request: VirtualCellRequestV2, **kwargs) -> PreparedAdapterInput:
         """Prepare model input without guessing Pack rows, mappings, or transforms."""
@@ -845,9 +1064,7 @@ class VirtualCellModelAdapter(ABC):
         envelope: AdapterOutputEnvelope,
     ) -> dict[str, Any]:
         """Project only after binding an envelope to its exact prepared input."""
-        return self.project_output(
-            self.validate_prepared_envelope(prepared, envelope)
-        )
+        return self.project_output(self.validate_prepared_envelope(prepared, envelope))
 
 
 class AdapterRegistry:
@@ -942,9 +1159,7 @@ def _alignment_binding(
         if mapping_asset is not None and type(mapping_asset) is not MappingAssetRef:
             raise AdapterContractError("mapping asset has the wrong type")
     try:
-        ModelFeatureContract.model_validate(
-            feature_contract.model_dump(mode="python", serialize_as_any=True)
-        )
+        ModelFeatureContract.model_validate(feature_contract.model_dump(mode="python", serialize_as_any=True))
     except (TypeError, ValidationError, ValueError) as exc:
         raise AdapterContractError("feature contract is invalid") from exc
     fingerprint = feature_contract.fingerprint()
@@ -1008,9 +1223,7 @@ class DeltaExpressionReferenceAdapter(VirtualCellModelAdapter):
         try:
             observed_request = request
             _reject_undeclared_model_fields(request, "request")
-            request = VirtualCellRequestV2.model_validate(
-                request.model_dump(mode="python", serialize_as_any=True)
-            )
+            request = VirtualCellRequestV2.model_validate(request.model_dump(mode="python", serialize_as_any=True))
             _reject_model_type_drift(observed_request, request, "request")
         except (TypeError, ValidationError, ValueError) as exc:
             raise AdapterContractError("invalid request") from exc
@@ -1231,9 +1444,7 @@ class DeltaExpressionReferenceAdapter(VirtualCellModelAdapter):
             try:
                 envelope = self.validate_envelope(raw_envelope)
             except (AdapterContractError, TypeError, ValueError) as exc:
-                raise AdapterContractError(
-                    "adapter outputs are not aggregation-compatible"
-                ) from exc
+                raise AdapterContractError("adapter outputs are not aggregation-compatible") from exc
             if (
                 envelope.provenance.adapter_fingerprint != self.fingerprint()
                 or envelope.provenance.input_contract_fingerprint != self.input_contract.fingerprint()
@@ -1302,9 +1513,7 @@ class DeltaExpressionReferenceAdapter(VirtualCellModelAdapter):
         try:
             envelope = self.validate_envelope(envelope)
         except (AdapterContractError, TypeError, ValueError) as exc:
-            raise AdapterContractError(
-                "adapter output is not projection-compatible"
-            ) from exc
+            raise AdapterContractError("adapter output is not projection-compatible") from exc
         if (
             envelope.provenance.adapter_fingerprint != self.fingerprint()
             or envelope.provenance.input_contract_fingerprint != self.input_contract.fingerprint()
@@ -1347,12 +1556,8 @@ def run_adapter_conformance(
     )
     deterministic = first.to_dict() == second.to_dict() and first.fingerprint() == second.fingerprint()
     if not first.abstain:
-        first_projection = adapter.validate_projection(
-            adapter.project_prepared_output(prepared, first)
-        )
-        second_projection = adapter.validate_projection(
-            adapter.project_prepared_output(prepared, second)
-        )
+        first_projection = adapter.validate_projection(adapter.project_prepared_output(prepared, first))
+        second_projection = adapter.validate_projection(adapter.project_prepared_output(prepared, second))
         if first_projection != second_projection:
             deterministic = False
     if not deterministic:

@@ -43,6 +43,9 @@ function asRecord(v: unknown): Record<string, unknown> {
 function asStrArr(v: unknown): string[] {
   return Array.isArray(v) ? v.map((x) => String(x)) : [];
 }
+function asArr(v: unknown): unknown[] {
+  return Array.isArray(v) ? v : [];
+}
 
 // 对象映射(ortholog_cautions / rejection_reasons)展平成 "key:reason" 可读列表;空映射 → []。
 function mapList(v: unknown): string[] {
@@ -188,6 +191,24 @@ export default function ProvenanceTab({
   const modelsFailed = asStrArr(g(p, "models_failed"));
   const criticViolations = asStrArr(g(p, "critic_violations"));
 
+  // direct-v2 provenance: execution contract + immutable plan/compatibility report.
+  const executionContract =
+    g(p, "execution_contract") != null ? String(g(p, "execution_contract")) : "";
+  const executionPlan = asRecord(g(p, "execution_plan"));
+  const directSteps = Array.isArray(g(executionPlan, "steps"))
+    ? (g(executionPlan, "steps") as unknown[]).map(asRecord)
+    : [];
+  const compatibilityReports = Array.isArray(g(p, "compatibility_reports"))
+    ? (g(p, "compatibility_reports") as unknown[]).map(asRecord)
+    : [];
+  const directReport = compatibilityReports[0] ?? asRecord(asArr(g(executionPlan, "reports"))[0]);
+  const directModels = directSteps.map((step) => {
+    const name = String(g(step, "model_name") ?? "—");
+    const version = String(g(step, "model_version") ?? "—");
+    return `${name}@${version}`;
+  });
+  const directScope = String(g(directReport, "research_execution_scope") ?? "—");
+
   // module_plan(对象):primary / secondary / overall_verdict / entries。
   const modulePlan = asRecord(g(p, "module_plan"));
   const mpPrimary = modulePlan.primary != null ? String(modulePlan.primary) : "";
@@ -221,7 +242,8 @@ export default function ProvenanceTab({
     evLevelText === "" &&
     evRationale.length === 0 &&
     evOod === "" &&
-    lqItems === 0;
+    lqItems === 0 &&
+    executionContract === "";
 
   // 溯源摘要文本(供 copy;含 provenance + llm_meta,与旧工具条一致)。
   const provSummary = pretty({ provenance: prov.provenance, llm_meta: prov.llm_meta });
@@ -266,6 +288,73 @@ export default function ProvenanceTab({
   const idRows: AuditRow[] = [
     { key: "job_id", label: "job 标识", detail: <Mono>{jobId}</Mono> },
   ];
+
+  const directRows: AuditRow[] = [];
+  if (executionContract !== "") {
+    directRows.push(
+      {
+        key: "execution_contract",
+        label: "执行合同",
+        detail: <Mono>{executionContract}</Mono>,
+      },
+      {
+        key: "execution_plan",
+        label: "执行计划",
+        detail: (
+          <span style={chipsStyle}>
+            <Mono>{String(g(executionPlan, "schema_version") ?? "—")}</Mono>
+            <Mono>{String(g(executionPlan, "plan_id") ?? "—")}</Mono>
+          </span>
+        ),
+      },
+      {
+        key: "pack",
+        label: "组学 Pack",
+        detail: (
+          <Mono>
+            {String(g(executionPlan, "pack_id") ?? "—")}@
+            {String(g(executionPlan, "pack_version") ?? "—")}
+          </Mono>
+        ),
+      },
+      {
+        key: "direct_models",
+        label: "执行模型",
+        detail: <Chips items={directModels} empty="无执行模型" />,
+      },
+      {
+        key: "research_scope",
+        label: "研究执行边界",
+        detail: (
+          <span style={chipsStyle}>
+            <Mono>{directScope}</Mono>
+            <Mono>
+              research_authorized=
+              {String(g(directReport, "research_execution_authorized") ?? "—")}
+            </Mono>
+          </span>
+        ),
+      },
+      {
+        key: "science_policy",
+        label: "科学 / 生产状态",
+        detail: (
+          <span style={chipsStyle}>
+            <Mono>
+              scientifically_validated=
+              {String(g(directReport, "scientifically_validated") ?? "—")}
+            </Mono>
+            <Mono>
+              benchmark_passed={String(g(directReport, "benchmark_passed") ?? "—")}
+            </Mono>
+            <Mono>
+              production_promoted={String(g(directReport, "production_promoted") ?? "—")}
+            </Mono>
+          </span>
+        ),
+      },
+    );
+  }
   if (nMessages != null) {
     idRows.push({
       key: "n_messages",
@@ -410,6 +499,12 @@ export default function ProvenanceTab({
         <Card title="运行标识">
           <AuditTable rows={idRows} />
         </Card>
+
+        {directRows.length > 0 && (
+          <Card title="Direct-v2 执行边界">
+            <AuditTable rows={directRows} />
+          </Card>
+        )}
 
         {/* 规则 */}
         <Card title="规则来源">

@@ -8,15 +8,15 @@ import {
 
 const RESULT_TABS: Array<[string, string]> = [
   ["报告", "概要"],
-  ["预测", "结果可靠性"],
-  ["模块路由", "路由摘要"],
+  ["预测", "本次未给出预测结论"],
+  ["模块路由", "未产生模块路由"],
   ["数据与执行身份", "数据与执行身份"],
   ["证据", "证据与审计"],
   ["运行轨迹", "运行轨迹"],
   ["溯源", "运行标识"],
 ];
 
-test("直接报告的 7 tabs、实际路由和 execution identity 均可审计", async ({
+test("无 Pack 的正式请求在 7 tabs 中明确 abstain 并保留 execution identity", async ({
   page,
 }) => {
   const failures = collectBrowserFailures(page);
@@ -30,18 +30,16 @@ test("直接报告的 7 tabs、实际路由和 execution identity 均可审计",
 
   for (const [tab, heading] of RESULT_TABS) {
     await result.getByRole("tab", { name: tab, exact: true }).click();
-    await expect(
-      result.getByRole("heading", { name: heading, exact: true }).first(),
-    ).toBeVisible();
+    const expected = ["预测", "模块路由"].includes(tab)
+      ? result.getByText(heading, { exact: true }).first()
+      : result.getByRole("heading", { name: heading, exact: true }).first();
+    await expect(expected).toBeVisible();
   }
 
   const modulePlan = (await run.modulePlanResponse.json()) as {
     module_plan: Record<string, unknown>;
   };
-  expect(modulePlan.module_plan).toMatchObject({
-    primary: "genetic_hub",
-    overall_verdict: "accept",
-  });
+  expect(modulePlan.module_plan).toEqual({});
 
   const provenance = (await run.provenanceResponse.json()) as {
     execution_identity: {
@@ -51,8 +49,8 @@ test("直接报告的 7 tabs、实际路由和 execution identity 均可审计",
     };
   };
   expect(provenance.execution_identity).toMatchObject({
-    schema_version: "vc.job-execution-identity.v1",
-    legacy_adapter: true,
+    schema_version: "vc.job-execution-identity.v2",
+    legacy_adapter: false,
   });
   expect(provenance.execution_identity.fingerprint).toMatch(/^[a-f0-9]{64}$/);
 
@@ -87,7 +85,7 @@ test("不兼容请求直接报告 abstain 且不伪造预测", async ({ page }) 
   expect(payload.structured_report.abstain).toBe(true);
   expect(payload.structured_report.prediction).toBeNull();
   expect(payload.structured_report.abstain_reasons).toContain(
-    "learned_abstain_low_reliability",
+    "pack_unregistered",
   );
 
   const result = page.getByRole("region", {
@@ -98,7 +96,7 @@ test("不兼容请求直接报告 abstain 且不伪造预测", async ({ page }) 
     result.getByText("本次未给出预测结论", { exact: true }).first(),
   ).toBeVisible();
   await expect(
-    result.getByText("learned_abstain_low_reliability", { exact: true }),
+    result.getByText("pack_unregistered", { exact: true }),
   ).toBeVisible();
   await result.getByRole("tab", { name: "预测", exact: true }).click();
   await expect(

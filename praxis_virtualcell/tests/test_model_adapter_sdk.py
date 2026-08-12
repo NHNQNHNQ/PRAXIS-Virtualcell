@@ -358,16 +358,12 @@ def test_prepared_validation_refreezes_model_copy_and_rejects_unknown_fields():
     assert normalized.model_input["nested"]["flags"] == (True,)
     assert normalized.fingerprint() == fingerprint
 
-    unknown = _prepared(adapter).model_copy(
-        update={"scientific_evidence": {"validated": True}}
-    )
+    unknown = _prepared(adapter).model_copy(update={"scientific_evidence": {"validated": True}})
     with pytest.raises(AdapterContractError, match="unknown fields"):
         adapter.validate_prepared_input(unknown)
 
     row = [1.0, 2.0]
-    nested = _prepared(adapter).model_copy(
-        update={"values": (row,), "shape": (1, 2)}
-    )
+    nested = _prepared(adapter).model_copy(update={"values": (row,), "shape": (1, 2)})
     normalized_nested = adapter.validate_prepared_input(nested)
     row.append(3.0)
     assert normalized_nested.values == ((1.0, 2.0),)
@@ -583,9 +579,7 @@ def test_alignment_report_nested_model_copy_extras_fail_closed():
     report = _alignment(contract)
     forged_report = replace(
         report,
-        mapping_asset=report.mapping_asset.model_copy(
-            update={"scientifically_validated": True}
-        ),
+        mapping_asset=report.mapping_asset.model_copy(update={"scientifically_validated": True}),
     )
     with pytest.raises(AdapterContractError, match="unknown fields"):
         adapter.prepare_input(
@@ -653,6 +647,71 @@ def test_projection_metadata_cannot_override_values_or_issue_science_policy():
     }
     with pytest.raises(AdapterContractError, match="reserved"):
         run_adapter_conformance(adapter, _prepared(adapter), raw)
+
+
+@pytest.mark.parametrize(
+    "unsafe_value",
+    [
+        "/private/test-pack-root/model.bin",
+        "~/private/model.bin",
+        "~\\private\\model.bin",
+        r"C:\\private\\model.bin",
+        r"\\\\server\\share\\model.bin",
+        "file:///private/model.bin",
+        "FILE:///private/model.bin",
+        "file:/private/model.bin",
+        " FILE:///private/model.bin",
+        r"\private\model.bin",
+        {"nested": "/private/test-pack-root/model.bin"},
+    ],
+)
+def test_projection_metadata_rejects_rooted_local_paths(unsafe_value):
+    adapter = DeltaExpressionReferenceAdapter()
+    envelope = adapter.adapt_output(_prepared(adapter), _raw())
+    raw = envelope.model_dump(mode="python")
+    raw["projection_metadata"] = {"fixture": unsafe_value}
+
+    with pytest.raises(ValidationError, match="rooted local path"):
+        AdapterOutputEnvelope.model_validate(raw)
+
+
+def test_projection_metadata_model_copy_cannot_bypass_rooted_path_rejection():
+    adapter = DeltaExpressionReferenceAdapter()
+    prepared = _prepared(adapter)
+    envelope = adapter.adapt_output(prepared, _raw())
+    forged = envelope.model_copy(update={"projection_metadata": {"fixture": "/private/test-pack-root/model.bin"}})
+
+    with pytest.raises(AdapterContractError, match="invalid adapter output envelope"):
+        adapter.validate_prepared_envelope(prepared, forged)
+
+
+def test_envelope_model_copy_cannot_hide_rooted_path_in_uncertainty_reason():
+    adapter = DeltaExpressionReferenceAdapter()
+    prepared = _prepared(adapter)
+    envelope = adapter.adapt_output(prepared, _raw())
+    forged = envelope.model_copy(
+        update={
+            "uncertainty": AdapterUncertainty(
+                available=False,
+                method="point_estimate",
+                calibrated=False,
+                reason="/private/test-pack-root/model.bin",
+            )
+        }
+    )
+
+    with pytest.raises(AdapterContractError, match="invalid adapter output envelope"):
+        adapter.validate_prepared_envelope(prepared, forged)
+    with pytest.raises(ValueError, match="rooted local paths"):
+        forged.to_dict()
+
+
+def test_projection_metadata_keeps_non_path_unit_text_valid():
+    adapter = DeltaExpressionReferenceAdapter()
+    envelope = adapter.adapt_output(_prepared(adapter), _raw())
+    safe = envelope.model_copy(update={"projection_metadata": {"objective_unit": "1/h"}})
+
+    assert adapter.validate_envelope(safe).projection_metadata == {"objective_unit": "1/h"}
 
 
 def test_delta_aggregation_and_projection_are_contract_bound():
@@ -735,11 +794,7 @@ class _MalformedEnvelopeAdapter(DeltaExpressionReferenceAdapter):
             "values": {"values": (float("nan"), -0.5)},
             "uncertainty": {"uncertainty": None},
             "ood": {"ood": None},
-            "provenance": {
-                "provenance": envelope.provenance.model_copy(
-                    update={"request_fingerprints": ("f" * 64,)}
-                )
-            },
+            "provenance": {"provenance": envelope.provenance.model_copy(update={"request_fingerprints": ("f" * 64,)})},
         }[self.malformation]
         return envelope.model_copy(update=updates)
 
@@ -799,11 +854,7 @@ def test_delta_growth_fitness_contract_conformance_and_default_allowlist():
         prepared = adapter.prepare_input(request, unit=adapter.input_contract.unit)
         assert run_adapter_conformance(adapter, prepared, raw).deterministic is True
         projection = adapter.project_output(adapter.adapt_output(prepared, raw))
-        expected_key = (
-            "delta"
-            if type(adapter) is DeltaExpressionReferenceAdapter
-            else adapter.output_contract.output
-        )
+        expected_key = "delta" if type(adapter) is DeltaExpressionReferenceAdapter else adapter.output_contract.output
         assert tuple(projection) == (expected_key,)
 
     assert {output for _, output in local.keys()} == {

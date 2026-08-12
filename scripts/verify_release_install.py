@@ -34,6 +34,70 @@ async def _verify_api() -> dict[str, object]:
         asset = await client.get(match.group(1))
         assert asset.status_code == 200 and asset.content
 
+        jobs_root = Path(os.environ["PRAXIS_VC_RUNS"])
+        assert not jobs_root.exists()
+        direct_v2 = await client.post(
+            "/api/jobs",
+            json={
+                "request": {
+                    "schema_version": "vc.request.v2",
+                    "request_id": "release-direct-v2-unconfigured",
+                    "species": {
+                        "schema_version": "vc.species-ref.v1",
+                        "taxonomy_id": "NCBITaxon:999999999",
+                        "scientific_name": "test-only organism",
+                        "common_name": None,
+                    },
+                    "cell_context": {
+                        "schema_version": "vc.cell-context.v1",
+                        "cell_type_name": None,
+                        "cell_type_id": None,
+                        "tissue_name": None,
+                        "tissue_id": None,
+                        "attributes": {},
+                    },
+                    "input_modality": {
+                        "schema_version": "vc.modality.v1",
+                        "name": "test_input",
+                        "ontology_id": None,
+                        "unit": "dimensionless",
+                        "feature_namespace": "TestFeature",
+                    },
+                    "output_modality": {
+                        "schema_version": "vc.modality.v1",
+                        "name": "test_output",
+                        "ontology_id": None,
+                        "unit": "dimensionless",
+                        "feature_namespace": "TestFeature",
+                    },
+                    "perturbation": {
+                        "schema_version": "vc.perturbation.v1",
+                        "kind": "gene",
+                        "targets": ["TEST:1"],
+                        "dose_value": None,
+                        "dose_unit": None,
+                        "timepoint": None,
+                    },
+                    "task": {
+                        "schema_version": "vc.task.v1",
+                        "task_type": "test_scalar_task",
+                        "requested_outputs": ["test_output"],
+                    },
+                    "baseline_context": None,
+                    "metadata": {},
+                    "constraints": {},
+                },
+                "mode": "offline",
+                "enable_llm_report": False,
+                "pack_id": "test-only-pack",
+                "pack_version": "0.0.0",
+                "submission_contract": "vc.direct-v2-execution.v1",
+            },
+        )
+        assert direct_v2.status_code == 503, direct_v2.text
+        assert direct_v2.json() == {"detail": "direct_v2_factory_unconfigured"}
+        assert not jobs_root.exists()
+
         job = await client.post(
             "/api/jobs",
             json={
@@ -49,13 +113,21 @@ async def _verify_api() -> dict[str, object]:
             },
         )
         assert job.status_code == 200, job.text
-        return {"health": health.status_code, "asset": match.group(1), "job_id": job.json()["job_id"]}
+        return {
+            "health": health.status_code,
+            "asset": match.group(1),
+            "direct_v2_unconfigured": direct_v2.status_code,
+            "job_id": job.json()["job_id"],
+        }
 
 
 def main() -> None:
     product_version = version("praxis-virtualcell")
     assert files("praxis_vc_web").joinpath("app.py").is_file()
     assert not files("praxis_virtualcell").joinpath("tests").is_dir()
+    registrations = files("praxis_virtualcell.model_zoo").joinpath("registrations")
+    assert registrations.joinpath("golden_additive_source_card.yaml").is_file()
+    assert registrations.joinpath("golden_additive_research_release.json").is_file()
     request = files("praxis_virtualcell").joinpath("examples", "norman_mock_request.json")
 
     from praxis_virtualcell.cli import main as cli_main

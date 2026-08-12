@@ -38,24 +38,29 @@ from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
 from praxis_virtualcell.model_zoo.registry_v2 import (
     ArtifactIdentity,
     EnvironmentIdentity,
+    EnvironmentIdentityV2,
     ModelRegistryV2,
     ModelReleaseRecord,
     OperatorPolicyRecord,
+    OperatorPolicyRecordV2,
     RegistryLifecycleEvent,
     ValidationEvidence,
 )
+from praxis_virtualcell.model_zoo.wrapper_registry import WrapperRegistry
 from praxis_virtualcell.model_zoo.wrappers.base import ModelWrapper
 from praxis_virtualcell.workflows.predict_delta_expression import build_runtime
 
 _MODEL_BYTES = b"p6-test-only-dummy-model\n"
 _MODEL_SHA = hashlib.sha256(_MODEL_BYTES).hexdigest()
 _DUMMY_NAME = "test_only_dummy_predictor"
-_DUMMY_WRAPPER = (
-    "praxis_virtualcell.tests.test_capability_runtime.DummyPredictor"
-)
-_PACK_ROOT = (
-    Path(__file__).parent / "fixtures" / "data_packs" / "valid_tiny"
-)
+_DUMMY_WRAPPER = "praxis_virtualcell.tests.test_capability_runtime.DummyPredictor"
+_PACK_ROOT = Path(__file__).parent / "fixtures" / "data_packs" / "valid_tiny"
+_TEST_ARTIFACT_SNAPSHOT_BUDGET = {
+    "schema_version": "vc.artifact-snapshot-budget-policy.v1",
+    "max_live_snapshot_payload_bytes": 4096,
+    "max_snapshot_entries_per_execution": 4,
+    "retention_scope": "execution_only",
+}
 
 
 class DummyPredictor(ModelWrapper):
@@ -353,6 +358,11 @@ def _v2_registry_and_environment(
     promoted: bool = True,
     safe_load_policy: str = "data_only",
     runtime_adapter=None,
+    research_execution_authorized: bool = False,
+    runtime_tasks: tuple[str, ...] = ("predict_delta_expression",),
+    runtime_outputs: tuple[str, ...] = ("delta_expression",),
+    identity_suffix: str | None = None,
+    snapshot_budget: dict | None = None,
 ) -> tuple[ModelRegistryV2, EnvironmentSnapshot]:
     card = ModelCard.from_dict(card_value)
     artifact = ArtifactIdentity.from_dict(
@@ -372,25 +382,34 @@ def _v2_registry_and_environment(
         }
     )
     adapter = (runtime_adapter or DeltaExpressionReferenceAdapter()).identity()
-    environment_identity = EnvironmentIdentity.from_dict(
-        {
-            "schema_version": "vc.model-environment.v1",
-            "environment_id": "test-only-cpu-environment",
-            "python_version": "3.13-test",
-            "packages": [],
-            "lock_digest": "6" * 64,
-            "image_digest": None,
-            "cpu_architecture": "test-cpu",
-            "resources": ["cpu"],
-            "accelerators": [],
-            "adapter_fingerprints": [adapter.fingerprint()],
-            "legacy_incomplete": False,
-        }
-    )
+    environment_identity_value = {
+        "schema_version": "vc.model-environment.v1",
+        "environment_id": "test-only-cpu-environment",
+        "python_version": "3.13-test",
+        "packages": [],
+        "lock_digest": "6" * 64,
+        "image_digest": None,
+        "cpu_architecture": "test-cpu",
+        "resources": ["cpu"],
+        "accelerators": [],
+        "adapter_fingerprints": [adapter.fingerprint()],
+        "legacy_incomplete": False,
+    }
+    if snapshot_budget is None:
+        environment_identity = EnvironmentIdentity.from_dict(environment_identity_value)
+    else:
+        environment_identity = EnvironmentIdentityV2.from_dict(
+            {
+                **environment_identity_value,
+                "schema_version": "vc.model-environment.v2",
+                "artifact_snapshot_budget_policy": copy.deepcopy(snapshot_budget),
+            }
+        )
+    suffix = "" if identity_suffix is None else f"-{identity_suffix}"
     evidence = ValidationEvidence.from_dict(
         {
             "schema_version": "vc.model-validation-evidence.v1",
-            "evidence_id": "test-only-capability-evidence",
+            "evidence_id": f"test-only-capability-evidence{suffix}",
             "pack_fingerprint": pack_fingerprint,
             "model_fingerprint": card.fingerprint(),
             "environment_fingerprint": environment_identity.fingerprint(),
@@ -425,13 +444,24 @@ def _v2_registry_and_environment(
             "legacy_status": None,
         }
     )
-    policy = OperatorPolicyRecord.from_dict(
+    policy_type = OperatorPolicyRecordV2 if research_execution_authorized else OperatorPolicyRecord
+    policy = policy_type.from_dict(
         {
-            "schema_version": "vc.model-operator-policy.v1",
-            "policy_id": "test-only-capability-policy",
+            "schema_version": (
+                "vc.model-operator-policy.v2" if research_execution_authorized else "vc.model-operator-policy.v1"
+            ),
+            "policy_id": f"test-only-capability-policy{suffix}",
             "capability_fingerprint": release_without_policy.capability_fingerprint(),
             "evidence_fingerprints": [evidence.fingerprint()],
             "production_promoted": promoted,
+            **(
+                {
+                    "research_execution_authorized": True,
+                    "research_execution_scope": "research_only",
+                }
+                if research_execution_authorized
+                else {}
+            ),
             "decision_kind": "operator_decision",
             "operator_id": "test-only-operator",
             "decided_at": "2026-08-02T00:00:00Z",
@@ -486,11 +516,11 @@ def _v2_registry_and_environment(
     )
     environment = EnvironmentSnapshot.from_dict(
         {
-            "schema_version": "vc.environment.v2",
+            "schema_version": "vc.environment.v3" if snapshot_budget is not None else "vc.environment.v2",
             "python_dependencies": [],
             "resources": ["cpu"],
-            "runtime_tasks": ["predict_delta_expression"],
-            "runtime_outputs": ["delta_expression"],
+            "runtime_tasks": list(runtime_tasks),
+            "runtime_outputs": list(runtime_outputs),
             "identity": environment_identity.to_dict(),
         }
     )
@@ -576,10 +606,7 @@ def test_self_trained_model_card_requires_complete_typed_training_card():
 def test_model_zoo_rejects_duplicate_yaml_keys(tmp_path):
     path = tmp_path / "registry.yaml"
     path.write_text(
-        "models:\n"
-        "  duplicate:\n"
-        "    name: one\n"
-        "    name: two\n",
+        "models:\n  duplicate:\n    name: one\n    name: two\n",
         encoding="utf-8",
     )
     with pytest.raises(ValueError, match="duplicate"):
@@ -811,9 +838,7 @@ def test_v2_execution_contracts_reject_cross_bound_identity(tmp_path):
 
     step_with_other_private_path = plan.steps[0].to_dict()
     step_with_other_private_path["asset_paths"] = {"model.bin": "/private/elsewhere"}
-    assert type(plan.steps[0]).from_dict(step_with_other_private_path).fingerprint() == (
-        plan.steps[0].fingerprint()
-    )
+    assert type(plan.steps[0]).from_dict(step_with_other_private_path).fingerprint() == (plan.steps[0].fingerprint())
 
 
 def test_v2_job_store_redacts_positive_runtime_paths_from_public_artifacts(tmp_path):
@@ -1144,9 +1169,7 @@ def test_pack_out_of_model_scope_fails_closed(tmp_path, field, value, reason):
 
 def test_model_scope_cannot_hide_requested_modality_absent_from_pack(tmp_path):
     card = _card()
-    card["modality"].append(
-        {"name": "protein", "ontology_id": "PRAXISASSAY:protein"}
-    )
+    card["modality"].append({"name": "protein", "ontology_id": "PRAXISASSAY:protein"})
     card["assay"].append("PRAXISASSAY:protein")
     _, _, packs, _, capabilities = _registry_stack(tmp_path, card)
     payload = _request_payload()
@@ -1411,6 +1434,74 @@ def test_incompatible_model_never_enters_execution_plan(tmp_path):
     assert "request.cell_domain" in plan.reports[0].reasons
 
 
+def test_research_only_v2_release_cannot_execute_through_legacy_workflow(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    card = _card()
+    packs = _pack_registry()
+    pack = packs.record("tiny-human-scrna", "0.1.0")
+    registry_v2, environment = _v2_registry_and_environment(
+        card,
+        pack.fingerprint,
+        promoted=False,
+        research_execution_authorized=True,
+        snapshot_budget=_TEST_ARTIFACT_SNAPSHOT_BUDGET,
+    )
+    zoo = _write_registry(tmp_path, card, registry_v2=registry_v2)
+    cache = _cache_with_model(tmp_path)
+    capabilities = CapabilityRegistry(zoo, cache)
+    direct_adapter = DeltaExpressionReferenceAdapter()
+    wrappers = WrapperRegistry()
+    wrappers.register(card["wrapper"], DummyPredictor)
+    direct = CapabilityRegistry(
+        zoo,
+        cache,
+        adapter_registry=AdapterRegistry([direct_adapter]),
+        wrapper_registry=wrappers,
+    )
+    request = legacy_request_to_v2(_legacy_request())
+    legacy_plan = capabilities.plan(request, pack, environment)
+    direct_plan = direct.plan(
+        request,
+        pack,
+        environment,
+        require_registered_wrapper=True,
+    )
+    calls: list[dict] = []
+
+    def forbidden(self, model_input):
+        calls.append(model_input)
+        raise AssertionError("legacy workflow must not execute a research-only wrapper")
+
+    monkeypatch.setattr(DummyPredictor, "run_prediction", forbidden)
+    runtime = build_runtime(
+        model_registry=zoo,
+        model_cache=cache,
+        pack_registry=packs,
+        environment=environment,
+        include_legacy_predictors=False,
+    )
+    report = runtime.run_workflow(
+        _legacy_request(),
+        pack_id="tiny-human-scrna",
+        pack_version="0.1.0",
+    )
+
+    assert legacy_plan.executable is False
+    assert legacy_plan.steps == ()
+    assert legacy_plan.reports[0].executable is False
+    assert "policy.research_execution_requires_direct_v2" in legacy_plan.reports[0].reasons
+    assert direct_plan.executable is True
+    assert len(direct_plan.steps) == 1
+    assert direct_plan.reports[0].executable is True
+    assert calls == []
+    assert report["abstain"] is True
+    assert report["models_used"] == []
+    assert report["provenance"]["execution_plan"]["executable"] is False
+    assert report["provenance"]["execution_plan"]["steps"] == []
+
+
 def test_model_broker_message_emits_compatibility_and_prepared_plan(tmp_path):
     _, zoo, packs, cache, _ = _registry_stack(tmp_path)
     broker = ModelBrokerAgent(
@@ -1449,9 +1540,7 @@ def test_model_broker_message_emits_compatibility_and_prepared_plan(tmp_path):
 def test_model_broker_removes_step_when_wrapper_construction_fails(tmp_path):
     card = _card()
     card["name"] = "test_only_raising_predictor"
-    card["wrapper"] = (
-        "praxis_virtualcell.tests.test_capability_runtime.RaisingPredictor"
-    )
+    card["wrapper"] = "praxis_virtualcell.tests.test_capability_runtime.RaisingPredictor"
     card["assets"] = []
     zoo = _write_registry(tmp_path, card)
     packs = _pack_registry()
@@ -1648,18 +1737,13 @@ def test_v2_runtime_uses_broker_prepared_input_and_strict_adapter_envelope(tmp_p
     assert report["abstain"] is False
     assert report["prediction"] == {"delta": [0.25]}
     assert report["models_used"] == [_DUMMY_NAME]
-    assert report["adapter_output"]["schema_version"] == (
-        "vc.adapter-output-envelope.v1"
+    assert report["adapter_output"]["schema_version"] == ("vc.adapter-output-envelope.v1")
+    assert report["adapter_output"]["provenance"]["adapter_fingerprint"] == (adapter.fingerprint())
+    assert report["provenance"]["execution_plan"]["steps"][0]["adapter_fingerprints"] == [adapter.fingerprint()]
+    assert (
+        report["provenance"]["adapter_outputs"][_DUMMY_NAME]["provenance"]["input_contract_fingerprint"]
+        == adapter.input_contract.fingerprint()
     )
-    assert report["adapter_output"]["provenance"]["adapter_fingerprint"] == (
-        adapter.fingerprint()
-    )
-    assert report["provenance"]["execution_plan"]["steps"][0][
-        "adapter_fingerprints"
-    ] == [adapter.fingerprint()]
-    assert report["provenance"]["adapter_outputs"][_DUMMY_NAME][
-        "provenance"
-    ]["input_contract_fingerprint"] == adapter.input_contract.fingerprint()
 
     result = {
         "structured_report": report,
@@ -1675,12 +1759,8 @@ def test_v2_runtime_uses_broker_prepared_input_and_strict_adapter_envelope(tmp_p
         result=result,
     )
     stored = store.load("p13-v2-runtime")
-    assert stored["execution_identity"]["models"][0]["adapter_fingerprints"] == [
-        adapter.fingerprint()
-    ]
-    assert len(
-        stored["execution_identity"]["structured_report_fingerprint"]
-    ) == 64
+    assert stored["execution_identity"]["models"][0]["adapter_fingerprints"] == [adapter.fingerprint()]
+    assert len(stored["execution_identity"]["structured_report_fingerprint"]) == 64
 
 
 def test_pack_aware_runtime_never_falls_back_to_mock_when_asset_missing(tmp_path):
@@ -1727,17 +1807,13 @@ def test_pack_aware_runtime_never_falls_back_to_mock_when_out_of_scope(tmp_path)
     assert report["prediction"] is None
     assert report["models_used"] == []
     assert report["provenance"]["execution_plan"]["steps"] == []
-    assert "request.cell_domain" in (
-        report["provenance"]["compatibility_reports"][0]["reasons"]
-    )
+    assert "request.cell_domain" in (report["provenance"]["compatibility_reports"][0]["reasons"])
 
 
 def test_malformed_plugin_output_fails_closed_instead_of_crashing_runtime(tmp_path):
     card = _card()
     card["name"] = "test_only_malformed_predictor"
-    card["wrapper"] = (
-        "praxis_virtualcell.tests.test_capability_runtime.MalformedPredictor"
-    )
+    card["wrapper"] = "praxis_virtualcell.tests.test_capability_runtime.MalformedPredictor"
     card["assets"] = []
     zoo = _write_registry(tmp_path, card)
     packs = _pack_registry()
@@ -1763,9 +1839,7 @@ def test_malformed_plugin_output_fails_closed_instead_of_crashing_runtime(tmp_pa
 def test_plugin_output_shape_must_match_declared_delta_contract(tmp_path):
     card = _card()
     card["name"] = "test_only_wrong_output_predictor"
-    card["wrapper"] = (
-        "praxis_virtualcell.tests.test_capability_runtime.WrongOutputPredictor"
-    )
+    card["wrapper"] = "praxis_virtualcell.tests.test_capability_runtime.WrongOutputPredictor"
     card["assets"] = []
     zoo = _write_registry(tmp_path, card)
     packs = _pack_registry()
@@ -1790,9 +1864,7 @@ def test_plugin_output_shape_must_match_declared_delta_contract(tmp_path):
 def test_plugin_nested_non_json_output_fails_closed(tmp_path):
     card = _card()
     card["name"] = "test_only_non_json_predictor"
-    card["wrapper"] = (
-        "praxis_virtualcell.tests.test_capability_runtime.NonJsonPredictor"
-    )
+    card["wrapper"] = "praxis_virtualcell.tests.test_capability_runtime.NonJsonPredictor"
     card["assets"] = []
     zoo = _write_registry(tmp_path, card)
     packs = _pack_registry()

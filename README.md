@@ -323,6 +323,32 @@ praxis-vc ask \
   --out runs/ahr
 ```
 
+首个真实数据研究模型必须显式提供三项本地根；不会进入默认模型池：
+
+```bash
+praxis-vc direct-v2 run \
+  --request examples/golden_ahr_klf1_request_v2.json \
+  --pack-id norman-2019-k562-golden \
+  --pack-version 1.0.0 \
+  --out runs/golden-ahr-klf1 \
+  --golden-registration-root /ABSOLUTE/PATH/research-release \
+  --golden-pack-root /ABSOLUTE/PATH/pack \
+  --golden-model-cache-root /ABSOLUTE/PATH/model_cache
+
+# 同一显式 factory 接到现有 POST /api/jobs；默认仍不配置 direct-v2。
+praxis-vc serve \
+  --golden-registration-root /ABSOLUTE/PATH/research-release \
+  --golden-pack-root /ABSOLUTE/PATH/pack \
+  --golden-model-cache-root /ABSOLUTE/PATH/model_cache
+```
+
+同源 UI 启动后选择 `K562`，点击
+`Run registered AHR+KLF1 CRISPRa · 5d · research-only` 即提交上述固定
+direct-v2 请求；入口不会调用自然语言解析，也不会在配置缺失时回退到 mock/legacy 模型。
+
+该 release 固定为 `research_only`；`benchmark_passed`、
+`scientifically_validated`、`promotion_eligible` 与 `production_promoted` 均为 `false`。
+
 每次运行会生成 `runs/<job>/report.md`，包含 Question、Cell Context、Routing、Result、Governance Verdict、Evidence & Provenance、Biological Interpretation、Limitations 和 Reproducibility 九个确定性章节。
 
 ## 治理裁决
@@ -547,6 +573,13 @@ identity 仍可解析，`JobStore.load` 只做只读投影、不改旧 bytes，�
 P17 compilation-backed direct-v2 job 使用 `vc.job-execution-identity.v3`，在上述字段外绑定
 Brain 与 DAG fingerprint；v1/v2/v3 只要存在 request/report/provenance/trace companions
 就会重算并交叉核验，真正无 companions 的 historical identity-only 记录继续只读兼容。
+
+这里的 P17 compilation 是 contract-only 编译/弃权路径，不等同于 U1 direct-v2 execution。
+后者是本地、未发布的 `vc.direct-v2-execution.v1` 选择器：仅由显式注入的
+`DirectV2RuntimeFactory` 进入单步通用执行缝，并写入 v4 identity；它仍不是 wheel/release、
+科学验证、production promotion 或任何领域能力声明。U2 的本地未发布 V3 仅允许精确注册、
+source-fingerprinted generic reducer，并写入 V5 identity；没有该 reducer 的多 step 继续以
+`output_reducer_required` fail-closed，任何 step 失败都不产生 subset result。
 
 P7 的“数据资源”页面提供独立的公开下载和隔离上传通道。公开目录使用 strict
 `vc.data-catalog.v1`，只对外置数据根中 path、size、SHA-256 全部匹配的文件开放

@@ -1,0 +1,60 @@
+{
+  "schema_version": "vc.golden-additive-research-release-pin.v1",
+  "model_name": "norman_additive_linear",
+  "model_version": "1.0.0-research.1",
+  "model_fingerprint": "986d5cb42819fbd608ddbb1ce965e68100f3739f9d70f15739c134ba37e33728",
+  "release_fingerprint": "f71afe9f967ba8d9e3c1397d6a69e5e78b13bc29833d218942e5dcb1a79753da",
+  "capability_fingerprint": "c8ed1a6b34bf3ba991f1adc743cef147e2ef65d95cf49ce817ca96cbdc02ebc3",
+  "registry_fingerprint": "e232a669036934bd8468989f40fcae259451693201fee4e453eb324bb331cf56",
+  "pack_fingerprint": "42165e430bab3474cdc9e607770ff5e204608c4243f84e492c08e2c6442c55ee",
+  "environment_fingerprint": "7879a768daa46f63650c853041f4fb76a1923c618952c80e0220884f7283f292",
+  "environment_lock_fingerprint": "5829126d78447860b7a3a118dcb757c50881cd2317056aee2be94e7a34a4418a",
+  "adapter_fingerprint": "24d6072d970594354734dd4029a1802d12d0a247e5ca33e9bb49c2f18d9c07e7",
+  "evidence_fingerprint": "fe8f666bc4c7b394a0afab529f468db5f5ff4ab71d782fdbbea1797a5e577ad8",
+  "policy_fingerprint": "6192ac150139bf752e397399dfd69c8cd7f9b89c5cbcc0ceb163af7001abb06d",
+  "technical_evidence_sha256": "6b076cf26d53fd134225837886274c668a84e2ae6e20fa606af67e665782d55e",
+  "source_real_run_sha256": "fe82a306ff2ecdb42d2da9abc5fb9007c9c46ecf1051734789da5afb0598f52d",
+  "runtime": {
+    "python_implementation": "CPython",
+    "python_version": "3.13.12",
+    "cpu_architecture": "arm64",
+    "packages": [
+      {"name": "numpy", "version": "2.4.4"},
+      {"name": "pydantic", "version": "2.13.4"},
+      {"name": "pydantic-core", "version": "2.46.4"},
+      {"name": "praxis-virtualcell", "version": "1.7.0"},
+      {"name": "pyyaml", "version": "6.0.3"}
+    ]
+  },
+  "artifacts": [
+    {
+      "artifact_id": "norman_additive_linear:baseline.json",
+      "fingerprint": "ebdaf1f407511614995eb44a5de7407c8b602bdc751040fe6281c01c0da9ae25",
+      "sha256": "b82dc7ab26c6f6fdef4414f6b05c51edb32b2a35e4c00f45824cc839ab9cf1a9",
+      "size_bytes": 95682,
+      "safe_load_policy": "data_only"
+    },
+    {
+      "artifact_id": "norman_additive_linear:linear_coefficients.npy",
+      "fingerprint": "5011fbf41700ac8a33c07f7e35eaf86dc59b57a6405a2e223242522d6c23b25b",
+      "sha256": "241210fb33b0abb86f923478870f9d19711c31e4a721fc5d60888d61900b86c4",
+      "size_bytes": 4237928,
+      "safe_load_policy": "data_only"
+    },
+    {
+      "artifact_id": "norman_additive_linear:linear_intercept.npy",
+      "fingerprint": "0969debe79131ad45f2dcf4bf15c9416dc6a4fd85376c290554667527fe2fb19",
+      "sha256": "6a870efd9f97b599769069aec95bcf2f920acedf43aa1d24740a7e5b40e7fac2",
+      "size_bytes": 40488,
+      "safe_load_policy": "data_only"
+    }
+  ],
+  "cataloged": true,
+  "artifact_ready": true,
+  "research_execution_authorized": true,
+  "research_execution_scope": "research_only",
+  "benchmark_passed": false,
+  "scientifically_validated": false,
+  "promotion_eligible": false,
+  "production_promoted": false
+}

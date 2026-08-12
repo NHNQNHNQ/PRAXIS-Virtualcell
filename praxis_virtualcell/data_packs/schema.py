@@ -99,7 +99,7 @@ class FeatureNamespaceSpec(SchemaObject):
 
 
 class FeatureSemanticsSpec(SchemaObject):
-    id_source: Literal["var_names"]
+    id_source: Literal["var_names", "value_columns"]
     id_format: Literal["ensembl_gene", "ncbi_gene_curie", "uniprot_protein"]
     symbol_field: str | None = None
 
@@ -191,6 +191,64 @@ class AssetSpec(SchemaObject):
         if isinstance(value, bool) or not isinstance(value, int) or value < 0:
             raise ValueError("asset.size_bytes must be a non-negative integer")
         return value
+
+
+class SelectedContentSpec(SchemaObject):
+    """Strict CSV source grammar for the v0.4 core content reader."""
+
+    schema_version: Literal["vc.pack-selected-csv.v1"]
+    asset: str
+    encoding: Literal["utf-8"]
+    delimiter: Literal[","]
+    representation: Literal["csv.record-vector.v1"]
+    record_id_column: str
+    split_column: str
+    value_columns: tuple[str, ...]
+    unit: str
+    shape: tuple[int, int]
+
+    @field_validator(
+        "asset",
+        "record_id_column",
+        "split_column",
+        "unit",
+        mode="before",
+    )
+    @classmethod
+    def _valid_text(cls, value):
+        return _text(value, "selected_content field")
+
+    @field_validator("value_columns", mode="before")
+    @classmethod
+    def _valid_columns(cls, value):
+        return _string_array(value, "selected_content.value_columns")
+
+    @field_validator("shape", mode="before")
+    @classmethod
+    def _valid_shape(cls, value):
+        if (
+            not isinstance(value, list)
+            or len(value) != 2
+            or any(
+                isinstance(item, bool) or not isinstance(item, int) or item <= 0
+                for item in value
+            )
+        ):
+            raise ValueError("selected_content.shape must be [positive records, positive features]")
+        return tuple(value)
+
+    @model_validator(mode="after")
+    def _consistent_columns(self):
+        if len(set(self.value_columns)) != len(self.value_columns):
+            raise ValueError("selected_content.value_columns must not contain duplicates")
+        if self.record_id_column == self.split_column or {
+            self.record_id_column,
+            self.split_column,
+        }.intersection(self.value_columns):
+            raise ValueError("selected_content CSV columns must be distinct")
+        if self.shape[1] != len(self.value_columns):
+            raise ValueError("selected_content.shape feature count must match value_columns")
+        return self
 
 
 class MatrixSpec(SchemaObject):

@@ -3,6 +3,7 @@
 科学决策全由确定性 runtime 完成;本服务只做 HTTP 适配 + job 持久化。默认 offline。
 启动:praxis-vc serve  或  uvicorn praxis_vc_api.main:app
 """
+
 from __future__ import annotations
 
 import logging
@@ -34,6 +35,8 @@ from praxis_virtualcell.pack_product import (
     PackNotFound,
     PackUnavailable,
 )
+from praxis_virtualcell.workflows.runtime_builder import DirectV2RuntimeFactory
+from praxis_virtualcell.workflows.submit_job import DirectV2FactoryUnconfigured
 
 logger = logging.getLogger(__name__)
 
@@ -55,11 +58,7 @@ class UploadBodyLimitMiddleware:
         receive: Receive,
         send: Send,
     ) -> None:
-        if (
-            scope["type"] != "http"
-            or scope["method"] != "POST"
-            or scope["path"] != "/api/data-uploads"
-        ):
+        if scope["type"] != "http" or scope["method"] != "POST" or scope["path"] != "/api/data-uploads":
             await self.app(scope, receive, send)
             return
 
@@ -87,6 +86,21 @@ class UploadBodyLimitMiddleware:
 
 
 app = FastAPI(title="PRAXIS-VirtualCell Local API", version=__version__)
+app.state.direct_v2_factory = None
+
+
+def configure_direct_v2_factory(factory: DirectV2RuntimeFactory | None) -> None:
+    """Explicitly attach a direct-v2 composition root to this ASGI host.
+
+    The base API intentionally has no default factory: selecting a direct-v2
+    submission without one must fail closed rather than auto-discovering a
+    model, Pack, adapter, or domain plugin.
+    """
+
+    if factory is not None and not isinstance(factory, DirectV2RuntimeFactory):
+        raise TypeError("direct_v2_factory must be DirectV2RuntimeFactory or None")
+    app.state.direct_v2_factory = factory
+
 
 # CORS:仅放行本地 Vite dev(5173)。前端只读展示,不影响后端科学决策。
 app.add_middleware(
@@ -107,9 +121,7 @@ async def protect_data_upload(request: Request, call_next):
     if request.method == "POST" and request.url.path == "/api/data-uploads":
         try:
             data_portal.authorize_upload(request.headers.get("authorization"))
-            data_portal.validate_upload_content_length(
-                request.headers.get("content-length")
-            )
+            data_portal.validate_upload_content_length(request.headers.get("content-length"))
         except data_portal.UploadRejected as exc:
             return JSONResponse(
                 status_code=exc.status_code,
@@ -219,21 +231,13 @@ def download_dataset_file(dataset_id: str, file_id: str):
     except data_portal.DatasetNotFound as exc:
         raise HTTPException(status_code=404, detail="dataset_not_found") from exc
     except data_portal.DatasetFileNotFound as exc:
-        raise HTTPException(
-            status_code=404, detail="dataset_file_not_found"
-        ) from exc
+        raise HTTPException(status_code=404, detail="dataset_file_not_found") from exc
     except data_portal.DatasetFileUnavailable as exc:
-        raise HTTPException(
-            status_code=404, detail="dataset_file_unavailable"
-        ) from exc
+        raise HTTPException(status_code=404, detail="dataset_file_unavailable") from exc
     except data_portal.DatasetIntegrityError as exc:
-        raise HTTPException(
-            status_code=409, detail="dataset_integrity_failed"
-        ) from exc
+        raise HTTPException(status_code=409, detail="dataset_integrity_failed") from exc
     except data_portal.DataPortalConfigError as exc:
-        raise HTTPException(
-            status_code=503, detail="data_catalog_invalid"
-        ) from exc
+        raise HTTPException(status_code=503, detail="data_catalog_invalid") from exc
     return FileResponse(
         path,
         media_type=catalog_file.media_type,
@@ -255,9 +259,7 @@ def upload_data_file(
             stream=file.file,
         )
     except data_portal.UploadRejected as exc:
-        raise HTTPException(
-            status_code=exc.status_code, detail=exc.detail
-        ) from exc
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
     except data_portal.DataPortalConfigError as exc:
         raise HTTPException(status_code=503, detail="uploads_disabled") from exc
 
@@ -272,7 +274,11 @@ def create_job(body: JobIn):
             body.enable_llm_report,
             body.pack_id,
             body.pack_version,
+            submission_contract=body.submission_contract,
+            direct_v2_factory=app.state.direct_v2_factory,
         )
+    except DirectV2FactoryUnconfigured as e:
+        raise HTTPException(status_code=503, detail="direct_v2_factory_unconfigured") from e
     except InputValidationError as e:
         raise HTTPException(status_code=400, detail="invalid_request") from e
     except PackNotFound as e:
@@ -309,11 +315,14 @@ def report(job_id: str):
         j = svc.get_job(job_id)
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail="job not found") from e
-    return {"structured_report": j.get("report", {}), "narrative_report": j.get("narrative"),
-            "trace_url": f"/api/reports/{job_id}/trace",
-            "provenance_url": f"/api/reports/{job_id}/provenance",
-            "markdown_url": f"/api/reports/{job_id}/markdown",
-            "llm_used_for_prediction": False}
+    return {
+        "structured_report": j.get("report", {}),
+        "narrative_report": j.get("narrative"),
+        "trace_url": f"/api/reports/{job_id}/trace",
+        "provenance_url": f"/api/reports/{job_id}/provenance",
+        "markdown_url": f"/api/reports/{job_id}/markdown",
+        "llm_used_for_prediction": False,
+    }
 
 
 @app.get("/api/reports/{job_id}/trace")

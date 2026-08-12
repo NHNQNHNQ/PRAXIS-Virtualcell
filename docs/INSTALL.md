@@ -59,7 +59,7 @@ python3.13 -m venv /tmp/praxis-release-venv
 
 该脚本拒绝任何 dirty state，从 `git archive HEAD` 建立全新临时源码树。P30A 本地流程使用 `PRAXIS_RELEASE_OFFLINE=1`：Python build wheel 必须从现有本地 pip cache 按 `requirements/build-py313.lock` 的 exact hash 物化，React 必须以 `npm ci --offline` 构建；缺任何精确依赖即 fail-closed。随后以 `--no-build-isolation` 构建完整 wheel，不复用 checkout 中旧的 `build/`、egg-info 或 hashed static asset。只有成功生成的 wheel 才内含 CLI/API、React 静态资源、`praxis_vc_web/app.py` 和默认 gene-set 数据，且不包含测试包。
 
-发行 verifier 从源码仓库外运行，覆盖 CLI `run` 的四项产物、API health/job、同源首页与 hashed asset，以及 Streamlit app 内容存在。它没有运行 `praxis-vc ask` 或启动完整 Streamlit server，不能把这些能力写成已验证。
+发行 verifier 从源码仓库外运行，覆盖 CLI `run` 的四项产物、API health/job、同源首页与 hashed asset，以及 Streamlit app 内容存在。对于未发布的通用 `vc.direct-v2-execution.v1`，它还发送一个 synthetic 请求并断言未注入 `DirectV2RuntimeFactory` 时得到 `503 direct_v2_factory_unconfigured`，且没有 JobStore 写入；这只是 fail-closed 安装边界，不验证模型、Pack、adapter 或科学结果。它没有运行 `praxis-vc ask` 或启动完整 Streamlit server，不能把这些能力写成已验证。
 
 ## 2. React 同源页面
 

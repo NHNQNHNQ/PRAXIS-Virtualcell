@@ -18,6 +18,7 @@ from praxis_virtualcell.model_zoo.adapter_sdk import (
     PreparedAdapterInput,
     VirtualCellModelAdapter,
 )
+from praxis_virtualcell.model_zoo.cache import ArtifactSnapshot
 from praxis_virtualcell.predictors.base import PredictorAgent
 
 
@@ -32,6 +33,7 @@ def _finite_runtime_number(value) -> bool:
 
 class ModelWrapper(PredictorAgent):
     name = "ModelWrapper"
+    artifact_snapshot_supported = False
 
     @classmethod
     def from_capability(
@@ -39,13 +41,21 @@ class ModelWrapper(PredictorAgent):
         *,
         card,
         compatibility_report,
-        asset_paths,
+        asset_paths=None,
         runtime_adapter=None,
         prepared_input=None,
+        artifact_snapshot=None,
     ):
         """Construct and bind a zero-argument plugin after broker validation."""
         if (runtime_adapter is None) != (prepared_input is None):
             raise ValueError("runtime_adapter and prepared_input must be bound together")
+        if artifact_snapshot is not None:
+            if not isinstance(artifact_snapshot, ArtifactSnapshot) or not artifact_snapshot.is_intact():
+                raise ValueError("artifact_snapshot must be an intact ArtifactSnapshot")
+            if cls.artifact_snapshot_supported is not True:
+                raise ValueError("direct-v2 wrapper has not declared artifact snapshot support")
+            if asset_paths is not None:
+                raise ValueError("snapshot-bound wrappers must not receive asset paths")
         if runtime_adapter is not None:
             if not isinstance(runtime_adapter, VirtualCellModelAdapter):
                 raise TypeError("runtime_adapter must implement VirtualCellModelAdapter")
@@ -57,7 +67,8 @@ class ModelWrapper(PredictorAgent):
         instance.model_version = card.version
         instance._capability_card = card
         instance._compatibility_report = compatibility_report
-        instance._capability_assets = dict(asset_paths)
+        instance._capability_assets = {} if artifact_snapshot is not None else dict(asset_paths or {})
+        instance._capability_artifact_snapshot = artifact_snapshot
         if runtime_adapter is not None:
             instance._runtime_adapter = runtime_adapter
             instance._prepared_adapter_input = prepared_input
@@ -66,6 +77,28 @@ class ModelWrapper(PredictorAgent):
     @property
     def capability_assets(self) -> dict[str, str]:
         return dict(getattr(self, "_capability_assets", {}))
+
+    @property
+    def capability_asset_bytes(self) -> dict[str, bytes]:
+        snapshot = getattr(self, "_capability_artifact_snapshot", None)
+        return {} if snapshot is None else snapshot.asset_bytes
+
+    @property
+    def capability_artifact_snapshot(self) -> ArtifactSnapshot | None:
+        snapshot = getattr(self, "_capability_artifact_snapshot", None)
+        return snapshot if isinstance(snapshot, ArtifactSnapshot) else None
+
+    def bound_adapter_execution(
+        self,
+    ) -> tuple[VirtualCellModelAdapter, PreparedAdapterInput]:
+        """Return the Broker-bound adapter/input pair without exposing it publicly."""
+        adapter = getattr(self, "_runtime_adapter", None)
+        prepared = getattr(self, "_prepared_adapter_input", None)
+        if not isinstance(adapter, VirtualCellModelAdapter) or not isinstance(
+            prepared, PreparedAdapterInput
+        ):
+            raise ValueError("wrapper has no Broker-bound adapter execution")
+        return adapter, adapter.validate_prepared_input(prepared)
 
     def assess_applicability(self, request: dict, brain_context: dict) -> tuple[float, str | None]:
         report = getattr(self, "_compatibility_report", None)

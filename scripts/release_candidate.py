@@ -17,6 +17,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tarfile
@@ -597,11 +598,41 @@ def _top_level_dist_info_member(name: str, leaf: str) -> bool:
     return len(path.parts) == 2 and path.parts[0].endswith(".dist-info") and path.parts[1] == leaf
 
 
-def _read_wheel(path: Path, sha256: str) -> WheelRecord | None:
-    try:
-        data = path.read_bytes()
-    except OSError:
+def _wheel_metadata_text(value: Any) -> str | None:
+    if value is None:
         return None
+    text = str(value).strip()
+    return text or None
+
+
+def _read_regular_file_bytes(path: Path, context: str) -> bytes:
+    """Read one regular file through a no-follow descriptor."""
+
+    if not hasattr(os, "O_NOFOLLOW"):
+        raise ReleaseContractError(f"{context} secure open is unsupported")
+    try:
+        descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    except OSError as error:
+        raise ReleaseContractError(f"{context} is unreadable: {path.name}") from error
+    try:
+        if not stat.S_ISREG(os.fstat(descriptor).st_mode):
+            raise ReleaseContractError(f"{context} must be a regular non-symlink file")
+        chunks: list[bytes] = []
+        while chunk := os.read(descriptor, 1024 * 1024):
+            chunks.append(chunk)
+        return b"".join(chunks)
+    except OSError as error:
+        raise ReleaseContractError(f"{context} is unreadable: {path.name}") from error
+    finally:
+        os.close(descriptor)
+
+
+def _read_wheel(path: Path, sha256: str, *, data: bytes | None = None) -> WheelRecord | None:
+    if data is None:
+        try:
+            data = path.read_bytes()
+        except OSError:
+            return None
     if not zipfile.is_zipfile(io.BytesIO(data)):
         return None
     try:
@@ -617,8 +648,8 @@ def _read_wheel(path: Path, sha256: str) -> WheelRecord | None:
             package_metadata = email.message_from_bytes(archive.read(metadata_names[0]))
     except (OSError, KeyError, zipfile.BadZipFile):
         return None
-    name = package_metadata.get("Name")
-    version = package_metadata.get("Version")
+    name = _wheel_metadata_text(package_metadata.get("Name"))
+    version = _wheel_metadata_text(package_metadata.get("Version"))
     if not name or not version:
         return None
     expected_dist_info = _wheel_dist_info_directory(name, version)
@@ -629,16 +660,20 @@ def _read_wheel(path: Path, sha256: str) -> WheelRecord | None:
     }
     if PurePosixPath(wheel_names[0]).parent.name != expected_dist_info or top_level_dist_info != {expected_dist_info}:
         return None
-    tags = tuple(sorted(wheel_metadata.get_all("Tag", [])))
-    build = wheel_metadata.get("Build")
-    license_expression = package_metadata.get("License-Expression") or package_metadata.get("License")
-    if license_expression is not None:
-        license_expression = license_expression.strip() or None
+    tags = tuple(
+        sorted(
+            tag for raw_tag in wheel_metadata.get_all("Tag", []) if (tag := _wheel_metadata_text(raw_tag)) is not None
+        )
+    )
+    build = _wheel_metadata_text(wheel_metadata.get("Build"))
+    license_expression = _wheel_metadata_text(
+        package_metadata.get("License-Expression") or package_metadata.get("License")
+    )
     classifiers = tuple(
         sorted(
             classifier.removeprefix("License :: ").strip()
-            for classifier in package_metadata.get_all("Classifier", [])
-            if classifier.startswith("License :: ")
+            for raw_classifier in package_metadata.get_all("Classifier", [])
+            if (classifier := _wheel_metadata_text(raw_classifier)) is not None and classifier.startswith("License :: ")
         )
     )
     return WheelRecord(
@@ -659,7 +694,10 @@ def _tags_support_profile(tags: tuple[str, ...], target_profile: str) -> bool:
     if target_profile not in _WHEELHOUSE_PROFILES:
         raise ReleaseContractError("unsupported wheelhouse target profile")
     for tag in tags:
-        python_tag, abi_tag, platform_tag = tag.split("-")
+        parts = tag.split("-")
+        if len(parts) != 3 or any(_SAFE_WHEEL_PART.fullmatch(part) is None for part in parts):
+            raise ReleaseContractError("wheel contains an invalid compatibility tag")
+        python_tag, abi_tag, platform_tag = parts
         if python_tag == "py3" and abi_tag == "none" and platform_tag == "any":
             return True
         if abi_tag == "cp313" and python_tag != "cp313":
@@ -881,6 +919,17 @@ def _load_wheelhouse_manifest(path: Path, locks: tuple[Path, ...]) -> dict[str, 
     )
     if observed_locks != expected_locks:
         raise ReleaseContractError("wheelhouse lock identity mismatch")
+    allowed_hashes: dict[tuple[str, str], set[str]] = {}
+    hash_owners: dict[str, tuple[str, str]] = {}
+    for lock in locks:
+        for component in parse_hash_lock(lock):
+            key = (component.name, component.version)
+            component_hashes = allowed_hashes.setdefault(key, set())
+            component_hashes.update(component.hashes)
+            for digest in component.hashes:
+                owner = hash_owners.setdefault(digest, key)
+                if owner != key:
+                    raise ReleaseContractError("one lock hash maps to multiple distributions")
     components = _array(manifest["components"], "wheelhouse components")
     observed_keys: list[tuple[str, str]] = []
     for index, raw in enumerate(components):
@@ -902,12 +951,38 @@ def _load_wheelhouse_manifest(path: Path, locks: tuple[Path, ...]) -> dict[str, 
         for wheel_index, raw_wheel in enumerate(wheels):
             wheel = _object(raw_wheel, f"wheelhouse wheel[{wheel_index}]")
             _exact_keys(wheel, {"filename", "sha256", "size", "tags"}, "wheelhouse wheel")
-            _text(wheel["filename"], "wheelhouse wheel filename")
-            _text(wheel["sha256"], "wheelhouse wheel sha256", pattern=_SHA256)
-            _integer(wheel["size"], "wheelhouse wheel size", minimum=1)
+            filename = _text(wheel["filename"], "wheelhouse wheel filename")
+            filename_path = PurePosixPath(filename)
+            if (
+                filename_path.is_absolute()
+                or len(filename_path.parts) != 1
+                or filename_path.name != filename
+                or "\\" in filename
+            ):
+                raise ReleaseContractError("wheelhouse wheel filename is unsafe")
+            digest = _text(wheel["sha256"], "wheelhouse wheel sha256", pattern=_SHA256)
+            if digest not in allowed_hashes.get((name, version), set()):
+                raise ReleaseContractError("wheelhouse wheel hash is not a locked hash for its component")
+            size = _integer(wheel["size"], "wheelhouse wheel size", minimum=1)
             tags = _unique_texts(wheel["tags"], "wheelhouse wheel tags")
             if not _tags_support_profile(tags, target_profile):
                 raise ReleaseContractError("wheelhouse contains a wheel incompatible with target profile")
+            wheel_path = path.parent / filename
+            wheel_bytes = _read_regular_file_bytes(wheel_path, "wheelhouse wheel")
+            if len(wheel_bytes) != size:
+                raise ReleaseContractError("wheelhouse wheel size differs from manifest")
+            if _sha256_bytes(wheel_bytes) != digest:
+                raise ReleaseContractError("wheelhouse wheel hash differs from manifest")
+            physical_wheel = _read_wheel(wheel_path, digest, data=wheel_bytes)
+            if physical_wheel is None:
+                raise ReleaseContractError("wheelhouse wheel metadata is invalid")
+            if (
+                physical_wheel.filename != filename
+                or physical_wheel.name != name
+                or physical_wheel.version != version
+                or physical_wheel.tags != tags
+            ):
+                raise ReleaseContractError("wheelhouse wheel metadata differs from manifest")
     if observed_keys != sorted(observed_keys) or len(observed_keys) != len(set(observed_keys)):
         raise ReleaseContractError("wheelhouse components must be sorted and unique")
     expected_keys = sorted(

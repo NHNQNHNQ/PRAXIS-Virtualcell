@@ -1,14 +1,15 @@
 """v0.6 P2:FastAPI pydantic schema。"""
+
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
 
 class ParseIn(BaseModel):
     text: str
-    mode: str = "offline"           # offline / llm_assisted
+    mode: str = "offline"  # offline / llm_assisted
 
 
 class ParseOut(BaseModel):
@@ -32,6 +33,10 @@ class JobIn(BaseModel):
     enable_llm_report: bool = False
     pack_id: str | None = None
     pack_version: str | None = None
+    submission_contract: Literal[
+        "vc.virtual-experiment-compilation.v1",
+        "vc.direct-v2-execution.v1",
+    ] = "vc.virtual-experiment-compilation.v1"
 
     @model_validator(mode="after")
     def _complete_pack_identity(self):

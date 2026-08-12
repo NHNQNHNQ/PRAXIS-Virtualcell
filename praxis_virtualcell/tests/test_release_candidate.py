@@ -45,6 +45,7 @@ def _minimal_wheel(
     version: str,
     *,
     license_expression: str = "MIT",
+    raw_license_header: bytes | None = None,
     vendored_dist_info: bool = False,
 ) -> bytes:
     distribution = name.replace("-", "_")
@@ -52,14 +53,24 @@ def _minimal_wheel(
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
 
-        def write_member(member_name: str, content: str) -> None:
+        def write_member(member_name: str, content: str | bytes) -> None:
             info = zipfile.ZipInfo(member_name, date_time=(2023, 11, 14, 22, 13, 20))
             info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, content)
 
+        metadata = (
+            b"Metadata-Version: 2.4\n"
+            + f"Name: {name}\nVersion: {version}\nLicense: ".encode()
+            + raw_license_header
+            + b"\n\n"
+            if raw_license_header is not None
+            else (
+                f"Metadata-Version: 2.4\nName: {name}\nVersion: {version}\nLicense-Expression: {license_expression}\n\n"
+            )
+        )
         write_member(
             f"{dist_info}/METADATA",
-            f"Metadata-Version: 2.4\nName: {name}\nVersion: {version}\nLicense-Expression: {license_expression}\n\n",
+            metadata,
         )
         write_member(
             f"{dist_info}/WHEEL",
@@ -457,6 +468,114 @@ def test_top_level_wheel_metadata_is_not_confused_with_vendored_dist_info(
 
     assert manifest["components"][0]["name"] == "setuptools"
     assert manifest["components"][0]["version"] == "83.0.0"
+
+
+def test_non_ascii_folded_license_header_does_not_escape_wheelhouse_contract(
+    tmp_path: Path,
+) -> None:
+    wheel = _minimal_wheel(
+        "fixture-lib",
+        "1.2.3",
+        raw_license_header=b"BSD-3-Clause\n        Copyright 2024 scverse\xc2\xae",
+    )
+    lock = tmp_path / "runtime-py313.lock"
+    cache_root = tmp_path / "cache"
+    _lock(lock, {("fixture-lib", "1.2.3"): wheel})
+    _cache(cache_root, [wheel])
+
+    manifest = release_candidate.materialize_wheelhouse(
+        lock_paths=(lock,),
+        cache_root=cache_root,
+        output_dir=tmp_path / "wheelhouse",
+        source_date_epoch=1_700_000_000,
+        target_profile="linux_arm64_cp313",
+    )
+
+    assert manifest["components"][0]["license_expression"].startswith("BSD-3-Clause")
+
+
+def test_wheelhouse_manifest_rejects_wheel_hash_outside_its_lock_entry(
+    tmp_path: Path,
+) -> None:
+    lock, wheelhouse = _materialized_wheelhouse(tmp_path)
+    manifest_path = wheelhouse / "wheelhouse-manifest.json"
+    manifest = _json(manifest_path)
+    manifest["components"][0]["wheels"][0]["sha256"] = "f" * 64
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    with pytest.raises(release_candidate.ReleaseContractError, match="locked hash"):
+        release_candidate._load_wheelhouse_manifest(manifest_path, (lock,))
+
+
+@pytest.mark.parametrize("mutation", ("missing", "byte_drift", "directory", "symlink"))
+def test_wheelhouse_manifest_requires_the_declared_regular_wheel_bytes(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    lock, wheelhouse = _materialized_wheelhouse(tmp_path)
+    manifest_path = wheelhouse / "wheelhouse-manifest.json"
+    wheel_name = _json(manifest_path)["components"][0]["wheels"][0]["filename"]
+    wheel_path = wheelhouse / wheel_name
+
+    if mutation == "missing":
+        wheel_path.unlink()
+    elif mutation == "byte_drift":
+        wheel_path.write_bytes(b"tampered wheel bytes")
+    elif mutation == "directory":
+        wheel_path.unlink()
+        wheel_path.mkdir()
+    else:
+        target = tmp_path / "wheel-target.whl"
+        target.write_bytes(wheel_path.read_bytes())
+        wheel_path.unlink()
+        wheel_path.symlink_to(target)
+
+    with pytest.raises(release_candidate.ReleaseContractError, match="wheelhouse wheel"):
+        release_candidate._load_wheelhouse_manifest(manifest_path, (lock,))
+
+
+@pytest.mark.parametrize("mutation", ("filename", "size", "tags", "name", "version"))
+def test_wheelhouse_manifest_binds_physical_wheel_identity_to_its_claim(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    lock, wheelhouse = _materialized_wheelhouse(tmp_path)
+    manifest_path = wheelhouse / "wheelhouse-manifest.json"
+    manifest = _json(manifest_path)
+    component = manifest["components"][0]
+    wheel = component["wheels"][0]
+    wheel_path = wheelhouse / wheel["filename"]
+
+    if mutation == "filename":
+        renamed = wheelhouse / "renamed.whl"
+        wheel_path.rename(renamed)
+        wheel["filename"] = renamed.name
+    elif mutation == "size":
+        wheel["size"] += 1
+    elif mutation == "tags":
+        wheel["tags"] = ["cp313-cp313-manylinux_2_17_aarch64"]
+    else:
+        claim = ("claimed-lib", "1.2.3") if mutation == "name" else ("fixture-lib", "9.9.9")
+        _lock(lock, {claim: wheel_path.read_bytes()})
+        manifest["locks"][0]["sha256"] = _sha(lock.read_bytes())
+        component["name"], component["version"] = claim
+    manifest_path.write_bytes(_canonical(manifest))
+
+    with pytest.raises(release_candidate.ReleaseContractError, match="wheelhouse wheel"):
+        release_candidate._load_wheelhouse_manifest(manifest_path, (lock,))
+
+
+def test_wheelhouse_manifest_invalid_tag_has_a_stable_fail_closed_error(
+    tmp_path: Path,
+) -> None:
+    lock, wheelhouse = _materialized_wheelhouse(tmp_path)
+    manifest_path = wheelhouse / "wheelhouse-manifest.json"
+    manifest = _json(manifest_path)
+    manifest["components"][0]["wheels"][0]["tags"] = ["not-a-wheel-tag"]
+    manifest_path.write_bytes(_canonical(manifest))
+
+    with pytest.raises(release_candidate.ReleaseContractError, match="invalid compatibility tag"):
+        release_candidate._load_wheelhouse_manifest(manifest_path, (lock,))
 
 
 def test_extra_top_level_dist_info_is_not_accepted_as_cached_wheel_identity(tmp_path: Path) -> None:

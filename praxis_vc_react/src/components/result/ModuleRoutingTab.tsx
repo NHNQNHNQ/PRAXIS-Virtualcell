@@ -155,7 +155,7 @@ export default function ModuleRoutingTab({
         {header}
         <EmptyState
           title="未产生模块路由"
-          hint="本次运行未产生可展示的主/辅模块路由(不可路由或已弃权)。"
+          hint="本次没有可展示的 legacy 模块路由：可能已弃权，或由 direct-v2 独立执行；以「执行身份」与「溯源」为准。"
         />
       </div>
     );

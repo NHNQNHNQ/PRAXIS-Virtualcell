@@ -191,6 +191,16 @@ def test_release_scripts_build_only_committed_candidates():
     assert "SOURCE_DATE_EPOCH=${PRAXIS_SOURCE_EPOCH}" in container_script
 
 
+def test_release_verifier_checks_direct_v2_unconfigured_factory_boundary():
+    verifier = (_ROOT / "scripts" / "verify_release_install.py").read_text(encoding="utf-8")
+
+    assert "vc.direct-v2-execution.v1" in verifier
+    assert "direct_v2_factory_unconfigured" in verifier
+    assert "assert not jobs_root.exists()" in verifier
+    assert "golden_additive_source_card.yaml" in verifier
+    assert "golden_additive_research_release.json" in verifier
+
+
 def test_ci_editable_installs_use_hash_locked_build_backend():
     workflow = (_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     frontend_job = workflow.split("  frontend:\n", 1)[1].split("  release-wheel:\n", 1)[0]

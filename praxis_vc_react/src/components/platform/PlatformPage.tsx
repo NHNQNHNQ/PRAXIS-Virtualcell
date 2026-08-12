@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import {
+  createGoldenResearchJob,
   createJob,
   getDataCatalog,
   getPackCatalog,
@@ -17,6 +18,7 @@ import {
   type PackCatalog,
   type ParseResult,
 } from "../../api";
+import goldenRequestText from "../../../../examples/golden_ahr_klf1_request_v2.json?raw";
 import LazyResultsStage from "../stages/LazyResultsStage";
 import type { PlatformView } from "../layout/JobSidebar";
 
@@ -63,6 +65,9 @@ const COMMON_CELL_IDS = new Set([
   "mouse_tcell",
   "ecoli_iml1515",
 ]);
+const GOLDEN_REQUEST = JSON.parse(goldenRequestText) as Record<string, unknown>;
+const GOLDEN_RESEARCH_LABEL =
+  "Run registered AHR+KLF1 CRISPRa · 5d · research-only";
 
 function composeCellQuery(
   query: string,
@@ -292,6 +297,8 @@ export default function PlatformPage({
         : [],
     [options, selectedCell],
   );
+  const goldenResearchAvailable =
+    selectedCell?.species === "human" && selectedCell.cell_type === "K562";
 
   function updateTurn(id: number, patch: Partial<ChatTurn>) {
     setTurns((current) =>
@@ -323,6 +330,49 @@ export default function PlatformPage({
           reason instanceof Error
             ? reason.message
             : "运行服务暂时不可用，请稍后重试。",
+      });
+    } finally {
+      if (isCurrent()) {
+        inFlightRef.current = false;
+        setBusy(false);
+      }
+    }
+  }
+
+  async function runGoldenResearch() {
+    if (!goldenResearchAvailable || busy || inFlightRef.current) return;
+
+    const requestEpoch = requestEpochRef.current + 1;
+    requestEpochRef.current = requestEpoch;
+    inFlightRef.current = true;
+    const turnId = turnIdRef.current + 1;
+    turnIdRef.current = turnId;
+    const isCurrent = () => requestEpochRef.current === requestEpoch;
+
+    setBusy(true);
+    setTurns((current) => [
+      ...current,
+      {
+        id: turnId,
+        query: "AHR+KLF1 CRISPRa · 5d · Golden research model",
+        status: "pending",
+        request: GOLDEN_REQUEST,
+      },
+    ]);
+
+    try {
+      const job = await createGoldenResearchJob(GOLDEN_REQUEST);
+      onJobCreated(job.job_id);
+      if (!isCurrent()) return;
+      updateTurn(turnId, { status: "report", jobId: job.job_id });
+    } catch (reason: unknown) {
+      if (!isCurrent()) return;
+      const detail = reason instanceof Error ? reason.message : "";
+      updateTurn(turnId, {
+        status: "error",
+        message: detail.includes("direct_v2_factory_unconfigured")
+          ? "当前服务尚未配置 Golden 真实研究运行时。请用三个 Golden 本地根启动服务后重试；系统不会回退到 mock 或旧模型。"
+          : detail || "真实研究任务暂时不可用，请核对本地 Pack、模型注册与缓存后重试。",
       });
     } finally {
       if (isCurrent()) {
@@ -601,25 +651,38 @@ export default function PlatformPage({
           </div>
         </div>
 
-        {turns.length === 0 && promptExamples.length > 0 && (
+        {(goldenResearchAvailable ||
+          (turns.length === 0 && promptExamples.length > 0)) && (
           <div className="prompt-examples" aria-label="Example questions">
             <span>Try an example</span>
             <div>
-              {promptExamples.map((example) => (
+              {goldenResearchAvailable && (
                 <button
-                  key={example.text}
                   type="button"
-                  onClick={() => {
-                    setQuery(example.text);
-                    composerRef.current?.focus();
-                  }}
+                  className="registered-research"
+                  disabled={busy}
+                  onClick={() => void runGoldenResearch()}
                 >
-                  {example.text}
+                  {GOLDEN_RESEARCH_LABEL}
                 </button>
-              ))}
+              )}
+              {turns.length === 0 &&
+                promptExamples.map((example) => (
+                  <button
+                    key={example.text}
+                    type="button"
+                    onClick={() => {
+                      setQuery(example.text);
+                      composerRef.current?.focus();
+                    }}
+                  >
+                    {example.text}
+                  </button>
+                ))}
             </div>
             <small>
-              示例来自所选 backend preset；点击只会填入问题，不代表已有兼容或验证模型。
+              “Run registered…” 会提交固定 Pack 与研究模型；其余示例只填入问题，不代表已有兼容模型。
+              研究运行不等于科学验证或生产晋级。
             </small>
           </div>
         )}

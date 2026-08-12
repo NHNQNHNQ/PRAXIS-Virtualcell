@@ -273,6 +273,7 @@ the queue is `BLOCKED_EXTERNAL` pending an exact separately authorized inventory
 | [P13 Completion Report](../reports/phase13/PHASE13_COMPLETION.md) | preserved historical P13 start/code/tree, Adapter SDK validation and science/policy non-claims |
 | [P13 Model Adapter SDK ADR](ADR-0010-virtualcell-model-adapter-sdk.md) | preserved P13 SDK schemas, exact identity/input/output binding, delta reference path and fail-closed decisions |
 | [P13 Model Adapter SDK Runbook](runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md) | preserved P13 adapter registration, conformance, runtime audit and directed local verification |
+| [U1/U2 Local Direct-v2 RC Supplement](ADR-0009-virtualcell-model-zoo-v2.md) | unpublished generic explicit-factory, U1 V2 single-step, U2 V3 explicit-reducer/V5 identity and installed-wheel fail-closed verification boundary; not a release or science claim |
 | [P12 Completion Report](../reports/phase12/PHASE12_COMPLETION.md) | exact P12 code SHA, validation, artifact fingerprints and science/policy non-claims |
 | [P12–P30 Sequential Master Prompt](PHASE12-30-SEQUENTIAL-MASTER-PROMPT.md) | superseded per-phase authorization prompt; historical only |
 | [P12–P30 Execution Plan](PHASE12-30-EXECUTION-PLAN-AND-PROMPTS.md) | phase scopes, dependencies and exact authorization templates |

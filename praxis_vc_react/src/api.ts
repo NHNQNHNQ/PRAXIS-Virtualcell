@@ -384,6 +384,22 @@ export function createJob(
   });
 }
 
+export function createGoldenResearchJob(
+  request: Record<string, unknown>,
+): Promise<JobRef> {
+  return req<JobRef>("/api/jobs", {
+    method: "POST",
+    body: JSON.stringify({
+      request,
+      mode: "offline",
+      enable_llm_report: false,
+      pack_id: "norman-2019-k562-golden",
+      pack_version: "1.0.0",
+      submission_contract: "vc.direct-v2-execution.v1",
+    }),
+  });
+}
+
 export function listJobs(): Promise<{ jobs: JobSummary[] }> {
   return req<{ jobs: JobSummary[] }>("/api/jobs");
 }

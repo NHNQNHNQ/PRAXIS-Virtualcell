@@ -170,3 +170,23 @@ task/output 必须先完成独立工程阶段并提供 exact model/environment/a
 授权。P9 negative result 保持 `available=false`、
 `scientifically_validated=false`，其 result SHA
 `abd1145c434fd4e48ac9d72e94e8e19d14a5b4011f03d05db4823dd91760da6e` 不变。
+
+## U1 本地 direct-v2 发布可验证性补充（未发布）
+
+这是 P13 历史完成记录之外的通用本地候选，不改变既有 Adapter SDK schema 或任何历史
+fingerprint。`vc.direct-v2-execution.v1` 只能由显式注入的 `DirectV2RuntimeFactory` 构造，
+Python、CLI、HTTP 共享 `submit_direct_v2_job_from_factory()`。未注入 factory 的 HTTP 请求返回
+`503 direct_v2_factory_unconfigured`，并且不写 JobStore；已安装 wheel verifier 将此作为负向合同。
+
+direct-v2 的 U1 V2 计划仍只支持一个已准备 step；U2 新增的 V3 仅在 exact registered
+`vc.output-reducer-policy.v1` 存在时允许多个 generic step，并把 reducer binding/receipt 写入
+新的 V3/V5 identity。无 policy 或 policy/order/source/output drift 先以
+`output_reducer_required` 空计划 fail-closed；任一步失败则 hard-abstain，不回退到 adapter aggregate、
+默认 reducer 或部分模型结果。direct-v2 wrapper 还必须显式声明
+`artifact_snapshot_supported = True`：Broker 以 no-follow descriptor 封存 exact artifact bytes，wrapper 只接收
+private snapshot 而不接收 path；未适配既有 wrapper 在构造期收敛为空计划，不能由 core 退回 path。Runtime 仅接受
+同一完整 snapshot handoff。direct-v2 还要求 write-new `vc.environment.v3` + `EnvironmentIdentityV2` 的
+`vc.artifact-snapshot-budget-policy.v1`：它只限制 sealed artifact snapshot 的声明 bytes/entries，并声明/绑定
+`execution_only` retention scope，不是 RSS/cgroup/隔离保证。Golden research-only release 已精确绑定其三件 artifact 的
+`4,374,098 bytes / 3 entries`；该数值不包含 2.28GB Pack，也不决定 production 容量、并发或部署隔离。
+本节仍是未发布本地证据，不证明科学验证、release 或 promotion。

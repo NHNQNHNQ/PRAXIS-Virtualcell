@@ -11,12 +11,13 @@ import json
 import re
 import unicodedata
 from collections.abc import Iterable
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import PurePosixPath
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 from urllib.parse import urlsplit
 
-from pydantic import BaseModel, ConfigDict, ValidationError, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _MODEL_NAME = re.compile(r"^[a-z][a-z0-9_]*$")
@@ -140,18 +141,12 @@ class _Contract(BaseModel):
             ):
                 location = ".".join(
                     str(item)
-                    if isinstance(item, int)
-                    or (
-                        isinstance(item, str)
-                        and item in cls.model_fields
-                    )
+                    if isinstance(item, int) or (isinstance(item, str) and item in cls.model_fields)
                     else "<field>"
                     for item in error["loc"]
                 )
                 messages.append(f"{location}: {error['msg']}")
-            raise ValueError(
-                f"{cls.__name__} validation failed: {'; '.join(messages)}"
-            ) from None
+            raise ValueError(f"{cls.__name__} validation failed: {'; '.join(messages)}") from None
 
     def to_dict(self) -> dict[str, Any]:
         return self.model_dump(mode="json")
@@ -224,9 +219,7 @@ class ArtifactIdentity(_Contract):
             or parsed.query
             or parsed.fragment
         ):
-            raise ValueError(
-                "uri must use an approved https/s3/gs/hf authority without credentials"
-            )
+            raise ValueError("uri must use an approved https/s3/gs/hf authority without credentials")
         return value
 
     @field_validator("size_bytes")
@@ -301,13 +294,10 @@ class EnvironmentIdentity(_Contract):
         if len(set(normalized_names)) != len(self.packages):
             raise ValueError("native environment distribution names must be unique")
         if any(
-            package.name != normalized
-            or not _PACKAGE_NAME.fullmatch(package.name)
+            package.name != normalized or not _PACKAGE_NAME.fullmatch(package.name)
             for package, normalized in zip(self.packages, normalized_names, strict=True)
         ):
-            raise ValueError(
-                "native packages.name must use canonical PEP 503 lowercase spelling"
-            )
+            raise ValueError("native packages.name must use canonical PEP 503 lowercase spelling")
         if self.python_version is None:
             raise ValueError("native environment identity requires python_version")
         if self.cpu_architecture is None:
@@ -319,6 +309,39 @@ class EnvironmentIdentity(_Contract):
         if not self.adapter_fingerprints:
             raise ValueError("native environment identity requires adapter fingerprints")
         return self
+
+
+class ArtifactSnapshotBudgetPolicyV1(_Contract):
+    """Versioned capacity identity for private artifact snapshot handoff."""
+
+    schema_version: Literal["vc.artifact-snapshot-budget-policy.v1"]
+    max_live_snapshot_payload_bytes: int
+    max_snapshot_entries_per_execution: int
+    retention_scope: Literal["execution_only"]
+
+    @field_validator(
+        "max_live_snapshot_payload_bytes",
+        "max_snapshot_entries_per_execution",
+        mode="before",
+    )
+    @classmethod
+    def _valid_positive_exact_int(cls, value, info):
+        if type(value) is not int or value <= 0:
+            raise ValueError(f"{info.field_name} must be a positive exact integer")
+        return value
+
+
+class EnvironmentIdentityV2(EnvironmentIdentity):
+    """Write-new environment identity that binds snapshot capacity policy."""
+
+    schema_version: Literal["vc.model-environment.v2"]
+    artifact_snapshot_budget_policy: ArtifactSnapshotBudgetPolicyV1
+
+
+EnvironmentIdentityRecord = Annotated[
+    EnvironmentIdentity | EnvironmentIdentityV2,
+    Field(discriminator="schema_version"),
+]
 
 
 class AdapterIdentity(_Contract):
@@ -350,8 +373,7 @@ class AdapterIdentity(_Contract):
     @model_validator(mode="after")
     def _complete_or_explicitly_legacy(self):
         if not self.legacy_incomplete and (
-            self.input_contract_fingerprint is None
-            or self.output_contract_fingerprint is None
+            self.input_contract_fingerprint is None or self.output_contract_fingerprint is None
         ):
             raise ValueError("native adapter identity requires input and output contracts")
         return self
@@ -411,22 +433,23 @@ class ValidationEvidence(_Contract):
     def _strict_binding_and_state(self):
         if self.legacy_incomplete or self.binding_errors:
             raise ValueError("legacy or unbound results must remain migration receipts")
-        if any(
-            value is None
-            for value in (
-                self.pack_fingerprint,
-                self.model_fingerprint,
-                self.environment_fingerprint,
-                self.protocol_fingerprint,
-                self.baseline_fingerprint,
+        if (
+            any(
+                value is None
+                for value in (
+                    self.pack_fingerprint,
+                    self.model_fingerprint,
+                    self.environment_fingerprint,
+                    self.protocol_fingerprint,
+                    self.baseline_fingerprint,
+                )
             )
-        ) or not self.adapter_fingerprints:
+            or not self.adapter_fingerprints
+        ):
             raise ValueError("validation evidence requires exact complete identity bindings")
         if self.scientifically_validated and not self.benchmark_passed:
             raise ValueError("scientifically_validated requires benchmark_passed")
-        if self.promotion_eligible and not (
-            self.benchmark_passed and self.scientifically_validated
-        ):
+        if self.promotion_eligible and not (self.benchmark_passed and self.scientifically_validated):
             raise ValueError("promotion_eligible requires benchmark and scientific validation")
         return self
 
@@ -466,6 +489,52 @@ class OperatorPolicyRecord(_Contract):
     def _promotion_has_evidence(self):
         if not self.evidence_fingerprints:
             raise ValueError("operator decisions require exact evidence fingerprints")
+        return self
+
+
+class OperatorPolicyRecordV2(_Contract):
+    """Versioned non-clinical execution authorization, distinct from promotion."""
+
+    schema_version: Literal["vc.model-operator-policy.v2"]
+    policy_id: str
+    capability_fingerprint: str
+    evidence_fingerprints: tuple[str, ...]
+    production_promoted: bool
+    research_execution_authorized: bool
+    research_execution_scope: Literal["research_only"] | None
+    decision_kind: Literal["operator_decision"]
+    operator_id: str
+    decided_at: str
+    reason: str
+
+    @field_validator("policy_id", "operator_id", "reason", mode="before")
+    @classmethod
+    def _valid_text(cls, value, info):
+        return _text(value, info.field_name)
+
+    @field_validator("capability_fingerprint", mode="before")
+    @classmethod
+    def _valid_capability(cls, value):
+        return _fingerprint(value, "capability_fingerprint")
+
+    @field_validator("evidence_fingerprints", mode="before")
+    @classmethod
+    def _valid_evidence(cls, value):
+        return _fingerprints(value, "evidence_fingerprints", allow_empty=True)
+
+    @field_validator("decided_at", mode="before")
+    @classmethod
+    def _valid_decided_at(cls, value):
+        return _rfc3339(value, "decided_at")
+
+    @model_validator(mode="after")
+    def _execution_authorization_has_exact_scope(self):
+        if not self.evidence_fingerprints:
+            raise ValueError("operator decisions require exact evidence fingerprints")
+        if self.research_execution_authorized and self.production_promoted:
+            raise ValueError("research execution authorization cannot be production promotion")
+        if self.research_execution_authorized != (self.research_execution_scope == "research_only"):
+            raise ValueError("research execution authorization requires research_only scope")
         return self
 
 
@@ -545,8 +614,7 @@ class ModelReleaseRecord(_Contract):
                 or not self.adapter_fingerprints
             ):
                 raise ValueError(
-                    "native release requires exactly one Pack and complete "
-                    "artifact/environment/adapter refs"
+                    "native release requires exactly one Pack and complete artifact/environment/adapter refs"
                 )
         else:
             if not self.incomplete_reasons:
@@ -706,10 +774,10 @@ def reduce_lifecycle(
 class ModelRegistryV2(_Contract):
     schema_version: Literal["vc.model-registry.v2"]
     artifacts: tuple[ArtifactIdentity, ...] = ()
-    environments: tuple[EnvironmentIdentity, ...] = ()
+    environments: tuple[EnvironmentIdentityRecord, ...] = ()
     adapters: tuple[AdapterIdentity, ...] = ()
     evidence_records: tuple[ValidationEvidence, ...] = ()
-    policy_records: tuple[OperatorPolicyRecord, ...] = ()
+    policy_records: tuple[OperatorPolicyRecord | OperatorPolicyRecordV2, ...] = ()
     releases: tuple[ModelReleaseRecord, ...] = ()
     lifecycle_events: tuple[RegistryLifecycleEvent, ...] = ()
 
@@ -758,10 +826,7 @@ class ModelRegistryV2(_Contract):
             if len(set(values)) != len(values):
                 raise ValueError(f"duplicate {field}")
 
-        cache_keys = [
-            unicodedata.normalize("NFC", artifact.cache_key).casefold()
-            for artifact in self.artifacts
-        ]
+        cache_keys = [unicodedata.normalize("NFC", artifact.cache_key).casefold() for artifact in self.artifacts]
         if len(set(cache_keys)) != len(cache_keys):
             raise ValueError("duplicate artifact cache_key")
 
@@ -785,9 +850,7 @@ class ModelRegistryV2(_Contract):
             for fingerprint in release.adapter_fingerprints:
                 if fingerprint not in adapters:
                     raise ValueError("release references unknown adapter")
-            if environment is not None and (
-                environment.adapter_fingerprints != release.adapter_fingerprints
-            ):
+            if environment is not None and (environment.adapter_fingerprints != release.adapter_fingerprints):
                 raise ValueError("environment and release adapter bindings differ")
 
             release_evidence = []
@@ -817,9 +880,7 @@ class ModelRegistryV2(_Contract):
                 if policy.production_promoted and not (
                     release_evidence
                     and all(
-                        evidence.benchmark_passed
-                        and evidence.scientifically_validated
-                        and evidence.promotion_eligible
+                        evidence.benchmark_passed and evidence.scientifically_validated and evidence.promotion_eligible
                         for evidence in release_evidence
                     )
                 ):
@@ -829,9 +890,13 @@ class ModelRegistryV2(_Contract):
                 artifact.legacy_incomplete for artifact in release_artifacts
             ):
                 raise ValueError("native release cannot reference incomplete artifacts")
-            if release.migration_status == "native" and environment is not None and (
-                environment.legacy_incomplete
-                or any(adapters[item].legacy_incomplete for item in release.adapter_fingerprints)
+            if (
+                release.migration_status == "native"
+                and environment is not None
+                and (
+                    environment.legacy_incomplete
+                    or any(adapters[item].legacy_incomplete for item in release.adapter_fingerprints)
+                )
             ):
                 raise ValueError("native release cannot reference incomplete environment or adapters")
 
@@ -850,32 +915,22 @@ class ModelRegistryV2(_Contract):
             if policy.capability_fingerprint not in release_capabilities:
                 raise ValueError("policy references unknown release capability")
 
-        referenced_artifacts = {
-            item for release in self.releases for item in release.artifact_fingerprints
-        }
+        referenced_artifacts = {item for release in self.releases for item in release.artifact_fingerprints}
         if set(artifacts) != referenced_artifacts:
             raise ValueError("artifact records must be referenced by the release closure")
         referenced_environments = {
-            release.environment_fingerprint
-            for release in self.releases
-            if release.environment_fingerprint is not None
+            release.environment_fingerprint for release in self.releases if release.environment_fingerprint is not None
         }
         if set(environments) != referenced_environments:
             raise ValueError("environment records must be referenced by the release closure")
-        referenced_adapters = {
-            item for release in self.releases for item in release.adapter_fingerprints
-        }
+        referenced_adapters = {item for release in self.releases for item in release.adapter_fingerprints}
         if set(adapters) != referenced_adapters:
             raise ValueError("adapter records must be referenced by the release closure")
-        referenced_evidence = {
-            item for release in self.releases for item in release.evidence_fingerprints
-        }
+        referenced_evidence = {item for release in self.releases for item in release.evidence_fingerprints}
         if set(evidence_records) != referenced_evidence:
             raise ValueError("evidence records must be referenced by the release closure")
         referenced_policies = {
-            release.policy_fingerprint
-            for release in self.releases
-            if release.policy_fingerprint is not None
+            release.policy_fingerprint for release in self.releases if release.policy_fingerprint is not None
         }
         if set(policies) != referenced_policies:
             raise ValueError("policy records must be referenced by the release closure")
@@ -888,21 +943,14 @@ class ModelRegistryV2(_Contract):
                 raise ValueError("lifecycle event hash chain is broken")
             if event.release_fingerprint not in releases:
                 raise ValueError("lifecycle event references unknown release")
-            if (
-                event.target_release_fingerprint is not None
-                and event.target_release_fingerprint not in releases
-            ):
+            if event.target_release_fingerprint is not None and event.target_release_fingerprint not in releases:
                 raise ValueError("supersede target is not registered")
             if event.action == "supersede":
                 target_state = reduce_lifecycle(
                     event.target_release_fingerprint,
                     self.lifecycle_events[: expected_sequence - 1],
                 )
-                if (
-                    not target_state.cataloged
-                    or target_state.revoked
-                    or target_state.superseded_by is not None
-                ):
+                if not target_state.cataloged or target_state.revoked or target_state.superseded_by is not None:
                     raise ValueError("supersede target must already be active and cataloged")
             previous = event.fingerprint()
 
@@ -926,7 +974,7 @@ class ModelRegistryV2(_Contract):
     def artifact(self, fingerprint: str) -> ArtifactIdentity:
         return self._lookup(self.artifacts, fingerprint, "artifact")
 
-    def environment(self, fingerprint: str) -> EnvironmentIdentity:
+    def environment(self, fingerprint: str) -> EnvironmentIdentityRecord:
         return self._lookup(self.environments, fingerprint, "environment")
 
     def adapter(self, fingerprint: str) -> AdapterIdentity:
@@ -935,7 +983,7 @@ class ModelRegistryV2(_Contract):
     def evidence(self, fingerprint: str) -> ValidationEvidence:
         return self._lookup(self.evidence_records, fingerprint, "evidence")
 
-    def policy(self, fingerprint: str) -> OperatorPolicyRecord:
+    def policy(self, fingerprint: str) -> OperatorPolicyRecord | OperatorPolicyRecordV2:
         return self._lookup(self.policy_records, fingerprint, "policy")
 
     def release(self, fingerprint: str) -> ModelReleaseRecord:
@@ -958,11 +1006,7 @@ class ModelRegistryV2(_Contract):
             release_fingerprint = release.fingerprint()
             state = self.state(release_fingerprint)
             evidence = [self.evidence(item) for item in release.evidence_fingerprints]
-            policy = (
-                self.policy(release.policy_fingerprint)
-                if release.policy_fingerprint is not None
-                else None
-            )
+            policy = self.policy(release.policy_fingerprint) if release.policy_fingerprint is not None else None
             releases.append(
                 {
                     "release_id": release.release_id,
@@ -982,24 +1026,20 @@ class ModelRegistryV2(_Contract):
                     "artifact_ready": state.artifact_ready,
                     "revoked": state.revoked,
                     "superseded_by": state.superseded_by,
-                    "benchmark_passed": (
-                        all(item.benchmark_passed for item in evidence)
-                        if evidence
-                        else None
-                    ),
+                    "benchmark_passed": (all(item.benchmark_passed for item in evidence) if evidence else None),
                     "scientifically_validated": (
-                        all(item.scientifically_validated for item in evidence)
-                        if evidence
-                        else None
+                        all(item.scientifically_validated for item in evidence) if evidence else None
                     ),
-                    "promotion_eligible": (
-                        all(item.promotion_eligible for item in evidence)
-                        if evidence
-                        else None
-                    ),
+                    "promotion_eligible": (all(item.promotion_eligible for item in evidence) if evidence else None),
                     "policy_present": policy is not None,
-                    "production_promoted": bool(
-                        policy is not None and policy.production_promoted
+                    "production_promoted": bool(policy is not None and policy.production_promoted),
+                    **(
+                        {
+                            "research_execution_authorized": (policy.research_execution_authorized),
+                            "research_execution_scope": (policy.research_execution_scope),
+                        }
+                        if isinstance(policy, OperatorPolicyRecordV2)
+                        else {}
                     ),
                 }
             )
@@ -1012,7 +1052,7 @@ class ModelRegistryV2(_Contract):
     @classmethod
     def from_v1_cards(cls, cards: Iterable[Any]) -> ModelRegistryV2:
         artifacts: list[ArtifactIdentity] = []
-        environments: list[EnvironmentIdentity] = []
+        environments: list[EnvironmentIdentityRecord] = []
         adapters: list[AdapterIdentity] = []
         releases: list[ModelReleaseRecord] = []
         events: list[RegistryLifecycleEvent] = []
@@ -1064,10 +1104,7 @@ class ModelRegistryV2(_Contract):
                 environment_id=f"legacy-environment:{card.name}:{card.version}",
                 python_version=None,
                 cpu_architecture=None,
-                packages=tuple(
-                    PackageIdentity(name=name, version=None)
-                    for name in card.resources.python_dependencies
-                ),
+                packages=tuple(PackageIdentity(name=name, version=None) for name in card.resources.python_dependencies),
                 lock_digest=None,
                 image_digest=None,
                 resources=resources,
@@ -1076,11 +1113,7 @@ class ModelRegistryV2(_Contract):
                 legacy_incomplete=True,
             )
             environments.append(environment)
-            safe_version = (
-                card.version
-                if _PUBLIC_IDENTIFIER.fullmatch(card.version)
-                else f"legacy-{model_fingerprint}"
-            )
+            safe_version = card.version if _PUBLIC_IDENTIFIER.fullmatch(card.version) else f"legacy-{model_fingerprint}"
             release = ModelReleaseRecord(
                 schema_version="vc.model-release.v1",
                 release_id=f"{card.name}@{safe_version}",
@@ -1129,6 +1162,191 @@ class ModelRegistryV2(_Contract):
             releases=releases,
             lifecycle_events=events,
         )
+
+
+@dataclass(frozen=True)
+class ComposedModelRegistryV2:
+    """Read-only, role-bound view over two independently auditable registries.
+
+    A composed view must not synthesize a third lifecycle chain.  Source
+    registries retain their own append-only lifecycle identities, while this
+    object only supplies the exact lookup surface needed by planning/runtime.
+    """
+
+    base: ModelRegistryV2
+    domain: ModelRegistryV2
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.base, ModelRegistryV2) or not isinstance(self.domain, ModelRegistryV2):
+            raise TypeError("base and domain must be ModelRegistryV2")
+        if self.base.fingerprint() == self.domain.fingerprint():
+            raise ValueError("base and domain cannot share lifecycle authorities")
+        self._validate_conflicts()
+
+    @classmethod
+    def compose(
+        cls,
+        base: ModelRegistryV2,
+        domain: ModelRegistryV2,
+    ) -> ComposedModelRegistryV2:
+        return cls(base=base, domain=domain)
+
+    def to_dict(self) -> dict[str, str]:
+        return {
+            "schema_version": "vc.model-registry-composition.v1",
+            "base_registry_fingerprint": self.base.fingerprint(),
+            "domain_registry_fingerprint": self.domain.fingerprint(),
+        }
+
+    def fingerprint(self) -> str:
+        return _canonical_fingerprint(self.to_dict())
+
+    def _validate_conflicts(self) -> None:
+        for field, identifier in (
+            ("artifacts", "artifact_id"),
+            ("environments", "environment_id"),
+            ("adapters", "adapter_id"),
+            ("evidence_records", "evidence_id"),
+            ("policy_records", "policy_id"),
+            ("releases", "release_id"),
+        ):
+            seen: dict[str, str] = {}
+            for source in (self.base, self.domain):
+                for record in getattr(source, field):
+                    key = getattr(record, identifier)
+                    fingerprint = record.fingerprint()
+                    if key in seen and seen[key] != fingerprint:
+                        raise ValueError(f"composed registry has conflicting {identifier}")
+                    seen[key] = fingerprint
+
+        cache_keys: dict[str, str] = {}
+        for source in (self.base, self.domain):
+            for artifact in source.artifacts:
+                key = unicodedata.normalize("NFC", artifact.cache_key).casefold()
+                fingerprint = artifact.fingerprint()
+                if key in cache_keys and cache_keys[key] != fingerprint:
+                    raise ValueError("composed registry has conflicting artifact cache_key")
+                cache_keys[key] = fingerprint
+
+        base_releases = {item.fingerprint() for item in self.base.releases}
+        domain_releases = {item.fingerprint() for item in self.domain.releases}
+        if base_releases & domain_releases:
+            raise ValueError("a release cannot have two lifecycle authorities")
+
+        routes: dict[tuple[str, str, str, str], str] = {}
+        for source in (self.base, self.domain):
+            for release in source.releases:
+                for pack_fingerprint in release.pack_fingerprints:
+                    key = (
+                        release.model_name,
+                        release.model_version,
+                        release.model_fingerprint,
+                        pack_fingerprint,
+                    )
+                    release_fingerprint = release.fingerprint()
+                    if key in routes and routes[key] != release_fingerprint:
+                        raise ValueError("composed registry has ambiguous release routing")
+                    routes[key] = release_fingerprint
+
+    @staticmethod
+    def _merged_records(base_records, domain_records):
+        result = []
+        seen: set[str] = set()
+        for record in (*base_records, *domain_records):
+            fingerprint = record.fingerprint()
+            if fingerprint not in seen:
+                result.append(record)
+                seen.add(fingerprint)
+        return tuple(result)
+
+    @property
+    def artifacts(self) -> tuple[ArtifactIdentity, ...]:
+        return self._merged_records(self.base.artifacts, self.domain.artifacts)
+
+    @property
+    def environments(self) -> tuple[EnvironmentIdentityRecord, ...]:
+        return self._merged_records(self.base.environments, self.domain.environments)
+
+    @property
+    def adapters(self) -> tuple[AdapterIdentity, ...]:
+        return self._merged_records(self.base.adapters, self.domain.adapters)
+
+    @property
+    def evidence_records(self) -> tuple[ValidationEvidence, ...]:
+        return self._merged_records(
+            self.base.evidence_records,
+            self.domain.evidence_records,
+        )
+
+    @property
+    def policy_records(self) -> tuple[OperatorPolicyRecord | OperatorPolicyRecordV2, ...]:
+        return self._merged_records(self.base.policy_records, self.domain.policy_records)
+
+    @property
+    def releases(self) -> tuple[ModelReleaseRecord, ...]:
+        return self._merged_records(self.base.releases, self.domain.releases)
+
+    def _lookup(self, records, fingerprint: str, kind: str):
+        fingerprint = _fingerprint(fingerprint, f"{kind}_fingerprint")
+        for record in records:
+            if record.fingerprint() == fingerprint:
+                return record
+        raise KeyError(f"unknown {kind} fingerprint: {fingerprint}")
+
+    def artifact(self, fingerprint: str) -> ArtifactIdentity:
+        return self._lookup(self.artifacts, fingerprint, "artifact")
+
+    def environment(self, fingerprint: str) -> EnvironmentIdentityRecord:
+        return self._lookup(self.environments, fingerprint, "environment")
+
+    def adapter(self, fingerprint: str) -> AdapterIdentity:
+        return self._lookup(self.adapters, fingerprint, "adapter")
+
+    def evidence(self, fingerprint: str) -> ValidationEvidence:
+        return self._lookup(self.evidence_records, fingerprint, "evidence")
+
+    def policy(self, fingerprint: str) -> OperatorPolicyRecord | OperatorPolicyRecordV2:
+        return self._lookup(self.policy_records, fingerprint, "policy")
+
+    def release(self, fingerprint: str) -> ModelReleaseRecord:
+        return self._lookup(self.releases, fingerprint, "release")
+
+    def state(self, release_fingerprint: str) -> RegistryState:
+        release_fingerprint = _fingerprint(
+            release_fingerprint,
+            "release_fingerprint",
+        )
+        owners = tuple(
+            source
+            for source in (self.base, self.domain)
+            if any(item.fingerprint() == release_fingerprint for item in source.releases)
+        )
+        if len(owners) != 1:
+            raise KeyError(f"unknown release fingerprint: {release_fingerprint}")
+        return owners[0].state(release_fingerprint)
+
+    def append(self, _event: RegistryLifecycleEvent):
+        raise TypeError("composed registries have no merged lifecycle authority")
+
+    def public_catalog(self) -> dict[str, Any]:
+        releases = [
+            *self.base.public_catalog()["releases"],
+            *self.domain.public_catalog()["releases"],
+        ]
+        return {
+            "schema_version": "vc.model-registry-catalog.v3",
+            "registry_fingerprint": self.fingerprint(),
+            "composition": self.to_dict(),
+            "releases": sorted(releases, key=lambda item: item["release_id"]),
+        }
+
+
+def compose_model_registries(
+    base: ModelRegistryV2,
+    domain: ModelRegistryV2,
+) -> ComposedModelRegistryV2:
+    """Compose explicit sources without changing either source identity."""
+    return ComposedModelRegistryV2.compose(base, domain)
 
 
 class LegacyMigrationReceipt(_Contract):

@@ -29,6 +29,7 @@ from praxis_virtualcell.data_packs.schema import (
     PerturbationsSpec,
     ProvenanceSpec,
     SchemaObject,
+    SelectedContentSpec,
     SplitSpec,
     TaxonSpec,
 )
@@ -63,7 +64,7 @@ class _UniqueKeyLoader(yaml.SafeLoader):
 
 
 class PackManifest(SchemaObject):
-    schema_version: Literal["vc.pack.v0.1", "vc.pack.v0.2", "vc.pack.v0.3"]
+    schema_version: Literal["vc.pack.v0.1", "vc.pack.v0.2", "vc.pack.v0.3", "vc.pack.v0.4"]
     pack_id: str
     pack_version: str
     taxon: TaxonSpec
@@ -79,6 +80,7 @@ class PackManifest(SchemaObject):
     cell_semantics: CellSemanticsSpec | None = None
     conditions: ConditionsSpec | None = None
     perturbations: PerturbationsSpec | None = None
+    selected_content: SelectedContentSpec | None = None
     split: SplitSpec
     provenance: ProvenanceSpec
     license: LicenseSpec
@@ -108,6 +110,7 @@ class PackManifest(SchemaObject):
             if (
                 any(field in value for field in semantic_fields)
                 or "multiomics" in value
+                or "selected_content" in value
                 or has_v02_split_fields
             ):
                 raise ValueError(
@@ -115,6 +118,8 @@ class PackManifest(SchemaObject):
                     "or vc.pack.v0.3 multiomics"
                 )
         if version == "vc.pack.v0.2":
+            if "selected_content" in value:
+                raise ValueError("vc.pack.v0.2 must not declare selected_content")
             if "multiomics" in value:
                 raise ValueError("vc.pack.v0.2 must not declare multiomics")
             if "condition" in value:
@@ -144,6 +149,7 @@ class PackManifest(SchemaObject):
                     "modality",
                     "feature_namespace",
                     "feature_semantics",
+                    "selected_content",
                 )
                 if field in value
             ]
@@ -160,6 +166,32 @@ class PackManifest(SchemaObject):
             missing = [field for field in required if field not in value]
             if missing:
                 raise ValueError(f"vc.pack.v0.3 requires fields: {missing}")
+        if version == "vc.pack.v0.4":
+            forbidden = [
+                field
+                for field in (
+                    "condition",
+                    "matrix",
+                    "multiomics",
+                    "cell_semantics",
+                    "conditions",
+                    "perturbations",
+                )
+                if field in value
+            ]
+            if forbidden:
+                raise ValueError(
+                    f"vc.pack.v0.4 must not declare unrelated Pack fields: {forbidden}"
+                )
+            required = (
+                "modality",
+                "feature_namespace",
+                "feature_semantics",
+                "selected_content",
+            )
+            missing = [field for field in required if field not in value]
+            if missing:
+                raise ValueError(f"vc.pack.v0.4 requires fields: {missing}")
         return value
 
     @field_validator("pack_id", "pack_version", mode="before")
@@ -216,6 +248,59 @@ class PackManifest(SchemaObject):
                     "vc.pack.v0.1 must not declare vc.pack.v0.2 semantic fields "
                     "or vc.pack.v0.3 multiomics"
                 )
+            return self
+        if self.schema_version == "vc.pack.v0.4":
+            if (
+                self.condition is not None
+                or self.matrix is not None
+                or self.multiomics is not None
+                or any(
+                    value is not None
+                    for value in (
+                        self.cell_semantics,
+                        self.conditions,
+                        self.perturbations,
+                    )
+                )
+                or self.modality is None
+                or self.feature_namespace is None
+                or self.feature_semantics is None
+                or self.selected_content is None
+            ):
+                raise ValueError(
+                    "vc.pack.v0.4 requires its strict single-vector mapping and forbids other Pack mappings"
+                )
+            if not _ASSEMBLY_ACCESSION.fullmatch(self.assembly.accession):
+                raise ValueError(
+                    "assembly.accession must be a versioned GCA_ or GCF_ accession"
+                )
+            if self.split.name is None or not self.split.leakage_guard:
+                raise ValueError("vc.pack.v0.4 requires split.name and split.leakage_guard")
+            if self.split.leakage_guard != (self.selected_content.record_id_column,):
+                raise ValueError(
+                    "vc.pack.v0.4 split.leakage_guard must contain only selected_content.record_id_column"
+                )
+            if self.identity.observation_key != self.selected_content.record_id_column:
+                raise ValueError("vc.pack.v0.4 identity.observation_key must match selected_content.record_id_column")
+            if self.split.field != self.selected_content.split_column:
+                raise ValueError("vc.pack.v0.4 split.field must match selected_content.split_column")
+            if self.feature_semantics.id_source != "value_columns":
+                raise ValueError("vc.pack.v0.4 feature_semantics.id_source must be value_columns")
+            expected_namespace = {
+                "ensembl_gene": "EnsemblGene",
+                "ncbi_gene_curie": "NCBIGene",
+                "uniprot_protein": "UniProtKB",
+            }.get(self.feature_semantics.id_format)
+            if expected_namespace is None or self.feature_namespace.name != expected_namespace:
+                raise ValueError(
+                    "vc.pack.v0.4 feature_namespace.name does not match feature_semantics.id_format"
+                )
+            selected_asset = next(
+                (asset for asset in self.assets if asset.id == self.selected_content.asset),
+                None,
+            )
+            if selected_asset is None or selected_asset.media_type != "text/csv":
+                raise ValueError("vc.pack.v0.4 selected_content.asset must name a text/csv asset")
             return self
         if self.condition is not None:
             raise ValueError(
@@ -325,6 +410,7 @@ class PackManifest(SchemaObject):
             "cell_semantics",
             "conditions",
             "perturbations",
+            "selected_content",
         ):
             if value[field] is None:
                 value.pop(field)

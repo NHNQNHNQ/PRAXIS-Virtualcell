@@ -61,6 +61,10 @@ _LEGACY_SPECIES_BY_TAXON = {taxon: name for name, (taxon, _) in _LEGACY_SPECIES.
 def _nonempty_string(value: Any, field_name: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{field_name} must be a non-empty string")
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError as exc:
+        raise ValueError(f"{field_name} must be UTF-8 encodable") from exc
     return value
 
 
@@ -87,7 +91,13 @@ def _unit(value: Any) -> str | None:
 
 
 def _json_value(value: Any, path: str = "$") -> Any:
-    if value is None or isinstance(value, (str, bool, int)):
+    if value is None or isinstance(value, (bool, int)):
+        return value
+    if isinstance(value, str):
+        try:
+            value.encode("utf-8")
+        except UnicodeEncodeError as exc:
+            raise ValueError(f"{path} contains a non-UTF-8 string") from exc
         return value
     if isinstance(value, float):
         if not math.isfinite(value):
@@ -101,6 +111,10 @@ def _json_value(value: Any, path: str = "$") -> Any:
         for key, item in value.items():
             if not isinstance(key, str):
                 raise ValueError(f"{path} contains a non-string key")
+            try:
+                key.encode("utf-8")
+            except UnicodeEncodeError as exc:
+                raise ValueError(f"{path} contains a non-UTF-8 key") from exc
             _json_value(item, f"{path}.{key}")
         return value
     raise ValueError(f"{path} contains non-JSON type {type(value).__name__}")
@@ -297,7 +311,10 @@ class PerturbationSpec(_VersionedDomainObject):
             return None
         if isinstance(value, bool) or not isinstance(value, (int, float)):
             raise ValueError("dose_value must be a finite non-negative number")
-        value = float(value)
+        try:
+            value = float(value)
+        except (OverflowError, ValueError) as exc:
+            raise ValueError("dose_value must be a finite non-negative number") from exc
         if not math.isfinite(value) or value < 0:
             raise ValueError("dose_value must be a finite non-negative number")
         return value
@@ -344,6 +361,21 @@ class TaskSpec(_VersionedDomainObject):
         return tuple(_nonempty_string(item, "requested_output") for item in value)
 
 
+class PackInputSelectorV1(_VersionedDomainObject):
+    """One exact record selector for a Pack-owned runtime input reader."""
+
+    schema_version: Literal["vc.pack-input-selector.v1"]
+    record_id: str
+
+    @field_validator("record_id", mode="before")
+    @classmethod
+    def _valid_record_id(cls, value):
+        value = _nonempty_string(value, "pack_input.record_id")
+        if value.strip() != value:
+            raise ValueError("pack_input.record_id must not have surrounding whitespace")
+        return value
+
+
 class VirtualCellRequestV2(_VersionedDomainObject):
     schema_version: Literal["vc.request.v2"]
     request_id: str
@@ -353,6 +385,7 @@ class VirtualCellRequestV2(_VersionedDomainObject):
     output_modality: ModalitySpec
     perturbation: PerturbationSpec
     task: TaskSpec
+    pack_input: PackInputSelectorV1 | None = None
     baseline_context: dict[str, Any] | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
     constraints: dict[str, Any] = Field(default_factory=dict)
@@ -377,6 +410,14 @@ class VirtualCellRequestV2(_VersionedDomainObject):
         if not isinstance(value, dict):
             raise ValueError("metadata and constraints must be JSON objects")
         return _json_value(value)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Preserve historic v2 request bytes when no Pack selector is used."""
+
+        value = super().to_dict()
+        if self.pack_input is None:
+            value.pop("pack_input")
+        return value
 
 
 class ModelInputBundle(_VersionedDomainObject):
@@ -438,7 +479,10 @@ class PredictionBundle(_VersionedDomainObject):
         for item in value:
             if isinstance(item, bool) or not isinstance(item, (int, float)):
                 raise ValueError("values must contain only finite numbers")
-            item = float(item)
+            try:
+                item = float(item)
+            except (OverflowError, ValueError) as exc:
+                raise ValueError("values must contain only finite numbers") from exc
             if not math.isfinite(item):
                 raise ValueError("values must contain only finite numbers")
             values.append(item)
@@ -460,6 +504,13 @@ class PredictionBundle(_VersionedDomainObject):
         if len(set(self.feature_ids)) != len(self.feature_ids):
             raise ValueError("feature_ids must be unique")
         return self
+
+
+def require_v2_request(value: Any) -> VirtualCellRequestV2:
+    """Parse only an explicitly declared v2 request; never project legacy input."""
+    if not isinstance(value, dict) or value.get("schema_version") != "vc.request.v2":
+        raise InputValidationError("vc.request.v2 schema_version is required")
+    return VirtualCellRequestV2.from_dict(value)
 
 
 def legacy_request_to_v2(request) -> VirtualCellRequestV2:
@@ -557,6 +608,7 @@ def v2_request_to_legacy(request: VirtualCellRequestV2):
         or request.output_modality.unit is not None
         or request.output_modality.feature_namespace is not None
         or request.perturbation.dose_unit is not None
+        or request.pack_input is not None
     ):
         raise InputValidationError("v2-only context cannot be silently discarded by the legacy adapter")
 

@@ -279,6 +279,24 @@ def test_strict_wrapper_rejects_cross_request_adapter_provenance():
     assert result["rejection_reason"] == "runtime_output_adapter_contract"
 
 
+def test_strict_wrapper_rejects_unsafe_projection_metadata_before_public_report():
+    wrapper, adapter, _ = _wrapper(_raw())
+    original = adapter.adapt_output
+    secret = "/private/test-pack-root/model.bin"
+
+    def unsafe_output(prepared_input, raw_output):
+        return original(prepared_input, raw_output).model_copy(
+            update={"projection_metadata": {"local_path": secret}}
+        )
+
+    adapter.adapt_output = unsafe_output
+    result = _run_wrapper(wrapper)
+
+    assert result["status"] == "rejected"
+    assert result["rejection_reason"] == "runtime_output_adapter_contract"
+    assert secret not in str(result)
+
+
 def test_legacy_ensemble_shape_and_fields_are_unchanged():
     result = {
         "agent_name": "legacy",

@@ -55,6 +55,18 @@ _INDEX_ENTRY_KEYS = {
     "factory_registration_fingerprint",
     "factory_store_root",
 }
+_DIRECT_V2_EXECUTION_CONTRACT = "vc.direct-v2-execution.v1"
+_DIRECT_V2_PROVENANCE_KEYS = frozenset(
+    {
+        "execution_contract",
+        "execution_plan",
+        "compatibility_reports",
+        "adapter_input_receipts",
+        "per_call_hashes",
+        "pack_view_receipt",
+        "domain_extension_identity",
+    }
+)
 
 
 class PackProductError(ValueError):
@@ -784,6 +796,19 @@ def _public_plan(plan: dict[str, Any]) -> dict[str, Any]:
             "executable",
             "legacy_adapter",
         ),
+        "vc.execution-plan.v3": (
+            "schema_version",
+            "plan_id",
+            "request_id",
+            "request_fingerprint",
+            "pack_id",
+            "pack_version",
+            "pack_fingerprint",
+            "environment_snapshot_fingerprint",
+            "executable",
+            "legacy_adapter",
+            "output_reducer",
+        ),
     }
     step_keys = {
         "vc.execution-plan.v1": (
@@ -795,6 +820,22 @@ def _public_plan(plan: dict[str, Any]) -> dict[str, Any]:
             "agent_name",
         ),
         "vc.execution-plan.v2": (
+            "schema_version",
+            "model_name",
+            "model_version",
+            "model_fingerprint",
+            "release_fingerprint",
+            "capability_fingerprint",
+            "artifact_fingerprints",
+            "environment_fingerprint",
+            "adapter_fingerprints",
+            "evidence_fingerprints",
+            "policy_fingerprint",
+            "compatibility_fingerprint",
+            "wrapper",
+            "agent_name",
+        ),
+        "vc.execution-plan.v3": (
             "schema_version",
             "model_name",
             "model_version",
@@ -870,19 +911,75 @@ def _public_plan(plan: dict[str, Any]) -> dict[str, Any]:
             "checks",
             "reasons",
         ),
+        "vc.execution-plan.v3": (
+            "schema_version",
+            "request_id",
+            "request_fingerprint",
+            "model_name",
+            "model_version",
+            "model_fingerprint",
+            "release_fingerprint",
+            "capability_fingerprint",
+            "pack_id",
+            "pack_version",
+            "pack_fingerprint",
+            "environment_fingerprint",
+            "environment_snapshot_fingerprint",
+            "artifact_fingerprints",
+            "adapter_fingerprints",
+            "evidence_fingerprints",
+            "policy_fingerprint",
+            "cataloged",
+            "artifact_ready",
+            "revoked",
+            "superseded_by",
+            "pack_valid",
+            "model_compatible",
+            "environment_compatible",
+            "adapter_compatible",
+            "assets_ready",
+            "wrapper_ready",
+            "benchmark_passed",
+            "scientifically_validated",
+            "promotion_eligible",
+            "policy_present",
+            "production_promoted",
+            "executable",
+            "checks",
+            "reasons",
+        ),
     }
     schema = plan.get("schema_version")
     if schema not in plan_keys:
         raise ValueError("unsupported execution plan schema for public projection")
     public = {key: plan[key] for key in plan_keys[schema]}
+    if schema == "vc.execution-plan.v3":
+        from praxis_virtualcell.model_zoo.post_result_policy import OutputReducerBindingV1
+
+        public["output_reducer"] = OutputReducerBindingV1.from_dict(
+            plan["output_reducer"]
+        ).to_dict()
     public["steps"] = [
         {key: step[key] for key in step_keys[schema]}
         for step in plan.get("steps", [])
     ]
-    public["reports"] = [
-        {key: report[key] for key in report_keys[schema]}
-        for report in plan.get("reports", [])
-    ]
+    public["reports"] = []
+    for report in plan.get("reports", []):
+        public_report = {key: report[key] for key in report_keys[schema]}
+        # Research-only execution authorization is public, non-sensitive policy
+        # state.  Preserve historical v2 projection bytes by adding it only when
+        # the source report is a v2-policy extension rather than emitting nulls.
+        if schema in {"vc.execution-plan.v2", "vc.execution-plan.v3"} and (
+            "research_execution_authorized" in report
+            or "research_execution_scope" in report
+        ):
+            public_report["research_execution_authorized"] = report.get(
+                "research_execution_authorized"
+            )
+            public_report["research_execution_scope"] = report.get(
+                "research_execution_scope"
+            )
+        public["reports"].append(public_report)
     for item in (*public["steps"], *public["reports"]):
         item["model_version"] = public_model_version(item["model_version"])
     return json.loads(json.dumps(public))
@@ -890,6 +987,39 @@ def _public_plan(plan: dict[str, Any]) -> dict[str, Any]:
 
 def _public_provenance(provenance: dict[str, Any]) -> dict[str, Any]:
     public = json.loads(json.dumps(provenance))
+    direct_v2 = public.get("execution_contract") == _DIRECT_V2_EXECUTION_CONTRACT
+
+    def unavailable_direct_v2_provenance() -> dict[str, Any]:
+        return {
+            "execution_contract": _DIRECT_V2_EXECUTION_CONTRACT,
+            "available": False,
+            "reason": "unsupported_or_invalid_direct_v2_provenance",
+        }
+
+    if direct_v2:
+        raw_plan = public.get("execution_plan")
+        schema = raw_plan.get("schema_version") if isinstance(raw_plan, dict) else None
+        allowed = _DIRECT_V2_PROVENANCE_KEYS
+        if schema == "vc.execution-plan.v3":
+            allowed = allowed | {"output_reducer_receipt"}
+        if schema not in {"vc.execution-plan.v2", "vc.execution-plan.v3"} or not set(public).issubset(allowed):
+            return unavailable_direct_v2_provenance()
+    raw_domain_identity = public.get("domain_extension_identity")
+    if raw_domain_identity is not None:
+        try:
+            from praxis_virtualcell.core.domain_extension import DomainExtensionIdentityV1
+
+            public["domain_extension_identity"] = DomainExtensionIdentityV1.from_dict(
+                raw_domain_identity
+            ).to_dict()
+        except (KeyError, TypeError, ValueError):
+            if direct_v2:
+                return unavailable_direct_v2_provenance()
+            public["domain_extension_identity"] = {
+                "schema_version": None,
+                "available": False,
+                "reason": "unsupported_or_invalid_domain_extension_identity",
+            }
     raw_plan = public.get("execution_plan")
     if raw_plan is not None:
         try:
@@ -907,6 +1037,20 @@ def _public_provenance(provenance: dict[str, Any]) -> dict[str, Any]:
                 public["compatibility_reports"] = projected["reports"]
     elif "compatibility_reports" in public:
         public["compatibility_reports"] = []
+    raw_reducer_receipt = public.get("output_reducer_receipt")
+    if raw_reducer_receipt is not None:
+        try:
+            from praxis_virtualcell.model_zoo.post_result_policy import OutputReducerReceiptV1
+
+            public["output_reducer_receipt"] = OutputReducerReceiptV1.from_dict(
+                raw_reducer_receipt
+            ).to_dict()
+        except (KeyError, TypeError, ValueError):
+            public["output_reducer_receipt"] = {
+                "schema_version": None,
+                "available": False,
+                "reason": "unsupported_or_invalid_output_reducer_receipt",
+            }
     raw_compilation = public.get("virtual_experiment")
     if raw_compilation is not None:
         try:

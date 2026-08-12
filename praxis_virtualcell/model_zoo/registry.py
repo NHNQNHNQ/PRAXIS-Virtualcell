@@ -3,6 +3,7 @@
 """
 from __future__ import annotations
 
+import json
 from copy import deepcopy
 from pathlib import Path
 
@@ -11,7 +12,11 @@ from yaml.constructor import ConstructorError
 
 from praxis_virtualcell.biological_modules import modules as M
 from praxis_virtualcell.model_zoo.capability_registry import ModelCard
-from praxis_virtualcell.model_zoo.registry_v2 import ModelRegistryV2
+from praxis_virtualcell.model_zoo.registry_v2 import (
+    ComposedModelRegistryV2,
+    ModelRegistryV2,
+    compose_model_registries,
+)
 
 LEGAL_TYPES = ("public_model", "self_trained")
 LEGAL_STATUS = ("available", "planned", "missing")
@@ -54,14 +59,14 @@ class ModelZooRegistry:
         registry_path: str | None = None,
         *,
         enable_v2: bool | None = None,
-        registry_v2: ModelRegistryV2 | None = None,
+        registry_v2: ModelRegistryV2 | ComposedModelRegistryV2 | None = None,
     ) -> None:
         self.path = Path(registry_path or _DEFAULT_REGISTRY)
         self._models: dict[str, dict] = {}
         self._cards: dict[str, ModelCard] = {}
         self._enable_v2 = registry_path is None if enable_v2 is None else enable_v2
         self._provided_registry_v2 = registry_v2
-        self._registry_v2: ModelRegistryV2 | None = None
+        self._registry_v2: ModelRegistryV2 | ComposedModelRegistryV2 | None = None
         self._load()
 
     def _load(self) -> None:
@@ -102,15 +107,21 @@ class ModelZooRegistry:
         if embedded is not None:
             self._registry_v2 = ModelRegistryV2.from_dict(embedded)
         elif self._provided_registry_v2 is not None:
-            if not isinstance(self._provided_registry_v2, ModelRegistryV2):
-                raise TypeError("registry_v2 must be ModelRegistryV2")
+            if not isinstance(
+                self._provided_registry_v2,
+                (ModelRegistryV2, ComposedModelRegistryV2),
+            ):
+                raise TypeError("registry_v2 must be ModelRegistryV2 or ComposedModelRegistryV2")
             self._registry_v2 = self._provided_registry_v2
         elif self._enable_v2:
             self._registry_v2 = ModelRegistryV2.from_v1_cards(self._cards.values())
         if self._registry_v2 is not None:
             self._validate_v2_bindings(self._registry_v2)
 
-    def _validate_v2_bindings(self, registry: ModelRegistryV2) -> None:
+    def _validate_v2_bindings(
+        self,
+        registry: ModelRegistryV2 | ComposedModelRegistryV2,
+    ) -> None:
         for release in registry.releases:
             try:
                 card = self._cards[release.model_name]
@@ -175,8 +186,73 @@ class ModelZooRegistry:
         return sorted(self._cards)
 
     @property
-    def registry_v2(self) -> ModelRegistryV2 | None:
+    def registry_v2(self) -> ModelRegistryV2 | ComposedModelRegistryV2 | None:
         return self._registry_v2
+
+    @classmethod
+    def from_components(
+        cls,
+        base: ModelZooRegistry,
+        domain: ModelZooRegistry,
+    ) -> ModelZooRegistry:
+        """Compose two already-validated registries without path discovery.
+
+        The caller assigns the roles explicitly.  Name collisions are never
+        resolved by precedence: identical entries may be shared, anything else
+        is rejected before the v2 lifecycle view is composed.
+        """
+        if not isinstance(base, cls) or not isinstance(domain, cls):
+            raise TypeError("base and domain must be ModelZooRegistry")
+        if not isinstance(base.registry_v2, ModelRegistryV2) or not isinstance(
+            domain.registry_v2,
+            ModelRegistryV2,
+        ):
+            raise ValueError("base and domain require independent ModelRegistryV2 sources")
+
+        models = deepcopy(base._models)
+        cards = dict(base._cards)
+        for name, entry in domain._models.items():
+            if name not in models:
+                models[name] = deepcopy(entry)
+                if name in domain._cards:
+                    cards[name] = domain._cards[name]
+                continue
+
+            base_card = base._cards.get(name)
+            domain_card = domain._cards.get(name)
+            if base_card is not None and domain_card is not None:
+                if base_card.fingerprint() != domain_card.fingerprint():
+                    raise ValueError("composed registry has conflicting model card")
+                continue
+            if base_card is not None or domain_card is not None:
+                raise ValueError("composed registry cannot mix model card and legacy entry")
+            if json.dumps(
+                models[name],
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+                allow_nan=False,
+            ) != json.dumps(
+                entry,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+                allow_nan=False,
+            ):
+                raise ValueError("composed registry has conflicting legacy model entry")
+
+        composed = cls.__new__(cls)
+        composed.path = None
+        composed._models = models
+        composed._cards = cards
+        composed._enable_v2 = True
+        composed._provided_registry_v2 = None
+        composed._registry_v2 = compose_model_registries(
+            base.registry_v2,
+            domain.registry_v2,
+        )
+        composed._validate_v2_bindings(composed._registry_v2)
+        return composed
 
     def card(self, name: str) -> ModelCard:
         if name not in self._models:

@@ -20,6 +20,11 @@ function g(obj: Record<string, unknown>, key: string): unknown {
 function asArr(v: unknown): unknown[] {
   return Array.isArray(v) ? v : [];
 }
+function asRecord(v: unknown): Record<string, unknown> {
+  return v != null && typeof v === "object" && !Array.isArray(v)
+    ? (v as Record<string, unknown>)
+    : {};
+}
 function joinArr(v: unknown, sep = ", "): string {
   const arr = asArr(v);
   return arr.length ? arr.map((x) => String(x)).join(sep) : "—";
@@ -83,6 +88,11 @@ export default function ReportTab({
   const srProv = (g(sr, "provenance") ?? {}) as Record<string, unknown>;
 
   const prediction = g(sr, "prediction");
+  const predictionRecord = asRecord(prediction);
+  const predictionValues = asArr(g(predictionRecord, "values"));
+  const projectionMetadata = asRecord(g(predictionRecord, "projection_metadata"));
+  const executionScope = g(sr, "execution_scope");
+  const scientificallyValidated = g(sr, "scientifically_validated");
   const abstainFlag = Boolean(g(sr, "abstain"));
   const abstainDecision = String(g(learned, "abstain_decision") ?? "");
   const abstained = abstainFlag || abstainDecision === "abstain";
@@ -108,6 +118,31 @@ export default function ReportTab({
           llm_used_for_prediction:<Mono>{String(report.llm_used_for_prediction)}</Mono>
         </span>
       </div>
+
+      {executionScope != null && (
+        <div
+          role="note"
+          style={{
+            padding: "var(--space-3) var(--space-4)",
+            borderRadius: "var(--radius)",
+            border: "1px solid color-mix(in srgb, var(--warn) 34%, transparent)",
+            background: "color-mix(in srgb, var(--warn) 8%, var(--surface))",
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--space-1)",
+            fontSize: 13,
+          }}
+        >
+          <strong>
+            执行范围：<Mono>{String(executionScope)}</Mono>
+          </strong>
+          <span style={{ color: "var(--text-muted)" }}>
+            scientifically_validated=
+            <Mono>{String(scientificallyValidated ?? "—")}</Mono>
+            ；研究运行不等于科学验证或生产晋级。
+          </span>
+        </div>
+      )}
 
       {/* abstain 突出:置顶醒目条,给出 abstain 原因 */}
       {abstained && (
@@ -171,6 +206,24 @@ export default function ReportTab({
           <p style={{ color: "var(--text-muted)", fontSize: 13, margin: 0 }}>
             本次未给出预测结论（原因见上方提示）。
           </p>
+        ) : predictionValues.length > 0 ? (
+          <div style={rowsStyle}>
+            <KV label="output">
+              <Mono>{String(g(predictionRecord, "output") ?? "—")}</Mono>
+            </KV>
+            <KV label="shape">
+              <Mono>{joinArr(g(predictionRecord, "shape"), " × ")}</Mono>
+            </KV>
+            <KV label="完整向量">
+              {predictionValues.length.toLocaleString("en-US")} 个数值（完整值见下载的 report JSON）
+            </KV>
+            <KV label="baseline">
+              <Mono>{String(g(projectionMetadata, "baseline") ?? "—")}</Mono>
+            </KV>
+            <KV label="feature identity">
+              <Mono>{String(g(projectionMetadata, "feature_ids_sha256") ?? "—")}</Mono>
+            </KV>
+          </div>
         ) : (
           <pre className="json">{pretty(prediction)}</pre>
         )}

@@ -72,4 +72,9 @@ def validate_pack(pack_root: str | Path) -> PackManifest:
             raise PackAssetHashMismatch(
                 f"asset hash mismatch for {asset.id}: expected {asset.sha256}, got {actual_hash}"
             )
+    if manifest.schema_version == "vc.pack.v0.4":
+        # Keep the public validator and PackRegistry admission gate equivalent.
+        from praxis_virtualcell.data_packs.selected_content import validate_selected_content_pack
+
+        validate_selected_content_pack(root=root, manifest=manifest)
     return manifest

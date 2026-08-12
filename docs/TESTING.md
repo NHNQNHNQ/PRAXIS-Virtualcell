@@ -1711,7 +1711,7 @@ cmp /tmp/release-one/praxis_virtualcell-*.whl \
     /tmp/release-two/praxis_virtualcell-*.whl
 ```
 
-随后在全新 Python 3.13 venv hash-install `requirements/runtime-py313.lock`，以 `--no-deps` 安装 wheel，运行 `pip check`，并从 checkout 外执行安装生成的 `praxis-vc --version` / `praxis-vc run` 与 `scripts/verify_release_install.py`。console entry 和 installed-package verifier 都覆盖 offline run 的四项产物；verifier 还覆盖 API health/job、同源 root/hashed asset、包内 web 入口和测试树排除。不包括完整 Streamlit server 或 `praxis-vc ask`。
+随后在全新 Python 3.13 venv hash-install `requirements/runtime-py313.lock`，以 `--no-deps` 安装 wheel，运行 `pip check`，并从 checkout 外执行安装生成的 `praxis-vc --version` / `praxis-vc run` 与 `scripts/verify_release_install.py`。console entry 和 installed-package verifier 都覆盖 offline run 的四项产物；verifier 还覆盖 API health/job、同源 root/hashed asset、包内 web 入口和测试树排除。对未发布的 generic `vc.direct-v2-execution.v1`，verifier 只检查未注入 `DirectV2RuntimeFactory` 时的 `503 direct_v2_factory_unconfigured` 与零 JobStore 写入；它不构造 factory、模型、Pack、adapter 或领域插件。U1 V2 multi-step 必须保持 `output_reducer_required` 空计划；U2 V3 的 generic reducer/V5 链路另有本地 synthetic conformance，不能把这个负向安装检查写成可执行领域多模型能力。不包括完整 Streamlit server 或 `praxis-vc ask`。
 
 Docker smoke 必须同时打开环境变量和 pytest integration 门；缺少任一项时只能得到 skip：
 

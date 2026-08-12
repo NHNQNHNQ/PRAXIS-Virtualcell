@@ -24,6 +24,7 @@ from praxis_virtualcell.model_zoo.registry_v2 import (
     ModelRegistryV2,
     ModelReleaseRecord,
     OperatorPolicyRecord,
+    OperatorPolicyRecordV2,
     RegistryLifecycleEvent,
     ValidationEvidence,
     legacy_migration_report,
@@ -46,9 +47,7 @@ def _event(
             "event_id": f"event-{len(registry.lifecycle_events) + 1}",
             "sequence": len(registry.lifecycle_events) + 1,
             "previous_event_fingerprint": (
-                registry.lifecycle_events[-1].fingerprint()
-                if registry.lifecycle_events
-                else None
+                registry.lifecycle_events[-1].fingerprint() if registry.lifecycle_events else None
             ),
             "release_fingerprint": release_fingerprint,
             "action": action,
@@ -123,10 +122,7 @@ def complete_registry_payload(*, promoted: bool = True) -> dict:
             "sha256": "3" * 64,
             "media_type": "application/octet-stream",
             "license": "CC0-1.0",
-            "source": (
-                "/private/source C:\\Users\\secret \\\\server\\share "
-                "file:///tmp/secret token=secret"
-            ),
+            "source": ("/private/source C:\\Users\\secret \\\\server\\share file:///tmp/secret token=secret"),
             "safe_load_policy": "data_only",
             "legacy_incomplete": False,
         }
@@ -357,12 +353,8 @@ def test_v2_execution_plan_rebuilds_canonical_identity():
         lambda value: value.update({"uri": "javascript:alert(1)"}),
         lambda value: value.update({"uri": "data:text/plain,model"}),
         lambda value: value.update({"uri": "https:"}),
-        lambda value: value.update(
-            {"uri": "https://private.invalid/model.bin?token=secret"}
-        ),
-        lambda value: value.update(
-            {"uri": "https://private.invalid/model.bin#credential"}
-        ),
+        lambda value: value.update({"uri": "https://private.invalid/model.bin?token=secret"}),
+        lambda value: value.update({"uri": "https://private.invalid/model.bin#credential"}),
     ],
 )
 def test_artifact_identity_rejects_unknown_bad_hash_and_unsafe_paths(mutate):
@@ -634,6 +626,61 @@ def test_scientific_and_policy_state_cannot_jump_gates():
         ModelRegistryV2.from_dict(payload)
 
 
+def test_research_execution_can_be_explicit_without_scientific_validation():
+    """A technical research run must not be mistaken for scientific promotion."""
+    value = _complete_v2_report_payload()
+    value.update(
+        {
+            "benchmark_passed": False,
+            "scientifically_validated": False,
+            "promotion_eligible": False,
+            "production_promoted": False,
+            "research_execution_authorized": True,
+            "research_execution_scope": "research_only",
+            "executable": True,
+        }
+    )
+
+    report = CompatibilityReportV2.from_dict(value)
+
+    assert report.executable is True
+    assert report.scientifically_validated is False
+    assert report.production_promoted is False
+    assert report.research_execution_scope == "research_only"
+
+
+def test_research_execution_policy_v2_preserves_v1_policy_identity():
+    payload = complete_registry_payload(promoted=False)
+    legacy = OperatorPolicyRecord.from_dict(payload["policy_records"][0])
+    assert legacy.schema_version == "vc.model-operator-policy.v1"
+    assert "research_execution_authorized" not in legacy.to_dict()
+
+    research_policy = OperatorPolicyRecordV2.from_dict(
+        {
+            **legacy.to_dict(),
+            "schema_version": "vc.model-operator-policy.v2",
+            "research_execution_authorized": True,
+            "research_execution_scope": "research_only",
+        }
+    )
+    payload["policy_records"] = [research_policy.to_dict()]
+    _install_release(
+        payload,
+        {
+            **payload["releases"][0],
+            "policy_fingerprint": research_policy.fingerprint(),
+        },
+    )
+
+    registry = ModelRegistryV2.from_dict(payload)
+
+    assert isinstance(registry.policy_records[0], OperatorPolicyRecordV2)
+    public_release = registry.public_catalog()["releases"][0]
+    assert public_release["production_promoted"] is False
+    assert public_release["research_execution_authorized"] is True
+    assert public_release["research_execution_scope"] == "research_only"
+
+
 def test_native_release_rejects_multi_pack_scope_overclaim():
     release = complete_registry_payload()["releases"][0]
     release["pack_fingerprints"].append("a" * 64)
@@ -684,9 +731,7 @@ def test_registry_rejects_duplicate_release_identity():
 
 def test_legacy_incomplete_release_cannot_become_artifact_ready():
     zoo = ModelZooRegistry()
-    migrated = ModelRegistryV2.from_v1_cards(
-        tuple(zoo.card(name) for name in zoo.capability_names())
-    )
+    migrated = ModelRegistryV2.from_v1_cards(tuple(zoo.card(name) for name in zoo.capability_names()))
     release_fp = migrated.releases[0].fingerprint()
     with pytest.raises(ValueError, match="complete native artifact"):
         migrated.append(_event(migrated, "artifact_ready", release_fp))
@@ -736,9 +781,7 @@ def test_supersede_requires_existing_distinct_target_and_closes_source():
             )
         )
 
-    revoked_target = registry.append(
-        _event(registry, "revoke", replacement.fingerprint())
-    )
+    revoked_target = registry.append(_event(registry, "revoke", replacement.fingerprint()))
     with pytest.raises(ValueError, match="target"):
         revoked_target.append(
             _event(
@@ -759,6 +802,8 @@ def test_public_catalog_is_an_explicit_path_safe_whitelist():
     assert public["releases"][0]["production_promoted"] is True
     assert public["releases"][0]["policy_present"] is True
     assert public["releases"][0]["legacy_status"] is None
+    assert "research_execution_authorized" not in public["releases"][0]
+    assert "research_execution_scope" not in public["releases"][0]
     for forbidden in (
         "private.invalid",
         "token=secret",
@@ -786,25 +831,17 @@ def test_default_v1_cards_migrate_cataloged_only_without_evidence_or_policy():
     assert migrated.policy_records == ()
     assert all(release.policy_fingerprint is None for release in migrated.releases)
     assert all(release.migration_status == "legacy_incomplete" for release in migrated.releases)
-    expected_statuses = json.loads(_FIXTURE.read_text(encoding="utf-8"))["model_registry"][
-        "expected_models"
-    ]
+    expected_statuses = json.loads(_FIXTURE.read_text(encoding="utf-8"))["model_registry"]["expected_models"]
+    assert {release.model_name: release.legacy_status for release in migrated.releases} == expected_statuses
     assert {
-        release.model_name: release.legacy_status for release in migrated.releases
-    } == expected_statuses
-    assert {
-        item["model_name"]: item["legacy_status"]
-        for item in migrated.public_catalog()["releases"]
+        item["model_name"]: item["legacy_status"] for item in migrated.public_catalog()["releases"]
     } == expected_statuses
     assert all(migrated.state(release.fingerprint()).cataloged for release in migrated.releases)
     assert not any(migrated.state(release.fingerprint()).artifact_ready for release in migrated.releases)
     assert not any(item["production_promoted"] for item in migrated.public_catalog()["releases"])
     assert not any(item["policy_present"] for item in migrated.public_catalog()["releases"])
     assert all(item["benchmark_passed"] is None for item in migrated.public_catalog()["releases"])
-    assert all(
-        item["scientifically_validated"] is None
-        for item in migrated.public_catalog()["releases"]
-    )
+    assert all(item["scientifically_validated"] is None for item in migrated.public_catalog()["releases"])
     assert all(item["promotion_eligible"] is None for item in migrated.public_catalog()["releases"])
     assert zoo.status("ecoli_gem") == "available"
     assert zoo.status("gears") == "planned"
@@ -830,9 +867,7 @@ def test_v1_unsafe_version_is_preserved_in_identity_but_redacted_from_public():
 def test_v1_import_module_dependency_survives_legacy_migration():
     zoo = ModelZooRegistry()
     source = zoo.card("ecoli_gem")
-    resources = source.resources.model_copy(
-        update={"python_dependencies": ("torch_geometric", "foo_bar", "foo.bar")}
-    )
+    resources = source.resources.model_copy(update={"python_dependencies": ("torch_geometric", "foo_bar", "foo.bar")})
     legacy = source.model_copy(update={"resources": resources})
 
     migrated = ModelRegistryV2.from_v1_cards((legacy,))
@@ -863,27 +898,19 @@ def test_p8_p9_legacy_receipts_remain_unbound_and_are_not_evidence():
         if receipt.receipt_id.startswith("p8-"):
             assert receipt.available is None
             assert receipt.declared_pack_fingerprint == source_doc["pack"]["fingerprint"]
-            assert (
-                receipt.scientifically_validated
-                is source_doc["states"]["scientifically_validated"]
-            )
+            assert receipt.scientifically_validated is source_doc["states"]["scientifically_validated"]
             assert receipt.benchmark_passed is None
             assert receipt.promotion_eligible is None
         else:
             assert receipt.available is source_doc["status"]["available"]
-            assert (
-                receipt.scientifically_validated
-                is source_doc["status"]["scientifically_validated"]
-            )
+            assert receipt.scientifically_validated is source_doc["status"]["scientifically_validated"]
             source_reasons = source_doc["status"]["reason_codes"]
             assert list(receipt.reason_codes[: len(source_reasons)]) == source_reasons
             assert receipt.benchmark_passed is False
             assert receipt.promotion_eligible is False
 
     zoo = ModelZooRegistry()
-    migrated = ModelRegistryV2.from_v1_cards(
-        tuple(zoo.card(name) for name in zoo.capability_names())
-    )
+    migrated = ModelRegistryV2.from_v1_cards(tuple(zoo.card(name) for name in zoo.capability_names()))
     report = legacy_migration_report(migrated, receipts)
     assert report.evidence_admitted is False
     assert report.production_promoted is False
@@ -894,12 +921,8 @@ def test_p8_p9_legacy_receipts_remain_unbound_and_are_not_evidence():
 
 def test_legacy_report_rejects_any_admitted_evidence_or_policy():
     zoo = ModelZooRegistry()
-    migrated = ModelRegistryV2.from_v1_cards(
-        tuple(zoo.card(name) for name in zoo.capability_names())
-    )
-    evidence = ValidationEvidence.from_dict(
-        complete_registry_payload()["evidence_records"][0]
-    )
+    migrated = ModelRegistryV2.from_v1_cards(tuple(zoo.card(name) for name in zoo.capability_names()))
+    evidence = ValidationEvidence.from_dict(complete_registry_payload()["evidence_records"][0])
     contaminated = migrated.model_copy(update={"evidence_records": (evidence,)})
 
     with pytest.raises(ValueError, match="evidence or policy"):
