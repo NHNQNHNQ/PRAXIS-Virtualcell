@@ -3,10 +3,12 @@
   "record_role": "prospective_local_candidate_build_protocol_not_scientific_evidence",
   "frozen_on": "2026-08-12",
   "identity": {
-    "payload_sha256": "356864b7ded90285b4db345af136ce9c0c6636c691874796a6a8f60461df9973",
+    "payload_sha256": "58285f730f46dc7fe7f5aad752a80cb8d22184171ff9186fd93e4040280388ef",
     "payload_hash_algorithm": "sha256(canonical_json(protocol_with_identity.payload_sha256_set_to_null))",
     "builder_path": "scripts/build_golden_gears_train_only_candidate.py",
-    "builder_sha256": "f6fff4f1585ba4ca0762de58aa758fba753fd55f2e9f16e23fd3288ab878cde6"
+    "builder_sha256": "f6fff4f1585ba4ca0762de58aa758fba753fd55f2e9f16e23fd3288ab878cde6",
+    "train_runner_path": "scripts/train_golden_gears_train_only_candidate.py",
+    "train_runner_sha256": "635db2e12fcfaa1668414c8bc812e6a015ac95aea39640def3884b2e28ff6582"
   },
   "candidate": {
     "name": "norman_gears_train_only_with_additive_fallback",
@@ -403,7 +405,7 @@
     "native_scope_coverage": 1.0,
     "single_condition_macro_mse_strictly_below": 0.0021203121,
     "combination_condition_macro_mse_strictly_below": 0.0025272989,
-    "test_access_before_gate_passes": false
+    "test_expression_and_outcome_access_before_gate_passes": false
   },
   "descriptive_test_analysis_if_separately_authorized": {
     "evaluator_status": "NOT_IMPLEMENTED_NOT_EXECUTABLE",
@@ -450,8 +452,21 @@
     "modes": [
       "prepare"
     ],
-    "smoke_status": "NOT_IMPLEMENTED_NOT_EXECUTABLE",
+    "train_runner_modes": [
+      "smoke"
+    ],
+    "smoke_status": "IMPLEMENTED_TECHNICAL_ONLY",
     "train_status": "NOT_IMPLEMENTED_NOT_EXECUTABLE",
+    "prepared_artifact_attestation": {
+      "candidate_record_normalized": {
+        "algorithm": "sha256(canonical_json(candidate_record_with_protocol_sha256_set_to_null))",
+        "sha256": "d6886b2aa2fdacdec31656ca2104d7019a7556f5ce8beeab09110aa1dfad956b"
+      },
+      "native_train_only_h5ad": {
+        "size_bytes": 153256772,
+        "sha256": "8c14761e0cc760386ef6564e542d80865caefc1bc0152b11f765218e49f95cf0"
+      }
+    },
     "derive_native_train_only_h5ad_before_first_GEARS_preprocessing_or_model_call": true,
     "derived_h5ad_reconstructed_from_X_and_minimal_fresh_string_metadata_only": true,
     "child_receives_full_pack_path": false,
