@@ -74,6 +74,18 @@ def test_interface_accepts_only_local_inputs_and_no_claims() -> None:
         )
 
 
+def test_test_environment_does_not_leak_runner_private_praxis_settings() -> None:
+    source = {
+        "PATH": "/usr/bin",
+        "PRAXIS_RELEASE_OFFLINE": "1",
+        "PRAXIS_PIP_CACHE_ROOT": "/cache/pip",
+        "PRAXIS_NPM_CACHE_ROOT": "/cache/npm",
+    }
+
+    assert runner._test_environment(source) == {"PATH": "/usr/bin"}
+    assert source["PRAXIS_RELEASE_OFFLINE"] == "1"
+
+
 def test_incomplete_record_never_grants_release_or_science_authority() -> None:
     error = runner.FullLocalRcError("wheel", "wheel failed")
     record = runner._incomplete_record(None, {}, error)

@@ -219,6 +219,12 @@ def _environment(tmp: Path, pip_cache: Path, npm_cache: Path) -> dict[str, str]:
     }
 
 
+def _test_environment(env: dict[str, str]) -> dict[str, str]:
+    """Keep runner-private PRAXIS settings out of product test processes."""
+
+    return {key: value for key, value in env.items() if not key.startswith("PRAXIS_")}
+
+
 def _identity(repo: Path) -> dict[str, Any]:
     try:
         source_sha, source_tree, epoch = release_candidate._require_clean_committed_repo(repo)
@@ -578,6 +584,7 @@ def _run_test_gates(
         env=env,
         roots=roots,
     )
+    test_env = _test_environment(env)
     _gate(
         gates,
         "pip_check",
@@ -585,7 +592,7 @@ def _run_test_gates(
         command_label="python -m pip check (exact dev environment)",
         summary="exact dev dependency graph passed pip check",
         cwd=test_source,
-        env=env,
+        env=test_env,
         roots=roots,
     )
     _gate(
@@ -595,7 +602,7 @@ def _run_test_gates(
         command_label="ruff check .",
         summary="repository lint passed",
         cwd=test_source,
-        env=env,
+        env=test_env,
         roots=roots,
     )
     packaging_tests = [
@@ -612,7 +619,7 @@ def _run_test_gates(
         command_label="pytest release packaging contract suite",
         summary="release packaging contract suite passed",
         cwd=test_source,
-        env=env,
+        env=test_env,
         roots=roots,
     )
     _gate(
@@ -635,7 +642,7 @@ def _run_test_gates(
         command_label='pytest praxis_virtualcell/tests -m "not llm"',
         summary="VirtualCell core suite passed with external gates left disabled",
         cwd=test_source,
-        env=env,
+        env=test_env,
         roots=roots,
     )
     _gate(
@@ -658,12 +665,12 @@ def _run_test_gates(
         command_label='pytest tests -m "not (integration or llm or remote)"',
         summary="legacy unit suite passed with external gates disabled",
         cwd=test_source,
-        env=env,
+        env=test_env,
         roots=roots,
     )
     frontend = test_source / "praxis_vc_react"
     frontend_env = {
-        **env,
+        **test_env,
         "npm_config_cache": str(npm_cache),
         "PRAXIS_VC_TEST_PYTHON": str(python),
     }
