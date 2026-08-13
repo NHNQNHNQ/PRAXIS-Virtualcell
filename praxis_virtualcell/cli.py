@@ -192,6 +192,75 @@ def _cmd_pack_validate(a) -> int:
     return 0 if result["pack_valid"] else 2
 
 
+def _cmd_pack_factory_init(a) -> int:
+    import uuid
+    from pathlib import Path
+
+    from praxis_virtualcell.pack_factory import (
+        PackFactoryError,
+        PackFactoryStore,
+        load_quarantined_upload,
+    )
+
+    requested_data_root = Path(a.data_root)
+    try:
+        data_root = requested_data_root.resolve(strict=True)
+    except OSError as exc:
+        raise PackFactoryError("data root is unavailable") from exc
+    if (
+        not requested_data_root.is_absolute()
+        or requested_data_root.is_symlink()
+        or requested_data_root != data_root
+        or not data_root.is_dir()
+    ):
+        raise PackFactoryError("data root must be an explicit canonical real directory")
+
+    uploads = data_root / "uploads"
+    quarantine = uploads / "quarantine"
+    for directory, label in ((uploads, "uploads"), (quarantine, "quarantine")):
+        try:
+            valid = not directory.is_symlink() and directory.is_dir() and directory.resolve(strict=True) == directory
+        except OSError as exc:
+            raise PackFactoryError(f"{label} directory is unavailable") from exc
+        if not valid:
+            raise PackFactoryError(f"{label} must be a canonical real non-symlink directory")
+
+    try:
+        parsed_upload_id = uuid.UUID(a.upload_id)
+    except ValueError as exc:
+        raise PackFactoryError("upload id must be a canonical UUIDv4") from exc
+    if parsed_upload_id.version != 4 or str(parsed_upload_id) != a.upload_id:
+        raise PackFactoryError("upload id must be a canonical UUIDv4")
+
+    store_path = Path(a.store)
+    if not store_path.is_absolute():
+        raise PackFactoryError("factory store root must be an explicit absolute path")
+    try:
+        resolved_store_path = store_path.resolve(strict=False)
+    except OSError as exc:
+        raise PackFactoryError("factory store path is unavailable") from exc
+    if resolved_store_path == uploads or uploads in resolved_store_path.parents:
+        raise PackFactoryError("factory store must be outside the data-root uploads subtree")
+
+    upload = load_quarantined_upload(quarantine / a.upload_id)
+    store = PackFactoryStore.create(store_path)
+    receipt_fingerprint = store.record_upload(upload)
+    _print_json(
+        {
+            "schema_version": "vc.pack-factory-init.v1",
+            "status": "receipt_recorded",
+            "upload_id": upload.receipt.upload_id,
+            "receipt_fingerprint": receipt_fingerprint,
+            "store_root": str(store.root),
+            "candidate_created": False,
+            "factory_registered": False,
+            "scientifically_validated": False,
+            "executable": False,
+        }
+    )
+    return 0
+
+
 def _cmd_pack_register(a) -> int:
     from praxis_virtualcell.pack_factory import (
         PackCandidateV1,
@@ -407,6 +476,26 @@ def main(argv=None, *, direct_v2_factory=None) -> int:
     )
     validate_cmd.add_argument("pack_root")
     validate_cmd.set_defaults(fn=_cmd_pack_validate)
+    factory_init_cmd = pack_sub.add_parser(
+        "factory-init",
+        help="重验一个 quarantine receipt 并初始化 write-new Factory store",
+    )
+    factory_init_cmd.add_argument(
+        "--data-root",
+        required=True,
+        help="P7 data root 的 canonical 绝对路径",
+    )
+    factory_init_cmd.add_argument(
+        "--upload-id",
+        required=True,
+        help="已完成 quarantine receipt 的 canonical UUIDv4",
+    )
+    factory_init_cmd.add_argument(
+        "--store",
+        required=True,
+        help="位于 uploads 子树外的绝对 write-new 路径",
+    )
+    factory_init_cmd.set_defaults(fn=_cmd_pack_factory_init)
     register_cmd = pack_sub.add_parser(
         "register",
         help="以完整 P19 receipt/review/validation/operator chain 写入本地索引",

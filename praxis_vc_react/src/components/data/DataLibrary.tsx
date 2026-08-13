@@ -506,11 +506,22 @@ export default function DataLibrary({
         {receipt && (
           <div className="data-upload-success" role="status">
             <strong>已进入隔离区</strong>
+            <code>Upload ID {receipt.upload_id}</code>
             <span>
               {receipt.filename} · {formatBytes(receipt.size_bytes)}
             </span>
             <code>SHA-256 {receipt.sha256}</code>
-            <p>该文件不会自动参与预测；后续须经过独立审查与显式注册。</p>
+            <p>
+              下一步由操作员重验并记录本次隔离收据：
+            </p>
+            <code>
+              praxis-vc pack factory-init --data-root /ABSOLUTE/DATA-ROOT
+              {" "}--upload-id {receipt.upload_id} --store
+              {" "}/ABSOLUTE/NEW-FACTORY-STORE
+            </code>
+            <p>
+              该命令不解析数据、不生成 candidate，也不注册 Pack；文件仍须经过独立审查。
+            </p>
           </div>
         )}
           </section>

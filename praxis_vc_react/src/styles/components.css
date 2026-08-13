@@ -1070,6 +1070,9 @@ select:focus {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 56px 40px 80px;
 }
 .data-heading,
 .data-section-head,
@@ -1306,6 +1309,9 @@ select:focus {
 }
 
 @media (max-width: 720px) {
+  .data-library {
+    padding: 34px 18px 60px;
+  }
   .data-heading,
   .data-section-head,
   .data-card-title,

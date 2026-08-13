@@ -23,6 +23,7 @@ from praxis_virtualcell.pack_factory import (
     PackOperatorDecisionV1,
     PackSupersessionV1,
     PreparedPackCandidate,
+    UploadReceiptV1,
     bind_pack_candidate,
     declare_pack_supersession,
     factory_catalog_payload,
@@ -142,6 +143,19 @@ def _write_exact_p7_upload(
         encoding="utf-8",
     )
     return upload
+
+
+def _factory_init_args(data_root: Path, upload_id: str, store_root: Path) -> list[str]:
+    return [
+        "pack",
+        "factory-init",
+        "--data-root",
+        str(data_root),
+        "--upload-id",
+        upload_id,
+        "--store",
+        str(store_root),
+    ]
 
 
 def _prepare(
@@ -1097,6 +1111,102 @@ def test_cli_register_requires_explicit_paths_and_commits_exact_chain(
     assert len(catalog["receipts"]) == len(catalog["candidates"]) == 1
     assert len(catalog["reviews"]) == len(catalog["validations"]) == 1
     assert len(catalog["decisions"]) == len(catalog["registrations"]) == 1
+
+
+def test_cli_factory_init_records_a_real_quarantine_receipt(tmp_path, capsys):
+    from praxis_virtualcell.cli import main
+
+    data_root = (tmp_path / "data").resolve()
+    upload_root = _write_exact_p7_upload(data_root, b"exact-omics-bytes", index=40)
+    upload = load_quarantined_upload(upload_root)
+    store_root = (tmp_path / "factory-store").resolve()
+    args = _factory_init_args(data_root, upload.receipt.upload_id, store_root)
+    assert main(args) == 0
+    assert json.loads(capsys.readouterr().out) == {
+        "schema_version": "vc.pack-factory-init.v1",
+        "status": "receipt_recorded",
+        "upload_id": upload.receipt.upload_id,
+        "receipt_fingerprint": upload.receipt.fingerprint(),
+        "store_root": str(store_root),
+        "candidate_created": False,
+        "factory_registered": False,
+        "scientifically_validated": False,
+        "executable": False,
+    }
+    store = PackFactoryStore.open(store_root)
+    assert store.get(UploadReceiptV1, upload.receipt.fingerprint()) == upload.receipt
+
+    with pytest.raises(PackFactoryError, match="write-new"):
+        main(args)
+
+
+@pytest.mark.parametrize(
+    "upload_id",
+    ["../00000000-0000-4000-8000-000000000040", "00000000-0000-1000-8000-000000000040"],
+)
+def test_cli_factory_init_rejects_traversal_and_non_v4_ids(tmp_path, upload_id):
+    from praxis_virtualcell.cli import main
+
+    data_root = (tmp_path / "data").resolve()
+    _write_exact_p7_upload(data_root, b"exact-omics-bytes", index=40)
+    store_root = (tmp_path / f"store-{len(upload_id)}").resolve()
+
+    with pytest.raises(PackFactoryError, match="canonical UUIDv4"):
+        main(_factory_init_args(data_root, upload_id, store_root))
+    assert not store_root.exists()
+
+
+@pytest.mark.parametrize("symlink_level", ["data-root", "uploads", "quarantine"])
+def test_cli_factory_init_rejects_symlinked_roots(tmp_path, symlink_level):
+    from praxis_virtualcell.cli import main
+
+    real_data_root = (tmp_path / "real-data").resolve()
+    upload_root = _write_exact_p7_upload(real_data_root, b"exact-omics-bytes", index=41)
+    data_root = real_data_root
+    if symlink_level == "data-root":
+        data_root = tmp_path / "linked-data"
+        data_root.symlink_to(real_data_root, target_is_directory=True)
+    elif symlink_level == "uploads":
+        data_root = (tmp_path / "data").resolve()
+        data_root.mkdir()
+        (data_root / "uploads").symlink_to(real_data_root / "uploads", target_is_directory=True)
+    else:
+        data_root = (tmp_path / "data").resolve()
+        (data_root / "uploads").mkdir(parents=True)
+        (data_root / "uploads" / "quarantine").symlink_to(
+            real_data_root / "uploads" / "quarantine",
+            target_is_directory=True,
+        )
+    store_root = (tmp_path / f"store-{symlink_level}").resolve()
+
+    with pytest.raises(PackFactoryError, match="canonical real|non-symlink"):
+        main(_factory_init_args(data_root, upload_root.name, store_root))
+    assert not store_root.exists()
+
+
+def test_cli_factory_init_rejects_tampering_before_store_creation(tmp_path):
+    from praxis_virtualcell.cli import main
+
+    data_root = (tmp_path / "data").resolve()
+    upload_root = _write_exact_p7_upload(data_root, b"exact-omics-bytes", index=42)
+    (upload_root / "payload").write_bytes(b"tampered")
+    store_root = (tmp_path / "factory-store").resolve()
+
+    with pytest.raises(PackFactoryError, match="immutable receipt"):
+        main(_factory_init_args(data_root, upload_root.name, store_root))
+    assert not store_root.exists()
+
+
+def test_cli_factory_init_rejects_store_inside_uploads(tmp_path):
+    from praxis_virtualcell.cli import main
+
+    data_root = (tmp_path / "data").resolve()
+    upload_root = _write_exact_p7_upload(data_root, b"exact-omics-bytes", index=43)
+    store_root = upload_root / "factory-store"
+
+    with pytest.raises(PackFactoryError, match="outside the data-root uploads subtree"):
+        main(_factory_init_args(data_root, upload_root.name, store_root))
+    assert not store_root.exists()
 
 
 def test_pack_factory_http_surface_is_complete_and_read_only(tmp_path, monkeypatch):

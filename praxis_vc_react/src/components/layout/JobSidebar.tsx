@@ -4,7 +4,7 @@ import {
   type JobSummary,
 } from "../../api";
 
-export type PlatformView = "chat" | "data-center";
+export type PlatformView = "chat" | "data-center" | "data-library";
 
 function HistoryItems({
   jobs,
@@ -89,6 +89,16 @@ export default function JobSidebar({
       >
         <span aria-hidden="true">◎</span>
         Data Center
+      </button>
+
+      <button
+        type="button"
+        className={view === "data-library" ? "chat-nav active" : "chat-nav"}
+        onClick={() => onNavigate("data-library")}
+        aria-current={view === "data-library" ? "page" : undefined}
+      >
+        <span aria-hidden="true">⇧</span>
+        Omics intake
       </button>
 
       <div className="chat-selected-context">

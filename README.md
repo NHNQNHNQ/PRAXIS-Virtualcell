@@ -548,17 +548,24 @@ P19 受控 register 不再接受单一路径，必须先由 library 生成/复�
 write-new store：
 
 ```bash
+praxis-vc pack factory-init \
+  --data-root /absolute/data-root \
+  --upload-id <canonical-uuidv4> \
+  --store /absolute/new-factory-store
+
 praxis-vc pack register \
-  --upload-directory /absolute/quarantine/<upload-id> \
+  --upload-directory /absolute/data-root/uploads/quarantine/<upload-id> \
   --pack-root /absolute/operator-authored-pack \
   --candidate /absolute/contracts/candidate.json \
   --review /absolute/contracts/review.json \
   --validation /absolute/contracts/validation.json \
   --decision /absolute/contracts/decision.json \
   --index /absolute/existing-parent/pack-index.json \
-  --store /absolute/initialized-factory-store
+  --store /absolute/new-factory-store
 ```
 
+`factory-init` 只重验并记录已有 quarantine receipt；它不读取矩阵语义、不推断 metadata、
+不创建 candidate，也不代表 factory registration、科学验证或可执行状态。
 `inspect` 明确返回未校验状态；`validate/register/list/compatibility/run` 均按当前
 bytes 重验。只读 API 位于 `/api/packs`、`/api/packs/{id}/{version}`、
 `/api/packs/{id}/{version}/validate`、`/api/packs/compatibility` 和 `/api/pack-factory`；

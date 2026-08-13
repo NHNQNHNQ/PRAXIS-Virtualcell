@@ -36,7 +36,7 @@ def test_checked_in_research_release_pin_closes_real_identifiers() -> None:
     pin = _release_pin()
     card = _research_card()
 
-    assert pin["registry_fingerprint"] == ("e232a669036934bd8468989f40fcae259451693201fee4e453eb324bb331cf56")
+    assert pin["registry_fingerprint"] == ("abca3ae3814e2d8b312ed9d70922eb182bd04b8842a694860406836178cc85e1")
     assert pin["model_name"] == card.name == MODEL_NAME
     assert pin["model_version"] == card.version == MODEL_VERSION
     assert pin["model_fingerprint"] == card.fingerprint()

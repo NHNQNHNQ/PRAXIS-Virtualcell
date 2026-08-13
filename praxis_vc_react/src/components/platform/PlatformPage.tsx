@@ -19,6 +19,7 @@ import {
   type ParseResult,
 } from "../../api";
 import goldenRequestText from "../../../../examples/golden_ahr_klf1_request_v2.json?raw";
+import DataLibrary from "../data/DataLibrary";
 import LazyResultsStage from "../stages/LazyResultsStage";
 import type { PlatformView } from "../layout/JobSidebar";
 
@@ -471,6 +472,10 @@ export default function PlatformPage({
         setBusy(false);
       }
     }
+  }
+
+  if (page === "data-library") {
+    return <DataLibrary section="datasets" />;
   }
 
   if (page === "data-center") {

@@ -134,7 +134,7 @@ praxis-vc pack register /absolute/path/to/pack
 
 ~~~bash
 praxis-vc pack register \
-  --upload-directory /absolute/quarantine/<upload-id> \
+  --upload-directory /absolute/data-root/uploads/quarantine/<upload-id> \
   --pack-root /absolute/operator-authored-pack \
   --candidate /absolute/contracts/candidate.json \
   --review /absolute/contracts/review.json \
@@ -144,7 +144,22 @@ praxis-vc pack register \
   --store /absolute/initialized-factory-store
 ~~~
 
-`--index` 和 `--store` 都是 required；`--store` 必须先由 `PackFactoryStore.create()` 初始化。
+先通过同一个 library 入口在绝对 write-new 路径初始化 store：
+
+~~~bash
+praxis-vc pack factory-init \
+  --data-root /absolute/data-root \
+  --upload-id <canonical-uuidv4> \
+  --store /absolute/new-factory-store
+~~~
+
+命令只接受 canonical real data root 下 exact `uploads/quarantine/<UUIDv4>`，重验 receipt
+与 payload bytes 后在 store 记录 receipt；不读取矩阵语义、不推断 metadata、不创建 candidate。
+成功 JSON 的 status 仅为 `receipt_recorded`，并明确返回 `candidate_created=false`、
+`factory_registered=false`、`scientifically_validated=false`、`executable=false`。
+Store 必须在 `data-root/uploads` 子树外，且必须是 absolute write-new path。随后 register 的
+`--index` 和 `--store` 都是 required；`--store` 必须先由上述命令或
+`PackFactoryStore.create()` 初始化。
 不得依赖 home default、普通既存目录或只设置环境变量完成管理写。
 CLI 使用 strict、duplicate-key-safe JSON loader，重新绑定 upload/Pack root 并重算 validation
 report。它不是 authoring wizard，也不会生成或批准 review/decision。
