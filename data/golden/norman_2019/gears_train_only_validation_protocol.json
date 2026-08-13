@@ -1,0 +1,185 @@
+{
+  "schema_version": "praxis.golden-gears-train-only-validation-protocol.v1",
+  "frozen_on": "2026-08-13",
+  "identity": {
+    "payload_hash_algorithm": "sha256(canonical_json(protocol_with_identity.payload_sha256_set_to_null))",
+    "payload_sha256": "b1ee2b7c1cfbfe76f9e6a92525dbb1b735bfe388171a0696ffa9635dc2150e0b",
+    "base_protocol_path": "data/golden/norman_2019/gears_train_only_protocol.json",
+    "base_protocol_payload_sha256": "58285f730f46dc7fe7f5aad752a80cb8d22184171ff9186fd93e4040280388ef",
+    "evaluator_path": "scripts/evaluate_golden_gears_train_only_validation.py",
+    "evaluator_sha256": "44e88a84f1016ee06606216903e6d1436eed3152d15f78e124f3f44967183957"
+  },
+  "implementation_status": "PENDING_CANDIDATE_FREEZE_NOT_EXECUTABLE",
+  "truth_bundle": {
+    "status": "FROZEN",
+    "preparation_command": "prepare-validation",
+    "allowed_source_expression_partition": "validation_including_matched_validation_control_only",
+    "test_expression_must_not_be_decoded_or_materialized": true,
+    "files": {
+      "metadata.json": {
+        "size_bytes": 6641,
+        "sha256": "9aa7ce877f91a40fe198c15f4f26dee025264b1b49e6e41a2f031d24b347d0fb"
+      },
+      "truth-delta.npy": {
+        "size_bytes": 1210928,
+        "sha256": "b5a7f4c8b61b0f57b174aaf8441bc16bf12bf4211835a0de4a4c8ad52a422fa4"
+      }
+    }
+  },
+  "candidate_set": {
+    "status": "PENDING_FREEZE",
+    "required_seed_order": [
+      11,
+      23,
+      37
+    ],
+    "required_epochs": 20,
+    "required_batch_size": 32,
+    "seeds": null
+  },
+  "inference": {
+    "device": "cpu",
+    "ordered_feature_count": 5045,
+    "rebuild_from_attested_prepare_h5ad_and_frozen_split": true,
+    "config_pickle_must_not_be_read": true,
+    "model_pt_load": "torch_load_map_location_cpu_weights_only_true_then_strict_state_dict_load",
+    "model_mode": "eval_plus_torch_inference_mode",
+    "query_order": "sorted_unique_canonical_target_symbol_tuples_with_mirrored_raw_labels_reusing_one_prediction",
+    "control_sampling": {
+      "algorithm": "sha256(b'praxis-gears-predict-controls-v1\\0'+str(training_seed).encode('ascii')+b'\\0'+canonical_json(target_symbol_list)); entropy=int.from_bytes(digest[:16],'big',signed=False); numpy.Generator(PCG64(entropy)); integers(0,2059,size=300,endpoint=False,dtype=int64)",
+      "sample_count": 300,
+      "with_replacement": true,
+      "uses_global_rng": false,
+      "uses_gears_prediction_cache": false,
+      "control_source": "2059_native_train_control_observations_in_source_order"
+    },
+    "per_seed_prediction": "GEARS_absolute_expression_float64_mean_over_300_sampled_train_controls_minus_full_native_train_control_mean_float64",
+    "seed_aggregation": "elementwise_arithmetic_mean_in_seed_order_11_23_37_using_float64",
+    "validation_fallback": "forbidden_validation_is_frozen_at_native_scope_coverage_1.0_and_any_unsupported_target_fails_closed",
+    "reduction_dtype": "float64",
+    "hash_array_byte_order": "explicit_big_endian",
+    "reconstructed_graphs": {
+      "G_coexpress": {
+        "shape": [
+          2,
+          6149
+        ],
+        "dtype": ">i8",
+        "sha256": "e6d26b541e6b41f30e20faaca5affb2c12dcbcda26bb35d207d1aea39cf79246"
+      },
+      "G_coexpress_weight": {
+        "shape": [
+          6149
+        ],
+        "dtype": ">f4",
+        "sha256": "db6e8579039e33c97ee61a37450db146322eb667d8b4506ebf40deab89133cef"
+      },
+      "G_go": {
+        "shape": [
+          2,
+          202314
+        ],
+        "dtype": ">i8",
+        "sha256": "3540be9a8a501915ca840024626ecd231094c2fbb9ecd23f46a8ed47fb183d5e"
+      },
+      "G_go_weight": {
+        "shape": [
+          202314
+        ],
+        "dtype": ">f4",
+        "sha256": "5962058b81ae61cd72a848ec468380a5d205bba1032295b48917600a4ca49964"
+      }
+    },
+    "candidate_runtime_graph_manifest": {
+      "schema_version": "praxis.gears-runtime-graph-manifest.v1",
+      "seed": null,
+      "vocabularies": {
+        "gene": {
+          "count": 5045,
+          "canonical_json_sha256": "76ed3a702c1cb54b4c957facdbf9ceb565cdacac1de5dbbd93dd62acd37c013b"
+        },
+        "perturbation": {
+          "count": 9853,
+          "canonical_json_sha256": "aec75533891c4b41b7343b562222615d321c3f8eeda2ec8eeeaa5745f03d63bd"
+        }
+      },
+      "graphs": {
+        "G_go": {
+          "node_vocabulary": "perturbation",
+          "edge_index": {
+            "shape": [2, 202314],
+            "dtype": "torch.int64",
+            "numel": 404628,
+            "sha256": "80f6e149284a3d0e3cbde939fa395191b72fe69e9b04fe4239d380ca17277f6a",
+            "finite": true
+          },
+          "edge_weight": {
+            "shape": [202314],
+            "dtype": "torch.float32",
+            "numel": 202314,
+            "sha256": "df6d33c1203420f8b5fe9ab95260777fccf1e174055f00e093332c2e7d857519",
+            "finite": true
+          }
+        },
+        "G_coexpress": {
+          "node_vocabulary": "gene",
+          "edge_index": {
+            "shape": [2, 6149],
+            "dtype": "torch.int64",
+            "numel": 12298,
+            "sha256": "461f44de88ba45570532674455df08630309c2c7249761354c07027a80554541",
+            "finite": true
+          },
+          "edge_weight": {
+            "shape": [6149],
+            "dtype": "torch.float32",
+            "numel": 6149,
+            "sha256": "3147b3443731f13cf84d159589e781d49f2aad344a3ebb52d9b403270f81d95f",
+            "finite": true
+          }
+        }
+      }
+    },
+    "vocabulary": {
+      "ordered_feature_symbols_sha256": "76ed3a702c1cb54b4c957facdbf9ceb565cdacac1de5dbbd93dd62acd37c013b",
+      "perturbation_vocabulary_sha256": "aec75533891c4b41b7343b562222615d321c3f8eeda2ec8eeeaa5745f03d63bd",
+      "train_control_observation_ids_source_order_sha256": "0752e1781273b317ac9ee7e9face91da0ef78ba181304e4e1ecee8aa4dfd148d",
+      "train_control_mean_sha256": "e46cb1ece11417f0a69d32ea207e346cd96d02eccf46c6aa4f5a9c0e5ed79732",
+      "train_control_count": 2059
+    }
+  },
+  "validation_gate": {
+    "metric": "condition_macro_full_feature_delta_mse",
+    "truth": "validation_condition_mean_X_minus_matched_validation_control_mean_X",
+    "features": 5045,
+    "candidate_mse_must_be_finite": true,
+    "native_scope_coverage": 1.0,
+    "single_condition_macro_mse_strictly_below": 0.0021203121,
+    "combination_condition_macro_mse_strictly_below": 0.0025272989,
+    "thresholds_apply_to": "aggregate_three_seed_prediction",
+    "both_scope_gates_required": true,
+    "test_expression_and_outcome_access_before_gate_passes": false
+  },
+  "execution_boundary": {
+    "evaluator_receives_full_golden_pack": false,
+    "truth_builder_receives_exact_golden_pack_only_before_evaluator_freeze": true,
+    "truth_builder_decodes_test_expression": false,
+    "evaluator_receives_validation_truth_bundle_only": true,
+    "evaluator_receives_attested_train_only_prepare_artifact": true,
+    "network_is_disabled_for_gears_inference_child": true,
+    "filesystem_read_isolation": false,
+    "output_policy": "write_new_atomic_no_replace",
+    "validation_gate_must_pass_before_any_separately_authorized_descriptive_test": true,
+    "test_is_not_implemented_or_executed_by_this_evaluator": true,
+    "registry_or_default_route_changes": false
+  },
+  "claim_ceiling": {
+    "output_schema_version": "praxis.golden-gears-train-only-validation-result.v1",
+    "record_role": "golden_validation_gate_result_not_test_not_scientific_promotion",
+    "benchmark_status": "NOT_RUN",
+    "benchmark_passed": null,
+    "scientifically_validated": false,
+    "promotion_eligible": false,
+    "production_promoted": false
+  }
+}
