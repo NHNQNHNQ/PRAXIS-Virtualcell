@@ -3,11 +3,11 @@
   "frozen_on": "2026-08-13",
   "identity": {
     "payload_hash_algorithm": "sha256(canonical_json(protocol_with_identity.payload_sha256_set_to_null))",
-    "payload_sha256": "b1ee2b7c1cfbfe76f9e6a92525dbb1b735bfe388171a0696ffa9635dc2150e0b",
+    "payload_sha256": "44498d6da2aae13b87d6bea2d4144c2cb3baffe9d239a27ba65f8a6d4affd660",
     "base_protocol_path": "data/golden/norman_2019/gears_train_only_protocol.json",
     "base_protocol_payload_sha256": "58285f730f46dc7fe7f5aad752a80cb8d22184171ff9186fd93e4040280388ef",
     "evaluator_path": "scripts/evaluate_golden_gears_train_only_validation.py",
-    "evaluator_sha256": "44e88a84f1016ee06606216903e6d1436eed3152d15f78e124f3f44967183957"
+    "evaluator_sha256": "60cfc2e6a91acb13198ea60bf2757c7cd32f836d742acdc9bc3bfd73d9c24156"
   },
   "implementation_status": "PENDING_CANDIDATE_FREEZE_NOT_EXECUTABLE",
   "truth_bundle": {
@@ -18,7 +18,7 @@
     "files": {
       "metadata.json": {
         "size_bytes": 6641,
-        "sha256": "9aa7ce877f91a40fe198c15f4f26dee025264b1b49e6e41a2f031d24b347d0fb"
+        "sha256": "8a66ef1e27783f7fd44e564c14ad8cfe186c190b48071705094982b39c567215"
       },
       "truth-delta.npy": {
         "size_bytes": 1210928,
@@ -41,7 +41,7 @@
     "device": "cpu",
     "ordered_feature_count": 5045,
     "rebuild_from_attested_prepare_h5ad_and_frozen_split": true,
-    "config_pickle_must_not_be_read": true,
+    "config_pickle_must_not_be_deserialized_or_used": true,
     "model_pt_load": "torch_load_map_location_cpu_weights_only_true_then_strict_state_dict_load",
     "model_mode": "eval_plus_torch_inference_mode",
     "query_order": "sorted_unique_canonical_target_symbol_tuples_with_mirrored_raw_labels_reusing_one_prediction",

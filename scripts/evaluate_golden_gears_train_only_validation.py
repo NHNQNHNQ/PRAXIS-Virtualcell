@@ -123,6 +123,8 @@ def _regular_inventory(root: Path) -> set[str]:
         if stat.S_ISLNK(info.st_mode) or not (stat.S_ISREG(info.st_mode) or stat.S_ISDIR(info.st_mode)):
             raise ValidationError("artifact inventory contains an unsafe entry")
         if stat.S_ISREG(info.st_mode):
+            if info.st_nlink != 1:
+                raise ValidationError("artifact inventory contains a linked file")
             files.add(path.relative_to(root).as_posix())
     return files
 
@@ -550,6 +552,17 @@ def _verify_candidate_runtime_manifests(
         raise ValidationError(f"seed {expected['seed']} runtime graph or vocabulary changed")
 
 
+def _verify_nonexecuted_candidate_files(directory: Path, record: dict[str, Any], builder) -> None:
+    artifacts = record.get("artifacts", {})
+    config_record = builder._file_record(directory / "model/config.pkl", single_link=True)
+    training_log_record = builder._file_record(directory / "training.log", single_link=True)
+    if not (
+        artifacts.get("config.pkl") == {**config_record, "unsafe_pickle": True}
+        and artifacts.get("training.log") == training_log_record
+    ):
+        raise ValidationError("non-executed candidate artifact identity changed")
+
+
 def _verify_candidates(
     root: Path, protocol: dict[str, Any], base: dict[str, Any], builder, prepare_sha256: str
 ) -> list[dict[str, Any]]:
@@ -628,6 +641,7 @@ def _verify_candidates(
             raise ValidationError(f"seed {seed} collection binding changed")
         record = _strict_json(record_path, builder)
         _validate_candidate_record(record, expected, base, prepare_sha256)
+        _verify_nonexecuted_candidate_files(directory, record, builder)
         _verify_candidate_runtime_manifests(directory, expected, protocol, base, builder)
         manifest = _strict_json(manifest_path, builder)
         try:

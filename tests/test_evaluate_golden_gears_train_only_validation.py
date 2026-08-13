@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -105,6 +106,41 @@ def test_candidate_inventory_requires_seven_files_and_collection_receipt() -> No
     assert 'root / "collection-record.json"' in source
     assert "candidate_runtime_graph_manifest" in source
     assert "raw_graph_manifest" in source
+
+
+def test_candidate_inventory_and_nonexecuted_files_reject_link_or_drift(
+    tmp_path: Path,
+) -> None:
+    module = _evaluator()
+    builder = module._builder()
+    candidate = tmp_path / "seed-11"
+    model = candidate / "model"
+    model.mkdir(parents=True)
+    config = model / "config.pkl"
+    training_log = candidate / "training.log"
+    config.write_bytes(b"opaque pickle bytes")
+    training_log.write_bytes(b"training log")
+    record = {
+        "artifacts": {
+            "config.pkl": {
+                **builder._file_record(config, single_link=True),
+                "unsafe_pickle": True,
+            },
+            "training.log": builder._file_record(training_log, single_link=True),
+        }
+    }
+    module._verify_nonexecuted_candidate_files(candidate, record, builder)
+    training_log.write_bytes(b"changed")
+    with pytest.raises(module.ValidationError, match="artifact identity"):
+        module._verify_nonexecuted_candidate_files(candidate, record, builder)
+
+    linked_root = tmp_path / "linked"
+    linked_root.mkdir()
+    source = linked_root / "source"
+    source.write_bytes(b"same inode")
+    os.link(source, linked_root / "alias")
+    with pytest.raises(module.ValidationError, match="linked file"):
+        module._regular_inventory(linked_root)
 
 
 def test_truth_builder_only_indexes_validation_expression() -> None:
