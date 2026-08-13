@@ -47,8 +47,9 @@ def _minimal_wheel(
     license_expression: str = "MIT",
     raw_license_header: bytes | None = None,
     vendored_dist_info: bool = False,
+    dist_info_distribution: str | None = None,
 ) -> bytes:
-    distribution = name.replace("-", "_")
+    distribution = (dist_info_distribution or name).replace("-", "_")
     dist_info = f"{distribution}-{version}.dist-info"
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
@@ -468,6 +469,28 @@ def test_top_level_wheel_metadata_is_not_confused_with_vendored_dist_info(
 
     assert manifest["components"][0]["name"] == "setuptools"
     assert manifest["components"][0]["version"] == "83.0.0"
+
+
+@pytest.mark.parametrize("metadata_name", ("PyJWT", "PyYAML"))
+def test_wheel_dist_info_name_accepts_normalized_case(tmp_path: Path, metadata_name: str) -> None:
+    normalized_name = metadata_name.lower()
+    wheel = _minimal_wheel(metadata_name, "2.13.0", dist_info_distribution=normalized_name)
+    lock = tmp_path / "runtime-py313.lock"
+    cache_root = tmp_path / "cache"
+    _lock(lock, {(normalized_name, "2.13.0"): wheel})
+    _cache(cache_root, [wheel])
+
+    manifest = release_candidate.materialize_wheelhouse(
+        lock_paths=(lock,),
+        cache_root=cache_root,
+        output_dir=tmp_path / "wheelhouse",
+        source_date_epoch=1_700_000_000,
+        target_profile="linux_arm64_cp313",
+    )
+
+    assert manifest["components"][0]["name"] == normalized_name
+    assert manifest["components"][0]["version"] == "2.13.0"
+    assert manifest["components"][0]["wheels"][0]["filename"].startswith(f"{normalized_name}-")
 
 
 def test_non_ascii_folded_license_header_does_not_escape_wheelhouse_contract(

@@ -579,7 +579,7 @@ def _wheel_filename(name: str, version: str, tags: tuple[str, ...], build: str |
         tag_text = "-".join((".".join(python_tags), ".".join(abi_tags), ".".join(platform_tags)))
     else:
         tag_text = "-".join(sorted(parsed)[0])
-    distribution = re.sub(r"[-_.]+", "_", name)
+    distribution = _normalize_distribution(name).replace("-", "_")
     wheel_version = version.replace("-", "_")
     build_text = ""
     if build is not None:
@@ -590,7 +590,8 @@ def _wheel_filename(name: str, version: str, tags: tuple[str, ...], build: str |
 
 
 def _wheel_dist_info_directory(name: str, version: str) -> str:
-    return f"{re.sub(r'[-_.]+', '_', name)}-{version.replace('-', '_')}.dist-info"
+    distribution = _normalize_distribution(name).replace("-", "_")
+    return f"{distribution}-{version.replace('-', '_')}.dist-info"
 
 
 def _top_level_dist_info_member(name: str, leaf: str) -> bool:
