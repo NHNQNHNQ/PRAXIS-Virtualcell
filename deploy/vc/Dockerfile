@@ -3,7 +3,7 @@
 # Multi-platform index digests are pinned so amd64 CI/.53 and arm64 developer
 # machines resolve the same reviewed release of each official base image.
 ARG NODE_IMAGE=node:24-alpine@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd
-ARG PYTHON_IMAGE=python:3.13.14-slim-bookworm@sha256:9d7f287598e1a5a978c015ee176d8216435aaf335ed69ac3c38dd1bbb10e8d64
+ARG PYTHON_IMAGE=python:3.13.14-slim-trixie@sha256:9662417aace5ae7b8e2609cce472b72a8958e134ba372808abe9cc1a0c0125e6
 
 FROM ${NODE_IMAGE} AS frontend
 

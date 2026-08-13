@@ -99,7 +99,7 @@ def test_release_container_uses_pinned_bases_and_locked_wheel_install():
     dockerfile = (_ROOT / "deploy" / "vc" / "Dockerfile").read_text(encoding="utf-8")
 
     assert re.search(r"node:24-alpine@sha256:[0-9a-f]{64}", dockerfile)
-    assert re.search(r"python:3\.13\.14-slim-bookworm@sha256:[0-9a-f]{64}", dockerfile)
+    assert re.search(r"python:3\.13\.14-slim-trixie@sha256:[0-9a-f]{64}", dockerfile)
     assert "COPY --from=frontend /src/praxis_vc_react/dist" in dockerfile
     assert "--requirement requirements/build-py313.lock" in dockerfile
     assert "--requirement requirements/runtime-py313.lock" in dockerfile
@@ -137,6 +137,7 @@ def test_artifact_oci_assembly_is_network_disabled_and_wheel_first():
     assert 'target_profile") != "linux_arm64_cp313"' in script
     assert '--builder "${PRAXIS_BUILDER}"' in script
     assert "--network none" in script
+    assert "--no-cache" in script
     assert "--pull=false" in script
     assert "--provenance=false" in script
     assert "--sbom=false" in script

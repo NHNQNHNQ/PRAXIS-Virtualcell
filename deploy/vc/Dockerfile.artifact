@@ -2,7 +2,7 @@
 # wheelhouse. The named `wheelhouse` build context is supplied by the caller;
 # this Dockerfile never downloads Python or JavaScript dependencies.
 
-ARG PYTHON_IMAGE=python@sha256:9d7f287598e1a5a978c015ee176d8216435aaf335ed69ac3c38dd1bbb10e8d64
+ARG PYTHON_IMAGE=python@sha256:9662417aace5ae7b8e2609cce472b72a8958e134ba372808abe9cc1a0c0125e6
 
 FROM ${PYTHON_IMAGE} AS installer
 
@@ -43,7 +43,7 @@ LABEL org.opencontainers.image.title="PRAXIS-VirtualCell" \
       org.opencontainers.image.version="${PRODUCT_VERSION}" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.revision="${GIT_SHA}" \
-      org.opencontainers.image.base.digest="sha256:9d7f287598e1a5a978c015ee176d8216435aaf335ed69ac3c38dd1bbb10e8d64"
+      org.opencontainers.image.base.digest="sha256:9662417aace5ae7b8e2609cce472b72a8958e134ba372808abe9cc1a0c0125e6"
 
 ENV GIT_SHA=${GIT_SHA} \
     PATH="/opt/venv/bin:${PATH}" \
