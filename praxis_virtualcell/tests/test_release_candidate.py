@@ -493,6 +493,47 @@ def test_wheel_dist_info_name_accepts_normalized_case(tmp_path: Path, metadata_n
     assert manifest["components"][0]["wheels"][0]["filename"].startswith(f"{normalized_name}-")
 
 
+@pytest.mark.parametrize(
+    "tag",
+    (
+        "cp39-abi3-macosx_11_0_arm64",
+        "cp310-abi3-macosx_10_9_universal2",
+        "cp313-cp313-macosx_11_0_universal2",
+        "py3-none-macosx_11_0_arm64",
+    ),
+)
+def test_macos_arm64_profile_accepts_compatible_wheel_tags(tag: str) -> None:
+    assert release_candidate._tags_support_profile((tag,), "macos_arm64_cp313") is True
+
+
+@pytest.mark.parametrize(
+    "tag",
+    (
+        "cp314-abi3-macosx_11_0_arm64",
+        "cp312-cp312-macosx_11_0_arm64",
+        "cp313-cp313-macosx_11_0_x86_64",
+        "py3-none-win_amd64",
+    ),
+)
+def test_macos_arm64_profile_rejects_incompatible_wheel_tags(tag: str) -> None:
+    assert release_candidate._tags_support_profile((tag,), "macos_arm64_cp313") is False
+
+
+@pytest.mark.parametrize(
+    ("tag", "expected"),
+    (
+        ("cp32-abi3-manylinux_2_17_aarch64", True),
+        ("cp313-cp313-linux_aarch64", True),
+        ("py3-none-manylinux_2_28_aarch64", True),
+        ("cp31-abi3-manylinux_2_17_aarch64", False),
+        ("cp313-cp313-manylinux_2_17_x86_64", False),
+        ("cp313-cp313-musllinux_1_2_aarch64", False),
+    ),
+)
+def test_linux_arm64_profile_enforces_compatible_wheel_tags(tag: str, expected: bool) -> None:
+    assert release_candidate._tags_support_profile((tag,), "linux_arm64_cp313") is expected
+
+
 def test_non_ascii_folded_license_header_does_not_escape_wheelhouse_contract(
     tmp_path: Path,
 ) -> None:

@@ -701,16 +701,16 @@ def _tags_support_profile(tags: tuple[str, ...], target_profile: str) -> bool:
         python_tag, abi_tag, platform_tag = parts
         if python_tag == "py3" and abi_tag == "none" and platform_tag == "any":
             return True
-        if abi_tag == "cp313" and python_tag != "cp313":
-            continue
-        if abi_tag == "abi3":
-            match = re.fullmatch(r"cp3(\d{2})", python_tag)
-            if match is None or int(match.group(1)) > 13:
+        if (python_tag, abi_tag) == ("py3", "none"):
+            pass
+        elif abi_tag == "abi3":
+            match = re.fullmatch(r"cp3(\d+)", python_tag)
+            if match is None or not 2 <= int(match.group(1)) <= 13:
                 continue
         elif (python_tag, abi_tag) != ("cp313", "cp313"):
             continue
         if target_profile == "macos_arm64_cp313":
-            if platform_tag.startswith("macosx_") and platform_tag.endswith("_arm64"):
+            if platform_tag.startswith("macosx_") and platform_tag.endswith(("_arm64", "_universal2")):
                 return True
         elif (
             platform_tag == "linux_aarch64"
