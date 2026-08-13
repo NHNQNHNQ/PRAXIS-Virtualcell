@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import threading
+from collections.abc import Iterator
+from contextlib import contextmanager
 
 from praxis_virtualcell.agents.model_broker_agent import ModelBrokerAgent
 from praxis_virtualcell.core.bus import MessageBus
@@ -14,6 +16,7 @@ from praxis_virtualcell.core.config import (
     assert_llm_boundaries,
 )
 from praxis_virtualcell.core.domain_extension import DomainExtension
+from praxis_virtualcell.core.request_v2 import VirtualCellRequestV2, require_v2_request
 from praxis_virtualcell.core.runtime import AgentRuntime
 from praxis_virtualcell.data_packs.registry import PackRegistry
 from praxis_virtualcell.model_zoo.adapter_sdk import AdapterRegistry
@@ -59,10 +62,7 @@ class DirectV2RuntimeFactory:
             raise TypeError("pack_registry must be PackRegistry")
         if not isinstance(environment, EnvironmentSnapshot):
             raise TypeError("environment must be EnvironmentSnapshot")
-        if (
-            environment.schema_version != "vc.environment.v3"
-            or type(environment.identity) is not EnvironmentIdentityV2
-        ):
+        if environment.schema_version != "vc.environment.v3" or type(environment.identity) is not EnvironmentIdentityV2:
             raise ValueError("direct-v2 requires an exact vc.environment.v3 EnvironmentIdentityV2")
         if not isinstance(adapter_registry, AdapterRegistry):
             raise TypeError("adapter_registry must be AdapterRegistry")
@@ -90,6 +90,50 @@ class DirectV2RuntimeFactory:
         # slot, preventing a stateful registered adapter from crossing jobs.
         self._execution_lock = threading.RLock()
 
+    def _broker(self) -> ModelBrokerAgent:
+        return ModelBrokerAgent(
+            registry=self._registry,
+            cache=self._cache,
+            pack_registry=self._pack_registry,
+            environment=self._environment,
+            adapter_registry=self._adapter_registry,
+            wrapper_registry=self._wrapper_registry,
+            output_reducer_registry=self._output_reducer_registry,
+        )
+
+    def compatibility(
+        self,
+        request: VirtualCellRequestV2 | dict,
+        pack_id: str,
+        pack_version: str,
+    ) -> dict:
+        """Return the path-free direct-v2 plan without preparing or running it."""
+
+        with self.compatibility_guard(request, pack_id, pack_version) as plan:
+            return plan
+
+    @contextmanager
+    def compatibility_guard(
+        self,
+        request: VirtualCellRequestV2 | dict,
+        pack_id: str,
+        pack_version: str,
+    ) -> Iterator[dict]:
+        """Hold the factory execution slot from exact planning through a caller's run."""
+
+        from praxis_virtualcell.pack_product import _public_plan
+
+        validated = request if isinstance(request, VirtualCellRequestV2) else require_v2_request(request)
+        if not all(isinstance(value, str) and value and value.strip() == value for value in (pack_id, pack_version)):
+            raise ValueError("pack_id and pack_version must be non-empty trimmed strings")
+        with self._execution_lock:
+            plan = self._broker().plan(
+                validated,
+                self._pack_registry.record(pack_id, pack_version),
+                require_registered_wrapper=True,
+            )
+            yield _public_plan(plan.to_dict())
+
     def build(
         self,
         *,
@@ -116,15 +160,5 @@ class DirectV2RuntimeFactory:
             domain_extensions=self._domain_extensions,
             execution_lock=self._execution_lock,
         )
-        runtime.register_agent(
-            ModelBrokerAgent(
-                registry=self._registry,
-                cache=self._cache,
-                pack_registry=self._pack_registry,
-                environment=self._environment,
-                adapter_registry=self._adapter_registry,
-                wrapper_registry=self._wrapper_registry,
-                output_reducer_registry=self._output_reducer_registry,
-            )
-        )
+        runtime.register_agent(self._broker())
         return runtime

@@ -770,14 +770,17 @@ def _snapshot_tree(root: Path) -> tuple[CandidateFileIdentityV1, ...]:
             if path.is_symlink() or not stat.S_ISREG(file_stat.st_mode):
                 raise PackFactoryError("candidate files must be regular non-symlink files")
             relative = path.relative_to(root).as_posix()
-            files.append(
-                CandidateFileIdentityV1(
-                    schema_version="vc.pack-candidate-file.v1",
-                    path=relative,
-                    size_bytes=file_stat.st_size,
-                    sha256=_hash_file(path),
+            try:
+                files.append(
+                    CandidateFileIdentityV1(
+                        schema_version="vc.pack-candidate-file.v1",
+                        path=relative,
+                        size_bytes=file_stat.st_size,
+                        sha256=_hash_file(path),
+                    )
                 )
-            )
+            except ValueError as exc:
+                raise PackFactoryError("candidate file identity is invalid") from exc
     files.sort(key=lambda item: item.path)
     if not files or files[0].path != "manifest.yaml":
         if not any(item.path == "manifest.yaml" for item in files):
@@ -2020,6 +2023,7 @@ class PackFactoryStore:
             return
         if type(value) is PackMetadataReviewV1:
             candidate = self.get(PackCandidateV1, value.candidate_fingerprint)
+            self._require_dependencies(candidate)
             claims = {item.topic: item.fingerprint() for item in candidate.metadata_claims}
             if any(item.claim_fingerprint != claims[item.topic] for item in value.confirmations):
                 raise PackFactoryError("stored review does not bind exact candidate claims")
@@ -2027,6 +2031,8 @@ class PackFactoryStore:
         if type(value) is PackValidationReportV1:
             candidate = self.get(PackCandidateV1, value.candidate_fingerprint)
             review = self.get(PackMetadataReviewV1, value.review_fingerprint)
+            self._require_dependencies(candidate)
+            self._require_dependencies(review)
             if (
                 review.candidate_fingerprint != candidate.fingerprint()
                 or value.candidate_fingerprint != candidate.fingerprint()
@@ -2048,6 +2054,7 @@ class PackFactoryStore:
                 PackValidationReportV1,
                 value.validation_report_fingerprint,
             )
+            self._require_dependencies(report)
             validate_operator_decision(candidate, review, report, value)
             return
         if type(value) is FactoryRegisteredPackV1:
@@ -2065,6 +2072,7 @@ class PackFactoryStore:
                 PackOperatorDecisionV1,
                 value.operator_decision_fingerprint,
             )
+            self._require_dependencies(decision)
             validate_operator_decision(candidate, review, report, decision)
             if (
                 decision.decision != "approve_register"
@@ -2092,6 +2100,8 @@ class PackFactoryStore:
                 FactoryRegisteredPackV1,
                 value.replacement_registration_fingerprint,
             )
+            self._require_dependencies(superseded)
+            self._require_dependencies(replacement)
             if (
                 superseded.pack_id != replacement.pack_id
                 or value.pack_id != superseded.pack_id
@@ -2561,3 +2571,30 @@ def load_factory_contract(
     except OSError as exc:
         raise PackFactoryError("factory artifact file is unavailable") from exc
     return model.from_dict(_json_object_bytes(payload, "factory artifact"))
+
+
+def load_pack_candidate_authoring(path: str | Path) -> dict[str, Any]:
+    """Load the small, explicit operator input used to prepare one candidate."""
+
+    artifact_path = Path(path)
+    try:
+        if artifact_path.is_symlink():
+            raise PackFactoryError("candidate authoring file must not be a symlink")
+        resolved = artifact_path.resolve(strict=True)
+        file_stat = resolved.lstat()
+        if not stat.S_ISREG(file_stat.st_mode) or not 0 < file_stat.st_size <= 1024 * 1024:
+            raise PackFactoryError("candidate authoring file has an invalid size")
+        value = _json_object_bytes(resolved.read_bytes(), "candidate authoring")
+    except OSError as exc:
+        raise PackFactoryError("candidate authoring file is unavailable") from exc
+    expected = {
+        "schema_version",
+        "source_asset_id",
+        "mapping_asset_ids",
+        "value_semantics",
+        "units",
+        "claim_origins",
+    }
+    if set(value) != expected or value["schema_version"] != "vc.pack-candidate-authoring.v1":
+        raise PackFactoryError("candidate authoring fields or schema are invalid")
+    return value

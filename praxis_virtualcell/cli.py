@@ -110,12 +110,39 @@ def _cmd_serve(a) -> int:
     except (OSError, TypeError, ValueError):
         _print_json({"status": "rejected", "reason": "golden_research_configuration_invalid"})
         return 2
-    configure_direct_v2_factory(factory)
+    configure_direct_v2_factory(
+        factory,
+        research_tasks=_golden_research_tasks() if a.golden_registration_root is not None else (),
+    )
     try:
         uvicorn.run(app, host=a.host, port=a.port, reload=False)
     finally:
         configure_direct_v2_factory(None)
     return 0
+
+
+def _golden_research_tasks() -> tuple[dict, ...]:
+    from praxis_virtualcell.model_zoo.golden_additive_research import (
+        MODEL_NAME,
+        MODEL_VERSION,
+        PACK_ID,
+        PACK_VERSION,
+        golden_ahr_klf1_request,
+    )
+
+    return (
+        {
+            "schema_version": "vc.research-task.v1",
+            "task_id": "norman-2019-ahr-klf1-research",
+            "request": golden_ahr_klf1_request().to_dict(),
+            "pack_id": PACK_ID,
+            "pack_version": PACK_VERSION,
+            "model_name": MODEL_NAME,
+            "model_version": MODEL_VERSION,
+            "execution_scope": "research_only",
+            "scientifically_validated": False,
+        },
+    )
 
 
 def _cmd_web(a) -> int:
@@ -192,17 +219,16 @@ def _cmd_pack_validate(a) -> int:
     return 0 if result["pack_valid"] else 2
 
 
-def _cmd_pack_factory_init(a) -> int:
+def _load_factory_upload(data_root_value: str, upload_id_value: str):
     import uuid
     from pathlib import Path
 
     from praxis_virtualcell.pack_factory import (
         PackFactoryError,
-        PackFactoryStore,
         load_quarantined_upload,
     )
 
-    requested_data_root = Path(a.data_root)
+    requested_data_root = Path(data_root_value)
     try:
         data_root = requested_data_root.resolve(strict=True)
     except OSError as exc:
@@ -226,11 +252,20 @@ def _cmd_pack_factory_init(a) -> int:
             raise PackFactoryError(f"{label} must be a canonical real non-symlink directory")
 
     try:
-        parsed_upload_id = uuid.UUID(a.upload_id)
+        parsed_upload_id = uuid.UUID(upload_id_value)
     except ValueError as exc:
         raise PackFactoryError("upload id must be a canonical UUIDv4") from exc
-    if parsed_upload_id.version != 4 or str(parsed_upload_id) != a.upload_id:
+    if parsed_upload_id.version != 4 or str(parsed_upload_id) != upload_id_value:
         raise PackFactoryError("upload id must be a canonical UUIDv4")
+    return data_root, uploads, load_quarantined_upload(quarantine / upload_id_value)
+
+
+def _cmd_pack_factory_init(a) -> int:
+    from pathlib import Path
+
+    from praxis_virtualcell.pack_factory import PackFactoryError, PackFactoryStore
+
+    _, uploads, upload = _load_factory_upload(a.data_root, a.upload_id)
 
     store_path = Path(a.store)
     if not store_path.is_absolute():
@@ -242,7 +277,6 @@ def _cmd_pack_factory_init(a) -> int:
     if resolved_store_path == uploads or uploads in resolved_store_path.parents:
         raise PackFactoryError("factory store must be outside the data-root uploads subtree")
 
-    upload = load_quarantined_upload(quarantine / a.upload_id)
     store = PackFactoryStore.create(store_path)
     receipt_fingerprint = store.record_upload(upload)
     _print_json(
@@ -259,6 +293,125 @@ def _cmd_pack_factory_init(a) -> int:
         }
     )
     return 0
+
+
+def _cmd_pack_candidate_prepare(a) -> int:
+    from pathlib import Path
+
+    from praxis_virtualcell.pack_factory import (
+        PackFactoryError,
+        PackFactoryStore,
+        UploadReceiptV1,
+        load_pack_candidate_authoring,
+        prepare_pack_candidate,
+    )
+
+    _, uploads, upload = _load_factory_upload(a.data_root, a.upload_id)
+    store = PackFactoryStore.open(a.store)
+    if store.get(UploadReceiptV1, upload.receipt.fingerprint()) != upload.receipt:
+        raise PackFactoryError("factory store does not bind the exact upload receipt")
+
+    raw_pack = Path(a.pack_root)
+    raw_authoring = Path(a.authoring)
+    if not raw_pack.is_absolute() or not raw_authoring.is_absolute():
+        raise PackFactoryError("candidate Pack and authoring paths must be absolute")
+    try:
+        pack_root = raw_pack.resolve(strict=True)
+        authoring_path = raw_authoring.resolve(strict=True)
+    except OSError as exc:
+        raise PackFactoryError("candidate Pack or authoring path is unavailable") from exc
+    if raw_pack.is_symlink() or not pack_root.is_dir() or pack_root != raw_pack:
+        raise PackFactoryError("candidate Pack root must be canonical and non-symlink")
+    if raw_authoring.is_symlink() or raw_authoring != authoring_path:
+        raise PackFactoryError("candidate authoring file must be canonical and non-symlink")
+    if (
+        pack_root == uploads
+        or uploads in pack_root.parents
+        or pack_root == store.root
+        or store.root in pack_root.parents
+        or pack_root in store.root.parents
+        or authoring_path == pack_root
+        or pack_root in authoring_path.parents
+        or authoring_path == uploads
+        or uploads in authoring_path.parents
+        or authoring_path == store.root
+        or store.root in authoring_path.parents
+    ):
+        raise PackFactoryError("candidate Pack and authoring file must stay outside uploads, store, and each other")
+
+    authoring = load_pack_candidate_authoring(authoring_path)
+    prepared = prepare_pack_candidate(
+        upload,
+        pack_root,
+        source_asset_id=authoring["source_asset_id"],
+        mapping_asset_ids=authoring["mapping_asset_ids"],
+        value_semantics=authoring["value_semantics"],
+        units=authoring["units"],
+        claim_origins=authoring["claim_origins"],
+    )
+    candidate_fingerprint = store.record_candidate(prepared)
+    candidate_path = store.root / "candidates" / f"{candidate_fingerprint}.json"
+    _print_json(
+        {
+            "schema_version": "vc.pack-candidate-prepare-result.v1",
+            "status": "candidate_unvalidated",
+            "upload_id": upload.receipt.upload_id,
+            "receipt_fingerprint": upload.receipt.fingerprint(),
+            "candidate_fingerprint": candidate_fingerprint,
+            "candidate_path": str(candidate_path),
+            "pack_valid": None,
+            "review_created": False,
+            "validation_performed": False,
+            "factory_registered": False,
+            "model_compatible": None,
+            "scientifically_validated": False,
+            "executable": False,
+        }
+    )
+    return 0
+
+
+def _cmd_pack_candidate_validate(a) -> int:
+    from praxis_virtualcell.pack_factory import (
+        PackCandidateV1,
+        PackFactoryError,
+        PackFactoryStore,
+        PackMetadataReviewV1,
+        bind_pack_candidate,
+        load_factory_contract,
+        validate_metadata_review,
+        validate_pack_candidate,
+    )
+
+    _, _, upload = _load_factory_upload(a.data_root, a.upload_id)
+    store = PackFactoryStore.open(a.store)
+    candidate = load_factory_contract(a.candidate, PackCandidateV1)
+    if store.get(PackCandidateV1, candidate.fingerprint()) != candidate:
+        raise PackFactoryError("factory store does not bind the exact candidate")
+    review = load_factory_contract(a.review, PackMetadataReviewV1)
+    prepared = bind_pack_candidate(upload, a.pack_root, candidate)
+    review = validate_metadata_review(prepared, review)
+    review_fingerprint = store.record(review)
+    report = validate_pack_candidate(prepared, review)
+    validation_fingerprint = store.record_validation(prepared, review, report)
+    _print_json(
+        {
+            "schema_version": "vc.pack-candidate-validate-result.v1",
+            "status": "validated" if report.passed else "validation_failed",
+            "candidate_fingerprint": candidate.fingerprint(),
+            "review_fingerprint": review_fingerprint,
+            "review_path": str(store.root / "reviews" / f"{review_fingerprint}.json"),
+            "validation_report_fingerprint": validation_fingerprint,
+            "validation_path": str(store.root / "validations" / f"{validation_fingerprint}.json"),
+            "pack_valid": report.pack_valid,
+            "registration_allowed": report.registration_allowed,
+            "factory_registered": False,
+            "model_compatible": None,
+            "scientifically_validated": False,
+            "executable": False,
+        }
+    )
+    return 0 if report.passed and report.registration_allowed else 2
 
 
 def _cmd_pack_register(a) -> int:
@@ -496,6 +649,27 @@ def main(argv=None, *, direct_v2_factory=None) -> int:
         help="位于 uploads 子树外的绝对 write-new 路径",
     )
     factory_init_cmd.set_defaults(fn=_cmd_pack_factory_init)
+    candidate_prepare_cmd = pack_sub.add_parser(
+        "candidate-prepare",
+        help="冻结 operator-authored Pack 为未审核 candidate；不推断 metadata",
+    )
+    candidate_prepare_cmd.add_argument("--data-root", required=True)
+    candidate_prepare_cmd.add_argument("--upload-id", required=True)
+    candidate_prepare_cmd.add_argument("--store", required=True)
+    candidate_prepare_cmd.add_argument("--pack-root", required=True)
+    candidate_prepare_cmd.add_argument("--authoring", required=True)
+    candidate_prepare_cmd.set_defaults(fn=_cmd_pack_candidate_prepare)
+    candidate_validate_cmd = pack_sub.add_parser(
+        "candidate-validate",
+        help="绑定人工 metadata review 并生成 strict validation report",
+    )
+    candidate_validate_cmd.add_argument("--data-root", required=True)
+    candidate_validate_cmd.add_argument("--upload-id", required=True)
+    candidate_validate_cmd.add_argument("--store", required=True)
+    candidate_validate_cmd.add_argument("--pack-root", required=True)
+    candidate_validate_cmd.add_argument("--candidate", required=True)
+    candidate_validate_cmd.add_argument("--review", required=True)
+    candidate_validate_cmd.set_defaults(fn=_cmd_pack_candidate_validate)
     register_cmd = pack_sub.add_parser(
         "register",
         help="以完整 P19 receipt/review/validation/operator chain 写入本地索引",

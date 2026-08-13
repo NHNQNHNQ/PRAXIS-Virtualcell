@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+
+from praxis_virtualcell.core.request_v2 import VirtualCellRequestV2
+from praxis_virtualcell.model_zoo.adapter_sdk import _contains_rooted_local_path
 
 
 class ParseIn(BaseModel):
@@ -61,6 +64,89 @@ class PackCompatibilityIn(BaseModel):
             if not value or value.strip() != value:
                 raise ValueError("Pack identity must be a non-empty trimmed string")
         return self
+
+
+class ResearchTaskDescriptor(BaseModel):
+    """Strict public identity for one explicitly configured research task."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
+
+    schema_version: Literal["vc.research-task.v1"]
+    task_id: str
+    request: VirtualCellRequestV2
+    pack_id: str
+    pack_version: str
+    model_name: str
+    model_version: str
+    execution_scope: Literal["research_only"]
+    scientifically_validated: Literal[False]
+
+    @field_validator(
+        "task_id",
+        "pack_id",
+        "pack_version",
+        "model_name",
+        "model_version",
+        mode="before",
+    )
+    @classmethod
+    def _path_safe_identifier(cls, value):
+        if (
+            not isinstance(value, str)
+            or not value
+            or value.strip() != value
+            or not value[0].isalnum()
+            or any(not (character.isalnum() or character in "._@+-") for character in value)
+        ):
+            raise ValueError("research task identifiers must be canonical and path-safe")
+        return value
+
+    @field_validator("request", mode="before")
+    @classmethod
+    def _canonical_request(cls, value):
+        if isinstance(value, VirtualCellRequestV2):
+            return VirtualCellRequestV2.from_dict(value.to_dict())
+        if not isinstance(value, dict):
+            raise ValueError("research task request must be an exact vc.request.v2")
+        try:
+            request = VirtualCellRequestV2.from_dict(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("research task request must be an exact vc.request.v2") from exc
+        if request.to_dict() != value:
+            raise ValueError("research task request must use its canonical vc.request.v2 form")
+        return request
+
+    @model_validator(mode="after")
+    def _exact_path_free_request(self):
+        payload = self.model_dump(mode="json")
+        if _contains_rooted_local_path(payload) or _contains_parent_traversal(payload):
+            raise ValueError("research task descriptor must not contain rooted local paths")
+        return self
+
+
+class ResearchTaskExecutionIn(BaseModel):
+    """Bind task execution to the exact compatibility preview the user confirmed."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
+
+    compatibility_fingerprint: str
+
+    @field_validator("compatibility_fingerprint")
+    @classmethod
+    def _sha256(cls, value: str) -> str:
+        if len(value) != 64 or any(character not in "0123456789abcdef" for character in value):
+            raise ValueError("compatibility_fingerprint must be a lowercase SHA-256")
+        return value
+
+
+def _contains_parent_traversal(value: Any) -> bool:
+    if isinstance(value, str):
+        return ".." in value.replace("\\", "/").split("/")
+    if isinstance(value, dict):
+        return any(_contains_parent_traversal(key) or _contains_parent_traversal(item) for key, item in value.items())
+    if isinstance(value, (list, tuple)):
+        return any(_contains_parent_traversal(item) for item in value)
+    return False
 
 
 class JobOut(BaseModel):

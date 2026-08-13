@@ -13,8 +13,22 @@ const GOLDEN_REQUEST = JSON.parse(
     "utf8",
   ),
 ) as Record<string, unknown>;
-const RUN_LABEL = "Run registered AHR+KLF1 CRISPRa · 5d · research-only";
+const PREVIEW_LABEL = "Preview registered AHR+KLF1 · 5d · research-only";
 const JOB_ID = "golden-ui-job";
+const DESCRIPTOR_FINGERPRINT = "d".repeat(64);
+const COMPATIBILITY_FINGERPRINT = "e".repeat(64);
+
+const researchTask = {
+  schema_version: "vc.research-task.v1",
+  task_id: "norman-2019-ahr-klf1-research",
+  request: GOLDEN_REQUEST,
+  pack_id: "norman-2019-k562-golden",
+  pack_version: "1.0.0",
+  model_name: "norman_additive_linear",
+  model_version: "1.0.0-research.1",
+  execution_scope: "research_only",
+  scientifically_validated: false,
+};
 
 const compatibilityReport = {
   model_name: "norman_additive_linear",
@@ -88,22 +102,53 @@ test("K562 registered task submits exact direct-v2 contract and renders the real
   page,
 }) => {
   const failures = collectBrowserFailures(page);
-  const jobBodies: unknown[] = [];
+  const executionBodies: unknown[] = [];
+  const genericJobBodies: unknown[] = [];
   let parseRequests = 0;
+  let compatibilityRequests = 0;
   let created = false;
 
   page.on("request", (request) => {
     if (isRequest(request, "POST", "/api/parse")) parseRequests += 1;
   });
+  await page.route("**/api/research-tasks", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ tasks: [researchTask] }),
+    });
+  });
+  await page.route("**/api/research-tasks/*/compatibility", async (route) => {
+    compatibilityRequests += 1;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        schema_version: "vc.research-task-compatibility.v1",
+        task_id: researchTask.task_id,
+        descriptor_fingerprint: DESCRIPTOR_FINGERPRINT,
+        compatibility_fingerprint: COMPATIBILITY_FINGERPRINT,
+        execution_plan: executionPlan,
+      }),
+    });
+  });
+  await page.route("**/api/research-tasks/*/execute", async (route) => {
+    created = true;
+    executionBodies.push(route.request().postDataJSON());
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ job_id: JOB_ID, status: "done" }),
+    });
+  });
   await page.route("**/api/jobs", async (route) => {
     const request = route.request();
     if (request.method() === "POST") {
-      created = true;
-      jobBodies.push(request.postDataJSON());
+      genericJobBodies.push(request.postDataJSON());
       await route.fulfill({
-        status: 200,
+        status: 500,
         contentType: "application/json",
-        body: JSON.stringify({ job_id: JOB_ID, status: "done" }),
+        body: JSON.stringify({ detail: "generic_job_path_forbidden" }),
       });
       return;
     }
@@ -123,6 +168,12 @@ test("K562 registered task submits exact direct-v2 contract and renders the real
                 ],
                 abstain: false,
                 reliability: "research_only",
+                pack_id: "norman-2019-k562-golden",
+                pack_version: "1.0.0",
+                pack_fingerprint: "a".repeat(64),
+                execution_scope: "research_only",
+                scientifically_validated: false,
+                models_used: ["norman_additive_linear"],
               },
             ]
           : [],
@@ -181,7 +232,26 @@ test("K562 registered task submits exact direct-v2 contract and renders the real
   });
 
   await selectCell(page, "K562");
-  await page.getByRole("button", { name: RUN_LABEL, exact: true }).click();
+  await page.getByRole("button", { name: PREVIEW_LABEL, exact: true }).click();
+
+  const preview = page.getByRole("region", {
+    name: "Research task compatibility preview",
+    exact: true,
+  });
+  await expect(preview).toBeVisible();
+  await expect(preview.getByText("norman-2019-k562-golden@1.0.0")).toBeVisible();
+  await expect(preview.getByText("norman_additive_linear@1.0.0-research.1")).toBeVisible();
+  await expect(preview.getByText("true", { exact: true })).toBeVisible();
+  expect(compatibilityRequests).toBe(1);
+  expect(parseRequests).toBe(0);
+  expect(executionBodies).toHaveLength(0);
+
+  await preview
+    .getByRole("button", {
+      name: "Confirm compatibility and run direct-v2",
+      exact: true,
+    })
+    .click();
 
   const result = page.getByRole("region", {
     name: `结果 · job ${JOB_ID}`,
@@ -189,17 +259,11 @@ test("K562 registered task submits exact direct-v2 contract and renders the real
   });
   await expect(result).toBeVisible();
   expect(parseRequests).toBe(0);
-  expect(jobBodies).toEqual([
-    {
-      request: GOLDEN_REQUEST,
-      mode: "offline",
-      enable_llm_report: false,
-      pack_id: "norman-2019-k562-golden",
-      pack_version: "1.0.0",
-      submission_contract: "vc.direct-v2-execution.v1",
-    },
+  expect(executionBodies).toEqual([
+    { compatibility_fingerprint: COMPATIBILITY_FINGERPRINT },
   ]);
-  const serializedBody = JSON.stringify(jobBodies[0]);
+  expect(genericJobBodies).toEqual([]);
+  const serializedBody = JSON.stringify(executionBodies[0]);
   expect(serializedBody).not.toContain("registration_root");
   expect(serializedBody).not.toContain("model_cache_root");
   expect(serializedBody).not.toContain("pack_root");
@@ -210,6 +274,13 @@ test("K562 registered task submits exact direct-v2 contract and renders the real
     result.getByText("scientifically_validated=false", { exact: false }).first(),
   ).toBeVisible();
   await expect(result.getByText("norman_additive_linear", { exact: true }).first()).toBeVisible();
+  const historyEntry = page.locator(".chat-history > .chat-history-item.active");
+  await expect(historyEntry).toContainText(
+    "Pack norman-2019-k562-golden@1.0.0",
+  );
+  await expect(historyEntry).toContainText(
+    "research_only · science=false · norman_additive_linear",
+  );
 
   await result.getByRole("tab", { name: "预测", exact: true }).click();
   await expect(result.getByText(/完整输出共 5,045 维/)).toBeVisible();
@@ -225,7 +296,7 @@ test("K562 registered task submits exact direct-v2 contract and renders the real
   expectNoBrowserFailures(failures);
 });
 
-test("registered task fails closed when the host has no direct-v2 factory", async ({
+test("registered task fails closed when compatibility is unavailable", async ({
   page,
 }) => {
   const pageErrors: string[] = [];
@@ -241,23 +312,54 @@ test("registered task fails closed when the host has no direct-v2 factory", asyn
     if (isRequest(request, "POST", "/api/jobs")) {
       jobBodies.push(request.postDataJSON());
     }
+    if (isRequest(request, "POST", /^\/api\/research-tasks\/[^/]+\/execute$/)) {
+      jobBodies.push(request.postDataJSON());
+    }
+  });
+  await page.route("**/api/research-tasks", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ tasks: [researchTask] }),
+    });
+  });
+  await page.route("**/api/research-tasks/*/compatibility", async (route) => {
+    await route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({ detail: "direct_v2_factory_unconfigured" }),
+    });
   });
 
   await selectCell(page, "K562");
   const responsePromise = page.waitForResponse((response) =>
-    isRequest(response.request(), "POST", "/api/jobs"),
+    isRequest(
+      response.request(),
+      "POST",
+      `/api/research-tasks/${researchTask.task_id}/compatibility`,
+    ),
   );
-  await page.getByRole("button", { name: RUN_LABEL, exact: true }).click();
+  await page.getByRole("button", { name: PREVIEW_LABEL, exact: true }).click();
   const response = await responsePromise;
   expect(response.status()).toBe(503);
   expect(await response.json()).toEqual({ detail: "direct_v2_factory_unconfigured" });
   expect(parseRequests).toBe(0);
-  expect(jobBodies).toHaveLength(1);
+  expect(jobBodies).toHaveLength(0);
   await expect(page.getByRole("alert")).toContainText(
-    "当前服务尚未配置 Golden 真实研究运行时",
+    "当前服务尚未配置真实研究运行时",
   );
-  await expect(page.getByRole("alert")).toContainText("不会回退到 mock 或旧模型");
-  await expect(page.getByRole("button", { name: RUN_LABEL, exact: true })).toBeEnabled();
+  await expect(page.getByRole("alert")).toContainText(
+    "不会回退到 mock、旧模型或解析路径",
+  );
+  await expect(
+    page.getByRole("button", { name: PREVIEW_LABEL, exact: true }),
+  ).toBeEnabled();
+  await expect(
+    page.getByRole("button", {
+      name: "Confirm compatibility and run direct-v2",
+      exact: true,
+    }),
+  ).toHaveCount(0);
   await expect(page.getByRole("region", { name: /结果 · job/ })).toHaveCount(0);
   expect(pageErrors).toEqual([]);
   expect(
@@ -265,4 +367,92 @@ test("registered task fails closed when the host has no direct-v2 factory", asyn
       (message) => !message.includes("503 (Service Unavailable)"),
     ),
   ).toEqual([]);
+});
+
+test("registered task rejects a stale confirmed preview without generic fallback", async ({
+  page,
+}) => {
+  const forbiddenRequests: string[] = [];
+  let executeBodies: unknown[] = [];
+  page.on("request", (request) => {
+    if (isRequest(request, "POST", "/api/parse") || isRequest(request, "POST", "/api/jobs")) {
+      forbiddenRequests.push(request.url());
+    }
+  });
+  await page.route("**/api/research-tasks", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ tasks: [researchTask] }),
+    });
+  });
+  await page.route("**/api/research-tasks/*/compatibility", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        schema_version: "vc.research-task-compatibility.v1",
+        task_id: researchTask.task_id,
+        descriptor_fingerprint: DESCRIPTOR_FINGERPRINT,
+        compatibility_fingerprint: COMPATIBILITY_FINGERPRINT,
+        execution_plan: executionPlan,
+      }),
+    });
+  });
+  await page.route("**/api/research-tasks/*/execute", async (route) => {
+    executeBodies = [...executeBodies, route.request().postDataJSON()];
+    await route.fulfill({
+      status: 409,
+      contentType: "application/json",
+      body: JSON.stringify({ detail: "research_task_compatibility_stale" }),
+    });
+  });
+
+  await selectCell(page, "K562");
+  await page.getByRole("button", { name: PREVIEW_LABEL, exact: true }).click();
+  const preview = page.getByRole("region", {
+    name: "Research task compatibility preview",
+    exact: true,
+  });
+  await preview
+    .getByRole("button", {
+      name: "Confirm compatibility and run direct-v2",
+      exact: true,
+    })
+    .click();
+
+  await expect(page.getByRole("alert").last()).toContainText(
+    "research_task_compatibility_stale",
+  );
+  expect(executeBodies).toEqual([
+    { compatibility_fingerprint: COMPATIBILITY_FINGERPRINT },
+  ]);
+  expect(forbiddenRequests).toEqual([]);
+  await expect(page.getByRole("region", { name: /结果 · job/ })).toHaveCount(0);
+});
+
+test("unconfigured empty research catalog hides the registered entry", async ({
+  page,
+}) => {
+  const requests: string[] = [];
+  page.on("request", (request) => {
+    if (
+      isRequest(request, "POST", "/api/parse") ||
+      isRequest(request, "POST", "/api/jobs") ||
+      isRequest(request, "POST", /^\/api\/research-tasks\/[^/]+\/(compatibility|execute)$/)
+    ) {
+      requests.push(request.url());
+    }
+  });
+  await page.route("**/api/research-tasks", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ tasks: [] }),
+    });
+  });
+
+  await selectCell(page, "K562");
+  await expect(page.locator("button.registered-research")).toHaveCount(0);
+  expect(requests).toEqual([]);
 });

@@ -12,6 +12,7 @@ pytest.importorskip("fastapi")
 from fastapi.testclient import TestClient
 
 from praxis_vc_api.main import app, configure_direct_v2_factory
+from praxis_vc_api.models.api_schema import ResearchTaskDescriptor
 from praxis_virtualcell.cli import main as cli_main
 from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.io.job_store import JobStore
@@ -94,6 +95,193 @@ def _direct_v2_body(request: object) -> dict:
     }
 
 
+def _research_task_descriptor(request: object) -> dict:
+    return {
+        "schema_version": "vc.research-task.v1",
+        "task_id": "test-only-direct-v2-research",
+        "request": request.to_dict(),
+        "pack_id": _PACK_ID,
+        "pack_version": _PACK_VERSION,
+        "model_name": _MODEL_NAME,
+        "model_version": "dummy-v1",
+        "execution_scope": "research_only",
+        "scientifically_validated": False,
+    }
+
+
+def test_factory_compatibility_uses_the_registered_direct_v2_stack_without_execution(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    factory, request = _factory_and_request(tmp_path / "factory")
+
+    def forbidden(*_args, **_kwargs):
+        raise AssertionError("compatibility must not prepare input or execute a model")
+
+    monkeypatch.setattr(_ScalarAdapter, "prepare_input", forbidden)
+    monkeypatch.setattr(_ScalarWrapper, "run_prediction", forbidden)
+
+    plan = factory.compatibility(request, _PACK_ID, _PACK_VERSION)
+
+    assert plan["schema_version"] == "vc.execution-plan.v2"
+    assert plan["executable"] is True
+    assert plan["steps"][0]["model_name"] == _MODEL_NAME
+    assert plan["reports"][0]["research_execution_scope"] == "research_only"
+    assert plan["reports"][0]["scientifically_validated"] is False
+    rendered = json.dumps(plan, sort_keys=True)
+    assert str(tmp_path) not in rendered
+    assert "asset_paths" not in rendered
+    assert "cache_root" not in rendered
+
+    factory._wrapper_registry = WrapperRegistry()
+    unavailable = factory.compatibility(request, _PACK_ID, _PACK_VERSION)
+    assert unavailable["executable"] is False
+    assert "model.wrapper" in unavailable["reports"][0]["reasons"]
+
+
+def test_research_task_catalog_and_compatibility_are_explicit_read_only_surfaces(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    factory, request = _factory_and_request(tmp_path / "factory")
+    descriptor = _research_task_descriptor(request)
+    client = TestClient(app, raise_server_exceptions=False)
+    executions: list[dict] = []
+
+    def execute(request_payload, mode, enable_llm_report, pack_id, pack_version, **kwargs):
+        executions.append(
+            {
+                "request": request_payload,
+                "mode": mode,
+                "enable_llm_report": enable_llm_report,
+                "pack_id": pack_id,
+                "pack_version": pack_version,
+                **kwargs,
+            }
+        )
+        return {"job_id": "bound-research-job", "status": "done"}
+
+    monkeypatch.setattr("praxis_vc_api.main.svc.run_job", execute)
+
+    configure_direct_v2_factory(None)
+    assert client.get("/api/research-tasks").json() == {"tasks": []}
+    configure_direct_v2_factory(factory, research_tasks=(descriptor,))
+    try:
+        catalog = client.get("/api/research-tasks")
+        compatible = client.post("/api/research-tasks/test-only-direct-v2-research/compatibility")
+        compatibility_payload = compatible.json()
+        executed = client.post(
+            "/api/research-tasks/test-only-direct-v2-research/execute",
+            json={"compatibility_fingerprint": compatibility_payload["compatibility_fingerprint"]},
+        )
+        stale = client.post(
+            "/api/research-tasks/test-only-direct-v2-research/execute",
+            json={"compatibility_fingerprint": "0" * 64},
+        )
+        missing = client.post("/api/research-tasks/unknown/compatibility")
+    finally:
+        configure_direct_v2_factory(None)
+
+    assert catalog.status_code == 200
+    assert catalog.json() == {"tasks": [descriptor]}
+    assert compatible.status_code == 200
+    payload = compatible.json()
+    assert payload["schema_version"] == "vc.research-task-compatibility.v1"
+    assert payload["task_id"] == descriptor["task_id"]
+    assert len(payload["descriptor_fingerprint"]) == 64
+    assert len(payload["compatibility_fingerprint"]) == 64
+    assert payload["execution_plan"]["executable"] is True
+    assert payload["execution_plan"]["reports"][0]["research_execution_scope"] == "research_only"
+    assert executed.status_code == 200
+    assert executed.json() == {"job_id": "bound-research-job", "status": "done"}
+    assert stale.status_code == 409
+    assert stale.json() == {"detail": "research_task_compatibility_stale"}
+    assert len(executions) == 1
+    assert executions[0]["request"] == descriptor["request"]
+    assert executions[0]["mode"] == "offline"
+    assert executions[0]["enable_llm_report"] is False
+    assert executions[0]["pack_id"] == _PACK_ID
+    assert executions[0]["pack_version"] == _PACK_VERSION
+    assert executions[0]["submission_contract"] == "vc.direct-v2-execution.v1"
+    assert executions[0]["direct_v2_factory"] is factory
+    assert missing.status_code == 404
+    assert missing.json() == {"detail": "research_task_not_found"}
+    rendered = json.dumps({"catalog": catalog.json(), "compatibility": payload}, sort_keys=True)
+    assert str(tmp_path) not in rendered
+    assert "asset_paths" not in rendered
+
+
+def test_research_task_compatibility_fails_closed_without_a_factory(tmp_path: Path) -> None:
+    _factory, request = _factory_and_request(tmp_path / "factory")
+    configure_direct_v2_factory(
+        None,
+        research_tasks=(_research_task_descriptor(request),),
+    )
+    try:
+        response = TestClient(app, raise_server_exceptions=False).post(
+            "/api/research-tasks/test-only-direct-v2-research/compatibility"
+        )
+    finally:
+        configure_direct_v2_factory(None)
+
+    assert response.status_code == 503
+    assert response.json() == {"detail": "direct_v2_factory_unconfigured"}
+
+
+def test_research_task_compatibility_rejects_descriptor_model_drift(tmp_path: Path) -> None:
+    factory, request = _factory_and_request(tmp_path / "factory")
+    descriptor = _research_task_descriptor(request)
+    descriptor["model_name"] = "wrong_model"
+    configure_direct_v2_factory(factory, research_tasks=(descriptor,))
+    try:
+        response = TestClient(app, raise_server_exceptions=False).post(
+            "/api/research-tasks/test-only-direct-v2-research/compatibility"
+        )
+    finally:
+        configure_direct_v2_factory(None)
+
+    assert response.status_code == 409
+    assert response.json() == {"detail": "research_task_unavailable"}
+
+
+def test_research_task_schema_rejects_unknown_fields_and_private_paths(tmp_path: Path) -> None:
+    _factory, request = _factory_and_request(tmp_path / "factory")
+    descriptor = _research_task_descriptor(request)
+
+    with pytest.raises(ValueError):
+        ResearchTaskDescriptor.model_validate({**descriptor, "cache_root": str(tmp_path)})
+
+    descriptor["request"]["metadata"]["server_root"] = str(tmp_path)
+    with pytest.raises(ValueError, match="rooted local paths"):
+        ResearchTaskDescriptor.model_validate(descriptor)
+
+    descriptor = _research_task_descriptor(request)
+    descriptor["request"]["metadata"]["server_root"] = "../../private/cache"
+    with pytest.raises(ValueError, match="rooted local paths"):
+        ResearchTaskDescriptor.model_validate(descriptor)
+
+
+def test_research_task_configuration_detaches_and_deep_freezes_requests(tmp_path: Path) -> None:
+    factory, request = _factory_and_request(tmp_path / "factory")
+    descriptor = _research_task_descriptor(request)
+    configured_payload = _research_task_descriptor(request)
+    configured_payload["task_id"] = "test-only-direct-v2-research-model"
+    configured = ResearchTaskDescriptor.model_validate(configured_payload)
+
+    with pytest.raises(TypeError):
+        configured.request.metadata["mutated"] = True
+
+    configure_direct_v2_factory(factory, research_tasks=(descriptor, configured))
+    descriptor["request"]["metadata"]["leak"] = "/private/server/root"
+    try:
+        tasks = TestClient(app).get("/api/research-tasks").json()["tasks"]
+    finally:
+        configure_direct_v2_factory(None)
+
+    assert "leak" not in tasks[0]["request"]["metadata"]
+    assert "leak" not in tasks[1]["request"]["metadata"]
+
+
 def test_http_direct_v2_requires_explicit_factory_and_never_uses_p17(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -137,6 +325,9 @@ def test_http_direct_v2_requires_explicit_factory_and_never_uses_p17(
     assert summary["perturbation_targets"] == ["AHR"]
     assert summary["pack_id"] == _PACK_ID
     assert summary["pack_version"] == _PACK_VERSION
+    assert summary["execution_scope"] == "research_only"
+    assert summary["scientifically_validated"] is False
+    assert summary["models_used"] == [_MODEL_NAME]
 
 
 def test_python_cli_and_http_use_the_same_explicit_direct_v2_seam(
@@ -372,12 +563,31 @@ def test_cli_loads_one_explicit_golden_factory_for_run_and_serve(
     def run(asgi_app, **kwargs):
         assert asgi_app is app
         assert app.state.direct_v2_factory is factory
+        configured_tasks = []
+        for task in app.state.research_tasks:
+            payload = task.model_dump(mode="json")
+            payload["request"] = task.request.to_dict()
+            configured_tasks.append(payload)
+        assert configured_tasks == [
+            {
+                "schema_version": "vc.research-task.v1",
+                "task_id": "norman-2019-ahr-klf1-research",
+                "request": golden.golden_ahr_klf1_request().to_dict(),
+                "pack_id": golden.PACK_ID,
+                "pack_version": golden.PACK_VERSION,
+                "model_name": golden.MODEL_NAME,
+                "model_version": golden.MODEL_VERSION,
+                "execution_scope": "research_only",
+                "scientifically_validated": False,
+            }
+        ]
         assert kwargs == {"host": "127.0.0.1", "port": 8765, "reload": False}
 
     configure_direct_v2_factory(None)
     monkeypatch.setattr(uvicorn, "run", run)
     assert cli_main(["serve", "--port", "8765", *root_args]) == 0
     assert app.state.direct_v2_factory is None
+    assert app.state.research_tasks == ()
     assert observed == [roots, roots]
 
 
@@ -503,6 +713,9 @@ def test_list_jobs_marks_wrong_typed_done_companion_corrupt(
             "pack_id": None,
             "pack_version": None,
             "pack_fingerprint": None,
+            "execution_scope": None,
+            "scientifically_validated": None,
+            "models_used": [],
         }
     ]
 
@@ -533,6 +746,9 @@ def test_list_jobs_projects_deep_json_companion_as_corrupt(
             "pack_id": None,
             "pack_version": None,
             "pack_fingerprint": None,
+            "execution_scope": None,
+            "scientifically_validated": None,
+            "models_used": [],
         }
     ]
 

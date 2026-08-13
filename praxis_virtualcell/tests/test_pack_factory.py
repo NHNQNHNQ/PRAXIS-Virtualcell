@@ -22,6 +22,7 @@ from praxis_virtualcell.pack_factory import (
     PackMetadataReviewV1,
     PackOperatorDecisionV1,
     PackSupersessionV1,
+    PackValidationReportV1,
     PreparedPackCandidate,
     UploadReceiptV1,
     bind_pack_candidate,
@@ -156,6 +157,17 @@ def _factory_init_args(data_root: Path, upload_id: str, store_root: Path) -> lis
         "--store",
         str(store_root),
     ]
+
+
+def _candidate_authoring() -> dict:
+    return {
+        "schema_version": "vc.pack-candidate-authoring.v1",
+        "source_asset_id": "expression",
+        "mapping_asset_ids": {"primary": "primary-identity-map"},
+        "value_semantics": {"primary": "raw_counts"},
+        "units": {"dose_units": ["1"], "time_units": ["h"]},
+        "claim_origins": {topic: "operator_declared" for topic in REQUIRED_REVIEW_TOPICS},
+    }
 
 
 def _prepare(
@@ -1207,6 +1219,320 @@ def test_cli_factory_init_rejects_store_inside_uploads(tmp_path):
     with pytest.raises(PackFactoryError, match="outside the data-root uploads subtree"):
         main(_factory_init_args(data_root, upload_root.name, store_root))
     assert not store_root.exists()
+
+
+def test_cli_candidate_prepare_records_exact_unvalidated_candidate(tmp_path, capsys):
+    from praxis_virtualcell.cli import main
+
+    data_root = (tmp_path / "data").resolve()
+    pack_root = _write_candidate_root((tmp_path / "candidate-pack").resolve())
+    upload_root = _write_exact_p7_upload(
+        data_root,
+        (pack_root / "tiny.h5ad").read_bytes(),
+        index=44,
+    )
+    store_root = (tmp_path / "factory-store").resolve()
+    assert main(_factory_init_args(data_root, upload_root.name, store_root)) == 0
+    capsys.readouterr()
+    authoring_path = (tmp_path / "candidate-authoring.json").resolve()
+    authoring_path.write_text(json.dumps(_candidate_authoring()), encoding="utf-8")
+
+    assert (
+        main(
+            [
+                "pack",
+                "candidate-prepare",
+                "--data-root",
+                str(data_root),
+                "--upload-id",
+                upload_root.name,
+                "--store",
+                str(store_root),
+                "--pack-root",
+                str(pack_root),
+                "--authoring",
+                str(authoring_path),
+            ]
+        )
+        == 0
+    )
+    output = json.loads(capsys.readouterr().out)
+    candidate = PackFactoryStore.open(store_root).get(
+        PackCandidateV1,
+        output["candidate_fingerprint"],
+    )
+    assert output == {
+        "schema_version": "vc.pack-candidate-prepare-result.v1",
+        "status": "candidate_unvalidated",
+        "upload_id": upload_root.name,
+        "receipt_fingerprint": candidate.receipt_fingerprint,
+        "candidate_fingerprint": candidate.fingerprint(),
+        "candidate_path": str(store_root / "candidates" / f"{candidate.fingerprint()}.json"),
+        "pack_valid": None,
+        "review_created": False,
+        "validation_performed": False,
+        "factory_registered": False,
+        "model_compatible": None,
+        "scientifically_validated": False,
+        "executable": False,
+    }
+    assert candidate.status == "candidate_unvalidated"
+    assert candidate.source_payload_sha256 == _sha256((pack_root / "tiny.h5ad").read_bytes())
+
+
+def test_cli_candidate_prepare_requires_recorded_receipt_and_strict_authoring(tmp_path):
+    from praxis_virtualcell.cli import main
+
+    data_root = (tmp_path / "data").resolve()
+    pack_root = _write_candidate_root((tmp_path / "candidate-pack").resolve())
+    upload_root = _write_exact_p7_upload(
+        data_root,
+        (pack_root / "tiny.h5ad").read_bytes(),
+        index=45,
+    )
+    store = PackFactoryStore.create((tmp_path / "factory-store").resolve())
+    authoring_path = (tmp_path / "candidate-authoring.json").resolve()
+    authoring_path.write_text(json.dumps(_candidate_authoring()), encoding="utf-8")
+    args = [
+        "pack",
+        "candidate-prepare",
+        "--data-root",
+        str(data_root),
+        "--upload-id",
+        upload_root.name,
+        "--store",
+        str(store.root),
+        "--pack-root",
+        str(pack_root),
+        "--authoring",
+        str(authoring_path),
+    ]
+
+    with pytest.raises(PackFactoryError, match="does not exist"):
+        main(args)
+    assert store.list(PackCandidateV1) == ()
+
+    upload = load_quarantined_upload(upload_root)
+    store.record_upload(upload)
+    authoring_path.write_text(
+        '{"schema_version":"vc.pack-candidate-authoring.v1","schema_version":"vc.pack-candidate-authoring.v1"}',
+        encoding="utf-8",
+    )
+    with pytest.raises(PackFactoryError, match="invalid candidate authoring JSON"):
+        main(args)
+    assert store.list(PackCandidateV1) == ()
+
+
+def test_cli_candidate_validate_records_review_and_strict_report(tmp_path, capsys):
+    from praxis_virtualcell.cli import main
+
+    data_root = (tmp_path / "data").resolve()
+    prepared = _prepare(data_root, index=46, pack_id="p19-cli-flow")
+    store = PackFactoryStore.create((tmp_path / "factory-store").resolve())
+    store.record_upload(prepared.upload)
+    candidate_fingerprint = store.record_candidate(prepared)
+    candidate_path = store.root / "candidates" / f"{candidate_fingerprint}.json"
+    review_path = _write_contract(
+        (tmp_path / "metadata-review.json").resolve(),
+        _review(prepared),
+    )
+
+    assert (
+        main(
+            [
+                "pack",
+                "candidate-validate",
+                "--data-root",
+                str(data_root),
+                "--upload-id",
+                prepared.upload.receipt.upload_id,
+                "--store",
+                str(store.root),
+                "--pack-root",
+                str(prepared.root),
+                "--candidate",
+                str(candidate_path),
+                "--review",
+                str(review_path),
+            ]
+        )
+        == 0
+    )
+    output = json.loads(capsys.readouterr().out)
+    review = store.get(PackMetadataReviewV1, output["review_fingerprint"])
+    report = store.get(
+        PackValidationReportV1,
+        output["validation_report_fingerprint"],
+    )
+    assert output == {
+        "schema_version": "vc.pack-candidate-validate-result.v1",
+        "status": "validated",
+        "candidate_fingerprint": candidate_fingerprint,
+        "review_fingerprint": review.fingerprint(),
+        "review_path": str(store.root / "reviews" / f"{review.fingerprint()}.json"),
+        "validation_report_fingerprint": report.fingerprint(),
+        "validation_path": str(store.root / "validations" / f"{report.fingerprint()}.json"),
+        "pack_valid": True,
+        "registration_allowed": True,
+        "factory_registered": False,
+        "model_compatible": None,
+        "scientifically_validated": False,
+        "executable": False,
+    }
+    decision_path = _write_contract(
+        (tmp_path / "registration-decision.json").resolve(),
+        _decision(prepared, review, report),
+    )
+    capsys.readouterr()
+    assert (
+        main(
+            [
+                "pack",
+                "register",
+                "--upload-directory",
+                str(prepared.upload.directory),
+                "--pack-root",
+                str(prepared.root),
+                "--candidate",
+                str(candidate_path),
+                "--review",
+                output["review_path"],
+                "--validation",
+                output["validation_path"],
+                "--decision",
+                str(decision_path),
+                "--index",
+                str((tmp_path / "pack-index.json").resolve()),
+                "--store",
+                str(store.root),
+            ]
+        )
+        == 0
+    )
+    registered = json.loads(capsys.readouterr().out)
+    assert registered["factory_registered"] is True
+    assert registered["scientifically_validated"] is False
+    assert registered["executable"] is False
+
+
+def test_cli_candidate_validate_rejects_review_for_another_candidate(tmp_path):
+    from praxis_virtualcell.cli import main
+
+    data_root = (tmp_path / "data").resolve()
+    prepared = _prepare(data_root, index=47)
+    other = _prepare((tmp_path / "other").resolve(), index=48, version="1.0.1")
+    store = PackFactoryStore.create((tmp_path / "factory-store").resolve())
+    store.record_upload(prepared.upload)
+    candidate_fingerprint = store.record_candidate(prepared)
+    review_path = _write_contract(
+        (tmp_path / "wrong-review.json").resolve(),
+        _review(other),
+    )
+
+    with pytest.raises(PackFactoryError, match="does not bind the exact candidate"):
+        main(
+            [
+                "pack",
+                "candidate-validate",
+                "--data-root",
+                str(data_root),
+                "--upload-id",
+                prepared.upload.receipt.upload_id,
+                "--store",
+                str(store.root),
+                "--pack-root",
+                str(prepared.root),
+                "--candidate",
+                str(store.root / "candidates" / f"{candidate_fingerprint}.json"),
+                "--review",
+                str(review_path),
+            ]
+        )
+    assert store.list(PackMetadataReviewV1) == ()
+    assert store.list(PackValidationReportV1) == ()
+
+
+def test_cli_candidate_validate_requires_complete_stored_receipt_chain(tmp_path):
+    from praxis_virtualcell.cli import main
+
+    data_root = (tmp_path / "data").resolve()
+    prepared = _prepare(data_root, index=49, pack_id="p19-missing-receipt")
+    store = PackFactoryStore.create((tmp_path / "factory-store").resolve())
+    receipt_fingerprint = store.record_upload(prepared.upload)
+    candidate_fingerprint = store.record_candidate(prepared)
+    (store.root / "receipts" / f"{receipt_fingerprint}.json").unlink()
+    review_path = _write_contract(
+        (tmp_path / "metadata-review.json").resolve(),
+        _review(prepared),
+    )
+
+    with pytest.raises(PackFactoryError, match="does not exist"):
+        main(
+            [
+                "pack",
+                "candidate-validate",
+                "--data-root",
+                str(data_root),
+                "--upload-id",
+                prepared.upload.receipt.upload_id,
+                "--store",
+                str(store.root),
+                "--pack-root",
+                str(prepared.root),
+                "--candidate",
+                str(store.root / "candidates" / f"{candidate_fingerprint}.json"),
+                "--review",
+                str(review_path),
+            ]
+        )
+    assert store.list(PackMetadataReviewV1) == ()
+    assert store.list(PackValidationReportV1) == ()
+
+
+def test_cli_candidate_validate_records_pack_tree_drift_as_failed_report(tmp_path, capsys):
+    from praxis_virtualcell.cli import main
+
+    data_root = (tmp_path / "data").resolve()
+    prepared = _prepare(data_root, index=50, pack_id="p19-drifted-candidate")
+    store = PackFactoryStore.create((tmp_path / "factory-store").resolve())
+    store.record_upload(prepared.upload)
+    candidate_fingerprint = store.record_candidate(prepared)
+    review_path = _write_contract(
+        (tmp_path / "metadata-review.json").resolve(),
+        _review(prepared),
+    )
+    (prepared.root / "undeclared-empty-file").touch()
+
+    assert (
+        main(
+            [
+                "pack",
+                "candidate-validate",
+                "--data-root",
+                str(data_root),
+                "--upload-id",
+                prepared.upload.receipt.upload_id,
+                "--store",
+                str(store.root),
+                "--pack-root",
+                str(prepared.root),
+                "--candidate",
+                str(store.root / "candidates" / f"{candidate_fingerprint}.json"),
+                "--review",
+                str(review_path),
+            ]
+        )
+        == 2
+    )
+    output = json.loads(capsys.readouterr().out)
+    report = store.get(
+        PackValidationReportV1,
+        output["validation_report_fingerprint"],
+    )
+    assert output["status"] == "validation_failed"
+    assert report.pack_valid is True
+    assert report.registration_allowed is False
+    assert "candidate_tree_immutable" in report.errors
 
 
 def test_pack_factory_http_surface_is_complete_and_read_only(tmp_path, monkeypatch):

@@ -4,7 +4,11 @@ import {
   type JobSummary,
 } from "../../api";
 
-export type PlatformView = "chat" | "data-center" | "data-library";
+export type PlatformView =
+  | "chat"
+  | "data-center"
+  | "omics-intake"
+  | "pack-library";
 
 function HistoryItems({
   jobs,
@@ -37,6 +41,17 @@ function HistoryItems({
         {job.perturbation_targets.join("、") || "无扰动靶点"}
       </strong>
       <small>{job.abstain ? "Abstained" : "Saved report"}</small>
+      {job.pack_id && (
+        <small>
+          Pack {job.pack_id}@{job.pack_version ?? "?"}
+        </small>
+      )}
+      {job.execution_scope && (
+        <small>
+          {job.execution_scope} · science={String(job.scientifically_validated)}
+          {job.models_used.length ? ` · ${job.models_used.join("、")}` : ""}
+        </small>
+      )}
     </button>
   ));
 }
@@ -93,12 +108,22 @@ export default function JobSidebar({
 
       <button
         type="button"
-        className={view === "data-library" ? "chat-nav active" : "chat-nav"}
-        onClick={() => onNavigate("data-library")}
-        aria-current={view === "data-library" ? "page" : undefined}
+        className={view === "omics-intake" ? "chat-nav active" : "chat-nav"}
+        onClick={() => onNavigate("omics-intake")}
+        aria-current={view === "omics-intake" ? "page" : undefined}
       >
         <span aria-hidden="true">⇧</span>
         Omics intake
+      </button>
+
+      <button
+        type="button"
+        className={view === "pack-library" ? "chat-nav active" : "chat-nav"}
+        onClick={() => onNavigate("pack-library")}
+        aria-current={view === "pack-library" ? "page" : undefined}
+      >
+        <span aria-hidden="true">▦</span>
+        Pack library
       </button>
 
       <div className="chat-selected-context">

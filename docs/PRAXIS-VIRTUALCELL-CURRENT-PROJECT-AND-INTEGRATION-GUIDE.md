@@ -693,13 +693,15 @@ Data Center 中显示的 dataset 数量和 Pack 数量只是背景信息。当�
 ```text
 chat
 data-center
+omics-intake
+pack-library
 ```
 
 因此其他项目不应根据过时的用户指南声称“五阶段 Workspace 是当前可见 UI”。
 
 ### 4.6 当前 UI 的关键限制
 
-当前 Chat 前端创建 job 时没有传入 `pack_id + pack_version`。因此：
+普通自然语言 Chat 前端创建 job 时没有传入 `pack_id + pack_version`。因此：
 
 - Cell preset 只提供 context；
 - 它不会因为 Data Center 中存在同物种 Pack 就自动绑定该 Pack；
@@ -709,6 +711,13 @@ data-center
   `pack_unregistered`、`prediction=null`、空 `models_used` 与 `legacy_adapter=false` 的 V2
   job identity；不存在 learned-reliability 数值；
 - 后端 API 支持显式 Pack identity，但当前主 UI 尚未收集这一输入。
+
+显式注册的 research task 是单独的窄入口，不适用上述最后一条：服务端只通过
+`GET /api/research-tasks` 公布 host 已配置的 path-free descriptor，UI 再向同一个注入的
+Direct-v2 Factory 请求只读 compatibility plan。只有用户确认 exact Pack、模型、
+`research_only` 与 science 状态后，UI 才把该 descriptor + plan 的服务端指纹提交给任务专用
+执行入口；服务端在同一个 Factory lock 内重算并匹配后才运行 exact direct-v2 job。目录为空、
+预检失败或指纹过期时不会回退到通用 job 或普通解析路径。
 
 正式入口与历史兼容 harness 的边界如下：
 
@@ -727,8 +736,9 @@ run_query / run_request / build_runtime compatibility harness
 adapter，且空计划没有 module route。UI 中的“Report generated”只表示后端完成了一次可审计
 abstention/report，不等于真实模型已经完成科学预测。
 
-未来 Pack UI 必须让用户显式选择 exact Pack，并将自然语言解析与确定性 Pack execution 分开；不能
-按物种、cell 名称或 Data Center 展示猜测 Pack。
+通用 Chat 的未来 Pack UI 仍必须让用户显式选择 exact Pack，并将自然语言解析与确定性 Pack
+execution 分开；不能按物种、cell 名称或 Data Center 展示猜测 Pack。现有 research task
+descriptor 只绑定一个操作员预先登记的 exact 请求，不是通用 Pack 自动选择器。
 
 ---
 

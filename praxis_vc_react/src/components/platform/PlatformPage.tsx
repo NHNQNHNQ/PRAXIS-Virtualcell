@@ -6,10 +6,12 @@ import {
   useState,
 } from "react";
 import {
-  createGoldenResearchJob,
   createJob,
+  executeResearchTask,
   getDataCatalog,
   getPackCatalog,
+  getResearchTaskCompatibility,
+  getResearchTasks,
   parse,
   type CellPreset,
   type DataCatalog,
@@ -17,8 +19,9 @@ import {
   type Options,
   type PackCatalog,
   type ParseResult,
+  type ResearchTask,
+  type ResearchTaskCompatibility,
 } from "../../api";
-import goldenRequestText from "../../../../examples/golden_ahr_klf1_request_v2.json?raw";
 import DataLibrary from "../data/DataLibrary";
 import LazyResultsStage from "../stages/LazyResultsStage";
 import type { PlatformView } from "../layout/JobSidebar";
@@ -66,9 +69,30 @@ const COMMON_CELL_IDS = new Set([
   "mouse_tcell",
   "ecoli_iml1515",
 ]);
-const GOLDEN_REQUEST = JSON.parse(goldenRequestText) as Record<string, unknown>;
-const GOLDEN_RESEARCH_LABEL =
-  "Run registered AHR+KLF1 CRISPRa · 5d · research-only";
+
+function nestedText(value: unknown, ...keys: string[]): string | null {
+  let current = value;
+  for (const key of keys) {
+    if (typeof current !== "object" || current === null || Array.isArray(current)) {
+      return null;
+    }
+    current = (current as Record<string, unknown>)[key];
+  }
+  return typeof current === "string" && current ? current : null;
+}
+
+function researchTaskLabel(task: ResearchTask, action: "Preview" | "Run") {
+  const condition = nestedText(task.request, "constraints", "condition_id");
+  const timepoint = nestedText(task.request, "perturbation", "timepoint");
+  return `${action} registered ${condition ?? task.task_id}${timepoint ? ` · ${timepoint}` : ""} · ${task.execution_scope.replace("_", "-")}`;
+}
+
+function researchTaskMatchesCell(task: ResearchTask, cell: CellPreset) {
+  return (
+    nestedText(task.request, "species", "common_name") === cell.species &&
+    nestedText(task.request, "cell_context", "cell_type_name") === cell.cell_type
+  );
+}
 
 function composeCellQuery(
   query: string,
@@ -216,6 +240,13 @@ export default function PlatformPage({
   const [catalog, setCatalog] = useState<DataCatalog | null>(null);
   const [packCatalog, setPackCatalog] = useState<PackCatalog | null>(null);
   const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [researchTasks, setResearchTasks] = useState<ResearchTask[]>([]);
+  const [researchPreview, setResearchPreview] = useState<{
+    task: ResearchTask;
+    compatibility: ResearchTaskCompatibility;
+  } | null>(null);
+  const [researchError, setResearchError] = useState<string | null>(null);
+  const [researchLoading, setResearchLoading] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [speciesFilter, setSpeciesFilter] = useState("all");
   const requestEpochRef = useRef(0);
@@ -230,13 +261,38 @@ export default function PlatformPage({
     setQuery("");
     setTurns([]);
     setBusy(false);
+    setResearchPreview(null);
+    setResearchError(null);
+    setResearchLoading(null);
   }, [chatEpoch]);
 
   useEffect(() => {
     requestEpochRef.current += 1;
     inFlightRef.current = false;
     setBusy(false);
+    setResearchPreview(null);
+    setResearchError(null);
+    setResearchLoading(null);
   }, [page]);
+
+  useEffect(() => {
+    let current = true;
+    getResearchTasks()
+      .then(({ tasks }) => {
+        if (current) setResearchTasks(tasks);
+      })
+      .catch(() => {
+        if (current) setResearchTasks([]);
+      });
+    return () => {
+      current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    setResearchPreview(null);
+    setResearchError(null);
+  }, [selectedCell]);
 
   useEffect(() => {
     if (page !== "data-center") return;
@@ -298,8 +354,13 @@ export default function PlatformPage({
         : [],
     [options, selectedCell],
   );
-  const goldenResearchAvailable =
-    selectedCell?.species === "human" && selectedCell.cell_type === "K562";
+  const cellResearchTasks = useMemo(
+    () =>
+      selectedCell
+        ? researchTasks.filter((task) => researchTaskMatchesCell(task, selectedCell))
+        : [],
+    [researchTasks, selectedCell],
+  );
 
   function updateTurn(id: number, patch: Partial<ChatTurn>) {
     setTurns((current) =>
@@ -340,8 +401,57 @@ export default function PlatformPage({
     }
   }
 
-  async function runGoldenResearch() {
-    if (!goldenResearchAvailable || busy || inFlightRef.current) return;
+  async function previewResearchTask(task: ResearchTask) {
+    if (busy || inFlightRef.current) return;
+
+    const requestEpoch = requestEpochRef.current + 1;
+    requestEpochRef.current = requestEpoch;
+    inFlightRef.current = true;
+    const isCurrent = () => requestEpochRef.current === requestEpoch;
+
+    setBusy(true);
+    setResearchLoading(task.task_id);
+    setResearchPreview(null);
+    setResearchError(null);
+
+    try {
+      const compatibility = await getResearchTaskCompatibility(task.task_id);
+      if (!isCurrent()) return;
+      if (
+        compatibility.task_id !== task.task_id ||
+        compatibility.descriptor_fingerprint.length !== 64 ||
+        compatibility.compatibility_fingerprint.length !== 64 ||
+        compatibility.execution_plan.pack_id !== task.pack_id ||
+        compatibility.execution_plan.pack_version !== task.pack_version
+      ) {
+        throw new Error("research task compatibility identity mismatch");
+      }
+      setResearchPreview({ task, compatibility });
+    } catch (reason: unknown) {
+      if (!isCurrent()) return;
+      const detail = reason instanceof Error ? reason.message : "";
+      setResearchError(
+        detail.includes("direct_v2_factory_unconfigured")
+          ? "当前服务尚未配置真实研究运行时；未创建任务，也不会回退到 mock、旧模型或解析路径。"
+          : "研究任务兼容预览失败；未创建任务，也不会回退到旧路径。",
+      );
+    } finally {
+      if (isCurrent()) {
+        inFlightRef.current = false;
+        setBusy(false);
+        setResearchLoading(null);
+      }
+    }
+  }
+
+  async function runResearchTask() {
+    if (
+      !researchPreview?.compatibility.execution_plan.executable ||
+      busy ||
+      inFlightRef.current
+    ) {
+      return;
+    }
 
     const requestEpoch = requestEpochRef.current + 1;
     requestEpochRef.current = requestEpoch;
@@ -349,20 +459,24 @@ export default function PlatformPage({
     const turnId = turnIdRef.current + 1;
     turnIdRef.current = turnId;
     const isCurrent = () => requestEpochRef.current === requestEpoch;
+    const task = researchPreview.task;
 
     setBusy(true);
     setTurns((current) => [
       ...current,
       {
         id: turnId,
-        query: "AHR+KLF1 CRISPRa · 5d · Golden research model",
+        query: researchTaskLabel(task, "Run"),
         status: "pending",
-        request: GOLDEN_REQUEST,
+        request: task.request,
       },
     ]);
 
     try {
-      const job = await createGoldenResearchJob(GOLDEN_REQUEST);
+      const job = await executeResearchTask(
+        task.task_id,
+        researchPreview.compatibility.compatibility_fingerprint,
+      );
       onJobCreated(job.job_id);
       if (!isCurrent()) return;
       updateTurn(turnId, { status: "report", jobId: job.job_id });
@@ -371,9 +485,9 @@ export default function PlatformPage({
       const detail = reason instanceof Error ? reason.message : "";
       updateTurn(turnId, {
         status: "error",
-        message: detail.includes("direct_v2_factory_unconfigured")
-          ? "当前服务尚未配置 Golden 真实研究运行时。请用三个 Golden 本地根启动服务后重试；系统不会回退到 mock 或旧模型。"
-          : detail || "真实研究任务暂时不可用，请核对本地 Pack、模型注册与缓存后重试。",
+        message:
+          detail ||
+          "真实研究任务暂时不可用；系统不会回退到 mock、旧模型或解析路径。",
       });
     } finally {
       if (isCurrent()) {
@@ -474,8 +588,12 @@ export default function PlatformPage({
     }
   }
 
-  if (page === "data-library") {
+  if (page === "omics-intake") {
     return <DataLibrary section="datasets" />;
+  }
+
+  if (page === "pack-library") {
+    return <DataLibrary section="packs" />;
   }
 
   if (page === "data-center") {
@@ -656,21 +774,24 @@ export default function PlatformPage({
           </div>
         </div>
 
-        {(goldenResearchAvailable ||
+        {(cellResearchTasks.length > 0 ||
           (turns.length === 0 && promptExamples.length > 0)) && (
           <div className="prompt-examples" aria-label="Example questions">
             <span>Try an example</span>
             <div>
-              {goldenResearchAvailable && (
+              {cellResearchTasks.map((task) => (
                 <button
+                  key={task.task_id}
                   type="button"
                   className="registered-research"
                   disabled={busy}
-                  onClick={() => void runGoldenResearch()}
+                  onClick={() => void previewResearchTask(task)}
                 >
-                  {GOLDEN_RESEARCH_LABEL}
+                  {researchLoading === task.task_id
+                    ? "Checking registered compatibility…"
+                    : researchTaskLabel(task, "Preview")}
                 </button>
-              )}
+              ))}
               {turns.length === 0 &&
                 promptExamples.map((example) => (
                   <button
@@ -685,9 +806,66 @@ export default function PlatformPage({
                   </button>
                 ))}
             </div>
+            {researchError && (
+              <p className="chat-error" role="alert">
+                {researchError}
+              </p>
+            )}
+            {researchPreview && (
+              <section aria-label="Research task compatibility preview">
+                <dl className="interpretation-grid">
+                  <div>
+                    <dt>Pack</dt>
+                    <dd>
+                      {researchPreview.compatibility.execution_plan.pack_id}@
+                      {researchPreview.compatibility.execution_plan.pack_version}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Model</dt>
+                    <dd>
+                      {researchPreview.task.model_name}@
+                      {researchPreview.task.model_version}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Executable</dt>
+                    <dd>
+                      {String(
+                        researchPreview.compatibility.execution_plan.executable,
+                      )}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Scope</dt>
+                    <dd>{researchPreview.task.execution_scope}</dd>
+                  </div>
+                  <div>
+                    <dt>Scientifically validated</dt>
+                    <dd>
+                      {String(researchPreview.task.scientifically_validated)}
+                    </dd>
+                  </div>
+                </dl>
+                {researchPreview.compatibility.execution_plan.executable ? (
+                  <button
+                    type="button"
+                    className="confirm-interpretation"
+                    disabled={busy}
+                    onClick={() => void runResearchTask()}
+                  >
+                    Confirm compatibility and run direct-v2
+                  </button>
+                ) : (
+                  <p className="chat-error" role="alert">
+                    当前兼容计划不可执行；未创建任务。
+                  </p>
+                )}
+              </section>
+            )}
             <small>
-              “Run registered…” 会提交固定 Pack 与研究模型；其余示例只填入问题，不代表已有兼容模型。
-              研究运行不等于科学验证或生产晋级。
+              “Preview registered…” 先读取同一运行时的兼容计划；仅在你明确确认后提交该目录任务。
+              其余示例只填入问题。研究运行不等于科学验证或生产晋级。
             </small>
           </div>
         )}

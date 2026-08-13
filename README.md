@@ -342,9 +342,13 @@ praxis-vc serve \
   --golden-model-cache-root /ABSOLUTE/PATH/model_cache
 ```
 
-同源 UI 启动后选择 `K562`，点击
-`Run registered AHR+KLF1 CRISPRa · 5d · research-only` 即提交上述固定
-direct-v2 请求；入口不会调用自然语言解析，也不会在配置缺失时回退到 mock/legacy 模型。
+同源 UI 启动后会先从 `GET /api/research-tasks` 读取该服务显式配置的任务；默认未配置服务
+返回空目录。选择 `K562` 后点击 `Preview registered AHR+KLF1 · 5d · research-only`，UI 会通过
+同一个 Direct-v2 Factory 取得只读 compatibility plan，显示 exact Pack、模型、scope 与 science
+状态。预览会绑定 task descriptor 与 execution plan 指纹；只有用户再次确认，服务端在同一个
+Factory lock 内重算且逐字匹配该指纹后，才通过任务专用 `/execute` 入口运行。过期预览返回
+409。入口不会调用自然语言解析，也不会在目录为空、预检失败或运行时缺失时回退到
+`/api/jobs`、mock 或 legacy 模型。
 
 该 release 固定为 `research_only`；`benchmark_passed`、
 `scientifically_validated`、`promotion_eligible` 与 `production_promoted` 均为 `false`。
@@ -553,6 +557,21 @@ praxis-vc pack factory-init \
   --upload-id <canonical-uuidv4> \
   --store /absolute/new-factory-store
 
+praxis-vc pack candidate-prepare \
+  --data-root /absolute/data-root \
+  --upload-id <canonical-uuidv4> \
+  --store /absolute/new-factory-store \
+  --pack-root /absolute/operator-authored-pack \
+  --authoring /absolute/contracts/candidate-authoring.json
+
+praxis-vc pack candidate-validate \
+  --data-root /absolute/data-root \
+  --upload-id <canonical-uuidv4> \
+  --store /absolute/new-factory-store \
+  --pack-root /absolute/operator-authored-pack \
+  --candidate /absolute/new-factory-store/candidates/<fingerprint>.json \
+  --review /absolute/contracts/metadata-review.json
+
 praxis-vc pack register \
   --upload-directory /absolute/data-root/uploads/quarantine/<upload-id> \
   --pack-root /absolute/operator-authored-pack \
@@ -564,8 +583,13 @@ praxis-vc pack register \
   --store /absolute/new-factory-store
 ```
 
-`factory-init` 只重验并记录已有 quarantine receipt；它不读取矩阵语义、不推断 metadata、
-不创建 candidate，也不代表 factory registration、科学验证或可执行状态。
+`factory-init` 只重验并记录已有 quarantine receipt。`candidate-prepare` 只冻结操作员已经
+写好的 v0.2/v0.3 Pack、identity mapping 和显式 metadata 声明，生成
+`candidate_unvalidated`。`candidate-validate` 只接受人工逐项确认的 metadata review，重放当前
+receipt、Pack tree 和 mapping 后写入 strict validation report；它不会代替操作员批准注册。
+这些命令不解析或转换上传、不推断 metadata，也不自动审核或注册 Pack。
+当前只有原始上传字节本身就是 Pack 数据资产的 H5AD/H5MU 能进入该步；CSV/MTX/压缩包仍只
+能留在 quarantine，不能静默转换。
 `inspect` 明确返回未校验状态；`validate/register/list/compatibility/run` 均按当前
 bytes 重验。只读 API 位于 `/api/packs`、`/api/packs/{id}/{version}`、
 `/api/packs/{id}/{version}/validate`、`/api/packs/compatibility` 和 `/api/pack-factory`；

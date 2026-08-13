@@ -47,6 +47,44 @@ export interface JobRef {
   status: string;
 }
 
+export interface ResearchTask {
+  schema_version: "vc.research-task.v1";
+  task_id: string;
+  request: Record<string, unknown>;
+  pack_id: string;
+  pack_version: string;
+  model_name: string;
+  model_version: string;
+  execution_scope: "research_only";
+  scientifically_validated: false;
+}
+
+export interface ResearchTaskCompatibility {
+  schema_version: "vc.research-task-compatibility.v1";
+  task_id: string;
+  descriptor_fingerprint: string;
+  compatibility_fingerprint: string;
+  execution_plan: {
+    schema_version: "vc.execution-plan.v2";
+    pack_id: string;
+    pack_version: string;
+    executable: boolean;
+    steps: {
+      model_name: string;
+      model_version: string;
+      [key: string]: unknown;
+    }[];
+    reports: {
+      model_name: string;
+      model_version: string;
+      research_execution_scope?: string;
+      scientifically_validated?: boolean;
+      [key: string]: unknown;
+    }[];
+    [key: string]: unknown;
+  };
+}
+
 export interface JobSummary {
   job_id: string;
   status: string;
@@ -54,6 +92,12 @@ export interface JobSummary {
   perturbation_targets: string[];
   abstain: boolean | null;
   reliability: string | null;
+  pack_id: string | null;
+  pack_version: string | null;
+  pack_fingerprint: string | null;
+  execution_scope: "production" | "research_only" | null;
+  scientifically_validated: boolean | null;
+  models_used: string[];
 }
 
 export interface ReportResult {
@@ -384,20 +428,32 @@ export function createJob(
   });
 }
 
-export function createGoldenResearchJob(
-  request: Record<string, unknown>,
+export function getResearchTasks(): Promise<{ tasks: ResearchTask[] }> {
+  return req<{ tasks: ResearchTask[] }>("/api/research-tasks");
+}
+
+export function getResearchTaskCompatibility(
+  taskId: string,
+): Promise<ResearchTaskCompatibility> {
+  return req<ResearchTaskCompatibility>(
+    `/api/research-tasks/${encodeURIComponent(taskId)}/compatibility`,
+    { method: "POST" },
+  );
+}
+
+export function executeResearchTask(
+  taskId: string,
+  compatibilityFingerprint: string,
 ): Promise<JobRef> {
-  return req<JobRef>("/api/jobs", {
+  return req<JobRef>(
+    `/api/research-tasks/${encodeURIComponent(taskId)}/execute`,
+    {
     method: "POST",
     body: JSON.stringify({
-      request,
-      mode: "offline",
-      enable_llm_report: false,
-      pack_id: "norman-2019-k562-golden",
-      pack_version: "1.0.0",
-      submission_contract: "vc.direct-v2-execution.v1",
+        compatibility_fingerprint: compatibilityFingerprint,
     }),
-  });
+    },
+  );
 }
 
 export function listJobs(): Promise<{ jobs: JobSummary[] }> {

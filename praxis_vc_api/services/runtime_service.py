@@ -280,6 +280,14 @@ def list_jobs() -> list[dict]:
         perturbation_targets = (
             [target for target in raw_targets if isinstance(target, str)] if isinstance(raw_targets, list) else []
         )
+        raw_models = rep.get("models_used")
+        models_used = [name for name in raw_models if isinstance(name, str)] if isinstance(raw_models, list) else []
+        execution_scope = rep.get("execution_scope")
+        if execution_scope not in {"production", "research_only"}:
+            execution_scope = None
+        scientifically_validated = rep.get("scientifically_validated")
+        if not isinstance(scientifically_validated, bool):
+            scientifically_validated = None
         out.append(
             {
                 "job_id": jid,
@@ -291,6 +299,9 @@ def list_jobs() -> list[dict]:
                 "pack_id": pack_identity.get("pack_id"),
                 "pack_version": pack_identity.get("pack_version"),
                 "pack_fingerprint": pack_identity.get("fingerprint"),
+                "execution_scope": execution_scope,
+                "scientifically_validated": scientifically_validated,
+                "models_used": models_used,
             }
         )
     return out

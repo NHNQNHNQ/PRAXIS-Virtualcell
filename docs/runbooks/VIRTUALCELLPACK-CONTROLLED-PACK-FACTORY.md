@@ -151,6 +151,21 @@ praxis-vc pack factory-init \
   --data-root /absolute/data-root \
   --upload-id <canonical-uuidv4> \
   --store /absolute/new-factory-store
+
+praxis-vc pack candidate-prepare \
+  --data-root /absolute/data-root \
+  --upload-id <canonical-uuidv4> \
+  --store /absolute/new-factory-store \
+  --pack-root /absolute/operator-authored-pack \
+  --authoring /absolute/contracts/candidate-authoring.json
+
+praxis-vc pack candidate-validate \
+  --data-root /absolute/data-root \
+  --upload-id <canonical-uuidv4> \
+  --store /absolute/new-factory-store \
+  --pack-root /absolute/operator-authored-pack \
+  --candidate /absolute/new-factory-store/candidates/<fingerprint>.json \
+  --review /absolute/contracts/metadata-review.json
 ~~~
 
 命令只接受 canonical real data root 下 exact `uploads/quarantine/<UUIDv4>`，重验 receipt
@@ -160,6 +175,15 @@ praxis-vc pack factory-init \
 Store 必须在 `data-root/uploads` 子树外，且必须是 absolute write-new path。随后 register 的
 `--index` 和 `--store` 都是 required；`--store` 必须先由上述命令或
 `PackFactoryStore.create()` 初始化。
+`candidate-prepare` 要求 store 已绑定同一 receipt，并从 strict、duplicate-key-safe authoring
+JSON 读取 exact `source_asset_id`、各 modality mapping asset、value semantics、dose/time units
+和全部 canonical claim origins。它复用 `prepare_pack_candidate()` 重验当前 Pack tree 后只追加
+`candidate_unvalidated`，输出的 `candidate_path` 可供后续独立 review/validation/register 使用。
+Authoring 文件和 Pack root 必须位于 uploads/store 外且不能相互嵌套。该命令不解包、不转换、
+不创建 review/decision；只有上传 payload 原字节就是实际 H5AD/H5MU data asset 时才可能通过。
+`candidate-validate` 要求操作员另行填写覆盖全部 canonical topics 的 review，并重新绑定当前
+receipt、candidate 和 Pack bytes。它只追加 review 与 validation report；即使全部检查通过，
+也不会创建 operator decision、写 Pack index 或声明模型兼容、科学有效、可执行。
 不得依赖 home default、普通既存目录或只设置环境变量完成管理写。
 CLI 使用 strict、duplicate-key-safe JSON loader，重新绑定 upload/Pack root 并重算 validation
 report。它不是 authoring wizard，也不会生成或批准 review/decision。
