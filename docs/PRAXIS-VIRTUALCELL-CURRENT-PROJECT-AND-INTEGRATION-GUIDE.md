@@ -4,6 +4,11 @@
 >
 > 核对日期：2026-08-08
 >
+> 历史快照说明：本文件保留 2026-08-08 的阶段身份。2026-08-13 之后的 Golden research、组学
+> intake/Pack Factory 与科学状态边界由
+> [`FOUNDATION-COMPLETION-2026-08-13.md`](../reports/FOUNDATION-COMPLETION-2026-08-13.md)
+> 补充；后者不改写本文件的历史阶段记录。
+>
 > 当前本地仓库：`/Volumes/T7/PRAXIS-virtualcell`
 >
 > 当前完成分支：`codex/p25e-virtual-microbiome`

@@ -67,7 +67,9 @@ make a biological capability predictable.
 
 ## Scientific and policy status
 
-Scientific status is `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; product policy is
+Formal P16/P21 release-science qualification is `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; the later
+GSE220974 external stress evaluation is limited evidence and does not change this release status.
+Product policy is
 `NO_NEW_DECISION`. There is no science-qualified badge for 1.7.0:
 
 - required real species capabilities: `3`; current: `0`;

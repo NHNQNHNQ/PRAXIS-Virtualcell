@@ -122,8 +122,10 @@ attestation。P30A-E1 已完成本地 release-contract hardening 与 reproducibi
 仅完成 output-root capability preflight，二者均不能形成 RC。
 formal P30A 仍为 `LOCAL_RC_INCOMPLETE`，且不授权 push、tag、发布或
 部署。P16R local authorization-preflight identity bridge 已完成；真实 P16R 仍
-`AUTHORIZATION_REQUIRED / NOT_RUN`。没有新的已登记本地 work unit；下一步须是独立授权的
-candidate/asset inventory，随后才可进入独立 P16R science window。
+`AUTHORIZATION_REQUIRED / NOT_RUN`。此后的真实 Golden research path、组学 intake/Pack Factory
+闭环与 GEARS train-only candidate 工作见
+[Foundation completion record](reports/FOUNDATION-COMPLETION-2026-08-13.md)；这些后续工程事实不改写
+历史 P30A/P16R 记录，也不产生 science 或 production promotion。
 exact 验证与克制的科学/policy 边界见
 [P12 完成报告](reports/phase12/PHASE12_COMPLETION.md)、
 [P13 完成报告](reports/phase13/PHASE13_COMPLETION.md)和
@@ -729,7 +731,9 @@ tracked-link causal attribution is unreproducible from the same committed tree's
 `git archive` inputs (raw stderr was not retained); both wheelhouse profiles remain incomplete. It ran
 no install/network/OCI/full gate or release action. The P16R local
 authorization-preflight identity bridge subsequently completed as a value-free local contract; it is
-not a P16R scientific run. Science remains `NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; policy remains
+not a P16R scientific run. Formal P16/P21 science qualification remains
+`NOT_RUN / SCIENCE_BADGE_INELIGIBLE`; the later GSE220974 stress evaluation is limited external
+evidence and does not change that status. Policy remains
 `NO_NEW_DECISION`. 完整命令、用时、skip/deselect
 含义、显式外部门和 GitHub CI 状态见 [测试指南](docs/TESTING.md)。普通测试默认不访问固定私网服务；`integration`、`llm`、`remote` 分别需要 `--run-integration`、`--run-llm`、`--run-remote`，一个测试拥有多个 marker 时必须同时满足对应门。
 
