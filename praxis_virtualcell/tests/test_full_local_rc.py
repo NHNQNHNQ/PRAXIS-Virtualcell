@@ -86,6 +86,13 @@ def test_test_environment_does_not_leak_runner_private_praxis_settings() -> None
     assert source["PRAXIS_RELEASE_OFFLINE"] == "1"
 
 
+def test_loaded_oci_uses_manifest_digest_as_daemon_identity() -> None:
+    source = inspect.getsource(runner._load_and_smoke_image)
+
+    assert "image_id = oci_identity.manifest_digest" in source
+    assert "image_id = oci_identity.config_digest" not in source
+
+
 def test_incomplete_record_never_grants_release_or_science_authority() -> None:
     error = runner.FullLocalRcError("wheel", "wheel failed")
     record = runner._incomplete_record(None, {}, error)

@@ -915,7 +915,9 @@ def _load_and_smoke_image(
         oci_identity = release_candidate.read_oci_identity(oci)
     except release_candidate.ReleaseContractError as error:
         raise FullLocalRcError("container", str(error)) from error
-    image_id = oci_identity.config_digest
+    # Docker Desktop's containerd store addresses a loaded OCI image by its
+    # manifest digest. The config digest remains bound inside that manifest.
+    image_id = oci_identity.manifest_digest
     existed = _docker_inspect(image_id, cwd=repo, env=env, roots=roots) is not None
     _run(
         ["docker", "image", "load", "--platform", "linux/arm64", "--input", str(oci)],
