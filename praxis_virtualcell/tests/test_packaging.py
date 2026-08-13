@@ -125,6 +125,9 @@ def test_artifact_oci_assembly_is_network_disabled_and_wheel_first():
     assert "npm ci" not in dockerfile
     assert "--no-index" in dockerfile
     assert "--require-hashes" in dockerfile
+    assert 'find /opt -xdev -exec touch -h -d "@${SOURCE_DATE_EPOCH}" {} +' in dockerfile
+    assert "COPY --from=installer /opt /opt" in dockerfile
+    assert 'touch -h -d "@${SOURCE_DATE_EPOCH}"' in dockerfile
     assert "USER 10001:10001" in dockerfile
     assert 'org.opencontainers.image.revision="${GIT_SHA}"' in dockerfile
 

@@ -30,7 +30,8 @@ RUN --network=none python -c \
     && /opt/venv/bin/python -m pip check \
     && /opt/venv/bin/praxis-vc --version \
     && /opt/venv/bin/python -c \
-        "from importlib.resources import files; index = files('praxis_vc_api').joinpath('static', 'index.html'); raise SystemExit(0 if index.is_file() else 1)"
+        "from importlib.resources import files; index = files('praxis_vc_api').joinpath('static', 'index.html'); raise SystemExit(0 if index.is_file() else 1)" \
+    && find /opt -xdev -exec touch -h -d "@${SOURCE_DATE_EPOCH}" {} +
 
 
 FROM ${PYTHON_IMAGE} AS runtime
@@ -55,14 +56,17 @@ ENV GIT_SHA=${GIT_SHA} \
     PYTHONUNBUFFERED=1 \
     SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
 
-COPY --from=installer /opt/venv /opt/venv
+COPY --from=installer /opt /opt
 
 RUN --network=none python -c \
         "import os, re; sha = os.environ.get('GIT_SHA', ''); epoch = os.environ.get('SOURCE_DATE_EPOCH', ''); raise SystemExit(0 if re.fullmatch(r'[0-9a-f]{40}', sha) and epoch.isdigit() and int(epoch) >= 315532800 else 'invalid release identity')" \
     && groupadd --gid 10001 praxisvc \
     && useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin praxisvc \
     && mkdir -p /app /var/lib/praxis-vc/runs \
-    && chown -R praxisvc:praxisvc /app /var/lib/praxis-vc
+    && chown -R praxisvc:praxisvc /app /var/lib/praxis-vc \
+    && touch -h -d "@${SOURCE_DATE_EPOCH}" \
+        /etc /etc/group /etc/gshadow /etc/passwd /etc/shadow /etc/subgid /etc/subuid /home /var/lib \
+    && find /app /home/praxisvc /var/lib/praxis-vc -xdev -exec touch -h -d "@${SOURCE_DATE_EPOCH}" {} +
 
 WORKDIR /app
 USER 10001:10001
