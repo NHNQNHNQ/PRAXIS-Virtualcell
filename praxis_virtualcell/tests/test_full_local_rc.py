@@ -220,6 +220,14 @@ def test_trivy_document_rejects_empty_or_wrong_artifact_report(tmp_path: Path) -
         runner._trivy_document(path, artifact_type="filesystem", artifact_name="other.json")
 
 
+def test_python_lock_scan_uses_a_path_free_subject() -> None:
+    source = inspect.getsource(runner._run_vulnerability_scan)
+
+    assert "python_sbom_path.name" in source
+    assert "cwd=evidence" in source
+    assert "artifact_name=python_sbom_path.name" in source
+
+
 def test_success_record_requires_all_executed_evidence(tmp_path: Path) -> None:
     output = tmp_path / "output"
     bundle = output / "release-bundle"

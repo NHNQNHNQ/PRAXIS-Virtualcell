@@ -1315,8 +1315,9 @@ def _run_vulnerability_scan(
     roots: tuple[Path, ...],
 ) -> dict[str, Any]:
     npm_path = output / "evidence" / "trivy-npm-lock.json"
-    python_sbom_path = output / "evidence" / "python-build-runtime-locks.cdx.json"
-    python_path = output / "evidence" / "trivy-python-locks.json"
+    evidence = output / "evidence"
+    python_sbom_path = evidence / "python-build-runtime-locks.cdx.json"
+    python_path = evidence / "trivy-python-locks.json"
     image_path = output / "evidence" / "trivy-image.json"
     python_sbom, expected_python = _python_lock_sbom(repo)
     _write_new_json(python_sbom_path, python_sbom)
@@ -1371,10 +1372,10 @@ def _run_vulnerability_scan(
             str(python_path),
             "--exit-code",
             "0",
-            str(python_sbom_path),
+            python_sbom_path.name,
         ],
         stage="trivy_python_locks",
-        cwd=repo,
+        cwd=evidence,
         env=env,
         roots=roots,
         timeout=1800,
@@ -1420,7 +1421,7 @@ def _run_vulnerability_scan(
     python_document = _trivy_document(
         python_path,
         artifact_type="cyclonedx",
-        artifact_name=str(python_sbom_path),
+        artifact_name=python_sbom_path.name,
         required_target_suffix="Python",
     )
     if _trivy_package_components(npm_document, "npm") != expected_npm:
