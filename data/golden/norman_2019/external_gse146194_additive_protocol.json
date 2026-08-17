@@ -1,0 +1,336 @@
+{
+  "schema_version": "praxis.golden-additive-gse146194-external-stress-protocol.v1",
+  "record_role": "prospective_external_stress_preregistration_not_p16_not_scientific_evidence",
+  "frozen_on": "2026-08-17",
+  "implementation_status": "PENDING_ASSET_FREEZE_NOT_EXECUTABLE",
+  "identity": {
+    "payload_hash_algorithm": "sha256(canonical_json(protocol_with_identity.payload_sha256_set_to_null))",
+    "payload_sha256": null,
+    "evaluator_path": "scripts/evaluate_golden_additive_external_gse146194.py",
+    "evaluator_sha256": null
+  },
+  "candidate": {
+    "name": "norman_additive_ridge_train_only_alpha_0_1",
+    "base_protocol_payload_sha256": "05e41f779b75c62ededf2c02c3ffa4582c1a6d696a952476d1a0f18a633b622c",
+    "selected_alpha": 0.1,
+    "training_scope": "canonical_104_outer_train_conditions_68_target_universe",
+    "feature_count": 5045,
+    "feature_ids_sha256": "ecca6c636629e35ae5f5a0ec6fe84c1a7983e1adb263fbbcaea70a0c5495b2b7",
+    "target_count": 68,
+    "target_ids_sha256": "2bc167c08c3b7a822ddfa626af55e515078a29ba13463607d70419692f777e57",
+    "files": {
+      "baseline.json": {
+        "size_bytes": 95109,
+        "sha256": "70ce31dbdca35d0e9f530679b61163cf8dd6abd585fdb1b4af245a50d9c54150"
+      },
+      "candidate-record.json": {
+        "size_bytes": 6165,
+        "sha256": "743bc29d2659de8eb8ee51511937f8e4f4532d02fe89bc3a82ce4cae087e1518"
+      },
+      "linear_coefficients.npy": {
+        "size_bytes": 2744608,
+        "sha256": "b11e6555fb3cdcf626d74a6fc5ece181c6d0c7f92c45e2bd737689773c5fd426"
+      },
+      "linear_intercept.npy": {
+        "size_bytes": 40488,
+        "sha256": "6a68609d883ce01a764567a7eae8dd64e645d2b3cbdcab5db50d5c106a0e1cae"
+      }
+    }
+  },
+  "comparator": {
+    "name": "norman_additive_linear",
+    "role": "preexisting_frozen_P8_condition_level_additive_ridge_alpha_1_pipeline_comparator",
+    "comparison_is_not_a_pure_alpha_ablation": true,
+    "comparison_scope_reason": "comparator_uses_original_137_train_conditions_105_target_universe_while_candidate_uses_canonical_104_conditions_68_targets",
+    "training_or_refit_on_external": false,
+    "feature_count": 5045,
+    "feature_ids_sha256": "ecca6c636629e35ae5f5a0ec6fe84c1a7983e1adb263fbbcaea70a0c5495b2b7",
+    "target_count": 105,
+    "target_ids_sha256": "4f58ed5c3ad7355ccba64eed0dd95e02cbcbf75a977d6aec2a1cfd5357abd64c",
+    "model_card_relative_path": "data/golden/norman_2019/model_cards/additive_linear.yaml",
+    "model_card_sha256": "28a0df07959d0eac6fc2ccf21e2724ff8bb303456d8e1028fb5d04cd319b875d",
+    "model_card_fingerprint": "eaaf8e7cc3ee0c3c74eb492ac6df77fa2c7edf73576c190d7c9a59c613159b6b",
+    "files": {
+      "baseline.json": {
+        "size_bytes": 95682,
+        "sha256": "b82dc7ab26c6f6fdef4414f6b05c51edb32b2a35e4c00f45824cc839ab9cf1a9"
+      },
+      "linear_coefficients.npy": {
+        "size_bytes": 4237928,
+        "sha256": "241210fb33b0abb86f923478870f9d19711c31e4a721fc5d60888d61900b86c4"
+      },
+      "linear_intercept.npy": {
+        "size_bytes": 40488,
+        "sha256": "6a870efd9f97b599769069aec95bcf2f920acedf43aa1d24740a7e5b40e7fac2"
+      }
+    }
+  },
+  "runtime": {
+    "source_base_protocol_payload_sha256": "58285f730f46dc7fe7f5aad752a80cb8d22184171ff9186fd93e4040280388ef",
+    "source_runtime_environment_sha256": "2e8adb7845de2fdf397bc16503d797ecb2be8944bf99c752cc255278abe299f7",
+    "expected_probe_sha256": "71d07b3becff583c2d24fc37e9eddedbf4851da870abbb01e343c0e9bd0cd4d3",
+    "verification": "reuse_exact_additive_validation_runtime_gate_before_any_external_matrix_or_candidate_array_load"
+  },
+  "decision_path_exposure": {
+    "prior_golden_development_validation_result_path": "reports/science/golden-additive-train-only-validation-result.json",
+    "prior_golden_development_validation_result_sha256": "c0c3ae835541209f1176b855603836d50689998bc0e6fee17d590c6048d7a71e",
+    "candidate_model_class_selected_after_a_prior_Golden_validation_failure": true,
+    "external_accession_or_outcome_used_for_candidate_training_or_selection": false,
+    "external_target_and_guide_selection_uses_metadata_only": true,
+    "all_external_targets_seen_in_candidate_outer_train": true,
+    "all_external_targets_seen_in_comparator_train": true
+  },
+  "external_dataset": {
+    "accession": "GSE146194",
+    "sample": "GSM4367986",
+    "experiment": "exp8_CRISPRa_multiplexing",
+    "bioproject": "PRJNA609688",
+    "sra_project": "SRP251252",
+    "sra_experiment": "SRX7826831",
+    "organism": "Homo sapiens",
+    "cell_line": "K562",
+    "cell_identity_id": "CVCL_0004",
+    "perturbation_system": "dCas9-SunTag_scFV-VP64_CRISPR_activation",
+    "sample_time_after_infection_days": 8,
+    "exact_P16_time_days": 5,
+    "platform": "10x_3_prime_v3_direct_guide_capture_NovaSeq_6000",
+    "genome_build": "GRCh38-1.2.0",
+    "source_root": "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSM4367986&format=file",
+    "license": "GEO_unrestricted_by_NCBI_with_submitter_IP_caveat_not_CC0",
+    "expected_matrix_shape": [
+      33862,
+      110462
+    ],
+    "expected_feature_rows": 33862,
+    "expected_barcode_rows": 110462,
+    "expected_cell_identity_rows": 60725,
+    "files": {
+      "GSM4367986_exp8.matrix.mtx.gz": {
+        "size_bytes": 1255248401,
+        "sha256": null
+      },
+      "GSM4367986_exp8.barcodes.tsv.gz": {
+        "size_bytes": 549118,
+        "sha256": "6ed6d9d2a5cd66ea933030a8f0b6bada36faa9ac5591d1ce35bc2ef85d8db481"
+      },
+      "GSM4367986_exp8.features.tsv.gz": {
+        "size_bytes": 321310,
+        "sha256": "b21527757f7b63825868e84a99dbb64f35d9ec50835efc7f1ce3e4bafeef598c"
+      },
+      "GSM4367986_exp8.cell_identities.csv.gz": {
+        "size_bytes": 2556477,
+        "sha256": "3c5f90ab2fb7c56292febb3788fc68d91da85707bce5f99386797b9e9cab9c14"
+      }
+    }
+  },
+  "selection": {
+    "selection_frozen_before_matrix_access": true,
+    "target_selection_rule": "all_exact_Candidate_2_outer_train_target_overlaps_with_metadata_rank_1_posA_guide_and_NegCtrl11_posB",
+    "target_common_filters": {
+      "good_coverage": true,
+      "num_guides": 2,
+      "number_of_cells": 1,
+      "type": "1_control",
+      "rank_A": "1",
+      "rank_B": "NegCtrl11",
+      "sgID_B": "NegCtrl11_posB"
+    },
+    "targets": [
+      {
+        "symbol": "IGDCC3",
+        "ensembl_id": "ENSG00000174498",
+        "sgID_A": "IGDCC3_-_65670488.23-P1P2_posA",
+        "expected_cells": 72
+      },
+      {
+        "symbol": "IRF1",
+        "ensembl_id": "ENSG00000125347",
+        "sgID_A": "IRF1_-_131826619.23-P1P2_posA",
+        "expected_cells": 193
+      },
+      {
+        "symbol": "KLF1",
+        "ensembl_id": "ENSG00000105610",
+        "sgID_A": "KLF1_+_12998353.23-P1P2_posA",
+        "expected_cells": 260
+      },
+      {
+        "symbol": "MAP2K3",
+        "ensembl_id": "ENSG00000034152",
+        "sgID_A": "MAP2K3_-_21187855.23-P1P2_posA",
+        "expected_cells": 517
+      },
+      {
+        "symbol": "MAP2K6",
+        "ensembl_id": "ENSG00000108984",
+        "sgID_A": "MAP2K6_+_67410755.23-P1P2_posA",
+        "expected_cells": 298
+      },
+      {
+        "symbol": "MAPK1",
+        "ensembl_id": "ENSG00000100030",
+        "sgID_A": "MAPK1_+_22222272.23-P1P2_posA",
+        "expected_cells": 102
+      },
+      {
+        "symbol": "PRTG",
+        "ensembl_id": "ENSG00000166450",
+        "sgID_A": "PRTG_-_56035322.23-P1P2_posA",
+        "expected_cells": 226
+      }
+    ],
+    "expected_target_cells": 1668,
+    "control_common_filters": {
+      "good_coverage": true,
+      "num_guides": 2,
+      "number_of_cells": 1,
+      "gene": "Non-Targeting",
+      "type": "control_posB",
+      "rank_A": "",
+      "rank_B": "",
+      "sgID_B": "NegCtrl11_posB"
+    },
+    "controls": [
+      {
+        "sgID_A": "NegCtrl1_posA",
+        "expected_cells": 529
+      },
+      {
+        "sgID_A": "NegCtrl5_posA",
+        "expected_cells": 560
+      },
+      {
+        "sgID_A": "NegCtrl8_posA",
+        "expected_cells": 802
+      },
+      {
+        "sgID_A": "NegCtrl9_posA",
+        "expected_cells": 626
+      }
+    ],
+    "expected_control_cells": 2517,
+    "required_cell_identity_columns": [
+      "cell_barcode",
+      "guide_identity",
+      "num_guides",
+      "gene",
+      "best_gamma",
+      "correction",
+      "distance",
+      "gamma_A",
+      "gamma_B",
+      "gene_type",
+      "protospacer_A",
+      "protospacer_B",
+      "rank_A",
+      "rank_B",
+      "sgID_A",
+      "sgID_B",
+      "type",
+      "target",
+      "umi_A",
+      "umi_B",
+      "read_count",
+      "UMI_count",
+      "coverage",
+      "good_coverage",
+      "number_of_cells",
+      "gemgroup"
+    ]
+  },
+  "feature_mapping": {
+    "method": "exact_case_sensitive_Ensembl_ID_projection_in_candidate_order",
+    "external_feature_count": 33862,
+    "candidate_feature_count": 5045,
+    "candidate_feature_ids_sha256": "ecca6c636629e35ae5f5a0ec6fe84c1a7983e1adb263fbbcaea70a0c5495b2b7",
+    "candidate_features_all_present": true,
+    "candidate_relative_order_preserved": true,
+    "symbol_alias_conversion": false,
+    "missing_value_fill": false,
+    "known_same_ID_symbol_alias_mismatches": [
+      "KIAA1804/RP5-862P8.2",
+      "C3orf72/FOXL2NB",
+      "RHOXF2BB/RHOXF2B",
+      "C19orf26/CBARP"
+    ]
+  },
+  "preprocessing": {
+    "external_input": "raw_UMI_counts",
+    "library_size_axis": "all_33862_external_features_per_cell_before_projection",
+    "reduction_dtype": "float64",
+    "cell_normalization": "library_size_10000_then_log1p",
+    "projection": "exact_candidate_5045_Ensembl_IDs_in_candidate_order",
+    "control_aggregation": "pooled_position_matched_NegCtrl_posA_with_NegCtrl11_posB_mean",
+    "truth": "target_condition_mean_minus_frozen_control_mean",
+    "candidate_training_or_tuning_on_external": false,
+    "comparator_training_or_tuning_on_external": false,
+    "forbidden": [
+      "outcome_based_target_or_guide_selection",
+      "differential_expression_feature_selection",
+      "symbol_alias_conversion",
+      "missing_value_fill_or_imputation",
+      "batch_correction",
+      "gene_scaling",
+      "external_calibration"
+    ],
+    "external_training_adaptation_steps": 0,
+    "external_representation_adaptation_steps": 2,
+    "external_representation_adaptations": [
+      "raw_count_to_library_size_10000_log1p",
+      "feature_projection_33862_to_5045"
+    ]
+  },
+  "primary_test": {
+    "unit": "external_target_condition",
+    "target_count": 7,
+    "per_target_metric": "full_5045_feature_delta_MSE",
+    "effect": "candidate_MSE_minus_frozen_alpha_1_comparator_MSE",
+    "aggregate": "equal_weight_mean_over_seven_targets",
+    "bootstrap_method": "paired_percentile",
+    "bootstrap_rng": "numpy.PCG64",
+    "bootstrap_seed": 0,
+    "bootstrap_replicates": 2000,
+    "bootstrap_interval": [
+      0.025,
+      0.975
+    ],
+    "bootstrap_quantile_method": "linear",
+    "pass_requirements": [
+      "all_identity_cell_feature_and_finite_gates_pass",
+      "mean_candidate_minus_comparator_MSE_strictly_below_zero",
+      "paired_percentile_CI_upper_strictly_below_zero"
+    ],
+    "secondary_metrics_are_descriptive_only": true
+  },
+  "exposure_audit": {
+    "accessions_absent_from_repo_history_and_named_external_roots_before_metadata_screen": true,
+    "candidate_selection_outcome_blinded": true,
+    "raw_expression_blinded_at_preregistration": true,
+    "condition_outcomes_blinded_at_preregistration": true,
+    "paper_result_naive": false,
+    "metadata_files_accessed": true,
+    "barcodes_accessed": true,
+    "matrix_accessed": false,
+    "golden_test_expression_or_outcome_accessed_by_this_work": false
+  },
+  "claim_ceiling": {
+    "result_name": "prospective_independent_dataset_external_stress_test",
+    "external_stress_test_passed": null,
+    "p16_exact_external_gate_satisfied": false,
+    "benchmark_status": "NOT_RUN",
+    "benchmark_passed": null,
+    "scientifically_validated": false,
+    "promotion_eligible": false,
+    "production_promoted": false,
+    "registry_or_default_route_changed": false,
+    "reasons": [
+      "external_timepoint_is_8d_not_exact_5d",
+      "feature_projection_is_an_external_adaptation_step",
+      "raw_count_to_normalized_X_is_an_external_representation_adaptation",
+      "only_single_gene_seen_training_targets_are_evaluated",
+      "no_combination_or_AHR_or_AHR_plus_KLF1_condition",
+      "candidate_is_not_a_formal_P12_P16_multi_artifact_release",
+      "no_P21_authorization_or_trusted_composite"
+    ]
+  }
+}
