@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
+import math
 import os
 from pathlib import Path
 
@@ -11,6 +13,7 @@ import pytest
 _ROOT = Path(__file__).parents[1]
 _EVALUATOR_PATH = _ROOT / "scripts/evaluate_golden_gears_train_only_validation.py"
 _PROTOCOL_PATH = _ROOT / "data/golden/norman_2019/gears_train_only_validation_protocol.json"
+_RESULT_PATH = _ROOT / "reports/science/golden-gears-linux-a100-validation-result.json"
 
 
 def _evaluator():
@@ -218,3 +221,39 @@ def test_claim_ceiling_never_promotes_validation_result() -> None:
     }
     assert value["execution_boundary"]["evaluator_receives_full_golden_pack"] is False
     assert value["execution_boundary"]["test_is_not_implemented_or_executed_by_this_evaluator"] is True
+
+
+def test_checked_in_linux_validation_failure_is_exact_and_arithmetically_closed() -> None:
+    protocol = json.loads(_PROTOCOL_PATH.read_text(encoding="utf-8"))
+    result_bytes = _RESULT_PATH.read_bytes()
+    assert hashlib.sha256(result_bytes).hexdigest() == (
+        "7a1ed0310dda4c48b2850dfc3486ed0d0f1852e6370a9f5c3da8f3bf90fb846f"
+    )
+    result = json.loads(result_bytes)
+    assert result["protocol_sha256"] == protocol["identity"]["payload_sha256"]
+    assert result["evaluator_sha256"] == protocol["identity"]["evaluator_sha256"]
+    metrics = result["metrics"]
+    per_condition = metrics["per_condition"]
+    singles = [item["mse"] for item in per_condition if item["scope"] == "single"]
+    combinations = [item["mse"] for item in per_condition if item["scope"] == "combination"]
+    assert (len(per_condition), len(singles), len(combinations)) == (30, 14, 16)
+    assert metrics["aggregate"] == {
+        "single_condition_macro_mse": math.fsum(singles) / len(singles),
+        "combination_condition_macro_mse": math.fsum(combinations) / len(combinations),
+        "all_condition_macro_mse": math.fsum(singles + combinations) / len(per_condition),
+    }
+    assert metrics["native_scope_coverage"] == 1.0
+    assert metrics["fallback_condition_count"] == 0
+    assert metrics["gate"]["validation_gate_passed"] is False
+    assert result["states"] == {
+        "validation_gate_passed": False,
+        "future_separately_authorized_descriptive_test_eligible": False,
+        "benchmark_status": "NOT_RUN",
+        "benchmark_passed": None,
+        "scientifically_validated": False,
+        "promotion_eligible": False,
+        "production_promoted": False,
+        "registry_or_default_route_changed": False,
+    }
+    assert result["execution"]["golden_test_expression_used"] is False
+    assert result["execution"]["golden_test_outcomes_used"] is False
