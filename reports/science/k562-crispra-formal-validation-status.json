@@ -122,8 +122,29 @@
   "engineering_state": {
     "p12_candidate2_multi_artifact_release_identity": "COMPLETE_IDENTITY_ONLY",
     "candidate2_deterministic_replay_technical_receipt": "COMPLETE_TECHNICAL_ONLY",
+    "custodian_blinded_intake_contract": "COMPLETE_VALUE_FREE_READY_FOR_EXTERNAL_CUSTODIAN",
     "p16_v2_multi_artifact_contract": "DEFERRED_UNTIL_ELIGIBLE_BUNDLES_ARE_FROZEN",
     "p21_v2_deterministic_execution_contract": "DEFERRED_UNTIL_ELIGIBLE_BUNDLES_ARE_FROZEN"
+  },
+  "custodian_intake": {
+    "status": "COMPLETE_VALUE_FREE_READY_FOR_EXTERNAL_CUSTODIAN",
+    "contract": {
+      "path": "data/golden/norman_2019/k562_crispra_blinded_intake_contract.json",
+      "size_bytes": 3434,
+      "sha256": "a2c3c2f8205dc7eafbe28370408aad61f65e05628d2ede558d435b62a3f94a40",
+      "payload_sha256": "d602c03307fe8b98367a241880dc84d9f937dbf93476b1a5d48e599d5b673197"
+    },
+    "verifier": {
+      "path": "scripts/freeze_k562_crispra_blinded_intake.py",
+      "size_bytes": 36285,
+      "sha256": "5e1e552c6e51830a72bb8b2d103b16fe1e4c976a3510a4842b5908f9510d93fa"
+    },
+    "maximum_manifest_status": "READY_FOR_ESCROW",
+    "outcome_values_decoded": false,
+    "pair_closure_required": true,
+    "trusted_pin_required": true,
+    "evaluation_lock_required": true,
+    "benchmark_or_scientific_evidence": false
   },
   "exposure_audit": {
     "golden_test_expression_accessed": false,
@@ -134,5 +155,5 @@
     "gse146194_outcomes_exposed_after_frozen_stress_protocol": true,
     "gse146194_reuse_as_confirmatory_evidence_allowed": false
   },
-  "next_authorized_transition": "freeze_two_exact_bundle_identities_and_p16_p21_v2_contracts_before_any_outcome_decode"
+  "next_authorized_transition": "run_value_free_custodian_intake_for_two_exact_independent_bundles_then_freeze_trusted_pins_and_p16_p21_v2_before_any_outcome_decode"
 }
