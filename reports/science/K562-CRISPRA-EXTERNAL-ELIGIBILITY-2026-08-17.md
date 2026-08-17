@@ -59,10 +59,11 @@ PRJNA609688, SRP251252, SRX7826831; associated
 - K562 dCas9-SunTag/scFV-VP64 CRISPRa;
 - 10x 3' v3 whole-transcriptome RNA plus direct guide capture;
 - sampled 8 days after infection, not 5 days;
-- 33,862 unique GRCh38-1.2.0 Ensembl features;
+- 33,862 matrix rows: 33,694 `Gene Expression` features and 168
+  `CRISPR Guide Capture` features;
 - all 5,045 Candidate-2 features are present and preserve relative order, but
-  selecting them from 33,862 features is a projection and therefore at least
-  one adaptation step;
+  selecting them from 33,694 `Gene Expression` features is a projection and
+  therefore at least one adaptation step;
 - four same-ID symbol aliases differ: `KIAA1804/RP5-862P8.2`,
   `C3orf72/FOXL2NB`, `RHOXF2BB/RHOXF2B`, and `C19orf26/CBARP`;
 - the paper describes 49 analyzed genes while the condition metadata contains
@@ -91,9 +92,13 @@ Two metadata assets were streamed solely for identity and eligibility checks:
 | `GSM4367986_exp8.features.tsv.gz` | 321,310 | `b21527757f7b63825868e84a99dbb64f35d9ec50835efc7f1ce3e4bafeef598c` |
 | `GSM4367986_exp8.cell_identities.csv.gz` | 2,556,477 | `3c5f90ab2fb7c56292febb3788fc68d91da85707bce5f99386797b9e9cab9c14` |
 
-The matrix was not accessed. Eligibility fails independently on time point and
-adaptation count. A later run may be called only a prospective external stress
-test and must keep all P16/P21/science/promotion claims false.
+At the time of this eligibility screen, matrix coordinate entries were not
+accessed. They were decoded only after the protocol and evaluator were frozen;
+the later execution is recorded in
+[`GSE146194-ADDITIVE-EXTERNAL-STRESS-2026-08-17.md`](GSE146194-ADDITIVE-EXTERNAL-STRESS-2026-08-17.md).
+Eligibility fails independently on time point and adaptation count. The result
+is only an external stress test and keeps all P16/P21/science/promotion claims
+false.
 
 ### GSE257547 — rejected
 
