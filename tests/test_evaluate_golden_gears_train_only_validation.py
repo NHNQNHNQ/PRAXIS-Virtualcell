@@ -106,6 +106,9 @@ def test_candidate_inventory_requires_seven_files_and_collection_receipt() -> No
     assert 'root / "collection-record.json"' in source
     assert "candidate_runtime_graph_manifest" in source
     assert "raw_graph_manifest" in source
+    assert "linux_a100_manifest_v1" in source
+    assert "network_isolation_argv" in source
+    assert "sandbox-exec" not in source
 
 
 def test_candidate_inventory_and_nonexecuted_files_reject_link_or_drift(
@@ -157,16 +160,49 @@ def test_truth_builder_only_indexes_validation_expression() -> None:
     assert 'source.X[np.flatnonzero(split == "test")]' not in body
 
 
-def test_pending_protocol_is_self_consistent_but_evaluation_is_disabled() -> None:
+def test_frozen_linux_protocol_is_self_consistent() -> None:
     module = _evaluator()
     value = json.loads(_PROTOCOL_PATH.read_text(encoding="utf-8"))
     assert value["identity"]["evaluator_path"] == "scripts/evaluate_golden_gears_train_only_validation.py"
     assert value["identity"]["evaluator_sha256"] == module._builder()._sha256(_EVALUATOR_PATH)
-    assert value["truth_bundle"]["status"] in {"PENDING_FREEZE", "FROZEN"}
-    assert value["candidate_set"]["status"] in {"PENDING_FREEZE", "FROZEN"}
-    if value["implementation_status"] != "FROZEN_EXECUTABLE":
-        with pytest.raises(module.ValidationError, match="not frozen"):
-            module._require_frozen(value)
+    assert value["truth_bundle"]["status"] == "FROZEN"
+    assert value["truth_bundle"]["preparation_evaluator_sha256"] == (
+        "60cfc2e6a91acb13198ea60bf2757c7cd32f836d742acdc9bc3bfd73d9c24156"
+    )
+    assert value["truth_bundle"]["preparation_evaluator_sha256"] != value["identity"]["evaluator_sha256"]
+    assert value["candidate_set"]["status"] == "FROZEN"
+    assert value["candidate_set"]["profile"] == "linux_a100_manifest_v1"
+    assert value["implementation_status"] == "FROZEN_EXECUTABLE"
+    module._require_frozen(value)
+
+
+def test_linux_graph_and_collection_identities_are_exactly_frozen() -> None:
+    value = json.loads(_PROTOCOL_PATH.read_text(encoding="utf-8"))
+    candidate_set = value["candidate_set"]
+    assert candidate_set["collection_record"] == {
+        "size_bytes": 6594,
+        "sha256": "e45020c925e52a674363f928c51667687c29017819634be5a1224d07f703c3f9",
+    }
+    assert candidate_set["linux_run_manifest"] == {
+        "path": "data/golden/norman_2019/gears_train_only_linux_a100_run.json",
+        "size_bytes": 5704,
+        "sha256": "acc2a41bd96c197ddb7645f1357804fa21359d8c39a2f56f8e55976dcbb38bea",
+        "payload_sha256": "b73c5fcec272407060aa7548776aeff604f98758855a3e7f2e9524766196fc04",
+        "worker_sha256": "1eb19686f48773ab2a33c04dffef98c662f10ae3194608904fb68bda156c2f8d",
+    }
+    graphs = value["inference"]["candidate_runtime_graph_manifest"]["graphs"]
+    assert graphs["G_go"]["edge_index"]["sha256"] == (
+        "6a4885fe8a2911b710711d57088dfaf3451848d8136b4e4fc8ee9dd1d30a33a1"
+    )
+    assert graphs["G_go"]["edge_weight"]["sha256"] == (
+        "9d99cc9e7e2631ee1e968c257d16eb23a97603d507873a13447a3ab7c700271a"
+    )
+    assert graphs["G_coexpress"]["edge_index"]["sha256"] == (
+        "901f62f365b1d47c583458d041901f404d3f062ba50e2c5117c95813494e90fb"
+    )
+    assert graphs["G_coexpress"]["edge_weight"]["sha256"] == (
+        "d381186ee3fc61d5067bedc95bad536a0a23f4b41fee79ce4ed8bfee1c9e4941"
+    )
 
 
 def test_claim_ceiling_never_promotes_validation_result() -> None:

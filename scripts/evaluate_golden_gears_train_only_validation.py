@@ -24,6 +24,8 @@ _BASE_PROTOCOL = _ROOT / "data/golden/norman_2019/gears_train_only_protocol.json
 _VALIDATION_PROTOCOL = _ROOT / "data/golden/norman_2019/gears_train_only_validation_protocol.json"
 _BUILDER = _ROOT / "scripts/build_golden_gears_train_only_candidate.py"
 _TRAIN_RUNNER = _ROOT / "scripts/train_golden_gears_train_only_candidate.py"
+_LINUX_RUNNER = _ROOT / "scripts/run_golden_gears_train_only_linux_a100.py"
+_LINUX_RUN_MANIFEST = _ROOT / "data/golden/norman_2019/gears_train_only_linux_a100_run.json"
 _CONTROL_PREFIX = b"praxis-gears-predict-controls-v1\0"
 _SEEDS = (11, 23, 37)
 _TRUTH_FILES = {"metadata.json", "truth-delta.npy"}
@@ -57,6 +59,10 @@ def _builder():
 
 def _train_runner():
     return _load_module("golden_gears_train_runner_for_validation", _TRAIN_RUNNER)
+
+
+def _linux_runner():
+    return _load_module("golden_gears_linux_runner_for_validation", _LINUX_RUNNER)
 
 
 def _strict_json(path: Path, builder) -> dict[str, Any]:
@@ -394,7 +400,7 @@ def _verify_truth_bundle(root: Path, protocol: dict[str, Any], base: dict[str, A
     if not (
         metadata.get("schema_version") == "praxis.golden-gears-validation-truth-bundle.v1"
         and metadata.get("base_protocol_payload_sha256") == base["identity"]["payload_sha256"]
-        and metadata.get("evaluator_sha256") == protocol["identity"]["evaluator_sha256"]
+        and metadata.get("evaluator_sha256") == expected["preparation_evaluator_sha256"]
         and metadata.get("decoded_expression_partitions") == ["validation"]
         and metadata.get("test_expression_decoded") is False
         and metadata.get("test_outcomes_used") is False
@@ -497,40 +503,6 @@ def _verify_prepare_root(root: Path, base: dict[str, Any], builder):
     return record, record_sha256, split, eligible
 
 
-def _validate_candidate_record(
-    record: dict[str, Any], expected: dict[str, Any], base: dict[str, Any], prepare_sha256: str
-) -> None:
-    seed = expected["seed"]
-    execution = record.get("execution", {})
-    if not (
-        record.get("schema_version") == "praxis.golden-gears-train-only-full-seed-candidate.v1"
-        and record.get("record_role") == "manifest_bound_full_training_candidate_not_scientific_evidence"
-        and record.get("candidate_name") == base["candidate"]["name"]
-        and record.get("mode") == "full_train"
-        and record.get("protocol_sha256") == base["identity"]["payload_sha256"]
-        and record.get("prepare_record_sha256") == prepare_sha256
-        and record.get("prepare_input")
-        == {
-            "path": "input/native_train_only.h5ad",
-            **base["execution_boundary"]["prepared_artifact_attestation"]["native_train_only_h5ad"],
-        }
-        and execution.get("seed") == seed
-        and execution.get("epochs") == base["training"]["model"]["max_epochs"]
-        and execution.get("batch_size") == base["training"]["model"]["batch_size"]
-        and execution.get("golden_validation_expression_or_outcomes_read") is False
-        and execution.get("golden_test_expression_or_outcomes_read") is False
-        and execution.get("golden_validation_or_test_paths_provided_to_child") is False
-        and execution.get("test_loader_present") is False
-        and record.get("benchmark_status") == "NOT_RUN"
-        and record.get("benchmark_passed") is None
-        and record.get("scientifically_validated") is False
-        and record.get("promotion_eligible") is False
-        and record.get("production_promoted") is False
-        and record.get("registry_or_default_route_changed") is False
-    ):
-        raise ValidationError(f"seed {seed} candidate record changed")
-
-
 def _verify_candidate_runtime_manifests(
     directory: Path, expected: dict[str, Any], protocol: dict[str, Any], base: dict[str, Any], builder
 ) -> None:
@@ -564,14 +536,22 @@ def _verify_nonexecuted_candidate_files(directory: Path, record: dict[str, Any],
 
 
 def _verify_candidates(
-    root: Path, protocol: dict[str, Any], base: dict[str, Any], builder, prepare_sha256: str
-) -> list[dict[str, Any]]:
+    root: Path,
+    prepare_root: Path,
+    protocol: dict[str, Any],
+    base: dict[str, Any],
+    builder,
+    prepare_sha256: str,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     if root.is_symlink() or not root.is_dir():
         raise ValidationError("candidate set root must be a regular directory")
-    records = protocol["candidate_set"].get("seeds")
+    candidate_set = protocol["candidate_set"]
+    if candidate_set.get("profile") != "linux_a100_manifest_v1":
+        raise ValidationError("unsupported candidate execution profile")
+    records = candidate_set.get("seeds")
     if not isinstance(records, list) or [item.get("seed") for item in records] != list(_SEEDS):
         raise ValidationError("candidate seed order changed")
-    collection_expected = protocol["candidate_set"].get("collection_record")
+    collection_expected = candidate_set.get("collection_record")
     if not isinstance(collection_expected, dict):
         raise ValidationError("candidate collection receipt is absent")
     expected_inventory = {"collection-record.json"}
@@ -580,36 +560,64 @@ def _verify_candidates(
         expected_inventory.update(f"{directory}/{relative}" for relative in _MODEL_FILES)
     if _regular_inventory(root) != expected_inventory:
         raise ValidationError("candidate collection inventory changed")
-    collection_path = root / "collection-record.json"
-    if builder._file_record(collection_path, single_link=True) != collection_expected:
-        raise ValidationError("candidate collection receipt identity changed")
-    collection = _strict_json(collection_path, builder)
+    linux = _linux_runner()
+    try:
+        context = linux._load_context(prepare_root)
+    except Exception as exc:
+        raise ValidationError("frozen Linux A100 candidate runtime changed") from exc
+    expected_manifest = candidate_set.get("linux_run_manifest", {})
+    observed_manifest = builder._file_record(_LINUX_RUN_MANIFEST, single_link=True)
     if not (
-        collection.get("schema_version") == "praxis.golden-gears-train-only-full-collection.v1"
-        and collection.get("record_role") == "manifest_bound_full_training_collection_not_scientific_evidence"
-        and collection.get("status") == "completed"
-        and collection.get("candidate_name") == base["candidate"]["name"]
-        and collection.get("protocol_sha256") == base["identity"]["payload_sha256"]
-        and collection.get("prepare_record_sha256") == prepare_sha256
-        and collection.get("execution", {}).get("seeds") == list(_SEEDS)
-        and collection.get("execution", {}).get("epochs_per_seed") == base["training"]["model"]["max_epochs"]
-        and collection.get("execution", {}).get("batch_size") == base["training"]["model"]["batch_size"]
-        and collection.get("execution", {}).get("golden_validation_expression_or_outcomes_read") is False
-        and collection.get("execution", {}).get("golden_test_expression_or_outcomes_read") is False
-        and collection.get("benchmark_status") == "NOT_RUN"
-        and collection.get("benchmark_passed") is None
-        and collection.get("scientifically_validated") is False
-        and collection.get("promotion_eligible") is False
-        and collection.get("production_promoted") is False
-        and collection.get("registry_or_default_route_changed") is False
+        expected_manifest.get("path") == "data/golden/norman_2019/gears_train_only_linux_a100_run.json"
+        and {key: expected_manifest.get(key) for key in ("size_bytes", "sha256")} == observed_manifest
+        and expected_manifest.get("payload_sha256") == context["manifest"]["identity"]["payload_sha256"]
+        and expected_manifest.get("worker_sha256") == context["manifest"]["identity"]["worker_sha256"]
+        and context["manifest_sha256"] == observed_manifest["sha256"]
+        and context["source_record_sha256"] == prepare_sha256
+        and context["protocol"] == base
+        and context["runtime"] == protocol["inference"]["runtime"]
     ):
-        raise ValidationError("candidate collection semantics changed")
-    collection_seeds = collection.get("seeds")
-    if not isinstance(collection_seeds, list) or [item.get("seed") for item in collection_seeds] != list(_SEEDS):
-        raise ValidationError("candidate collection seed order changed")
-    runner = _train_runner()
+        raise ValidationError("Linux A100 execution manifest or runtime changed")
+    parent, parent_fd = linux._open_output(root, builder)
+    try:
+        verified_records = [
+            linux._verify_named_seed(
+                parent_fd=parent_fd,
+                **context,
+                mode="full",
+                seed=seed,
+                epochs=20,
+                batch_size=32,
+            )
+            for seed in _SEEDS
+        ]
+        computed_collection = linux._collection_record(
+            verified_records,
+            parent,
+            builder,
+            context["protocol"],
+            context["manifest"],
+            context["manifest_sha256"],
+            context["source_record_sha256"],
+        )
+        collection = linux._json(context["full"]._read_regular_at(parent_fd, "collection-record.json"), builder)
+    except Exception as exc:
+        raise ValidationError("Linux A100 candidate collection failed strict verification") from exc
+    finally:
+        os.close(parent_fd)
+    collection_path = root / "collection-record.json"
+    if not (
+        builder._file_record(collection_path, single_link=True) == collection_expected
+        and collection == computed_collection
+        and collection.get("schema_version") == "praxis.golden-gears-train-only-linux-a100-collection.v1"
+        and collection.get("record_role") == "linux_a100_manifest_bound_collection_not_scientific_evidence"
+        and collection.get("status") == "completed"
+        and collection.get("bitwise_equivalent_to_darwin_cpu_candidate") is False
+    ):
+        raise ValidationError("Linux A100 candidate collection identity changed")
+    collection_seeds = collection["seeds"]
     verified = []
-    for expected, collection_seed in zip(records, collection_seeds, strict=True):
+    for expected, collection_seed, record in zip(records, collection_seeds, verified_records, strict=True):
         seed = expected["seed"]
         directory = root / _safe_relative(expected["directory"], "candidate")
         record_path = directory / "candidate-record.json"
@@ -639,13 +647,11 @@ def _verify_candidates(
             == expected["runtime_graph_manifest"]
         ):
             raise ValidationError(f"seed {seed} collection binding changed")
-        record = _strict_json(record_path, builder)
-        _validate_candidate_record(record, expected, base, prepare_sha256)
         _verify_nonexecuted_candidate_files(directory, record, builder)
         _verify_candidate_runtime_manifests(directory, expected, protocol, base, builder)
         manifest = _strict_json(manifest_path, builder)
         try:
-            runner._validate_tensor_manifest(manifest)
+            context["smoke"]._validate_tensor_manifest(manifest)
         except Exception as exc:
             raise ValidationError(f"seed {seed} tensor manifest is invalid") from exc
         artifacts = record.get("artifacts", {})
@@ -659,7 +665,7 @@ def _verify_candidates(
         ):
             raise ValidationError(f"seed {seed} model artifact receipt changed")
         verified.append({"seed": seed, "root": directory, "model_pt": expected["model_pt"]})
-    return verified
+    return verified, {**context, "linux_runner": linux}
 
 
 _CHILD = r"""
@@ -771,12 +777,10 @@ def _run_inference(
     base: dict[str, Any],
     builder,
     output_parent: Path,
+    linux_context: dict[str, Any],
 ) -> tuple[np.ndarray, dict[str, Any], dict[str, str]]:
-    train_runner = _train_runner()
-    try:
-        runtime = train_runner._verify_runtime(builder, base)
-    except Exception as exc:
-        raise ValidationError("frozen GEARS runtime identity changed") from exc
+    linux = linux_context["linux_runner"]
+    manifest = linux_context["manifest"]
     parent, parent_fd = builder._validated_output_parent((output_parent / "validation-receipt.json").absolute())
     name = ""
     directory_fd = -1
@@ -829,12 +833,10 @@ def _run_inference(
             "expected_vocab": inference["vocabulary"],
         }
         (staging / "job.json").write_bytes(builder._canonical_bytes(job))
-        if sys.platform != "darwin" or not Path("/usr/bin/sandbox-exec").is_file():
-            raise ValidationError("network-denying sandbox is unavailable")
         result = subprocess.run(
-            ["/usr/bin/sandbox-exec", "-p", "(version 1)(allow default)(deny network*)", sys.executable, "-c", _CHILD],
+            [*manifest["runtime"]["network_isolation_argv"], sys.executable, "-c", _CHILD],
             cwd=staging,
-            env=builder._child_env(staging=staging),
+            env=linux._child_env(staging, manifest),
             capture_output=True,
             check=False,
         )
@@ -886,7 +888,16 @@ def _run_inference(
                 )
         if receipt["control_samples"] != expected_samples:
             raise ValidationError("control sampling changed")
-        return prediction.copy(), receipt, {**logs, "runtime_sha256": builder._fingerprint(runtime)}
+        return (
+            prediction.copy(),
+            receipt,
+            {
+                **logs,
+                "execution_profile": "linux_a100_manifest_v1",
+                "linux_run_manifest_payload_sha256": manifest["identity"]["payload_sha256"],
+                "runtime_sha256": builder._fingerprint(linux_context["runtime"]),
+            },
+        )
     finally:
         if directory_fd >= 0:
             os.close(directory_fd)
@@ -1008,7 +1019,14 @@ def evaluate(
     _prepare_record, prepare_sha256, split, eligible = _verify_prepare_root(prepare_root, base, builder)
     if any(not set(record["targets"]).issubset(eligible) for record in metadata["conditions"]):
         raise ValidationError("Golden validation native coverage is not exactly 1.0")
-    candidates = _verify_candidates(candidates_root.absolute(), protocol, base, builder, prepare_sha256)
+    candidates, linux_context = _verify_candidates(
+        candidates_root.absolute(),
+        prepare_root.absolute(),
+        protocol,
+        base,
+        builder,
+        prepare_sha256,
+    )
     queries = sorted({tuple(record["targets"]) for record in metadata["conditions"]})
     predictions, child_receipt, runtime = _run_inference(
         prepare_root=prepare_root.absolute(),
@@ -1019,6 +1037,7 @@ def evaluate(
         base=base,
         builder=builder,
         output_parent=output.absolute().parent,
+        linux_context=linux_context,
     )
     metrics = _score(
         truth=truth,
@@ -1050,7 +1069,7 @@ def evaluate(
         "metrics": metrics,
         "execution": {
             "device": "cpu",
-            "network_denied_by_sandbox": True,
+            "network_denied_by_rootless_namespace": True,
             "full_golden_pack_received_by_evaluator": False,
             "validation_truth_bundle_used": True,
             "golden_test_expression_used": False,
