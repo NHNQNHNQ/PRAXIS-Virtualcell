@@ -52,6 +52,34 @@
     "sha256": "64a0dce0980b4ed7277598a49c4c0fe6506ead1c03dd07056eca61b0d157b46a",
     "eligible_public_dataset_count": 0
   },
+  "prospective_acquisition": {
+    "status": "READY_FOR_QUOTE_NOT_WET_LAB_EXECUTION",
+    "plan": {
+      "path": "data/golden/norman_2019/k562_crispra_acquisition_plan.json",
+      "size_bytes": 388249,
+      "sha256": "07cc18bb20ad5e27c8795ff74b6024ae16c4e0b4b12c31e2761dbf3bc7ce98ee",
+      "payload_sha256": "b6ad8d74a5ae8e9f928f8356e9f3f6a43c323eff7b31159d4ef70b10aead4643"
+    },
+    "verifier": {
+      "path": "scripts/verify_k562_crispra_acquisition_plan.py",
+      "size_bytes": 22806,
+      "sha256": "7961e06eb03fcf83dba9343c52f1919dd198df6c3c40704e049cb088cca803ef"
+    },
+    "human_rfp": {
+      "path": "docs/runbooks/K562-CRISPRA-BLINDED-ACQUISITION-RFP.md",
+      "size_bytes": 14984,
+      "sha256": "757438414ac85cc63c3a34f400a32f0c29812a0484ca18ae464f32d518353b5b",
+      "authoritative": false,
+      "messages_sent": false,
+      "budget_or_schedule_committed": false
+    },
+    "provider_and_custodian_selected": false,
+    "guide_map_frozen": false,
+    "construct_sequence_identity_frozen": false,
+    "role_specific_execution_and_qc_policy_frozen": false,
+    "wet_lab_execution_authorized": false,
+    "outcome_values_accessed": false
+  },
   "observed_nonqualifying_external_stress": {
     "dataset": "GSE146194/GSM4367986_exp8",
     "path": "reports/science/gse146194-additive-external-stress-result.json",
@@ -66,6 +94,8 @@
   "blocking_reasons": [
     "replacement_primary_holdout_bundle_absent",
     "independent_external_dataset_and_platform_bundle_absent",
+    "two_independent_providers_and_custodians_not_selected_or_authorized",
+    "role_specific_guide_construct_execution_and_qc_policies_not_frozen",
     "p16_v1_cannot_bind_candidate2_four_file_artifact_set",
     "p21_v1_cannot_represent_deterministic_replay_without_fake_stochastic_seeds"
   ],
@@ -122,6 +152,7 @@
   "engineering_state": {
     "p12_candidate2_multi_artifact_release_identity": "COMPLETE_IDENTITY_ONLY",
     "candidate2_deterministic_replay_technical_receipt": "COMPLETE_TECHNICAL_ONLY",
+    "prospective_acquisition_plan": "COMPLETE_VALUE_FREE_READY_FOR_QUOTE_NOT_WET_LAB_EXECUTION",
     "custodian_blinded_intake_contract": "COMPLETE_VALUE_FREE_READY_FOR_EXTERNAL_CUSTODIAN",
     "p16_v2_multi_artifact_contract": "DEFERRED_UNTIL_ELIGIBLE_BUNDLES_ARE_FROZEN",
     "p21_v2_deterministic_execution_contract": "DEFERRED_UNTIL_ELIGIBLE_BUNDLES_ARE_FROZEN"
@@ -130,14 +161,14 @@
     "status": "COMPLETE_VALUE_FREE_READY_FOR_EXTERNAL_CUSTODIAN",
     "contract": {
       "path": "data/golden/norman_2019/k562_crispra_blinded_intake_contract.json",
-      "size_bytes": 3434,
-      "sha256": "a2c3c2f8205dc7eafbe28370408aad61f65e05628d2ede558d435b62a3f94a40",
-      "payload_sha256": "d602c03307fe8b98367a241880dc84d9f937dbf93476b1a5d48e599d5b673197"
+      "size_bytes": 4742,
+      "sha256": "62177e39cd95dbea37f688fafb0647d247eff42266e2ffca19a390c41cb58794",
+      "payload_sha256": "c362ec6ed71a8ea4059792a1d012042caa69570a5ab20bd5fd45ec77ebf57ec3"
     },
     "verifier": {
       "path": "scripts/freeze_k562_crispra_blinded_intake.py",
-      "size_bytes": 36285,
-      "sha256": "5e1e552c6e51830a72bb8b2d103b16fe1e4c976a3510a4842b5908f9510d93fa"
+      "size_bytes": 41536,
+      "sha256": "35a4a8329bf3d1277a31c24aa8782bbdd1b20ea6aec49351bd78532fc8a97e12"
     },
     "maximum_manifest_status": "READY_FOR_ESCROW",
     "outcome_values_decoded": false,
@@ -155,5 +186,5 @@
     "gse146194_outcomes_exposed_after_frozen_stress_protocol": true,
     "gse146194_reuse_as_confirmatory_evidence_allowed": false
   },
-  "next_authorized_transition": "run_value_free_custodian_intake_for_two_exact_independent_bundles_then_freeze_trusted_pins_and_p16_p21_v2_before_any_outcome_decode"
+  "next_authorized_transition": "obtain_explicit_human_authorization_then_send_value_free_capability_inquiries_select_two_independent_providers_and_custodians_and_freeze_role_specific_guide_construct_execution_and_qc_policies_before_wet_lab_execution"
 }

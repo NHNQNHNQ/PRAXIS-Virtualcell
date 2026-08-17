@@ -20,8 +20,12 @@ from urllib.parse import urlsplit
 
 _ROOT = Path(__file__).parents[1]
 _CONTRACT = _ROOT / "data/golden/norman_2019/k562_crispra_blinded_intake_contract.json"
-_CONTRACT_SIZE_BYTES = 3434
-_CONTRACT_SHA256 = "a2c3c2f8205dc7eafbe28370408aad61f65e05628d2ede558d435b62a3f94a40"
+_CONTRACT_SIZE_BYTES = 4742
+_CONTRACT_SHA256 = "62177e39cd95dbea37f688fafb0647d247eff42266e2ffca19a390c41cb58794"
+_ACQUISITION_PLAN = _ROOT / "data/golden/norman_2019/k562_crispra_acquisition_plan.json"
+_ACQUISITION_PLAN_SIZE_BYTES = 388249
+_ACQUISITION_PLAN_SHA256 = "07cc18bb20ad5e27c8795ff74b6024ae16c4e0b4b12c31e2761dbf3bc7ce98ee"
+_ACQUISITION_PLAN_PAYLOAD_SHA256 = "b6ad8d74a5ae8e9f928f8356e9f3f6a43c323eff7b31159d4ef70b10aead4643"
 _SCOPE_NAME = "scope-manifest.json"
 _CUSTODY_NAME = "custody-record.json"
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -111,6 +115,13 @@ def _hash(value: Any, label: str) -> str:
     value = _text(value, label)
     if not _SHA256.fullmatch(value):
         raise BlindedIntakeError(f"{label} must be a lowercase SHA-256")
+    return value
+
+
+def _identity_hash(value: Any, label: str) -> str:
+    value = _hash(value, label)
+    if value == "0" * 64:
+        raise BlindedIntakeError(f"{label} must be a realized non-placeholder SHA-256")
     return value
 
 
@@ -275,7 +286,7 @@ def _load_contract() -> tuple[dict[str, Any], dict[str, Any]]:
     copy = json.loads(_canonical_bytes(contract))
     copy["identity"]["payload_sha256"] = None
     if not (
-        contract["schema_version"] == "praxis.k562-crispra-blinded-intake-contract.v1"
+        contract["schema_version"] == "praxis.k562-crispra-blinded-intake-contract.v2"
         and contract["record_role"] == "value_free_custodian_intake_contract_not_scientific_evidence"
         and identity["payload_hash_algorithm"]
         == "sha256(canonical_json(contract_with_identity.payload_sha256_set_to_null))"
@@ -283,6 +294,56 @@ def _load_contract() -> tuple[dict[str, Any], dict[str, Any]]:
     ):
         raise BlindedIntakeError("contract identity changed")
     return contract, file_identity
+
+
+def _load_acquisition_plan(contract: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    expected = contract["input_contract"].get("acquisition_plan_contract")
+    if type(expected) is not dict:
+        raise BlindedIntakeError("acquisition plan contract is invalid")
+    _exact_fields(
+        expected,
+        {
+            "relative_path",
+            "size_bytes",
+            "sha256",
+            "payload_sha256",
+            "payload_hash_algorithm",
+            "scope_manifest_binding_field",
+        },
+        "acquisition plan contract",
+    )
+    pinned = {
+        "relative_path": "data/golden/norman_2019/k562_crispra_acquisition_plan.json",
+        "size_bytes": _ACQUISITION_PLAN_SIZE_BYTES,
+        "sha256": _ACQUISITION_PLAN_SHA256,
+        "payload_sha256": _ACQUISITION_PLAN_PAYLOAD_SHA256,
+        "payload_hash_algorithm": "sha256(canonical_json(plan_with_identity.payload_sha256_set_to_null))",
+        "scope_manifest_binding_field": "acquisition_plan_sha256",
+    }
+    if expected != pinned:
+        raise BlindedIntakeError("acquisition plan contract identity changed")
+    payload, file_identity = _read_regular_path(_ACQUISITION_PLAN, "acquisition plan")
+    if file_identity != {"size_bytes": _ACQUISITION_PLAN_SIZE_BYTES, "sha256": _ACQUISITION_PLAN_SHA256}:
+        raise BlindedIntakeError("acquisition plan raw identity changed")
+    plan = _strict_json(payload, "acquisition plan")
+    identity = plan.get("identity")
+    if type(identity) is not dict:
+        raise BlindedIntakeError("acquisition plan identity is invalid")
+    _exact_fields(identity, {"payload_sha256", "payload_hash_algorithm"}, "acquisition plan identity")
+    copy = json.loads(_canonical_bytes(plan))
+    copy["identity"]["payload_sha256"] = None
+    if not (
+        plan.get("schema_version") == "praxis.k562-crispra-acquisition-plan.v1"
+        and plan.get("record_role") == "outcome_blind_prospective_acquisition_plan_not_scientific_evidence"
+        and identity
+        == {
+            "payload_sha256": _ACQUISITION_PLAN_PAYLOAD_SHA256,
+            "payload_hash_algorithm": pinned["payload_hash_algorithm"],
+        }
+        and identity["payload_sha256"] == _fingerprint(copy)
+    ):
+        raise BlindedIntakeError("acquisition plan logical identity changed")
+    return plan, file_identity
 
 
 def _verify_scope(value: dict[str, Any], contract: dict[str, Any]) -> list[dict[str, Any]]:
@@ -298,6 +359,11 @@ def _verify_scope(value: dict[str, Any], contract: dict[str, Any]) -> list[dict[
             "platform_fingerprint",
             "source",
             "license",
+            "acquisition_plan_sha256",
+            "guide_map_sha256",
+            "construct_identity_sha256",
+            "wet_lab_execution_record_sha256",
+            "platform_family",
             "outcome_values_in_manifest",
             "condition_set_sha256",
             "group_set_sha256",
@@ -309,18 +375,47 @@ def _verify_scope(value: dict[str, Any], contract: dict[str, Any]) -> list[dict[
         "scope manifest",
     )
     expected = contract["input_contract"]
+    role_contracts = expected.get("role_scope_contract")
+    if type(role_contracts) is not dict or set(role_contracts) != set(expected["allowed_bundle_roles"]):
+        raise BlindedIntakeError("role scope contract is invalid")
+    role = value["bundle_role"]
+    role_contract = role_contracts.get(role)
+    if type(role_contract) is not dict:
+        raise BlindedIntakeError("bundle role has no exact scope contract")
+    _exact_fields(
+        role_contract,
+        {"condition_set_sha256", "condition_counts", "platform_family"},
+        "role scope contract",
+    )
     if not (
         value["schema_version"] == expected["scope_manifest_schema_version"]
         and value["record_role"] == "outcome_opaque_custodian_scope_declaration"
-        and value["bundle_role"] in expected["allowed_bundle_roles"]
+        and role in expected["allowed_bundle_roles"]
         and value["outcome_values_in_manifest"] is False
         and _canonical_bytes(value["scope"]) == _canonical_bytes(expected["required_scope"])
+        and value["acquisition_plan_sha256"] == expected["acquisition_plan_contract"]["sha256"]
+        and value["condition_set_sha256"] == role_contract["condition_set_sha256"]
+        and value["condition_counts"] == role_contract["condition_counts"]
+        and value["platform_family"] == role_contract["platform_family"]
     ):
         raise BlindedIntakeError("scope manifest does not match the exact K562 CRISPRa contract")
     for field in ("source_id", "laboratory_id"):
         _identifier(value[field], field)
-    for field in ("dataset_fingerprint", "platform_fingerprint", "condition_set_sha256", "group_set_sha256"):
+    for field in (
+        "dataset_fingerprint",
+        "platform_fingerprint",
+        "condition_set_sha256",
+        "group_set_sha256",
+    ):
         _hash(value[field], field)
+    for field in (
+        "acquisition_plan_sha256",
+        "guide_map_sha256",
+        "construct_identity_sha256",
+        "wet_lab_execution_record_sha256",
+    ):
+        _identity_hash(value[field], field)
+    _text(value["platform_family"], "platform_family")
     _source_locator(value["source"], "source")
     license_id = _license(value["license"])
     condition_counts = value["condition_counts"]
@@ -398,7 +493,7 @@ def _verify_scope(value: dict[str, Any], contract: dict[str, Any]) -> list[dict[
     if set(item["role"] for item in result) != required_roles or any(
         role_counts[role] != 1 for role in exactly_one_roles
     ):
-        raise BlindedIntakeError("all seven required opaque asset roles must occur exactly once")
+        raise BlindedIntakeError("all required opaque asset roles must occur exactly once")
 
     closure = value["asset_identity_closure"]
     if type(closure) is not dict:
@@ -409,6 +504,9 @@ def _verify_scope(value: dict[str, Any], contract: dict[str, Any]) -> list[dict[
     by_role = {item["role"]: item for item in result}
     if any(closure[field] != by_role[role]["sha256"] for role, field in role_sha256_fields.items()):
         raise BlindedIntakeError("asset role SHA-256 closure does not match declared assets")
+    for field in ("guide_map_sha256", "construct_identity_sha256", "wet_lab_execution_record_sha256"):
+        if value[field] != closure[field]:
+            raise BlindedIntakeError(f"scope {field} does not match its declared opaque asset")
     if closure["license_sha256"] != _sha256(license_id.encode("utf-8")):
         raise BlindedIntakeError("license SHA-256 closure does not match the scope license")
     return result
@@ -703,6 +801,7 @@ def _write_new(output: Path, payload: bytes, private_root: Path) -> None:
 
 def freeze(*, private_root: Path, output: Path) -> dict[str, Any]:
     contract, contract_file_identity = _load_contract()
+    acquisition_plan, acquisition_plan_file_identity = _load_acquisition_plan(contract)
     root, root_fd, root_info = _private_root(private_root)
     try:
         initial_inventory = set(os.listdir(root_fd))
@@ -747,6 +846,8 @@ def freeze(*, private_root: Path, output: Path) -> dict[str, Any]:
     contract_payload_sha256 = contract["identity"]["payload_sha256"]
     bundle_basis = {
         "contract_payload_sha256": contract_payload_sha256,
+        "acquisition_plan_payload_sha256": acquisition_plan["identity"]["payload_sha256"],
+        "acquisition_plan_file": acquisition_plan_file_identity,
         "scope_manifest_sha256": scope_identity["sha256"],
         "custody_record_sha256": custody_identity["sha256"],
         "asset_identities": asset_identities,
@@ -761,6 +862,8 @@ def freeze(*, private_root: Path, output: Path) -> dict[str, Any]:
             "payload_hash_algorithm": "sha256(canonical_json(manifest_with_identity.payload_sha256_set_to_null))",
             "contract_payload_sha256": contract_payload_sha256,
             "contract_file": contract_file_identity,
+            "acquisition_plan_payload_sha256": acquisition_plan["identity"]["payload_sha256"],
+            "acquisition_plan_file": acquisition_plan_file_identity,
             "verifier_sha256": verifier_file_identity["sha256"],
         },
         "source": {
@@ -771,6 +874,11 @@ def freeze(*, private_root: Path, output: Path) -> dict[str, Any]:
             "platform_fingerprint": scope["platform_fingerprint"],
             "source": scope["source"],
             "license": scope["license"],
+            "acquisition_plan_sha256": scope["acquisition_plan_sha256"],
+            "guide_map_sha256": scope["guide_map_sha256"],
+            "construct_identity_sha256": scope["construct_identity_sha256"],
+            "wet_lab_execution_record_sha256": scope["wet_lab_execution_record_sha256"],
+            "platform_family": scope["platform_family"],
             "condition_set_sha256": scope["condition_set_sha256"],
             "group_set_sha256": scope["group_set_sha256"],
         },

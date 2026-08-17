@@ -46,11 +46,13 @@ def _install_controlled_no_replace(module, monkeypatch) -> None:
     monkeypatch.setattr(module, "_rename_no_replace", controlled_no_replace)
 
 
-def _fixture(module, tmp_path: Path) -> tuple[Path, Path, dict[str, bytes]]:
+def _fixture(module, tmp_path: Path, role: str | None = None) -> tuple[Path, Path, dict[str, bytes]]:
     private_root = tmp_path / "private-custodian-root"
     private_root.mkdir(mode=0o700)
     private_root.chmod(0o700)
     contract = module._strict_json(module._CONTRACT.read_bytes(), "contract")
+    bundle_role = role or contract["input_contract"]["allowed_bundle_roles"][0]
+    role_contract = contract["input_contract"]["role_scope_contract"][bundle_role]
     asset_contract = contract["input_contract"]["asset_contract"]
     opaque_payloads = {}
     assets = []
@@ -81,21 +83,22 @@ def _fixture(module, tmp_path: Path) -> tuple[Path, Path, dict[str, bytes]]:
     scope = {
         "schema_version": contract["input_contract"]["scope_manifest_schema_version"],
         "record_role": "outcome_opaque_custodian_scope_declaration",
-        "bundle_role": contract["input_contract"]["allowed_bundle_roles"][0],
+        "bundle_role": bundle_role,
         "source_id": "custodian:synthetic",
         "laboratory_id": "laboratory:fixture",
         "dataset_fingerprint": "1" * 64,
         "platform_fingerprint": "2" * 64,
         "source": "custodian:synthetic-dataset",
         "license": "CC0-1.0",
+        "acquisition_plan_sha256": contract["input_contract"]["acquisition_plan_contract"]["sha256"],
+        "guide_map_sha256": closure["guide_map_sha256"],
+        "construct_identity_sha256": closure["construct_identity_sha256"],
+        "wet_lab_execution_record_sha256": closure["wet_lab_execution_record_sha256"],
+        "platform_family": role_contract["platform_family"],
         "outcome_values_in_manifest": False,
-        "condition_set_sha256": "3" * 64,
+        "condition_set_sha256": role_contract["condition_set_sha256"],
         "group_set_sha256": "4" * 64,
-        "condition_counts": {
-            "gene_combination": 2,
-            "matched_non_targeting_control": 3,
-            "single_gene": 5,
-        },
+        "condition_counts": role_contract["condition_counts"],
         "asset_identity_closure": closure,
         "scope": contract["input_contract"]["required_scope"],
         "opaque_assets": assets,
@@ -142,7 +145,29 @@ def test_freeze_is_value_free_path_free_self_hashed_and_write_new(tmp_path: Path
     unhashed = json.loads(module._canonical_bytes(manifest))
     unhashed["identity"]["payload_sha256"] = None
     assert manifest["identity"]["payload_sha256"] == module._fingerprint(unhashed)
+    assert manifest["schema_version"] == "praxis.k562-crispra-blinded-consumer-manifest.v2"
     assert manifest["identity"]["verifier_sha256"] == hashlib.sha256(_SCRIPT.read_bytes()).hexdigest()
+    assert manifest["identity"]["acquisition_plan_file"] == {
+        "size_bytes": module._ACQUISITION_PLAN_SIZE_BYTES,
+        "sha256": module._ACQUISITION_PLAN_SHA256,
+    }
+    assert manifest["identity"]["acquisition_plan_payload_sha256"] == module._ACQUISITION_PLAN_PAYLOAD_SHA256
+    assert manifest["source"] == {
+        "bundle_role": "independent_external_dataset_and_platform",
+        "source_id": "custodian:synthetic",
+        "laboratory_id": "laboratory:fixture",
+        "dataset_fingerprint": "1" * 64,
+        "platform_fingerprint": "2" * 64,
+        "source": "custodian:synthetic-dataset",
+        "license": "CC0-1.0",
+        "acquisition_plan_sha256": module._ACQUISITION_PLAN_SHA256,
+        "guide_map_sha256": hashlib.sha256(opaque_payloads["guide_map"]).hexdigest(),
+        "construct_identity_sha256": hashlib.sha256(opaque_payloads["construct_identity"]).hexdigest(),
+        "wet_lab_execution_record_sha256": hashlib.sha256(opaque_payloads["wet_lab_execution_record"]).hexdigest(),
+        "platform_family": "Parse_Evercode_WT_plus_CRISPR_Detect",
+        "condition_set_sha256": "29c16fbeda05db178fd6d01908d2f1ec01cac6b0e017ad1796f4f4e297716210",
+        "group_set_sha256": "4" * 64,
+    }
     assert manifest["scope"] == {
         "adaptation": {"consumer": "evaluation-client", "steps": 0},
         "cell_identity": {"cellosaurus_id": "CVCL_0004", "name": "K562"},
@@ -202,6 +227,9 @@ def test_freeze_is_value_free_path_free_self_hashed_and_write_new(tmp_path: Path
         "preprocessing_code",
         "preprocessing_environment",
         "outcome_delta",
+        "guide_map",
+        "construct_identity",
+        "wet_lab_execution_record",
     }
     outcome_identity = next(item for item in manifest["opaque_asset_identities"] if item["role"] == "outcome_delta")
     assert outcome_identity == {
@@ -246,6 +274,93 @@ def test_contract_raw_and_logical_identities_are_both_pinned(tmp_path: Path, mon
 
     with pytest.raises(module.BlindedIntakeError, match="raw identity changed"):
         module._load_contract()
+
+
+def test_acquisition_plan_raw_and_logical_identities_are_both_pinned() -> None:
+    module = _module()
+    contract, _ = module._load_contract()
+    raw = module._ACQUISITION_PLAN.read_bytes()
+    assert len(raw) == module._ACQUISITION_PLAN_SIZE_BYTES
+    assert hashlib.sha256(raw).hexdigest() == module._ACQUISITION_PLAN_SHA256
+    plan, file_identity = module._load_acquisition_plan(contract)
+    assert file_identity == {
+        "size_bytes": module._ACQUISITION_PLAN_SIZE_BYTES,
+        "sha256": module._ACQUISITION_PLAN_SHA256,
+    }
+    unhashed = json.loads(module._canonical_bytes(plan))
+    unhashed["identity"]["payload_sha256"] = None
+    assert plan["identity"]["payload_sha256"] == module._ACQUISITION_PLAN_PAYLOAD_SHA256
+    assert plan["identity"]["payload_sha256"] == module._fingerprint(unhashed)
+
+
+@pytest.mark.parametrize(
+    ("role", "condition_set_sha256", "platform_family"),
+    [
+        (
+            "replacement_primary_holdout",
+            "30f015924978feefd1eb29bb9e1a47a10f632d74c6bd6fe68f63c39a9b8383ea",
+            "10x_Chromium_whole_transcriptome_plus_CRISPR_Guide_Capture",
+        ),
+        (
+            "independent_external_dataset_and_platform",
+            "29c16fbeda05db178fd6d01908d2f1ec01cac6b0e017ad1796f4f4e297716210",
+            "Parse_Evercode_WT_plus_CRISPR_Detect",
+        ),
+    ],
+)
+def test_role_scope_is_exactly_bound(
+    tmp_path: Path,
+    monkeypatch,
+    role: str,
+    condition_set_sha256: str,
+    platform_family: str,
+) -> None:
+    module = _module()
+    _install_controlled_no_replace(module, monkeypatch)
+    private_root, output, _ = _fixture(module, tmp_path, role)
+
+    manifest = module.freeze(private_root=private_root, output=output)
+
+    assert manifest["source"]["condition_set_sha256"] == condition_set_sha256
+    assert manifest["source"]["platform_family"] == platform_family
+    assert manifest["intake_closure"]["condition_counts"] == {
+        "gene_combination": 36,
+        "matched_non_targeting_control": 1,
+        "single_gene": 68,
+    }
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "acquisition_plan_sha256",
+        "guide_map_sha256",
+        "construct_identity_sha256",
+        "wet_lab_execution_record_sha256",
+        "platform_family",
+        "condition_set_sha256",
+    ],
+)
+def test_freeze_rejects_changed_execution_or_plan_binding(tmp_path: Path, field: str) -> None:
+    module = _module()
+    private_root, output, _ = _fixture(module, tmp_path)
+    scope_path = private_root / module._SCOPE_NAME
+    scope = module._strict_json(scope_path.read_bytes(), "scope")
+    asset_bindings = {"guide_map_sha256", "construct_identity_sha256", "wet_lab_execution_record_sha256"}
+    if field == "platform_family":
+        scope[field] = "changed"
+    elif field in asset_bindings:
+        scope[field] = "9" * 64
+    else:
+        scope[field] = "0" * 64
+    _write_json(module, scope_path, scope)
+
+    with pytest.raises(
+        module.BlindedIntakeError,
+        match="declared opaque asset" if field in asset_bindings else None,
+    ):
+        module.freeze(private_root=private_root, output=output)
+    assert not output.exists()
 
 
 @pytest.mark.parametrize("mutation", ["duplicate_role", "zero_count", "closure"])
