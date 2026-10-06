@@ -93,6 +93,10 @@ evidence_ref. observation.field MUST equal the final decoded JSON Pointer segmen
 means field="medium"; /genes/0/expression_value means field="expression_value". It is not a semantic
 label such as "culture_medium" or "gene_expression". Do not use a profile/molecule citation as evidence
 for a specific gene's expression.
+Preserve nested provenance paths exactly: overview.provenance.input_role is /provenance/input_role,
+not /input_role. Do not flatten any nested tool fields. A rejection may supply matching_value_pointers;
+these are actual locations in the SAME tool result with the exact same value and closest source_id.
+You must choose and verify an appropriate actual path yourself; a suggestion does not validate the claim.
 Known target_id must be a gene_id or protein_id actually returned by a gene tool and cited there;
 otherwise use null and explain that the target identity is unconfirmed.
 Final output must be one JSON object matching the Assessment schema below, no markdown or thoughts.
@@ -263,6 +267,9 @@ async def analyze_candidate(
                 "Preserve valid judgments and required gene evidence; do not invent or silently remove necessary citations. "
                 "field must be the final decoded pointer token: /condition/medium -> medium; "
                 "/genes/0/expression_value -> expression_value. Values and source IDs must match exactly. "
+                "Do not flatten nested provenance: overview.provenance.input_role -> /provenance/input_role. "
+                "matching_value_pointers are actual same-call/same-value/same-source locations; choose an "
+                "appropriate path only after checking that tool data. These hints do not validate your claim. "
                 "If a judgment lacks support, explicitly mark it uncertain/null and explain the gap. "
                 "This is the only final-answer repair opportunity, within the original turn budget."
             ),

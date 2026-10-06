@@ -5,6 +5,7 @@ import math
 import re
 from typing import Any
 
+from .diagnostics import _public_value
 from .schemas import Assessment, EvidenceReference
 
 
@@ -58,6 +59,40 @@ def _reference(ref: EvidenceReference, calls: dict[str, dict]) -> tuple[Any, dic
     return actual, gene
 
 
+def matching_value_pointers(ref: EvidenceReference, calls: dict[str, dict]) -> list[str]:
+    """Suggest at most five actual scalar locations in this same successful call.
+
+    This is diagnostic information only. It never edits a reference or makes an
+    invalid assessment admissible. Both value and closest source must match.
+    """
+    call = calls.get(ref.tool_call_id)
+    if not call or not call.get("ok"):
+        return []
+    matches: list[str] = []
+
+    def walk(value: Any, pointer: str, source_id: Any) -> None:
+        if len(matches) >= 5:
+            return
+        if isinstance(value, dict):
+            if value.get("source_id"):
+                source_id = value["source_id"]
+            for key, child in value.items():
+                escaped = str(key).replace("~", "~0").replace("/", "~1")
+                walk(child, f"{pointer}/{escaped}", source_id)
+                if len(matches) >= 5:
+                    break
+        elif isinstance(value, list):
+            for index, child in enumerate(value):
+                walk(child, f"{pointer}/{index}", source_id)
+                if len(matches) >= 5:
+                    break
+        elif pointer and source_id == ref.source_id and _equal(value, ref.value):
+            matches.append(pointer)
+
+    walk(call.get("data"), "", None)
+    return matches
+
+
 def validate_evidence(
     assessment: Assessment, tool_calls: list[dict], *, diagnostics: list[dict] | None = None,
 ) -> list[str]:
@@ -71,13 +106,16 @@ def validate_evidence(
     expression_values: set[float] = set()
     source_ids: set[str] = set()
 
-    def flag(code: str, location: list[str | int]) -> None:
+    def flag(code: str, location: list[str | int], ref: EvidenceReference | None = None) -> None:
         issues.append(code)
         if diagnostics is not None:
             message = ("field must equal the decoded final JSON Pointer segment; "
                        "/condition/medium -> medium; /genes/0/expression_value -> expression_value"
                        if code == "observation_field_does_not_match_pointer" else code)
             entry = {"location": location, "code": code, "message": message}
+            if ref is not None:
+                entry["offending_reference"] = _public_value(ref.model_dump())
+                entry["matching_value_pointers"] = matching_value_pointers(ref, calls)
             if entry not in diagnostics:
                 diagnostics.append(entry)
 
@@ -120,17 +158,17 @@ def validate_evidence(
                 try:
                     actual, gene = _reference(ref, calls)
                     if not _equal(actual, observation.value):
-                        flag("observation_value_does_not_match_tool", location + ["value"])
+                        flag("observation_value_does_not_match_tool", location + ["value"], ref)
                     pointer_field = ref.pointer.rsplit("/", 1)[-1].replace("~1", "/").replace("~0", "~")
                     if pointer_field != observation.field:
-                        flag("observation_field_does_not_match_pointer", location + ["field"])
+                        flag("observation_field_does_not_match_pointer", location + ["field"], ref)
                     if gene and observation.gene_id != gene["gene_id"]:
-                        flag("observation_gene_does_not_match_tool", location + ["gene_id"])
+                        flag("observation_gene_does_not_match_tool", location + ["gene_id"], ref)
                     if observation.gene_id and (not gene or observation.gene_id not in available_genes):
-                        flag("observation_gene_not_loaded", location + ["gene_id"])
+                        flag("observation_gene_not_loaded", location + ["gene_id"], ref)
                 except (KeyError, IndexError, TypeError, ValueError):
                     # The reference-specific reason is collected below as well.
-                    flag("invalid_observation_reference", location + ["evidence_ref"])
+                    flag("invalid_observation_reference", location + ["evidence_ref"], ref)
 
     for target_index, target in enumerate(assessment.targets):
         location = ["targets", target_index]
@@ -147,7 +185,11 @@ def validate_evidence(
                 except (KeyError, IndexError, TypeError, ValueError):
                     pass
             if not bound:
-                flag("target_identity_not_bound_to_evidence", location + ["evidence_refs"])
+                if target.evidence_refs:
+                    for ref_index, ref in enumerate(target.evidence_refs):
+                        flag("target_identity_not_bound_to_evidence", location + ["evidence_refs", ref_index], ref)
+                else:
+                    flag("target_identity_not_bound_to_evidence", location + ["evidence_refs"])
     for mechanism_index, mechanism in enumerate(assessment.mechanism_hypotheses):
         location = ["mechanism_hypotheses", mechanism_index]
         refs.extend((ref, location + ["evidence_refs", i]) for i, ref in enumerate(mechanism.evidence_refs))
@@ -161,9 +203,13 @@ def validate_evidence(
                 mic_has_gene_evidence = True
         except (KeyError, IndexError, TypeError, ValueError) as exc:
             reason = str(exc) if isinstance(exc, ValueError) else "unresolved_evidence_pointer"
-            flag(reason, location)
+            flag(reason, location, ref)
     if assessment.mic_estimate.value is not None and not mic_has_gene_evidence:
-        flag("numeric_mic_requires_verified_gene_evidence", ["mic_estimate", "evidence_refs"])
+        if assessment.mic_estimate.evidence_refs:
+            for ref_index, ref in enumerate(assessment.mic_estimate.evidence_refs):
+                flag("numeric_mic_requires_verified_gene_evidence", ["mic_estimate", "evidence_refs", ref_index], ref)
+        else:
+            flag("numeric_mic_requires_verified_gene_evidence", ["mic_estimate", "evidence_refs"])
 
     # Native gene IDs mentioned in free text must also have been returned by a
     # tool. This catches fabricated ABUW IDs outside the structured fields.

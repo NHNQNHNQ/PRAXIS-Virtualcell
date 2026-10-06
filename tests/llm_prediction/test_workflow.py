@@ -275,6 +275,34 @@ async def test_one_final_repair_preserves_public_draft_and_checks_again():
     assert result["evidence_validation"]["status"] == "passed"
 
 
+async def test_nested_provenance_hint_is_supplied_and_model_must_correct_it(monkeypatch):
+    original = Profile.overview
+
+    def overview(self):
+        result = original(self)
+        result["provenance"] = {"input_role": "unexposed baseline"}
+        return result
+
+    monkeypatch.setattr(Profile, "overview", overview)
+    invalid = assessment(None)
+    bad_ref = {"tool_call_id": "context-overview", "pointer": "/input_role",
+               "source_id": "omics:AB5075-AZI000:profile", "value": "unexposed baseline"}
+    invalid["supporting_evidence"][0]["observations"].append({
+        "gene_id": None, "field": "input_role", "value": "unexposed baseline", "evidence_ref": bad_ref,
+    })
+    corrected = deepcopy(invalid)
+    corrected["supporting_evidence"][0]["observations"][1]["evidence_ref"]["pointer"] = "/provenance/input_role"
+    client = Client([tool_response(), final_response(invalid), final_response(corrected)])
+    result = await analyze_candidate("CCO", client=client, max_turns=3)
+    assert result["status"] == "completed"
+    feedback = json.loads(client.requests[2]["messages"][-1]["content"])
+    reference_errors = [item for item in feedback["evidence_errors"] if item.get("offending_reference") == bad_ref]
+    assert reference_errors
+    assert all(item["matching_value_pointers"] == ["/provenance/input_role"] for item in reference_errors)
+    assert result["rejected_output"]["parsed_draft"]["supporting_evidence"][0]["observations"][1]["evidence_ref"]["pointer"] == "/input_role"
+    assert result["assessment"]["supporting_evidence"][0]["observations"][1]["evidence_ref"]["pointer"] == "/provenance/input_role"
+
+
 async def test_second_invalid_final_is_rejected_without_third_repair():
     invalid = assessment()
     invalid["mic_estimate"]["evidence_refs"][0]["value"] = 999

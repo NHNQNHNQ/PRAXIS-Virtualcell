@@ -30,7 +30,7 @@ PRAXIS_MODEL=deepseek-v4-pro
 .venv/bin/praxis-vc serve --port 8787
 ```
 
-打开 `http://127.0.0.1:8787`。页面显示实际输入包的身份与数据覆盖；分析后可查看报告、工具轨迹以及 JSON/Markdown。
+打开 `http://127.0.0.1:8787`。页面显示实际输入包的身份与数据覆盖；分析后可查看报告、工具轨迹以及 JSON/Markdown；带报告编号的页面链接可重新打开，无需再次调用模型。
 
 ```bash
 .venv/bin/praxis-vc batch --profile AB5075-AZI000 --input candidates/synthemol_20260923/repeat_1/molecules.csv --limit 1 --output reports/llm_live/first-candidate
