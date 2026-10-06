@@ -74,9 +74,11 @@ async def test_two_turn_closed_loop_tool_then_final_answer():
     assert events[-1] == {"type": "end", "reason": TerminalReason.STOP.value}
     # messages 链路:user / assistant(tool_use) / user(tool_result) / 终答轮
     assert st.messages[1]["role"] == "assistant"
-    assert st.messages[1]["content"][0]["type"] == "tool_use"
+    assert st.messages[1]["content"][0] == {"type": "text", "text": "我来查一下"}
+    assert st.messages[1]["content"][1]["type"] == "tool_use"
     assert st.messages[2]["role"] == "user"
     assert st.messages[2]["content"][0]["type"] == "tool_result"
+    assert st.messages[-1] == {"role": "assistant", "content": "工具返回 hi,完成"}
     assert st.turn_count == 2  # tool 轮 + 终答轮
     await client.aclose()
 

@@ -1,7 +1,7 @@
 [project]
 name = "praxis-virtualcell"
-version = "2.0.0"
-description = "Antibacterial candidate analysis with LLM tools, MIC predictors and traceable evidence"
+version = "2.1.0"
+description = "Strain-conditioned antibacterial assessment with LLM inference and traceable omics evidence"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
@@ -20,6 +20,7 @@ dev = [
 ]
 api = ["fastapi>=0.110,<1", "uvicorn>=0.27,<1", "sqlalchemy>=2,<3", "redis>=5,<8"]
 chemistry = ["rdkit==2026.3.3"]
+omics = ["anndata>=0.11,<0.13", "mudata>=0.3,<0.4", "h5py>=3.11,<4"]
 mechanistic = ["cobra==0.31.1", "optlang==1.9.1", "swiglpk==5.0.13"]
 server = [
     "asyncpg>=0.29,<1", "redis>=5,<8", "argon2-cffi>=23,<26",
@@ -28,7 +29,7 @@ server = [
 ]
 
 [project.scripts]
-praxis-vc = "praxis_virtualcell.mdr_gnb.cli:main"
+praxis-vc = "praxis_virtualcell.cli:main"
 praxis-mdr = "praxis_virtualcell.mdr_gnb.cli:main"
 
 [build-system]
@@ -40,7 +41,7 @@ include = ["praxis2*", "praxis_virtualcell", "praxis_virtualcell.*"]
 exclude = ["*.tests", "*.tests.*", "*.tests_real", "*.tests_real.*"]
 
 [tool.setuptools.package-data]
-praxis_virtualcell = ["**/*.yaml", "**/*.json", "**/*.md"]
+praxis_virtualcell = ["**/*.yaml", "**/*.json", "**/*.md", "web/static/*.html"]
 
 [tool.ruff]
 line-length = 120

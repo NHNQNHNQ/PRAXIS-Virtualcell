@@ -1,4 +1,4 @@
-name: antibacterial-tools
+name: llm-omics-platform
 on: [push, pull_request]
 permissions:
   contents: read
@@ -12,11 +12,11 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
-      - run: python -m pip install -e '.[dev,api,chemistry]'
+      - run: python -m pip install -e '.[dev,api,chemistry,omics]'
       - run: python -m ruff check praxis2 praxis_virtualcell tests
-      - run: praxis-mdr --help
+      - run: praxis-vc --help
       - run: >-
-          python -m pytest -q tests/agent_runtime
+          python -m pytest -q tests/agent_runtime tests/omics tests/llm_prediction tests/test_llm_platform.py
           tests/mdr_gnb/unit/test_abstain.py
           tests/mdr_gnb/unit/test_features.py
           tests/mdr_gnb/unit/test_ensembler.py

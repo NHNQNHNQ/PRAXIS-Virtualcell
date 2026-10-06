@@ -5,6 +5,7 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .venv/
+.venv
 *.egg-info/
 build/
 dist/
@@ -19,6 +20,8 @@ runs/
 .staging_agent_tests/
 data/mdr_gnb/
 data/antibacterial/
+data/organisms/
+reports/llm_live/
 research/mdr_gnb/mic_discovery/
 *.joblib
 *.pt

@@ -1,0 +1,67 @@
+"""Render verified observations and clearly attributed LLM hypotheses."""
+from __future__ import annotations
+
+from typing import Any
+
+
+def _citations(refs: list[dict]) -> str:
+    return "；".join(f"`{ref['source_id']}`（`{ref['tool_call_id']}{ref['pointer']}`）" for ref in refs)
+
+
+def render_report(result: dict[str, Any]) -> str:
+    if "results" in result:
+        return "\n\n---\n\n".join(render_report(item) for item in result["results"])
+    candidate = result["candidate"]
+    profile = result["profile"]
+    species = profile.get("species", "未知物种")
+    if isinstance(species, dict):
+        species = species.get("scientific_name", "未知物种")
+    assessment = result["assessment"]
+    mic = assessment["mic_estimate"]
+    estimate = "未知（未给出数值）" if mic["value"] is None else f"{mic['value']:g} µg/mL（LLM 估计）"
+    lines = [
+        f"# 候选 {candidate['id']}", "",
+        f"- 状态：{result['status']}",
+        f"- 菌株档案：{profile.get('profile_id')}；{species} / {profile.get('strain', '未知菌株')}",
+        f"- 结构：`{candidate.get('canonical_smiles') or candidate.get('smiles')}`",
+        f"- 活性判断：{assessment['activity']}",
+        f"- MIC：{estimate}",
+        f"- 信心：{assessment['confidence']['level']}（未经校准）",
+        "- 杀伤率 / MBC / 时间杀菌曲线：未知；MIC 表示生长抑制。", "",
+        assessment["rationale_summary"], "",
+        f"MIC 依据：{mic['reason']}",
+    ]
+    if mic["evidence_refs"]:
+        lines.append(f"引用：{_citations(mic['evidence_refs'])}")
+    for title, key in (("支持证据", "supporting_evidence"), ("反证", "counterevidence")):
+        lines.extend(["", f"## {title}", ""])
+        for item in assessment[key]:
+            lines.append(f"- {item['claim']}")
+            for observation in item["observations"]:
+                ref = observation["evidence_ref"]
+                lines.append(f"  - {observation.get('gene_id') or '来源字段'} / {observation['field']} = {observation['value']}；"
+                             f"`{ref['source_id']}`，`{ref['tool_call_id']}{ref['pointer']}`")
+        if not assessment[key]:
+            lines.append("未提供可核验观察。")
+    lines.extend(["", "## 靶点与机制假说", ""])
+    for target in assessment["targets"]:
+        lines.append(f"- {target['name']}（{target.get('target_id') or '身份未确认'}）：{target['hypothesis']}。"
+                     "这是待验证假说，表达观察不能证明直接作用。")
+        if target["evidence_refs"]:
+            lines.append(f"  - 观察引用：{_citations(target['evidence_refs'])}")
+        if target["counterevidence_refs"]:
+            lines.append(f"  - 反证引用：{_citations(target['counterevidence_refs'])}")
+    for mechanism in assessment["mechanism_hypotheses"]:
+        lines.append(f"- {mechanism['hypothesis']}（待验证假说）")
+        if mechanism["evidence_refs"]:
+            lines.append(f"  - 观察引用：{_citations(mechanism['evidence_refs'])}")
+        if mechanism["counterevidence_refs"]:
+            lines.append(f"  - 反证引用：{_citations(mechanism['counterevidence_refs'])}")
+    if not assessment["targets"] and not assessment["mechanism_hypotheses"]:
+        lines.append("未知。")
+    lines.extend(["", "## 缺口", ""])
+    lines.extend(f"- {gap}" for gap in assessment["gaps"])
+    if not assessment["gaps"]:
+        lines.append("未列出额外缺口；信心仍未经校准。")
+    lines.extend(["", f"证据校验：{result['evidence_validation']['status']}；模型：{result['execution_trace']['model']}。", ""])
+    return "\n".join(lines)
