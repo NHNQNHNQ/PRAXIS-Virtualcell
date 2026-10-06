@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import math
 import re
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from typing import Any
 
 from .diagnostics import _public_value
@@ -223,10 +224,27 @@ def validate_evidence(
     cited_sources = {source.rstrip(".,;") for source in re.findall(r"\bomics:[A-Za-z0-9_.:-]+", " ".join(texts))}
     if cited_sources - source_ids:
         flag("source_in_text_not_observed", ["public_text"])
-    # Structured observations remain the factual contract. Also reject explicit
-    # expression quantities smuggled into prose rather than its typed fields.
+    # Machine references remain exact. Prose may round a decimal measurement to
+    # its displayed precision, but integers do not gain a rounding tolerance.
     pattern = r"(?:expression(?:[_ ]value)?|表达(?:值|量)?)\s*(?:为|是|[:=]|is|of|at|equals)?\s*([-+]?(?:\d*\.\d+|\d+)(?:[eE][+-]?\d+)?)"
     quantities = re.findall(pattern, " ".join(texts), flags=re.IGNORECASE)
-    if any(float(quantity) not in expression_values for quantity in quantities):
+    observed_decimals = {Decimal(str(value)) for value in expression_values}
+
+    def observed_display(quantity: str) -> bool:
+        displayed = Decimal(quantity)
+        if displayed in observed_decimals:
+            return True
+        if "." not in quantity:
+            return False
+        quantum = Decimal((0, (1,), displayed.as_tuple().exponent))
+        for actual in observed_decimals:
+            try:
+                if actual.quantize(quantum, rounding=ROUND_HALF_UP) == displayed:
+                    return True
+            except InvalidOperation:
+                continue
+        return False
+
+    if any(not observed_display(quantity) for quantity in quantities):
         flag("expression_quantity_in_text_not_observed", ["public_text"])
     return sorted(set(issues))
