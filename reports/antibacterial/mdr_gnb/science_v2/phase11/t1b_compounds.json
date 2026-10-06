@@ -1,0 +1,39 @@
+{
+  "face_validity": {
+    "anchors": {
+      "ciprofloxacin_log10_lt_0": true
+    },
+    "gates": {
+      "ciprofloxacin_anchor_low": true,
+      "coverage_ge_0.70": true
+    },
+    "metrics": {
+      "coverage": 1.0,
+      "mae": 0.24837359432952535,
+      "n": 17,
+      "n_scored": 17,
+      "r2": 0.8639639326638247,
+      "rmse": 0.37832108024642547
+    },
+    "note": "部署模型见过训练化合物,训练集乐观估计;泛化见 compound_generalization()",
+    "stratum": "train_set_optimistic"
+  },
+  "generalization": {
+    "gates": {
+      "mae_le_0.75": true,
+      "r2_ge_0.40": true
+    },
+    "metrics": {
+      "coverage": 1.0,
+      "mae": 0.5131962235234823,
+      "n": 27175,
+      "n_scored": 27175,
+      "r2": 0.5653833365201386,
+      "rmse": 0.7132709487285761
+    },
+    "n": 27175,
+    "note": "留出泛化数字来自 scaffold-OOF(每化合物由未见其骨架的折预测),非训练集;门槛不随任务调整,fail 如实记录为发现",
+    "source": "reports/science_v2/qsar_baseline/qsar_per_compound.parquet",
+    "stratum": "held_out"
+  }
+}

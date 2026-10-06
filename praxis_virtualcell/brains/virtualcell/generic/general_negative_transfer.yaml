@@ -1,4 +1,0 @@
-negative_transfer:
-  - from_species: human
-    to_species: [bacteria, yeast]
-    rule: mammalian_scrna_predictor_not_applicable

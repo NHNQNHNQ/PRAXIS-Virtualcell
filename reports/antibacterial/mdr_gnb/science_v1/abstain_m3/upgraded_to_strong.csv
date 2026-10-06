@@ -1,0 +1,3 @@
+species,drug,coverage_at_pass,delta_vme,p_value
+acinetobacter_baumannii,ampicillin,1.0,-0.2966,0.0001
+acinetobacter_baumannii,aztreonam,1.0,-0.5289,0.0001

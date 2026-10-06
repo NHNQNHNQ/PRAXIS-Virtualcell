@@ -1,0 +1,10 @@
+cohort,source_sheet,eligibility,rows,parents,positives
+MIC,MIC,author_seen,3503,123,1477.0
+MIC,MIC,eligible,8846,5684,3320.0
+screen_50uM,SD1,author_seen,7679,5785,112.0
+screen_50uM,SD1,invalid_or_nonorganic_structure,5,1,0.0
+screen_50uM,SD3.Highest 240,author_seen,240,237,40.0
+screen_50uM,SD3.Lowest 240,author_seen,238,234,0.0
+screen_50uM,SD3.Lowest 240,invalid_or_nonorganic_structure,2,1,0.0
+screen_50uM,SD3.Prioritized 240,author_seen,239,234,9.0
+screen_50uM,SD3.Prioritized 240,invalid_or_nonorganic_structure,1,1,0.0

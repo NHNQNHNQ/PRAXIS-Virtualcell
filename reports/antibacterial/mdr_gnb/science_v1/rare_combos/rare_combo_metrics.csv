@@ -1,0 +1,5 @@
+species,drug,n,n_R,n_R_ST,vme_ml,me_ml,auc_R,ece,reliable
+klebsiella_pneumoniae,colistin,238,71,26,0.6125,0.0769,0.7826,0.0644,True
+escherichia_coli,colistin,541,16,15,1.0,0.0,0.9605,0.024,True
+pseudomonas_aeruginosa,colistin,144,13,10,1.0,0.0,0.5044,0.0768,False
+acinetobacter_baumannii,colistin,303,24,8,0.875,0.0036,0.7063,0.0537,False

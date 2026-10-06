@@ -1,0 +1,21 @@
+# M. morganii brain(五键)。固有:colistin/tigecycline 耐药 + 染色体 AmpC(同 Proteus 族)。
+intrinsic_resistance: true
+rules:
+  - id: intrinsic_colistin_tigecycline
+    if: {species: "morganella_morganii"}
+    then: {colistin: R, tigecycline: R}
+    provenance: "固有 colistin/tigecycline 耐药;EUCAST intrinsic resistance table"
+resistance_mechanisms:
+  - name: ampc_chromosomal
+    features: ["ampC_derepressed"]
+    mechanism: beta_lactam_hydrolysis
+    supervised_by: "beta_lactamase_activity"
+negative_cases:
+  - note: "固有 colistin/tigecycline 耐药,不得报告 S(阴性对照)"
+    drug: colistin
+assay_boundaries:
+  - method: broth_microdilution
+    supported: true
+    note: "固有耐药物种,折点解释须结合 intrinsic resistance 表"
+species_specific_breakpoints:
+  ceftriaxone: {S: "<=1", R: ">2", source: "EUCAST v14.0"}

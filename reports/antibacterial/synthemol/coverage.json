@@ -1,0 +1,12 @@
+{
+  "author_training_rows": 13524,
+  "reference_raw_rows": 27951,
+  "reference_unique_smiles": 19120,
+  "reference_parents": 10649,
+  "reference_invalid_or_nonorganic": 14,
+  "project_mic_rows": 12349,
+  "screen_rows": 8404,
+  "inference_unique_smiles": 5949,
+  "eligible_rows": 8846,
+  "eligible_parents": 5684
+}

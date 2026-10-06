@@ -1,8 +1,0 @@
-abstain_if:
-  - all_predictors_rejected
-  - species_not_supported
-  - core_predictor_failed
-  - model_disagreement_too_high
-# pairwise cosine distance 阈值(归一化 [0,1]);disagreement score > 此值视为高分歧(§8.3)。
-# 可配置而非硬编,便于未来接入真分歧 predictor 后调参不改代码。
-disagreement_threshold: 0.5

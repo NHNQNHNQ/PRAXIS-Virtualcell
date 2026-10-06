@@ -1,0 +1,54 @@
+{
+  "face_validity": {
+    "anchors": [
+      {
+        "abstained": false,
+        "drug": "meropenem",
+        "expect": "R",
+        "got": "R",
+        "species": "klebsiella_pneumoniae"
+      },
+      {
+        "abstained": false,
+        "drug": "ceftriaxone",
+        "expect": "R",
+        "got": "R",
+        "species": "escherichia_coli"
+      }
+    ],
+    "gates": {
+      "anchors_all_R": true,
+      "coverage_ge_0.70": true
+    },
+    "metrics": {
+      "accuracy": 0.9117647058823529,
+      "coverage": 1.0,
+      "major_error": 0.18,
+      "n": 102,
+      "n_R": 52,
+      "n_S": 50,
+      "very_major_error": 0.0
+    },
+    "note": "部署模型见过全量,此为训练集乐观估计,非泛化;泛化见 sir_generalization()",
+    "stratum": "train_set_optimistic"
+  },
+  "generalization": {
+    "gates": {
+      "auc_ge_0.85": true,
+      "vme_le_0.10": false
+    },
+    "median_auc_R": 0.94,
+    "median_vme_fusion": 0.1254,
+    "n_auc": 26,
+    "n_strong": 26,
+    "n_vme": 26,
+    "note": "留出泛化数字来自 G2R evidence_tiers(per-ST VME / AUC_R),非训练集;门槛不随任务调整,fail 如实记录为发现",
+    "source": "evidence_tiers.yaml",
+    "stratum": "held_out"
+  },
+  "limitations": {
+    "face_validity_species_coverage": "轨A 面值仅覆盖 escherichia_coli / klebsiella_pneumoniae 两物种,因 pseudomonas_aeruginosa / acinetobacter_baumannii / salmonella_enterica 本地无 ncbi_amr_phenotypes.tsv;且轨A 为训练集乐观估计,不作泛化门槛。",
+    "fidelity_reproducible": "轨A amr_profile(base 名)与训练特征化逐位一致,由 verify_amr_fidelity.py 一键复现(N/N 逐位相等),不写死具体数字。",
+    "generalization_species_coverage": "轨B 泛化基于 evidence_tiers 全 26 strong combos,覆盖 5 物种(含 PA/AB/SE),为留出真泛化数字;泛化门槛下在此轨。"
+  }
+}

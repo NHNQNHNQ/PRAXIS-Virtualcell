@@ -1,4 +1,0 @@
-{"request_id": "norman-001", "species": "human", "cell_type": "K562",
- "perturbation_type": "gene", "perturbation_targets": ["AHR"],
- "input_modality": "scRNA", "output_modality": "delta_expression",
- "task_type": "predict_delta_expression", "metadata": {"benchmark": "norman"}}

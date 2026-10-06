@@ -1,0 +1,15 @@
+{
+  "test_files": 44,
+  "helpers": [
+    "_llm_fakes.py",
+    "cassette.py"
+  ],
+  "cassettes": [
+    "m1_prompt_too_long.json",
+    "openai_stream_reasoning.sse",
+    "openai_stream_text_tooluse.sse"
+  ],
+  "destination": "tests/agent_runtime",
+  "excludes": "historical phase/snapshot/deployment/remote/auth/DB/science suites",
+  "note": "Imports are relative; brain and file fixtures do not depend on old VirtualCell repository content."
+}

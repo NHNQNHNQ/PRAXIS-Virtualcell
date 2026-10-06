@@ -1,0 +1,30 @@
+# E. coli brain(兼容 schema:五键)。规则/机制来自 CARD + AMRFinderPlus + EUCAST 折点。
+rules:
+  - id: ctxm_esbl_3gc
+    if: {gene: "blaCTX-M-15"}
+    then: {ceftriaxone: R, cefotaxime: R}
+    provenance: "CARD:ARO:3001989; EUCAST v14.0"
+  - id: ndm_carbapenem
+    if: {gene: "blaNDM-5"}
+    then: {meropenem: R, ertapenem: R}
+    provenance: "AMRFinderPlus 3.12.8; CARD:ARO:3000589"
+resistance_mechanisms:
+  - name: esbl
+    genes: ["blaCTX-M-15", "blaSHV-12"]
+    mechanism: beta_lactam_hydrolysis
+    supervised_by: "beta_lactamase_activity"   # D4 独立机理监督挂点
+  - name: carbapenemase
+    genes: ["blaNDM-5", "blaKPC-2", "blaOXA-48"]
+    mechanism: carbapenem_hydrolysis
+    supervised_by: "beta_lactamase_activity"
+negative_cases:
+  - note: "无 mcr / pmrB 突变时不得预测 colistin 耐药(阴性对照)"
+    drug: colistin
+assay_boundaries:
+  - method: broth_microdilution
+    supported: true
+  - method: disk_diffusion
+    note: "折点换算仅限 EUCAST 有 disk 折点的药,否则降级"
+species_specific_breakpoints:
+  ceftriaxone: {S: "<=1", R: ">2", source: "EUCAST v14.0"}
+  meropenem: {S: "<=2", R: ">8", source: "EUCAST v14.0"}

@@ -1,0 +1,27 @@
+rules:
+  - id: kpc_carbapenem
+    if: {gene: "blaKPC-2"}
+    then: {meropenem: R, imipenem: R}
+    provenance: "CARD:ARO:3000059; AMRFinderPlus 3.12.8"
+  - id: ompk36_porin_loss
+    if: {mutation: "ompK36_disrupted", gene: "blaCTX-M-15"}
+    then: {ertapenem: R}
+    provenance: "porin loss + ESBL 协同(非 FBA;学习/规则状态模型)"
+resistance_mechanisms:
+  - name: carbapenemase
+    genes: ["blaKPC-2", "blaNDM-1", "blaOXA-48"]
+    mechanism: carbapenem_hydrolysis
+    supervised_by: "beta_lactamase_activity"
+  - name: porin_loss
+    features: ["ompK35_disrupted", "ompK36_disrupted"]
+    mechanism: reduced_outer_membrane_permeability   # D4:非代谢靶,须学习状态模型非 FBA
+    supervised_by: "outer_membrane_permeability"
+negative_cases:
+  - note: "单纯 ompK36 缺失不足以判 meropenem R(需协同 β-内酰胺酶),避免假阳"
+    drug: meropenem
+assay_boundaries:
+  - method: broth_microdilution
+    supported: true
+species_specific_breakpoints:
+  meropenem: {S: "<=2", R: ">8", source: "EUCAST v14.0"}
+  ceftazidime_avibactam: {S: "<=8", R: ">8", source: "EUCAST v14.0"}

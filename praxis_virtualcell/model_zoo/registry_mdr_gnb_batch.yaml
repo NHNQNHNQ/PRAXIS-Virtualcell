@@ -1,0 +1,3430 @@
+models:
+  mdrgnb_sir__acinetobacter_baumannii__amikacin:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__amikacin.joblib
+      sha256: bc79264503e54f9a7e27fc76bd33785fce4d0a71995956cb6ef9a6bf6c7c0344
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__amikacin
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 405
+        S: 539
+        n: 944
+        nfeat: 289
+        r_rate: 0.429
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=bc79264503e54f9a7e27fc76bd33785fce4d0a71995956cb6ef9a6bf6c7c0344
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=944 R=405 S=539)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__ampicillin-sulbactam:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__ampicillin-sulbactam.joblib
+      sha256: ee618f2f711ef4815929d7ae0cd666b2032c336f8e62e4bdd93fcdf22ed274f1
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__ampicillin-sulbactam
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 353
+        S: 581
+        n: 934
+        nfeat: 282
+        r_rate: 0.3779
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=ee618f2f711ef4815929d7ae0cd666b2032c336f8e62e4bdd93fcdf22ed274f1
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=934 R=353 S=581)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__aztreonam:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__aztreonam.joblib
+      sha256: c4071e1ecca70cc9efdb571b400fbd4fb59cd66d2f155e5d0fd187a09ab6a259
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__aztreonam
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 637
+        S: 13
+        n: 650
+        nfeat: 189
+        r_rate: 0.98
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=c4071e1ecca70cc9efdb571b400fbd4fb59cd66d2f155e5d0fd187a09ab6a259
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=650 R=637 S=13)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__cefepime:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__cefepime.joblib
+      sha256: 5d77e7548e967e6881815ca2c5aaefbb200cf2604c34ee7c663a1e2ec618de5c
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__cefepime
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 178
+        S: 141
+        n: 319
+        nfeat: 241
+        r_rate: 0.558
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=5d77e7548e967e6881815ca2c5aaefbb200cf2604c34ee7c663a1e2ec618de5c
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=319 R=178 S=141)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__cefotaxime:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__cefotaxime.joblib
+      sha256: c7285a2eaf840e20229b5363a2caa385e319102d802261a87b6945b895d5254e
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__cefotaxime
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 562
+        S: 68
+        n: 630
+        nfeat: 201
+        r_rate: 0.8921
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=c7285a2eaf840e20229b5363a2caa385e319102d802261a87b6945b895d5254e
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=630 R=562 S=68)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__ceftazidime:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__ceftazidime.joblib
+      sha256: cac9f5d0a665681239bdbefa31f59281421cf6127f9a4136a0c6eac70ffe3b7b
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__ceftazidime
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 649
+        S: 311
+        n: 960
+        nfeat: 289
+        r_rate: 0.676
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=cac9f5d0a665681239bdbefa31f59281421cf6127f9a4136a0c6eac70ffe3b7b
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=960 R=649 S=311)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__ceftriaxone:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__ceftriaxone.joblib
+      sha256: 00a352af6fb12b6f9a5eb3aca7b0612c46cd7641a2e576aa5a2c5661f09fd81e
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__ceftriaxone
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 665
+        S: 142
+        n: 807
+        nfeat: 255
+        r_rate: 0.824
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=00a352af6fb12b6f9a5eb3aca7b0612c46cd7641a2e576aa5a2c5661f09fd81e
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=807 R=665 S=142)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__ciprofloxacin:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__ciprofloxacin.joblib
+      sha256: 15137bf3834278f1bba727258b5082d5069b042cf62508668887cba86a79a103
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__ciprofloxacin
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 790
+        S: 197
+        n: 987
+        nfeat: 296
+        r_rate: 0.8004
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=15137bf3834278f1bba727258b5082d5069b042cf62508668887cba86a79a103
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=987 R=790 S=197)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__colistin:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__colistin.joblib
+      sha256: 61f0e082beb154ee1916fdafd993c5c0298cf6d1599d6467ccf895e122b4f3d5
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__colistin
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 24
+        S: 279
+        n: 303
+        nfeat: 236
+        r_rate: 0.0792
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=61f0e082beb154ee1916fdafd993c5c0298cf6d1599d6467ccf895e122b4f3d5
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=303 R=24 S=279)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__doripenem:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__doripenem.joblib
+      sha256: a76c67a9b9d3a9ded4f211091d0a55f3eb146b5a3ee4034d1ab10bc0ccac14e4
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__doripenem
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 120
+        S: 194
+        n: 314
+        nfeat: 173
+        r_rate: 0.3822
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=a76c67a9b9d3a9ded4f211091d0a55f3eb146b5a3ee4034d1ab10bc0ccac14e4
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=314 R=120 S=194)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__gentamicin:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__gentamicin.joblib
+      sha256: 2505d7ecef64fc1dfbdf4fde3046bb547324fe1491357b221feb143c92e7e978
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__gentamicin
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 709
+        S: 273
+        n: 982
+        nfeat: 297
+        r_rate: 0.722
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=2505d7ecef64fc1dfbdf4fde3046bb547324fe1491357b221feb143c92e7e978
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=982 R=709 S=273)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__imipenem:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__imipenem.joblib
+      sha256: be2ae879fea8334a2a0fa854453081d8433273fd6e80fb1c1a7baf650353f540
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__imipenem
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 306
+        S: 669
+        n: 975
+        nfeat: 290
+        r_rate: 0.3138
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=be2ae879fea8334a2a0fa854453081d8433273fd6e80fb1c1a7baf650353f540
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=975 R=306 S=669)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__levofloxacin:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__levofloxacin.joblib
+      sha256: fd21469cec0ab7e3c96369f72e95295a79438f5129c8b46ae3f4d3e188e81d2f
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__levofloxacin
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 500
+        S: 300
+        n: 800
+        nfeat: 260
+        r_rate: 0.625
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=fd21469cec0ab7e3c96369f72e95295a79438f5129c8b46ae3f4d3e188e81d2f
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=800 R=500 S=300)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__meropenem:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__meropenem.joblib
+      sha256: 293354e7dfbfcdb03cec2d8e8c6a7dcee23273da047d0b9d55333a58c697d2ce
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__meropenem
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 276
+        S: 347
+        n: 623
+        nfeat: 276
+        r_rate: 0.443
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=293354e7dfbfcdb03cec2d8e8c6a7dcee23273da047d0b9d55333a58c697d2ce
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=623 R=276 S=347)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__minocycline:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__minocycline.joblib
+      sha256: 24b706ea29a7e9f69ef90d924c4beb16a90b695921fc5d14f9b4afb37d469176
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__minocycline
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 15
+        S: 156
+        n: 171
+        nfeat: 144
+        r_rate: 0.0877
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=24b706ea29a7e9f69ef90d924c4beb16a90b695921fc5d14f9b4afb37d469176
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=171 R=15 S=156)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__moxifloxacin:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__moxifloxacin.joblib
+      sha256: 98be8f56316b5c4495d80ca76c1accbf9c761941a08cbb48c93da766fe36d072
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__moxifloxacin
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 57
+        S: 32
+        n: 89
+        nfeat: 95
+        r_rate: 0.6404
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=98be8f56316b5c4495d80ca76c1accbf9c761941a08cbb48c93da766fe36d072
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=89 R=57 S=32)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__piperacillin-tazobactam:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__piperacillin-tazobactam.joblib
+      sha256: 9aff55cecb5f26a1dbc4ee9a38d570f468ea7424379b4a67a8fece3de9545cc3
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__piperacillin-tazobactam
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 135
+        S: 73
+        n: 208
+        nfeat: 180
+        r_rate: 0.649
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=9aff55cecb5f26a1dbc4ee9a38d570f468ea7424379b4a67a8fece3de9545cc3
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=208 R=135 S=73)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__polymyxin_b:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__polymyxin_b.joblib
+      sha256: e8ade91d98fee79fd41177016c263155240a1b6bcb9f915513040a7efb5904a3
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__polymyxin_b
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 11
+        S: 162
+        n: 173
+        nfeat: 145
+        r_rate: 0.0636
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=e8ade91d98fee79fd41177016c263155240a1b6bcb9f915513040a7efb5904a3
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=173 R=11 S=162)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__tetracycline:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__tetracycline.joblib
+      sha256: 28b2aaba319af3b99bd37474bb517133da23e17064e7f097077da6afb5c2ccad
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__tetracycline
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 516
+        S: 281
+        n: 797
+        nfeat: 254
+        r_rate: 0.6474
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=28b2aaba319af3b99bd37474bb517133da23e17064e7f097077da6afb5c2ccad
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=797 R=516 S=281)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__tobramycin:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__tobramycin.joblib
+      sha256: a9da36be8fde97dea4eca0119869f6386a1c98b7f636921a67258228496a15c5
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__tobramycin
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 421
+        S: 374
+        n: 795
+        nfeat: 256
+        r_rate: 0.5296
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=a9da36be8fde97dea4eca0119869f6386a1c98b7f636921a67258228496a15c5
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=795 R=421 S=374)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__acinetobacter_baumannii__trimethoprim-sulfamethoxazole:
+    assets:
+    - filename: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__trimethoprim-sulfamethoxazole.joblib
+      sha256: c4f87ad4d17c3032cc8c9d32b309fbb2f4daac4bdc983ae378826c920c06ebb2
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__acinetobacter_baumannii__trimethoprim-sulfamethoxazole
+    source: local M2-artifact
+    species:
+    - acinetobacter_baumannii
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 672
+        S: 156
+        n: 828
+        nfeat: 271
+        r_rate: 0.8116
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=c4f87ad4d17c3032cc8c9d32b309fbb2f4daac4bdc983ae378826c920c06ebb2
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection acinetobacter_baumannii genotype→SIR
+        (n=828 R=672 S=156)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__amikacin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__amikacin.joblib
+      sha256: 180dba636ffc1ebc61a7a2b184848059d0d9325a7abc14b2ad50b4721bd6725e
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__amikacin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 57
+        S: 3304
+        n: 3361
+        nfeat: 504
+        r_rate: 0.017
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=180dba636ffc1ebc61a7a2b184848059d0d9325a7abc14b2ad50b4721bd6725e
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=3361
+        R=57 S=3304)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__amoxicillin-clavulanic_acid:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__amoxicillin-clavulanic_acid.joblib
+      sha256: 378530720d261320761744e23df4467cd42c8f0e8684f03f5c64754d9a9a7e2d
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__amoxicillin-clavulanic_acid
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 801
+        S: 5959
+        n: 6760
+        nfeat: 616
+        r_rate: 0.1185
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=378530720d261320761744e23df4467cd42c8f0e8684f03f5c64754d9a9a7e2d
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=6760
+        R=801 S=5959)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__ampicillin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ampicillin.joblib
+      sha256: 64b597684586209b559643661d4935bd86a3cb0a54721d8284510b96271e66e6
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__ampicillin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 3571
+        S: 4038
+        n: 7609
+        nfeat: 698
+        r_rate: 0.4693
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=64b597684586209b559643661d4935bd86a3cb0a54721d8284510b96271e66e6
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=7609
+        R=3571 S=4038)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__ampicillin-sulbactam:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ampicillin-sulbactam.joblib
+      sha256: 13fcb047eb0753ebc6dfae9722c1e8e7853cf7bcc08abd3840b5f30a2c0a856c
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__ampicillin-sulbactam
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 180
+        S: 187
+        n: 367
+        nfeat: 222
+        r_rate: 0.4905
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=13fcb047eb0753ebc6dfae9722c1e8e7853cf7bcc08abd3840b5f30a2c0a856c
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=367
+        R=180 S=187)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__azithromycin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__azithromycin.joblib
+      sha256: ea1e3be0d0fcfaa4d0c31bd90edbdcdc486bba66456d943f2d8a07fda1aa8577
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__azithromycin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 55
+        S: 4514
+        n: 4569
+        nfeat: 466
+        r_rate: 0.012
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=ea1e3be0d0fcfaa4d0c31bd90edbdcdc486bba66456d943f2d8a07fda1aa8577
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=4569
+        R=55 S=4514)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__aztreonam:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__aztreonam.joblib
+      sha256: 9cc5bc172d88f1d906654b244716cdcf30fce32ae1ed1b1094e04ab4655d00cb
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__aztreonam
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 268
+        S: 2054
+        n: 2322
+        nfeat: 363
+        r_rate: 0.1154
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=9cc5bc172d88f1d906654b244716cdcf30fce32ae1ed1b1094e04ab4655d00cb
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=2322
+        R=268 S=2054)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__cefazolin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cefazolin.joblib
+      sha256: 68bff03ef4b7da88f36d693f4e419659899d2e019652724347f422fd50d0b025
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__cefazolin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 963
+        S: 1819
+        n: 2782
+        nfeat: 403
+        r_rate: 0.3462
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=68bff03ef4b7da88f36d693f4e419659899d2e019652724347f422fd50d0b025
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=2782
+        R=963 S=1819)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__cefepime:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cefepime.joblib
+      sha256: 0a91bf9f9f3fce4b715c73c921d20b01a4edc1c60aaa977f7bde50b6ee32c891
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__cefepime
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 615
+        S: 2910
+        n: 3525
+        nfeat: 500
+        r_rate: 0.1745
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=0a91bf9f9f3fce4b715c73c921d20b01a4edc1c60aaa977f7bde50b6ee32c891
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=3525
+        R=615 S=2910)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__cefotaxime:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cefotaxime.joblib
+      sha256: 1200c7a7736b7539fbfb1f1eb243970fa24cd01dc3906d5d88506a97cdbd3d4e
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__cefotaxime
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 660
+        S: 274
+        n: 934
+        nfeat: 345
+        r_rate: 0.7066
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=1200c7a7736b7539fbfb1f1eb243970fa24cd01dc3906d5d88506a97cdbd3d4e
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=934
+        R=660 S=274)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__cefotaxime-clavulanic_acid:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cefotaxime-clavulanic_acid.joblib
+      sha256: 0234c656df0235461d03dc87f880a7f6b5e45647e30252cc0a5afbdd2495f888
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__cefotaxime-clavulanic_acid
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 56
+        S: 285
+        n: 341
+        nfeat: 170
+        r_rate: 0.1642
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=0234c656df0235461d03dc87f880a7f6b5e45647e30252cc0a5afbdd2495f888
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=341
+        R=56 S=285)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__cefoxitin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cefoxitin.joblib
+      sha256: f3e0e0fa325f94e869aeca31af35cdd5d50a43d76290403761614140eaf424f4
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__cefoxitin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 913
+        S: 4258
+        n: 5171
+        nfeat: 597
+        r_rate: 0.1766
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=f3e0e0fa325f94e869aeca31af35cdd5d50a43d76290403761614140eaf424f4
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=5171
+        R=913 S=4258)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__cefpodoxime:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cefpodoxime.joblib
+      sha256: f32bce289f71e46aa70e63feba389d37e96d60c0dce00b06b2d37e7affb983e2
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__cefpodoxime
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 115
+        S: 58
+        n: 173
+        nfeat: 103
+        r_rate: 0.6647
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=f32bce289f71e46aa70e63feba389d37e96d60c0dce00b06b2d37e7affb983e2
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=173
+        R=115 S=58)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__ceftazidime:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ceftazidime.joblib
+      sha256: f27e024f160b28a6bd69bb406e49db8a65ee69c79782cde86ddf955dcbe0b5b7
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__ceftazidime
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 896
+        S: 2599
+        n: 3495
+        nfeat: 509
+        r_rate: 0.2564
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=f27e024f160b28a6bd69bb406e49db8a65ee69c79782cde86ddf955dcbe0b5b7
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=3495
+        R=896 S=2599)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__ceftazidime-clavulanic_acid:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ceftazidime-clavulanic_acid.joblib
+      sha256: cb67c7313281d0583360a5afd397151e300607d5697707e8ba70dcaf08c87a2a
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__ceftazidime-clavulanic_acid
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 54
+        S: 285
+        n: 339
+        nfeat: 161
+        r_rate: 0.1593
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=cb67c7313281d0583360a5afd397151e300607d5697707e8ba70dcaf08c87a2a
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=339
+        R=54 S=285)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__ceftiofur:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ceftiofur.joblib
+      sha256: 5d0f61f104a153c5795c048ad9cee20e871b8193a3a6e22febcbd744c6c19812
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__ceftiofur
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 363
+        S: 851
+        n: 1214
+        nfeat: 222
+        r_rate: 0.299
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=5d0f61f104a153c5795c048ad9cee20e871b8193a3a6e22febcbd744c6c19812
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=1214
+        R=363 S=851)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__ceftriaxone:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ceftriaxone.joblib
+      sha256: 64135f35f1583cb476ce9766ebbb8295ab42fc7727325d5d80f6e67efb3291bf
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__ceftriaxone
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 1386
+        S: 5466
+        n: 6852
+        nfeat: 639
+        r_rate: 0.2023
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=64135f35f1583cb476ce9766ebbb8295ab42fc7727325d5d80f6e67efb3291bf
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=6852
+        R=1386 S=5466)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__cephalothin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cephalothin.joblib
+      sha256: d8a58c009f00865b24aed9a02f9140a5e5a1c93f632d417343f7d911c82da151
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__cephalothin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 121
+        S: 57
+        n: 178
+        nfeat: 110
+        r_rate: 0.6798
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=d8a58c009f00865b24aed9a02f9140a5e5a1c93f632d417343f7d911c82da151
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=178
+        R=121 S=57)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__chloramphenicol:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__chloramphenicol.joblib
+      sha256: bdb95ff3c5b350e8e93cd779cda01a7168c18e5aa89a3951c2f21b4b5ebe6f17
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__chloramphenicol
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 448
+        S: 4185
+        n: 4633
+        nfeat: 493
+        r_rate: 0.0967
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=bdb95ff3c5b350e8e93cd779cda01a7168c18e5aa89a3951c2f21b4b5ebe6f17
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=4633
+        R=448 S=4185)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__ciprofloxacin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ciprofloxacin.joblib
+      sha256: 288765900ae4f7fea914db737c700c3907ebbb1039871fd595870c020eb43c4a
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__ciprofloxacin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 1331
+        S: 6425
+        n: 7756
+        nfeat: 711
+        r_rate: 0.1716
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=288765900ae4f7fea914db737c700c3907ebbb1039871fd595870c020eb43c4a
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=7756
+        R=1331 S=6425)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__colistin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__colistin.joblib
+      sha256: 14ade1c00cf64452126f19de7b6c1b5988087df83fbd0c894fbdd57917fae57a
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__colistin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 16
+        S: 525
+        n: 541
+        nfeat: 257
+        r_rate: 0.0296
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=14ade1c00cf64452126f19de7b6c1b5988087df83fbd0c894fbdd57917fae57a
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=541
+        R=16 S=525)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__ertapenem:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ertapenem.joblib
+      sha256: ac6c11a83faaf0362571dbbf64de01c6b86d6647de45e5282aa4cd9dc93dcea2
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__ertapenem
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 69
+        S: 3273
+        n: 3342
+        nfeat: 469
+        r_rate: 0.0206
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=ac6c11a83faaf0362571dbbf64de01c6b86d6647de45e5282aa4cd9dc93dcea2
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=3342
+        R=69 S=3273)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__gentamicin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__gentamicin.joblib
+      sha256: 18e7debca429802dee5993ca486c646c0bd56abb2ddb0b5faf29b91d551e30b0
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__gentamicin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 1139
+        S: 6306
+        n: 7445
+        nfeat: 697
+        r_rate: 0.153
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=18e7debca429802dee5993ca486c646c0bd56abb2ddb0b5faf29b91d551e30b0
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=7445
+        R=1139 S=6306)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__imipenem:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__imipenem.joblib
+      sha256: 773cd39a8a505691d914535a272c4b01404879a6b00b9d467674463eac87fef3
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__imipenem
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 37
+        S: 3041
+        n: 3078
+        nfeat: 456
+        r_rate: 0.012
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=773cd39a8a505691d914535a272c4b01404879a6b00b9d467674463eac87fef3
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=3078
+        R=37 S=3041)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__kanamycin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__kanamycin.joblib
+      sha256: fec670781318a29528c4577d7089828ec3fa0aa8fe3e9fe6a571a9e7a965ea46
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__kanamycin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 178
+        S: 1058
+        n: 1236
+        nfeat: 237
+        r_rate: 0.144
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=fec670781318a29528c4577d7089828ec3fa0aa8fe3e9fe6a571a9e7a965ea46
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=1236
+        R=178 S=1058)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__levofloxacin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__levofloxacin.joblib
+      sha256: 1e202146107da38ac71b062797c1c5c649a071bc3abfda2ab4db6731173c3115
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__levofloxacin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 876
+        S: 2198
+        n: 3074
+        nfeat: 432
+        r_rate: 0.285
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=1e202146107da38ac71b062797c1c5c649a071bc3abfda2ab4db6731173c3115
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=3074
+        R=876 S=2198)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__meropenem:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__meropenem.joblib
+      sha256: 5279bb281452bb0886979b210ed0d905758c935f5fa0e24f691f97df5026ca63
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__meropenem
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 69
+        S: 6163
+        n: 6232
+        nfeat: 650
+        r_rate: 0.0111
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=5279bb281452bb0886979b210ed0d905758c935f5fa0e24f691f97df5026ca63
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=6232
+        R=69 S=6163)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__moxifloxacin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__moxifloxacin.joblib
+      sha256: ac820c30de2b4905609420f3def8ecd8662aff5162f38783f98c89092920633d
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__moxifloxacin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 37
+        S: 22
+        n: 59
+        nfeat: 103
+        r_rate: 0.6271
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=ac820c30de2b4905609420f3def8ecd8662aff5162f38783f98c89092920633d
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=59 R=37
+        S=22)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__nalidixic_acid:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__nalidixic_acid.joblib
+      sha256: b67ee7407099b400b1ca79b458134d99664caeaa29a3a28467aa13f5eae91ce3
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__nalidixic_acid
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 380
+        S: 4345
+        n: 4725
+        nfeat: 481
+        r_rate: 0.0804
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=b67ee7407099b400b1ca79b458134d99664caeaa29a3a28467aa13f5eae91ce3
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=4725
+        R=380 S=4345)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__nitrofurantoin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__nitrofurantoin.joblib
+      sha256: 62564d2f3f544ca8e49522e15e64d84f51c4208bd10da8e7a141a9d425d29aab
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__nitrofurantoin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 27
+        S: 433
+        n: 460
+        nfeat: 236
+        r_rate: 0.0587
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=62564d2f3f544ca8e49522e15e64d84f51c4208bd10da8e7a141a9d425d29aab
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=460
+        R=27 S=433)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__norfloxacin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__norfloxacin.joblib
+      sha256: c8821a535c528660da84010f19e846bc66775f0b9ac3a5db953a4963bc952c83
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__norfloxacin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 14
+        S: 84
+        n: 98
+        nfeat: 87
+        r_rate: 0.1429
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=c8821a535c528660da84010f19e846bc66775f0b9ac3a5db953a4963bc952c83
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=98 R=14
+        S=84)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__piperacillin-tazobactam:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__piperacillin-tazobactam.joblib
+      sha256: 0061561a5271093068cdf2315ed36b920eeaade3cc82ae0eeea6d8de54c7feb4
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__piperacillin-tazobactam
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 98
+        S: 2709
+        n: 2807
+        nfeat: 396
+        r_rate: 0.0349
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=0061561a5271093068cdf2315ed36b920eeaade3cc82ae0eeea6d8de54c7feb4
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=2807
+        R=98 S=2709)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__streptomycin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__streptomycin.joblib
+      sha256: 7516bb15b1fd524e82a73bf783cabd3af104394fa09f883c4eb8c35b2352e026
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__streptomycin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 1446
+        S: 2644
+        n: 4090
+        nfeat: 406
+        r_rate: 0.3535
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=7516bb15b1fd524e82a73bf783cabd3af104394fa09f883c4eb8c35b2352e026
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=4090
+        R=1446 S=2644)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__sulfamethoxazole:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__sulfamethoxazole.joblib
+      sha256: 1d602c1bc0c0e7541117c530d9dbfb2441d2b1e170f52568d0b07c7bab970fc4
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__sulfamethoxazole
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 301
+        S: 195
+        n: 496
+        nfeat: 203
+        r_rate: 0.6069
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=1d602c1bc0c0e7541117c530d9dbfb2441d2b1e170f52568d0b07c7bab970fc4
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=496
+        R=301 S=195)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__sulfisoxazole:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__sulfisoxazole.joblib
+      sha256: 2da2d0cf6d52818345ce16cb475e468dd8cc551753e84bc9478d3a99865fa57f
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__sulfisoxazole
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 1460
+        S: 2618
+        n: 4078
+        nfeat: 394
+        r_rate: 0.358
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=2da2d0cf6d52818345ce16cb475e468dd8cc551753e84bc9478d3a99865fa57f
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=4078
+        R=1460 S=2618)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__tetracycline:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__tetracycline.joblib
+      sha256: e9d3858106289b2c6e4af70943a56eccad3857e41f06890d660e29c29f9750db
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__tetracycline
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 3107
+        S: 4140
+        n: 7247
+        nfeat: 662
+        r_rate: 0.4287
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=e9d3858106289b2c6e4af70943a56eccad3857e41f06890d660e29c29f9750db
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=7247
+        R=3107 S=4140)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__tigecycline:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__tigecycline.joblib
+      sha256: 6200b6e2249561d0b5080918ae17931ebff1a88d106f9d9ac4a194df75a62db5
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__tigecycline
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 9
+        S: 650
+        n: 659
+        nfeat: 301
+        r_rate: 0.0137
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=6200b6e2249561d0b5080918ae17931ebff1a88d106f9d9ac4a194df75a62db5
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=659
+        R=9 S=650)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__tobramycin:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__tobramycin.joblib
+      sha256: f1da80d09fa79c0cf117f5edd54f8f957a2600b883b7d9a8f9cd3f307c329e4d
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__tobramycin
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 246
+        S: 2726
+        n: 2972
+        nfeat: 441
+        r_rate: 0.0828
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=f1da80d09fa79c0cf117f5edd54f8f957a2600b883b7d9a8f9cd3f307c329e4d
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=2972
+        R=246 S=2726)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__trimethoprim:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__trimethoprim.joblib
+      sha256: 280cf8a838144fe49f0872941af52c9784b726be896cebeb2092abc3da3df104
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__trimethoprim
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 231
+        S: 266
+        n: 497
+        nfeat: 216
+        r_rate: 0.4648
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=280cf8a838144fe49f0872941af52c9784b726be896cebeb2092abc3da3df104
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=497
+        R=231 S=266)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__escherichia_coli__trimethoprim-sulfamethoxazole:
+    assets:
+    - filename: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__trimethoprim-sulfamethoxazole.joblib
+      sha256: 7094ef1753a5329a680ee24856740c26d5b37099fa31f7c30ed3c7ed9b939a14
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__escherichia_coli__trimethoprim-sulfamethoxazole
+    source: local M2-artifact
+    species:
+    - escherichia_coli
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 1273
+        S: 5767
+        n: 7040
+        nfeat: 653
+        r_rate: 0.1808
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=7094ef1753a5329a680ee24856740c26d5b37099fa31f7c30ed3c7ed9b939a14
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection escherichia_coli genotype→SIR (n=7040
+        R=1273 S=5767)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__amikacin:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__amikacin.joblib
+      sha256: d0e62810e42dc2e6ec6f62aae642c5f4ba93c1dfae664023f690d79249314258
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__amikacin
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 165
+        S: 565
+        n: 730
+        nfeat: 408
+        r_rate: 0.226
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=d0e62810e42dc2e6ec6f62aae642c5f4ba93c1dfae664023f690d79249314258
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=730
+        R=165 S=565)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__amoxicillin-clavulanic_acid:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__amoxicillin-clavulanic_acid.joblib
+      sha256: acf67a853a3f49f94907002001958a2f497e63885b2b5f69f97303120a0c9f08
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__amoxicillin-clavulanic_acid
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 227
+        S: 459
+        n: 686
+        nfeat: 341
+        r_rate: 0.3309
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=acf67a853a3f49f94907002001958a2f497e63885b2b5f69f97303120a0c9f08
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=686
+        R=227 S=459)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__ampicillin:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ampicillin.joblib
+      sha256: 4e722f89aa81c13edae845bd8a9205674d0ae4aaa0d3387c8db42d55ce5ab0f6
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__ampicillin
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 512
+        S: 16
+        n: 528
+        nfeat: 364
+        r_rate: 0.9697
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=4e722f89aa81c13edae845bd8a9205674d0ae4aaa0d3387c8db42d55ce5ab0f6
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=528
+        R=512 S=16)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__ampicillin-sulbactam:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ampicillin-sulbactam.joblib
+      sha256: 1ae0ab291e02518ada76512737cbe6adcac918fbc3118d15728d6ae7d736dd08
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__ampicillin-sulbactam
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 225
+        S: 99
+        n: 324
+        nfeat: 300
+        r_rate: 0.6944
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=1ae0ab291e02518ada76512737cbe6adcac918fbc3118d15728d6ae7d736dd08
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=324
+        R=225 S=99)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__aztreonam:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__aztreonam.joblib
+      sha256: 9e203ec624152d1e40bf3b5d4d0f5dc4ddf3b39a2127ad0ed6cea5dad906c94a
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__aztreonam
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 260
+        S: 63
+        n: 323
+        nfeat: 305
+        r_rate: 0.805
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=9e203ec624152d1e40bf3b5d4d0f5dc4ddf3b39a2127ad0ed6cea5dad906c94a
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=323
+        R=260 S=63)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__cefazolin:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefazolin.joblib
+      sha256: 491968d6d0dad863fde0c317650718c886f8d6cba1e883a0af1ad9f7309cc948
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__cefazolin
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 336
+        S: 59
+        n: 395
+        nfeat: 329
+        r_rate: 0.8506
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=491968d6d0dad863fde0c317650718c886f8d6cba1e883a0af1ad9f7309cc948
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=395
+        R=336 S=59)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__cefepime:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefepime.joblib
+      sha256: fbd1b49769ec4e1fdc823021114a76efbc7dd783f25825288ea5c9327f59f289
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__cefepime
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 348
+        S: 279
+        n: 627
+        nfeat: 387
+        r_rate: 0.555
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=fbd1b49769ec4e1fdc823021114a76efbc7dd783f25825288ea5c9327f59f289
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=627
+        R=348 S=279)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__cefotaxime:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefotaxime.joblib
+      sha256: f83c4cf83ab8d2c4d2d8d02a4917421e187e5a55aade43cb0315b0ff3e40887d
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__cefotaxime
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 385
+        S: 326
+        n: 711
+        nfeat: 355
+        r_rate: 0.5415
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=f83c4cf83ab8d2c4d2d8d02a4917421e187e5a55aade43cb0315b0ff3e40887d
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=711
+        R=385 S=326)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__cefotetan:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefotetan.joblib
+      sha256: 12344593b1a61983ffc86e4e1eff7fb059158d96f735e689de72bcdd36088d21
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__cefotetan
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 17
+        S: 89
+        n: 106
+        nfeat: 197
+        r_rate: 0.1604
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=12344593b1a61983ffc86e4e1eff7fb059158d96f735e689de72bcdd36088d21
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=106
+        R=17 S=89)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__cefoxitin:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefoxitin.joblib
+      sha256: e70cd021ed9273b8f56bd4edd649d034923813b8f7204686707e52f3758decb1
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__cefoxitin
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 187
+        S: 306
+        n: 493
+        nfeat: 363
+        r_rate: 0.3793
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=e70cd021ed9273b8f56bd4edd649d034923813b8f7204686707e52f3758decb1
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=493
+        R=187 S=306)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__cefpodoxime:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefpodoxime.joblib
+      sha256: 6a0f796da45f1c1619d6797c8f319552dc2688536f826d42ac7eb56b67b9df5a
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__cefpodoxime
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 62
+        S: 37
+        n: 99
+        nfeat: 194
+        r_rate: 0.6263
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=6a0f796da45f1c1619d6797c8f319552dc2688536f826d42ac7eb56b67b9df5a
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=99
+        R=62 S=37)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__ceftazidime:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ceftazidime.joblib
+      sha256: 681ac5a068fd53c7bf128491b69639bf4fd564e509f2b1ea82be705db1c81fe3
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__ceftazidime
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 664
+        S: 755
+        n: 1419
+        nfeat: 462
+        r_rate: 0.4679
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=681ac5a068fd53c7bf128491b69639bf4fd564e509f2b1ea82be705db1c81fe3
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=1419
+        R=664 S=755)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__ceftazidime-avibactam:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ceftazidime-avibactam.joblib
+      sha256: 0b8c96fff9ee2d26a6f8359883b0517eb9833e8f2c28b7eb3cda9c5f5e034404
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__ceftazidime-avibactam
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 68
+        S: 146
+        n: 214
+        nfeat: 242
+        r_rate: 0.3178
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=0b8c96fff9ee2d26a6f8359883b0517eb9833e8f2c28b7eb3cda9c5f5e034404
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=214
+        R=68 S=146)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__ceftolozane-tazobactam:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ceftolozane-tazobactam.joblib
+      sha256: b6363e54682e8d80d3222734dd485575c0b72154a2532f7f4557a54d05b224d7
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__ceftolozane-tazobactam
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 45
+        S: 63
+        n: 108
+        nfeat: 202
+        r_rate: 0.4167
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=b6363e54682e8d80d3222734dd485575c0b72154a2532f7f4557a54d05b224d7
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=108
+        R=45 S=63)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__ceftriaxone:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ceftriaxone.joblib
+      sha256: a6ea353ac48d16ca8c0501a2bdaa6363dd8448813e533735f6c53648905da3c4
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__ceftriaxone
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 578
+        S: 446
+        n: 1024
+        nfeat: 431
+        r_rate: 0.5645
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=a6ea353ac48d16ca8c0501a2bdaa6363dd8448813e533735f6c53648905da3c4
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=1024
+        R=578 S=446)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__cefuroxime:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefuroxime.joblib
+      sha256: 962d4eb8daf7193bdad447287712f9e201d72698e1b6755aa9b29719c7b3494a
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__cefuroxime
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 83
+        S: 37
+        n: 120
+        nfeat: 208
+        r_rate: 0.6917
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=962d4eb8daf7193bdad447287712f9e201d72698e1b6755aa9b29719c7b3494a
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=120
+        R=83 S=37)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__cephalothin:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cephalothin.joblib
+      sha256: c8ad5fa1413154579b298a9a2b7e75db6dc0405e46bcafcacfbf2ddb948578c9
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__cephalothin
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 75
+        S: 45
+        n: 120
+        nfeat: 203
+        r_rate: 0.625
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=c8ad5fa1413154579b298a9a2b7e75db6dc0405e46bcafcacfbf2ddb948578c9
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=120
+        R=75 S=45)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__chloramphenicol:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__chloramphenicol.joblib
+      sha256: 7d02d6d7252fee596c909f5dc77107290a88ab1ad7796c2925cbd72b20dcd5e3
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__chloramphenicol
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 28
+        S: 62
+        n: 90
+        nfeat: 151
+        r_rate: 0.3111
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=7d02d6d7252fee596c909f5dc77107290a88ab1ad7796c2925cbd72b20dcd5e3
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=90
+        R=28 S=62)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__ciprofloxacin:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ciprofloxacin.joblib
+      sha256: 818b0d72be0fc2ca284bcc51d503827dea921adc706817dcdfe9ed0f462c9fc7
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__ciprofloxacin
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 493
+        S: 289
+        n: 782
+        nfeat: 409
+        r_rate: 0.6304
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=818b0d72be0fc2ca284bcc51d503827dea921adc706817dcdfe9ed0f462c9fc7
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=782
+        R=493 S=289)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__colistin:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__colistin.joblib
+      sha256: 149429ce0f3628941b53ba1e6289cd67e7ad5255f66b98ed8b3d2c931cdea74a
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__colistin
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 77
+        S: 161
+        n: 238
+        nfeat: 234
+        r_rate: 0.3235
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=149429ce0f3628941b53ba1e6289cd67e7ad5255f66b98ed8b3d2c931cdea74a
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=238
+        R=77 S=161)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__doripenem:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__doripenem.joblib
+      sha256: f745b1beb0786d7518e93a8ff2ab612b8d63f4220fc7bd52d5287041f95b8edb
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__doripenem
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 144
+        S: 44
+        n: 188
+        nfeat: 232
+        r_rate: 0.766
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=f745b1beb0786d7518e93a8ff2ab612b8d63f4220fc7bd52d5287041f95b8edb
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=188
+        R=144 S=44)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__doxycycline:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__doxycycline.joblib
+      sha256: 01fb3c45906dc20ab7b927bf0deb7600bcf173c7b1d63f013417f6bc8f50678f
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__doxycycline
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 21
+        S: 57
+        n: 78
+        nfeat: 120
+        r_rate: 0.2692
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=01fb3c45906dc20ab7b927bf0deb7600bcf173c7b1d63f013417f6bc8f50678f
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=78
+        R=21 S=57)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__ertapenem:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ertapenem.joblib
+      sha256: d05010675576c4490d2d7c9a64027f4f2ec67e4283135562f43818f0951b8ecc
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__ertapenem
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 289
+        S: 371
+        n: 660
+        nfeat: 374
+        r_rate: 0.4379
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=d05010675576c4490d2d7c9a64027f4f2ec67e4283135562f43818f0951b8ecc
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=660
+        R=289 S=371)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__gentamicin:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__gentamicin.joblib
+      sha256: fd109a1641b43b1fefb9c1ff1a0a8838c07236549d1e149f1b473684374cc926
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__gentamicin
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 387
+        S: 332
+        n: 719
+        nfeat: 406
+        r_rate: 0.5382
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=fd109a1641b43b1fefb9c1ff1a0a8838c07236549d1e149f1b473684374cc926
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=719
+        R=387 S=332)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__imipenem:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__imipenem.joblib
+      sha256: e28aa264b921c39900c17463f47b389a5a48b1507c314de911e9a49fe7611588
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__imipenem
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 277
+        S: 277
+        n: 554
+        nfeat: 358
+        r_rate: 0.5
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=e28aa264b921c39900c17463f47b389a5a48b1507c314de911e9a49fe7611588
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=554
+        R=277 S=277)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__levofloxacin:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__levofloxacin.joblib
+      sha256: c7ae049b55d77c154dec8c30347741ff1258191996e3942b5a4ce153cf2a47ff
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__levofloxacin
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 296
+        S: 302
+        n: 598
+        nfeat: 378
+        r_rate: 0.495
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=c7ae049b55d77c154dec8c30347741ff1258191996e3942b5a4ce153cf2a47ff
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=598
+        R=296 S=302)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__meropenem:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__meropenem.joblib
+      sha256: 2036345d10cae33858b6875207b488c67925b7b9f9be61b7805f95bc6017299c
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__meropenem
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 339
+        S: 429
+        n: 768
+        nfeat: 415
+        r_rate: 0.4414
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=2036345d10cae33858b6875207b488c67925b7b9f9be61b7805f95bc6017299c
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=768
+        R=339 S=429)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__minocycline:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__minocycline.joblib
+      sha256: 252d051920692f464e28e0f01e4b8fbb9361266c30073184960cfe30eeeda266
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__minocycline
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 18
+        S: 94
+        n: 112
+        nfeat: 168
+        r_rate: 0.1607
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=252d051920692f464e28e0f01e4b8fbb9361266c30073184960cfe30eeeda266
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=112
+        R=18 S=94)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__moxifloxacin:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__moxifloxacin.joblib
+      sha256: ea55f27dd1da24ec3ff749a848a0dd8ce27466dc3f3f2532a6153efd33b6abda
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__moxifloxacin
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 42
+        S: 66
+        n: 108
+        nfeat: 197
+        r_rate: 0.3889
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=ea55f27dd1da24ec3ff749a848a0dd8ce27466dc3f3f2532a6153efd33b6abda
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=108
+        R=42 S=66)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__nalidixic_acid:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__nalidixic_acid.joblib
+      sha256: defaba771081a66a0389a87c81f9341c43b6c77014aae9b0a957044b88bc91d5
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__nalidixic_acid
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 47
+        S: 69
+        n: 116
+        nfeat: 196
+        r_rate: 0.4052
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=defaba771081a66a0389a87c81f9341c43b6c77014aae9b0a957044b88bc91d5
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=116
+        R=47 S=69)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__nitrofurantoin:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__nitrofurantoin.joblib
+      sha256: f1309e05367223a172b9c841a22279b07be5a807ebf29fa2a3b5f6d9b6a1bff6
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__nitrofurantoin
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 217
+        S: 148
+        n: 365
+        nfeat: 278
+        r_rate: 0.5945
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=f1309e05367223a172b9c841a22279b07be5a807ebf29fa2a3b5f6d9b6a1bff6
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=365
+        R=217 S=148)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__piperacillin-tazobactam:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__piperacillin-tazobactam.joblib
+      sha256: fcc6a30b20ade4d6c90b8d187573c2c3b616ca48eb864fb27e81daae63246ada
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__piperacillin-tazobactam
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 422
+        S: 642
+        n: 1064
+        nfeat: 425
+        r_rate: 0.3966
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=fcc6a30b20ade4d6c90b8d187573c2c3b616ca48eb864fb27e81daae63246ada
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=1064
+        R=422 S=642)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__polymyxin_b:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__polymyxin_b.joblib
+      sha256: 8189399a35516c2df074e90a1b3d9a172bb8c27bec80c9c00878b1b252d0f1f1
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__polymyxin_b
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 46
+        S: 76
+        n: 122
+        nfeat: 173
+        r_rate: 0.377
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=8189399a35516c2df074e90a1b3d9a172bb8c27bec80c9c00878b1b252d0f1f1
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=122
+        R=46 S=76)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__tetracycline:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__tetracycline.joblib
+      sha256: b62295739e8dd1b840f9ab3ec36fef81d610ca16ee8cef894780b14e46463e89
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__tetracycline
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 240
+        S: 181
+        n: 421
+        nfeat: 344
+        r_rate: 0.5701
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=b62295739e8dd1b840f9ab3ec36fef81d610ca16ee8cef894780b14e46463e89
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=421
+        R=240 S=181)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__tigecycline:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__tigecycline.joblib
+      sha256: 0c53dac1df17180fde1edc6c424dc0652c765285618675ec973120e9997a7d6f
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__tigecycline
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 19
+        S: 298
+        n: 317
+        nfeat: 306
+        r_rate: 0.0599
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=0c53dac1df17180fde1edc6c424dc0652c765285618675ec973120e9997a7d6f
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=317
+        R=19 S=298)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__tobramycin:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__tobramycin.joblib
+      sha256: b2ebdb475b58388434631da5cfa37bde66b2d823b4731b300736c2d0badd0e28
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__tobramycin
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 321
+        S: 283
+        n: 604
+        nfeat: 375
+        r_rate: 0.5315
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=b2ebdb475b58388434631da5cfa37bde66b2d823b4731b300736c2d0badd0e28
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=604
+        R=321 S=283)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__klebsiella_pneumoniae__trimethoprim-sulfamethoxazole:
+    assets:
+    - filename: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__trimethoprim-sulfamethoxazole.joblib
+      sha256: 750ad1d381bf213ec841689ae35aa07ead31bdf60dec4c04d2cfc8258cd928d6
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__klebsiella_pneumoniae__trimethoprim-sulfamethoxazole
+    source: local M2-artifact
+    species:
+    - klebsiella_pneumoniae
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 470
+        S: 242
+        n: 712
+        nfeat: 399
+        r_rate: 0.6601
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=750ad1d381bf213ec841689ae35aa07ead31bdf60dec4c04d2cfc8258cd928d6
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection klebsiella_pneumoniae genotype→SIR (n=712
+        R=470 S=242)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__amikacin:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__amikacin.joblib
+      sha256: 68189371ecc952f8e532b3ce1dad3724fd631fd627295d67a5eb9bbb3a84bcfc
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__amikacin
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 73
+        S: 443
+        n: 516
+        nfeat: 443
+        r_rate: 0.1415
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=68189371ecc952f8e532b3ce1dad3724fd631fd627295d67a5eb9bbb3a84bcfc
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=516
+        R=73 S=443)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__aztreonam:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__aztreonam.joblib
+      sha256: 114c9e6abd0cfce41480937050f5c562e6ba8927b195933162d63716db7a3be0
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__aztreonam
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 99
+        S: 81
+        n: 180
+        nfeat: 346
+        r_rate: 0.55
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=114c9e6abd0cfce41480937050f5c562e6ba8927b195933162d63716db7a3be0
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=180
+        R=99 S=81)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__cefepime:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__cefepime.joblib
+      sha256: d09c041e22eecdcc6431e34c3f71543d14bed8b665e2d721ece4d6700f03602f
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__cefepime
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 195
+        S: 256
+        n: 451
+        nfeat: 389
+        r_rate: 0.4324
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=d09c041e22eecdcc6431e34c3f71543d14bed8b665e2d721ece4d6700f03602f
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=451
+        R=195 S=256)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__ceftazidime:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__ceftazidime.joblib
+      sha256: 7a364a533b60f67763dabf1f0403ccb2cfd777c22915da8155526608d983f3b4
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__ceftazidime
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 188
+        S: 305
+        n: 493
+        nfeat: 479
+        r_rate: 0.3813
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=7a364a533b60f67763dabf1f0403ccb2cfd777c22915da8155526608d983f3b4
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=493
+        R=188 S=305)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__ceftazidime-avibactam:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__ceftazidime-avibactam.joblib
+      sha256: f0ca66cbea856e8936433c0c82ffe13d4955a5d925dee491e3cc8c38690139b1
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__ceftazidime-avibactam
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 35
+        S: 19
+        n: 54
+        nfeat: 200
+        r_rate: 0.6481
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=f0ca66cbea856e8936433c0c82ffe13d4955a5d925dee491e3cc8c38690139b1
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=54
+        R=35 S=19)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__ciprofloxacin:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__ciprofloxacin.joblib
+      sha256: bdbfdd786be6aa352d69bb6fb911cffc1845d8d3343cafbb84a4fee82c1a41ed
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__ciprofloxacin
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 398
+        S: 247
+        n: 645
+        nfeat: 432
+        r_rate: 0.6171
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=bdbfdd786be6aa352d69bb6fb911cffc1845d8d3343cafbb84a4fee82c1a41ed
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=645
+        R=398 S=247)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__colistin:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__colistin.joblib
+      sha256: 19442be5e0a03a3019072b6b2d57bae92405843fcb8df0b53f5f8a732d9f00e3
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__colistin
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 14
+        S: 130
+        n: 144
+        nfeat: 288
+        r_rate: 0.0972
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=19442be5e0a03a3019072b6b2d57bae92405843fcb8df0b53f5f8a732d9f00e3
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=144
+        R=14 S=130)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__gentamicin:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__gentamicin.joblib
+      sha256: bb384a5df11dba802558a0b8fe96be20321fbe6e28827cbbe8f37b45769f5e23
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__gentamicin
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 277
+        S: 267
+        n: 544
+        nfeat: 376
+        r_rate: 0.5092
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=bb384a5df11dba802558a0b8fe96be20321fbe6e28827cbbe8f37b45769f5e23
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=544
+        R=277 S=267)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__imipenem:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__imipenem.joblib
+      sha256: 77f9ffc0f98141845445d3e4e436802b7eeca704ba00aee24c80a09076882062
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__imipenem
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 307
+        S: 118
+        n: 425
+        nfeat: 375
+        r_rate: 0.7224
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=77f9ffc0f98141845445d3e4e436802b7eeca704ba00aee24c80a09076882062
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=425
+        R=307 S=118)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__levofloxacin:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__levofloxacin.joblib
+      sha256: 0a7bb434ed1d707e6a8a7f6e882c8d79ab2fdb269c86a9cc2d170137c96e394b
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__levofloxacin
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 233
+        S: 182
+        n: 415
+        nfeat: 406
+        r_rate: 0.5614
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=0a7bb434ed1d707e6a8a7f6e882c8d79ab2fdb269c86a9cc2d170137c96e394b
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=415
+        R=233 S=182)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__meropenem:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__meropenem.joblib
+      sha256: d737bf7503ed440086a240d97ea80ac0e4305964bab107060c8bf2ba8c0eae02
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__meropenem
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 219
+        S: 132
+        n: 351
+        nfeat: 412
+        r_rate: 0.6239
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=d737bf7503ed440086a240d97ea80ac0e4305964bab107060c8bf2ba8c0eae02
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=351
+        R=219 S=132)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__piperacillin-tazobactam:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__piperacillin-tazobactam.joblib
+      sha256: 6fc325ed7cfc4a415f22c5cfb6def714f12447bca9a3b5bc56eb696392c69726
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__piperacillin-tazobactam
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 147
+        S: 212
+        n: 359
+        nfeat: 351
+        r_rate: 0.4095
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=6fc325ed7cfc4a415f22c5cfb6def714f12447bca9a3b5bc56eb696392c69726
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=359
+        R=147 S=212)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__polymyxin_b:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__polymyxin_b.joblib
+      sha256: f95b80f55f540e19265ea267189fc1d8c0e05438930a64be6cf141c3d6fd0858
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__polymyxin_b
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 13
+        S: 79
+        n: 92
+        nfeat: 204
+        r_rate: 0.1413
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=f95b80f55f540e19265ea267189fc1d8c0e05438930a64be6cf141c3d6fd0858
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=92
+        R=13 S=79)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__pseudomonas_aeruginosa__tobramycin:
+    assets:
+    - filename: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__tobramycin.joblib
+      sha256: 7ed936ced3d4e8853df5d6c0e69e3d0e62412401db7600854875e8b6f930a280
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__pseudomonas_aeruginosa__tobramycin
+    source: local M2-artifact
+    species:
+    - pseudomonas_aeruginosa
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 260
+        S: 197
+        n: 457
+        nfeat: 376
+        r_rate: 0.5689
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=7ed936ced3d4e8853df5d6c0e69e3d0e62412401db7600854875e8b6f930a280
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection pseudomonas_aeruginosa genotype→SIR (n=457
+        R=260 S=197)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__amoxicillin-clavulanic_acid:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__amoxicillin-clavulanic_acid.joblib
+      sha256: c667b359bd22fef3fda3b0eb8654784f4e00059618670dd5c0007eab1ce10f27
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__amoxicillin-clavulanic_acid
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 899
+        S: 8591
+        n: 9490
+        nfeat: 148
+        r_rate: 0.0947
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=c667b359bd22fef3fda3b0eb8654784f4e00059618670dd5c0007eab1ce10f27
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=9490
+        R=899 S=8591)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__ampicillin:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__ampicillin.joblib
+      sha256: 617a8a837d2ecdd6204c20416c7d1614ef08deac5bfdac6ee9d6178990a97a51
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__ampicillin
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 2456
+        S: 7155
+        n: 9611
+        nfeat: 154
+        r_rate: 0.2555
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=617a8a837d2ecdd6204c20416c7d1614ef08deac5bfdac6ee9d6178990a97a51
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=9611
+        R=2456 S=7155)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__azithromycin:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__azithromycin.joblib
+      sha256: 26b220ef4103cd47d20d85504e73c4412967cf5298bc068362248062153e36dc
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__azithromycin
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 15
+        S: 6803
+        n: 6818
+        nfeat: 141
+        r_rate: 0.0022
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=26b220ef4103cd47d20d85504e73c4412967cf5298bc068362248062153e36dc
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=6818
+        R=15 S=6803)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__cefoxitin:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__cefoxitin.joblib
+      sha256: 79ece8e23a2876b5f483cecada776827ba3b48b6ab0d43c7f38128e9f58bdf23
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__cefoxitin
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 802
+        S: 8702
+        n: 9504
+        nfeat: 149
+        r_rate: 0.0844
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=79ece8e23a2876b5f483cecada776827ba3b48b6ab0d43c7f38128e9f58bdf23
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=9504
+        R=802 S=8702)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__ceftiofur:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__ceftiofur.joblib
+      sha256: ef4dcf09f69c7d3e4345522575cad60720c8bbdb7435a896b2112f0f4566d188
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__ceftiofur
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 710
+        S: 4066
+        n: 4776
+        nfeat: 112
+        r_rate: 0.1487
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=ef4dcf09f69c7d3e4345522575cad60720c8bbdb7435a896b2112f0f4566d188
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=4776
+        R=710 S=4066)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__ceftriaxone:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__ceftriaxone.joblib
+      sha256: daa1cf4794c153384461b4ee2b69137ccec608576030414d36a0282320ffbb73
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__ceftriaxone
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 1219
+        S: 8294
+        n: 9513
+        nfeat: 151
+        r_rate: 0.1281
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=daa1cf4794c153384461b4ee2b69137ccec608576030414d36a0282320ffbb73
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=9513
+        R=1219 S=8294)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__chloramphenicol:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__chloramphenicol.joblib
+      sha256: 560a9386e5d5378943674c2b24c1a862b06020e64f83f45939271516d6271f7b
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__chloramphenicol
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 588
+        S: 9000
+        n: 9588
+        nfeat: 147
+        r_rate: 0.0613
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=560a9386e5d5378943674c2b24c1a862b06020e64f83f45939271516d6271f7b
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=9588
+        R=588 S=9000)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__ciprofloxacin:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__ciprofloxacin.joblib
+      sha256: 95585b9bc78ef4a8a13dee0571a62759bf3e006e28042a496a1ccd6120bc2fa8
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__ciprofloxacin
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 604
+        S: 8854
+        n: 9458
+        nfeat: 150
+        r_rate: 0.0639
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=95585b9bc78ef4a8a13dee0571a62759bf3e006e28042a496a1ccd6120bc2fa8
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=9458
+        R=604 S=8854)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__gentamicin:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__gentamicin.joblib
+      sha256: 301efe1f44d79eea8b2eb18cf8bf08624254890b3adb0e95d295a1ecddd451cd
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__gentamicin
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 900
+        S: 8688
+        n: 9588
+        nfeat: 152
+        r_rate: 0.0939
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=301efe1f44d79eea8b2eb18cf8bf08624254890b3adb0e95d295a1ecddd451cd
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=9588
+        R=900 S=8688)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__kanamycin:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__kanamycin.joblib
+      sha256: 629928a95a42f2c04392ed6d0fab40e6545b148e04dbebeda796982563c5af2f
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__kanamycin
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 476
+        S: 3363
+        n: 3839
+        nfeat: 78
+        r_rate: 0.124
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=629928a95a42f2c04392ed6d0fab40e6545b148e04dbebeda796982563c5af2f
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=3839
+        R=476 S=3363)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__nalidixic_acid:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__nalidixic_acid.joblib
+      sha256: 16c64c96dc1f609f8ad72bdd199e9c4f56cd62a8e269db696b37bbd6b1b3d2a6
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__nalidixic_acid
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 823
+        S: 8749
+        n: 9572
+        nfeat: 141
+        r_rate: 0.086
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=16c64c96dc1f609f8ad72bdd199e9c4f56cd62a8e269db696b37bbd6b1b3d2a6
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=9572
+        R=823 S=8749)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__streptomycin:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__streptomycin.joblib
+      sha256: 2ba6f6d68ac87def3b5291ba31ceda24578ccecbd6cdb5e61ee07dd8aac1f00a
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__streptomycin
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 3254
+        S: 5259
+        n: 8513
+        nfeat: 138
+        r_rate: 0.3822
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=2ba6f6d68ac87def3b5291ba31ceda24578ccecbd6cdb5e61ee07dd8aac1f00a
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=8513
+        R=3254 S=5259)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__sulfamethoxazole:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__sulfamethoxazole.joblib
+      sha256: 669f57a07b29bdb73750fe675725869b956190f3d819fa29278f1ec4152d4c3a
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__sulfamethoxazole
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 88
+        S: 341
+        n: 429
+        nfeat: 44
+        r_rate: 0.2051
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=669f57a07b29bdb73750fe675725869b956190f3d819fa29278f1ec4152d4c3a
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=429
+        R=88 S=341)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__sulfisoxazole:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__sulfisoxazole.joblib
+      sha256: f2641aaff044d4df06edec0a90b78fd36d0f1a505783dcd5dcb6395aa293201b
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__sulfisoxazole
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 2727
+        S: 6422
+        n: 9149
+        nfeat: 144
+        r_rate: 0.2981
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=f2641aaff044d4df06edec0a90b78fd36d0f1a505783dcd5dcb6395aa293201b
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=9149
+        R=2727 S=6422)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__tetracycline:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__tetracycline.joblib
+      sha256: 4c6b48adfb48f64d47a98f85083bbe1b93a920d1187909f0057aa2a215d2a2b7
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__tetracycline
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 4875
+        S: 4708
+        n: 9583
+        nfeat: 152
+        r_rate: 0.5087
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=4c6b48adfb48f64d47a98f85083bbe1b93a920d1187909f0057aa2a215d2a2b7
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=9583
+        R=4875 S=4708)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper
+  mdrgnb_sir__salmonella_enterica__trimethoprim-sulfamethoxazole:
+    assets:
+    - filename: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__trimethoprim-sulfamethoxazole.joblib
+      sha256: d1e66c13b47dec771fe3929bae6bd688c1688a96a8cb901ab3fe68a15d250156
+    license: research-only
+    module: genetic_hub
+    name: mdrgnb_sir__salmonella_enterica__trimethoprim-sulfamethoxazole
+    source: local M2-artifact
+    species:
+    - salmonella_enterica
+    status: available
+    task: predict_sir
+    training_card:
+      baseline: rule_baseline_sir(冻结 AMRFinderPlus 规则法)
+      metrics:
+        R: 318
+        S: 9206
+        n: 9524
+        nfeat: 153
+        r_rate: 0.0334
+      provenance: M2-artifact env/train_genotype_sir.py RandomForest; artifact sha256=d1e66c13b47dec771fe3929bae6bd688c1688a96a8cb901ab3fe68a15d250156
+      split: ST GroupKFold 防泄漏(见 M1/G1 assert_no_leak_all,ST 不跨 train/test)
+      training_data: NCBI Pathogen Detection salmonella_enterica genotype→SIR (n=9524
+        R=318 S=9206)
+    type: self_trained
+    version: m2-2026-07
+    wrapper: praxis_virtualcell.model_zoo.wrappers.sir_wrapper.GenotypeToSIRWrapper

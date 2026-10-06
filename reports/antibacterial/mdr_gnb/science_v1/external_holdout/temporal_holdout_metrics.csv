@@ -1,0 +1,6 @@
+species,drug,cutoff,train_n,test_n,test_R_ST,vme_fusion,vme_rule,delta_vme,t_star,year_coverage
+escherichia_coli,ceftriaxone,2021,6464,337,68,0.0000,0.0223,-0.0223,0.040,0.993
+escherichia_coli,ciprofloxacin,2021,6423,336,41,0.0000,0.0079,-0.0079,0.100,0.871
+klebsiella_pneumoniae,meropenem,2021,392,210,24,0.0480,0.1010,-0.0530,0.160,0.784
+klebsiella_pneumoniae,cefepime,2021,248,230,31,0.0000,0.0312,-0.0312,0.240,0.762
+klebsiella_pneumoniae,ceftriaxone,2021,792,138,44,0.0044,0.0819,-0.0774,0.240,0.908
