@@ -1,0 +1,17 @@
+{
+  "antibiotic_chemprop": {
+    "members": 10,
+    "replay_passed": true,
+    "rows": 5949
+  },
+  "antibiotic_chemprop_rdkit": {
+    "members": 10,
+    "replay_passed": true,
+    "rows": 5949
+  },
+  "antibiotic_random_forest": {
+    "members": 10,
+    "replay_passed": true,
+    "rows": 5949
+  }
+}

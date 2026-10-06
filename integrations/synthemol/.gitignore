@@ -1,0 +1,6 @@
+external/
+archives/
+assets/
+.venv*/
+__pycache__/
+*.pyc

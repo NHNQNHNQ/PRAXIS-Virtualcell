@@ -1,0 +1,208 @@
+# 版本冻结的 AMRFinderPlus 基因族 → SIR 声明式规则(G2 对照基线)。
+# 语义:某药物下,基因型命中任一 resistant_if_any.gene_family(前缀匹配)即判 R,否则 S。
+# db_version 由 amrfinder_runner 快照回填校验;规则表未收录的药物显式抛错(不静默判 S)。
+#
+# NCBI-only 适配说明:NCBI ncbi_amr_genotypes 基因名扁平(如 blaSHV-12/blaTEM-1 无 ESBL 后缀),
+# 无法用前缀区分 ESBL 与非 ESBL 变体,故只收录**无歧义的耐药决定簇**(ESBL/AmpC/碳青霉烯酶),
+# 刻意排除歧义的 blaTEM/blaSHV 广义前缀,避免过度判 R(宁可漏判也不虚判,基线以精确为先)。
+# 这是种子表,按需扩展(锚点两药 ceftriaxone/meropenem 先覆盖)。
+schema_version: 1
+rules:
+  ceftriaxone:
+    # 3 代头孢:ESBL(CTX-M)、质粒 AmpC、碳青霉烯酶均致 3GC 耐药
+    resistant_if_any:
+      gene_family:
+        - blaCTX-M
+        - blaCMY
+        - blaDHA
+        - blaACC
+        - blaFOX
+        - blaMOX
+        - blaACT
+        - blaMIR
+        - blaKPC
+        - blaNDM
+        - blaVIM
+        - blaIMP
+        - blaGES
+        - blaOXA-48
+        - blaOXA-181
+        - blaOXA-232
+  meropenem:
+    # 碳青霉烯:各类碳青霉烯酶(A/B/D 类)
+    resistant_if_any:
+      gene_family:
+        - blaKPC
+        - blaNDM
+        - blaVIM
+        - blaIMP
+        - blaSPM
+        - blaSIM
+        - blaGIM
+        - blaGES
+        - blaOXA-48
+        - blaOXA-181
+        - blaOXA-232
+        - blaOXA-23
+        - blaOXA-24
+        - blaOXA-40
+        - blaOXA-58
+        - blaOXA-72
+        - blaOXA-51
+  ciprofloxacin:
+    # 氟喹诺酮:QRDR 靶点点突变(gyrA/parC/parE)+ 质粒介导 PMQR(qnr/aac(6')-Ib-cr/oqx/qepA)。
+    # 临床标准决定簇,写强(高召回),看 RF 能否在"突变累积/非线性"上进一步超越。
+    resistant_if_any:
+      gene_family:
+        - gyrA_S83
+        - gyrA_D87
+        - parC_S80
+        - parC_E84
+        - parC_A56
+        - parE_S458
+        - parE_L416
+        - parE_I529
+        - qnr
+        - aac(6')-Ib-cr
+        - oqxA
+        - oqxB
+        - qepA
+  levofloxacin:
+    # 同氟喹诺酮机制(与 ciprofloxacin 共用 QRDR + PMQR 决定簇)
+    resistant_if_any:
+      gene_family:
+        - gyrA_S83
+        - gyrA_D87
+        - parC_S80
+        - parC_E84
+        - parC_A56
+        - parE_S458
+        - parE_L416
+        - parE_I529
+        - qnr
+        - aac(6')-Ib-cr
+        - oqxA
+        - oqxB
+        - qepA
+  ampicillin:
+    # 氨苄西林:任一 β-内酰胺酶(含窄谱 TEM-1/SHV-1/OXA-1)即致耐药(与 3GC 不同,窄谱酶也算)
+    resistant_if_any:
+      gene_family:
+        - blaTEM
+        - blaSHV
+        - blaOXA-1
+        - blaOXA-2
+        - blaOXA-9
+        - blaOXA-10
+        - blaCTX-M
+        - blaCARB
+        - blaCMY
+        - blaDHA
+        - blaACT
+        - blaMIR
+        - blaFOX
+        - blaKPC
+        - blaNDM
+        - blaVIM
+        - blaIMP
+        - blaOXA-48
+  cefepime:
+    # 4 代头孢:高产 ESBL、碳青霉烯酶致耐(对 AmpC 较稳定)
+    resistant_if_any:
+      gene_family:
+        - blaCTX-M
+        - blaKPC
+        - blaNDM
+        - blaVIM
+        - blaIMP
+        - blaGES
+        - blaOXA-48
+        - blaOXA-181
+        - blaOXA-232
+        - blaPER
+        - blaVEB
+  aztreonam:
+    # 氨曲南:ESBL(CTX-M)、KPC/GES 致耐;金属酶(NDM/VIM/IMP)不水解氨曲南,故不收
+    resistant_if_any:
+      gene_family:
+        - blaCTX-M
+        - blaKPC
+        - blaGES
+        - blaPER
+        - blaVEB
+        - blaCMY
+        - blaDHA
+  gentamicin:
+    # 庆大霉素:AAC(3)、ANT(2'')修饰酶 + 16S rRNA 甲基化酶(泛氨基糖苷)
+    resistant_if_any:
+      gene_family:
+        - aac(3)-II
+        - aac(3)-IV
+        - aac(3)-VI
+        - ant(2'')
+        - armA
+        - rmtB
+        - rmtC
+        - rmtF
+        - rmtG
+  tobramycin:
+    # 妥布霉素:AAC(6')、ANT(2'')、AAC(3)-IV + 16S 甲基化酶
+    resistant_if_any:
+      gene_family:
+        - aac(6')-I
+        - aac(3)-IV
+        - ant(2'')
+        - ant(4')
+        - armA
+        - rmtB
+        - rmtC
+        - rmtF
+  amikacin:
+    # 阿米卡星:AAC(6')-Ib(修饰阿米卡星)+ 16S 甲基化酶(泛耐)
+    resistant_if_any:
+      gene_family:
+        - aac(6')-Ib
+        - aac(6')-Ic
+        - armA
+        - rmtB
+        - rmtC
+        - rmtF
+        - rmtG
+  trimethoprim-sulfamethoxazole:
+    # 复方磺胺:dfrA(甲氧苄啶靶点)或 sul(磺胺)——任一存在即多判耐药
+    resistant_if_any:
+      gene_family:
+        - dfrA
+        - dfrB
+        - sul1
+        - sul2
+        - sul3
+  tetracycline:
+    # 四环素:外排 tet(A/B/D/G/C)+ 核糖体保护 tet(M/O/W)
+    resistant_if_any:
+      gene_family:
+        - tet(A)
+        - tet(B)
+        - tet(C)
+        - tet(D)
+        - tet(G)
+        - tet(M)
+        - tet(O)
+        - tet(W)
+  chloramphenicol:
+    # 氯霉素:cat(乙酰转移酶)+ 外排 cmlA/floR
+    resistant_if_any:
+      gene_family:
+        - catA
+        - catB
+        - catI
+        - cmlA
+        - floR
+  fosfomycin:
+    # 磷霉素:fosA(谷胱甘肽转移酶,KP 常染色体固有)+ 质粒 fosA3/A5
+    resistant_if_any:
+      gene_family:
+        - fosA
+        - fosA3
+        - fosA5
+        - fosA7

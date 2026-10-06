@@ -1,0 +1,15 @@
+# G2 锚点门预注册:先于跑数写定,事后不得改(改动须记 PROGRESS.md 并注明理由/日期)。
+# NCBI-only 适配:无定量 MIC,故"折点附近耐药株子集"退化为"全部真耐药株(R)";
+# metric=vme 在全 R 株上计,操作点须对齐(匹配 ME 或 VME-coverage)后再比。
+significance_unit: ST
+metric: vme
+subset: all_resistant          # NCBI 无 MIC,无折点附近子集,用全 R 株
+operating_point: match_me      # 公平比较:ML 阈值调到与规则法相同 ME,再比 VME
+test: paired_permutation
+n_permutations: 10000
+alpha: 0.05
+min_effect_size: 0.05          # model 相对 rule 的 per-ST VME 绝对下降下限(单侧)
+min_st_with_R: 8               # 参与检验的、含耐药株的 ST 数下限
+anchors:
+  - {species: escherichia_coli, drug: ceftriaxone}
+  - {species: klebsiella_pneumoniae, drug: meropenem}

@@ -1,0 +1,19 @@
+# S. enterica brain(五键)。gyrA QRDR 氟喹诺酮 + 质粒 blaCTX-M。
+rules:
+  - id: gyra_qrdr_fq
+    if: {mutation: "gyrA_S83F"}
+    then: {ciprofloxacin: R}
+    provenance: "QRDR 突变;EUCAST v14.0(沙门菌 cipro 折点严)"
+resistance_mechanisms:
+  - name: qrdr_gyra
+    features: ["gyrA_S83F", "gyrA_D87N"]
+    mechanism: dna_gyrase_target_alteration
+    supervised_by: "dna_gyrase_sensitivity"
+negative_cases:
+  - note: "单一 qnr 而无 QRDR 突变时判 cipro I 非 R(避免过判)"
+    drug: ciprofloxacin
+assay_boundaries:
+  - method: broth_microdilution
+    supported: true
+species_specific_breakpoints:
+  ciprofloxacin: {S: "<=0.06", R: ">0.06", source: "EUCAST v14.0 (Salmonella)"}

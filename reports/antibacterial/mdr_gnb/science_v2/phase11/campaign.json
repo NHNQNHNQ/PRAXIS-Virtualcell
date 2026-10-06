@@ -1,0 +1,281 @@
+{
+  "all_gates_pass": false,
+  "campaign_pass": true,
+  "findings": [],
+  "layers": {
+    "t1a": {
+      "face_validity": {
+        "anchors": [
+          {
+            "abstained": false,
+            "drug": "meropenem",
+            "expect": "R",
+            "got": "R",
+            "species": "klebsiella_pneumoniae"
+          },
+          {
+            "abstained": false,
+            "drug": "ceftriaxone",
+            "expect": "R",
+            "got": "R",
+            "species": "escherichia_coli"
+          }
+        ],
+        "metrics": {
+          "accuracy": 0.9117647058823529,
+          "coverage": 1.0,
+          "major_error": 0.18,
+          "n": 102,
+          "n_R": 52,
+          "n_S": 50,
+          "very_major_error": 0.0
+        },
+        "stratum": "train_set_optimistic"
+      },
+      "findings": [],
+      "gates": {
+        "face.anchors_all_R": true,
+        "face.coverage_ge_0.70": true,
+        "gen.auc_ge_0.85": true,
+        "gen.vme_le_0.10": false
+      },
+      "generalization": {
+        "median_auc_R": 0.94,
+        "median_vme_fusion": 0.1254,
+        "n_auc": 26,
+        "n_strong": 26,
+        "n_vme": 26,
+        "source": "evidence_tiers.yaml",
+        "stratum": "held_out"
+      },
+      "hard_red_line": false,
+      "layer": "t1a",
+      "limitations": {
+        "face_validity_species_coverage": "轨A 面值仅覆盖 escherichia_coli / klebsiella_pneumoniae 两物种,因 pseudomonas_aeruginosa / acinetobacter_baumannii / salmonella_enterica 本地无 ncbi_amr_phenotypes.tsv;且轨A 为训练集乐观估计,不作泛化门槛。",
+        "fidelity_reproducible": "轨A amr_profile(base 名)与训练特征化逐位一致,由 verify_amr_fidelity.py 一键复现(N/N 逐位相等),不写死具体数字。",
+        "generalization_species_coverage": "轨B 泛化基于 evidence_tiers 全 26 strong combos,覆盖 5 物种(含 PA/AB/SE),为留出真泛化数字;泛化门槛下在此轨。"
+      },
+      "pass": false
+    },
+    "t1b": {
+      "face_validity": {
+        "anchors": {
+          "ciprofloxacin_log10_lt_0": true
+        },
+        "metrics": {
+          "coverage": 1.0,
+          "mae": 0.24837359432952535,
+          "n": 17,
+          "n_scored": 17,
+          "r2": 0.8639639326638247,
+          "rmse": 0.37832108024642547
+        },
+        "stratum": "train_set_optimistic"
+      },
+      "findings": [],
+      "gates": {
+        "face.ciprofloxacin_anchor_low": true,
+        "face.coverage_ge_0.70": true,
+        "gen.mae_le_0.75": true,
+        "gen.r2_ge_0.40": true
+      },
+      "generalization": {
+        "metrics": {
+          "coverage": 1.0,
+          "mae": 0.5131962235234823,
+          "n": 27175,
+          "n_scored": 27175,
+          "r2": 0.5653833365201386,
+          "rmse": 0.7132709487285761
+        },
+        "n": 27175,
+        "source": "reports/science_v2/qsar_baseline/qsar_per_compound.parquet",
+        "stratum": "held_out"
+      },
+      "hard_red_line": false,
+      "layer": "t1b",
+      "limitations": {},
+      "pass": true
+    },
+    "t1c": {
+      "face_validity": {
+        "anchors": {
+          "magainin2_log10_in_1_2": true
+        },
+        "metrics": {
+          "coverage": 1.0,
+          "mae": 0.20106817287661205,
+          "n": 18,
+          "n_scored": 18,
+          "r2": 0.9244763400585128,
+          "rmse": 0.2783796806838633
+        },
+        "stratum": "train_set_optimistic"
+      },
+      "findings": [],
+      "gates": {
+        "face.coverage_ge_0.70": true,
+        "face.magainin2_anchor_in_range": true,
+        "gen.mae_le_0.90": true,
+        "gen.r2_ge_0.20": true
+      },
+      "generalization": {
+        "metrics": {
+          "coverage": 1.0,
+          "mae": 0.4572207064688159,
+          "n": 774,
+          "n_scored": 774,
+          "r2": 0.2937679983298941,
+          "rmse": 0.6210575408901026
+        },
+        "n": 774,
+        "source": "reports/science_v2/peptide_baseline/peptide_per_seq.parquet",
+        "stratum": "held_out"
+      },
+      "hard_red_line": false,
+      "layer": "t1c",
+      "limitations": {},
+      "pass": true
+    },
+    "t2": {
+      "findings": [],
+      "gates": {
+        "fail_closed_verified": true
+      },
+      "hard_red_line": true,
+      "layer": "t2",
+      "n_compounds": 3,
+      "n_compounds_abstained": 3,
+      "n_peptides": 3,
+      "n_peptides_abstained": 3,
+      "n_sir_leaks": 0,
+      "n_sir_malformed": 3,
+      "n_total_leaks": 0,
+      "pass": true
+    },
+    "t3": {
+      "findings": [],
+      "g3_candidate_drugs": [
+        "trimethoprim"
+      ],
+      "gates": {
+        "honest": true
+      },
+      "hard_red_line": true,
+      "layer": "t3",
+      "n_violations": 0,
+      "no_model_species": [
+        "enterobacter_cloacae",
+        "morganella_morganii",
+        "proteus_mirabilis"
+      ],
+      "non_metabolic_drugs": [
+        "colistin",
+        "meropenem"
+      ],
+      "pass": true,
+      "violations": []
+    },
+    "t4": {
+      "corpus_composition": {
+        "compound_activity": 9,
+        "fail_closed": 6,
+        "peptide_activity": 8,
+        "sir": 12
+      },
+      "fba_coverage": {
+        "drug": "trimethoprim",
+        "fba_simulation_present": true,
+        "growth_inhibition": 1.0,
+        "mechanism_available": true,
+        "reactions_blocked": [
+          "DHFR"
+        ]
+      },
+      "findings": [],
+      "gates": {
+        "all_stable": true
+      },
+      "hard_red_line": true,
+      "layer": "t4",
+      "n_queries": 35,
+      "n_repeats": 100,
+      "n_unstable": 0,
+      "pass": true,
+      "unstable_examples": []
+    },
+    "t5": {
+      "crashes": [],
+      "findings": [],
+      "gates": {
+        "no_crashed": true,
+        "no_leaked": true
+      },
+      "hard_red_line": false,
+      "layer": "t5",
+      "leaks": [],
+      "n_crashed": 0,
+      "n_fail_closed": 10,
+      "n_leaked": 0,
+      "n_total": 10,
+      "pass": true
+    },
+    "t6": {
+      "by_case_kind": {
+        "abstained": 10,
+        "peptide_activity": 25,
+        "sir": 50,
+        "sm_activity": 27
+      },
+      "findings": [],
+      "gates": {
+        "evidence_systems_consistent": true
+      },
+      "hard_red_line": true,
+      "layer": "t6",
+      "n_case": 112,
+      "n_mismatch": 0,
+      "pass": true
+    },
+    "t7": {
+      "findings": [],
+      "gates": {
+        "all_cases_schema_fixed_point": true,
+        "e2e_science_consistent": true
+      },
+      "hard_red_line": true,
+      "layer": "t7",
+      "n_case": 7,
+      "n_mismatch": 0,
+      "n_task_id_mismatch": 0,
+      "negative_controls": {
+        "demonstrated_power_kinds": [
+          "peptide_activity",
+          "sir",
+          "sm_activity"
+        ],
+        "power_not_demonstrated_kinds": [
+          "no_model_species",
+          "ood"
+        ]
+      },
+      "pass": true,
+      "science_fields_compared": [
+        "abstained",
+        "output_kind",
+        "sir",
+        "activity",
+        "peptide_activity",
+        "mechanism"
+      ]
+    }
+  },
+  "red_flags": [],
+  "t4_repeats": 100,
+  "verdict_definitions": {
+    "all_gates_pass": "含软门槛:九层(含 T1 三子层)的**每一个** gate 都为 True,且无 red_line finding。它比 campaign_pass 严格 —— T1 的软门槛或 T5 的 gates 任一未达即 False。**门槛来源**:九层中八层的 gates 直读自各层自己的预注册字段,唯 T5 的两条 gate 系推导(详见「九层一览」下方的门槛来源披露)。",
+    "campaign_pass": "硬红线语义:HARD_RED_LINE_LAYERS(T2/T3/T4/T6/T7)全部 pass,且全战役无 severity=red_line 的 finding。回答的是「平台的安全与诚实边界守住了吗」。T1 的软门槛(准确率/VME/MIC 误差)**不**参与本读数。",
+    "difference": "二者的差 = T1 软指标 **及 T5 的非硬红线 gates**。campaign_pass=True 而 all_gates_pass=False 意味着:硬红线守住了,但某条非硬红线门槛未达 —— 差异若来自 T1,那是**科学局限**(预测性能未达预注册门槛,不是红线事故);若来自 T5,那是**边界缺口**(对抗输入未 fail-closed),性质更重,只是依预注册规则不由本读数拉黑(它由 red_line finding 拉黑)。**读数差异的来源要看是哪一层,不可一律当作科学局限。**两个读数同时呈现,是为了让读者自己判断,而不是由我们替他挑一个好看的。",
+    "red_flags": "红旗 = ①任一硬红线层失败 或 ②任一 severity=red_line 的 finding。非空 ⇔ campaign_pass=False。软门槛失败**不**进红旗(它是科学发现,如实记录,不调阈值)。"
+  }
+}

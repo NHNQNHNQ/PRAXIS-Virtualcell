@@ -1,0 +1,2 @@
+species,n_compounds,n_scaffolds,rf_r2,rf_mae,rf_rmse,mean_rmse,nn1_rmse,beats_mean,beats_nn1
+escherichia_coli,27175,8724,0.5654,0.5132,0.7133,1.0837,0.8268,True,True

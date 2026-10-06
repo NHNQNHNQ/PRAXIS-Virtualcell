@@ -1,0 +1,49 @@
+{
+  "bootstrap": {
+    "alpha": 0.05,
+    "n_resamples": 2000,
+    "seed": 0
+  },
+  "effect_note": "E4 显著性来自 RF 在大误差样本上的改善;逐化合物 win_rate=0.5114(1-NN 在重复化合物上精确命中),效应量 dz=0.1282 偏小——'显著优于'成立,但非全面碾压",
+  "evidence_level": "E4",
+  "ladder": {
+    "E1_artifact_exists": true,
+    "E2_deterministic": true,
+    "E3_scaffold_cv": true,
+    "E4_beats_similarity_retrieval": true,
+    "E5_external_holdout": false
+  },
+  "method": "验证层(每模型):读 B0.1 scaffold-OOF 真数据跑配对 bootstrap 定级,累积取最高达成级",
+  "n_compounds": 27175,
+  "n_scaffolds": 8724,
+  "not_e5_because": "无外部数据集(换来源/换年份)holdout;当前仅 ChEMBL EC 内部 scaffold-split CV",
+  "r2": 0.5654,
+  "rationale": [
+    "E1 artifact 在",
+    "E2 确定性 E2E(B1 验证同 raw 逐字相等)",
+    "E3 scaffold-split CV:R²=0.5654,优于均值=True",
+    "E4 显著优于 1-NN 相似性检索:ΔMSE=0.1748, p=0.0(显著)",
+    "E5 外部数据集 holdout:未做"
+  ],
+  "rmse_mean": 1.0837,
+  "rmse_nn1": 0.8268,
+  "rmse_rf": 0.7133,
+  "sig_vs_mean": {
+    "delta_mse": 0.6618,
+    "effect_size_dz": 0.38,
+    "p_lt": 0.0005,
+    "p_value": 0.0,
+    "significant": true,
+    "win_rate": 0.6921
+  },
+  "sig_vs_mean_note": "均值基线用全局 y.mean() 近似,与 qsar_metrics.csv 的逐折 mean_rmse 略异;仅作 E3 佐证,E3 定级实读 metrics.csv 的 beats_mean(逐折)",
+  "sig_vs_nn1": {
+    "delta_mse": 0.1748,
+    "effect_size_dz": 0.1282,
+    "p_lt": 0.0005,
+    "p_value": 0.0,
+    "significant": true,
+    "win_rate": 0.5114
+  },
+  "species": "escherichia_coli"
+}

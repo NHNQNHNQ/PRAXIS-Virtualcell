@@ -1,0 +1,22 @@
+{
+  "all_stable": true,
+  "corpus_composition": {
+    "compound_activity": 9,
+    "fail_closed": 6,
+    "peptide_activity": 8,
+    "sir": 12
+  },
+  "fba_coverage": {
+    "drug": "trimethoprim",
+    "fba_simulation_present": true,
+    "growth_inhibition": 1.0,
+    "mechanism_available": true,
+    "reactions_blocked": [
+      "DHFR"
+    ]
+  },
+  "n_queries": 35,
+  "n_repeats": 100,
+  "n_unstable": 0,
+  "unstable_examples": []
+}

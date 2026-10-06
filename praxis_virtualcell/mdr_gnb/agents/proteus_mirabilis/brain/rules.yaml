@@ -1,0 +1,22 @@
+# P. mirabilis brain(五键)。固有:colistin/polymyxin + tigecycline + nitrofurantoin 耐药。
+intrinsic_resistance: true
+rules:
+  - id: intrinsic_colistin_tigecycline
+    if: {species: "proteus_mirabilis"}
+    then: {colistin: R, tigecycline: R}
+    provenance: "固有 colistin(LPS 修饰)+ tigecycline(AcrAB 外排);EUCAST intrinsic table"
+resistance_mechanisms:
+  - name: intrinsic_polymyxin
+    mechanism: lps_modification
+    supervised_by: "outer_membrane_permeability"
+negative_cases:
+  - note: "固有 colistin/tigecycline 耐药,不得报告 S(阴性对照)"
+    drug: colistin
+  - note: "无 NCBI PD 独立 organism 组,建模数据缺;药敏解释以规则+固有表为主"
+    drug: tigecycline
+assay_boundaries:
+  - method: broth_microdilution
+    supported: true
+    note: "固有耐药物种,折点解释须结合 intrinsic resistance 表"
+species_specific_breakpoints:
+  ceftriaxone: {S: "<=1", R: ">2", source: "EUCAST v14.0"}

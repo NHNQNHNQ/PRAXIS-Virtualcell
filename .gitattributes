@@ -1,0 +1,8 @@
+* text=auto
+# Keep imported scientific records byte-for-byte, including their original line endings.
+reports/antibacterial/** -text whitespace=-blank-at-eof,cr-at-eol
+candidates/** -text whitespace=-blank-at-eof,cr-at-eol
+*.py text eol=lf
+*.md text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf

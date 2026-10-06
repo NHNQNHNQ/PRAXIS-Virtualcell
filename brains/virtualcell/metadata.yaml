@@ -1,13 +1,17 @@
-# virtualcell brain — 虚拟细胞多物种多任务预测。
-# helps_with=场景痛点 · delivers=交付物 · examples=试试这样问。
+short_prompt: "结合活性工具和来源证据分析抗菌候选分子，解释 MIC/药敏预测并提出可验证的机制假说。"
+methods:
+  - "按物种与模型范围选择 MDR 活性或独立 direct MIC 入口"
+  - "检索文献、蛋白和结构证据，保留工具状态与来源"
+  - "区分实验观察、模型预测与机制假说"
 helps_with:
-  - "想预测基因扰动/敲除后单细胞转录组怎么变(Norman / Replogle 类)"
-  - "想比较多个 perturbation predictor 并要可靠性(abstain)判断"
-  - "想把哺乳动物的方法迁到细菌/酵母,但担心跨物种误迁移"
+  - "候选分子的物种层面抗菌活性评分与适用范围分析"
+  - "已知药物与菌株耐药背景的证据整理"
+  - "潜在作用机制的证据比较与实验验证建议"
 delivers:
-  - "Coordinator 编排的 perturbation 预测 + 不确定性 + abstain 决策"
-  - "跨物种适用性 / 负迁移告警(species-aware,Week 5 起)"
-  - "公开 benchmark 同表对比(Norman / Replogle / Sciplex / E.coli / yeast)"
+  - "含模型版本、单位、弃权原因及来源的候选分析"
+  - "关联支持与反对证据的机制假说"
+  - "需补充的实验与输入信息"
 examples:
-  - "Norman 双基因扰动,Coordinator+abstain 给可靠预测"
-  - "这个 predictor 能用在 E. coli 上吗?"
+  - "评估 Escherichia coli 候选分子的 MIC，说明模型范围、OOD 与依据。"
+  - "分析 Acinetobacter baumannii 候选分子的 direct MIC 结果与不确定性。"
+  - "检索候选分子的靶点证据，区分实验结果和机制假说。"

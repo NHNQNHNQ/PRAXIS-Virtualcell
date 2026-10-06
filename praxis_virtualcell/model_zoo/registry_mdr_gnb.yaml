@@ -1,0 +1,4629 @@
+schema_version: '1.0'
+catalog_version: 2026-07-18-local
+generated_from:
+  sir_batch_manifest:
+    path: praxis_virtualcell/model_zoo/registry_mdr_gnb_batch.yaml
+    sha256: 05a2190cbed5e0ceba7ae5951ad0b7aa8295f98ee01f50b4b319beaab35155d5
+  evidence_tiers:
+    path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+    sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+  amrfinder_sir_rules:
+    path: praxis_virtualcell/mdr_gnb/predictors/rules/amrfinder_sir_rules.yaml
+    sha256: cf9633bc1ec1dcad6163c24a238656d3395c02fb4d793019b09df2f86cbe1e18
+models:
+  activity/escherichia_coli/peptide:
+    id: activity/escherichia_coli/peptide
+    execution: predict
+    capability:
+      output_kind: peptide_activity
+      species: escherichia_coli
+      drug_id: '*'
+      scientific_contract: aggregated_ecoli_activity
+    runtime:
+      adapter: peptide
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: peptide_sequence_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/peptide_activity__mic.joblib
+      sha256: d9f3d71ee3d7c41442d542109bb4bdaf41f4129d7cb1656f2b3ade92191ec60e
+    validation:
+      status: limited
+      evidence_source: reports/science_v2/peptide_baseline
+      artifact_sha256: d9f3d71ee3d7c41442d542109bb4bdaf41f4129d7cb1656f2b3ade92191ec60e
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  activity/escherichia_coli/small_molecule:
+    id: activity/escherichia_coli/small_molecule
+    execution: predict
+    capability:
+      output_kind: sm_activity
+      species: escherichia_coli
+      drug_id: '*'
+      scientific_contract: aggregated_ecoli_activity
+    runtime:
+      adapter: small_molecule
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      - rdkit
+      dependency_versions:
+        scikit-learn: 1.9.0
+        rdkit: 2026.3.3
+      input_contract_id: smiles_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/sm_activity__mic.joblib
+      sha256: 5c0ced7b340266d2c4a921357a0cfe1c170bd2d116322bb98ecbafee230b7b7c
+    validation:
+      status: limited
+      evidence_source: reports/science_v2/qsar_baseline
+      artifact_sha256: 5c0ced7b340266d2c4a921357a0cfe1c170bd2d116322bb98ecbafee230b7b7c
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  mechanism/escherichia_coli/iml1515:
+    id: mechanism/escherichia_coli/iml1515
+    execution: experimental
+    capability:
+      output_kind: mechanism_state
+      species: escherichia_coli
+      drug_id: '*'
+      scientific_contract: experimental_mechanism_candidate
+    runtime:
+      adapter: iml1515
+      dependencies:
+      - cobra
+      - optlang
+      - swiglpk
+      dependency_versions:
+        cobra: 0.31.1
+        optlang: 1.9.1
+        swiglpk: 5.0.13
+      input_contract_id: metabolic_target_drug_v1
+    asset:
+      path: data/mdr_gnb/gems/iML1515.xml.gz
+      sha256: 2555e0f7e55a8cb8e770b9bb29cdaeb5db171941c414e7a232ff2d8e0228e308
+    validation:
+      status: unverified
+      evidence_source: null
+      artifact_sha256: null
+    lifecycle:
+      declared: true
+      routeable_when_ready: false
+  sir/acinetobacter_baumannii/amikacin:
+    id: sir/acinetobacter_baumannii/amikacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: amikacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__amikacin.joblib
+      sha256: bc79264503e54f9a7e27fc76bd33785fce4d0a71995956cb6ef9a6bf6c7c0344
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: acinetobacter_baumannii:amikacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 09695df9afb99fbfb99895ec9c4073da9c92ee0dfffbe7283d013c6ae26fe6af
+      artifact_sha256: bc79264503e54f9a7e27fc76bd33785fce4d0a71995956cb6ef9a6bf6c7c0344
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__amikacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/ampicillin-sulbactam:
+    id: sir/acinetobacter_baumannii/ampicillin-sulbactam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: ampicillin-sulbactam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__ampicillin-sulbactam.joblib
+      sha256: ee618f2f711ef4815929d7ae0cd666b2032c336f8e62e4bdd93fcdf22ed274f1
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: acinetobacter_baumannii:ampicillin-sulbactam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: a7b8855c0640efdb3bbff705e4a425207e798b02951437b38b83a21e137ea11d
+      artifact_sha256: ee618f2f711ef4815929d7ae0cd666b2032c336f8e62e4bdd93fcdf22ed274f1
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__ampicillin-sulbactam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/aztreonam:
+    id: sir/acinetobacter_baumannii/aztreonam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: aztreonam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__aztreonam.joblib
+      sha256: c4071e1ecca70cc9efdb571b400fbd4fb59cd66d2f155e5d0fd187a09ab6a259
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: acinetobacter_baumannii:aztreonam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: f22690c49488b742f82fbfbed6e6ee1997a79112df1317653999c9607836bab4
+      artifact_sha256: c4071e1ecca70cc9efdb571b400fbd4fb59cd66d2f155e5d0fd187a09ab6a259
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__aztreonam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/cefepime:
+    id: sir/acinetobacter_baumannii/cefepime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: cefepime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__cefepime.joblib
+      sha256: 5d77e7548e967e6881815ca2c5aaefbb200cf2604c34ee7c663a1e2ec618de5c
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: acinetobacter_baumannii:cefepime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 386d6a1a35d78793012a4e8cb2c4d79a9ac85e1081cc66e796b4b5c9263dc066
+      artifact_sha256: 5d77e7548e967e6881815ca2c5aaefbb200cf2604c34ee7c663a1e2ec618de5c
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__cefepime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/cefotaxime:
+    id: sir/acinetobacter_baumannii/cefotaxime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: cefotaxime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__cefotaxime.joblib
+      sha256: c7285a2eaf840e20229b5363a2caa385e319102d802261a87b6945b895d5254e
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: acinetobacter_baumannii:cefotaxime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 20a558d5ad20b962eed7a03f5f72df6353f8eaa214b220ba504a6265b61702a6
+      artifact_sha256: c7285a2eaf840e20229b5363a2caa385e319102d802261a87b6945b895d5254e
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__cefotaxime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/ceftazidime:
+    id: sir/acinetobacter_baumannii/ceftazidime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: ceftazidime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__ceftazidime.joblib
+      sha256: cac9f5d0a665681239bdbefa31f59281421cf6127f9a4136a0c6eac70ffe3b7b
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: acinetobacter_baumannii:ceftazidime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 0e56322e95a9de984e545669d2e729d4a75e603fcc7bab64033a3f5465b4bea3
+      artifact_sha256: cac9f5d0a665681239bdbefa31f59281421cf6127f9a4136a0c6eac70ffe3b7b
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__ceftazidime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/ceftriaxone:
+    id: sir/acinetobacter_baumannii/ceftriaxone
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: ceftriaxone
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__ceftriaxone.joblib
+      sha256: 00a352af6fb12b6f9a5eb3aca7b0612c46cd7641a2e576aa5a2c5661f09fd81e
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: acinetobacter_baumannii:ceftriaxone
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 032d0df6fd8502a266a35e5b28e3b0ca093cd45ebf8dab5f16b81b5d5defb027
+      artifact_sha256: 00a352af6fb12b6f9a5eb3aca7b0612c46cd7641a2e576aa5a2c5661f09fd81e
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__ceftriaxone
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/ciprofloxacin:
+    id: sir/acinetobacter_baumannii/ciprofloxacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: ciprofloxacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__ciprofloxacin.joblib
+      sha256: 15137bf3834278f1bba727258b5082d5069b042cf62508668887cba86a79a103
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: acinetobacter_baumannii:ciprofloxacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: af34001c1afaa0780fb8b723b1dda4f5fbba9483bc3b1bb52ccb6f2689b9f277
+      artifact_sha256: 15137bf3834278f1bba727258b5082d5069b042cf62508668887cba86a79a103
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__ciprofloxacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/colistin:
+    id: sir/acinetobacter_baumannii/colistin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: colistin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__colistin.joblib
+      sha256: 61f0e082beb154ee1916fdafd993c5c0298cf6d1599d6467ccf895e122b4f3d5
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: acinetobacter_baumannii:colistin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 72dedc2b5a2daf49c7f980af58c307a585f057bc08837823cb125c3156f87bc7
+      artifact_sha256: 61f0e082beb154ee1916fdafd993c5c0298cf6d1599d6467ccf895e122b4f3d5
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__colistin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/doripenem:
+    id: sir/acinetobacter_baumannii/doripenem
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: doripenem
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__doripenem.joblib
+      sha256: a76c67a9b9d3a9ded4f211091d0a55f3eb146b5a3ee4034d1ab10bc0ccac14e4
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: acinetobacter_baumannii:doripenem
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 6b2b8f10f0e4146eef869e1a106f0368307eb927cb8666d812f99e0ff0025005
+      artifact_sha256: a76c67a9b9d3a9ded4f211091d0a55f3eb146b5a3ee4034d1ab10bc0ccac14e4
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__doripenem
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/gentamicin:
+    id: sir/acinetobacter_baumannii/gentamicin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: gentamicin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__gentamicin.joblib
+      sha256: 2505d7ecef64fc1dfbdf4fde3046bb547324fe1491357b221feb143c92e7e978
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: acinetobacter_baumannii:gentamicin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: f93bfd956a469d110a64bb60ed26c04068d2d7892b871ba1e5284fa664c01603
+      artifact_sha256: 2505d7ecef64fc1dfbdf4fde3046bb547324fe1491357b221feb143c92e7e978
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__gentamicin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/imipenem:
+    id: sir/acinetobacter_baumannii/imipenem
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: imipenem
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__imipenem.joblib
+      sha256: be2ae879fea8334a2a0fa854453081d8433273fd6e80fb1c1a7baf650353f540
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: acinetobacter_baumannii:imipenem
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: e43e8bb92e6bf2da760e3554415b75f252453af986dc03b6aeb4bfdfecb43715
+      artifact_sha256: be2ae879fea8334a2a0fa854453081d8433273fd6e80fb1c1a7baf650353f540
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__imipenem
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/levofloxacin:
+    id: sir/acinetobacter_baumannii/levofloxacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: levofloxacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__levofloxacin.joblib
+      sha256: fd21469cec0ab7e3c96369f72e95295a79438f5129c8b46ae3f4d3e188e81d2f
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: acinetobacter_baumannii:levofloxacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: c5801dc38aecabcdee3cf0ad4154d81a4e27693d8c062684c709eeba7a03903e
+      artifact_sha256: fd21469cec0ab7e3c96369f72e95295a79438f5129c8b46ae3f4d3e188e81d2f
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__levofloxacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/meropenem:
+    id: sir/acinetobacter_baumannii/meropenem
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: meropenem
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__meropenem.joblib
+      sha256: 293354e7dfbfcdb03cec2d8e8c6a7dcee23273da047d0b9d55333a58c697d2ce
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: acinetobacter_baumannii:meropenem
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: b31d59a630f91e45d077bb81fedf49827a8a48cc11c07fd2b67427ee9d12e2cc
+      artifact_sha256: 293354e7dfbfcdb03cec2d8e8c6a7dcee23273da047d0b9d55333a58c697d2ce
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__meropenem
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/minocycline:
+    id: sir/acinetobacter_baumannii/minocycline
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: minocycline
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__minocycline.joblib
+      sha256: 24b706ea29a7e9f69ef90d924c4beb16a90b695921fc5d14f9b4afb37d469176
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: acinetobacter_baumannii:minocycline
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 480dfbe146902c882da42c0664e9a7e18432595a4f5d8cc9b76a6c4a2ce87dce
+      artifact_sha256: 24b706ea29a7e9f69ef90d924c4beb16a90b695921fc5d14f9b4afb37d469176
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__minocycline
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/moxifloxacin:
+    id: sir/acinetobacter_baumannii/moxifloxacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: moxifloxacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__moxifloxacin.joblib
+      sha256: 98be8f56316b5c4495d80ca76c1accbf9c761941a08cbb48c93da766fe36d072
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: acinetobacter_baumannii:moxifloxacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 4c9b35565d421814ff4732a12f3256f512428cf7b92a64175e6a7c62d99a6659
+      artifact_sha256: 98be8f56316b5c4495d80ca76c1accbf9c761941a08cbb48c93da766fe36d072
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__moxifloxacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/piperacillin-tazobactam:
+    id: sir/acinetobacter_baumannii/piperacillin-tazobactam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: piperacillin-tazobactam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__piperacillin-tazobactam.joblib
+      sha256: 9aff55cecb5f26a1dbc4ee9a38d570f468ea7424379b4a67a8fece3de9545cc3
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: acinetobacter_baumannii:piperacillin-tazobactam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 8f604e7a3d58d5efb9e15610e8127c71ec3965b8518b8b9fb64eb7107d204bac
+      artifact_sha256: 9aff55cecb5f26a1dbc4ee9a38d570f468ea7424379b4a67a8fece3de9545cc3
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__piperacillin-tazobactam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/polymyxin_b:
+    id: sir/acinetobacter_baumannii/polymyxin_b
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: polymyxin_b
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__polymyxin_b.joblib
+      sha256: e8ade91d98fee79fd41177016c263155240a1b6bcb9f915513040a7efb5904a3
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: acinetobacter_baumannii:polymyxin_b
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 96dbce200d8eaa2d95677c89ba4a4f257d76cbdd642513889d2ca45e7f66efff
+      artifact_sha256: e8ade91d98fee79fd41177016c263155240a1b6bcb9f915513040a7efb5904a3
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__polymyxin_b
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/tetracycline:
+    id: sir/acinetobacter_baumannii/tetracycline
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: tetracycline
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__tetracycline.joblib
+      sha256: 28b2aaba319af3b99bd37474bb517133da23e17064e7f097077da6afb5c2ccad
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: acinetobacter_baumannii:tetracycline
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: cf7293862053c94b3d6acec9013ce1cb187869800a503dede4511e566647e7f0
+      artifact_sha256: 28b2aaba319af3b99bd37474bb517133da23e17064e7f097077da6afb5c2ccad
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__tetracycline
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/tobramycin:
+    id: sir/acinetobacter_baumannii/tobramycin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: tobramycin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__tobramycin.joblib
+      sha256: a9da36be8fde97dea4eca0119869f6386a1c98b7f636921a67258228496a15c5
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: acinetobacter_baumannii:tobramycin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 4d329902a099eaa3cf1d622e14f8a79b25c04515ef4b61f6e457761f80e099ca
+      artifact_sha256: a9da36be8fde97dea4eca0119869f6386a1c98b7f636921a67258228496a15c5
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__tobramycin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/acinetobacter_baumannii/trimethoprim-sulfamethoxazole:
+    id: sir/acinetobacter_baumannii/trimethoprim-sulfamethoxazole
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: acinetobacter_baumannii
+      drug_id: trimethoprim-sulfamethoxazole
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/acinetobacter_baumannii/genotype_to_sir__trimethoprim-sulfamethoxazole.joblib
+      sha256: c4f87ad4d17c3032cc8c9d32b309fbb2f4daac4bdc983ae378826c920c06ebb2
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: acinetobacter_baumannii:trimethoprim-sulfamethoxazole
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 5de2b1d05d76bc062ddb23aaeaffb423dec15ea4d93c35d9e0d7c4ea55158424
+      artifact_sha256: c4f87ad4d17c3032cc8c9d32b309fbb2f4daac4bdc983ae378826c920c06ebb2
+    source:
+      batch_model_name: mdrgnb_sir__acinetobacter_baumannii__trimethoprim-sulfamethoxazole
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/amikacin:
+    id: sir/escherichia_coli/amikacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: amikacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__amikacin.joblib
+      sha256: 180dba636ffc1ebc61a7a2b184848059d0d9325a7abc14b2ad50b4721bd6725e
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: escherichia_coli:amikacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: c4996a3d6c598b0e89d68e841b413c8d0e788b1e02f63262921f63d5a669357a
+      artifact_sha256: 180dba636ffc1ebc61a7a2b184848059d0d9325a7abc14b2ad50b4721bd6725e
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__amikacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/amoxicillin-clavulanic_acid:
+    id: sir/escherichia_coli/amoxicillin-clavulanic_acid
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: amoxicillin-clavulanic_acid
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__amoxicillin-clavulanic_acid.joblib
+      sha256: 378530720d261320761744e23df4467cd42c8f0e8684f03f5c64754d9a9a7e2d
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:amoxicillin-clavulanic_acid
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 02be831fe2d33695c5a4c492a16bd948e2ba69eecef9d04d65d070ea1368a8b0
+      artifact_sha256: 378530720d261320761744e23df4467cd42c8f0e8684f03f5c64754d9a9a7e2d
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__amoxicillin-clavulanic_acid
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/ampicillin:
+    id: sir/escherichia_coli/ampicillin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: ampicillin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ampicillin.joblib
+      sha256: 64b597684586209b559643661d4935bd86a3cb0a54721d8284510b96271e66e6
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: escherichia_coli:ampicillin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: b80f3aac7d30ca4cc4e9b0b434788883f17230ea2440abcf2cba64979632dc02
+      artifact_sha256: 64b597684586209b559643661d4935bd86a3cb0a54721d8284510b96271e66e6
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__ampicillin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/ampicillin-sulbactam:
+    id: sir/escherichia_coli/ampicillin-sulbactam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: ampicillin-sulbactam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ampicillin-sulbactam.joblib
+      sha256: 13fcb047eb0753ebc6dfae9722c1e8e7853cf7bcc08abd3840b5f30a2c0a856c
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:ampicillin-sulbactam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 1356854c98c7766cb655f59504119369121b4610c6fc062b397bc6b95d4400b6
+      artifact_sha256: 13fcb047eb0753ebc6dfae9722c1e8e7853cf7bcc08abd3840b5f30a2c0a856c
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__ampicillin-sulbactam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/azithromycin:
+    id: sir/escherichia_coli/azithromycin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: azithromycin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__azithromycin.joblib
+      sha256: ea1e3be0d0fcfaa4d0c31bd90edbdcdc486bba66456d943f2d8a07fda1aa8577
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:azithromycin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 3f63ec3a13c5446adfcf1fd6e3b6c3d18ce3d000376cd2fa7fa93671e701435d
+      artifact_sha256: ea1e3be0d0fcfaa4d0c31bd90edbdcdc486bba66456d943f2d8a07fda1aa8577
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__azithromycin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/aztreonam:
+    id: sir/escherichia_coli/aztreonam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: aztreonam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__aztreonam.joblib
+      sha256: 9cc5bc172d88f1d906654b244716cdcf30fce32ae1ed1b1094e04ab4655d00cb
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: escherichia_coli:aztreonam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 8601fc94d0a7ba6fc9bd6792a709a7762c7e62c951b52d41fe160de08e04da0b
+      artifact_sha256: 9cc5bc172d88f1d906654b244716cdcf30fce32ae1ed1b1094e04ab4655d00cb
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__aztreonam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/cefazolin:
+    id: sir/escherichia_coli/cefazolin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: cefazolin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cefazolin.joblib
+      sha256: 68bff03ef4b7da88f36d693f4e419659899d2e019652724347f422fd50d0b025
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:cefazolin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 3826102d11aea9d1737200fc3bdfc84f60d6b49f495370c553e740faa509a26f
+      artifact_sha256: 68bff03ef4b7da88f36d693f4e419659899d2e019652724347f422fd50d0b025
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__cefazolin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/cefepime:
+    id: sir/escherichia_coli/cefepime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: cefepime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cefepime.joblib
+      sha256: 0a91bf9f9f3fce4b715c73c921d20b01a4edc1c60aaa977f7bde50b6ee32c891
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: escherichia_coli:cefepime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 70dea68378684299829f5c50c1d2cf833e2ef6120d8dcca6704a3d563f78fb09
+      artifact_sha256: 0a91bf9f9f3fce4b715c73c921d20b01a4edc1c60aaa977f7bde50b6ee32c891
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__cefepime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/cefotaxime:
+    id: sir/escherichia_coli/cefotaxime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: cefotaxime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cefotaxime.joblib
+      sha256: 1200c7a7736b7539fbfb1f1eb243970fa24cd01dc3906d5d88506a97cdbd3d4e
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:cefotaxime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: fbcc690468856c2b66ab572de1264788627a0d8bffb6c42b8fbfbf44b5b1c4df
+      artifact_sha256: 1200c7a7736b7539fbfb1f1eb243970fa24cd01dc3906d5d88506a97cdbd3d4e
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__cefotaxime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/cefotaxime-clavulanic_acid:
+    id: sir/escherichia_coli/cefotaxime-clavulanic_acid
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: cefotaxime-clavulanic_acid
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cefotaxime-clavulanic_acid.joblib
+      sha256: 0234c656df0235461d03dc87f880a7f6b5e45647e30252cc0a5afbdd2495f888
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:cefotaxime-clavulanic_acid
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: f2dafd76cbaa6b76c07f003a1c69d56cc924b5914e89f20d99f8fa503e959bf7
+      artifact_sha256: 0234c656df0235461d03dc87f880a7f6b5e45647e30252cc0a5afbdd2495f888
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__cefotaxime-clavulanic_acid
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/cefoxitin:
+    id: sir/escherichia_coli/cefoxitin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: cefoxitin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cefoxitin.joblib
+      sha256: f3e0e0fa325f94e869aeca31af35cdd5d50a43d76290403761614140eaf424f4
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:cefoxitin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: fb703ca2ba7aca00e3b3a217b24cc90ce33aea8f6569a826dbb29705cc271421
+      artifact_sha256: f3e0e0fa325f94e869aeca31af35cdd5d50a43d76290403761614140eaf424f4
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__cefoxitin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/cefpodoxime:
+    id: sir/escherichia_coli/cefpodoxime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: cefpodoxime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cefpodoxime.joblib
+      sha256: f32bce289f71e46aa70e63feba389d37e96d60c0dce00b06b2d37e7affb983e2
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:cefpodoxime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 5d1c428559124b5725133011be3ab8b0e39b61fded023de9f19bdcd1d160df8f
+      artifact_sha256: f32bce289f71e46aa70e63feba389d37e96d60c0dce00b06b2d37e7affb983e2
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__cefpodoxime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/ceftazidime:
+    id: sir/escherichia_coli/ceftazidime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: ceftazidime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ceftazidime.joblib
+      sha256: f27e024f160b28a6bd69bb406e49db8a65ee69c79782cde86ddf955dcbe0b5b7
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:ceftazidime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: fde81ec9668d0fcf7c64163083604ed77e1a5538a54718f23f843d15f2c8d568
+      artifact_sha256: f27e024f160b28a6bd69bb406e49db8a65ee69c79782cde86ddf955dcbe0b5b7
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__ceftazidime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/ceftazidime-clavulanic_acid:
+    id: sir/escherichia_coli/ceftazidime-clavulanic_acid
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: ceftazidime-clavulanic_acid
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ceftazidime-clavulanic_acid.joblib
+      sha256: cb67c7313281d0583360a5afd397151e300607d5697707e8ba70dcaf08c87a2a
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:ceftazidime-clavulanic_acid
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: a183df304bc45acdc37caa6ac0e69e825cf2ad6b04b32de0c071520043fe06da
+      artifact_sha256: cb67c7313281d0583360a5afd397151e300607d5697707e8ba70dcaf08c87a2a
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__ceftazidime-clavulanic_acid
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/ceftiofur:
+    id: sir/escherichia_coli/ceftiofur
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: ceftiofur
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ceftiofur.joblib
+      sha256: 5d0f61f104a153c5795c048ad9cee20e871b8193a3a6e22febcbd744c6c19812
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:ceftiofur
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: c08aeb0b1fdc18d23bb2f9bea879199afde1917eaf3423f2900e97f5131a9806
+      artifact_sha256: 5d0f61f104a153c5795c048ad9cee20e871b8193a3a6e22febcbd744c6c19812
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__ceftiofur
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/ceftriaxone:
+    id: sir/escherichia_coli/ceftriaxone
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: ceftriaxone
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ceftriaxone.joblib
+      sha256: 64135f35f1583cb476ce9766ebbb8295ab42fc7727325d5d80f6e67efb3291bf
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: escherichia_coli:ceftriaxone
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: e138e979d4137cecac43d51e5d21c24c4cdffbbc281e42924b05fcbf971504ab
+      artifact_sha256: 64135f35f1583cb476ce9766ebbb8295ab42fc7727325d5d80f6e67efb3291bf
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__ceftriaxone
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/cephalothin:
+    id: sir/escherichia_coli/cephalothin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: cephalothin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__cephalothin.joblib
+      sha256: d8a58c009f00865b24aed9a02f9140a5e5a1c93f632d417343f7d911c82da151
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:cephalothin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 206b2023ee537e47fc9d8d10d59ab396a3060643e31b1270ec9f7aaebd12c56f
+      artifact_sha256: d8a58c009f00865b24aed9a02f9140a5e5a1c93f632d417343f7d911c82da151
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__cephalothin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/chloramphenicol:
+    id: sir/escherichia_coli/chloramphenicol
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: chloramphenicol
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__chloramphenicol.joblib
+      sha256: bdb95ff3c5b350e8e93cd779cda01a7168c18e5aa89a3951c2f21b4b5ebe6f17
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: escherichia_coli:chloramphenicol
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 1b576b0d48bfda40feb09554bb39df2bae12326411429acca4d8e7927e2ee2f8
+      artifact_sha256: bdb95ff3c5b350e8e93cd779cda01a7168c18e5aa89a3951c2f21b4b5ebe6f17
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__chloramphenicol
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/ciprofloxacin:
+    id: sir/escherichia_coli/ciprofloxacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: ciprofloxacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ciprofloxacin.joblib
+      sha256: 288765900ae4f7fea914db737c700c3907ebbb1039871fd595870c020eb43c4a
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: escherichia_coli:ciprofloxacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 900239d0b3c9f046876b782b28c6fe6519cefe0c8fe17917522285efae232c23
+      artifact_sha256: 288765900ae4f7fea914db737c700c3907ebbb1039871fd595870c020eb43c4a
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__ciprofloxacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/colistin:
+    id: sir/escherichia_coli/colistin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: colistin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__colistin.joblib
+      sha256: 14ade1c00cf64452126f19de7b6c1b5988087df83fbd0c894fbdd57917fae57a
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:colistin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: c122caa49576c50e6ce935e7e76661615e018c943de466000145c275611dd8c0
+      artifact_sha256: 14ade1c00cf64452126f19de7b6c1b5988087df83fbd0c894fbdd57917fae57a
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__colistin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/ertapenem:
+    id: sir/escherichia_coli/ertapenem
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: ertapenem
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__ertapenem.joblib
+      sha256: ac6c11a83faaf0362571dbbf64de01c6b86d6647de45e5282aa4cd9dc93dcea2
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:ertapenem
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 2ad24ae5e815b10952a3f6973994ecb5315bbb91eed603eb038638af931beaa5
+      artifact_sha256: ac6c11a83faaf0362571dbbf64de01c6b86d6647de45e5282aa4cd9dc93dcea2
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__ertapenem
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/gentamicin:
+    id: sir/escherichia_coli/gentamicin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: gentamicin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__gentamicin.joblib
+      sha256: 18e7debca429802dee5993ca486c646c0bd56abb2ddb0b5faf29b91d551e30b0
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: escherichia_coli:gentamicin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: cae5a67e28e168816ecf4b50cea37ce2ee8a7d133d1ff8795592085cd831a3ab
+      artifact_sha256: 18e7debca429802dee5993ca486c646c0bd56abb2ddb0b5faf29b91d551e30b0
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__gentamicin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/imipenem:
+    id: sir/escherichia_coli/imipenem
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: imipenem
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__imipenem.joblib
+      sha256: 773cd39a8a505691d914535a272c4b01404879a6b00b9d467674463eac87fef3
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:imipenem
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 6ebf007df9d7c9183abadbdf10fa324416fcb32e6929b3fd67a74d0cd37ad962
+      artifact_sha256: 773cd39a8a505691d914535a272c4b01404879a6b00b9d467674463eac87fef3
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__imipenem
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/kanamycin:
+    id: sir/escherichia_coli/kanamycin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: kanamycin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__kanamycin.joblib
+      sha256: fec670781318a29528c4577d7089828ec3fa0aa8fe3e9fe6a571a9e7a965ea46
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:kanamycin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 23de45c77f1a74a98e515464e3bed4fc57fd19c252badaaefb1e37ab0ad8a6c2
+      artifact_sha256: fec670781318a29528c4577d7089828ec3fa0aa8fe3e9fe6a571a9e7a965ea46
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__kanamycin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/levofloxacin:
+    id: sir/escherichia_coli/levofloxacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: levofloxacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__levofloxacin.joblib
+      sha256: 1e202146107da38ac71b062797c1c5c649a071bc3abfda2ab4db6731173c3115
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: escherichia_coli:levofloxacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 2c858bf195b49cbc10f91322ec06123d07ff6258036010fe02e334392beca2f0
+      artifact_sha256: 1e202146107da38ac71b062797c1c5c649a071bc3abfda2ab4db6731173c3115
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__levofloxacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/meropenem:
+    id: sir/escherichia_coli/meropenem
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: meropenem
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__meropenem.joblib
+      sha256: 5279bb281452bb0886979b210ed0d905758c935f5fa0e24f691f97df5026ca63
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: escherichia_coli:meropenem
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: abff685290d7c033a5f304bd3decbeacc35a14f7097fb5a2986b9cea5c78750f
+      artifact_sha256: 5279bb281452bb0886979b210ed0d905758c935f5fa0e24f691f97df5026ca63
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__meropenem
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/moxifloxacin:
+    id: sir/escherichia_coli/moxifloxacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: moxifloxacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__moxifloxacin.joblib
+      sha256: ac820c30de2b4905609420f3def8ecd8662aff5162f38783f98c89092920633d
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:moxifloxacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: b77235731ea22889a70bec2973bcc1b145e1cf5ddd0d9f97a19cf570ae9d22c7
+      artifact_sha256: ac820c30de2b4905609420f3def8ecd8662aff5162f38783f98c89092920633d
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__moxifloxacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/nalidixic_acid:
+    id: sir/escherichia_coli/nalidixic_acid
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: nalidixic_acid
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__nalidixic_acid.joblib
+      sha256: b67ee7407099b400b1ca79b458134d99664caeaa29a3a28467aa13f5eae91ce3
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:nalidixic_acid
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: de86aa0f8a3126717fe4919d44bfb278c9ce84921fa02e695ffb0384f9ea9aec
+      artifact_sha256: b67ee7407099b400b1ca79b458134d99664caeaa29a3a28467aa13f5eae91ce3
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__nalidixic_acid
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/nitrofurantoin:
+    id: sir/escherichia_coli/nitrofurantoin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: nitrofurantoin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__nitrofurantoin.joblib
+      sha256: 62564d2f3f544ca8e49522e15e64d84f51c4208bd10da8e7a141a9d425d29aab
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:nitrofurantoin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: d39608f4906a3deb37bb8a02f5d0aaee7fcccbdfa6de4195511e942beb74567a
+      artifact_sha256: 62564d2f3f544ca8e49522e15e64d84f51c4208bd10da8e7a141a9d425d29aab
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__nitrofurantoin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/norfloxacin:
+    id: sir/escherichia_coli/norfloxacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: norfloxacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__norfloxacin.joblib
+      sha256: c8821a535c528660da84010f19e846bc66775f0b9ac3a5db953a4963bc952c83
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: escherichia_coli:norfloxacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 32e48170f2fa210e34284298993ae9c9829d8332c76e644729588db829c8f595
+      artifact_sha256: c8821a535c528660da84010f19e846bc66775f0b9ac3a5db953a4963bc952c83
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__norfloxacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/piperacillin-tazobactam:
+    id: sir/escherichia_coli/piperacillin-tazobactam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: piperacillin-tazobactam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__piperacillin-tazobactam.joblib
+      sha256: 0061561a5271093068cdf2315ed36b920eeaade3cc82ae0eeea6d8de54c7feb4
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:piperacillin-tazobactam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 71bfc9a82669ca9fd2aa749edac551ea4b8e0577a259eea8be3d3e226adf0523
+      artifact_sha256: 0061561a5271093068cdf2315ed36b920eeaade3cc82ae0eeea6d8de54c7feb4
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__piperacillin-tazobactam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/streptomycin:
+    id: sir/escherichia_coli/streptomycin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: streptomycin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__streptomycin.joblib
+      sha256: 7516bb15b1fd524e82a73bf783cabd3af104394fa09f883c4eb8c35b2352e026
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:streptomycin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 8ea89386743478b68d7e746747c1d54898f4239a230c5fc146eafbc04b642e51
+      artifact_sha256: 7516bb15b1fd524e82a73bf783cabd3af104394fa09f883c4eb8c35b2352e026
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__streptomycin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/sulfamethoxazole:
+    id: sir/escherichia_coli/sulfamethoxazole
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: sulfamethoxazole
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__sulfamethoxazole.joblib
+      sha256: 1d602c1bc0c0e7541117c530d9dbfb2441d2b1e170f52568d0b07c7bab970fc4
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:sulfamethoxazole
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 1eb572c408d5449699012674b937de06864835cbe5d6de3cd2d656455a9a7c12
+      artifact_sha256: 1d602c1bc0c0e7541117c530d9dbfb2441d2b1e170f52568d0b07c7bab970fc4
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__sulfamethoxazole
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/sulfisoxazole:
+    id: sir/escherichia_coli/sulfisoxazole
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: sulfisoxazole
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__sulfisoxazole.joblib
+      sha256: 2da2d0cf6d52818345ce16cb475e468dd8cc551753e84bc9478d3a99865fa57f
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:sulfisoxazole
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: b0593625cb69be1c7d37b82769327bcdd50389406a642241d998637fbf241b73
+      artifact_sha256: 2da2d0cf6d52818345ce16cb475e468dd8cc551753e84bc9478d3a99865fa57f
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__sulfisoxazole
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/tetracycline:
+    id: sir/escherichia_coli/tetracycline
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: tetracycline
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__tetracycline.joblib
+      sha256: e9d3858106289b2c6e4af70943a56eccad3857e41f06890d660e29c29f9750db
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: escherichia_coli:tetracycline
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 771be56d0d58b72dc63b0ac21419db675d6639316e0532dfcc2b2540ebe4ad25
+      artifact_sha256: e9d3858106289b2c6e4af70943a56eccad3857e41f06890d660e29c29f9750db
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__tetracycline
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/tigecycline:
+    id: sir/escherichia_coli/tigecycline
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: tigecycline
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__tigecycline.joblib
+      sha256: 6200b6e2249561d0b5080918ae17931ebff1a88d106f9d9ac4a194df75a62db5
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: escherichia_coli:tigecycline
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 75c6c895b3372775d12b48f28d5305989869f7311769e5e2c682874fb26ce254
+      artifact_sha256: 6200b6e2249561d0b5080918ae17931ebff1a88d106f9d9ac4a194df75a62db5
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__tigecycline
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/tobramycin:
+    id: sir/escherichia_coli/tobramycin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: tobramycin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__tobramycin.joblib
+      sha256: f1da80d09fa79c0cf117f5edd54f8f957a2600b883b7d9a8f9cd3f307c329e4d
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: escherichia_coli:tobramycin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 34ba504c366335aa44c6ac0e81b0acbbaf45697c36a0e402edb596998c402715
+      artifact_sha256: f1da80d09fa79c0cf117f5edd54f8f957a2600b883b7d9a8f9cd3f307c329e4d
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__tobramycin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/trimethoprim:
+    id: sir/escherichia_coli/trimethoprim
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: trimethoprim
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__trimethoprim.joblib
+      sha256: 280cf8a838144fe49f0872941af52c9784b726be896cebeb2092abc3da3df104
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: escherichia_coli:trimethoprim
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 99839f136f1f6a3f68a7362d4781e96014d5ab0c3634d118a54459ec309cbc4b
+      artifact_sha256: 280cf8a838144fe49f0872941af52c9784b726be896cebeb2092abc3da3df104
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__trimethoprim
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/escherichia_coli/trimethoprim-sulfamethoxazole:
+    id: sir/escherichia_coli/trimethoprim-sulfamethoxazole
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: escherichia_coli
+      drug_id: trimethoprim-sulfamethoxazole
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/escherichia_coli/genotype_to_sir__trimethoprim-sulfamethoxazole.joblib
+      sha256: 7094ef1753a5329a680ee24856740c26d5b37099fa31f7c30ed3c7ed9b939a14
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: escherichia_coli:trimethoprim-sulfamethoxazole
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 46b8cf07b6a363f78a66ae1a259a0d0a0a231ddbc776b6a0d5e88251f066bd5c
+      artifact_sha256: 7094ef1753a5329a680ee24856740c26d5b37099fa31f7c30ed3c7ed9b939a14
+    source:
+      batch_model_name: mdrgnb_sir__escherichia_coli__trimethoprim-sulfamethoxazole
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/amikacin:
+    id: sir/klebsiella_pneumoniae/amikacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: amikacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__amikacin.joblib
+      sha256: d0e62810e42dc2e6ec6f62aae642c5f4ba93c1dfae664023f690d79249314258
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: klebsiella_pneumoniae:amikacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: cf9916fca5186f0204acea06d8b4910be9d43f88d59cb1c3a9dcd1471503a1c0
+      artifact_sha256: d0e62810e42dc2e6ec6f62aae642c5f4ba93c1dfae664023f690d79249314258
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__amikacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/amoxicillin-clavulanic_acid:
+    id: sir/klebsiella_pneumoniae/amoxicillin-clavulanic_acid
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: amoxicillin-clavulanic_acid
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__amoxicillin-clavulanic_acid.joblib
+      sha256: acf67a853a3f49f94907002001958a2f497e63885b2b5f69f97303120a0c9f08
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:amoxicillin-clavulanic_acid
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 647a34ceea4495aa47cc83a512d17c73b7dffd41a4659a051fc1883ada70e777
+      artifact_sha256: acf67a853a3f49f94907002001958a2f497e63885b2b5f69f97303120a0c9f08
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__amoxicillin-clavulanic_acid
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/ampicillin:
+    id: sir/klebsiella_pneumoniae/ampicillin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: ampicillin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ampicillin.joblib
+      sha256: 4e722f89aa81c13edae845bd8a9205674d0ae4aaa0d3387c8db42d55ce5ab0f6
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: klebsiella_pneumoniae:ampicillin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 5d479d93170fd0a9c43e5b4c9f7c1c858aafed0d34e708482d918e89b6b29d7d
+      artifact_sha256: 4e722f89aa81c13edae845bd8a9205674d0ae4aaa0d3387c8db42d55ce5ab0f6
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__ampicillin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/ampicillin-sulbactam:
+    id: sir/klebsiella_pneumoniae/ampicillin-sulbactam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: ampicillin-sulbactam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ampicillin-sulbactam.joblib
+      sha256: 1ae0ab291e02518ada76512737cbe6adcac918fbc3118d15728d6ae7d736dd08
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:ampicillin-sulbactam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: fdf8be77fd55db3a690cfe0e08033d1b2f59005c66ffba0920e565469956302a
+      artifact_sha256: 1ae0ab291e02518ada76512737cbe6adcac918fbc3118d15728d6ae7d736dd08
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__ampicillin-sulbactam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/aztreonam:
+    id: sir/klebsiella_pneumoniae/aztreonam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: aztreonam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__aztreonam.joblib
+      sha256: 9e203ec624152d1e40bf3b5d4d0f5dc4ddf3b39a2127ad0ed6cea5dad906c94a
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: klebsiella_pneumoniae:aztreonam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 9a800e970b2a61fc5909920367331f16ead1cf633ce4dfd1a478c3a77b9796d5
+      artifact_sha256: 9e203ec624152d1e40bf3b5d4d0f5dc4ddf3b39a2127ad0ed6cea5dad906c94a
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__aztreonam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/cefazolin:
+    id: sir/klebsiella_pneumoniae/cefazolin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: cefazolin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefazolin.joblib
+      sha256: 491968d6d0dad863fde0c317650718c886f8d6cba1e883a0af1ad9f7309cc948
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:cefazolin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 50160a646ca4be814ce101557e738e5d16f788f8aa033aa2cb6e6c575581d027
+      artifact_sha256: 491968d6d0dad863fde0c317650718c886f8d6cba1e883a0af1ad9f7309cc948
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__cefazolin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/cefepime:
+    id: sir/klebsiella_pneumoniae/cefepime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: cefepime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefepime.joblib
+      sha256: fbd1b49769ec4e1fdc823021114a76efbc7dd783f25825288ea5c9327f59f289
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: klebsiella_pneumoniae:cefepime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: c41e86655df3933ac4f98fbfa115779dec0b2ac262db6d112642cec04024818b
+      artifact_sha256: fbd1b49769ec4e1fdc823021114a76efbc7dd783f25825288ea5c9327f59f289
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__cefepime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/cefotaxime:
+    id: sir/klebsiella_pneumoniae/cefotaxime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: cefotaxime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefotaxime.joblib
+      sha256: f83c4cf83ab8d2c4d2d8d02a4917421e187e5a55aade43cb0315b0ff3e40887d
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:cefotaxime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 246547377286607718216b72458b721a89f6703505af9456e9f58a2463ee050e
+      artifact_sha256: f83c4cf83ab8d2c4d2d8d02a4917421e187e5a55aade43cb0315b0ff3e40887d
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__cefotaxime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/cefotetan:
+    id: sir/klebsiella_pneumoniae/cefotetan
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: cefotetan
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefotetan.joblib
+      sha256: 12344593b1a61983ffc86e4e1eff7fb059158d96f735e689de72bcdd36088d21
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:cefotetan
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: a88336866a7e766ea3cf060c93193f7813e5b68dd32a8fccfef16596aa2f74c5
+      artifact_sha256: 12344593b1a61983ffc86e4e1eff7fb059158d96f735e689de72bcdd36088d21
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__cefotetan
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/cefoxitin:
+    id: sir/klebsiella_pneumoniae/cefoxitin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: cefoxitin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefoxitin.joblib
+      sha256: e70cd021ed9273b8f56bd4edd649d034923813b8f7204686707e52f3758decb1
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:cefoxitin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: a1883cc5a6aab964dcb5485579fe273405f2fb5aebcb8c2c371e6fdeeeac9bb6
+      artifact_sha256: e70cd021ed9273b8f56bd4edd649d034923813b8f7204686707e52f3758decb1
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__cefoxitin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/cefpodoxime:
+    id: sir/klebsiella_pneumoniae/cefpodoxime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: cefpodoxime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefpodoxime.joblib
+      sha256: 6a0f796da45f1c1619d6797c8f319552dc2688536f826d42ac7eb56b67b9df5a
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:cefpodoxime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 937d858517864c747ae4a096699cbca30b6334d40846e00ab09aa0501b2c1e45
+      artifact_sha256: 6a0f796da45f1c1619d6797c8f319552dc2688536f826d42ac7eb56b67b9df5a
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__cefpodoxime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/ceftazidime:
+    id: sir/klebsiella_pneumoniae/ceftazidime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: ceftazidime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ceftazidime.joblib
+      sha256: 681ac5a068fd53c7bf128491b69639bf4fd564e509f2b1ea82be705db1c81fe3
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:ceftazidime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 1fcd5173a72f7fc3eb14e50dcf497e3ffef0c0ed2fe9cde541be07234e0ff187
+      artifact_sha256: 681ac5a068fd53c7bf128491b69639bf4fd564e509f2b1ea82be705db1c81fe3
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__ceftazidime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/ceftazidime-avibactam:
+    id: sir/klebsiella_pneumoniae/ceftazidime-avibactam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: ceftazidime-avibactam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ceftazidime-avibactam.joblib
+      sha256: 0b8c96fff9ee2d26a6f8359883b0517eb9833e8f2c28b7eb3cda9c5f5e034404
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:ceftazidime-avibactam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 8128950674df66baba66ddb8f5076ce71bdc46c607d7a014944dc4697a329e0b
+      artifact_sha256: 0b8c96fff9ee2d26a6f8359883b0517eb9833e8f2c28b7eb3cda9c5f5e034404
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__ceftazidime-avibactam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/ceftolozane-tazobactam:
+    id: sir/klebsiella_pneumoniae/ceftolozane-tazobactam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: ceftolozane-tazobactam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ceftolozane-tazobactam.joblib
+      sha256: b6363e54682e8d80d3222734dd485575c0b72154a2532f7f4557a54d05b224d7
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:ceftolozane-tazobactam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 0527303da965326cf406ae288a94d542d099875ec045890401effd8e3da440fd
+      artifact_sha256: b6363e54682e8d80d3222734dd485575c0b72154a2532f7f4557a54d05b224d7
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__ceftolozane-tazobactam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/ceftriaxone:
+    id: sir/klebsiella_pneumoniae/ceftriaxone
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: ceftriaxone
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ceftriaxone.joblib
+      sha256: a6ea353ac48d16ca8c0501a2bdaa6363dd8448813e533735f6c53648905da3c4
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: klebsiella_pneumoniae:ceftriaxone
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 716af4d50b2d5b7a39162165646e0b560df5d2510c39049f49ef27397a7858f2
+      artifact_sha256: a6ea353ac48d16ca8c0501a2bdaa6363dd8448813e533735f6c53648905da3c4
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__ceftriaxone
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/cefuroxime:
+    id: sir/klebsiella_pneumoniae/cefuroxime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: cefuroxime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cefuroxime.joblib
+      sha256: 962d4eb8daf7193bdad447287712f9e201d72698e1b6755aa9b29719c7b3494a
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:cefuroxime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 6f59506a9763a4280a6dc9eab1ef2cdcf7efea248487a175ce583417bf88a33a
+      artifact_sha256: 962d4eb8daf7193bdad447287712f9e201d72698e1b6755aa9b29719c7b3494a
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__cefuroxime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/cephalothin:
+    id: sir/klebsiella_pneumoniae/cephalothin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: cephalothin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__cephalothin.joblib
+      sha256: c8ad5fa1413154579b298a9a2b7e75db6dc0405e46bcafcacfbf2ddb948578c9
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:cephalothin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 4de1e4fb4fa08e21c65bb41c22c928db2dca65949d2b7b64cc719b5cd6a94f8c
+      artifact_sha256: c8ad5fa1413154579b298a9a2b7e75db6dc0405e46bcafcacfbf2ddb948578c9
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__cephalothin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/chloramphenicol:
+    id: sir/klebsiella_pneumoniae/chloramphenicol
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: chloramphenicol
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__chloramphenicol.joblib
+      sha256: 7d02d6d7252fee596c909f5dc77107290a88ab1ad7796c2925cbd72b20dcd5e3
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: klebsiella_pneumoniae:chloramphenicol
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 0dfa5c29c5ca6f55e405dd1b0bd158f6d16394d35ab961138727e8b46cff1e8c
+      artifact_sha256: 7d02d6d7252fee596c909f5dc77107290a88ab1ad7796c2925cbd72b20dcd5e3
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__chloramphenicol
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/ciprofloxacin:
+    id: sir/klebsiella_pneumoniae/ciprofloxacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: ciprofloxacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ciprofloxacin.joblib
+      sha256: 818b0d72be0fc2ca284bcc51d503827dea921adc706817dcdfe9ed0f462c9fc7
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: klebsiella_pneumoniae:ciprofloxacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: ba4ba9d5959c2638c1b05d24e0cc701289cd20cb8df3a97d979ba70217ef29e7
+      artifact_sha256: 818b0d72be0fc2ca284bcc51d503827dea921adc706817dcdfe9ed0f462c9fc7
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__ciprofloxacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/colistin:
+    id: sir/klebsiella_pneumoniae/colistin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: colistin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__colistin.joblib
+      sha256: 149429ce0f3628941b53ba1e6289cd67e7ad5255f66b98ed8b3d2c931cdea74a
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:colistin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: dc56dfb0e5c154a39355ae1b2da4ef47f58ebc868507a047db73d5f4c189e38a
+      artifact_sha256: 149429ce0f3628941b53ba1e6289cd67e7ad5255f66b98ed8b3d2c931cdea74a
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__colistin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/doripenem:
+    id: sir/klebsiella_pneumoniae/doripenem
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: doripenem
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__doripenem.joblib
+      sha256: f745b1beb0786d7518e93a8ff2ab612b8d63f4220fc7bd52d5287041f95b8edb
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:doripenem
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: e0bf363c80f0bb5b3630c148dcd69606be138b527bce7ef0a75d6b13c7f2502e
+      artifact_sha256: f745b1beb0786d7518e93a8ff2ab612b8d63f4220fc7bd52d5287041f95b8edb
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__doripenem
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/doxycycline:
+    id: sir/klebsiella_pneumoniae/doxycycline
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: doxycycline
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__doxycycline.joblib
+      sha256: 01fb3c45906dc20ab7b927bf0deb7600bcf173c7b1d63f013417f6bc8f50678f
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: klebsiella_pneumoniae:doxycycline
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 2d116c355e0d4a1105846f1f339f751083b795e24dbbd2280126183c3c827487
+      artifact_sha256: 01fb3c45906dc20ab7b927bf0deb7600bcf173c7b1d63f013417f6bc8f50678f
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__doxycycline
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/ertapenem:
+    id: sir/klebsiella_pneumoniae/ertapenem
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: ertapenem
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__ertapenem.joblib
+      sha256: d05010675576c4490d2d7c9a64027f4f2ec67e4283135562f43818f0951b8ecc
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:ertapenem
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: dd31380bed4807460b80f1d00534b13fe99fc843d60bd521ddb2a4d62d8b542c
+      artifact_sha256: d05010675576c4490d2d7c9a64027f4f2ec67e4283135562f43818f0951b8ecc
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__ertapenem
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/gentamicin:
+    id: sir/klebsiella_pneumoniae/gentamicin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: gentamicin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__gentamicin.joblib
+      sha256: fd109a1641b43b1fefb9c1ff1a0a8838c07236549d1e149f1b473684374cc926
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: klebsiella_pneumoniae:gentamicin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: e15abb2f8c64ad779075e1d703691ce374edf5d233e3f2023e16ba28dea8ca93
+      artifact_sha256: fd109a1641b43b1fefb9c1ff1a0a8838c07236549d1e149f1b473684374cc926
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__gentamicin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/imipenem:
+    id: sir/klebsiella_pneumoniae/imipenem
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: imipenem
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__imipenem.joblib
+      sha256: e28aa264b921c39900c17463f47b389a5a48b1507c314de911e9a49fe7611588
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:imipenem
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 18d557be8d7e399f88dbe03ef8d9813318ddef39c3d4028a568b9a9207ed8a5e
+      artifact_sha256: e28aa264b921c39900c17463f47b389a5a48b1507c314de911e9a49fe7611588
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__imipenem
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/levofloxacin:
+    id: sir/klebsiella_pneumoniae/levofloxacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: levofloxacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__levofloxacin.joblib
+      sha256: c7ae049b55d77c154dec8c30347741ff1258191996e3942b5a4ce153cf2a47ff
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: klebsiella_pneumoniae:levofloxacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 34ce69f478823eeb549df5b601bbc9c7417af5ae6c700e21b4c2cf424cdf7636
+      artifact_sha256: c7ae049b55d77c154dec8c30347741ff1258191996e3942b5a4ce153cf2a47ff
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__levofloxacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/meropenem:
+    id: sir/klebsiella_pneumoniae/meropenem
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: meropenem
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__meropenem.joblib
+      sha256: 2036345d10cae33858b6875207b488c67925b7b9f9be61b7805f95bc6017299c
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: klebsiella_pneumoniae:meropenem
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 70591b0131a76bdb2d5960abf674b721f741e18871b346e2cf22d82caa5ee2ae
+      artifact_sha256: 2036345d10cae33858b6875207b488c67925b7b9f9be61b7805f95bc6017299c
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__meropenem
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/minocycline:
+    id: sir/klebsiella_pneumoniae/minocycline
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: minocycline
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__minocycline.joblib
+      sha256: 252d051920692f464e28e0f01e4b8fbb9361266c30073184960cfe30eeeda266
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: klebsiella_pneumoniae:minocycline
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 3989e0d13bda5c4395ee80fc9ffc4c2e8c234e28f99c31c33a62515c2904de75
+      artifact_sha256: 252d051920692f464e28e0f01e4b8fbb9361266c30073184960cfe30eeeda266
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__minocycline
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/moxifloxacin:
+    id: sir/klebsiella_pneumoniae/moxifloxacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: moxifloxacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__moxifloxacin.joblib
+      sha256: ea55f27dd1da24ec3ff749a848a0dd8ce27466dc3f3f2532a6153efd33b6abda
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:moxifloxacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 4cb61700069f2c4b634e1e48132efd4d09980d5bfedf65103bea69bec04e8227
+      artifact_sha256: ea55f27dd1da24ec3ff749a848a0dd8ce27466dc3f3f2532a6153efd33b6abda
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__moxifloxacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/nalidixic_acid:
+    id: sir/klebsiella_pneumoniae/nalidixic_acid
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: nalidixic_acid
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__nalidixic_acid.joblib
+      sha256: defaba771081a66a0389a87c81f9341c43b6c77014aae9b0a957044b88bc91d5
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:nalidixic_acid
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 943747cd26afcb3d97fe3652df9c0b329fe7d153813500f2d460cb5d45248834
+      artifact_sha256: defaba771081a66a0389a87c81f9341c43b6c77014aae9b0a957044b88bc91d5
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__nalidixic_acid
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/nitrofurantoin:
+    id: sir/klebsiella_pneumoniae/nitrofurantoin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: nitrofurantoin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__nitrofurantoin.joblib
+      sha256: f1309e05367223a172b9c841a22279b07be5a807ebf29fa2a3b5f6d9b6a1bff6
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:nitrofurantoin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 8f1f06301a0d47530338bbf83ae66d872abd8cdac9a9811294f29e0d535aac71
+      artifact_sha256: f1309e05367223a172b9c841a22279b07be5a807ebf29fa2a3b5f6d9b6a1bff6
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__nitrofurantoin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/piperacillin-tazobactam:
+    id: sir/klebsiella_pneumoniae/piperacillin-tazobactam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: piperacillin-tazobactam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__piperacillin-tazobactam.joblib
+      sha256: fcc6a30b20ade4d6c90b8d187573c2c3b616ca48eb864fb27e81daae63246ada
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:piperacillin-tazobactam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 528094363627cc7ee66af9382a9ce44ca20b8cb5a0a50a18c7f40de324449017
+      artifact_sha256: fcc6a30b20ade4d6c90b8d187573c2c3b616ca48eb864fb27e81daae63246ada
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__piperacillin-tazobactam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/polymyxin_b:
+    id: sir/klebsiella_pneumoniae/polymyxin_b
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: polymyxin_b
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__polymyxin_b.joblib
+      sha256: 8189399a35516c2df074e90a1b3d9a172bb8c27bec80c9c00878b1b252d0f1f1
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:polymyxin_b
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 1fb0ddbd47844ae46061059f4a26f57386bba3498520272fd4b7a79572f6ed7a
+      artifact_sha256: 8189399a35516c2df074e90a1b3d9a172bb8c27bec80c9c00878b1b252d0f1f1
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__polymyxin_b
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/tetracycline:
+    id: sir/klebsiella_pneumoniae/tetracycline
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: tetracycline
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__tetracycline.joblib
+      sha256: b62295739e8dd1b840f9ab3ec36fef81d610ca16ee8cef894780b14e46463e89
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: klebsiella_pneumoniae:tetracycline
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: b21bedd9ef4a55d54cf5285f5d310552d72d8d4bbc85acbea83c8550147d3155
+      artifact_sha256: b62295739e8dd1b840f9ab3ec36fef81d610ca16ee8cef894780b14e46463e89
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__tetracycline
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/tigecycline:
+    id: sir/klebsiella_pneumoniae/tigecycline
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: tigecycline
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__tigecycline.joblib
+      sha256: 0c53dac1df17180fde1edc6c424dc0652c765285618675ec973120e9997a7d6f
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: klebsiella_pneumoniae:tigecycline
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 9345efc0991c8b6c614918e37d1d84bd676e3ca2f4b44e597510f0e1f5e462e4
+      artifact_sha256: 0c53dac1df17180fde1edc6c424dc0652c765285618675ec973120e9997a7d6f
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__tigecycline
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/tobramycin:
+    id: sir/klebsiella_pneumoniae/tobramycin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: tobramycin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__tobramycin.joblib
+      sha256: b2ebdb475b58388434631da5cfa37bde66b2d823b4731b300736c2d0badd0e28
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: klebsiella_pneumoniae:tobramycin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 449043463ea449c4b43890e540b9c7dbc3b0253b09999d87087dd175249f6515
+      artifact_sha256: b2ebdb475b58388434631da5cfa37bde66b2d823b4731b300736c2d0badd0e28
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__tobramycin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/klebsiella_pneumoniae/trimethoprim-sulfamethoxazole:
+    id: sir/klebsiella_pneumoniae/trimethoprim-sulfamethoxazole
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: klebsiella_pneumoniae
+      drug_id: trimethoprim-sulfamethoxazole
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/klebsiella_pneumoniae/genotype_to_sir__trimethoprim-sulfamethoxazole.joblib
+      sha256: 750ad1d381bf213ec841689ae35aa07ead31bdf60dec4c04d2cfc8258cd928d6
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: klebsiella_pneumoniae:trimethoprim-sulfamethoxazole
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: c52a320b9c567bd0c706a59fadf4f217f710dc0650017e697cf3bf5bfd3ce62e
+      artifact_sha256: 750ad1d381bf213ec841689ae35aa07ead31bdf60dec4c04d2cfc8258cd928d6
+    source:
+      batch_model_name: mdrgnb_sir__klebsiella_pneumoniae__trimethoprim-sulfamethoxazole
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/amikacin:
+    id: sir/pseudomonas_aeruginosa/amikacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: amikacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__amikacin.joblib
+      sha256: 68189371ecc952f8e532b3ce1dad3724fd631fd627295d67a5eb9bbb3a84bcfc
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: pseudomonas_aeruginosa:amikacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: b8716605a04f5d5f4f917ee6a7c86f2bc787fddd8b7af77cadeb266781cab692
+      artifact_sha256: 68189371ecc952f8e532b3ce1dad3724fd631fd627295d67a5eb9bbb3a84bcfc
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__amikacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/aztreonam:
+    id: sir/pseudomonas_aeruginosa/aztreonam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: aztreonam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__aztreonam.joblib
+      sha256: 114c9e6abd0cfce41480937050f5c562e6ba8927b195933162d63716db7a3be0
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: pseudomonas_aeruginosa:aztreonam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 0cfe8db65c2936e3ec93f290aa0b19d9bf71eefbfd751b4b9bcd93b50f333c26
+      artifact_sha256: 114c9e6abd0cfce41480937050f5c562e6ba8927b195933162d63716db7a3be0
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__aztreonam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/cefepime:
+    id: sir/pseudomonas_aeruginosa/cefepime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: cefepime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__cefepime.joblib
+      sha256: d09c041e22eecdcc6431e34c3f71543d14bed8b665e2d721ece4d6700f03602f
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: pseudomonas_aeruginosa:cefepime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: a9b2bd22eb2c8ef6636b3e4fdc2be299cc138de881487d0c9e165d6015603f84
+      artifact_sha256: d09c041e22eecdcc6431e34c3f71543d14bed8b665e2d721ece4d6700f03602f
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__cefepime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/ceftazidime:
+    id: sir/pseudomonas_aeruginosa/ceftazidime
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: ceftazidime
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__ceftazidime.joblib
+      sha256: 7a364a533b60f67763dabf1f0403ccb2cfd777c22915da8155526608d983f3b4
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: pseudomonas_aeruginosa:ceftazidime
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 262b085796284c203010b2e2046032660d7764db4a8dfb0ec7828b75ab199266
+      artifact_sha256: 7a364a533b60f67763dabf1f0403ccb2cfd777c22915da8155526608d983f3b4
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__ceftazidime
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/ceftazidime-avibactam:
+    id: sir/pseudomonas_aeruginosa/ceftazidime-avibactam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: ceftazidime-avibactam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__ceftazidime-avibactam.joblib
+      sha256: f0ca66cbea856e8936433c0c82ffe13d4955a5d925dee491e3cc8c38690139b1
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: pseudomonas_aeruginosa:ceftazidime-avibactam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: c2b34b1888f5875caae0090e572d1108fecf6f952728a3a9bcdb2cf58fd458a5
+      artifact_sha256: f0ca66cbea856e8936433c0c82ffe13d4955a5d925dee491e3cc8c38690139b1
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__ceftazidime-avibactam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/ciprofloxacin:
+    id: sir/pseudomonas_aeruginosa/ciprofloxacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: ciprofloxacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__ciprofloxacin.joblib
+      sha256: bdbfdd786be6aa352d69bb6fb911cffc1845d8d3343cafbb84a4fee82c1a41ed
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: pseudomonas_aeruginosa:ciprofloxacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 26a3422bb4ce23a74e165b61f7412741131dd81ab049badf0f00dd7bdc5c4305
+      artifact_sha256: bdbfdd786be6aa352d69bb6fb911cffc1845d8d3343cafbb84a4fee82c1a41ed
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__ciprofloxacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/colistin:
+    id: sir/pseudomonas_aeruginosa/colistin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: colistin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__colistin.joblib
+      sha256: 19442be5e0a03a3019072b6b2d57bae92405843fcb8df0b53f5f8a732d9f00e3
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: pseudomonas_aeruginosa:colistin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: fa2a059309621f74ea6b772a116d0019157c59ed141a82b720263e4ad2a8cbd7
+      artifact_sha256: 19442be5e0a03a3019072b6b2d57bae92405843fcb8df0b53f5f8a732d9f00e3
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__colistin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/gentamicin:
+    id: sir/pseudomonas_aeruginosa/gentamicin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: gentamicin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__gentamicin.joblib
+      sha256: bb384a5df11dba802558a0b8fe96be20321fbe6e28827cbbe8f37b45769f5e23
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: pseudomonas_aeruginosa:gentamicin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: b0b871e762f09af649b56252ba8f023d4b2d1d6eb50258df8f9b155e8a234750
+      artifact_sha256: bb384a5df11dba802558a0b8fe96be20321fbe6e28827cbbe8f37b45769f5e23
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__gentamicin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/imipenem:
+    id: sir/pseudomonas_aeruginosa/imipenem
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: imipenem
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__imipenem.joblib
+      sha256: 77f9ffc0f98141845445d3e4e436802b7eeca704ba00aee24c80a09076882062
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: pseudomonas_aeruginosa:imipenem
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: d3e8ff44c42be861b120fce17f896c52a929b41e97c4e37f9d8df539a0091f6b
+      artifact_sha256: 77f9ffc0f98141845445d3e4e436802b7eeca704ba00aee24c80a09076882062
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__imipenem
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/levofloxacin:
+    id: sir/pseudomonas_aeruginosa/levofloxacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: levofloxacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__levofloxacin.joblib
+      sha256: 0a7bb434ed1d707e6a8a7f6e882c8d79ab2fdb269c86a9cc2d170137c96e394b
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: pseudomonas_aeruginosa:levofloxacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 0feb5d5942fe5a7fd257777a6d248891f67e4842b78969b9c116fa5447f7c1d8
+      artifact_sha256: 0a7bb434ed1d707e6a8a7f6e882c8d79ab2fdb269c86a9cc2d170137c96e394b
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__levofloxacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/meropenem:
+    id: sir/pseudomonas_aeruginosa/meropenem
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: meropenem
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__meropenem.joblib
+      sha256: d737bf7503ed440086a240d97ea80ac0e4305964bab107060c8bf2ba8c0eae02
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: pseudomonas_aeruginosa:meropenem
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 34b786e1f28ad00387b6f59f6429e953eb1cd77a328aa808c79d5c7838546967
+      artifact_sha256: d737bf7503ed440086a240d97ea80ac0e4305964bab107060c8bf2ba8c0eae02
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__meropenem
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/piperacillin-tazobactam:
+    id: sir/pseudomonas_aeruginosa/piperacillin-tazobactam
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: piperacillin-tazobactam
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__piperacillin-tazobactam.joblib
+      sha256: 6fc325ed7cfc4a415f22c5cfb6def714f12447bca9a3b5bc56eb696392c69726
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: pseudomonas_aeruginosa:piperacillin-tazobactam
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: e824244f8af0aa84d8105f47935466422921baaa6885aed288f9e89cdfd60708
+      artifact_sha256: 6fc325ed7cfc4a415f22c5cfb6def714f12447bca9a3b5bc56eb696392c69726
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__piperacillin-tazobactam
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/polymyxin_b:
+    id: sir/pseudomonas_aeruginosa/polymyxin_b
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: polymyxin_b
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__polymyxin_b.joblib
+      sha256: f95b80f55f540e19265ea267189fc1d8c0e05438930a64be6cf141c3d6fd0858
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: pseudomonas_aeruginosa:polymyxin_b
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 47476ee74dc487eccd728e4564c8ac657d80c89f6092225e4c70a7277286f5b9
+      artifact_sha256: f95b80f55f540e19265ea267189fc1d8c0e05438930a64be6cf141c3d6fd0858
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__polymyxin_b
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/pseudomonas_aeruginosa/tobramycin:
+    id: sir/pseudomonas_aeruginosa/tobramycin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: pseudomonas_aeruginosa
+      drug_id: tobramycin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/pseudomonas_aeruginosa/genotype_to_sir__tobramycin.joblib
+      sha256: 7ed936ced3d4e8853df5d6c0e69e3d0e62412401db7600854875e8b6f930a280
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: pseudomonas_aeruginosa:tobramycin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 87a9ce52d39a7f50e0cf800b31de124a2d3d10a17871476ee78895ac58825818
+      artifact_sha256: 7ed936ced3d4e8853df5d6c0e69e3d0e62412401db7600854875e8b6f930a280
+    source:
+      batch_model_name: mdrgnb_sir__pseudomonas_aeruginosa__tobramycin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/amoxicillin-clavulanic_acid:
+    id: sir/salmonella_enterica/amoxicillin-clavulanic_acid
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: amoxicillin-clavulanic_acid
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__amoxicillin-clavulanic_acid.joblib
+      sha256: c667b359bd22fef3fda3b0eb8654784f4e00059618670dd5c0007eab1ce10f27
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: salmonella_enterica:amoxicillin-clavulanic_acid
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 45893ffe549c87d7157a5e454f831304c84a9b3daf7c674f2cefee0e61c6a846
+      artifact_sha256: c667b359bd22fef3fda3b0eb8654784f4e00059618670dd5c0007eab1ce10f27
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__amoxicillin-clavulanic_acid
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/ampicillin:
+    id: sir/salmonella_enterica/ampicillin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: ampicillin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__ampicillin.joblib
+      sha256: 617a8a837d2ecdd6204c20416c7d1614ef08deac5bfdac6ee9d6178990a97a51
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: salmonella_enterica:ampicillin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 7416bc209525e15b5afc65f8372f7143c990aa955c4b0b2211ecd8f597c5e6e5
+      artifact_sha256: 617a8a837d2ecdd6204c20416c7d1614ef08deac5bfdac6ee9d6178990a97a51
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__ampicillin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/azithromycin:
+    id: sir/salmonella_enterica/azithromycin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: azithromycin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__azithromycin.joblib
+      sha256: 26b220ef4103cd47d20d85504e73c4412967cf5298bc068362248062153e36dc
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: salmonella_enterica:azithromycin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: f26c4c10d860ca37425ce691dbaa3bead9bb8a249ddb14eec8eb5cfbc21cc23a
+      artifact_sha256: 26b220ef4103cd47d20d85504e73c4412967cf5298bc068362248062153e36dc
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__azithromycin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/cefoxitin:
+    id: sir/salmonella_enterica/cefoxitin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: cefoxitin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__cefoxitin.joblib
+      sha256: 79ece8e23a2876b5f483cecada776827ba3b48b6ab0d43c7f38128e9f58bdf23
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: salmonella_enterica:cefoxitin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: a9882dcebd249a4bff6132469450147af36c251df9761588bb99b4cbcd1da156
+      artifact_sha256: 79ece8e23a2876b5f483cecada776827ba3b48b6ab0d43c7f38128e9f58bdf23
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__cefoxitin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/ceftiofur:
+    id: sir/salmonella_enterica/ceftiofur
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: ceftiofur
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__ceftiofur.joblib
+      sha256: ef4dcf09f69c7d3e4345522575cad60720c8bbdb7435a896b2112f0f4566d188
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: salmonella_enterica:ceftiofur
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 6322d5413af23e11f2c93752198707cec7e23a469f231243fb91fc766e340e37
+      artifact_sha256: ef4dcf09f69c7d3e4345522575cad60720c8bbdb7435a896b2112f0f4566d188
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__ceftiofur
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/ceftriaxone:
+    id: sir/salmonella_enterica/ceftriaxone
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: ceftriaxone
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__ceftriaxone.joblib
+      sha256: daa1cf4794c153384461b4ee2b69137ccec608576030414d36a0282320ffbb73
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: salmonella_enterica:ceftriaxone
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 536c30dadf784c97bbbe128d4eeb1cc9c8c9498b8511ba5be18e2f1852750044
+      artifact_sha256: daa1cf4794c153384461b4ee2b69137ccec608576030414d36a0282320ffbb73
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__ceftriaxone
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/chloramphenicol:
+    id: sir/salmonella_enterica/chloramphenicol
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: chloramphenicol
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__chloramphenicol.joblib
+      sha256: 560a9386e5d5378943674c2b24c1a862b06020e64f83f45939271516d6271f7b
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: salmonella_enterica:chloramphenicol
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: b1f8c4b190f443e3b2ce2342d8daaf763c68a3cc42f2ea8e9e86b13d55bec304
+      artifact_sha256: 560a9386e5d5378943674c2b24c1a862b06020e64f83f45939271516d6271f7b
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__chloramphenicol
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/ciprofloxacin:
+    id: sir/salmonella_enterica/ciprofloxacin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: ciprofloxacin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__ciprofloxacin.joblib
+      sha256: 95585b9bc78ef4a8a13dee0571a62759bf3e006e28042a496a1ccd6120bc2fa8
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: salmonella_enterica:ciprofloxacin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 73af990188c1cc5815e4deb66274fa42127a1d2fc8c01a2c200e9b180bb729b9
+      artifact_sha256: 95585b9bc78ef4a8a13dee0571a62759bf3e006e28042a496a1ccd6120bc2fa8
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__ciprofloxacin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/gentamicin:
+    id: sir/salmonella_enterica/gentamicin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: gentamicin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__gentamicin.joblib
+      sha256: 301efe1f44d79eea8b2eb18cf8bf08624254890b3adb0e95d295a1ecddd451cd
+    validation:
+      status: limited
+      evidence_level: E4
+      evidence_tier: strong
+      evidence_key: salmonella_enterica:gentamicin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: dbd49e6f9498ab62b8ce7e4c29d425bda9c16b2d13c7625dfee766f6c08ac0a7
+      artifact_sha256: 301efe1f44d79eea8b2eb18cf8bf08624254890b3adb0e95d295a1ecddd451cd
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__gentamicin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/kanamycin:
+    id: sir/salmonella_enterica/kanamycin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: kanamycin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__kanamycin.joblib
+      sha256: 629928a95a42f2c04392ed6d0fab40e6545b148e04dbebeda796982563c5af2f
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: salmonella_enterica:kanamycin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 67b90ec9c202c5813b4ba3c88f0e20ef106cffc36a1b41173ab9038151e02ec9
+      artifact_sha256: 629928a95a42f2c04392ed6d0fab40e6545b148e04dbebeda796982563c5af2f
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__kanamycin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/nalidixic_acid:
+    id: sir/salmonella_enterica/nalidixic_acid
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: nalidixic_acid
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__nalidixic_acid.joblib
+      sha256: 16c64c96dc1f609f8ad72bdd199e9c4f56cd62a8e269db696b37bbd6b1b3d2a6
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: salmonella_enterica:nalidixic_acid
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: a054f5477ce196fdeaa73afbcb8b3c79dccca405300b5dea64709de8fc47c653
+      artifact_sha256: 16c64c96dc1f609f8ad72bdd199e9c4f56cd62a8e269db696b37bbd6b1b3d2a6
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__nalidixic_acid
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/streptomycin:
+    id: sir/salmonella_enterica/streptomycin
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: streptomycin
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__streptomycin.joblib
+      sha256: 2ba6f6d68ac87def3b5291ba31ceda24578ccecbd6cdb5e61ee07dd8aac1f00a
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: salmonella_enterica:streptomycin
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 5e938d0141bdd9bef0688a2c22bfb10ce0d79ac46ba9f024744a91b9c8ad7ff6
+      artifact_sha256: 2ba6f6d68ac87def3b5291ba31ceda24578ccecbd6cdb5e61ee07dd8aac1f00a
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__streptomycin
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/sulfamethoxazole:
+    id: sir/salmonella_enterica/sulfamethoxazole
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: sulfamethoxazole
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__sulfamethoxazole.joblib
+      sha256: 669f57a07b29bdb73750fe675725869b956190f3d819fa29278f1ec4152d4c3a
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: salmonella_enterica:sulfamethoxazole
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 1576809495eab09bd433ee942eb7a3c9790e07ad829d7293a71efa54e338e91b
+      artifact_sha256: 669f57a07b29bdb73750fe675725869b956190f3d819fa29278f1ec4152d4c3a
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__sulfamethoxazole
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/sulfisoxazole:
+    id: sir/salmonella_enterica/sulfisoxazole
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: sulfisoxazole
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__sulfisoxazole.joblib
+      sha256: f2641aaff044d4df06edec0a90b78fd36d0f1a505783dcd5dcb6395aa293201b
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: no_baseline
+      evidence_key: salmonella_enterica:sulfisoxazole
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: 74697d29135557a151e2f60a11358a877c4fcfa2fa9d55e99ed6c3bf72b91064
+      artifact_sha256: f2641aaff044d4df06edec0a90b78fd36d0f1a505783dcd5dcb6395aa293201b
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__sulfisoxazole
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/tetracycline:
+    id: sir/salmonella_enterica/tetracycline
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: tetracycline
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__tetracycline.joblib
+      sha256: 4c6b48adfb48f64d47a98f85083bbe1b93a920d1187909f0057aa2a215d2a2b7
+    validation:
+      status: limited
+      evidence_level: E3
+      evidence_tier: practical
+      evidence_key: salmonella_enterica:tetracycline
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: f111685094801af30d57feaa40764287034479cf533f6ca8a4f53a4587a916e5
+      artifact_sha256: 4c6b48adfb48f64d47a98f85083bbe1b93a920d1187909f0057aa2a215d2a2b7
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__tetracycline
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  sir/salmonella_enterica/trimethoprim-sulfamethoxazole:
+    id: sir/salmonella_enterica/trimethoprim-sulfamethoxazole
+    execution: predict
+    capability:
+      output_kind: sir_class
+      species: salmonella_enterica
+      drug_id: trimethoprim-sulfamethoxazole
+      scientific_contract: r_vs_non_r
+    runtime:
+      adapter: genotype_to_sir
+      dependencies:
+      - numpy
+      - joblib
+      - sklearn
+      dependency_versions:
+        scikit-learn: 1.9.0
+      input_contract_id: amr_profile_v1
+    asset:
+      path: data/mdr_gnb/models/salmonella_enterica/genotype_to_sir__trimethoprim-sulfamethoxazole.joblib
+      sha256: d1e66c13b47dec771fe3929bae6bd688c1688a96a8cb901ab3fe68a15d250156
+    validation:
+      status: limited
+      evidence_level: E1
+      evidence_tier: unevaluated
+      evidence_key: salmonella_enterica:trimethoprim-sulfamethoxazole
+      evidence_source_path: praxis_virtualcell/model_zoo/evidence_tiers.yaml
+      evidence_source_sha256: aec8d8a45d55803ee923f4f73ebf9d629585a59c7a20f43aa25bbc5a1e73368c
+      evidence_record_sha256: bfa22571cd37a98136d8f73a6b55c2f0eba3af85ef78081f85442c750839350a
+      artifact_sha256: d1e66c13b47dec771fe3929bae6bd688c1688a96a8cb901ab3fe68a15d250156
+    source:
+      batch_model_name: mdrgnb_sir__salmonella_enterica__trimethoprim-sulfamethoxazole
+      batch_version: m2-2026-07
+    lifecycle:
+      declared: true
+      routeable_when_ready: true
+  stub/mechanism_state:
+    id: stub/mechanism_state
+    execution: fail_closed
+    capability:
+      output_kind: mechanism_state
+      species: '*'
+      drug_id: '*'
+      scientific_contract: not_an_available_model
+    runtime:
+      adapter: null
+      dependencies: []
+      input_contract_id: null
+    asset: null
+    validation:
+      status: unverified
+      evidence_source: null
+    lifecycle:
+      declared: true
+      routeable_when_ready: false
+      reason_code: mechanism_state_model_unavailable
+  stub/mic_regressor:
+    id: stub/mic_regressor
+    execution: fail_closed
+    capability:
+      output_kind: mic_scalar
+      species: '*'
+      drug_id: '*'
+      scientific_contract: not_an_available_model
+    runtime:
+      adapter: null
+      dependencies: []
+      input_contract_id: null
+    asset: null
+    validation:
+      status: unverified
+      evidence_source: null
+    lifecycle:
+      declared: true
+      routeable_when_ready: false
+      reason_code: quantitative_mic_model_unavailable
+  stub/rule_baseline:
+    id: stub/rule_baseline
+    execution: fail_closed
+    capability:
+      output_kind: sir_class
+      species: '*'
+      drug_id: '*'
+      scientific_contract: not_an_available_model
+    runtime:
+      adapter: null
+      dependencies: []
+      input_contract_id: null
+    asset: null
+    validation:
+      status: unverified
+      evidence_source: null
+    lifecycle:
+      declared: true
+      routeable_when_ready: false
+      reason_code: rule_baseline_not_runtime_predictor
+orphaned_evidence:
+- species: acinetobacter_baumannii
+  drug_id: ampicillin
+  evidence_level: E3
+  tier: practical
+  reason_code: evidence_without_runtime_artifact
+- species: acinetobacter_baumannii
+  drug_id: cefazolin
+  evidence_level: E3
+  tier: no_baseline
+  reason_code: evidence_without_runtime_artifact
+- species: acinetobacter_baumannii
+  drug_id: cefotetan
+  evidence_level: E3
+  tier: no_baseline
+  reason_code: evidence_without_runtime_artifact
+- species: acinetobacter_baumannii
+  drug_id: cefoxitin
+  evidence_level: E3
+  tier: no_baseline
+  reason_code: evidence_without_runtime_artifact
+- species: acinetobacter_baumannii
+  drug_id: nitrofurantoin
+  evidence_level: E3
+  tier: no_baseline
+  reason_code: evidence_without_runtime_artifact

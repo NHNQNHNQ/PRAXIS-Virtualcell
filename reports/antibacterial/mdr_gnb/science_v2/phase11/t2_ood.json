@@ -1,0 +1,199 @@
+{
+  "note": "咖啡因/聚乙烯片段(C16)经实跑证实近训练分布(max_tanimoto>OOD阈值0.30),平台合理给出 MIC,非泄漏,详见 near_training_distribution;EC 空基因型/无关基因不是敏感性证据，必须以 amr_profile_no_recognized_features 弃权，详见 sir_insufficient_profile_cases。",
+  "sir_insufficient_profile_cases": [
+    {
+      "abstain_reasons": [
+        "no_successful_predictor",
+        "amr_profile_no_recognized_features"
+      ],
+      "abstained": true,
+      "activity": null,
+      "evidence": {
+        "auc_R": 0.9422,
+        "calibration_ece": 0.0189,
+        "delta_vme": -0.0182,
+        "drug": "meropenem",
+        "evidence_level": "E3",
+        "me_fusion": 0.0499,
+        "me_rule": 0.0023,
+        "n": 6232,
+        "n_R_ST": 32,
+        "p_value": 0.2475,
+        "per_st_vme_fusion": 0.1693,
+        "per_st_vme_rule": 0.1875,
+        "species": "escherichia_coli",
+        "t_star": 0.1,
+        "tier": "practical"
+      },
+      "mechanism": null,
+      "name": "EC空基因型",
+      "output_kind": null,
+      "peptide_activity": null,
+      "prediction_available": false,
+      "sir": null,
+      "task_id": "mdr-003d00fc57800777"
+    },
+    {
+      "abstain_reasons": [
+        "no_successful_predictor",
+        "amr_profile_no_recognized_features"
+      ],
+      "abstained": true,
+      "activity": null,
+      "evidence": {
+        "auc_R": 0.9422,
+        "calibration_ece": 0.0189,
+        "delta_vme": -0.0182,
+        "drug": "meropenem",
+        "evidence_level": "E3",
+        "me_fusion": 0.0499,
+        "me_rule": 0.0023,
+        "n": 6232,
+        "n_R_ST": 32,
+        "p_value": 0.2475,
+        "per_st_vme_fusion": 0.1693,
+        "per_st_vme_rule": 0.1875,
+        "species": "escherichia_coli",
+        "t_star": 0.1,
+        "tier": "practical"
+      },
+      "mechanism": null,
+      "name": "EC只有无关基因",
+      "output_kind": null,
+      "peptide_activity": null,
+      "prediction_available": false,
+      "sir": null,
+      "task_id": "mdr-2cf9bc95de61dff0"
+    }
+  ],
+  "sir_leaks": [],
+  "sir_malformed_cases": [
+    {
+      "abstain_reasons": [
+        "no_successful_predictor"
+      ],
+      "abstained": true,
+      "activity": null,
+      "evidence": null,
+      "mechanism": null,
+      "name": "未知物种",
+      "output_kind": null,
+      "peptide_activity": null,
+      "prediction_available": false,
+      "sir": null,
+      "task_id": "mdr-e9c12d9a1be91e85"
+    },
+    {
+      "abstain_reasons": [
+        "species_uncertain",
+        "drug_out_of_training_distribution",
+        "combo_gate_excluded",
+        "no_successful_predictor"
+      ],
+      "abstained": true,
+      "activity": null,
+      "evidence": null,
+      "mechanism": null,
+      "name": "全空乱格式",
+      "output_kind": null,
+      "peptide_activity": null,
+      "prediction_available": false,
+      "sir": null,
+      "task_id": "mdr-474815a9e1318dbb"
+    },
+    {
+      "abstain_reasons": [
+        "no_successful_predictor"
+      ],
+      "abstained": true,
+      "activity": null,
+      "evidence": null,
+      "mechanism": null,
+      "name": "已知物种_药无训练artifact",
+      "output_kind": null,
+      "peptide_activity": null,
+      "prediction_available": false,
+      "sir": null,
+      "task_id": "mdr-815ab9766936c17b"
+    }
+  ],
+  "small_molecule_peptide_ood": {
+    "compound_results": [
+      {
+        "abstained": true,
+        "activity": null,
+        "name": "甲烷",
+        "smiles": "C"
+      },
+      {
+        "abstained": true,
+        "activity": null,
+        "name": "乙烷",
+        "smiles": "CC"
+      },
+      {
+        "abstained": true,
+        "activity": null,
+        "name": "苯",
+        "smiles": "c1ccccc1"
+      }
+    ],
+    "leaks": [],
+    "n_abstained": 6,
+    "n_compounds": 3,
+    "n_compounds_abstained": 3,
+    "n_leaked": 0,
+    "n_peptides": 3,
+    "n_peptides_abstained": 3,
+    "near_training_distribution": [
+      {
+        "abstained": false,
+        "activity": {
+          "is_ood": false,
+          "log10_mic": 0.186,
+          "max_tanimoto": 0.5676,
+          "mic_ug_ml": 1.5347,
+          "uncertainty_std": 1.1659
+        },
+        "name": "咖啡因",
+        "smiles": "Cn1cnc2c1c(=O)n(C)c(=O)n2C"
+      },
+      {
+        "abstained": false,
+        "activity": {
+          "is_ood": false,
+          "log10_mic": 1.2693,
+          "max_tanimoto": 0.6154,
+          "mic_ug_ml": 18.5901,
+          "uncertainty_std": 0.5184
+        },
+        "name": "聚乙烯片段",
+        "smiles": "CCCCCCCCCCCCCCCC"
+      }
+    ],
+    "peptide_results": [
+      {
+        "abstained": true,
+        "name": "polyA",
+        "peptide_activity": null,
+        "sequence": "AAAAAAAAAAAAAAAAAA"
+      },
+      {
+        "abstained": true,
+        "name": "polyG",
+        "peptide_activity": null,
+        "sequence": "GGGGGGGGGGGGGGGG"
+      },
+      {
+        "abstained": true,
+        "name": "polyP",
+        "peptide_activity": null,
+        "sequence": "PPPPPPPPPPPPPPPP"
+      }
+    ]
+  },
+  "verdict": {
+    "fail_closed_verified": true,
+    "n_total_leaks": 0
+  }
+}

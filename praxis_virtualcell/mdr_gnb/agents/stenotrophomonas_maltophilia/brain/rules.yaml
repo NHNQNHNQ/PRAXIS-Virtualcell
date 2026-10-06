@@ -1,0 +1,23 @@
+# S. maltophilia brain(五键)。固有:L1(金属)+ L2(丝氨酸)β-内酰胺酶 → 固有碳青霉烯耐药。折点稀缺。
+intrinsic_resistance: true
+rules:
+  - id: intrinsic_carbapenem
+    if: {species: "stenotrophomonas_maltophilia"}
+    then: {meropenem: R, imipenem: R}
+    provenance: "固有 L1/L2 β-内酰胺酶;EUCAST intrinsic resistance table"
+resistance_mechanisms:
+  - name: l1_l2_betalactamase
+    genes: ["blaL1", "blaL2"]
+    mechanism: carbapenem_hydrolysis
+    supervised_by: "beta_lactamase_activity"
+negative_cases:
+  - note: "固有碳青霉烯耐药,不得报告 meropenem S(阴性对照)"
+    drug: meropenem
+assay_boundaries:
+  - method: broth_microdilution
+    supported: true
+    note: "折点稀缺:仅 TMP-SMX/米诺环素/左氧氟沙星有 EUCAST 折点,其余降级 abstain"
+species_specific_breakpoints:
+  trimethoprim-sulfamethoxazole: {S: "<=4", R: ">4", source: "EUCAST v14.0"}
+  minocycline: {S: "<=0.5", R: ">4", source: "CLSI M100"}
+  levofloxacin: {S: "<=1", R: ">2", source: "EUCAST v14.0"}

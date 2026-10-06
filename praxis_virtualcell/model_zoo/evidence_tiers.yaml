@@ -1,0 +1,1099 @@
+# G2R 证据分层(run_g2r_evidence_sweep 产,OOF ST-CV 全功效 + 机制融合)
+# tier: strong=显著优于冻结AMRFinderPlus / practical=不劣于规则 / no_baseline=规则表未收录
+# 评估: ST 分组, per-ST VME, 版本冻结 AMRFinderPlus 对照, NCBI-only
+# 证据等级(模型级 E0-E5): E4=ST-CV 完成且显著优于/匹配 AMRFinderPlus 且有安全收益;
+#   E3=ST-CV 完成;E1=artifact 存在+确定性加载(未做本地 CV,如 PA/AB/SE 无评估数据)。
+evidence_tiers:
+  - species: acinetobacter_baumannii
+    drug: "amikacin"
+    tier: strong
+    evidence_level: E4
+    n: 944
+    n_R_ST: 36
+    t_star: 0.64   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.353
+    per_st_vme_rule: 0.8512
+    delta_vme: -0.4982
+    p_value: 0.0001
+    me_fusion: 0.0508
+    me_rule: 0.015
+    auc_R: 0.9123
+    calibration_ece: 0.1615
+  - species: acinetobacter_baumannii
+    drug: "ampicillin"
+    tier: practical
+    evidence_level: E3
+    n: 651
+    n_R_ST: 53
+    t_star: 0.98   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0571
+    per_st_vme_rule: 0.3537
+    delta_vme: -0.2966
+    p_value: 0.0001
+    me_fusion: 1.0
+    me_rule: 0.0
+    auc_R: 0.4534
+    calibration_ece: 0.0021
+  - species: acinetobacter_baumannii
+    drug: "ampicillin-sulbactam"
+    tier: no_baseline
+    evidence_level: E3
+  - species: acinetobacter_baumannii
+    drug: "aztreonam"
+    tier: practical
+    evidence_level: E3
+    n: 650
+    n_R_ST: 48
+    t_star: 0.98   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.4114
+    per_st_vme_rule: 0.9403
+    delta_vme: -0.5289
+    p_value: 0.0001
+    me_fusion: 0.3846
+    me_rule: 0.0
+    auc_R: 0.6307
+    calibration_ece: 0.0038
+  - species: acinetobacter_baumannii
+    drug: "cefazolin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: acinetobacter_baumannii
+    drug: "cefepime"
+    tier: strong
+    evidence_level: E4
+    n: 319
+    n_R_ST: 32
+    t_star: 0.92   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.5857
+    per_st_vme_rule: 0.728
+    delta_vme: -0.1424
+    p_value: 0.0159
+    me_fusion: 0.036
+    me_rule: 0.0
+    auc_R: 0.881
+    calibration_ece: 0.0808
+  - species: acinetobacter_baumannii
+    drug: "cefotaxime"
+    tier: no_baseline
+    evidence_level: E3
+  - species: acinetobacter_baumannii
+    drug: "cefotetan"
+    tier: no_baseline
+    evidence_level: E3
+  - species: acinetobacter_baumannii
+    drug: "cefoxitin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: acinetobacter_baumannii
+    drug: "ceftazidime"
+    tier: no_baseline
+    evidence_level: E3
+  - species: acinetobacter_baumannii
+    drug: "ceftriaxone"
+    tier: strong
+    evidence_level: E4
+    n: 807
+    n_R_ST: 40
+    t_star: 0.9   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.5041
+    per_st_vme_rule: 0.8067
+    delta_vme: -0.3026
+    p_value: 0.0001
+    me_fusion: 0.0226
+    me_rule: 0.0
+    auc_R: 0.9101
+    calibration_ece: 0.0884
+  - species: acinetobacter_baumannii
+    drug: "ciprofloxacin"
+    tier: strong
+    evidence_level: E4
+    n: 987
+    n_R_ST: 44
+    t_star: 0.94   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.722
+    per_st_vme_rule: 0.9995
+    delta_vme: -0.2775
+    p_value: 0.0001
+    me_fusion: 0.043
+    me_rule: 0.0
+    auc_R: 0.9662
+    calibration_ece: 0.0722
+  - species: acinetobacter_baumannii
+    drug: "doripenem"
+    tier: no_baseline
+    evidence_level: E3
+  - species: acinetobacter_baumannii
+    drug: "gentamicin"
+    tier: strong
+    evidence_level: E4
+    n: 982
+    n_R_ST: 53
+    t_star: 0.84   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.1839
+    per_st_vme_rule: 0.2887
+    delta_vme: -0.1048
+    p_value: 0.0043
+    me_fusion: 0.3602
+    me_rule: 0.3218
+    auc_R: 0.8739
+    calibration_ece: 0.0497
+  - species: acinetobacter_baumannii
+    drug: "imipenem"
+    tier: no_baseline
+    evidence_level: E3
+  - species: acinetobacter_baumannii
+    drug: "levofloxacin"
+    tier: strong
+    evidence_level: E4
+    n: 800
+    n_R_ST: 38
+    t_star: 0.84   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.7782
+    per_st_vme_rule: 1.0
+    delta_vme: -0.2218
+    p_value: 0.0006
+    me_fusion: 0.0373
+    me_rule: 0.0034
+    auc_R: 0.8967
+    calibration_ece: 0.1355
+  - species: acinetobacter_baumannii
+    drug: "meropenem"
+    tier: practical
+    evidence_level: E3
+    n: 623
+    n_R_ST: 35
+    t_star: 0.64   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.2215
+    per_st_vme_rule: 0.2222
+    delta_vme: -0.0007
+    p_value: 0.5035
+    me_fusion: 0.2018
+    me_rule: 0.181
+    auc_R: 0.8983
+    calibration_ece: 0.099
+  - species: acinetobacter_baumannii
+    drug: "nitrofurantoin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: acinetobacter_baumannii
+    drug: "piperacillin-tazobactam"
+    tier: no_baseline
+    evidence_level: E3
+  - species: acinetobacter_baumannii
+    drug: "tetracycline"
+    tier: strong
+    evidence_level: E4
+    n: 797
+    n_R_ST: 34
+    t_star: 0.74   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.3765
+    per_st_vme_rule: 0.4319
+    delta_vme: -0.0554
+    p_value: 0.0336
+    me_fusion: 0.0627
+    me_rule: 0.0148
+    auc_R: 0.8967
+    calibration_ece: 0.2164
+  - species: acinetobacter_baumannii
+    drug: "tobramycin"
+    tier: practical
+    evidence_level: E3
+    n: 795
+    n_R_ST: 37
+    t_star: 0.64   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.1195
+    per_st_vme_rule: 0.1386
+    delta_vme: -0.0191
+    p_value: 0.5054
+    me_fusion: 0.2466
+    me_rule: 0.2011
+    auc_R: 0.8525
+    calibration_ece: 0.1449
+  - species: acinetobacter_baumannii
+    drug: "trimethoprim-sulfamethoxazole"
+    tier: practical
+    evidence_level: E3
+    n: 828
+    n_R_ST: 51
+    t_star: 0.74   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0204
+    per_st_vme_rule: 0.0204
+    delta_vme: 0.0
+    p_value: 1.0
+    me_fusion: 0.2055
+    me_rule: 0.1575
+    auc_R: 0.9366
+    calibration_ece: 0.0955
+  - species: escherichia_coli
+    drug: "amikacin"
+    tier: practical
+    evidence_level: E3
+    n: 3361
+    n_R_ST: 30
+    t_star: 0.12   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.23
+    per_st_vme_rule: 0.23
+    delta_vme: 0.0
+    p_value: 1.0
+    me_fusion: 0.112
+    me_rule: 0.0657
+    auc_R: 0.8844
+    calibration_ece: 0.0176
+  - species: escherichia_coli
+    drug: "amoxicillin-clavulanic acid"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "ampicillin"
+    tier: strong
+    evidence_level: E4
+    n: 7609
+    n_R_ST: 531
+    t_star: 0.26   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0258
+    per_st_vme_rule: 0.1223
+    delta_vme: -0.0965
+    p_value: 0.0001
+    me_fusion: 0.057
+    me_rule: 0.0182
+    auc_R: 0.9868
+    calibration_ece: 0.0355
+  - species: escherichia_coli
+    drug: "ampicillin-sulbactam"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "azithromycin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "aztreonam"
+    tier: practical
+    evidence_level: E3
+    n: 2322
+    n_R_ST: 55
+    t_star: 0.1   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0366
+    per_st_vme_rule: 0.0651
+    delta_vme: -0.0285
+    p_value: 0.0601
+    me_fusion: 0.0907
+    me_rule: 0.0531
+    auc_R: 0.9758
+    calibration_ece: 0.0122
+  - species: escherichia_coli
+    drug: "cefazolin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "cefepime"
+    tier: strong
+    evidence_level: E4
+    n: 3525
+    n_R_ST: 158
+    t_star: 0.12   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0418
+    per_st_vme_rule: 0.1671
+    delta_vme: -0.1253
+    p_value: 0.0001
+    me_fusion: 0.2202
+    me_rule: 0.175
+    auc_R: 0.9372
+    calibration_ece: 0.0155
+  - species: escherichia_coli
+    drug: "cefotaxime"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "cefotaxime-clavulanic acid"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "cefoxitin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "cefpodoxime"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "ceftazidime"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "ceftazidime-clavulanic acid"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "ceftiofur"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "ceftriaxone"
+    tier: strong
+    evidence_level: E4
+    n: 6852
+    n_R_ST: 246
+    t_star: 0.12   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0269
+    per_st_vme_rule: 0.0297
+    delta_vme: -0.0028
+    p_value: 0.001
+    me_fusion: 0.0463
+    me_rule: 0.0089
+    auc_R: 0.9913
+    calibration_ece: 0.0151
+  - species: escherichia_coli
+    drug: "cephalothin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "chloramphenicol"
+    tier: practical
+    evidence_level: E3
+    n: 4633
+    n_R_ST: 174
+    t_star: 0.14   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0248
+    per_st_vme_rule: 0.0313
+    delta_vme: -0.0064
+    p_value: 0.1258
+    me_fusion: 0.0387
+    me_rule: 0.0058
+    auc_R: 0.9934
+    calibration_ece: 0.0303
+  - species: escherichia_coli
+    drug: "ciprofloxacin"
+    tier: practical
+    evidence_level: E3
+    n: 7756
+    n_R_ST: 196
+    t_star: 0.12   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0773
+    per_st_vme_rule: 0.087
+    delta_vme: -0.0097
+    p_value: 0.0632
+    me_fusion: 0.1339
+    me_rule: 0.0995
+    auc_R: 0.9826
+    calibration_ece: 0.0278
+  - species: escherichia_coli
+    drug: "colistin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "ertapenem"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "gentamicin"
+    tier: strong
+    evidence_level: E4
+    n: 7445
+    n_R_ST: 212
+    t_star: 0.2   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0346
+    per_st_vme_rule: 0.068
+    delta_vme: -0.0334
+    p_value: 0.0001
+    me_fusion: 0.0637
+    me_rule: 0.0179
+    auc_R: 0.9809
+    calibration_ece: 0.0266
+  - species: escherichia_coli
+    drug: "imipenem"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "kanamycin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "levofloxacin"
+    tier: practical
+    evidence_level: E3
+    n: 3074
+    n_R_ST: 85
+    t_star: 0.08   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0986
+    per_st_vme_rule: 0.1104
+    delta_vme: -0.0118
+    p_value: 0.4986
+    me_fusion: 0.2649
+    me_rule: 0.2264
+    auc_R: 0.9842
+    calibration_ece: 0.0404
+  - species: escherichia_coli
+    drug: "meropenem"
+    tier: practical
+    evidence_level: E3
+    n: 6232
+    n_R_ST: 32
+    t_star: 0.1   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.1693
+    per_st_vme_rule: 0.1875
+    delta_vme: -0.0182
+    p_value: 0.2475
+    me_fusion: 0.0499
+    me_rule: 0.0023
+    auc_R: 0.9422
+    calibration_ece: 0.0189
+  - species: escherichia_coli
+    drug: "moxifloxacin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "nalidixic acid"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "nitrofurantoin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "piperacillin-tazobactam"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "streptomycin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "sulfamethoxazole"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "sulfisoxazole"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "tetracycline"
+    tier: strong
+    evidence_level: E4
+    n: 7247
+    n_R_ST: 541
+    t_star: 0.36   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0211
+    per_st_vme_rule: 0.0225
+    delta_vme: -0.0014
+    p_value: 0.0164
+    me_fusion: 0.0626
+    me_rule: 0.0183
+    auc_R: 0.9895
+    calibration_ece: 0.0484
+  - species: escherichia_coli
+    drug: "tobramycin"
+    tier: strong
+    evidence_level: E4
+    n: 2972
+    n_R_ST: 47
+    t_star: 0.14   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.2427
+    per_st_vme_rule: 0.3912
+    delta_vme: -0.1485
+    p_value: 0.0005
+    me_fusion: 0.0616
+    me_rule: 0.0144
+    auc_R: 0.9484
+    calibration_ece: 0.0145
+  - species: escherichia_coli
+    drug: "trimethoprim"
+    tier: no_baseline
+    evidence_level: E3
+  - species: escherichia_coli
+    drug: "trimethoprim-sulfamethoxazole"
+    tier: strong
+    evidence_level: E4
+    n: 7040
+    n_R_ST: 199
+    t_star: 0.06   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0162
+    per_st_vme_rule: 0.0198
+    delta_vme: -0.0036
+    p_value: 0.0165
+    me_fusion: 0.2855
+    me_rule: 0.2409
+    auc_R: 0.9802
+    calibration_ece: 0.0286
+  - species: klebsiella_pneumoniae
+    drug: "amikacin"
+    tier: strong
+    evidence_level: E4
+    n: 730
+    n_R_ST: 36
+    t_star: 0.16   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0017
+    per_st_vme_rule: 0.082
+    delta_vme: -0.0803
+    p_value: 0.0087
+    me_fusion: 0.5536
+    me_rule: 0.5057
+    auc_R: 0.9267
+    calibration_ece: 0.0342
+  - species: klebsiella_pneumoniae
+    drug: "amoxicillin-clavulanic acid"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "ampicillin"
+    tier: practical
+    evidence_level: E3
+    n: 528
+    n_R_ST: 159
+    t_star: 0.02   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0
+    per_st_vme_rule: 0.0063
+    delta_vme: -0.0063
+    p_value: 0.5052
+    me_fusion: 1.0
+    me_rule: 1.0
+    auc_R: 0.5469
+    calibration_ece: 0.03
+  - species: klebsiella_pneumoniae
+    drug: "ampicillin-sulbactam"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "aztreonam"
+    tier: practical
+    evidence_level: E3
+    n: 323
+    n_R_ST: 71
+    t_star: 0.78   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0957
+    per_st_vme_rule: 0.1154
+    delta_vme: -0.0198
+    p_value: 0.0591
+    me_fusion: 0.1667
+    me_rule: 0.1333
+    auc_R: 0.9435
+    calibration_ece: 0.0467
+  - species: klebsiella_pneumoniae
+    drug: "cefazolin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "cefepime"
+    tier: strong
+    evidence_level: E4
+    n: 627
+    n_R_ST: 86
+    t_star: 0.4   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0286
+    per_st_vme_rule: 0.0591
+    delta_vme: -0.0305
+    p_value: 0.0146
+    me_fusion: 0.4706
+    me_rule: 0.4244
+    auc_R: 0.9057
+    calibration_ece: 0.0526
+  - species: klebsiella_pneumoniae
+    drug: "cefotaxime"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "cefotetan"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "cefoxitin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "cefpodoxime"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "ceftazidime"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "ceftazidime-avibactam"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "ceftolozane-tazobactam"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "ceftriaxone"
+    tier: strong
+    evidence_level: E4
+    n: 1024
+    n_R_ST: 145
+    t_star: 0.64   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.1445
+    per_st_vme_rule: 0.2615
+    delta_vme: -0.117
+    p_value: 0.0001
+    me_fusion: 0.0703
+    me_rule: 0.0216
+    auc_R: 0.9615
+    calibration_ece: 0.0452
+  - species: klebsiella_pneumoniae
+    drug: "cefuroxime"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "cephalothin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "chloramphenicol"
+    tier: practical
+    evidence_level: E3
+    n: 90
+    n_R_ST: 15
+    t_star: 0.36   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.1667
+    per_st_vme_rule: 0.2333
+    delta_vme: -0.0667
+    p_value: 0.5079
+    me_fusion: 0.386
+    me_rule: 0.3509
+    auc_R: 0.7892
+    calibration_ece: 0.0373
+  - species: klebsiella_pneumoniae
+    drug: "ciprofloxacin"
+    tier: practical
+    evidence_level: E3
+    n: 782
+    n_R_ST: 93
+    t_star: 0.02   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0
+    per_st_vme_rule: 0.0
+    delta_vme: 0.0
+    p_value: 1.0
+    me_fusion: 0.9923
+    me_rule: 0.9807
+    auc_R: 0.9388
+    calibration_ece: 0.0468
+  - species: klebsiella_pneumoniae
+    drug: "colistin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "doripenem"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "ertapenem"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "gentamicin"
+    tier: strong
+    evidence_level: E4
+    n: 719
+    n_R_ST: 89
+    t_star: 0.58   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.09
+    per_st_vme_rule: 0.1264
+    delta_vme: -0.0364
+    p_value: 0.029
+    me_fusion: 0.1246
+    me_rule: 0.0895
+    auc_R: 0.9297
+    calibration_ece: 0.0994
+  - species: klebsiella_pneumoniae
+    drug: "imipenem"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "levofloxacin"
+    tier: practical
+    evidence_level: E3
+    n: 598
+    n_R_ST: 61
+    t_star: 0.02   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0
+    per_st_vme_rule: 0.0
+    delta_vme: 0.0
+    p_value: 1.0
+    me_fusion: 0.9886
+    me_rule: 0.9811
+    auc_R: 0.9375
+    calibration_ece: 0.0634
+  - species: klebsiella_pneumoniae
+    drug: "meropenem"
+    tier: strong
+    evidence_level: E4
+    n: 768
+    n_R_ST: 68
+    t_star: 0.4   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.1063
+    per_st_vme_rule: 0.2662
+    delta_vme: -0.1598
+    p_value: 0.0001
+    me_fusion: 0.1858
+    me_rule: 0.1374
+    auc_R: 0.954
+    calibration_ece: 0.0483
+  - species: klebsiella_pneumoniae
+    drug: "moxifloxacin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "nalidixic acid"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "nitrofurantoin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "piperacillin-tazobactam"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "polymyxin b"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "tetracycline"
+    tier: practical
+    evidence_level: E3
+    n: 421
+    n_R_ST: 85
+    t_star: 0.62   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.2056
+    per_st_vme_rule: 0.2096
+    delta_vme: -0.004
+    p_value: 0.2585
+    me_fusion: 0.0925
+    me_rule: 0.052
+    auc_R: 0.8505
+    calibration_ece: 0.1112
+  - species: klebsiella_pneumoniae
+    drug: "tigecycline"
+    tier: no_baseline
+    evidence_level: E3
+  - species: klebsiella_pneumoniae
+    drug: "tobramycin"
+    tier: strong
+    evidence_level: E4
+    n: 604
+    n_R_ST: 76
+    t_star: 0.4   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.037
+    per_st_vme_rule: 0.0683
+    delta_vme: -0.0313
+    p_value: 0.0036
+    me_fusion: 0.204
+    me_rule: 0.16
+    auc_R: 0.9428
+    calibration_ece: 0.0466
+  - species: klebsiella_pneumoniae
+    drug: "trimethoprim-sulfamethoxazole"
+    tier: practical
+    evidence_level: E3
+    n: 712
+    n_R_ST: 113
+    t_star: 0.44   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0257
+    per_st_vme_rule: 0.0257
+    delta_vme: 0.0
+    p_value: 1.0
+    me_fusion: 0.4587
+    me_rule: 0.4128
+    auc_R: 0.9171
+    calibration_ece: 0.0499
+  - species: pseudomonas_aeruginosa
+    drug: "amikacin"
+    tier: practical
+    evidence_level: E3
+    n: 516
+    n_R_ST: 24
+    t_star: 0.16   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.4051
+    per_st_vme_rule: 0.5139
+    delta_vme: -0.1088
+    p_value: 0.0639
+    me_fusion: 0.2542
+    me_rule: 0.2155
+    auc_R: 0.7446
+    calibration_ece: 0.1175
+  - species: pseudomonas_aeruginosa
+    drug: "aztreonam"
+    tier: strong
+    evidence_level: E4
+    n: 180
+    n_R_ST: 56
+    t_star: 0.72   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.8217
+    per_st_vme_rule: 0.9169
+    delta_vme: -0.0952
+    p_value: 0.0063
+    me_fusion: 0.038
+    me_rule: 0.0127
+    auc_R: 0.7191
+    calibration_ece: 0.1428
+  - species: pseudomonas_aeruginosa
+    drug: "cefepime"
+    tier: practical
+    evidence_level: E3
+    n: 451
+    n_R_ST: 71
+    t_star: 0.94   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.6491
+    per_st_vme_rule: 0.6491
+    delta_vme: 0.0
+    p_value: 1.0
+    me_fusion: 0.0714
+    me_rule: 0.0714
+    auc_R: 0.4072
+    calibration_ece: 0.3984
+  - species: pseudomonas_aeruginosa
+    drug: "ceftazidime"
+    tier: no_baseline
+    evidence_level: E3
+  - species: pseudomonas_aeruginosa
+    drug: "ceftazidime-avibactam"
+    tier: no_baseline
+    evidence_level: E3
+  - species: pseudomonas_aeruginosa
+    drug: "ciprofloxacin"
+    tier: strong
+    evidence_level: E4
+    n: 645
+    n_R_ST: 79
+    t_star: 0.52   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.3402
+    per_st_vme_rule: 0.8672
+    delta_vme: -0.527
+    p_value: 0.0001
+    me_fusion: 0.0734
+    me_rule: 0.0321
+    auc_R: 0.9592
+    calibration_ece: 0.0654
+  - species: pseudomonas_aeruginosa
+    drug: "gentamicin"
+    tier: practical
+    evidence_level: E3
+    n: 544
+    n_R_ST: 37
+    t_star: 0.7   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.6039
+    per_st_vme_rule: 0.6775
+    delta_vme: -0.0736
+    p_value: 0.0615
+    me_fusion: 0.049
+    me_rule: 0.0082
+    auc_R: 0.9422
+    calibration_ece: 0.1466
+  - species: pseudomonas_aeruginosa
+    drug: "imipenem"
+    tier: no_baseline
+    evidence_level: E3
+  - species: pseudomonas_aeruginosa
+    drug: "levofloxacin"
+    tier: strong
+    evidence_level: E4
+    n: 415
+    n_R_ST: 76
+    t_star: 0.46   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.2621
+    per_st_vme_rule: 0.8728
+    delta_vme: -0.6107
+    p_value: 0.0001
+    me_fusion: 0.0745
+    me_rule: 0.0373
+    auc_R: 0.9241
+    calibration_ece: 0.0919
+  - species: pseudomonas_aeruginosa
+    drug: "meropenem"
+    tier: strong
+    evidence_level: E4
+    n: 351
+    n_R_ST: 83
+    t_star: 0.7   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.6024
+    per_st_vme_rule: 0.6931
+    delta_vme: -0.0907
+    p_value: 0.0012
+    me_fusion: 0.2941
+    me_rule: 0.2521
+    auc_R: 0.833
+    calibration_ece: 0.145
+  - species: pseudomonas_aeruginosa
+    drug: "piperacillin-tazobactam"
+    tier: no_baseline
+    evidence_level: E3
+  - species: pseudomonas_aeruginosa
+    drug: "tobramycin"
+    tier: practical
+    evidence_level: E3
+    n: 457
+    n_R_ST: 34
+    t_star: 0.3   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.2353
+    per_st_vme_rule: 0.2373
+    delta_vme: -0.002
+    p_value: 0.4957
+    me_fusion: 0.1323
+    me_rule: 0.0952
+    auc_R: 0.9394
+    calibration_ece: 0.1158
+  - species: salmonella_enterica
+    drug: "amoxicillin-clavulanic acid"
+    tier: no_baseline
+    evidence_level: E3
+  - species: salmonella_enterica
+    drug: "ampicillin"
+    tier: strong
+    evidence_level: E4
+    n: 9611
+    n_R_ST: 43
+    t_star: 0.1   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0461
+    per_st_vme_rule: 0.0587
+    delta_vme: -0.0126
+    p_value: 0.009
+    me_fusion: 0.0442
+    me_rule: 0.0049
+    auc_R: 0.9878
+    calibration_ece: 0.026
+  - species: salmonella_enterica
+    drug: "cefoxitin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: salmonella_enterica
+    drug: "ceftiofur"
+    tier: no_baseline
+    evidence_level: E3
+  - species: salmonella_enterica
+    drug: "ceftriaxone"
+    tier: practical
+    evidence_level: E3
+    n: 9513
+    n_R_ST: 26
+    t_star: 0.06   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0926
+    per_st_vme_rule: 0.1311
+    delta_vme: -0.0385
+    p_value: 0.4958
+    me_fusion: 0.0475
+    me_rule: 0.0016
+    auc_R: 0.9782
+    calibration_ece: 0.0113
+  - species: salmonella_enterica
+    drug: "gentamicin"
+    tier: strong
+    evidence_level: E4
+    n: 9588
+    n_R_ST: 36
+    t_star: 0.12   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0439
+    per_st_vme_rule: 0.123
+    delta_vme: -0.0791
+    p_value: 0.008
+    me_fusion: 0.0611
+    me_rule: 0.0201
+    auc_R: 0.9704
+    calibration_ece: 0.0333
+  - species: salmonella_enterica
+    drug: "kanamycin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: salmonella_enterica
+    drug: "streptomycin"
+    tier: no_baseline
+    evidence_level: E3
+  - species: salmonella_enterica
+    drug: "sulfamethoxazole"
+    tier: no_baseline
+    evidence_level: E3
+  - species: salmonella_enterica
+    drug: "sulfisoxazole"
+    tier: no_baseline
+    evidence_level: E3
+  - species: salmonella_enterica
+    drug: "tetracycline"
+    tier: practical
+    evidence_level: E3
+    n: 9583
+    n_R_ST: 56
+    t_star: 0.1   # 机制特征模型的操作点(tuned 用;需匹配重训模型)
+    per_st_vme_fusion: 0.0494
+    per_st_vme_rule: 0.0494
+    delta_vme: 0.0
+    p_value: 1.0
+    me_fusion: 0.0634
+    me_rule: 0.0172
+    auc_R: 0.9855
+    calibration_ece: 0.0583
+  - species: acinetobacter_baumannii
+    drug: "colistin"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: acinetobacter_baumannii
+    drug: "minocycline"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: acinetobacter_baumannii
+    drug: "moxifloxacin"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: acinetobacter_baumannii
+    drug: "polymyxin b"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: escherichia_coli
+    drug: "norfloxacin"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: escherichia_coli
+    drug: "tigecycline"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: klebsiella_pneumoniae
+    drug: "doxycycline"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: klebsiella_pneumoniae
+    drug: "minocycline"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: pseudomonas_aeruginosa
+    drug: "colistin"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: pseudomonas_aeruginosa
+    drug: "polymyxin b"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: salmonella_enterica
+    drug: "azithromycin"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: salmonella_enterica
+    drug: "chloramphenicol"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: salmonella_enterica
+    drug: "ciprofloxacin"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: salmonella_enterica
+    drug: "nalidixic acid"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)
+  - species: salmonella_enterica
+    drug: "trimethoprim-sulfamethoxazole"
+    tier: unevaluated
+    evidence_level: E1
+    note: artifact 存在+确定性加载;本地无 phenotype/ST 数据未做 ST-CV(需 53)

@@ -1,7 +1,0 @@
-/* 样式聚合入口。载入顺序:fonts → tokens → themes → base → components。
-   base/components 排在 tokens/themes 之后(依赖变量);均在 App.css 之前载入(main 先 import 本文件)。 */
-@import "./fonts.css";
-@import "./tokens.css";
-@import "./themes.css";
-@import "./base.css";
-@import "./components.css";

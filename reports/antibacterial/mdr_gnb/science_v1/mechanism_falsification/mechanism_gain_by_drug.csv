@@ -1,0 +1,6 @@
+drug,n_combos,delta_vme_D_minus_C,mean_vme_C,mean_vme_D
+ceftriaxone,2,-0.0178,0.0775,0.0597
+meropenem,4,-0.0242,0.3003,0.2762
+ciprofloxacin,2,0.0006,0.0381,0.0387
+cefepime,1,-0.0162,0.0448,0.0286
+levofloxacin,1,-0.0263,0.2884,0.2621

@@ -1,104 +1,62 @@
 [project]
 name = "praxis-virtualcell"
-version = "1.6.0"
-description = "PRAXIS-2-derived multi-agent framework for virtual-cell prediction"
+version = "2.0.0"
+description = "Antibacterial candidate analysis with LLM tools, MIC predictors and traceable evidence"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
 dependencies = [
-    "httpx>=0.27,<1",
-    "mcp>=1.26,<2",
-    "pydantic>=2.7,<3",
-    "pydantic-settings>=2.3,<3",
-    "python-multipart>=0.0.9,<1",
-    "python-magic>=0.4.27,<1",
-    "PyYAML>=6.0,<7",
+    "httpx>=0.27,<1", "mcp>=1.26,<2", "pydantic>=2.7,<3",
+    "pydantic-settings>=2.3,<3", "python-multipart>=0.0.9,<1",
+    "python-magic>=0.4.27,<1", "PyYAML>=6.0,<7",
+    "numpy>=2.4,<3", "joblib>=1.5,<2", "scikit-learn==1.9.0",
+    "pandas>=2.3,<3", "pyarrow>=24,<25",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.2,<10",
-    "pytest-asyncio>=0.23,<2",
-    "respx>=0.21,<1",
-    "ruff>=0.5,<1",
-    "asyncpg>=0.29,<1",
-    "redis>=5.0,<8",
-    "argon2-cffi>=23,<26",
-    "alembic>=1.13,<2",
-    "fakeredis>=2.20,<3",
-    "greenlet>=3.1,<4",
-    "watchdog>=2.1.5,<7",
-    "asyncssh>=2.14,<3",
-    "httpx2>=2,<3",
-    "packaging>=24,<27",
+    "pytest>=8.2,<10", "pytest-asyncio>=0.23,<2", "respx>=0.21,<1",
+    "ruff>=0.5,<1", "fakeredis>=2.20,<3", "httpx2==2.7.0",
 ]
-# D.5 reviewer M0/M8 #4:prod 依赖必须 pin 上下界
-# 下界基于 .venv 实测、上界取下个 major 防破坏性更新(三周后 rebuild 不爆)
-prod = [
-    "httpx>=0.27,<1",
-    "pydantic>=2.7,<3",
-    "pydantic-settings>=2.3,<3",
-    "asyncpg>=0.29,<1",
-    "redis>=5.0,<8",
-    "gunicorn>=22.0,<27",
-    "uvicorn[standard]>=0.30,<1",
-    "argon2-cffi>=23,<26",
-    "alembic>=1.13,<2",
-]
-
-# v0.4 W2:机制模型(GEM/FBA)——bacteria/yeast growth case;test 无 cobra 时 skip
-mechanistic = [
-    "cobra>=0.29,<1",
-]
-# v0.6:本地 API 服务(FastAPI)+ 本地网页(Streamlit)
-api = [
-    "fastapi>=0.110,<1",
-    "uvicorn>=0.27,<1",
-]
-web = [
-    "streamlit>=1.30,<2",
-    "requests>=2.31,<3",
+api = ["fastapi>=0.110,<1", "uvicorn>=0.27,<1", "sqlalchemy>=2,<3", "redis>=5,<8"]
+chemistry = ["rdkit==2026.3.3"]
+mechanistic = ["cobra==0.31.1", "optlang==1.9.1", "swiglpk==5.0.13"]
+server = [
+    "asyncpg>=0.29,<1", "redis>=5,<8", "argon2-cffi>=23,<26",
+    "alembic>=1.13,<2", "asyncssh>=2.14,<3", "gunicorn>=22,<27",
+    "uvicorn>=0.27,<1", "fastapi>=0.110,<1",
 ]
 
 [project.scripts]
-praxis-vc = "praxis_virtualcell.cli:main"
+praxis-vc = "praxis_virtualcell.mdr_gnb.cli:main"
+praxis-mdr = "praxis_virtualcell.mdr_gnb.cli:main"
 
 [build-system]
-requires = ["setuptools==83.0.0", "wheel==0.47.0"]
+requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-include-package-data = true
+[tool.setuptools.packages.find]
+include = ["praxis2*", "praxis_virtualcell", "praxis_virtualcell.*"]
+exclude = ["*.tests", "*.tests.*", "*.tests_real", "*.tests_real.*"]
 
 [tool.setuptools.package-data]
-praxis_virtualcell = ["**/*.yaml", "**/*.json", "**/*.txt", "**/*.md", "**/*.gz"]
-praxis_vc_api = ["static/**/*"]
-
-[tool.setuptools.exclude-package-data]
-praxis_virtualcell = ["tests/*", "tests/**/*"]
-
-[tool.setuptools.packages.find]
-include = ["praxis2*", "praxis_virtualcell*", "praxis_vc_api*", "praxis_vc_web*"]
-exclude = ["praxis_virtualcell.tests*"]
+praxis_virtualcell = ["**/*.yaml", "**/*.json", "**/*.md"]
 
 [tool.ruff]
 line-length = 120
 target-version = "py311"
-# 排除非发布的一次性工具脚本(图表/审计/远程 skill runner),它们非可导入库、不参与 import 测试;
-# 发布代码(praxis_virtualcell / praxis_vc_api / praxis2 / tests)仍严格 lint。
-exclude = ["._*", ".venv", "*.egg-info", "frontend", "docs", "scripts", "brains"]
+exclude = ["._*", ".venv", "data", "models", "local", "research", "reports"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B"]
+select = ["E9", "F63", "F7", "F82"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "session"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
 markers = [
-    "integration: needs explicitly enabled service, container, or release dependencies",
-    "llm: makes a real external LLM request and requires explicit opt-in plus credentials",
-    "remote: needs an explicitly enabled remote GPU, checkpoint, donor, or private service",
-    "operational: probes a live deployed service rather than an isolated test dependency",
+    "integration: explicitly enabled external service or executable",
+    "llm: explicitly enabled real LLM request",
+    "remote: explicitly enabled remote compute or data",
+    "operational: live deployment probe",
 ]
-strict_markers = true
-addopts = "-q"

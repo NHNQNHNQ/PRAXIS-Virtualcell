@@ -1,0 +1,39 @@
+{
+  "verified_at_utc": "2026-09-22T12:51:48.631666+00:00",
+  "model": "SyntheMol-MCTS",
+  "tag": "v_1.0.3",
+  "source_commit": "7444ee4762244cf53d316822609e288505c51457",
+  "doi": "10.5281/zenodo.13932150",
+  "code_license": "MIT",
+  "asset_license": "cc-by-4.0",
+  "files": [
+    {
+      "file": "Data.zip",
+      "bytes": 885192166,
+      "checksum": "md5:fd5cce7c87c82da07ed8f138f1fcfad0",
+      "matches_author": true,
+      "zip_crc_passed": true,
+      "archive_members": 207,
+      "pt_or_pkl_members": 2
+    },
+    {
+      "file": "Models.zip",
+      "bytes": 197528579,
+      "checksum": "md5:4cbb05926cebc0584b4093b5e94a8daa",
+      "matches_author": true,
+      "zip_crc_passed": true,
+      "archive_members": 353,
+      "pt_or_pkl_members": 150
+    },
+    {
+      "file": "README.md",
+      "bytes": 2196,
+      "checksum": "md5:71d6c44d6414a6c1ef88a6e1ea1a1fc1",
+      "matches_author": true
+    }
+  ],
+  "download_complete": true,
+  "runtime_tested": false,
+  "integrated_with_v1": false,
+  "note": "Integrity verified only; not an installation, generation, or efficacy test."
+}

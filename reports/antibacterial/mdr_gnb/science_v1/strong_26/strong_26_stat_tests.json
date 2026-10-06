@@ -1,0 +1,236 @@
+{
+  "acinetobacter_baumannii::amikacin": {
+    "delta_vme": -0.49817548595312516,
+    "delta_vme_ci": [
+      -0.6358,
+      -0.3492
+    ],
+    "me_margin_ok": true,
+    "p_value": 9.999000099990002e-05
+  },
+  "acinetobacter_baumannii::cefepime": {
+    "delta_vme": -0.1423768939393939,
+    "delta_vme_ci": [
+      -0.2812,
+      -0.0339
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.015898410158984102
+  },
+  "acinetobacter_baumannii::ceftriaxone": {
+    "delta_vme": -0.30261418762884573,
+    "delta_vme_ci": [
+      -0.4372,
+      -0.1731
+    ],
+    "me_margin_ok": true,
+    "p_value": 9.999000099990002e-05
+  },
+  "acinetobacter_baumannii::ciprofloxacin": {
+    "delta_vme": -0.2774532749532749,
+    "delta_vme_ci": [
+      -0.4074,
+      -0.1498
+    ],
+    "me_margin_ok": true,
+    "p_value": 9.999000099990002e-05
+  },
+  "acinetobacter_baumannii::gentamicin": {
+    "delta_vme": -0.10481952420016405,
+    "delta_vme_ci": [
+      -0.1876,
+      -0.0377
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.004299570042995701
+  },
+  "acinetobacter_baumannii::levofloxacin": {
+    "delta_vme": -0.22181054636870956,
+    "delta_vme_ci": [
+      -0.3539,
+      -0.1108
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.0005999400059994001
+  },
+  "acinetobacter_baumannii::tetracycline": {
+    "delta_vme": -0.05540674603174606,
+    "delta_vme_ci": [
+      -0.1294,
+      -0.0019
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.033596640335966405
+  },
+  "escherichia_coli::ampicillin": {
+    "delta_vme": -0.09647199930235904,
+    "delta_vme_ci": [
+      -0.1205,
+      -0.0749
+    ],
+    "me_margin_ok": true,
+    "p_value": 9.999000099990002e-05
+  },
+  "escherichia_coli::cefepime": {
+    "delta_vme": -0.13158330218914324,
+    "delta_vme_ci": [
+      -0.1799,
+      -0.0888
+    ],
+    "me_margin_ok": true,
+    "p_value": 9.999000099990002e-05
+  },
+  "escherichia_coli::ceftriaxone": {
+    "delta_vme": -0.0027846742904557506,
+    "delta_vme_ci": [
+      -0.0052,
+      -0.001
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.000999900009999
+  },
+  "escherichia_coli::gentamicin": {
+    "delta_vme": -0.033424652720396464,
+    "delta_vme_ci": [
+      -0.056,
+      -0.0143
+    ],
+    "me_margin_ok": true,
+    "p_value": 9.999000099990002e-05
+  },
+  "escherichia_coli::tetracycline": {
+    "delta_vme": -0.0012701726435200636,
+    "delta_vme_ci": [
+      -0.0035,
+      -0.0
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.06209379062093791
+  },
+  "escherichia_coli::tobramycin": {
+    "delta_vme": -0.1485284093675446,
+    "delta_vme_ci": [
+      -0.2461,
+      -0.0634
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.0004999500049995
+  },
+  "escherichia_coli::trimethoprim-sulfamethoxazole": {
+    "delta_vme": -0.0035861926545893014,
+    "delta_vme_ci": [
+      -0.009,
+      -0.0002
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.0164983501649835
+  },
+  "klebsiella_pneumoniae::amikacin": {
+    "delta_vme": -0.08031135531135533,
+    "delta_vme_ci": [
+      -0.1603,
+      -0.0139
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.0086991300869913
+  },
+  "klebsiella_pneumoniae::cefepime": {
+    "delta_vme": -0.03048864894795128,
+    "delta_vme_ci": [
+      -0.0676,
+      -0.0039
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.014598540145985401
+  },
+  "klebsiella_pneumoniae::ceftriaxone": {
+    "delta_vme": -0.11701062560410508,
+    "delta_vme_ci": [
+      -0.165,
+      -0.0686
+    ],
+    "me_margin_ok": true,
+    "p_value": 9.999000099990002e-05
+  },
+  "klebsiella_pneumoniae::gentamicin": {
+    "delta_vme": -0.03726879861711324,
+    "delta_vme_ci": [
+      -0.0745,
+      -0.0031
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.015998400159984
+  },
+  "klebsiella_pneumoniae::meropenem": {
+    "delta_vme": -0.1546663027956281,
+    "delta_vme_ci": [
+      -0.244,
+      -0.0779
+    ],
+    "me_margin_ok": true,
+    "p_value": 9.999000099990002e-05
+  },
+  "klebsiella_pneumoniae::tobramycin": {
+    "delta_vme": -0.031330800524164364,
+    "delta_vme_ci": [
+      -0.072,
+      -0.003
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.0035996400359964
+  },
+  "pseudomonas_aeruginosa::aztreonam": {
+    "delta_vme": -0.09523809523809523,
+    "delta_vme_ci": [
+      -0.1726,
+      -0.0327
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.006299370062993701
+  },
+  "pseudomonas_aeruginosa::ciprofloxacin": {
+    "delta_vme": -0.5269615095750615,
+    "delta_vme_ci": [
+      -0.6288,
+      -0.4215
+    ],
+    "me_margin_ok": true,
+    "p_value": 9.999000099990002e-05
+  },
+  "pseudomonas_aeruginosa::levofloxacin": {
+    "delta_vme": -0.610745614035088,
+    "delta_vme_ci": [
+      -0.7081,
+      -0.5077
+    ],
+    "me_margin_ok": true,
+    "p_value": 9.999000099990002e-05
+  },
+  "pseudomonas_aeruginosa::meropenem": {
+    "delta_vme": -0.09066265060240952,
+    "delta_vme_ci": [
+      -0.15,
+      -0.0364
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.0011998800119988001
+  },
+  "salmonella_enterica::ampicillin": {
+    "delta_vme": -0.012639401543783978,
+    "delta_vme_ci": [
+      -0.0238,
+      -0.0038
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.008999100089991
+  },
+  "salmonella_enterica::gentamicin": {
+    "delta_vme": -0.0791228728728729,
+    "delta_vme_ci": [
+      -0.1549,
+      -0.0201
+    ],
+    "me_margin_ok": true,
+    "p_value": 0.007999200079992
+  }
+}

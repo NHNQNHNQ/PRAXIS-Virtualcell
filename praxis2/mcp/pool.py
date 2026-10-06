@@ -52,6 +52,7 @@ class MCPConnectionPool:
         from mcp import ClientSession, StdioServerParameters  # noqa: PLC0415
         from mcp.client.stdio import stdio_client  # noqa: PLC0415
         last_err: Exception | None = None
+        startup_timeout_s = spec.startup_timeout_s or self._startup_timeout_s
         for _attempt in range(self._retry + 1):
             sub = AsyncExitStack()
             try:
@@ -65,10 +66,10 @@ class MCPConnectionPool:
                 # 握手加超时:防 server spawn 成功但不讲 MCP 协议时永久挂起
                 # (call_timeout_s 只管 call_tool,管不到 initialize/list_tools)
                 await asyncio.wait_for(
-                    session.initialize(), timeout=self._startup_timeout_s
+                    session.initialize(), timeout=startup_timeout_s
                 )
                 listed = await asyncio.wait_for(
-                    session.list_tools(), timeout=self._startup_timeout_s
+                    session.list_tools(), timeout=startup_timeout_s
                 )
                 for t in listed.tools:
                     self._tools.append(MCPTool(

@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "praxis-abaumannii-mic"
+version = "0.1.0"
+description = "Direct structure-to-MIC auxiliary model for antibacterial candidate analysis"
+requires-python = ">=3.11"
+dependencies = ["torch>=2.6", "numpy", "pandas", "rdkit"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.scripts]
+praxis-ab-mic = "abwm.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

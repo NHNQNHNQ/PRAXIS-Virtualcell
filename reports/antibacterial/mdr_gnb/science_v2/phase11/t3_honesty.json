@@ -1,0 +1,75 @@
+{
+  "g3_candidate": {
+    "trimethoprim": {
+      "available": true,
+      "disclaimer": "FBA 为可证伪机制模拟;G3 门未验证该药(候选机制,不作已证实解释)",
+      "engine": "gem_fba",
+      "fba_simulation": {
+        "baseline_growth": 0.877,
+        "constrained_growth": 0.0,
+        "growth_inhibition": 1.0,
+        "note": "一阶原理代谢 FBA 模拟(iML1515):钳制代谢靶反应通量→估 growth 抑制(可证伪)",
+        "reactions_blocked": [
+          "DHFR"
+        ]
+      },
+      "g3_gate": {
+        "claim_allowed": false,
+        "status": "not_evaluated"
+      },
+      "mechanism_claim": null
+    }
+  },
+  "no_model": {
+    "enterobacter_cloacae": {
+      "abstained": false,
+      "prediction_available": false,
+      "sir": null
+    },
+    "morganella_morganii": {
+      "abstained": false,
+      "prediction_available": false,
+      "sir": null
+    },
+    "proteus_mirabilis": {
+      "abstained": false,
+      "prediction_available": false,
+      "sir": null
+    }
+  },
+  "no_model_probe_drug": "meropenem",
+  "non_metabolic": {
+    "colistin": {
+      "available": false,
+      "engine": "gem_fba",
+      "mechanism_claim": null,
+      "reason": "非代谢靶抗生素,FBA 不适用,交由 MechanismStateModel 处理"
+    },
+    "meropenem": {
+      "available": false,
+      "engine": "gem_fba",
+      "mechanism_claim": null,
+      "reason": "非代谢靶抗生素,FBA 不适用,交由 MechanismStateModel 处理"
+    }
+  },
+  "note": "T3A:无模型物种(morganella_morganii/proteus_mirabilis/enterobacter_cloacae,MANIFEST 训练=0)必须 sir=None、prediction_available=False,不伪造 R/S;T3B:非代谢靶药(meropenem/colistin,真实 PubChem canonical SMILES,非 OOD)mechanism.available 必须 False,不伪造机制;T3C:代谢靶候选药(trimethoprim)FBA 真阻断 DHFR 但 G3 门(仅覆盖 β-内酰胺两锚点)未评估该药,mechanism_claim 必须恒 None(候选,不越权声称已证实)。",
+  "smiles_used": {
+    "colistin": {
+      "smiles": "CCC(C)CCCC(=O)NC(CCN)C(=O)NC(C(=O)NC(CCN)C(=O)NC1CCNC(=O)C(C(C)O)NC(=O)C(CCN)NC(=O)C(CCN)NC(=O)C(CC(C)C)NC(=O)C(CC(C)C)NC(=O)C(CCN)NC1=O)C(C)O",
+      "source": "PubChem canonical SMILES(公开事实,内建于 t3_honesty._EXTRA_SMILES)"
+    },
+    "meropenem": {
+      "smiles": "CC(O)C1C(=O)N2C(C(=O)O)=C(SC3CNC(C(=O)N(C)C)C3)C(C)C12",
+      "source": "PubChem canonical SMILES(公开事实,内建于 t3_honesty._EXTRA_SMILES)"
+    },
+    "trimethoprim": {
+      "smiles": "COc1cc(Cc2cnc(N)nc2N)cc(OC)c1OC",
+      "source": "data/mdr_gnb/golden/golden_compounds.csv(T1B 已核对分子式,label_source=chembl_train)"
+    }
+  },
+  "verdict": {
+    "honest": true,
+    "n_violations": 0
+  },
+  "violations": []
+}

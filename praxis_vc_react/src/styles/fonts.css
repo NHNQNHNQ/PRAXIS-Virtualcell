@@ -1,6 +1,0 @@
-/* self-host 字体(@fontsource,只引所需字重以控制打包体积)。
-   Inter 兼作正文与大标题;JetBrains Mono 供 code/trace。 */
-@import "@fontsource/inter/latin-400.css";
-@import "@fontsource/inter/latin-500.css";
-@import "@fontsource/inter/latin-600.css";
-@import "@fontsource/jetbrains-mono/latin-400.css";

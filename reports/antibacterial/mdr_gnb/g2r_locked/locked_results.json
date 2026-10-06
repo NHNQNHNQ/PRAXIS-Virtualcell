@@ -1,0 +1,94 @@
+{
+ "klebsiella_pneumoniae__meropenem": {
+  "best": "rule",
+  "dev_table": {
+   "rule": {
+    "per_st_vme": 0.27164868871525216,
+    "me": 0.14726027397260275,
+    "vme_global": 0.11555555555555555
+   },
+   "ml_aligned": {
+    "per_st_vme": 0.12255639097744361,
+    "me": 0.4520547945205479,
+    "vme_global": 0.044444444444444446
+   },
+   "ml_budget": {
+    "per_st_vme": 0.131077694235589,
+    "me": 0.410958904109589,
+    "vme_global": 0.057777777777777775
+   },
+   "fusion_aligned": {
+    "per_st_vme": 0.087468671679198,
+    "me": 0.4520547945205479,
+    "vme_global": 0.035555555555555556
+   },
+   "fusion_budget": {
+    "per_st_vme": 0.08997493734335839,
+    "me": 0.410958904109589,
+    "vme_global": 0.04
+   }
+  },
+  "locked": {
+   "best_candidate": "rule",
+   "verdict": "G2R-fail",
+   "n_locked": 200,
+   "n_st_with_R": 11,
+   "per_st_vme_best": 0.23766233766233763,
+   "per_st_vme_rule": 0.23766233766233763,
+   "delta_vme": 0.0,
+   "p_value": 1.0,
+   "me_best": 0.10891089108910891,
+   "me_rule": 0.10891089108910891,
+   "vme_global_best": 0.09090909090909091
+  },
+  "n_dev": 568,
+  "n_lock": 200,
+  "rule_vme_atlas": []
+ },
+ "escherichia_coli__ceftriaxone": {
+  "best": "fusion_aligned",
+  "dev_table": {
+   "rule": {
+    "per_st_vme": 0.03295547641325445,
+    "me": 0.00961978928080623,
+    "vme_global": 0.03216650898770104
+   },
+   "ml_aligned": {
+    "per_st_vme": 0.06099181531887299,
+    "me": 0.055886394869445716,
+    "vme_global": 0.027436140018921477
+   },
+   "ml_budget": {
+    "per_st_vme": 0.03097943722943723,
+    "me": 0.24919835089326614,
+    "vme_global": 0.011352885525070956
+   },
+   "fusion_aligned": {
+    "per_st_vme": 0.026562702764760436,
+    "me": 0.05611543747136968,
+    "vme_global": 0.017975402081362345
+   },
+   "fusion_budget": {
+    "per_st_vme": 0.020698051948051945,
+    "me": 0.24919835089326614,
+    "vme_global": 0.007568590350047304
+   }
+  },
+  "locked": {
+   "best_candidate": "fusion_aligned",
+   "verdict": "G2R-practical-pass",
+   "n_locked": 1369,
+   "n_st_with_R": 70,
+   "per_st_vme_best": 0.01880952380952381,
+   "per_st_vme_rule": 0.021434676434676433,
+   "delta_vme": -0.0026251526251526228,
+   "p_value": 0.24737526247375263,
+   "me_best": 0.04549763033175355,
+   "me_rule": 0.005687203791469194,
+   "vme_global_best": 0.009554140127388535
+  },
+  "n_dev": 5483,
+  "n_lock": 1369,
+  "rule_vme_atlas": []
+ }
+}

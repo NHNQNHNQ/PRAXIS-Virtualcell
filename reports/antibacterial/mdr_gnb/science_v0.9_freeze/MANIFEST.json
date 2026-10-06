@@ -1,0 +1,55 @@
+{
+  "anchors_strong_pass": [
+    "EC×ceftriaxone",
+    "KP×meropenem"
+  ],
+  "counts": {
+    "no_baseline": 67,
+    "practical": 24,
+    "strong": 26,
+    "unevaluated": 15
+  },
+  "description": "Science v0.9 证据面只读冻结(S0.2);后续升级以此为基线,勿悄改计数。",
+  "evidence_levels": {
+    "E1": 15,
+    "E3": 91,
+    "E4": 26
+  },
+  "files": {
+    "01_model_zoo_inventory.csv": {
+      "sha256": "a6e67c2ad64be58eaf93815bafab9762b608cf48f1f24544ab762fc45d93141e"
+    },
+    "02_evidence_surface_132.csv": {
+      "sha256": "7e966ee4b10c2bc70984efe282fee0782d64d6c90ae8830d4210e082a5d8a3de"
+    },
+    "03_g2r_anchor_results.md": {
+      "sha256": "292d58d9046bd0d4b0baaad1380e3bb025390afa2f7ff95513425a68c8f42338"
+    },
+    "04_strong_26_detail.csv": {
+      "sha256": "5fe4bc98249fc5afb747fd8264804ebd07ddf91a364cd2b7d288fc53d1669f86"
+    },
+    "05_practical_24_detail.csv": {
+      "sha256": "08dff78b771bfdd2fc6a5cfef69fcaad586d17eb8fb3eb5266aba849e9879f9b"
+    },
+    "06_no_baseline_67_detail.csv": {
+      "sha256": "31c979c32c95bbb18e67c6612026eb1eb4fbe8a7b562db65481bea290189c297"
+    },
+    "07_unevaluated_15_detail.csv": {
+      "sha256": "222fc2a5c76a9b7fa59d570cff76d2ef2b43c401f04d8bc3bb3d1687f978b34d"
+    },
+    "08_rule_first_safety_patch.md": {
+      "sha256": "8423d85f07d2398b524fc1e65520e4fc3dfafc85ed0cccd15b457383cf1dc95c"
+    },
+    "09_known_scientific_limits.md": {
+      "sha256": "d2eb7fae6259a631d065c1a3ccf1374a4882547fd1b57fc882784ea8320c38e3"
+    }
+  },
+  "n_combos": 132,
+  "n_models": 127,
+  "science_version": "v0.9",
+  "source": {
+    "anchors": "reports/g2r_locked/",
+    "evidence_tiers": "praxis_virtualcell/model_zoo/evidence_tiers.yaml",
+    "registry": "praxis_virtualcell/model_zoo/registry_mdr_gnb_batch.yaml"
+  }
+}

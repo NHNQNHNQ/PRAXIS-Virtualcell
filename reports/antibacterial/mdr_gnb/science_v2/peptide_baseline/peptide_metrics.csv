@@ -1,0 +1,2 @@
+species,n_peptides,n_clusters,rf_r2,rf_mae,rf_rmse,mean_rmse,nn1_rmse,beats_mean,beats_nn1
+Escherichia coli,774,374,0.2938,0.4572,0.6211,0.7416,0.8353,True,True
