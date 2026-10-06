@@ -1,5 +1,24 @@
 # 验证
 
+## 2.1 纯 LLM 与组学入口
+
+当前 CI 安装 `.[dev,api,chemistry,omics]`，运行智能体框架、组学加载、LLM 证据校验、页面 API 和保留的基础兼容测试。2026-10-06 本地同一选择集 **422 passed**；Ruff 和 `git diff --check` 通过。其中 41 条组学测试包含小型真实 H5AD 文件、损坏哈希/形状边界、来源和未给药数组隔离，37 条 LLM 分析测试验证引用拒绝、一次格式纠正与多轮思考历史。
+
+```bash
+.venv/bin/python -m pytest -q tests/agent_runtime tests/omics tests/llm_prediction tests/test_llm_platform.py \
+  tests/mdr_gnb/unit/test_abstain.py tests/mdr_gnb/unit/test_features.py \
+  tests/mdr_gnb/unit/test_ensembler.py tests/mdr_gnb/unit/test_critic.py \
+  tests/mdr_gnb/unit/test_rule_baseline.py tests/mdr_gnb/unit/test_species_registry.py \
+  tests/mdr_gnb/unit/test_report_builder.py tests/mdr_gnb/api/test_schemas.py
+.venv/bin/python -m ruff check praxis2 praxis_virtualcell tests
+```
+
+GitHub 不携带本地组学源文件，真实 AB5075 文件的用例会明确跳过；合成输入包和 H5AD 文件的边界验证仍运行。已在 APFS 暂存源代码构建 2.1.0 wheel，并在仓库外从 wheel 读取实际组学包、提供静态页面，确认页面资源已打包，凭据、大型数据和实时报告未打包。
+
+真实 API 验证与离线测试分别记录。真实调用成功只说明工具链与引用格式可运行，不是独立 MIC、杀伤能力或靶点准确率评估。
+
+## 历史组件与整合验证
+
 ```bash
 .venv/bin/python -m pytest tests/agent_runtime -q
 .venv/bin/python -m pytest tests/mdr_gnb -m 'not (integration or llm or remote)' -q
@@ -10,7 +29,7 @@
 
 AB 组件另有依赖及测试入口，见组件 README。整合验证包含从本地旧版本权重运行直接 MIC，并保持与 09-23 的较新服务器比较结果区别。
 
-GitHub CI 运行不依赖大型本地工件的智能体、数值工具/API 合同测试和安装检查；旧论文实验、Docker/A100 和多阶段 release 合同退出当前 CI。
+历史整合 CI 运行不依赖大型本地工件的智能体、数值工具/API 合同测试和安装检查；旧论文实验、Docker/A100 和多阶段 release 合同退出 CI。
 
 独立组件的验证记录见 `reports/antibacterial/direct_mic/import_verification_20261006.json` 与 `reports/antibacterial/synthemol/migration_verification_20261006.json`：12 个原版本权重各复现一条留出预测，4 项 direct MIC 与 5 项生成器验证单测通过。新主包 wheel 在仓库外安装后确认版本 2.0.0、物种规则、CLI、API `/health` 与 `/species` 可用；该安装检查未装大型工件，物种可用数为零符合预期。
 

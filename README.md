@@ -1,42 +1,55 @@
 # PRAXIS-VirtualCell
 
-面向抗菌候选分子的分析平台基础：复用 LLM 工具运行框架、直接 MIC/药敏预测器和可追溯的机制证据。2026-10-06 将 PRAXIS-MDR-GNB 与 Ab-虚拟细胞世界模型的可用资产整合到本仓库，历史工程归档到同级 `PRAXIS-virtualcell-old/`。
+加载具体菌株的真实组学数据，由 LLM 直接预测候选分子的抗菌活性、MIC，并提出有数据依据的靶点与机制假说。默认使用 DeepSeek；组学查询与结构处理工具不承担药效预测。
 
-## 当前可用能力
+## 当前入口
 
-- `praxis2/`：LLM 工具调用循环、记忆、任务执行以及 PubMed/UniProt/PDB/PubChem 等检索和对接工具接口。
-- `praxis_virtualcell/mdr_gnb/`：已知药物 AMR 分类、大肠杆菌 SMILES→MIC/肽活性预测、规则/OOD/报告和单药 API。
-- `components/abaumannii_mic/`：独立的鲍曼不动杆菌直接 MIC 工具；显式选择数据和模型目录，不依赖世界模型训练。
-- `integrations/synthemol/`、`candidates/`：SyntheMol 的恢复/验证脚本和已生成候选。作者生成器及其外部资产需按来源说明另行恢复。
-- `reports/antibacterial/`：保留已有模型表现、失败与适用边界；原始科学结果不因目录整合而升级。
+- `praxis_virtualcell/data_packs/`：从原平台恢复的 AnnData/MuData 校验、只读矩阵读取与显式特征对齐。
+- `praxis_virtualcell/omics/`：菌株/样本输入包与 NPZ 转录组适配；首包是 AB5075 历史未给药参考 `AB5075-AZI000`。
+- `praxis_virtualcell/llm_prediction/`：组学与结构工具调用、LLM 预测、事实引用校验、JSON/Markdown 报告。
+- `praxis2/llm/`：复用原平台客户端，支持 DeepSeek 思考模式与连续工具调用。
+- `praxis_virtualcell/web/`：选择菌株样本、输入候选结构、查看组学概览与分析报告的本地页面。
 
-目标流程是：候选生成 → 活性工具评分 → 菌株背景/机制证据检索 → LLM 汇总 → 实验验证。当前各工具已归入同一工程，但批量智能体闭环、菌株条件化的新化合物预测及新靶点预测仍需后续开发。
+旧 MIC、AMR、QSAR、扰动和世界模型不进入新预测入口。实测 MIC 记录不作为推理输入或查表答案。历史工具保留在 `praxis-mdr` 和独立组件中，已有结果保持原科学范围。
 
-MIC 与生长抑制是当前主要终点；没有相应数据时不输出杀伤率、MBC 或时间杀菌曲线。LLM 的机制推断应标为假说并关联证据。
+## 启动
 
-## 安装与使用
+安装见 [INSTALL](docs/INSTALL.md)。本地 `.env` 保存凭据并被 Git 忽略：
 
-在仓库根目录创建环境并安装：
-
-```bash
-python3.11 -m venv .venv
-.venv/bin/python -m pip install -e '.[api,chemistry,dev]'
-.venv/bin/praxis-mdr --help
-.venv/bin/praxis-mdr run --request examples/ecoli_activity.json
-.venv/bin/praxis-mdr serve --host 127.0.0.1 --port 8000
+```text
+DEEPSEEK_API_KEY=自己的本地凭据
+PRAXIS_ANTHROPIC_BASE_URL=https://api.deepseek.com
+PRAXIS_MODEL=deepseek-v4-pro
 ```
 
-`praxis-vc` 是同一 MDR CLI 的兼容入口。鲍曼 MIC 组件单独安装与调用，详见 [组件说明](components/abaumannii_mic/README.md)。
+`PRAXIS_ANTHROPIC_BASE_URL` 是原框架兼容配置名，实际使用 OpenAI-compatible Chat Completions。凭据只在服务端读取。
 
-上述真实预测使用本地 `data/mdr_gnb/` 或 `models/abaumannii/` 的工件。GitHub 保存代码、配置、来源说明和小型结果；大型权重、原始数据及服务器恢复资料仅留本地。缺少工件时会报告不可用或弃权。
+```bash
+.venv/bin/praxis-vc profiles
+.venv/bin/praxis-vc inspect --profile AB5075-AZI000
+.venv/bin/praxis-vc serve --port 8787
+```
 
-## 导航
+打开 `http://127.0.0.1:8787`。页面显示实际输入包的身份与数据覆盖；分析后可查看报告、工具轨迹以及 JSON/Markdown。
 
-- [安装与环境](docs/INSTALL.md)
-- [项目结构](docs/REPOSITORY-LAYOUT.md)
-- [数据及模型清单](docs/DATA-ASSETS.md)
-- [迁移与恢复](docs/CONSOLIDATION.md)
-- [验证范围](docs/TESTING.md)
-- [第三方数据来源与许可](docs/DATA-LICENSES.md)
+```bash
+.venv/bin/praxis-vc batch --profile AB5075-AZI000 --input candidates/synthemol_20260923/repeat_1/molecules.csv --limit 1 --output reports/llm_live/first-candidate
+```
 
-代码许可为 MIT。第三方实验数据与模型资产遵循各自来源许可。
+批量导入只读取 SMILES 和候选编号，忽略 CSV 的历史 score/Q_value 与终点字段。去掉 `--limit` 可处理完整候选集；每个候选都会调用配置的 LLM。
+
+## 数据与结果语义
+
+首包含真实转录组参考与参考注释，不宣称拥有实测蛋白组、代谢组或新分离株当前状态。未知时间、温度、基因型和生长期保持未知。处理后表达、实际 delta 和 MIC 标签不进入新候选工具结果。
+
+MIC 是未经校准的 LLM 估计，可以为未知；它表示生长抑制，不等于杀伤率。靶点与机制保留假说身份。引用校验只证明观察值与工具返回一致，不证明药效正确或靶点因果关系。无实际组学查询或事实引用校验失败时返回 `unsupported`，不调用其他预测器补数值。
+
+大型数据只存本地 `data/organisms/`，对应归档路径保留引用。数据准备与复现见 [OMICS](docs/OMICS.md)。本地 `.env` 与完整实时报告不进入 GitHub。
+
+## 验证与后续
+
+离线测试覆盖实际文件读取、样本/特征对应、未来数据隔离、多轮工具历史与事实引用。真实 API 运行验证工程链路，尚不构成独立药效准确率评估。当前使用基础 API 模型，尚未训练专用微调模型。
+
+作者药物生成器及外部资产仍需恢复。现有 24 个候选结构可进入同一接口；重复记录不计为 48 个不同分子。
+
+历史整合与来源见 [CONSOLIDATION](docs/CONSOLIDATION.md)、[DATA-ASSETS](docs/DATA-ASSETS.md)、[DATA-LICENSES](docs/DATA-LICENSES.md)。代码许可 MIT；第三方数据遵循原来源许可。

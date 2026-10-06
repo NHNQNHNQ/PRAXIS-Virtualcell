@@ -47,6 +47,8 @@ async def query(
     # §12.3 调用前主动 compact 注入缝;gate 由调用方用 usage.should_auto_compact 构造,
     # 返回 True 且本轮未主动 compact 过则压缩。不传则行为与 M3 完全一致(零回归)。
     precompact_gate: "Callable[[State], bool] | None" = None,
+    thinking: "dict[str, Any] | None" = None,
+    reasoning_effort: "str | None" = None,
 ) -> AsyncIterator[dict]:
     max_turns = getattr(settings, "max_turns", None)
 
@@ -68,8 +70,14 @@ async def query(
 
         tool_use_blocks: list[dict] = []
         text_parts: list[str] = []
+        reasoning_parts: list[str] = []
         needs_follow_up = False
         stop_reason: str | None = None
+        reasoning_options: dict[str, Any] = {}
+        if thinking is not None:
+            reasoning_options["thinking"] = thinking
+        if reasoning_effort is not None:
+            reasoning_options["reasoning_effort"] = reasoning_effort
 
         # ---- a. streaming;§7.1.4 ① prompt-too-long → reactive compact → 重试 ----
         if on_request is not None:  # §7.2.8:每次 API 请求前落完整 prompt(可观测)
@@ -80,6 +88,7 @@ async def query(
                         "system": system,
                         "messages": state.messages,
                         "tools": registry.openai_tools() or None,
+                        **reasoning_options,
                     }
                 )
             except Exception:  # noqa: BLE001 - dump 是调试设施,失败不得中断主循环
@@ -96,11 +105,16 @@ async def query(
                 messages=state.messages,
                 system=system,
                 tools=registry.openai_tools() or None,
+                **reasoning_options,
             ):
                 t = ev["type"]
                 if t == "text":
                     text_parts.append(ev["text"])
                     yield {"type": "text", "text": ev["text"]}  # §7.1.3 顺序保真
+                elif t == "thinking":
+                    # Provider-private history, carried across tool turns but never
+                    # emitted as answer text or scientific evidence.
+                    reasoning_parts.append(ev["text"])
                 elif t == "tool_use":
                     tool_use_blocks.append(ev)
                     needs_follow_up = True
@@ -130,23 +144,24 @@ async def query(
                    "message": repr(exc)[:200]}
             return
 
+        assistant_message: dict[str, Any] = {
+            "role": "assistant", "content": "".join(text_parts),
+        }
+        if tool_use_blocks:
+            assistant_message["content"] = (
+                ([{"type": "text", "text": "".join(text_parts)}] if text_parts else [])
+                + [
+                    {"type": "tool_use", "id": b["id"], "name": b["name"], "input": b["input"]}
+                    for b in tool_use_blocks
+                ]
+            )
+        if reasoning_parts:
+            assistant_message["reasoning_content"] = "".join(reasoning_parts)
+
         # ---- §7.1.5 streaming 结束**立即**检查 abort(在落 messages 之前)----
         if abort is not None and abort.is_set():
             if tool_use_blocks:
-                state.messages.append(
-                    {
-                        "role": "assistant",
-                        "content": [
-                            {
-                                "type": "tool_use",
-                                "id": b["id"],
-                                "name": b["name"],
-                                "input": b["input"],
-                            }
-                            for b in tool_use_blocks
-                        ],
-                    }
-                )
+                state.messages.append(assistant_message)
                 state.messages.append(
                     {"role": "user", "content": placeholder_results(tool_use_blocks)}
                 )
@@ -155,15 +170,7 @@ async def query(
 
         # 正常路径:本轮 assistant(tool_use)消息落 messages(唯一一次)
         if tool_use_blocks:
-            state.messages.append(
-                {
-                    "role": "assistant",
-                    "content": [
-                        {"type": "tool_use", "id": b["id"], "name": b["name"], "input": b["input"]}
-                        for b in tool_use_blocks
-                    ],
-                }
-            )
+            state.messages.append(assistant_message)
 
         # ---- c. 有 tool_use:串行执行 → tool_result 回填(§3 step3.c)----
         if needs_follow_up:
@@ -201,6 +208,8 @@ async def query(
         # 状态自行判断)。修复漏洞:否决后中间 tool 轮 + 第二终答仍未满足 → 原本静默放行。
         state.turn_count += 1
         state.last_assistant_text = "".join(text_parts)  # GAP-AH-2:本轮终答供 stop_hook 看
+        if text_parts or reasoning_parts:
+            state.messages.append(assistant_message)
         if stop_hook is not None:
             dec = stop_hook(state)
             if getattr(dec, "veto", False):

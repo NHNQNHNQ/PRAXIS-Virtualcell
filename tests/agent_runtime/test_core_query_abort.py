@@ -32,7 +32,9 @@ async def test_abort_after_stream_pairs_tooluse_and_returns_aborted():
     reg = ToolRegistry()
     reg.register(Echo())
     runner = SerialToolRunner(reg, recovery_budget=3, permission=AllowAllPermission())
-    client = FakeLLMClient(turns=[TURN_TOOLUSE])  # 模型发 tool_use
+    client = FakeLLMClient(turns=[[
+        {"type": "thinking", "text": "private aborted tool plan"}, *TURN_TOOLUSE,
+    ]])
     abort = AbortSignal()
     abort.set()  # 流结束即视为已中断
     st = State()
@@ -57,6 +59,8 @@ async def test_abort_after_stream_pairs_tooluse_and_returns_aborted():
         if m["role"] == "assistant" and isinstance(m["content"], list)
     )
     tu_ids = {b["id"] for b in asst["content"] if b["type"] == "tool_use"}
+    assert asst["reasoning_content"] == "private aborted tool plan"
+    assert all(event["type"] != "thinking" for event in events)
     user_tr = next(
         m for m in st.messages
         if m["role"] == "user" and isinstance(m["content"], list)

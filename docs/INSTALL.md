@@ -1,17 +1,39 @@
-# 安装
+# 安装与运行
 
-主包使用 Python 3.11 或更新版本；现有 MDR 工件要求 scikit-learn 1.9.0。新建环境后使用 editable 安装，因为 MDR 的外部工件按仓库根定位。
+需要 Python 3.11 或更新版本。
 
 ```bash
 python3.11 -m venv .venv
-.venv/bin/python -m pip install -e '.[dev,api,chemistry]'
-.venv/bin/praxis-mdr --help
+.venv/bin/python -m pip install -e '.[api,chemistry,omics,dev]'
 ```
 
-`api` 提供本地 FastAPI 服务，`chemistry` 提供 RDKit 分子特征；`mechanistic` 为可选 FBA 侧车。`server` 为继承的 praxis2 多用户服务依赖，非单药 CLI 的必需安装项。
+T7 使用 ExFAT 时，Python 安装工具可能误识别 AppleDouble 元数据。建议把虚拟环境放到 Mac 的 APFS 磁盘，再将项目的 `.venv` 链接到它。当前工作区使用 `/Users/mzy/.local/share/venvs/praxis-virtualcell-llm`：
 
-AB MIC 使用独立组件的安装说明。SyntheMol 也使用独立环境，避免其原始 Chemprop/PyTorch/RDKit 版本与 MDR 的已序列化模型环境混用。
+```bash
+python3.11 -m venv "$HOME/.local/share/venvs/praxis-virtualcell-llm"
+ln -s "$HOME/.local/share/venvs/praxis-virtualcell-llm" .venv
+.venv/bin/python -m pip install -e '.[api,chemistry,omics,dev]'
+```
 
-本地已迁入全部 MDR 工件与从 2026-09-13 交付包恢复的 AB direct MIC 权重。GitHub 克隆不包含这些大型工件；请按 [数据清单](DATA-ASSETS.md) 和各组件来源说明恢复。原数据及权重未因本次整合重训。
+复制 `.env.example` 为本地 `.env`，配置 DeepSeek 凭据。环境变量优先于文件；`.env` 不提交 Git。本工作区沿用了原平台凭据，值不写入报告或命令输出。
 
-LLM 凭据放 `.env` 或环境变量，示例见根 `.env.example`；离线数值工具不需要 LLM 凭据。
+默认输入包根为仓库 `data/organisms/`，可用 `praxis-vc --data-root DIRECTORY` 覆盖。GitHub 不保存完整表达矩阵，准备方式见 `docs/OMICS.md`。缺少本地数据时 `profiles` 返回空列表。
+
+```bash
+.venv/bin/praxis-vc profiles
+.venv/bin/praxis-vc inspect --profile AB5075-AZI000
+.venv/bin/praxis-vc serve --port 8787
+```
+
+浏览器打开 `http://127.0.0.1:8787`。单候选与批量入口：
+
+```bash
+.venv/bin/praxis-vc analyze --profile AB5075-AZI000 --smiles '候选SMILES' --output reports/llm_live/result.json
+.venv/bin/praxis-vc batch --profile AB5075-AZI000 --input candidates/synthemol_20260923/repeat_1/molecules.csv --output reports/llm_live/batch
+```
+
+`--env-file` 和 `--data-root` 是全局参数，放在子命令之前。每个候选输出 JSON 与同名 Markdown；批量另外输出 `summary.json`。未完成或不支持时保留原因与轨迹，CLI 返回非零状态。
+
+批量默认顺序执行，可加 `--concurrency 4` 同时处理最多四个候选。实际完成顺序可以不同，文件编号与汇总顺序始终对应输入 CSV。
+
+`praxis-mdr` 是历史工具 CLI，独立 direct MIC 组件也不由新入口调用。

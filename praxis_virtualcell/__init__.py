@@ -1,4 +1,4 @@
-"""PRAXIS-VirtualCell:大脑引导的可通讯虚拟细胞智能体系统(offline-first,LLM-optional)。"""
+"""PRAXIS-VirtualCell: strain-conditioned LLM analysis with real omics evidence."""
 
 from praxis_virtualcell.version import PRODUCT_VERSION as __version__
 

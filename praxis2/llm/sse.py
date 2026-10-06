@@ -80,7 +80,7 @@ async def parse_stream_response(
 
         # reasoning / thinking(deepseek-v4 / R1 风格)
         reasoning = delta.get("reasoning_content")
-        if reasoning:
+        if isinstance(reasoning, str):
             yield {"type": "thinking", "text": reasoning}
 
         # tool_calls 流(partial JSON args 累积)

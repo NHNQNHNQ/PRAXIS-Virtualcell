@@ -1,0 +1,39 @@
+{
+  "profile_id": "AB5075-AZI000",
+  "strain": "AB5075",
+  "condition_id": "AZI_000",
+  "medium": "CA-MHB",
+  "observation_unit": "historical_condition_mean",
+  "source_samples": [
+    "Abaum_0017",
+    "Abaum_0023"
+  ],
+  "unit": "author_log2_TPM_QC",
+  "scale": "author_log2_tpm_qc_unscaled_ABUW_namespace",
+  "unknown_fields": [
+    "time_h",
+    "temperature_c",
+    "growth_phase",
+    "genotype"
+  ],
+  "tool_examples": [
+    {
+      "name": "query_genes",
+      "arguments": {
+        "gene_ids": [
+          "ABUW_0001",
+          "ABUW_6001",
+          "unknown_gene"
+        ]
+      }
+    },
+    {
+      "name": "search_annotations",
+      "arguments": {
+        "query": "efflux",
+        "limit": 10
+      }
+    }
+  ],
+  "data_requirement": "Place the locally licensed AB5075-AZI000 baseline profile under data/organisms or provide data_root explicitly."
+}

@@ -112,3 +112,36 @@ def test_translate_messages_tool_result_list_content():
         system=None,
     )
     assert out == [{"role": "tool", "tool_call_id": "T2", "content": "part1part2"}]
+
+
+@pytest.mark.parametrize("options", [
+    {},
+    {"thinking": {"type": "enabled"}, "reasoning_effort": "high"},
+    {"thinking": {"type": "disabled"}},
+])
+@respx.mock
+async def test_native_tool_history_and_explicit_reasoning_options_reach_http(options):
+    history = [
+        {"role": "user", "content": "read evidence"},
+        {"role": "assistant", "content": None, "reasoning_content": "private plan",
+         "tool_calls": [{"id": "call-1", "type": "function", "function": {
+             "name": "evidence", "arguments": '{"record":"R1"}',
+         }}]},
+        {"role": "tool", "tool_call_id": "call-1", "content": "record R1"},
+        {"role": "assistant", "content": "Evidence received", "reasoning_content": ""},
+    ]
+    route = respx.post("https://up.example/v1/chat/completions").mock(
+        return_value=httpx.Response(200, json={"choices": [{"message": {"content": "done"}}]})
+    )
+    client = LLMClient(api_key="test-only", base_url="https://up.example")
+    try:
+        await client.messages(model="test-model", messages=history, max_tokens=64, **options)
+    finally:
+        await client.aclose()
+    payload = json.loads(route.calls.last.request.content)
+    assert payload["messages"] == history
+    for key in ("thinking", "reasoning_effort"):
+        if key in options:
+            assert payload[key] == options[key]
+        else:
+            assert key not in payload
