@@ -2,7 +2,7 @@
 
 ## 2.1 纯 LLM 与组学入口
 
-当前 CI 安装 `.[dev,api,chemistry,omics]`，运行智能体框架、组学加载、LLM 证据校验、页面 API 和保留的基础兼容测试。2026-10-06 本地同一选择集 **432 passed**；Ruff 和 `git diff --check` 通过。其中 41 条组学测试包含小型真实 H5AD 文件、损坏哈希/形状边界、来源和未给药数组隔离，47 条 LLM 分析测试验证引用拒绝、一次格式纠正与多轮思考历史。
+当前 CI 安装 `.[dev,api,chemistry,omics]`，运行智能体框架、组学加载、LLM 证据校验、页面 API 和保留的基础兼容测试。2026-10-06 本地同一选择集 **453 passed**；Ruff 和 `git diff --check` 通过。其中 41 条组学测试包含小型真实 H5AD 文件、损坏哈希/形状边界、来源和未给药数组隔离，68 条 LLM 分析测试验证引用拒绝、一次格式纠正与多轮思考历史。
 
 ```bash
 .venv/bin/python -m pytest -q tests/agent_runtime tests/omics tests/llm_prediction tests/test_llm_platform.py \

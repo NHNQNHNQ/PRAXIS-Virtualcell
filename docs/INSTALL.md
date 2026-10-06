@@ -36,4 +36,8 @@ ln -s "$HOME/.local/share/venvs/praxis-virtualcell-llm" .venv
 
 批量默认顺序执行，可加 `--concurrency 4` 同时处理最多四个候选。实际完成顺序可以不同，文件编号与汇总顺序始终对应输入 CSV。
 
+默认每轮输出预算是 65,536 tokens，思考强度为 `high`。真实批量验证发现，原先 10,000 tokens 会截断部分 JSON；思考和最终回答都占用输出预算。配置文件可设 `PRAXIS_MAX_OUTPUT_TOKENS`、`PRAXIS_REASONING_EFFORT`，CLI 可用 `--max-output-tokens`、`--reasoning-effort low|high|max` 覆盖。对应 API 参数见 [DeepSeek Chat Completions](https://api-docs.deepseek.com/api/create-chat-completion/)。
+
+默认最多八轮，包括最多一次引用纠正。最后一轮关闭新工具调用并要求提交最终 JSON；若仍截断、引用未通过或没有读取实际基因，保留失败状态，不能据此输出有效预测。
+
 `praxis-mdr` 是历史工具 CLI，独立 direct MIC 组件也不由新入口调用。

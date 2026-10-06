@@ -28,6 +28,15 @@ class LLMSettings:
     api_key: str = field(repr=False)
     base_url: str = "https://api.deepseek.com"
     model: str = "deepseek-v4-pro"
+    max_output_tokens: int = 65536
+    reasoning_effort: str = "high"
+
+    def __post_init__(self):
+        if (isinstance(self.max_output_tokens, bool) or not isinstance(self.max_output_tokens, int)
+                or not 1024 <= self.max_output_tokens <= 131072):
+            raise ValueError("max_output_tokens must be an integer from 1024 to 131072")
+        if self.reasoning_effort not in {"low", "high", "max"}:
+            raise ValueError("reasoning_effort must be low, high, or max")
 
     @classmethod
     def load(cls, env_path: str | Path | None = None, *, environ: dict | None = None):
@@ -38,6 +47,8 @@ class LLMSettings:
             api_key=values.get("DEEPSEEK_API_KEY") or values.get("PRAXIS_ANTHROPIC_API_KEY", ""),
             base_url=values.get("PRAXIS_ANTHROPIC_BASE_URL") or values.get("PRAXIS_VC_LLM_BASE_URL", "https://api.deepseek.com"),
             model=values.get("PRAXIS_MODEL") or values.get("PRAXIS_VC_LLM_MODEL", "deepseek-v4-pro"),
+            max_output_tokens=int(values.get("PRAXIS_MAX_OUTPUT_TOKENS", "65536")),
+            reasoning_effort=values.get("PRAXIS_REASONING_EFFORT", "high"),
         )
 
     def require_key(self):

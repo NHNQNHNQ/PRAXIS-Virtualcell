@@ -16,6 +16,10 @@ def test_settings_reuse_one_local_key_without_exposing_it(tmp_path):
     assert settings.api_key == "private-test-credential"
     assert "private-test-credential" not in repr(settings)
     assert LLMSettings.load(path, environ={"PRAXIS_MODEL": "deepseek-flash"}).model == "deepseek-flash"
+    budget = LLMSettings.load(path, environ={"PRAXIS_MAX_OUTPUT_TOKENS": "32768", "PRAXIS_REASONING_EFFORT": "low"})
+    assert budget.max_output_tokens == 32768 and budget.reasoning_effort == "low"
+    with pytest.raises(ValueError):
+        LLMSettings.load(path, environ={"PRAXIS_MAX_OUTPUT_TOKENS": "0"})
 
 
 def test_candidate_import_excludes_old_prediction_scores(tmp_path):

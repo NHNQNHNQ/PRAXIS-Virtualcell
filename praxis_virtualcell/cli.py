@@ -40,6 +40,9 @@ async def run_analysis(args):
     settings = LLMSettings.load(args.env_file)
     settings.require_key()
     model = args.model or settings.model
+    output_override = getattr(args, "max_output_tokens", None)
+    limits = {"max_output_tokens": settings.max_output_tokens if output_override is None else output_override,
+              "reasoning_effort": getattr(args, "reasoning_effort", None) or settings.reasoning_effort}
     client = LLMClient(settings.api_key, settings.base_url, timeout_s=180)
     def progress(candidate_id):
         def emit(event):
@@ -49,7 +52,7 @@ async def run_analysis(args):
         if args.command == "analyze":
             result = await analyze_candidate(args.smiles, args.profile, client=client, model=model,
                                              data_root=args.data_root, max_turns=args.max_turns,
-                                             candidate_id=args.candidate_id, on_progress=progress(args.candidate_id))
+                                             candidate_id=args.candidate_id, on_progress=progress(args.candidate_id), **limits)
             write_result(result, args.output)
             print(json.dumps({"status": result["status"], "report": str(Path(args.output).resolve())}, ensure_ascii=False))
             return 0 if result["status"] == "completed" else 2
@@ -61,7 +64,7 @@ async def run_analysis(args):
             async with gate:
                 result = await analyze_candidate(candidate["smiles"], args.profile, client=client, model=model,
                                                  data_root=args.data_root, max_turns=args.max_turns,
-                                                 candidate_id=candidate["id"], on_progress=progress(candidate["id"]))
+                                                 candidate_id=candidate["id"], on_progress=progress(candidate["id"]), **limits)
             report = destination / f"{index + 1:03d}.json"
             write_result(result, report)
             assessment = result.get("assessment", {})
@@ -90,6 +93,8 @@ def main(argv=None):
         item.add_argument("--profile", default="AB5075-AZI000")
         item.add_argument("--model")
         item.add_argument("--max-turns", type=int, default=8)
+        item.add_argument("--max-output-tokens", type=int, help="Per-call reasoning and answer budget (1024–131072)")
+        item.add_argument("--reasoning-effort", choices=["low", "high", "max"])
         if command == "analyze":
             item.add_argument("--smiles", required=True)
             item.add_argument("--candidate-id", default="candidate-001")
@@ -116,6 +121,8 @@ def main(argv=None):
             return 0
         if not 1 <= args.max_turns <= 20:
             raise ValueError("max-turns must be between 1 and 20")
+        if args.max_output_tokens is not None and not 1024 <= args.max_output_tokens <= 131072:
+            raise ValueError("max-output-tokens must be between 1024 and 131072")
         if args.command == "batch" and args.limit is not None and args.limit < 1:
             raise ValueError("limit must be positive")
         return asyncio.run(run_analysis(args))

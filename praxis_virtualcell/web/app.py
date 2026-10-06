@@ -5,6 +5,7 @@ import json
 import logging
 from pathlib import Path
 from uuid import UUID, uuid4
+from typing import Literal
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
@@ -18,6 +19,8 @@ class AnalysisRequest(BaseModel):
     smiles: str = Field(min_length=1, max_length=10000)
     candidate_id: str = Field(default="candidate-001", max_length=200)
     max_turns: int = Field(default=8, ge=1, le=20)
+    max_output_tokens: int | None = Field(default=None, ge=1024, le=131072)
+    reasoning_effort: Literal["low", "high", "max"] | None = None
 
 
 class GeneRequest(BaseModel):
@@ -83,7 +86,9 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
                 result = await run(request.smiles, request.profile_id, client=client,
                                    model=settings.model, data_root=data_root,
                                    max_turns=request.max_turns, candidate_id=request.candidate_id,
-                                   on_progress=progress)
+                                   on_progress=progress,
+                                   max_output_tokens=request.max_output_tokens or settings.max_output_tokens,
+                                   reasoning_effort=request.reasoning_effort or settings.reasoning_effort)
             except Exception as exc:
                 raise HTTPException(502, "LLM analysis failed; no prediction was substituted") from exc
             finally:

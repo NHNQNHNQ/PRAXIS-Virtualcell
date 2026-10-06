@@ -113,9 +113,109 @@ async def test_real_tool_loop_and_reasoning_are_not_persisted():
     assert second_messages[-1]["tool_call_id"] == "genes-1"
     assert "PRIVATE_REASONING" not in json.dumps(result)
     assert "PRIVATE_FINAL_REASONING" not in render_report(result)
-    assert client.requests[0]["max_tokens"] == 10000
+    assert client.requests[0]["max_tokens"] == 65536
     assert client.requests[0]["thinking"] == {"type": "enabled"}
     assert client.requests[0]["reasoning_effort"] == "high"
+    assert result["execution_trace"]["limits"] == {
+        "max_turns": 8, "max_output_tokens": 65536, "reasoning_effort": "high"}
+
+
+@pytest.mark.parametrize("budget,effort", [(1024, "low"), (65536, "high"), (131072, "max")])
+async def test_output_budget_and_effort_are_forwarded(budget, effort):
+    client = Client([tool_response(), final_response(assessment(None))])
+    result = await analyze_candidate("CCO", client=client, max_turns=2,
+                                     max_output_tokens=budget, reasoning_effort=effort)
+    assert result["status"] == "completed"
+    assert all(request["max_tokens"] == budget and request["reasoning_effort"] == effort
+               for request in client.requests)
+    assert result["execution_trace"]["limits"] == {
+        "max_turns": 2, "max_output_tokens": budget, "reasoning_effort": effort}
+    assert json.loads(client.requests[0]["messages"][0]["content"])["max_turns"] == 2
+
+
+@pytest.mark.parametrize("kwargs", [
+    {"max_output_tokens": True}, {"max_output_tokens": 1023}, {"max_output_tokens": 131073},
+    {"max_output_tokens": 65536.0}, {"max_output_tokens": "65536"}, {"max_output_tokens": None},
+    {"reasoning_effort": "medium"}, {"reasoning_effort": "HIGH"}, {"reasoning_effort": None},
+    {"reasoning_effort": True}, {"max_turns": True}, {"max_turns": 0}, {"max_turns": 21},
+])
+async def test_invalid_limits_are_rejected_before_request_for_single_and_empty_batch(kwargs):
+    client = Client([])
+    with pytest.raises(ValueError):
+        await analyze_candidate("CCO", client=client, **kwargs)
+    with pytest.raises(ValueError):
+        await analyze_candidates([], client=client, **kwargs)
+    assert not client.requests
+
+
+async def test_batch_forwards_custom_budget_and_effort():
+    client = Client([tool_response(), final_response(assessment(None)),
+                     tool_response(), final_response(assessment(None))])
+    result = await analyze_candidates(["CCO", "CCC"], client=client, max_turns=2,
+                                      max_output_tokens=98304, reasoning_effort="max")
+    assert result["counts"]["completed"] == 2
+    assert len(client.requests) == 4
+    assert all(request["max_tokens"] == 98304 and request["reasoning_effort"] == "max"
+               for request in client.requests)
+    assert all(item["execution_trace"]["limits"]["max_output_tokens"] == 98304
+               for item in result["results"])
+
+
+async def test_final_turn_disables_tools_and_preserves_reasoning_history():
+    client = Client([tool_response(), final_response(assessment(None))])
+    result = await analyze_candidate("CCO", client=client, max_turns=2)
+    assert result["status"] == "completed"
+    assert client.requests[0]["tools"] == workflow.TOOLS
+    last = client.requests[1]
+    assert last["tools"] is None
+    reminder = json.loads(last["messages"][-1]["content"])
+    assert reminder["task"] == "finalize_assessment"
+    assert reminder["max_turns"] == reminder["turn"] == 2
+    assert "No new tools" in reminder["instruction"]
+    assert last["messages"][-3]["reasoning_content"] == "PRIVATE_REASONING"
+    assert last["messages"][-2]["tool_call_id"] == "genes-1"
+    assert "PRIVATE" not in json.dumps(result)
+
+
+async def test_model_cannot_execute_another_tool_on_final_turn(monkeypatch):
+    executed = []
+
+    def search(self, query, limit=30):
+        executed.append(query)
+        raise AssertionError("Final-turn tools must not execute")
+
+    monkeypatch.setattr(Profile, "search_annotations", search)
+    client = Client([tool_response(), tool_response("search_annotations", {"query": "membrane"}, call_id="extra"),
+                     final_response(assessment(None))])
+    result = await analyze_candidate("CCO", client=client, max_turns=2)
+    assert result["status"] == "incomplete"
+    assert result["evidence_validation"]["issues"] == ["final_turn_tools_disabled"]
+    assert result["assessment"]["mic_estimate"]["value"] is None
+    assert len(client.requests) == 2
+    assert not executed
+    assert all(call["tool_call_id"] != "extra" for call in result["execution_trace"]["tool_calls"])
+    assert result["execution_trace"]["events"][-1]["error"] == "final_turn_tools_disabled"
+
+
+async def test_final_turn_does_not_replace_missing_gene_observations():
+    client = Client([final_response(assessment(None))])
+    result = await analyze_candidate("CCO", client=client, max_turns=1)
+    assert result["status"] == "unsupported"
+    assert "no_gene_observations_loaded" in result["evidence_validation"]["issues"]
+    assert client.requests[0]["tools"] is None
+    assert len(client.requests) == 1
+
+
+async def test_truncated_final_turn_with_gene_observations_stays_incomplete():
+    truncated = final_response(assessment())
+    truncated["choices"][0]["finish_reason"] = "length"
+    client = Client([tool_response(), truncated, final_response(assessment())])
+    result = await analyze_candidate("CCO", client=client, max_turns=2, max_output_tokens=1024)
+    assert result["status"] == "incomplete"
+    assert result["evidence_validation"]["issues"] == ["llm_output_truncated"]
+    assert result["assessment"]["mic_estimate"]["value"] is None
+    assert len(client.requests) == 2
+    assert result["rejected_output"]["is_prediction"] is False
 
 
 async def test_unknown_mic_remains_null():
@@ -213,7 +313,7 @@ async def test_search_annotations_uses_the_same_verifiable_rows():
 
 async def test_normalizer_cannot_substitute_a_different_candidate():
     result = await analyze_candidate("CCO", client=Client([
-        tool_response("normalize_molecule", {"smiles": "CCC"})]), max_turns=1)
+        tool_response("normalize_molecule", {"smiles": "CCC"})]), max_turns=2)
     assert result["execution_trace"]["tool_calls"][-1]["error"] == "molecule_does_not_match_candidate"
 
 
@@ -227,7 +327,7 @@ async def test_truncated_model_output_is_not_a_completed_estimate():
 
 async def test_only_allowed_tools_can_execute_and_loop_is_bounded():
     response = tool_response("predict_mic", {"smiles": "CCO"})
-    result = await analyze_candidate("CCO", client=Client([response]), max_turns=1)
+    result = await analyze_candidate("CCO", client=Client([response]), max_turns=2)
     assert result["status"] == "incomplete"
     assert result["execution_trace"]["tool_calls"][-1]["error"] == "tool_not_allowed"
     assert result["assessment"]["mic_estimate"]["value"] is None
@@ -267,10 +367,11 @@ async def test_one_final_repair_preserves_public_draft_and_checks_again():
     assert rejected["parsed_draft"]["mic_estimate"]["value"] == 8
     assert rejected["evidence_errors"][0]["location"] == ["supporting_evidence", 0, "observations", 0, "field"]
     assert rejected["evidence_errors"][0]["code"] == "observation_field_does_not_match_pointer"
-    feedback = json.loads(client.requests[2]["messages"][-1]["content"])
+    feedback = json.loads(client.requests[2]["messages"][-2]["content"])
     assert feedback["task"] == "correct_rejected_assessment"
     assert "/condition/medium -> medium" in feedback["instruction"]
-    assert client.requests[2]["messages"][-2]["reasoning_content"] == "PRIVATE_FINAL_REASONING"
+    assert client.requests[2]["messages"][-3]["reasoning_content"] == "PRIVATE_FINAL_REASONING"
+    assert client.requests[2]["tools"] is None
     assert "PRIVATE" not in json.dumps(result)
     assert result["evidence_validation"]["status"] == "passed"
 
@@ -295,7 +396,7 @@ async def test_nested_provenance_hint_is_supplied_and_model_must_correct_it(monk
     client = Client([tool_response(), final_response(invalid), final_response(corrected)])
     result = await analyze_candidate("CCO", client=client, max_turns=3)
     assert result["status"] == "completed"
-    feedback = json.loads(client.requests[2]["messages"][-1]["content"])
+    feedback = json.loads(client.requests[2]["messages"][-2]["content"])
     reference_errors = [item for item in feedback["evidence_errors"] if item.get("offending_reference") == bad_ref]
     assert reference_errors
     assert all(item["matching_value_pointers"] == ["/provenance/input_role"] for item in reference_errors)
