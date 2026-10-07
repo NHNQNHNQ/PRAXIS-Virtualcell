@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="zh-CN">
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PRAXIS · 菌株组学与候选分析</title>
+<title>PRAXIS · 组学与候选分析</title>
 <style>
 :root{font-family:system-ui,-apple-system,sans-serif;color:#182b37;background:#eff4f6}*{box-sizing:border-box}body{margin:0}header{background:#133c47;color:#fff;padding:28px max(24px,calc((100vw - 1200px)/2))}h1{margin:0 0 8px;font-size:27px}header p{color:#c4dedf;margin:0;line-height:1.6}main{max-width:1248px;padding:24px;margin:auto;display:grid;grid-template-columns:360px 1fr;gap:24px}.card{background:white;border:1px solid #dbe5e8;border-radius:12px;padding:24px;box-shadow:0 4px 18px #24435005}h2{font-size:18px;margin:0 0 18px}label{display:block;font-weight:600;margin:16px 0 7px}input,select,textarea{width:100%;border:1px solid #bfcfd4;border-radius:6px;padding:11px;font:inherit;background:#fff}textarea{min-height:110px;resize:vertical;font-family:ui-monospace,monospace}button{border:0;border-radius:6px;padding:12px 18px;font:inherit;font-weight:600;cursor:pointer;background:#146d73;color:white;width:100%;margin-top:18px}button:disabled{opacity:.55;cursor:wait}.note{color:#536c77;font-size:13px;line-height:1.8}.pill{display:inline-block;padding:5px 9px;border-radius:20px;background:#d9eeeb;color:#145956;font-size:12px;margin-right:7px}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.8 ui-monospace,monospace;margin:0;color:#2a4450}#report{font:14px/1.85 system-ui,sans-serif}#status{margin:16px 0;font-size:14px;line-height:1.6;color:#145956}#error{color:#a32d2d;white-space:pre-wrap}.links{display:flex;gap:18px;margin-bottom:16px}.links a{color:#146d73}details{border-top:1px solid #e4ecee;margin-top:20px;padding-top:16px}summary{cursor:pointer;color:#365763}.empty{color:#80949c;padding:40px 0;text-align:center}@media(max-width:800px){main{grid-template-columns:1fr;padding:16px}.card{padding:20px}}
 .modality-options{display:grid;gap:9px;border:1px solid #dbe5e8;border-radius:8px;padding:14px;margin:18px 0}.modality-options legend{font-weight:600;padding:0 5px}.modality-option{display:flex;align-items:center;gap:9px;margin:0;font-weight:400}.modality-option input{width:auto}.modality-option:has(input:disabled){color:#80949c}.stage-list{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.stage{padding:6px 10px;border-radius:6px;background:#eff4f6;font-size:13px}.stage[data-status=completed]{background:#d9eeeb}.stage[data-status=failed]{background:#f8e2de}#agent-review{font:13px/1.8 system-ui,sans-serif;margin-bottom:16px}</style>
-<header><h1>PRAXIS VirtualCell</h1><p>加载具体菌株的组学数据，让 LLM 对候选分子进行活性与机制分析。</p></header>
-<main><section class="card"><h2>菌株与候选分子</h2><div id="health" class="note">正在连接平台…</div>
-<label for="profile">组学样本</label><select id="profile"></select><p class="note">每个选项对应一个明确的样本或历史参考状态。</p>
+<header><h1>PRAXIS VirtualCell</h1><p>加载菌株样本或物种参考组学，让 LLM 对候选分子进行活性与机制分析。</p></header>
+<main><section class="card"><h2>组学与候选分子</h2><div id="health" class="note">正在连接平台…</div>
+<label for="profile">组学档案</label><select id="profile"></select><p class="note">可选择菌株样本或物种参考集合。参考集合保留各模态的来源株与培养条件。</p>
 <fieldset id="modalities" class="modality-options"><legend>本次组学输入（可组合）</legend><label class="modality-option"><input type="checkbox" value="genome" disabled>基因组</label><label class="modality-option"><input type="checkbox" value="transcriptome" disabled>转录组</label><label class="modality-option"><input type="checkbox" value="proteome" disabled>蛋白组</label></fieldset><p id="modality-note" class="note"></p>
 <p id="profile-summary" class="note"></p><details><summary>原始元数据与来源</summary><pre id="profile-info"></pre></details>
 <label for="candidate">候选编号</label><input id="candidate" value="candidate-001">
@@ -15,7 +15,7 @@
 <button id="analyze">加载组学并开始分析</button><p class="note">结果为 LLM 预测与机制假说。MIC 表示生长抑制；杀菌效果单独标记。</p><div id="status" role="status"></div><div id="error" role="alert"></div>
 </section><section class="card"><h2>分析报告</h2><div class="pill">真实组学输入</div><div class="pill">LLM 直接预测</div><p class="note">报告保留数据依据、反证、缺口和实际工具调用记录。</p>
 <div id="agent-stages" class="stage-list" aria-label="智能体执行阶段"></div><pre id="agent-review"></pre>
-<div id="links" class="links"></div><pre id="report" class="empty">选择组学样本并输入候选分子后开始分析。</pre>
+<div id="links" class="links"></div><pre id="report" class="empty">选择组学档案并输入候选分子后开始分析。</pre>
 <details><summary>证据校验与执行记录</summary><pre id="trace"></pre></details></section></main>
 <script>
 const el=id=>document.getElementById(id);
@@ -23,7 +23,24 @@ async function api(url,options){const response=await fetch(url,options);const re
 let currentProfile=null;
 const modalityInputs=()=>Array.from(el('modalities').querySelectorAll('input'));
 const selectedModalities=()=>modalityInputs().filter(input=>input.checked&&!input.disabled).map(input=>input.value);
-function showProfile(value){currentProfile=value;el('profile-info').textContent=JSON.stringify(value,null,2);const species=typeof value.species==='object'?value.species.scientific_name:value.species;el('profile-summary').textContent=[species+' / '+value.strain,'特征 '+value.feature_count+' · 已注释 '+value.annotated_feature_count,'本次输入：'+(value.selected_modalities||[]).join('、'),'表达尺度：'+(value.unit||'按模态分别记录'),'来源样本：'+(value.source_samples||[]).join('、'),'未知字段：'+(value.unknown_fields||[]).join('、')].join('\n');el('profile-summary').style.whiteSpace='pre-line';}
+function showProfile(value){
+ currentProfile=value;el('profile-info').textContent=JSON.stringify(value,null,2);
+ const species=typeof value.species==='object'?value.species.scientific_name:value.species;
+ const reference=value.input_role==='species_reference';
+ const lines=[species+' / '+(reference?'物种参考背景':(value.strain||'未知菌株')),
+  '特征 '+value.feature_count+(value.annotated_feature_count==null?'':' · 已注释 '+value.annotated_feature_count),
+  '本次输入：'+(value.selected_modalities||[]).join('、'),'数值尺度：'+(value.unit||'按模态分别记录'),
+  '来源样本：'+(value.source_samples||[]).join('、'),'未知字段：'+(value.unknown_fields||[]).join('、')];
+ if(reference){
+  lines.push('各模态为独立来源的物种参考，不表示同一样本，也不代表所有菌株或当前细胞状态。');
+  const names={genome:'基因组',transcriptome:'转录组',proteome:'蛋白组'};
+  for(const [name,source] of Object.entries(value.modalities||{})){
+   const condition=source.condition||{};
+   lines.push((names[name]||name)+'：来源株 '+(source.strain||'未知')+'；条件 '+(condition.condition_id||'未知')+'；培养基 '+(condition.medium||'未知'));
+  }
+ }
+ el('profile-summary').textContent=lines.join('\n');el('profile-summary').style.whiteSpace='pre-line';
+}
 function renderModalities(value){const available=value.available_modalities||['transcriptome'];const selected=value.selected_modalities||available;for(const input of modalityInputs()){input.disabled=!available.includes(input.value);input.checked=!input.disabled&&selected.includes(input.value);input.title=input.disabled?'此档案没有该模态的可用数据':'';}el('modality-note').textContent='可用输入：'+available.join('、')+'。灰色选项表示该档案没有对应数据。';}
 async function profileChanged(){const value=await api('/api/profiles/'+encodeURIComponent(el('profile').value));showProfile(value);renderModalities(value);}
 async function selectionChanged(){const selected=selectedModalities();if(!selected.length){el('analyze').disabled=true;el('error').textContent='至少选择一个可用组学模态。';return;}el('error').textContent='';const query=new URLSearchParams();for(const modality of selected)query.append('modalities',modality);const value=await api('/api/profiles/'+encodeURIComponent(el('profile').value)+'?'+query);showProfile(value);renderModalities(value);el('analyze').disabled=false;}

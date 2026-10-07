@@ -85,7 +85,7 @@ async def run_analysis(args):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="PRAXIS: real strain omics with LLM-only antibacterial inference")
+    parser = argparse.ArgumentParser(description="PRAXIS: strain or species-reference omics with LLM-only antibacterial inference")
     parser.add_argument("--data-root", help="Organism profile directory (default: data/organisms)")
     parser.add_argument("--env-file", help="Local credential file (default: .env)")
     parser.add_argument("--knowledge-catalog", help="Curated mechanism catalog; never experimental MIC labels")
@@ -136,8 +136,47 @@ def main(argv=None):
     seeds = sub.add_parser("prepare-seeds", help="Prepare source-grounded tool supervision candidates for review")
     seeds.add_argument("--output", required=True)
     seeds.add_argument("--limit", type=int, default=80)
+    species_db = sub.add_parser("build-species-db", help="Link canonical measured labels to one reference per species and modality")
+    species_db.add_argument("--references", required=True, help="Selected native reference profiles JSON")
+    species_db.add_argument("--labels", nargs="+", required=True, help="Existing canonical ExperimentRecord JSONL files")
+    species_db.add_argument("--output", required=True, help="New version directory for the derived SQLite database")
+    coverage = sub.add_parser("species-db", help="Inspect species/MIC/reference coverage without reading MIC answers")
+    coverage.add_argument("--database", required=True)
+    species_inputs = sub.add_parser("export-species-inputs", help="Export species-reference inputs without endpoints or assay labels")
+    species_inputs.add_argument("--database", required=True)
+    species_inputs.add_argument("--output", required=True)
+    acquire = sub.add_parser("acquire-species-mic", help="Reuse native metadata and acquire bounded official MIC pages for curation")
+    acquire.add_argument("--repo-root", default=str(Path(__file__).resolve().parents[1]))
+    acquire.add_argument("--archive-root", help="Existing archived AB project, for native molecule metadata reuse")
+    acquire.add_argument("--taxon-ids", nargs="+", type=int, choices=[470, 562, 573, 287], default=[562, 573, 287])
+    acquire.add_argument("--per-species-limit", type=int, default=300, help="Bounded first page, 1–500 records per species")
+    acquire.add_argument("--reuse-labels", nargs="*", default=[], help="Canonical experimental JSONL files referenced without copying")
+    acquire.add_argument("--output", required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command == "acquire-species-mic":
+            from praxis_virtualcell.datasets.chembl_import import acquire_species_mic
+            result = acquire_species_mic(args.repo_root, args.output, taxon_ids=tuple(args.taxon_ids),
+                                         per_species_limit=args.per_species_limit, archive_root=args.archive_root,
+                                         reused_label_paths=tuple(args.reuse_labels))
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "build-species-db":
+            from praxis_virtualcell.datasets.species_registry import build_species_database
+            from praxis_virtualcell.omics.profiles import _data_root
+            result = build_species_database(args.references, args.labels, args.output, profile_root=_data_root(args.data_root))
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "species-db":
+            from praxis_virtualcell.datasets.species_registry import database_coverage
+            print(json.dumps(database_coverage(args.database), ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "export-species-inputs":
+            from praxis_virtualcell.datasets.species_registry import export_species_inputs
+            count = export_species_inputs(args.database, args.output)
+            print(json.dumps({"records": count, "output": str(Path(args.output).resolve()),
+                              "prediction_scope": "species_reference", "labels_included": False}, ensure_ascii=False))
+            return 0
         if args.command == "curate-labels":
             from praxis_virtualcell.datasets.curation import curate_existing_labels
             print(json.dumps(curate_existing_labels(args.repo_root, args.output), ensure_ascii=False, indent=2))

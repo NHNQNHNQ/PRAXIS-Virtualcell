@@ -84,7 +84,7 @@ MULTIOMICS_TOOLS = TOOLS + [
 ]
 
 AGENT_TOOLS = MULTIOMICS_TOOLS + [
-    _tool("search_mechanistic_evidence", "Search curated gene functions/pathways or exact candidate protein assays. No whole-cell MIC labels. Taxon and strain are fixed by the selected profile.",
+    _tool("search_mechanistic_evidence", "Search curated gene functions/pathways or exact candidate protein assays. No whole-cell MIC labels. Organism scope is fixed by the selected profile; species-reference mode retains each record's original strain.",
           {"query": {"type": "string", "maxLength": 200},
            "native_ids": {"type": "array", "items": {"type": "string"}, "maxItems": 30},
            "candidate_interactions_only": {"type": "boolean"},
@@ -109,7 +109,14 @@ than repeatedly expanding searches. Your final turn has no tools: use only alrea
 Treat annotation nulls as unknown. Do not invent genes, expression values, source IDs or measurements.
 The profile's expression scale and observation unit must be preserved; no unobserved differential
 expression, drug response, protein abundance or measured bactericidal effects may be invented.
+Preserve source caveats: an inferred control identity is not a verified untreated sample,
+and an unconfirmed numeric scale must remain unconfirmed in the public explanation.
 Expression/annotation can inform a target hypothesis, but cannot demonstrate binding or causality.
+When input_role is species_reference, predict at the declared species reference scope, not for an
+individual strain. Each modality retains its own source strain, sample and culture conditions.
+Different reference sources are not a matched sample. State source-specific observations and
+uncertainty; do not generalize a reference strain's genes, variants or expression to every strain.
+Fixed species references cannot explain within-species MIC differences or current cellular states.
 Every target and mechanism remains a hypothesis, even when its gene identity is verified.
 MIC means growth inhibition, not killing rate, MBC or time-kill kinetics. killing_effect is unknown.
 MIC may be null. Any numeric MIC is your uncalibrated LLM estimate in ug/mL, not a measurement.
@@ -193,8 +200,9 @@ def _execute(name: str, args: dict, profile: Any, molecule: dict, candidate_id: 
         overview = profile.overview()
         scope = {"strain": overview["strain"], "limit": limit, "catalog_path": knowledge_catalog_path}
         taxonomy_id = overview["species"].get("taxonomy_id")
+        species_reference = overview.get("input_role") == "species_reference"
         if (not isinstance(taxonomy_id, str) or not re.fullmatch(r"NCBITaxon:[1-9][0-9]*", taxonomy_id)
-                or not isinstance(scope["strain"], str) or not scope["strain"].strip()):
+                or not species_reference and (not isinstance(scope["strain"], str) or not scope["strain"].strip())):
             return {"profile_id": overview["profile_id"], "status": "unavailable", "records": [],
                     "reason": "organism_scope_unverified", "candidate_causality_supported": False,
                     "limitations": ["Mechanistic evidence requires a verified exact taxon and strain scope."]}
@@ -213,6 +221,12 @@ def _execute(name: str, args: dict, profile: Any, molecule: dict, candidate_id: 
                 raise ValueError("invalid_mechanistic_query")
             data = search_mechanistic_evidence(taxonomy_id, query, native_ids=ids,
                                               compound_smiles=molecule["canonical_smiles"] if exact else None, **scope)
+        if species_reference:
+            data["prediction_scope"] = "species_reference"
+            data["reference_source_strains"] = sorted({item["strain"] for item in overview["modalities"].values()
+                                                       if item.get("strain")})
+            data["limitations"] = [*data.get("limitations", []),
+                                   "Retrieved records retain their own source strains; species-level retrieval does not establish applicability to every strain or pairing with reference omics."]
         return {"profile_id": overview["profile_id"], **data,
                 "source_id": f"mechanistic-query:{overview['profile_id']}:{data.get('catalog_id') or 'unavailable'}"}
     if name in {"query_features", "search_features"}:
@@ -261,7 +275,7 @@ def _citation_examples(call: dict) -> list[dict]:
     data = call["data"]
     candidates = []
     if data.get("source_id"):
-        for field in ("status", "scale", "unit"):
+        for field in ("status", "scale", "unit", "input_role", "relation", "prediction_scope"):
             if field in data:
                 candidates.append((f"/{field}", data["source_id"], data[field]))
         if "input_role" in data.get("provenance", {}):

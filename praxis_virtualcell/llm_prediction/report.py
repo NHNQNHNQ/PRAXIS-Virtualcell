@@ -1,11 +1,16 @@
 """Render verified observations and clearly attributed LLM hypotheses."""
 from __future__ import annotations
 
+import re
 from typing import Any
 
 
 def _citations(refs: list[dict]) -> str:
     return "；".join(f"`{ref['source_id']}`（`{ref['tool_call_id']}{ref['pointer']}`）" for ref in refs)
+
+
+def _source_citation(citation: str) -> str:
+    return re.sub(r"https?://[^\s;,，；]+", lambda match: f"[作者来源](<{match[0]}>)", citation)
 
 
 def render_report(result: dict[str, Any]) -> str:
@@ -19,10 +24,13 @@ def render_report(result: dict[str, Any]) -> str:
     assessment = result["assessment"]
     mic = assessment["mic_estimate"]
     estimate = "未知（未给出数值）" if mic["value"] is None else f"{mic['value']:g} µg/mL（LLM 估计）"
+    species_reference = profile.get("input_role") == "species_reference"
+    identity = (f"- 物种参考档案：{profile.get('profile_id')}；{species}（物种参考背景）" if species_reference else
+                f"- 菌株档案：{profile.get('profile_id')}；{species} / {profile.get('strain') or '未知菌株'}")
     lines = [
         f"# 候选 {candidate['id']}", "",
         f"- 状态：{result['status']}",
-        f"- 菌株档案：{profile.get('profile_id')}；{species} / {profile.get('strain', '未知菌株')}",
+        identity,
         f"- 结构：`{candidate.get('canonical_smiles') or candidate.get('smiles')}`",
         f"- 活性判断：{assessment['activity']}",
         f"- MIC：{estimate}",
@@ -34,6 +42,26 @@ def render_report(result: dict[str, Any]) -> str:
     selected = profile.get("selected_modalities") or result.get("analysis_plan", {}).get("selected_modalities")
     if selected:
         lines.insert(4, f"- 本次组学输入：{'、'.join(selected)}")
+    if species_reference:
+        source_lines = ["- 预测范围：物种参考背景；各模态来源不表示同一样本，也不代表所有菌株或当前细胞状态。"]
+        names = {"genome": "基因组", "transcriptome": "转录组", "proteome": "蛋白组"}
+        for name, source in profile.get("modalities", {}).items():
+            condition = source.get("condition", {})
+            # v2 stores native table semantics inside its selected modality;
+            # historical v1 exposes the same fields at the source overview root.
+            native = source.get("modalities", {}).get(name, source)
+            source_lines.append(f"- {names.get(name, name)}参考来源：{source.get('profile_id')}；"
+                                f"来源株 {source.get('strain') or '未知'}；条件 {condition.get('condition_id') or '未知'}；"
+                                f"培养基 {condition.get('medium') or '未知'}；"
+                                f"来源样本 {'、'.join(source.get('source_samples', [])) or '未知'}。")
+            source_lines.extend([
+                f"  - 数据解释与来源限制：{native.get('value_semantics') or '未知'}",
+                f"  - 观察单位：{native.get('observation_unit') or '未知'}；"
+                f"数值单位：{native.get('unit') or '未知'}；尺度：{native.get('scale') or '未知'}。",
+                "  - 未知来源条件 / 字段：" + ("、".join(source.get("unknown_fields", [])) or "未列出"),
+                "  - 作者引用：" + _source_citation(native.get("provenance", {}).get("citation") or "未知"),
+            ])
+        lines[5:5] = source_lines
     if mic["evidence_refs"]:
         lines.append(f"引用：{_citations(mic['evidence_refs'])}")
     stages = result.get("agent_trace", {}).get("stages", [])

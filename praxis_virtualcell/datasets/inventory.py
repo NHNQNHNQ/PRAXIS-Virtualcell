@@ -102,9 +102,19 @@ def build_omics_inventory(repo_root: str | Path, archive_root: str | Path | None
             row = {key: overview[key] for key in ("profile_id", "species", "strain", "condition", "feature_count",
                                                   "available_modalities", "source_samples")}
             row["source_manifest"] = str(path)
-            if "observation_unit" in overview:
+            is_collection = overview.get("input_role") == "species_reference"
+            row["is_reference_collection"] = is_collection
+            row["prediction_scope"] = overview.get("prediction_scope")
+            if is_collection:
+                row["input_role"] = overview["input_role"]
+                row["reference_profiles"] = overview["reference_profiles"]
+                row["observation_unit"] = "independent_species_references"
+            elif "observation_unit" in overview:
+                row["input_role"] = overview.get("provenance", {}).get("input_role")
                 row["observation_unit"] = overview["observation_unit"]
             else:
+                row["input_role"] = {name: item.get("provenance", {}).get("input_role")
+                                     for name, item in overview["modalities"].items()}
                 row["observation_unit"] = {name: item["observation_unit"] for name, item in overview["modalities"].items()}
             profiles.append(row)
         except (ProfileError, OSError, ValueError) as exc:
@@ -157,13 +167,44 @@ def build_omics_inventory(repo_root: str | Path, archive_root: str | Path | None
         if any(word in Path(candidate["path"]).name for word in ("orthogroup", "reference_protein")):
             candidate["classification"] = "reference_sequence_or_translation_not_measured_proteome"
     modality_counts = Counter(name for profile in profiles for name in profile["available_modalities"])
+    native_profiles = [profile for profile in profiles if not profile["is_reference_collection"]]
+    native_modality_counts = Counter(name for profile in native_profiles for name in profile["available_modalities"])
+    reference_collection_count = len(profiles) - len(native_profiles)
+    pa_rna = [profile["profile_id"] for profile in native_profiles
+              if profile["species"].get("scientific_name") == "Pseudomonas aeruginosa"
+              and "transcriptome" in profile["available_modalities"]]
+    pa_matrix["verified_native_transcriptome_profile_ids"] = pa_rna
+    pa_matrix["profile_availability_note"] = (
+        f"{len(pa_rna)} verified native PA transcriptome profiles are available; candidate-file import blockers apply only to this historical matrix."
+        if pa_rna else "No native PA transcriptome profile has been verified in this inventory."
+    )
+    measured_proteome_count = native_modality_counts.get("proteome", 0)
+    proteome_note = (
+        f"{measured_proteome_count} native measured proteome profiles have been verified; reference collections do not add independent measurements or establish MIC pairing."
+        if measured_proteome_count else "No measured protein abundance profile has been verified in these scanned local roots."
+    )
+    blockers = []
+    if not local_ab["individual_expression_matrix"]["available"]:
+        blockers.append("T7 canonical AB sources lack the original individual expression matrix; frozen means cannot recover it.")
+    if local_ab["verified_untreated_author_columns"] or author_ab and author_ab["verified_untreated_author_columns"]:
+        blockers.append("AB untreated expression columns may share BioSample; biological independence requires source-specific verification.")
+    if not pa_rna:
+        blockers.append("PA expression requires validated native feature mapping and corrected source metadata before profile import.")
+    if not measured_proteome_count:
+        blockers.append("No verified pre-treatment measured proteome profile is available in the scanned local roots.")
+    blockers.extend([
+        "Strict MIC pairing has not been verified by this inventory; species reference collections do not establish matched strains, samples or conditions.",
+        "Genome-only context does not resolve historic MIC assay/identity/rights/negative-call qualification gaps.",
+    ])
     return {
         "schema_version": "praxis.omics-readiness-inventory.v1", "created_at": datetime.now(timezone.utc).isoformat(),
         "scope": {"repo_root": str(repo), "organisms_root": str(organisms), "archive_root": str(archive),
                   "author_data_root": str(Path(author_data_root).resolve()) if author_data_root else None,
                   "network_requests": 0, "source_assets_copied": False},
         "canonical_source_records": canonical, "verified_profiles": profiles, "profile_errors": errors,
-        "profile_modality_counts": dict(modality_counts), "ab_frozen_control_means": frozen,
+        "profile_modality_counts": dict(modality_counts),
+        "native_profile_modality_counts": dict(native_modality_counts),
+        "reference_collection_count": reference_collection_count, "ab_frozen_control_means": frozen,
         "ab_canonical_metadata_only": local_ab, "ab_original_author_data": author_ab,
         "pa_author_expression_candidate": pa_matrix,
         "genome_references": {"verified_assembly_count": len(genome_refs),
@@ -173,30 +214,25 @@ def build_omics_inventory(repo_root: str | Path, archive_root: str | Path | None
                               "references": genome_refs, "errors": genome_errors,
                               "historic_mic_admission_marker": "not_admitted", "historic_gate_codes": sorted(historic_gate_codes),
                               "interpretation": "Verified sequence annotation can provide genome-only context; this does not validate associated MIC measurements or imply a measured proteome."},
-        "proteome": {"verified_measured_profile_count": modality_counts.get("proteome", 0),
+        "proteome": {"verified_measured_profile_count": measured_proteome_count,
                      "candidate_assets": protein_candidates,
-                     "note": "No measured protein abundance matrix has been verified in these scanned local roots."},
-        "readiness_blockers": [
-            "T7 canonical AB sources lack the original individual expression matrix; frozen means cannot recover it.",
-            "AB untreated expression columns share BioSample in the original author records; independence needs verification.",
-            "PA expression requires validated native feature mapping and corrected source metadata before profile import.",
-            "No verified pre-treatment measured proteome or genuine genome/RNA/protein pairing is available in the scanned local roots.",
-            "Genome-only context does not resolve historic MIC assay/identity/rights/negative-call qualification gaps.",
-        ],
+                     "note": proteome_note},
+        "readiness_blockers": blockers,
     }
 
 
 def render_inventory_markdown(inventory: dict) -> str:
-    counts = inventory["profile_modality_counts"]
+    counts = inventory.get("native_profile_modality_counts", inventory["profile_modality_counts"])
     frozen = inventory["ab_frozen_control_means"]
     genome = inventory["genome_references"]
     lines = ["# 组学数据盘点", "", f"生成时间：{inventory['created_at']}", "",
              "本报告读取本地资产，未下载、调用模型、复制原始数据或把历史均值拆成单样本。", "",
              "| 项目 | 已核验数量与含义 |", "| --- | --- |",
              f"| 已加载 profile | {len(inventory['verified_profiles'])} |",
-             f"| genome profile | {counts.get('genome', 0)}；独立的 sequenced_reference 背景 |",
-             f"| transcriptome profile | {counts.get('transcriptome', 0)}；观测单位详见 JSON |",
-             f"| proteome profile | {counts.get('proteome', 0)} |",
+             f"| 物种参考集合 | {inventory.get('reference_collection_count', 0)}；复用原生档案，不新增独立观测 |",
+             f"| 原生 genome profile | {counts.get('genome', 0)}；来源和观测单位详见 JSON |",
+             f"| 原生 transcriptome profile | {counts.get('transcriptome', 0)}；观测单位详见 JSON |",
+             f"| 原生 proteome profile | {counts.get('proteome', 0)} |",
              f"| 冻结 AB control 数组 | {frozen.get('pair_rows', 0)} 行，{frozen.get('distinct_control_mean_vectors', 0)} 个不同均值 |",
              f"| 均值源样本 ID | {frozen.get('source_member_count', 0)}；不能据此恢复这些单样本向量 |",
              f"| 官方 E. coli FASTA/GFF | {genome['verified_assembly_count']} assembly / {genome['distinct_biosample_count']} BioSample |",
@@ -213,8 +249,10 @@ def render_inventory_markdown(inventory: dict) -> str:
     lines.extend(["## PA 与蛋白组", "",
                   f"PA 作者矩阵：`{inventory['pa_author_expression_candidate']['path']}`。"
                   f"feature ID 类型：{inventory['pa_author_expression_candidate'].get('feature_identity_kind', 'unavailable')}。",
-                  "数字行索引不能直接替代原生基因 ID；作者 metadata 字段、重复 run 和培养基 crosswalk 仍需审核。",
+                  inventory["pa_author_expression_candidate"].get("profile_availability_note", "历史候选矩阵的来源映射仍需审核。"),
+                  "历史候选矩阵的数字行索引不能直接替代原生基因 ID；其 metadata 字段、重复 run 和培养基 crosswalk 仍需审核。",
                   "reference_proteins、protein_orthogroups 和参考翻译注释不属于实测蛋白丰度。", "",
+                  inventory["proteome"]["note"], "",
                   "## 基因组背景与 MIC 准入", "",
                   "参考 genome profile 只提供 GFF 中真实观察到的基因/伪基因注释。presence=true 表示注释存在，"
                   "不表示功能、表达、蛋白丰度或目标药物活性；未命中的 feature 不作为基因阴性调用。",

@@ -8,7 +8,8 @@ from pathlib import Path
 import pytest
 
 
-def test_ui_disables_unavailable_inputs_and_submits_a_real_combination():
+@pytest.mark.parametrize("species_reference", [False, True])
+def test_ui_disables_unavailable_inputs_and_submits_a_real_combination(species_reference):
     node = shutil.which("node")
     if node is None:
         pytest.skip("Node is needed to execute the static UI script")
@@ -26,7 +27,10 @@ function get(id){if(!elements.has(id))elements.set(id,element());return elements
 get('modalities').querySelectorAll=()=>inputs;
 get('profile').value='test-profile';get('candidate').value='C1';get('smiles').value='CCO';
 let available=['transcriptome'];let submitted=null;
-const profile=selected=>({profile_id:'test-profile',species:{scientific_name:'Test bacterium'},strain:'S1',
+const profile=selected=>({profile_id:'test-profile',species:{scientific_name:'Test bacterium'},strain:REFERENCE?null:'S1',
+ input_role:REFERENCE?'species_reference':'measured_pre_treatment',
+ modalities:REFERENCE?Object.fromEntries(selected.map(name=>[name,{strain:'source-'+name,
+  condition:{condition_id:'condition-'+name,medium:'medium-'+name}}])):{},
  available_modalities:available,selected_modalities:selected,feature_count:2,annotated_feature_count:2,
  source_samples:['untreated-1'],unknown_fields:[],unit:'source_native'});
 const context={document:{getElementById:get,createElement:()=>element()},URLSearchParams,
@@ -62,9 +66,10 @@ vm.createContext(context);new vm.Script(SCRIPT).runInContext(context);
  await context.selectionChanged();
  await get('analyze').listeners.click();
  process.stdout.write(JSON.stringify({first,emptyDisabled,submitted,
-  stages:get('agent-stages').children.map(x=>x.textContent),review:get('agent-review').textContent}));
+  stages:get('agent-stages').children.map(x=>x.textContent),review:get('agent-review').textContent,
+  summary:get('profile-summary').textContent}));
 })().catch(error=>{console.error(error);process.exitCode=1;});
-'''.replace("VALUES", json.dumps(values)).replace("SCRIPT", json.dumps(script))
+'''.replace("VALUES", json.dumps(values)).replace("SCRIPT", json.dumps(script)).replace("REFERENCE", json.dumps(species_reference))
     result = subprocess.run([node, "-e", harness], capture_output=True, text=True, check=True)
     state = json.loads(result.stdout)
     assert state["first"] == [
@@ -79,3 +84,9 @@ vm.createContext(context);new vm.Script(SCRIPT).runInContext(context);
     assert "修订 · completed" in state["stages"]
     assert "审核决定：revise" in state["review"]
     assert "No binding experiment" in state["review"]
+    assert "null" not in state["summary"] and "undefined" not in state["summary"]
+    if species_reference:
+        assert "物种参考背景" in state["summary"]
+        assert "不表示同一样本" in state["summary"]
+        assert "source-genome" in state["summary"] and "source-proteome" in state["summary"]
+        assert "source-transcriptome" not in state["summary"]

@@ -69,7 +69,7 @@ class _Modality(_Strict):
     unit: str = Field(min_length=1)
     scale: str = Field(min_length=1)
     value_semantics: str = Field(min_length=1)
-    observation_unit: Literal["measured_baseline_sample", "measured_reference_assembly"]
+    observation_unit: Literal["measured_baseline_sample", "measured_reference_assembly", "author_condition_summary"]
     features: _TableAsset
     provenance: _TableProvenance
 

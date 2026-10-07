@@ -1,0 +1,236 @@
+{
+  "schema_version": "praxis.species-database-engineering-verification.v1",
+  "MIC_records": 12450,
+  "unique_compounds": 6199,
+  "selected_native_references": 12,
+  "species_reference_collections": 4,
+  "profiles": [
+    {
+      "profile_id": "AB-SPECIES-REFERENCE",
+      "taxon_id": 470,
+      "verified_combinations": 7
+    },
+    {
+      "profile_id": "EC-SPECIES-REFERENCE",
+      "taxon_id": 562,
+      "verified_combinations": 7
+    },
+    {
+      "profile_id": "KP-SPECIES-REFERENCE",
+      "taxon_id": 573,
+      "verified_combinations": 7
+    },
+    {
+      "profile_id": "PA-SPECIES-REFERENCE",
+      "taxon_id": 287,
+      "verified_combinations": 7
+    }
+  ],
+  "profile_api_requests_checked": 40,
+  "actual_feature_query_citations_checked": 12,
+  "inference_export_whitelist_verified": true,
+  "sqlite_integrity": "ok",
+  "foreign_key_errors": 0,
+  "numeric_MIC_columns_in_index": false,
+  "MIC_answers_in_inference_export": false,
+  "raw_assets_copied": false,
+  "species_reference_is_matched_sample": false,
+  "current_run_external_LLM_calls": 0,
+  "current_run_training_started": false,
+  "independent_drug_efficacy_accuracy_evaluated": false,
+  "ab_proteome_condition_identity": "inferred_from_author_group_design",
+  "limitations": [
+    "One reference per species/modality cannot evaluate within-species strain-state variation.",
+    "Supplemental MIC records are bounded first pages, not complete ChEMBL coverage.",
+    "AB protein A1 control identity is inferred; detailed sample medium/time remain uncertain.",
+    "Genome annotation context does not imply variant calls or complete plasmid coverage."
+  ],
+  "created_at": "2026-10-07",
+  "species_coverage": [
+    {
+      "taxon_id": 287,
+      "scientific_name": "Pseudomonas aeruginosa",
+      "profile_id": "PA-SPECIES-REFERENCE",
+      "MIC_records": 292,
+      "unique_compounds": 229,
+      "studies": 16,
+      "available_modalities": [
+        "genome",
+        "proteome",
+        "transcriptome"
+      ],
+      "missing_modalities": [],
+      "censoring": {
+        "exact": 242,
+        "right": 50
+      }
+    },
+    {
+      "taxon_id": 470,
+      "scientific_name": "Acinetobacter baumannii",
+      "profile_id": "AB-SPECIES-REFERENCE",
+      "MIC_records": 11650,
+      "unique_compounds": 5774,
+      "studies": 466,
+      "available_modalities": [
+        "genome",
+        "proteome",
+        "transcriptome"
+      ],
+      "missing_modalities": [],
+      "censoring": {
+        "exact": 7835,
+        "interval": 117,
+        "left": 160,
+        "right": 3538
+      }
+    },
+    {
+      "taxon_id": 562,
+      "scientific_name": "Escherichia coli",
+      "profile_id": "EC-SPECIES-REFERENCE",
+      "MIC_records": 232,
+      "unique_compounds": 176,
+      "studies": 11,
+      "available_modalities": [
+        "genome",
+        "proteome",
+        "transcriptome"
+      ],
+      "missing_modalities": [],
+      "censoring": {
+        "exact": 228,
+        "right": 4
+      }
+    },
+    {
+      "taxon_id": 573,
+      "scientific_name": "Klebsiella pneumoniae",
+      "profile_id": "KP-SPECIES-REFERENCE",
+      "MIC_records": 276,
+      "unique_compounds": 262,
+      "studies": 19,
+      "available_modalities": [
+        "genome",
+        "proteome",
+        "transcriptome"
+      ],
+      "missing_modalities": [],
+      "censoring": {
+        "exact": 246,
+        "left": 1,
+        "right": 29
+      }
+    }
+  ],
+  "selected_reference_profiles": [
+    {
+      "profile_id": "AB-REFERENCE-GENOME",
+      "modality": "genome",
+      "feature_count": 3895,
+      "load_verified": true
+    },
+    {
+      "profile_id": "EC-REFERENCE-GENOME",
+      "modality": "genome",
+      "feature_count": 4290,
+      "load_verified": true
+    },
+    {
+      "profile_id": "PA-REFERENCE-GENOME",
+      "modality": "genome",
+      "feature_count": 5572,
+      "load_verified": true
+    },
+    {
+      "profile_id": "KP-REFERENCE-GENOME",
+      "modality": "genome",
+      "feature_count": 5404,
+      "load_verified": true
+    },
+    {
+      "profile_id": "AB5075-AZI000",
+      "modality": "transcriptome",
+      "feature_count": 3895,
+      "load_verified": true
+    },
+    {
+      "profile_id": "PA-REFERENCE-RNA",
+      "modality": "transcriptome",
+      "feature_count": 5572,
+      "load_verified": true
+    },
+    {
+      "profile_id": "EC-REFERENCE-RNA",
+      "modality": "transcriptome",
+      "feature_count": 4257,
+      "load_verified": true
+    },
+    {
+      "profile_id": "KP-REFERENCE-RNA",
+      "modality": "transcriptome",
+      "feature_count": 5867,
+      "load_verified": true
+    },
+    {
+      "profile_id": "EC-REFERENCE-PROTEOME",
+      "modality": "proteome",
+      "feature_count": 2019,
+      "load_verified": true,
+      "finite_abundance_count": 2019,
+      "null_abundance_count": 0
+    },
+    {
+      "profile_id": "PA-REFERENCE-PROTEOME",
+      "modality": "proteome",
+      "feature_count": 1591,
+      "load_verified": true,
+      "finite_abundance_count": 1590,
+      "null_abundance_count": 1
+    },
+    {
+      "profile_id": "KP-REFERENCE-PROTEOME",
+      "modality": "proteome",
+      "feature_count": 1813,
+      "load_verified": true,
+      "finite_abundance_count": 1442,
+      "null_abundance_count": 371
+    },
+    {
+      "profile_id": "AB-REFERENCE-PROTEOME",
+      "modality": "proteome",
+      "feature_count": 1955,
+      "load_verified": true,
+      "finite_abundance_count": 1136,
+      "null_abundance_count": 819,
+      "reference_condition_identity_status": "inferred_from_author_group_design"
+    }
+  ],
+  "new_MIC_records": 800,
+  "reused_AB_MIC_records": 11650,
+  "supplemental_MIC_activities_excluded": 100,
+  "legacy_EC_source_rows_quarantined": 90099,
+  "native_profile_modality_counts": {
+    "genome": 23,
+    "transcriptome": 4,
+    "proteome": 4
+  },
+  "selected_reference_source_urls": {
+    "AB-REFERENCE-GENOME": "https://www.ncbi.nlm.nih.gov/nuccore/CP008706.1",
+    "EC-REFERENCE-GENOME": "https://www.ncbi.nlm.nih.gov/nuccore/NC_000913.3",
+    "PA-REFERENCE-GENOME": "https://www.ncbi.nlm.nih.gov/nuccore/NC_002516.2",
+    "KP-REFERENCE-GENOME": "https://www.ncbi.nlm.nih.gov/nuccore/NC_016845.1",
+    "AB5075-AZI000": "https://www.ncbi.nlm.nih.gov/bioproject/PRJNA658638",
+    "PA-REFERENCE-RNA": "https://www.ebi.ac.uk/biostudies/arrayexpress/studies/E-MTAB-5820",
+    "EC-REFERENCE-RNA": "https://github.com/SBRG/precise1k",
+    "KP-REFERENCE-RNA": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM3181651",
+    "EC-REFERENCE-PROTEOME": "https://www.nature.com/articles/nbt.3418",
+    "PA-REFERENCE-PROTEOME": "https://link.springer.com/article/10.1186/s12866-019-1441-7",
+    "KP-REFERENCE-PROTEOME": "https://www.nature.com/articles/s44259-025-00147-7",
+    "AB-REFERENCE-PROTEOME": "https://journals.plos.org/plospathogens/article?id=10.1371/journal.ppat.1010308"
+  },
+  "offline_tests_passed": 881,
+  "ruff": "passed",
+  "git_diff_check": "passed",
+  "report_preserves_source_caveats": true
+}
