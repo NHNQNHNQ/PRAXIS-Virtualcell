@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 
-@pytest.mark.parametrize("species_reference", [False, True])
+@pytest.mark.parametrize("species_reference", [False, True, "strain_reference"])
 def test_ui_disables_unavailable_inputs_and_submits_a_real_combination(species_reference):
     node = shutil.which("node")
     if node is None:
@@ -27,9 +27,11 @@ function get(id){if(!elements.has(id))elements.set(id,element());return elements
 get('modalities').querySelectorAll=()=>inputs;
 get('profile').value='test-profile';get('candidate').value='C1';get('smiles').value='CCO';
 let available=['transcriptome'];let submitted=null;
-const profile=selected=>({profile_id:'test-profile',species:{scientific_name:'Test bacterium'},strain:REFERENCE?null:'S1',
- input_role:REFERENCE?'species_reference':'measured_pre_treatment',
- modalities:REFERENCE?Object.fromEntries(selected.map(name=>[name,{strain:'source-'+name,
+const speciesReference=REFERENCE===true;const strainReference=REFERENCE==='strain_reference';
+const profile=selected=>({profile_id:'test-profile',species:{scientific_name:'Test bacterium'},strain:speciesReference?null:'S1',
+ input_role:speciesReference?'species_reference':strainReference?'strain_reference':'measured_pre_treatment',
+ strain_namespace:'author_strain_name',identity_basis:'Synthetic exact S1 source declarations',genotype:null,
+ modalities:(speciesReference||strainReference)?Object.fromEntries(selected.map(name=>[name,{strain:strainReference?'S1':'source-'+name,
   condition:{condition_id:'condition-'+name,medium:'medium-'+name}}])):{},
  available_modalities:available,selected_modalities:selected,feature_count:2,annotated_feature_count:2,
  source_samples:['untreated-1'],unknown_fields:[],unit:'source_native'});
@@ -38,7 +40,10 @@ const context={document:{getElementById:get,createElement:()=>element()},URLSear
  fetch:async(url,options)=>{
   let result;
   if(url==='/api/health')result={model:'mock',credential_configured:true};
-  else if(url==='/api/profiles')result={profiles:[{profile_id:'test-profile',label:'Test profile'}]};
+  else if(url==='/api/profiles')result={profiles:strainReference?
+   [{profile_id:'species-background',label:'Earlier species background',input_role:'species_reference'},
+    {profile_id:'test-profile',label:'S1 strain reference',input_role:'strain_reference',strain:'S1'}]:
+   [{profile_id:'test-profile',label:'Test profile'}]};
   else if(url.startsWith('/api/profiles/test-profile')){
    const selected=new URL(url,'http://local').searchParams.getAll('modalities');
    result=profile(selected.length?selected:available);
@@ -85,8 +90,15 @@ vm.createContext(context);new vm.Script(SCRIPT).runInContext(context);
     assert "审核决定：revise" in state["review"]
     assert "No binding experiment" in state["review"]
     assert "null" not in state["summary"] and "undefined" not in state["summary"]
-    if species_reference:
+    if species_reference is True:
         assert "物种参考背景" in state["summary"]
         assert "不表示同一样本" in state["summary"]
         assert "source-genome" in state["summary"] and "source-proteome" in state["summary"]
         assert "source-transcriptome" not in state["summary"]
+    elif species_reference == "strain_reference":
+        assert state["submitted"]["profile_id"] == "test-profile"
+        assert "Test bacterium / S1" in state["summary"]
+        assert "author_strain_name" in state["summary"]
+        assert "不表示同一样本" in state["summary"] and "未确认野生型" in state["summary"]
+        assert "缺失模态不借用其他菌株" in state["summary"]
+        assert "物种参考背景" not in state["summary"]

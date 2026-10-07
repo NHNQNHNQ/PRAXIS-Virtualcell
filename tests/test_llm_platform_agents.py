@@ -94,6 +94,62 @@ def test_selected_overview_and_native_feature_endpoints(platform):
         assert client.post("/api/profiles/test-profile/genes", json={"gene_ids": ["g1"], "modality": "transcriptome"}).json()["selected_modalities"] == ["transcriptome"]
 
 
+def test_web_prefers_loadable_exact_strain_collection_for_omitted_profile(tmp_path, monkeypatch):
+    from praxis_virtualcell.web.app import create_app
+    from tests.omics.test_strain_reference import REFERENCE_ID, _strain_references
+    from praxis_virtualcell.omics import load_profile
+    import praxis_virtualcell.llm_prediction as prediction
+    import praxis2.llm.client as llm
+
+    root = tmp_path / "profiles"
+    root.mkdir()
+    _strain_references(root)
+    env = tmp_path / ".env"
+    env.write_text("DEEPSEEK_API_KEY=dummy-local-test-key\n")
+    class Client:
+        def __init__(self, *args, **kwargs):
+            pass
+        async def aclose(self):
+            pass
+    monkeypatch.setattr(llm, "LLMClient", Client)
+    monkeypatch.setattr(prediction, "render_report", lambda result: "Public strain report")
+    seen = []
+    async def analyze(smiles, profile_id, **kwargs):
+        seen.append((profile_id, kwargs.get("modalities")))
+        return {"status": "completed", "profile": load_profile(profile_id, root).overview()}
+    with TestClient(create_app(data_root=root, env_file=env, report_root=tmp_path / "reports", analyzer=analyze)) as client:
+        data = client.get("/api/profiles").json()
+        assert data["default_profile_id"] == data["profiles"][0]["profile_id"] == REFERENCE_ID
+        assert data["profiles"][0]["strain"] == "AB5075"
+        assert all(item.get("input_role") != "species_reference" for item in data["profiles"])
+        legacy = client.get("/api/profiles/synthetic-species-reference")
+        assert legacy.status_code == 200 and legacy.json()["input_role"] == "species_reference"
+        assert client.get("/api/health").json()["default_profile_id"] == REFERENCE_ID
+        view = client.get(f"/api/profiles/{REFERENCE_ID}", params={"modalities": "proteome"}).json()
+        assert view["prediction_scope"] == "strain_reference" and view["strain"] == "AB5075"
+        assert view["selected_modalities"] == ["proteome"]
+        assert client.post("/api/analyze", json={"smiles": "CCO", "modalities": ["genome"]}).status_code == 200
+        assert seen == [(REFERENCE_ID, ["genome"])]
+        assert client.post("/api/analyze", json={"smiles": "CCO", "profile_id": "synthetic-species-reference"}).status_code == 422
+        assert seen == [(REFERENCE_ID, ["genome"])]
+
+
+def test_web_never_defaults_to_a_species_only_background(tmp_path, monkeypatch):
+    from praxis_virtualcell.web.app import create_app
+    import praxis_virtualcell.omics as omics
+
+    monkeypatch.setattr(omics, "list_profiles", lambda data_root=None: [{
+        "profile_id": "species-only", "label": "Species background", "strain": None,
+        "input_role": "species_reference", "prediction_scope": "species_reference",
+    }])
+    env = tmp_path / ".env"
+    env.write_text("DEEPSEEK_API_KEY=\n")
+    with TestClient(create_app(env_file=env)) as client:
+        assert client.get("/api/profiles").json()["default_profile_id"] is None
+        response = client.post("/api/analyze", json={"smiles": "CCO"})
+        assert response.status_code == 422 and "explicit strain" in response.json()["detail"]
+
+
 @pytest.mark.parametrize("modalities", [[], ["metabolome"], ["genome", "genome"]])
 def test_invalid_modality_requests_do_not_start_analyzer(platform, tmp_path, modalities):
     from praxis_virtualcell.web.app import create_app

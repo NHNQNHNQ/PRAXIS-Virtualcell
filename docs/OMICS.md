@@ -1,12 +1,14 @@
-# 菌株与物种参考组学输入
+# 菌株参考组学输入
 
 当前平台向 LLM 提供有来源的、给药前的菌株组学背景。组学加载层负责读文件、检查身份和数值、返回特征注释与来源定位；药物活性、杀伤和作用机制的判断由 LLM 生成。原有 v1 RNA profile 保持兼容；v2 声明接口支持基因组、转录组、蛋白组单独输入或组合。加载层没有恢复旧 MIC/AMR 模型、实测 MIC 查表、扰动预测或世界模型，也不把旧八维状态向量作为实测组学。
 
-新增 `praxis.species-reference.v1` 独立参考集合：每物种每模态引用一个 native v1/v2 profile，允许不同参考株和条件，各自保留来源身份；单模态与组合都经过同一加载入口。它不声明样本配对，也不改变下文 native v2 的严格规则。配置、数据库与使用见 [SPECIES-DATABASE](SPECIES-DATABASE.md)。
+当前默认使用 `praxis.strain-reference.v1`：每个具体菌株的每个模态只引用一个 native v1/v2 profile，校验完全一致的 species、strain、genotype。允许同菌株各模态来自不同样本或培养条件，分别保留条件和 native source IDs；关系为 `same_strain_reference`，不声明实验配对。未知基因型不代表已验证野生型，别名与突变株不会自动合并。单模态和组合使用同一加载入口，集合仅存指针。旧物种集合保留兼容读取，但 CLI/Web 默认和训练索引已改为菌株。配置见 [STRAIN-TRAINING](STRAIN-TRAINING.md)。
+
+本地默认 `AB5075-STRAIN-REFERENCE` 引用 AB5075 基因组、下述历史 RNA 与实测蛋白组；MG1655、PAO1 也各有三模态。K. pneumoniae 的 HS11286、K26、NCTC418 是三个不同菌株，分别保留单模态档案。另有 18 个 E. coli 基因组参考。加载不会把 HS11286 的参考映射命名空间误认为 K26 RNA 的来源菌株。
 
 ## 已有 AB5075 profile 的含义
 
-默认本地输入位于 `data/organisms/AB5075-AZI000/`，由 `manifest.json`、`baseline.npz` 和 `annotations.csv` 组成。
+历史 RNA 原生输入位于 `data/organisms/AB5075-AZI000/`，由 `manifest.json`、`baseline.npz` 和 `annotations.csv` 组成。默认菌株集合引用它，不复制这些文件。
 
 | 字段 | 当前值或含义 |
 | --- | --- |
@@ -199,7 +201,7 @@ print(view.search_features("genome", "efflux"))
 
 `query_features` 按该模态的原生 `feature_id` 查询，返回 `features`、`missing_feature_ids` 和 `truncated`。v2 每条观测的 source ID 为 `omics:<profile_id>:<modality>:feature:<feature_id>`，包含模态单位、尺度、观测字段及派生资产记录索引/原始行定位。v1 的通用 feature 查询保留原有 gene source ID 和真实 AB5075 来源位置。`query_genes` 在 v2 返回所选模态中所有明确关联该 `gene_id` 的记录，蛋白未映射到基因时需按 protein feature 查询。
 
-这个版本不包含 FASTQ/BAM 自动处理、自动注释、跨 assembly/跨菌株同源映射、代谢组或单细胞适配。`prepare_genome.py` 只读取已冻结、已注释的本地 NCBI FASTA/GFF，验证字节、assembly、taxon、contig、原生 feature 与坐标，导出参考注释存在性，不作新注释或阴性基因调用。已接入 19 个 E. coli genome-only 参考；默认 AB5075 profile 仍是历史 RNA 背景，实测蛋白组为 0。完整库存见 [DATA-READINESS](DATA-READINESS.md)。
+这个版本不包含 FASTQ/BAM 自动处理、自动注释、跨 assembly/跨菌株同源映射、代谢组或单细胞适配。`prepare_genome.py` 只读取已冻结、已注释的本地 NCBI FASTA/GFF，验证字节、assembly、taxon、contig、原生 feature 与坐标，导出参考注释存在性，不作新注释或阴性基因调用。已接入 19 个 E. coli genome-only 原生参考；当前菌株集合还引用后来接入的真实 RNA 和实测蛋白丰度。完整库存见 [DATA-READINESS](DATA-READINESS.md)。
 
 `prepare_baseline_samples.py` 从服务器作者原始 QC 矩阵导出 Abaum_0017/0023 实际两列，不拆均值、不复制原矩阵。每个新 profile 的收据保留原矩阵/metadata 行、QC、Run、BioSample 与来源 hash；两列共用一个 BioSample，独立生物重复未证实。
 

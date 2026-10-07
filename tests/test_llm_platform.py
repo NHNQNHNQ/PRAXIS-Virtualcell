@@ -91,7 +91,7 @@ def test_web_profile_selection_and_no_key_failure(tmp_path, web_profiles):
         assert client.get("/").status_code == 200
         assert client.get("/api/profiles").json()["profiles"][0]["strain"] == "AB5075"
         assert client.get("/api/profiles/wrong-strain").status_code == 404
-        response = client.post("/api/analyze", json={"smiles": "CCO"})
+        response = client.post("/api/analyze", json={"smiles": "CCO", "profile_id": "AB5075-AZI000"})
         assert response.status_code == 503
 
 

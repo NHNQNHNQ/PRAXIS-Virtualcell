@@ -27,6 +27,11 @@ For species_reference input, the scope is a species background; each modality ke
 source strain, sample and conditions. They are not a matched sample. Do not present reference
 strain observations as facts about all strains, an individual predicted strain or current state.
 Fixed species references do not establish within-species MIC differences.
+For strain_reference input, remain within the exact declared strain and genotype identity.
+Preserve strain_namespace and identity_basis. Do not broaden to the species, infer aliases,
+borrow another strain's missing modality, or conflate parent strains with mutants/derivatives.
+Sources may have different culture conditions and do not establish a matched sample or current state.
+Unknown genotype is not verified wild type. An unavailable exact-strain query remains a data gap.
 Genome annotation/translated protein identity is not measured protein abundance. RNA expression
 is not direct protein binding. A target hypothesis is not established causality. MIC is growth
 inhibition, not a killing rate, MBC or time-kill measurement. An LLM MIC may be null and remains

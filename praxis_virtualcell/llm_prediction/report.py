@@ -25,6 +25,7 @@ def render_report(result: dict[str, Any]) -> str:
     mic = assessment["mic_estimate"]
     estimate = "未知（未给出数值）" if mic["value"] is None else f"{mic['value']:g} µg/mL（LLM 估计）"
     species_reference = profile.get("input_role") == "species_reference"
+    strain_reference = profile.get("input_role") == "strain_reference"
     identity = (f"- 物种参考档案：{profile.get('profile_id')}；{species}（物种参考背景）" if species_reference else
                 f"- 菌株档案：{profile.get('profile_id')}；{species} / {profile.get('strain') or '未知菌株'}")
     lines = [
@@ -42,8 +43,13 @@ def render_report(result: dict[str, Any]) -> str:
     selected = profile.get("selected_modalities") or result.get("analysis_plan", {}).get("selected_modalities")
     if selected:
         lines.insert(4, f"- 本次组学输入：{'、'.join(selected)}")
-    if species_reference:
-        source_lines = ["- 预测范围：物种参考背景；各模态来源不表示同一样本，也不代表所有菌株或当前细胞状态。"]
+    if species_reference or strain_reference:
+        source_lines = (["- 预测范围：物种参考背景；各模态来源不表示同一样本，也不代表所有菌株或当前细胞状态。"]
+                        if species_reference else [
+                            f"- 预测范围：具体菌株 {profile['strain']}；命名空间 {profile['strain_namespace']}；基因型 {profile.get('genotype') or '未知（未确认野生型）'}。",
+                            f"- 菌株身份依据：{profile['identity_basis']}",
+                            "- 同菌株参考可来自不同培养条件，不表示同一样本；缺失模态不借用其他菌株。",
+                        ])
         names = {"genome": "基因组", "transcriptome": "转录组", "proteome": "蛋白组"}
         for name, source in profile.get("modalities", {}).items():
             condition = source.get("condition", {})

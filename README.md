@@ -1,16 +1,16 @@
 # PRAXIS-VirtualCell
 
-加载具体菌株样本或物种参考组学，由 LLM 直接预测候选分子的抗菌活性、MIC，并提出有数据依据的靶点与机制假说。默认使用 DeepSeek；组学查询与结构处理工具不承担药效预测。
+加载具体菌株的参考组学，由 LLM 直接预测候选分子的抗菌活性、MIC，并提出有数据依据的靶点与机制假说。默认使用 DeepSeek；组学查询与结构处理工具不承担药效预测。
 
 ## 当前入口
 
 - `praxis_virtualcell/data_packs/`：从原平台恢复的 AnnData/MuData 校验、只读矩阵读取与显式特征对齐。
-- `praxis_virtualcell/omics/`：原生 v1/v2 组学与独立物种参考集合，支持单组学与组合选择，保留各来源株、条件、单位和引用身份。
+- `praxis_virtualcell/omics/`：原生 v1/v2 组学与菌株参考集合，支持单组学与组合选择，保留各来源条件、单位和引用身份。
 - `praxis_virtualcell/llm_prediction/`：规划、组学工具分析、引用校验、科学审查、一次修订与复审、JSON/Markdown 报告和监督轨迹导出。
 - `praxis_virtualcell/knowledge/`：按实际 taxon/strain 和候选精确结构检索独立机制证据，区分参考功能与蛋白实验。
-- `praxis_virtualcell/datasets/`：真实实验监督整理、官方源数据补取、物种参考 SQLite 映射、标签隔离、分组冻结和事后评分。
+- `praxis_virtualcell/datasets/`：真实实验监督、菌株 SQLite 索引、条件化 MIC 目标、官方文献定位与审核、标签隔离、分组冻结和事后评分。
 - `praxis2/llm/`：复用原平台客户端，支持 DeepSeek 思考模式与连续工具调用。
-- `praxis_virtualcell/web/`：选择菌株样本或物种参考、输入候选结构、查看组学概览与分析报告的本地页面。
+- `praxis_virtualcell/web/`：选择具体菌株与组学模态、输入候选结构、查看概览与分析报告的本地页面。
 
 旧 MIC、AMR、QSAR、扰动和世界模型不进入新预测入口。实测 MIC 记录不作为推理输入或查表答案。历史工具保留在 `praxis-mdr` 和独立组件中，已有结果保持原科学范围。
 
@@ -30,16 +30,16 @@ PRAXIS_MODEL=deepseek-v4-pro
 
 ```bash
 .venv/bin/praxis-vc profiles
-.venv/bin/praxis-vc inspect --profile AB5075-AZI000
-.venv/bin/praxis-vc inspect --profile AB5075-AZI000 --modalities transcriptome
-.venv/bin/praxis-vc inspect --profile AB-SPECIES-REFERENCE --modalities genome transcriptome
+.venv/bin/praxis-vc inspect --profile AB5075-STRAIN-REFERENCE
+.venv/bin/praxis-vc inspect --profile AB5075-STRAIN-REFERENCE --modalities transcriptome
+.venv/bin/praxis-vc inspect --profile EC-MG1655-STRAIN-REFERENCE --modalities genome transcriptome
 .venv/bin/praxis-vc serve --port 8787
 ```
 
 打开 `http://127.0.0.1:8787`。页面显示实际输入包的身份与数据覆盖；分析后可查看报告、工具轨迹以及 JSON/Markdown；带报告编号的页面链接可重新打开，无需再次调用模型。
 
 ```bash
-.venv/bin/praxis-vc batch --profile AB5075-AZI000 --input candidates/synthemol_20260923/repeat_1/molecules.csv --limit 1 --output reports/llm_live/first-candidate
+.venv/bin/praxis-vc batch --profile AB5075-STRAIN-REFERENCE --input candidates/synthemol_20260923/repeat_1/molecules.csv --limit 1 --output reports/llm_live/first-candidate
 ```
 
 批量导入只读取 SMILES 和候选编号，忽略 CSV 的历史 score/Q_value 与终点字段。去掉 `--limit` 可处理完整候选集；每个候选都会调用配置的 LLM。
@@ -52,13 +52,13 @@ PRAXIS_MODEL=deepseek-v4-pro
 
 ## 数据与结果语义
 
-本机现有物种参考包含基因组注释、真实转录组和实测蛋白丰度，各模态保留独立来源与条件。参考注释不能代替新分离株的全基因组变异；固定参考丰度不能代表所有菌株的当前状态。未知时间、温度、基因型和生长期保持未知。处理后表达、实际 delta 和 MIC 标签不进入新候选工具结果。
+本机现有菌株参考包含基因组注释、真实转录组和实测蛋白丰度。同一集合只引用同菌株、同声明基因型的来源，允许不同模态来自不同培养条件。AB5075、MG1655、PAO1 各可使用三模态；K. pneumoniae 的 HS11286、K26、NCTC418 分别只有基因组、RNA、蛋白组，分开选择。其余 18 个 E. coli 档案为 genome-only。参考注释不能代替新分离株的全基因组变异；未知时间、温度、基因型和生长期保持未知。处理后表达、实际 delta 和 MIC 标签不进入新候选工具结果。
 
 MIC 是未经校准的 LLM 估计，可以为未知；它表示生长抑制，不等于杀伤率。靶点与机制保留假说身份。引用校验只证明观察值与工具返回一致，不证明药效正确或靶点因果关系。无实际组学查询或事实引用校验失败时返回 `unsupported`，不调用其他预测器补数值。
 
 大型数据只存本地 `data/organisms/`，对应归档路径保留引用。数据准备与复现见 [OMICS](docs/OMICS.md)。本地 `.env` 与完整实时报告不进入 GitHub。
 
-物种参考模式按“药物—实测 MIC—物种”建立监督，每物种每模态仅选一个来源，允许参考株与实验株不同。参考集合只存指针，SQLite 索引通过 canonical 标签位置关联答案，推理导出不包含终点。当前 v2 有 **24,792 条 MIC、10,813 个结构身份、4 个物种、12 个选定原生参考**，四物种均可选择三种单模态与七种组合。AB 蛋白对照身份有明确的推定限制。已复用本机数据，并将 EC/KP/PA 的官方活动覆盖分别扩至累计 5,000 条，按来源和测量规则筛选；这仍是有限覆盖。配置与使用见 [SPECIES-DATABASE](docs/SPECIES-DATABASE.md)，实际覆盖和剩余缺口见 [DATA-READINESS](docs/DATA-READINESS.md)。
+当前监督采用“药物—菌株—参考组学—实验条件—MIC—文献机制解析”。底层仍复用 **24,792 条 MIC、10,813 个结构身份、4 个物种**的 canonical 文件。11,973 条有明确菌株名称，917 个带命名空间的身份不等于 917 个已核验的独立生物菌株；研究内编号不跨文献合并。52 条 AB5075 MIC 有同菌株组学，其中训练 48 条。已物化 7,227 个 MIC 组件目标，保留 7,774 次训练测量；其中 48 个有组学，其余明确标为无组学辅助任务。文献联合监督需要明确的化合物、菌株和原文绑定。使用与覆盖见 [STRAIN-TRAINING](docs/STRAIN-TRAINING.md)。历史物种索引保留作为只读来源，旧物种参考兼容入口不再作为默认档案。
 
 ## 验证与后续
 

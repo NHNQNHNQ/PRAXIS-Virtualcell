@@ -134,3 +134,28 @@ def test_prepare_seeds_explicit_root_and_limit_reach_builder(tmp_path, monkeypat
     captured = capsys.readouterr()
     assert captured.err == ""
     assert json.loads(captured.out)["record_count"] == 5
+
+
+@pytest.mark.parametrize("command,target,arguments,expected_args,expected_kwargs", [
+    ("build-strain-dataset", "strain_dataset.build_strain_dataset",
+     ["--database", "db", "--frozen-manifest", "freeze", "--enrichments", "review", "--output", "out"],
+     ("db", "freeze", "out"), {"profile_root": _data_root(None), "enrichments_path": "review"}),
+    ("prepare-strain-supervision", "strain_supervision.prepare_strain_supervision",
+     ["--dataset", "dataset", "--output", "out"], ("dataset", "out"), {}),
+    ("acquire-literature", "literature.acquire_literature",
+     ["--cases", "cases", "--limit", "7", "--offline", "--output", "out"],
+     ("cases", "out"), {"limit": 7, "offline": True, "skip_supplements": True}),
+    ("prepare-joint-supervision", "joint_supervision.prepare_joint_supervision",
+     ["--supervision", "sft", "--literature", "papers", "--reviews", "review", "--output", "out"],
+     ("sft", "papers", "review", "out"), {}),
+])
+def test_strain_dataset_commands_do_not_load_credentials_or_clients(monkeypatch, capsys, command, target,
+                                                                   arguments, expected_args, expected_kwargs):
+    calls = []
+    def run(*args, **kwargs):
+        calls.append((args, kwargs))
+        return {"source_verified": True}
+    monkeypatch.setattr("praxis_virtualcell.datasets." + target, run)
+    assert cli.main([command, *arguments]) == 0
+    assert calls == [(expected_args, expected_kwargs)]
+    assert json.loads(capsys.readouterr().out) == {"source_verified": True}

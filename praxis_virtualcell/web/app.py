@@ -17,7 +17,7 @@ Modality = Literal["genome", "transcriptome", "proteome"]
 
 
 class AnalysisRequest(BaseModel):
-    profile_id: str = "AB5075-AZI000"
+    profile_id: str | None = None
     smiles: str = Field(min_length=1, max_length=10000)
     candidate_id: str = Field(default="candidate-001", max_length=200)
     max_turns: int = Field(default=8, ge=1, le=20)
@@ -39,6 +39,7 @@ class FeatureRequest(BaseModel):
 def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None, knowledge_catalog_path=None) -> FastAPI:
     from praxis_virtualcell.omics import list_profiles, load_profile
     from praxis_virtualcell.llm_prediction import analyze_with_agents, render_report
+    from praxis_virtualcell.llm_prediction.workflow import DEFAULT_PROFILE
     from praxis2.llm.client import LLMClient
 
     app = FastAPI(title="PRAXIS VirtualCell", version="2.1.0")
@@ -46,6 +47,21 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
     destination = Path(report_root or "reports/llm_live/web")
     run = analyzer or analyze_with_agents
     gate = asyncio.Semaphore(1)
+
+    def profile_choices():
+        return sorted((item for item in list_profiles(data_root=data_root)
+                       if item.get("input_role") != "species_reference"), key=lambda item: (
+            item.get("input_role") != "strain_reference", item.get("input_role") == "species_reference",
+            item.get("label") or item.get("name") or item["profile_id"],
+        ))
+
+    def default_profile_id(choices):
+        if any(item["profile_id"] == DEFAULT_PROFILE and item.get("input_role") == "strain_reference"
+               for item in choices):
+            return DEFAULT_PROFILE
+        return next((item["profile_id"] for item in choices if item.get("input_role") == "strain_reference"),
+                    next((item["profile_id"] for item in choices
+                          if item.get("input_role") != "species_reference" and item.get("strain")), None))
 
     def profile(profile_id):
         try:
@@ -68,14 +84,16 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
 
     @app.get("/api/health")
     async def health():
+        choices = profile_choices()
         return {"status": "ok", "inference": "llm_only", "model": settings.model,
                 "workflow": "planning_analysis_review_revision",
                 "credential_configured": bool(settings.api_key),
-                "profile_count": len(list_profiles(data_root=data_root))}
+                "profile_count": len(choices), "default_profile_id": default_profile_id(choices)}
 
     @app.get("/api/profiles")
     async def profiles():
-        return {"profiles": list_profiles(data_root=data_root)}
+        choices = profile_choices()
+        return {"profiles": choices, "default_profile_id": default_profile_id(choices)}
 
     @app.get("/api/profiles/{profile_id}")
     async def overview(profile_id: str, modalities: list[Modality] | None = Query(default=None)):
@@ -113,7 +131,12 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
 
     @app.post("/api/analyze")
     async def analyze(request: AnalysisRequest):
-        selected_profile(request.profile_id, request.modalities)
+        chosen_id = request.profile_id or default_profile_id(profile_choices())
+        if chosen_id is None:
+            raise HTTPException(422, "Select an explicit strain profile; species references are not selected by default")
+        loaded = selected_profile(chosen_id, request.modalities)
+        if loaded.overview().get("input_role") == "species_reference":
+            raise HTTPException(422, "New analysis requires an explicit strain; species references remain readable as historical context")
         if not settings.api_key:
             raise HTTPException(503, "Configure DEEPSEEK_API_KEY locally")
         async with gate:
@@ -125,7 +148,7 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
                 selection = {"modalities": request.modalities} if request.modalities is not None else {}
                 if knowledge_catalog_path is not None:
                     selection["knowledge_catalog_path"] = knowledge_catalog_path
-                result = await run(request.smiles, request.profile_id, client=client,
+                result = await run(request.smiles, chosen_id, client=client,
                                    model=settings.model, data_root=data_root,
                                    max_turns=request.max_turns, candidate_id=request.candidate_id,
                                    on_progress=progress,

@@ -85,18 +85,18 @@ async def run_analysis(args):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="PRAXIS: strain or species-reference omics with LLM-only antibacterial inference")
+    parser = argparse.ArgumentParser(description="PRAXIS: strain-reference omics with LLM-only antibacterial inference")
     parser.add_argument("--data-root", help="Organism profile directory (default: data/organisms)")
     parser.add_argument("--env-file", help="Local credential file (default: .env)")
     parser.add_argument("--knowledge-catalog", help="Curated mechanism catalog; never experimental MIC labels")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("profiles", help="List locally available organism profiles")
     inspect = sub.add_parser("inspect", help="Inspect real profile identity and omics coverage")
-    inspect.add_argument("--profile", default="AB5075-AZI000")
+    inspect.add_argument("--profile", default="AB5075-STRAIN-REFERENCE")
     inspect.add_argument("--modalities", nargs="+", choices=["genome", "transcriptome", "proteome"])
     for command in ("analyze", "batch"):
         item = sub.add_parser(command)
-        item.add_argument("--profile", default="AB5075-AZI000")
+        item.add_argument("--profile", default="AB5075-STRAIN-REFERENCE")
         item.add_argument("--modalities", nargs="+", choices=["genome", "transcriptome", "proteome"],
                           help="One or more available profile modalities used by the agents")
         item.add_argument("--model")
@@ -168,8 +168,49 @@ def main(argv=None):
     acquire.add_argument("--reuse-cache", nargs="*", default=[], help="Existing native cache roots reused without copying responses")
     acquire.add_argument("--reuse-labels", nargs="*", default=[], help="Canonical experimental JSONL files referenced without copying")
     acquire.add_argument("--output", required=True)
+    strain_db = sub.add_parser("build-strain-dataset", help="Build strain identities and same-strain omics links over frozen cases")
+    strain_db.add_argument("--database", required=True)
+    strain_db.add_argument("--frozen-manifest", required=True)
+    strain_db.add_argument("--enrichments", help="Source-anchored strain/condition enrichment sidecar")
+    strain_db.add_argument("--output", required=True)
+    strain_sft = sub.add_parser("prepare-strain-supervision", help="Export train-only measured MIC targets with actual strain tool observations")
+    strain_sft.add_argument("--dataset", required=True, help="Strain dataset summary JSON")
+    strain_sft.add_argument("--output", required=True)
+    literature = sub.add_parser("acquire-literature", help="Acquire bounded official full-text sources for training-only literature review")
+    literature.add_argument("--cases", required=True, help="Strain dataset cases JSONL")
+    literature.add_argument("--limit", type=int, default=25)
+    literature.add_argument("--offline", action="store_true")
+    literature.add_argument("--include-supplements", action="store_true", help="Also attempt bounded supplementary archives; default pilot uses metadata and full text")
+    literature.add_argument("--output", required=True)
+    joint = sub.add_parser("prepare-joint-supervision", help="Compile source-reviewed drug/strain literature annotation targets")
+    joint.add_argument("--supervision", required=True, help="Strain MIC supervision directory")
+    joint.add_argument("--literature", required=True, help="Official literature snapshot directory")
+    joint.add_argument("--reviews", required=True, help="Explicit record-bound source review JSON")
+    joint.add_argument("--output", required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command == "prepare-joint-supervision":
+            from praxis_virtualcell.datasets.joint_supervision import prepare_joint_supervision
+            result = prepare_joint_supervision(args.supervision, args.literature, args.reviews, args.output)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "build-strain-dataset":
+            from praxis_virtualcell.datasets.strain_dataset import build_strain_dataset
+            from praxis_virtualcell.omics.profiles import _data_root
+            result = build_strain_dataset(args.database, args.frozen_manifest, args.output,
+                                          profile_root=_data_root(args.data_root), enrichments_path=args.enrichments)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "prepare-strain-supervision":
+            from praxis_virtualcell.datasets.strain_supervision import prepare_strain_supervision
+            print(json.dumps(prepare_strain_supervision(args.dataset, args.output), ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "acquire-literature":
+            from praxis_virtualcell.datasets.literature import acquire_literature
+            result = acquire_literature(args.cases, args.output, limit=args.limit, offline=args.offline,
+                                        skip_supplements=not args.include_supplements)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
         if args.command == "acquire-species-mic":
             from praxis_virtualcell.datasets.chembl_import import acquire_species_mic
             result = acquire_species_mic(args.repo_root, args.output, taxon_ids=tuple(args.taxon_ids),

@@ -16,7 +16,7 @@ from .diagnostics import rejected_draft, schema_diagnostics
 from .evidence import _reference, validate_evidence, validate_modality_coverage
 from .schemas import Assessment, EvidenceReference, empty_assessment
 
-DEFAULT_PROFILE = "AB5075-AZI000"
+DEFAULT_PROFILE = "AB5075-STRAIN-REFERENCE"
 DEFAULT_MODEL = "deepseek-v4-pro"
 
 
@@ -84,7 +84,7 @@ MULTIOMICS_TOOLS = TOOLS + [
 ]
 
 AGENT_TOOLS = MULTIOMICS_TOOLS + [
-    _tool("search_mechanistic_evidence", "Search curated gene functions/pathways or exact candidate protein assays. No whole-cell MIC labels. Organism scope is fixed by the selected profile; species-reference mode retains each record's original strain.",
+    _tool("search_mechanistic_evidence", "Search curated gene functions/pathways or exact candidate protein assays. No whole-cell MIC labels. Organism scope is fixed by the selected profile; strain-reference mode requires the exact strain, and species-reference mode retains each record's original strain.",
           {"query": {"type": "string", "maxLength": 200},
            "native_ids": {"type": "array", "items": {"type": "string"}, "maxItems": 30},
            "candidate_interactions_only": {"type": "boolean"},
@@ -117,6 +117,11 @@ individual strain. Each modality retains its own source strain, sample and cultu
 Different reference sources are not a matched sample. State source-specific observations and
 uncertainty; do not generalize a reference strain's genes, variants or expression to every strain.
 Fixed species references cannot explain within-species MIC differences or current cellular states.
+When input_role is strain_reference, analyze only the exact declared strain and genotype identity.
+Do not broaden retrieval to the species, infer strain aliases, replace missing modalities with another
+strain, or combine parent strains with mutants or derivatives. Different culture conditions may be
+present in this same-strain reference; they are not a matched sample or a current cellular state.
+Unknown genotype does not establish wild type. Preserve strain_namespace and identity_basis.
 Every target and mechanism remains a hypothesis, even when its gene identity is verified.
 MIC means growth inhibition, not killing rate, MBC or time-kill kinetics. killing_effect is unknown.
 MIC may be null. Any numeric MIC is your uncalibrated LLM estimate in ug/mL, not a measurement.
@@ -201,11 +206,26 @@ def _execute(name: str, args: dict, profile: Any, molecule: dict, candidate_id: 
         scope = {"strain": overview["strain"], "limit": limit, "catalog_path": knowledge_catalog_path}
         taxonomy_id = overview["species"].get("taxonomy_id")
         species_reference = overview.get("input_role") == "species_reference"
+        strain_reference = overview.get("input_role") == "strain_reference"
         if (not isinstance(taxonomy_id, str) or not re.fullmatch(r"NCBITaxon:[1-9][0-9]*", taxonomy_id)
-                or not species_reference and (not isinstance(scope["strain"], str) or not scope["strain"].strip())):
+                or not species_reference and (not isinstance(scope["strain"], str) or not scope["strain"].strip())
+                or strain_reference and any(not isinstance(overview.get(key), str) or not overview[key].strip()
+                                            for key in ("strain_namespace", "identity_basis"))):
             return {"profile_id": overview["profile_id"], "status": "unavailable", "records": [],
                     "reason": "organism_scope_unverified", "candidate_causality_supported": False,
                     "limitations": ["Mechanistic evidence requires a verified exact taxon and strain scope."]}
+        if strain_reference and overview.get("genotype") is not None:
+            # The current catalog has no genotype field, so even an exact parent
+            # strain name cannot establish applicability to an explicit mutant.
+            return {"profile_id": overview["profile_id"], "status": "unavailable", "records": [],
+                    "reason": "strain_genotype_scope_unverified", "candidate_causality_supported": False,
+                    "prediction_scope": "strain_reference",
+                    "limitations": ["The catalog cannot verify this declared genotype; parent-strain or derivative evidence is not substituted."]}
+        if strain_reference and overview["strain_namespace"].startswith("study:"):
+            return {"profile_id": overview["profile_id"], "status": "unavailable", "records": [],
+                    "reason": "strain_namespace_scope_unverified", "candidate_causality_supported": False,
+                    "prediction_scope": "strain_reference",
+                    "limitations": ["The catalog has no strain namespace field; a same-named strain from another study cannot be substituted."]}
         if name == "query_mechanistic_evidence":
             ids = args.get("record_ids")
             if (not isinstance(ids, list) or not 1 <= len(ids) <= 30
@@ -227,6 +247,12 @@ def _execute(name: str, args: dict, profile: Any, molecule: dict, candidate_id: 
                                                        if item.get("strain")})
             data["limitations"] = [*data.get("limitations", []),
                                    "Retrieved records retain their own source strains; species-level retrieval does not establish applicability to every strain or pairing with reference omics."]
+        elif strain_reference:
+            data["prediction_scope"] = "strain_reference"
+            data["strain_namespace"] = overview["strain_namespace"]
+            data["identity_basis"] = overview["identity_basis"]
+            data["limitations"] = [*data.get("limitations", []),
+                                   "Retrieval is restricted to the exact declared strain; no species-wide, alias, mutant or derivative fallback is allowed. Source conditions remain independent."]
         return {"profile_id": overview["profile_id"], **data,
                 "source_id": f"mechanistic-query:{overview['profile_id']}:{data.get('catalog_id') or 'unavailable'}"}
     if name in {"query_features", "search_features"}:

@@ -48,9 +48,9 @@ v1 原生 RNA profile 保持兼容。v2 支持声明过身份、实验条件、�
 
 所选视图只返回所选模态的特征和来源。native v2 多个模态必须具有一致的菌种、菌株、基因型与条件，并有明确配对声明；程序验证声明一致性，整理者仍需核验原始实验配对依据。
 
-独立 `species_reference` 模式引用每物种每模态一个 native profile，可来自不同参考株、样本和条件。分析上下文、角色提示和报告明确物种参考范围，工具保留各模态的真实源身份与 source IDs；机制查询固定物种，来源株事实不能推广为所有同种菌株的当前状态。集合只存指针，参见 [SPECIES-DATABASE](SPECIES-DATABASE.md)。
+默认 `strain_reference` 模式引用具体菌株的原生档案，严格校验菌株和声明基因型，同菌株各模态可来自不同条件。角色提示、报告与机制查询均固定这一菌株；null 基因型不代表野生型。集合仅存指针，旧物种兼容入口不再作为默认，参见 [STRAIN-TRAINING](STRAIN-TRAINING.md)。
 
-原始数据仍单份存放。v2 是已整理特征表的导入契约，不直接处理 FASTQ/BAM、自动注释 FASTA 或将任意 H5AD/H5MU 自动转换为 profile。完整字段与准备方法见 [OMICS](OMICS.md)。现有真实 `AB5075-AZI000` 仍只有历史未暴露 RNA 背景；本次没有增加真实蛋白组、基因组配对样本。
+原始数据仍单份存放。v2 是已整理特征表的导入契约，不直接处理 FASTQ/BAM、自动注释 FASTA 或将任意 H5AD/H5MU 自动转换为 profile。完整字段与准备方法见 [OMICS](OMICS.md)。现有真实 `AB5075-AZI000` 仍只有历史未暴露 RNA 背景；后续菌株集合引用了真实基因组和实测蛋白丰度，但仍不宣称与 RNA 或 MIC 是同一样本。
 
 ## 模块与契约
 
@@ -71,7 +71,7 @@ v1 原生 RNA profile 保持兼容。v2 支持声明过身份、实验条件、�
 ## 从架构生成监督样本
 
 ```bash
-.venv/bin/praxis-vc analyze --profile AB5075-AZI000 \
+.venv/bin/praxis-vc analyze --profile AB5075-STRAIN-REFERENCE \
   --modalities transcriptome --smiles 'CCO' \
   --output reports/llm_live/example.json
 

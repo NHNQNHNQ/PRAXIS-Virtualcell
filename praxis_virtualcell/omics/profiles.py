@@ -316,18 +316,20 @@ def list_profiles(data_root=None) -> list[dict]:
             version = json.loads(path.read_text(encoding="utf-8")).get("schema_version")
         except (OSError, ValueError, AttributeError) as exc:
             raise ProfileError(f"Invalid organism manifest: {path}") from exc
-        if version == "praxis.species-reference.v1":
-            from praxis_virtualcell.omics.species_reference import load_species_reference
-
-            overview = load_species_reference(path.parent, path.parent.name).overview()
+        if version in {"praxis.species-reference.v1", "praxis.strain-reference.v1"}:
+            overview = load_profile(path.parent.name, root).overview()
+            strain_reference = overview["input_role"] == "strain_reference"
             profiles.append({
                 key: overview[key] for key in ("profile_id", "species", "strain", "condition", "source_id",
                                                "available_modalities", "selected_modalities", "input_role",
                                                "relation", "prediction_scope")
-            } | {"name": f"{overview['species']['scientific_name']} / species reference",
-                 "label": f"{overview['species']['scientific_name']} · 物种参考组学",
+            } | {"name": f"{overview['species']['scientific_name']} / {overview['strain']}" if strain_reference
+                 else f"{overview['species']['scientific_name']} / species reference",
+                 "label": overview["label"] if strain_reference else f"{overview['species']['scientific_name']} · 物种参考组学",
                  "modality": "+".join(overview["available_modalities"]), "unit": None, "scale": None,
-                 "observation_unit": "independent_species_references"})
+                 "observation_unit": "independent_strain_references" if strain_reference else "independent_species_references"}
+                | ({"strain_namespace": overview["strain_namespace"], "identity_basis": overview["identity_basis"]}
+                   if strain_reference else {}))
             continue
         if version == "praxis.organism-profile.v2":
             from praxis_virtualcell.omics.multiomics import load_multiomics_profile
@@ -375,6 +377,10 @@ def load_profile(profile_id: str = DEFAULT_PROFILE_ID, data_root=None) -> Organi
         from praxis_virtualcell.omics.species_reference import load_species_reference
 
         return load_species_reference(profile_root, profile_id)
+    if version == "praxis.strain-reference.v1":
+        from praxis_virtualcell.omics.strain_reference import load_strain_reference
+
+        return load_strain_reference(profile_root, profile_id)
     if version == "praxis.organism-profile.v2":
         from praxis_virtualcell.omics.multiomics import load_multiomics_profile
 

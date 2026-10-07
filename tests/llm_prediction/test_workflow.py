@@ -100,7 +100,7 @@ def final_response(value):
 
 async def test_real_tool_loop_and_reasoning_are_not_persisted():
     client = Client([tool_response(), final_response(assessment())])
-    result = await analyze_candidate("CCO", client=client, candidate_id="C1")
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=client, candidate_id="C1")
     assert result["status"] == "completed"
     assert result["assessment"]["mic_estimate"]["value"] == 8
     assert result["assessment"]["confidence"]["calibrated"] is False
@@ -123,7 +123,7 @@ async def test_real_tool_loop_and_reasoning_are_not_persisted():
 @pytest.mark.parametrize("budget,effort", [(1024, "low"), (65536, "high"), (131072, "max")])
 async def test_output_budget_and_effort_are_forwarded(budget, effort):
     client = Client([tool_response(), final_response(assessment(None))])
-    result = await analyze_candidate("CCO", client=client, max_turns=2,
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=client, max_turns=2,
                                      max_output_tokens=budget, reasoning_effort=effort)
     assert result["status"] == "completed"
     assert all(request["max_tokens"] == budget and request["reasoning_effort"] == effort
@@ -142,16 +142,16 @@ async def test_output_budget_and_effort_are_forwarded(budget, effort):
 async def test_invalid_limits_are_rejected_before_request_for_single_and_empty_batch(kwargs):
     client = Client([])
     with pytest.raises(ValueError):
-        await analyze_candidate("CCO", client=client, **kwargs)
+        await analyze_candidate("CCO", "AB5075-AZI000", client=client, **kwargs)
     with pytest.raises(ValueError):
-        await analyze_candidates([], client=client, **kwargs)
+        await analyze_candidates([], "AB5075-AZI000", client=client, **kwargs)
     assert not client.requests
 
 
 async def test_batch_forwards_custom_budget_and_effort():
     client = Client([tool_response(), final_response(assessment(None)),
                      tool_response(), final_response(assessment(None))])
-    result = await analyze_candidates(["CCO", "CCC"], client=client, max_turns=2,
+    result = await analyze_candidates(["CCO", "CCC"], "AB5075-AZI000", client=client, max_turns=2,
                                       max_output_tokens=98304, reasoning_effort="max")
     assert result["counts"]["completed"] == 2
     assert len(client.requests) == 4
@@ -163,7 +163,7 @@ async def test_batch_forwards_custom_budget_and_effort():
 
 async def test_final_turn_disables_tools_and_preserves_reasoning_history():
     client = Client([tool_response(), final_response(assessment(None))])
-    result = await analyze_candidate("CCO", client=client, max_turns=2)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=client, max_turns=2)
     assert result["status"] == "completed"
     assert client.requests[0]["tools"] == workflow.TOOLS
     last = client.requests[1]
@@ -187,7 +187,7 @@ async def test_model_cannot_execute_another_tool_on_final_turn(monkeypatch):
     monkeypatch.setattr(Profile, "search_annotations", search)
     client = Client([tool_response(), tool_response("search_annotations", {"query": "membrane"}, call_id="extra"),
                      final_response(assessment(None))])
-    result = await analyze_candidate("CCO", client=client, max_turns=2)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=client, max_turns=2)
     assert result["status"] == "incomplete"
     assert result["evidence_validation"]["issues"] == ["final_turn_tools_disabled"]
     assert result["assessment"]["mic_estimate"]["value"] is None
@@ -199,7 +199,7 @@ async def test_model_cannot_execute_another_tool_on_final_turn(monkeypatch):
 
 async def test_final_turn_does_not_replace_missing_gene_observations():
     client = Client([final_response(assessment(None))])
-    result = await analyze_candidate("CCO", client=client, max_turns=1)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=client, max_turns=1)
     assert result["status"] == "unsupported"
     assert "no_gene_observations_loaded" in result["evidence_validation"]["issues"]
     assert client.requests[0]["tools"] is None
@@ -210,7 +210,7 @@ async def test_truncated_final_turn_with_gene_observations_stays_incomplete():
     truncated = final_response(assessment())
     truncated["choices"][0]["finish_reason"] = "length"
     client = Client([tool_response(), truncated, final_response(assessment())])
-    result = await analyze_candidate("CCO", client=client, max_turns=2, max_output_tokens=1024)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=client, max_turns=2, max_output_tokens=1024)
     assert result["status"] == "incomplete"
     assert result["evidence_validation"]["issues"] == ["llm_output_truncated"]
     assert result["assessment"]["mic_estimate"]["value"] is None
@@ -219,7 +219,7 @@ async def test_truncated_final_turn_with_gene_observations_stays_incomplete():
 
 
 async def test_unknown_mic_remains_null():
-    result = await analyze_candidate("CCO", client=Client([tool_response(), final_response(assessment(None))]))
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=Client([tool_response(), final_response(assessment(None))]))
     assert result["status"] == "completed"
     assert result["assessment"]["mic_estimate"]["value"] is None
     assert "未知（未给出数值）" in render_report(result)
@@ -258,7 +258,7 @@ async def test_fabricated_evidence_is_rejected(change, issue):
     if change == "observation": value["supporting_evidence"][0]["observations"][0]["value"] = 999
     if change == "text_expression": value["rationale_summary"] = "ABUW_0001 expression_value = 999."
     if change == "text_source": value["rationale_summary"] = "According to omics:AB5075-AZI000:invented."
-    result = await analyze_candidate("CCO", client=Client([tool_response(), final_response(value)]))
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=Client([tool_response(), final_response(value)]))
     assert result["status"] == "unsupported"
     assert issue in result["evidence_validation"]["issues"]
     assert result["assessment"]["mic_estimate"]["value"] is None
@@ -266,7 +266,7 @@ async def test_fabricated_evidence_is_rejected(change, issue):
 
 @pytest.mark.parametrize("mic", [0, -1, "8", True, float("nan"), float("inf")])
 async def test_invalid_numbers_are_not_predictions(mic):
-    result = await analyze_candidate("CCO", client=Client([tool_response(), final_response(assessment(mic))]))
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=Client([tool_response(), final_response(assessment(mic))]))
     assert result["status"] == "unsupported"
     assert result["assessment"]["mic_estimate"]["value"] is None
 
@@ -278,13 +278,13 @@ async def test_units_and_estimate_boundaries_are_enforced(change):
     if change == "calibration": value["confidence"]["calibrated"] = True
     if change == "killing": value["killing_effect"] = "90%"
     if change == "confirmed_target": value["targets"][0]["status"] = "confirmed"
-    result = await analyze_candidate("CCO", client=Client([tool_response(), final_response(value)]))
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=Client([tool_response(), final_response(value)]))
     assert result["status"] == "unsupported"
     assert result["evidence_validation"]["issues"] == ["invalid_assessment_schema"]
 
 
 async def test_omics_must_actually_be_queried():
-    result = await analyze_candidate("CCO", client=Client([final_response(assessment(None))]))
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=Client([final_response(assessment(None))]))
     assert result["status"] == "unsupported"
     assert "no_gene_observations_loaded" in result["evidence_validation"]["issues"]
 
@@ -299,20 +299,20 @@ async def test_missing_expression_is_not_imputed(monkeypatch):
     value["supporting_evidence"][0]["observations"][0].update(value=None, evidence_ref=ref(value=None))
     value["supporting_evidence"][0]["evidence_refs"] = [ref(value=None)]
     value["mechanism_hypotheses"] = []
-    result = await analyze_candidate("CCO", client=Client([tool_response(), final_response(value)]))
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=Client([tool_response(), final_response(value)]))
     assert result["status"] == "completed"
     assert result["assessment"]["supporting_evidence"][0]["observations"][0]["value"] is None
 
 
 async def test_search_annotations_uses_the_same_verifiable_rows():
-    result = await analyze_candidate("CCO", client=Client([
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=Client([
         tool_response("search_annotations", {"query": "membrane", "limit": 5}), final_response(assessment(None))]))
     assert result["status"] == "completed"
     assert result["execution_trace"]["tool_calls"][-1]["name"] == "search_annotations"
 
 
 async def test_normalizer_cannot_substitute_a_different_candidate():
-    result = await analyze_candidate("CCO", client=Client([
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=Client([
         tool_response("normalize_molecule", {"smiles": "CCC"})]), max_turns=2)
     assert result["execution_trace"]["tool_calls"][-1]["error"] == "molecule_does_not_match_candidate"
 
@@ -320,14 +320,14 @@ async def test_normalizer_cannot_substitute_a_different_candidate():
 async def test_truncated_model_output_is_not_a_completed_estimate():
     response = final_response(assessment(None))
     response["choices"][0]["finish_reason"] = "length"
-    result = await analyze_candidate("CCO", client=Client([response]))
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=Client([response]))
     assert result["status"] == "incomplete"
     assert result["assessment"]["mic_estimate"]["value"] is None
 
 
 async def test_only_allowed_tools_can_execute_and_loop_is_bounded():
     response = tool_response("predict_mic", {"smiles": "CCO"})
-    result = await analyze_candidate("CCO", client=Client([response]), max_turns=2)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=Client([response]), max_turns=2)
     assert result["status"] == "incomplete"
     assert result["execution_trace"]["tool_calls"][-1]["error"] == "tool_not_allowed"
     assert result["assessment"]["mic_estimate"]["value"] is None
@@ -335,7 +335,7 @@ async def test_only_allowed_tools_can_execute_and_loop_is_bounded():
 
 async def test_batch_order_and_error_are_preserved():
     client = Client([tool_response(), final_response(assessment(None))])
-    result = await analyze_candidates([{"id": "bad", "smiles": "bad molecule"}, {"id": "ok", "smiles": "CCO"}], client=client)
+    result = await analyze_candidates([{"id": "bad", "smiles": "bad molecule"}, {"id": "ok", "smiles": "CCO"}], "AB5075-AZI000", client=client)
     assert [r["candidate"]["id"] for r in result["results"]] == ["bad", "ok"]
     assert result["counts"]["error"] == result["counts"]["completed"] == 1
 
@@ -359,7 +359,7 @@ async def test_one_final_repair_preserves_public_draft_and_checks_again():
     invalid = assessment()
     invalid["supporting_evidence"][0]["observations"][0]["field"] = "basal_expression"
     client = Client([tool_response(), final_response(invalid), final_response(assessment())])
-    result = await analyze_candidate("CCO", client=client, max_turns=3)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=client, max_turns=3)
     assert result["status"] == "completed"
     assert result["assessment"]["mic_estimate"]["value"] == 8
     rejected = result["rejected_output"]
@@ -394,7 +394,7 @@ async def test_nested_provenance_hint_is_supplied_and_model_must_correct_it(monk
     corrected = deepcopy(invalid)
     corrected["supporting_evidence"][0]["observations"][1]["evidence_ref"]["pointer"] = "/provenance/input_role"
     client = Client([tool_response(), final_response(invalid), final_response(corrected)])
-    result = await analyze_candidate("CCO", client=client, max_turns=3)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=client, max_turns=3)
     assert result["status"] == "completed"
     feedback = json.loads(client.requests[2]["messages"][-2]["content"])
     reference_errors = [item for item in feedback["evidence_errors"] if item.get("offending_reference") == bad_ref]
@@ -408,7 +408,7 @@ async def test_second_invalid_final_is_rejected_without_third_repair():
     invalid = assessment()
     invalid["mic_estimate"]["evidence_refs"][0]["value"] = 999
     client = Client([tool_response(), final_response(invalid), final_response(invalid), final_response(assessment())])
-    result = await analyze_candidate("CCO", client=client, max_turns=8)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=client, max_turns=8)
     assert result["status"] == "unsupported"
     assert result["assessment"]["mic_estimate"]["value"] is None
     assert len(client.requests) == 3
@@ -420,7 +420,7 @@ async def test_repair_does_not_extend_original_turn_budget():
     invalid = assessment()
     invalid["mic_estimate"]["unit"] = "uM"
     client = Client([tool_response(), final_response(invalid), final_response(assessment())])
-    result = await analyze_candidate("CCO", client=client, max_turns=2)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=client, max_turns=2)
     assert result["status"] == "unsupported"
     assert len(client.requests) == 2
     assert result["rejected_output"]["schema_errors"][0]["location"] == ["mic_estimate", "unit"]
@@ -431,7 +431,7 @@ async def test_repair_does_not_extend_original_turn_budget():
 async def test_invalid_json_public_answer_is_retained_without_thoughts():
     response = final_response(assessment())
     response["choices"][0]["message"]["content"] = '<think>PRIVATE_EMBEDDED_THOUGHT</think>{"activity":"uncertain",'
-    result = await analyze_candidate("CCO", client=Client([response]), max_turns=1)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=Client([response]), max_turns=1)
     assert result["status"] == "unsupported"
     assert result["rejected_output"]["public_answer"] == '{"activity":"uncertain",'
     assert result["rejected_output"]["schema_errors"][0]["code"] == "invalid_json"
@@ -442,7 +442,7 @@ async def test_private_extra_fields_do_not_survive_rejection_diagnostics():
     invalid = assessment()
     invalid["reasoning_content"] = "PRIVATE_EMBEDDED_REASONING"
     invalid["api_key"] = "PRIVATE_EMBEDDED_KEY"
-    result = await analyze_candidate("CCO", client=Client([tool_response(), final_response(invalid)]), max_turns=2)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=Client([tool_response(), final_response(invalid)]), max_turns=2)
     assert result["status"] == "unsupported"
     assert "PRIVATE" not in json.dumps(result)
     assert "api_key" not in result["rejected_output"]["parsed_draft"]
@@ -452,7 +452,7 @@ async def test_private_extra_fields_do_not_survive_rejection_diagnostics():
 async def test_safe_sync_and_async_progress_are_optional():
     events = []
     client = Client([tool_response(), final_response(assessment(None))])
-    result = await analyze_candidate("CCO", client=client, on_progress=events.append)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=client, on_progress=events.append)
     assert result["status"] == "completed"
     assert {event["stage"] for event in events} >= {"profile_loaded", "turn_started", "tool_started", "tool_completed", "assessment_completed"}
     assert all(set(event) <= {"stage", "candidate_id", "profile_id", "turn", "tool_name", "status"} for event in events)
@@ -461,7 +461,7 @@ async def test_safe_sync_and_async_progress_are_optional():
     async def callback(event):
         events.append(event)
 
-    result = await analyze_candidate("CCO", client=Client([tool_response(), final_response(assessment(None))]), on_progress=callback)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=Client([tool_response(), final_response(assessment(None))]), on_progress=callback)
     assert result["status"] == "completed"
 
 
@@ -473,6 +473,6 @@ async def test_error_bodies_and_callback_errors_are_not_persisted():
     def callback(event):
         raise RuntimeError("PRIVATE_CALLBACK_BODY")
 
-    result = await analyze_candidate("CCO", client=FailingClient(), on_progress=callback)
+    result = await analyze_candidate("CCO", "AB5075-AZI000", client=FailingClient(), on_progress=callback)
     assert result["status"] == "error"
     assert "PRIVATE" not in json.dumps(result)
