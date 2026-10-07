@@ -1,0 +1,158 @@
+{
+  "status": "prepared_not_trained",
+  "date": "2026-10-07",
+  "model": {
+    "id": "Qwen/Qwen3-32B",
+    "revision": "9216db5781bf21249d130ec9da846c4624c16137",
+    "precision": "bf16",
+    "download_status": "complete",
+    "official_weight_shards_verified": 17,
+    "weight_file_bytes": 65524328560
+  },
+  "recipe": {
+    "algorithm": "assistant_only_LoRA_SFT",
+    "r": 16,
+    "alpha": 32,
+    "dropout": 0.05,
+    "parallelism": "8_GPU_FSDP_FULL_SHARD",
+    "max_length": 24576,
+    "microbatch_per_GPU": 1,
+    "gradient_accumulation_steps": 4,
+    "effective_batch_size": 32,
+    "learning_rate": 5e-05,
+    "epochs": 1,
+    "objective": "native_masked_causal_cross_entropy",
+    "full_context_preserved": true,
+    "output_projection": "native_Qwen3_logits_to_keep_and_shift_labels",
+    "actual_training_runs": 0
+  },
+  "data": {
+    "train_records": 7227,
+    "train_MIC_measurements": 7774,
+    "train_scopes": {
+      "strain_conditioned_MIC_auxiliary": 7179,
+      "strain_reference_MIC": 48
+    },
+    "training_omics_view_count": 1,
+    "evaluation": {
+      "validation": {
+        "record_count": 1419,
+        "measurement_count": 1540,
+        "cohorts": {
+          "frozen_scaffold": 1419,
+          "compound_unseen": 1419,
+          "strain_unseen": 179,
+          "source_unseen": 225,
+          "compound_strain_source_unseen": 176
+        },
+        "comparison": "train"
+      },
+      "test": {
+        "record_count": 2383,
+        "measurement_count": 2659,
+        "cohorts": {
+          "frozen_scaffold": 2383,
+          "compound_unseen": 2383,
+          "strain_unseen": 234,
+          "source_unseen": 260,
+          "compound_strain_source_unseen": 234
+        },
+        "comparison": "train_and_validation"
+      }
+    },
+    "mechanism_training_records": 0,
+    "mechanism_review_records": 3,
+    "strain_collections": 24,
+    "native_and_reference_profiles": 59,
+    "private_answer_locators_verified": 11973,
+    "raw_sources_duplicated": false
+  },
+  "agent_audit": {
+    "status": "active_paths_passed",
+    "fixes": [
+      "default_selected_multiomics_tools_and_coverage",
+      "exact_measured_genotype_catalog_scope_guard"
+    ],
+    "legacy_predictor_imports_in_new_paths": [],
+    "curated_gene_function_records": 7,
+    "compound_protein_interaction_gold_records": 0
+  },
+  "verification": {
+    "local_platform_CI_selection_plus_preflight": {
+      "passed": 1045,
+      "skipped": 2
+    },
+    "remote_active_tests": "363 passed, 1 skipped in 10.40s",
+    "legacy_full_suite_failures": 5,
+    "native_tokenizer_template_unchanged": true,
+    "training_records_tokenized": 7227,
+    "max_observed_tokens": 19762,
+    "nonassistant_loss_tokens": 0,
+    "truncation_performed": false,
+    "mask_self_test": {
+      "tokens": 207,
+      "assistant_loss_tokens": 27,
+      "serialized_role_tokens": {
+        "system": 112,
+        "user": 53,
+        "assistant": 37
+      },
+      "status": "passed",
+      "trl_collator_labels_verified": true,
+      "system_user_tool_loss_tokens": 0,
+      "native_template_unchanged": true,
+      "chatml_special_token_offsets_verified": true,
+      "assistant_tool_call_tokens_verified": true
+    },
+    "sparse_loss_numeric_self_test": {
+      "status": "passed",
+      "model": "random_tiny_Qwen3",
+      "device": "cpu",
+      "numeric_cases": 4,
+      "parameter_gradient_comparisons": 74,
+      "max_loss_absolute_error": 4.76837158203125e-07,
+      "max_gradient_absolute_error": 0.0,
+      "full_context_preserved": true,
+      "dense_and_peft_checked": true,
+      "optimizer_steps": 0
+    },
+    "gpu_forward": {
+      "base_model": "Qwen/Qwen3-32B",
+      "precision": "bf16",
+      "attention": "sdpa",
+      "world_size": 8,
+      "trainable_parameters": 134217728,
+      "total_parameters": 32896340992,
+      "native_template_unchanged": true,
+      "heldout_inputs_used_for_training": false,
+      "loss": 0.4864514172077179,
+      "full_context_preserved": true,
+      "status": "gpu_forward_passed",
+      "tokens": 19762,
+      "lm_head_positions": 493,
+      "peak_allocated_GiB_per_rank": [
+        16.415,
+        16.415,
+        16.415,
+        16.415,
+        16.415,
+        16.415,
+        16.415,
+        16.415
+      ],
+      "optimizer_steps": 0,
+      "backward_runs": 0,
+      "saved_adapter": false
+    }
+  },
+  "limitations": [
+    "48 same-strain reference components use 1 omics views; they are not paired MIC experiment samples.",
+    "Most auxiliary components have no omics and partially unknown culture conditions.",
+    "A frozen scaffold split does not hold out shared strains or papers. Stricter cohorts are explicit subsets and may be empty.",
+    "MIC distribution targets preserve empirical repeated/censored measurements; they are not calibrated predictive distributions.",
+    "This numeric component is not a complete activity/target/mechanism agent report.",
+    "No real 32B backward pass, optimization, MIC accuracy evaluation or omics ablation has been performed.",
+    "The preflight forward loss checks runtime finiteness, not MIC accuracy.",
+    "Existing CI workflow remains unchanged because the GitHub OAuth login lacks workflow scope."
+  ]
+}

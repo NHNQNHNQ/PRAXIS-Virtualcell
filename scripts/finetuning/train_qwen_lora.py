@@ -239,6 +239,7 @@ def run_model(config: dict, features: list[dict], tokenizer, *, forward_only: bo
                       lm_head_positions=int(sparse_batch["logits_to_keep"].numel()),
                       peak_allocated_GiB_per_rank=[round(value / 1024**3, 3) for value in peaks],
                       optimizer_steps=0, backward_runs=0, saved_adapter=False)
+        trainer.accelerator.end_training()
         return report
     result = trainer.train()
     # Official PEFT/FSDP save path gathers state to rank 0 CPU and writes the
@@ -248,6 +249,7 @@ def run_model(config: dict, features: list[dict], tokenizer, *, forward_only: bo
     trainer.accelerator.wait_for_everyone()
     report.update(status="trained", optimizer_steps=trainer.state.global_step,
                   train_loss=float(result.training_loss), saved_adapter=True, output_dir=str(output))
+    trainer.accelerator.end_training()
     return report
 
 
