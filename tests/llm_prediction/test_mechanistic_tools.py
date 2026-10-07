@@ -160,6 +160,23 @@ def test_unverified_profile_identity_cannot_broaden_mechanistic_search(tmp_path,
     assert result["reason"] == "organism_scope_unverified"
 
 
+@pytest.mark.parametrize("name,arguments", [
+    ("search_mechanistic_evidence", {"query": "testGene"}),
+    ("query_mechanistic_evidence", {"record_ids": ["TEST:reference:GENE_1"]}),
+])
+def test_native_mutant_profile_cannot_borrow_an_unverified_parent_catalog(tmp_path, name, arguments):
+    class MutantProfile(Profile):
+        def overview(self):
+            return {**super().overview(), "genotype": "delta-relA"}
+
+    path = catalog(tmp_path)
+    assert execute(name, arguments, path)["records"]
+    result = execute(name, arguments, path, MutantProfile())
+    assert result["status"] == "unavailable" and result["records"] == []
+    assert result["reason"] == "strain_genotype_scope_unverified"
+    assert "prediction_scope" not in result
+
+
 def test_retrieval_is_exact_and_reference_annotation_does_not_become_candidate_binding(tmp_path):
     path = catalog(tmp_path)
     result = execute("search_mechanistic_evidence", {"query": "testGene", "native_ids": ["GENE_1"]}, path)

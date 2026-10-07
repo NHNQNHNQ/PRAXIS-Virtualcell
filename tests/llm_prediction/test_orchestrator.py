@@ -105,6 +105,27 @@ COMBINATIONS = [list(combo) for n in range(1, 4) for combo in itertools.combinat
 
 
 @pytest.mark.parametrize("selected", COMBINATIONS)
+async def test_direct_analysis_uses_the_loaded_view_when_modalities_are_omitted(selected):
+    client = Client([tool_response(selected), response(assessment(selected))])
+    result = await workflow.analyze_candidate("CCO", "test-strain", client=client,
+                                              _profile=Profile(selected), max_turns=2)
+    assert result["status"] == "completed"
+    assert result["profile"]["selected_modalities"] == selected
+    assert "query_features" in {item["function"]["name"] for item in client.requests[0]["tools"]}
+    assert "EVERY selected modality" in client.requests[0]["system"]
+
+
+async def test_direct_analysis_cannot_skip_other_loaded_modalities_without_a_selection_argument():
+    client = Client([tool_response(["transcriptome"]), response(assessment(["transcriptome"]))])
+    result = await workflow.analyze_candidate("CCO", "test-strain", client=client,
+                                              _profile=Profile(), max_turns=2)
+    assert result["status"] == "unsupported"
+    assert result["assessment"]["mic_estimate"]["value"] is None
+    assert "selected_modality_not_observed:genome" in result["evidence_validation"]["issues"]
+    assert "selected_modality_not_cited:proteome" in result["evidence_validation"]["issues"]
+
+
+@pytest.mark.parametrize("selected", COMBINATIONS)
 async def test_seven_views_run_review_and_export_without_hidden_reasoning(selected):
     client = Client([response(plan(selected)), tool_response(selected), response(assessment(selected)), response(review())])
     events = []

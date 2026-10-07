@@ -214,12 +214,13 @@ def _execute(name: str, args: dict, profile: Any, molecule: dict, candidate_id: 
             return {"profile_id": overview["profile_id"], "status": "unavailable", "records": [],
                     "reason": "organism_scope_unverified", "candidate_causality_supported": False,
                     "limitations": ["Mechanistic evidence requires a verified exact taxon and strain scope."]}
-        if strain_reference and overview.get("genotype") is not None:
+        if not species_reference and overview.get("genotype") is not None:
             # The current catalog has no genotype field, so even an exact parent
-            # strain name cannot establish applicability to an explicit mutant.
+            # strain name cannot establish applicability to an explicit mutant,
+            # including native measured profiles rather than reference wrappers.
             return {"profile_id": overview["profile_id"], "status": "unavailable", "records": [],
                     "reason": "strain_genotype_scope_unverified", "candidate_causality_supported": False,
-                    "prediction_scope": "strain_reference",
+                    **({"prediction_scope": "strain_reference"} if strain_reference else {}),
                     "limitations": ["The catalog cannot verify this declared genotype; parent-strain or derivative evidence is not substituted."]}
         if strain_reference and overview["strain_namespace"].startswith("study:"):
             return {"profile_id": overview["profile_id"], "status": "unavailable", "records": [],
@@ -434,6 +435,16 @@ async def analyze_candidate(
         trace["events"].append({"error": "profile_unavailable", "exception_type": type(exc).__name__})
         return finish("error", "profile_unavailable")
     result["profile"] = overview
+    # Omitting an explicit selection means using the profile's selected view,
+    # not opting out of multiomics validation. Native v1 RNA profiles retain
+    # their historical four-tool contract; table/reference views expose their
+    # modality summaries even when only RNA is selected.
+    if analysis_plan is None and (
+        modalities is not None or overview.get("modalities")
+        or overview.get("selected_modalities", ["transcriptome"]) != ["transcriptome"]
+    ):
+        active_tools = MULTIOMICS_TOOLS
+        system = MULTIOMICS_SYSTEM
     await progress("profile_loaded")
     trace["tool_calls"].extend([
         {"tool_call_id": "context-molecule", "name": "normalize_molecule", "arguments": {"smiles": smiles},
