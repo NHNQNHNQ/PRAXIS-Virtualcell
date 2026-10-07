@@ -1,6 +1,6 @@
 # 菌株组学输入与来源
 
-当前平台向 LLM 提供有来源的、给药前的菌株表达背景。组学加载层负责读文件、检查身份和数值、返回基因注释与来源定位；药物活性、杀伤和作用机制的判断由 LLM 生成。加载层没有恢复旧 MIC/AMR 模型、实测 MIC 查表、扰动预测或世界模型，也不把旧八维状态向量作为实测组学。
+当前平台向 LLM 提供有来源的、给药前的菌株组学背景。组学加载层负责读文件、检查身份和数值、返回特征注释与来源定位；药物活性、杀伤和作用机制的判断由 LLM 生成。原有 v1 RNA profile 保持兼容；v2 声明接口支持基因组、转录组、蛋白组单独输入或组合。加载层没有恢复旧 MIC/AMR 模型、实测 MIC 查表、扰动预测或世界模型，也不把旧八维状态向量作为实测组学。
 
 ## 已有 AB5075 profile 的含义
 
@@ -103,7 +103,7 @@ abaumprecise/interim/metadata_qc.csv
 
 | 接口 | 当前实际能力 | 主要限制 |
 | --- | --- | --- |
-| `praxis_virtualcell.omics.load_profile` | 加载已准备好的 JSON manifest、NPZ 基线向量和注释 CSV；返回概览、原生基因表达、注释和来源定位 | 当前模态为 `bulk_RNA_seq`，每个 profile 是一个基线向量；AB5075 准备器针对指定的六个历史源文件 |
+| `praxis_virtualcell.omics.load_profile` | v1 读取 NPZ RNA 基线和注释 CSV；v2 读取显式声明的基因组、转录组、蛋白组 CSV/JSON 特征表，支持七种模态组合及选择视图 | 需要事先整理原生特征与验证样本身份；不会自动融合菌株、条件或推断组学数据 |
 | `data_packs.load_anndata_view` | 验证 Pack manifest 与资产，使用公开 AnnData API 以只读 backed 模式打开真实 H5AD，选择观察和特征 | 从 `X` 读取；支持 dense/CSR/CSC，不自动预处理、补值、归一化或重排用户请求 |
 | `data_packs.load_mudata_view` | 读取 `vc.pack.v0.3` H5MU；验证模态、形状、观察 ID、共享/联合观察及配对关系 | 保留各模态原有观察，不把缺失模态填成零；严格语义 ID 规则需要数据事先满足 |
 | `data_packs.align_features` | 按显式特征契约做数据对齐与报告 | 契约类型仍叫 `ModelFeatureContract`；该函数不加载或调用旧预测模型，也不自动建立菌株同源关系 |
@@ -122,9 +122,9 @@ with load_anndata_view("path/to/pack") as view:
     matrix = view.matrix
 ```
 
-Pack 根需有符合契约的 `manifest.yaml` 和声明的 H5AD/H5MU 资产，文件后缀本身不足以导入。当前 CLI/Web 没有“上传任意 H5AD/H5MU 后自动生成菌株 profile”的入口，也没有通用表达 CSV 导入器。准备器使用 CSV 的能力限于声明的 pair、元数据、参考注释和映射表，不能据此声称已支持任意用户表格。
+Pack 根需有符合契约的 `manifest.yaml` 和声明的 H5AD/H5MU 资产，文件后缀本身不足以导入。H5AD/H5MU 尚未自动转换成 organism profile。v2 可以导入符合下述严格字段契约的 CSV/JSON 特征表，不能据此声称已支持任意用户表格或未经处理的测序文件。
 
-## 准备新的菌株 profile
+## 准备 v1 RNA profile
 
 可以在自定义数据根手工准备一个新 profile 目录，交由 loader 验证。当前接口要求：
 
@@ -134,7 +134,72 @@ Pack 根需有符合契约的 `manifest.yaml` 和声明的 H5AD/H5MU 资产，�
 4. 注释 CSV 至少含 `gene_id,gene_symbol,product,protein_id,contig,reference_key,mapping_evidence,reference_row,mapping_row`；注释 ID 唯一且属于表达基因集合，来源行号为数字。注释可以覆盖部分基因，概览分别报告表达和注释数量。
 5. 声明实测输入与来源，保留原生 ID 和单位。不得将候选药物给药后表达、响应差值、MIC 或旧状态向量塞入基线 NPZ/provenance；额外 schema 字段会被拒绝。
 
-可参照准备器生成的 manifest，但手工准备不是自动适配任意实验的承诺。当前 schema 没有蛋白组、代谢组或单细胞菌株 profile 类型；没有 FASTQ/BAM/FASTA 处理、自动注释、跨 assembly/跨菌株映射或从测序文件推断耐药基因型。新增这些输入需要独立、可核验的适配步骤。
+可参照准备器生成的 manifest。v1 只表示 RNA，其他模态使用 v2；原有 `AB5075-AZI000` 身份和尺度被冻结，不能用同名 v2 替换。
+
+## v2 多组学导入契约
+
+目录结构为 `<data_root>/<profile_id>/manifest.json`，每个模态的派生特征资产放在同一 profile 内，原始资产仍只存一份。manifest 用 `features.path` 引用相对路径，并声明 `format`（`csv` 或 `json`）、字节大小和 SHA-256。loader 复用现有安全路径与哈希校验，不打开 provenance 中的原始定位路径，不复制原始数据，也不做归一化。
+
+[v2 RNA manifest 模板](../examples/organisms/v2_transcriptome_manifest.template.json) 包含完整单模态声明。它只有占位字段，没有生物学数据；必须替换身份、样本、单位、来源、资产大小和哈希后才可使用。未知实验条件保持 `null`，不能根据一般培养流程猜测。
+
+顶层需要 `schema_version: praxis.organism-profile.v2`、`profile_id`、`species`、`strain`、`genotype`、`condition`、`pairing` 和 `modalities`。`modalities` 是字典，键只接受 `genome`、`transcriptome`、`proteome`。每个模态都要独立声明菌种、菌株、基因型、条件、`sample_id`、`pairing_id`、`assay`、原生特征命名空间、单位、尺度、值语义、观测单位、特征资产和 provenance。
+
+身份和配对规则如下：
+
+- 每个模态的菌种、菌株、基因型和完整条件必须与顶层一致。不同菌株、不同采样条件的表不能自动融合；未知与已知条件也不能假装相同。
+- 每个 `sample_id` 必须存在于该模态的 `provenance.source_samples`，源样本 ID 非空且唯一。
+- 单模态可以使用 `pairing: null`、`pairing_id: null`。多模态必须提供 `{pairing_id, relation, evidence}`，各模态 `pairing_id` 必须一致。
+- `relation: same_sample` 要求所有模态使用同一个明确 sample ID。不同 assay/aliquot ID 只能通过 `matched_samples` 和明确的配对依据声明；loader 检查声明一致性，原始实验配对依据仍需数据整理者核验。
+- 转录组和蛋白组必须声明 `input_role: measured_pre_treatment`；基因组可用 `sequenced_reference`。v2 另接受 `condition.role: sequenced_reference`，严格限定 genome-only 并要求 reference provenance，未知培养/暴露条件保持 null；v1 仍仅接受原两种角色。药物处理后的响应表不进入此输入接口。
+
+测量类型有独立校验：基因组支持 `whole_genome_sequencing`、`targeted_sequencing`、`assembly_annotation`；转录组支持 `RNA_seq`、`microarray`、`measured_transcriptomics`；蛋白组支持 `LC_MS_MS`、`SWATH_MS`、`targeted_MS`、`measured_proteomics`。参考序列的翻译产物、蛋白 ID 和基因产物注释不会因为存在而成为实测蛋白组。
+
+三个特征表的字段如下：
+
+| 模态 | 必需字段（值可明确为空的字段另标） | 可选观测字段 |
+| --- | --- | --- |
+| genome | `feature_id`、`presence`（布尔或 null）、原始来源定位 | `gene_id`、`protein_id`、`variant`、`copy_number` |
+| transcriptome | `feature_id`、非空 `gene_id`、`expression_value`（有限数值或 null）、原始来源定位 | `protein_id` |
+| proteome | `feature_id`、非空 `protein_id`、`abundance_value`（有限数值或 null）、原始来源定位 | `gene_id` |
+
+所有模态可额外提供 `gene_symbol`、`product`、`contig`。ID 必须非空、无首尾空白，`feature_id` 在同一模态内唯一。`gene_id` 或 `protein_id` 必须来自明确映射，不能根据名称猜测。多个蛋白 feature 可以对应同一 gene，查询会保留多条观测，不自动求平均。
+
+CSV 使用严格表头：转录组最小例子为 `feature_id,gene_id,expression_value,source_path,source_row`。`source_path` 与 `source_row` 定位到原始表；也可以提供 `source_accession` 或 `source_record_id`。JSON 是记录列表，每条记录使用 `source_locator: {path, row, accession, record_id}`，四个键都需要存在，不适用的项为 `null`。每条 feature 至少需要源路径或 accession，以及行号、记录 ID 或 accession。行号从 1 开始，CSV 的首个数据行为第 2 行。
+
+CSV 空单元格解析为 `null`；JSON 使用原生 `null`。`presence` 在 CSV 中只接受 `true`、`false` 或空，JSON 使用布尔或 null。实测 `0.0` 保持零值；缺失丰度保持 null，不补零。数值字符串仅在 CSV 导入时解析，JSON 必须使用数字，`NaN`、无穷和负 copy number 被拒绝。其他字段及 MIC/处理后响应字段不在严格 schema 内，不能混入特征表或 provenance。
+
+计算本地特征资产大小与哈希可使用标准库：
+
+```python
+import hashlib
+from pathlib import Path
+
+asset = Path("transcriptome.csv")
+print(asset.stat().st_size)
+print(hashlib.sha256(asset.read_bytes()).hexdigest())
+```
+
+声明完成后按现有入口验证和注册，无需调用 LLM：
+
+```python
+from praxis_virtualcell.omics import load_profile
+
+profile = load_profile("YOUR-PROFILE-ID", data_root="/path/to/organisms")
+view = profile.select_modalities(["genome", "proteome"])
+print(view.overview())
+print(view.query_features("proteome", ["YOUR-NATIVE-PROTEIN-FEATURE"]))
+print(view.search_features("genome", "efflux"))
+```
+
+`select_modalities(None)` 选择全部可用模态，传列表支持七种组合，顺序统一为 genome、transcriptome、proteome。空列表、未知模态和不可用模态明确报错。v1 只接受 transcriptome；其蛋白注释不会新增可选模态。
+
+选择视图的 `overview` 返回 `available_modalities` 和 `selected_modalities`，但模态描述、样本来源和 provenance 只包含所选模态。未选特征不能通过 `query_features` 或 `search_features` 读取；`query_genes`、`search_annotations` 也只在所选模态内检索。单模态视图不会暴露跨模态配对 provenance，子集组合不会带出未选模态的配对依据文本。
+
+`query_features` 按该模态的原生 `feature_id` 查询，返回 `features`、`missing_feature_ids` 和 `truncated`。v2 每条观测的 source ID 为 `omics:<profile_id>:<modality>:feature:<feature_id>`，包含模态单位、尺度、观测字段及派生资产记录索引/原始行定位。v1 的通用 feature 查询保留原有 gene source ID 和真实 AB5075 来源位置。`query_genes` 在 v2 返回所选模态中所有明确关联该 `gene_id` 的记录，蛋白未映射到基因时需按 protein feature 查询。
+
+这个版本不包含 FASTQ/BAM 自动处理、自动注释、跨 assembly/跨菌株同源映射、代谢组或单细胞适配。`prepare_genome.py` 只读取已冻结、已注释的本地 NCBI FASTA/GFF，验证字节、assembly、taxon、contig、原生 feature 与坐标，导出参考注释存在性，不作新注释或阴性基因调用。已接入 19 个 E. coli genome-only 参考；默认 AB5075 profile 仍是历史 RNA 背景，实测蛋白组为 0。完整库存见 [DATA-READINESS](DATA-READINESS.md)。
+
+`prepare_baseline_samples.py` 从服务器作者原始 QC 矩阵导出 Abaum_0017/0023 实际两列，不拆均值、不复制原矩阵。每个新 profile 的收据保留原矩阵/metadata 行、QC、Run、BioSample 与来源 hash；两列共用一个 BioSample，独立生物重复未证实。
 
 ## 定向验证
 
@@ -143,6 +208,6 @@ Pack 根需有符合契约的 `manifest.yaml` 和声明的 H5AD/H5MU 资产，�
 .venv/bin/ruff check tests/omics praxis_virtualcell/omics praxis_virtualcell/data_packs
 ```
 
-测试包括真实本地 AB5075 的 3895 基因、`dnaA` 数值/单位/源数组位置核对，以及小型真实 NPZ/CSV/H5AD 的哈希、形状、ID、空值和只读边界。合成源文件把给药后、delta、MIC 键设为不可按安全 NPZ 方式读取的对象，以确认准备器不访问这些键；另用隔离进程阻止历史预测模块导入，验证 profile 读取闭包。
+测试包括真实本地 AB5075 的 3895 基因、`dnaA` 数值/单位/源数组位置核对，以及小型 NPZ/CSV/JSON/H5AD 的哈希、形状、ID、空值和只读边界。v2 合成 fixture 覆盖七种导入组合、七种所选视图、未选数据隔离、样本配对和跨菌株/条件拒绝，明确只用于软件测试。合成源文件把给药后、delta、MIC 键设为不可按安全 NPZ 方式读取的对象，以确认准备器不访问这些键；另用隔离进程阻止历史预测模块导入，验证 profile 读取闭包。
 
 真实 AB5075 资产未随 Git 再分发，缺少本地 manifest 时该真实数据用例明确跳过，其余合成文件用例仍可运行。H5AD 用例需要 `omics` 安装依赖；测试不会把 fixture 值作为生物学证据，也不会调用付费 API 或训练模型。

@@ -53,7 +53,7 @@ async def test_batch_bounds_concurrency_and_preserves_input_order(tmp_path, monk
         return {"status": "completed", "candidate": {"id": kwargs["candidate_id"]},
                 "assessment": {"activity": "uncertain", "mic_estimate": {"value": None}}}
     monkeypatch.setattr(llm, "LLMClient", Client)
-    monkeypatch.setattr(prediction, "analyze_candidate", analyze)
+    monkeypatch.setattr(prediction, "analyze_with_agents", analyze)
     monkeypatch.setattr(prediction, "render_report", lambda result: result["candidate"]["id"])
     args = argparse.Namespace(command="batch", env_file=env, model=None, input=source,
                               limit=None, output=tmp_path / "reports", concurrency=2,

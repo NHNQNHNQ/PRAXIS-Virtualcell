@@ -36,13 +36,17 @@ def write_result(result: dict, output: str | Path) -> None:
 
 async def run_analysis(args):
     from praxis2.llm.client import LLMClient
-    from praxis_virtualcell.llm_prediction import analyze_candidate
+    from praxis_virtualcell.llm_prediction import analyze_with_agents
     settings = LLMSettings.load(args.env_file)
     settings.require_key()
     model = args.model or settings.model
     output_override = getattr(args, "max_output_tokens", None)
     limits = {"max_output_tokens": settings.max_output_tokens if output_override is None else output_override,
               "reasoning_effort": getattr(args, "reasoning_effort", None) or settings.reasoning_effort}
+    if getattr(args, "modalities", None) is not None:
+        limits["modalities"] = args.modalities
+    if getattr(args, "knowledge_catalog", None) is not None:
+        limits["knowledge_catalog_path"] = args.knowledge_catalog
     client = LLMClient(settings.api_key, settings.base_url, timeout_s=180)
     def progress(candidate_id):
         def emit(event):
@@ -50,7 +54,7 @@ async def run_analysis(args):
         return emit
     try:
         if args.command == "analyze":
-            result = await analyze_candidate(args.smiles, args.profile, client=client, model=model,
+            result = await analyze_with_agents(args.smiles, args.profile, client=client, model=model,
                                              data_root=args.data_root, max_turns=args.max_turns,
                                              candidate_id=args.candidate_id, on_progress=progress(args.candidate_id), **limits)
             write_result(result, args.output)
@@ -62,7 +66,7 @@ async def run_analysis(args):
         gate = asyncio.Semaphore(args.concurrency)
         async def analyze_one(index, candidate):
             async with gate:
-                result = await analyze_candidate(candidate["smiles"], args.profile, client=client, model=model,
+                result = await analyze_with_agents(candidate["smiles"], args.profile, client=client, model=model,
                                                  data_root=args.data_root, max_turns=args.max_turns,
                                                  candidate_id=candidate["id"], on_progress=progress(candidate["id"]), **limits)
             report = destination / f"{index + 1:03d}.json"
@@ -84,13 +88,17 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="PRAXIS: real strain omics with LLM-only antibacterial inference")
     parser.add_argument("--data-root", help="Organism profile directory (default: data/organisms)")
     parser.add_argument("--env-file", help="Local credential file (default: .env)")
+    parser.add_argument("--knowledge-catalog", help="Curated mechanism catalog; never experimental MIC labels")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("profiles", help="List locally available organism profiles")
     inspect = sub.add_parser("inspect", help="Inspect real profile identity and omics coverage")
     inspect.add_argument("--profile", default="AB5075-AZI000")
+    inspect.add_argument("--modalities", nargs="+", choices=["genome", "transcriptome", "proteome"])
     for command in ("analyze", "batch"):
         item = sub.add_parser(command)
         item.add_argument("--profile", default="AB5075-AZI000")
+        item.add_argument("--modalities", nargs="+", choices=["genome", "transcriptome", "proteome"],
+                          help="One or more available profile modalities used by the agents")
         item.add_argument("--model")
         item.add_argument("--max-turns", type=int, default=8)
         item.add_argument("--max-output-tokens", type=int, help="Per-call reasoning and answer budget (1024–131072)")
@@ -107,17 +115,77 @@ def main(argv=None):
     serve = sub.add_parser("serve", help="Open the strain/candidate analysis platform")
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8787)
+    export = sub.add_parser("export-sft", help="Export public agent/tool trajectories from a saved report")
+    export.add_argument("--input", required=True, help="Saved report JSON")
+    export.add_argument("--output", required=True, help="Output training trajectory JSONL")
+    export.add_argument("--supervision", help="Optional explicit reviewed supervision JSON")
+    curate = sub.add_parser("curate-labels", help="Prepare independent measured labels, quarantining ambiguous contexts")
+    curate.add_argument("--repo-root", default=str(Path(__file__).resolve().parents[1]))
+    curate.add_argument("--output", required=True)
+    freeze = sub.add_parser("freeze-evaluation", help="Freeze grouped inputs and a separate private answer index")
+    freeze.add_argument("--labels", required=True)
+    freeze.add_argument("--output", required=True)
+    freeze.add_argument("--grouping", choices=["compound", "scaffold", "strain", "study", "joint"], default="compound")
+    freeze.add_argument("--seed", type=int, default=20261007)
+    freeze.add_argument("--paired-only", action="store_true")
+    score = sub.add_parser("score-evaluation", help="Score saved predictions after inference, with coverage and censoring")
+    score.add_argument("--manifest", required=True)
+    score.add_argument("--predictions", required=True)
+    score.add_argument("--split", choices=["train", "validation", "test"], default="test")
+    score.add_argument("--output", required=True)
+    seeds = sub.add_parser("prepare-seeds", help="Prepare source-grounded tool supervision candidates for review")
+    seeds.add_argument("--output", required=True)
+    seeds.add_argument("--limit", type=int, default=80)
     args = parser.parse_args(argv)
     try:
+        if args.command == "curate-labels":
+            from praxis_virtualcell.datasets.curation import curate_existing_labels
+            print(json.dumps(curate_existing_labels(args.repo_root, args.output), ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "freeze-evaluation":
+            from praxis_virtualcell.datasets.evaluation import freeze_evaluation
+            result = freeze_evaluation(args.labels, args.output, grouping=args.grouping, seed=args.seed,
+                                       paired_only=args.paired_only)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0 if result["status"] == "ready" else 2
+        if args.command == "score-evaluation":
+            from praxis_virtualcell.datasets.evaluation import score_evaluation
+            result = score_evaluation(args.manifest, args.predictions, split=args.split)
+            output = Path(args.output)
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+            print(json.dumps({key: value for key, value in result.items() if key != "details"}, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "prepare-seeds":
+            from praxis_virtualcell.datasets.seeds import prepare_seed_queue
+            from praxis_virtualcell.omics.profiles import _data_root
+            print(json.dumps(prepare_seed_queue(_data_root(args.data_root), args.output, limit=args.limit), ensure_ascii=False, indent=2))
+            return 0
         if args.command in {"profiles", "inspect"}:
             from praxis_virtualcell.omics import list_profiles, load_profile
-            result = list_profiles(args.data_root) if args.command == "profiles" else load_profile(args.profile, args.data_root).overview()
+            if args.command == "profiles":
+                result = list_profiles(args.data_root)
+            else:
+                profile = load_profile(args.profile, args.data_root)
+                if args.modalities is not None:
+                    profile = profile.select_modalities(args.modalities)
+                result = profile.overview()
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return 0
+        if args.command == "export-sft":
+            from praxis_virtualcell.llm_prediction.trajectories import export_trajectories, write_trajectories_jsonl
+            report = json.loads(Path(args.input).read_text(encoding="utf-8"))
+            supervision = json.loads(Path(args.supervision).read_text(encoding="utf-8")) if args.supervision else None
+            exported = export_trajectories(report, supervision)
+            count = write_trajectories_jsonl(args.output, exported)
+            print(json.dumps({"records": count, "skipped": len(exported["skipped"]),
+                              "output": str(Path(args.output).resolve())}, ensure_ascii=False))
+            return 0 if count else 2
         if args.command == "serve":
             import uvicorn
             from praxis_virtualcell.web.app import create_app
-            uvicorn.run(create_app(data_root=args.data_root, env_file=args.env_file), host=args.host, port=args.port)
+            uvicorn.run(create_app(data_root=args.data_root, env_file=args.env_file,
+                                   knowledge_catalog_path=args.knowledge_catalog), host=args.host, port=args.port)
             return 0
         if not 1 <= args.max_turns <= 20:
             raise ValueError("max-turns must be between 1 and 20")

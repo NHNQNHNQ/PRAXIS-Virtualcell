@@ -7,11 +7,13 @@ from pathlib import Path
 from uuid import UUID, uuid4
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 
 from praxis_virtualcell.settings import LLMSettings
+
+Modality = Literal["genome", "transcriptome", "proteome"]
 
 
 class AnalysisRequest(BaseModel):
@@ -21,21 +23,28 @@ class AnalysisRequest(BaseModel):
     max_turns: int = Field(default=8, ge=1, le=20)
     max_output_tokens: int | None = Field(default=None, ge=1024, le=131072)
     reasoning_effort: Literal["low", "high", "max"] | None = None
+    modalities: list[Modality] | None = Field(default=None, min_length=1, max_length=3)
 
 
 class GeneRequest(BaseModel):
     gene_ids: list[str] = Field(max_length=100)
+    modality: Modality | None = None
 
 
-def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None) -> FastAPI:
+class FeatureRequest(BaseModel):
+    feature_ids: list[str] = Field(max_length=100)
+    modality: Modality
+
+
+def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None, knowledge_catalog_path=None) -> FastAPI:
     from praxis_virtualcell.omics import list_profiles, load_profile
-    from praxis_virtualcell.llm_prediction import analyze_candidate, render_report
+    from praxis_virtualcell.llm_prediction import analyze_with_agents, render_report
     from praxis2.llm.client import LLMClient
 
     app = FastAPI(title="PRAXIS VirtualCell", version="2.1.0")
     settings = LLMSettings.load(env_file)
     destination = Path(report_root or "reports/llm_live/web")
-    run = analyzer or analyze_candidate
+    run = analyzer or analyze_with_agents
     gate = asyncio.Semaphore(1)
 
     def profile(profile_id):
@@ -44,6 +53,15 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
         except (ValueError, FileNotFoundError, KeyError) as exc:
             raise HTTPException(404, "Profile unavailable or invalid") from exc
 
+    def selected_profile(profile_id, modalities=None):
+        loaded = profile(profile_id)
+        if modalities is None:
+            return loaded
+        try:
+            return loaded.select_modalities(modalities)
+        except ValueError as exc:
+            raise HTTPException(422, "Requested modalities are unavailable or invalid for this profile") from exc
+
     @app.get("/", include_in_schema=False)
     async def index():
         return FileResponse(Path(__file__).parent / "static" / "index.html")
@@ -51,6 +69,7 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
     @app.get("/api/health")
     async def health():
         return {"status": "ok", "inference": "llm_only", "model": settings.model,
+                "workflow": "planning_analysis_review_revision",
                 "credential_configured": bool(settings.api_key),
                 "profile_count": len(list_profiles(data_root=data_root))}
 
@@ -59,22 +78,42 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
         return {"profiles": list_profiles(data_root=data_root)}
 
     @app.get("/api/profiles/{profile_id}")
-    async def overview(profile_id: str):
-        return profile(profile_id).overview()
+    async def overview(profile_id: str, modalities: list[Modality] | None = Query(default=None)):
+        return selected_profile(profile_id, modalities).overview()
 
     @app.post("/api/profiles/{profile_id}/genes")
     async def genes(profile_id: str, request: GeneRequest):
-        return profile(profile_id).query_genes(request.gene_ids)
+        loaded = selected_profile(profile_id, [request.modality] if request.modality else None)
+        return loaded.query_genes(request.gene_ids)
+
+    @app.post("/api/profiles/{profile_id}/features")
+    async def features(profile_id: str, request: FeatureRequest):
+        loaded = selected_profile(profile_id, [request.modality])
+        try:
+            return loaded.query_features(request.modality, request.feature_ids)
+        except ValueError as exc:
+            raise HTTPException(422, "Invalid feature query for the selected modality") from exc
+
+    @app.get("/api/profiles/{profile_id}/features")
+    async def search_features(profile_id: str, query: str, modality: Modality):
+        if not query.strip() or len(query) > 200:
+            raise HTTPException(422, "Provide a short feature search term")
+        loaded = selected_profile(profile_id, [modality])
+        try:
+            return loaded.search_features(modality, query)
+        except ValueError as exc:
+            raise HTTPException(422, "Invalid feature query for the selected modality") from exc
 
     @app.get("/api/profiles/{profile_id}/annotations")
-    async def annotations(profile_id: str, query: str):
+    async def annotations(profile_id: str, query: str, modality: Modality | None = None):
         if not query.strip() or len(query) > 200:
             raise HTTPException(422, "Provide a short annotation search term")
-        return profile(profile_id).search_annotations(query)
+        loaded = selected_profile(profile_id, [modality] if modality else None)
+        return loaded.search_annotations(query)
 
     @app.post("/api/analyze")
     async def analyze(request: AnalysisRequest):
-        profile(request.profile_id)
+        selected_profile(request.profile_id, request.modalities)
         if not settings.api_key:
             raise HTTPException(503, "Configure DEEPSEEK_API_KEY locally")
         async with gate:
@@ -83,12 +122,16 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
                 logging.getLogger("uvicorn.error").info("Analysis progress: %s", json.dumps(
                     {"candidate_id": request.candidate_id, **event}, ensure_ascii=False))
             try:
+                selection = {"modalities": request.modalities} if request.modalities is not None else {}
+                if knowledge_catalog_path is not None:
+                    selection["knowledge_catalog_path"] = knowledge_catalog_path
                 result = await run(request.smiles, request.profile_id, client=client,
                                    model=settings.model, data_root=data_root,
                                    max_turns=request.max_turns, candidate_id=request.candidate_id,
                                    on_progress=progress,
                                    max_output_tokens=request.max_output_tokens or settings.max_output_tokens,
-                                   reasoning_effort=request.reasoning_effort or settings.reasoning_effort)
+                                   reasoning_effort=request.reasoning_effort or settings.reasoning_effort,
+                                   **selection)
             except Exception as exc:
                 raise HTTPException(502, "LLM analysis failed; no prediction was substituted") from exc
             finally:

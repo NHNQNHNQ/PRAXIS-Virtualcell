@@ -1,5 +1,31 @@
 # 验证
 
+## 2026-10-07 智能体架构与多组学
+
+当前 CLI/Web 默认执行规划、组学分析、精确引用校验、科学审查和最多一次修订/复审。多组学 v2 支持 genome/transcriptome/proteome 七种组合，v1 真实 AB5075 RNA 输入保持兼容。公开阶段可以导出为默认待审核的 SFT 记录，监督答案与推理输入分开。
+
+本地与 CI 相同的选择集 **778 passed**，Ruff、`git diff --check` 和 CLI 入口通过：
+
+```bash
+.venv/bin/python -m pytest -q tests/agent_runtime tests/omics tests/llm_prediction tests/datasets tests/knowledge \
+  tests/test_llm_platform.py tests/test_llm_platform_agents.py tests/test_llm_platform_ui.py \
+  tests/mdr_gnb/unit/test_abstain.py tests/mdr_gnb/unit/test_features.py \
+  tests/mdr_gnb/unit/test_ensembler.py tests/mdr_gnb/unit/test_critic.py \
+  tests/mdr_gnb/unit/test_rule_baseline.py tests/mdr_gnb/unit/test_species_registry.py \
+  tests/mdr_gnb/unit/test_report_builder.py tests/mdr_gnb/api/test_schemas.py
+.venv/bin/python -m ruff check praxis2 praxis_virtualcell tests
+```
+
+测试验证所选模态实际被读取并引用、不同菌株/条件拒绝融合、实测蛋白组与参考翻译区分、缺失值不补零、未选数据隔离、修订后的第二次审查、失败不发布数值以及人工金标也满足模态覆盖。页面测试用 Node 实际执行静态 JavaScript；没有 Node 时明确跳过该项。真实本地 AB5075 工具读取接入新角色流程的测试通过，但该测试的模型回复为离线模拟。GitHub 缺少不可再分发的本地 profile 时，实际文件用例明确跳过。
+
+新增测试覆盖真实标签与增效上下文隔离、删失区间、盐/母体分组、研究限定菌株命名空间、联合传递分组、无标签推理输入、冻结不可覆盖、事后覆盖率评分、实际来源监督队列、机制作用域与引用，以及机制不能替代模态观测。数据 CLI 不读取凭据或构造模型客户端。
+
+本次实际接入 19 个本地 genome-only 参考、53 上 2 列原始 RNA，未增加严格组学与药效配对、实测蛋白组或专用微调模型。工程链路验证不代表药效准确率评估。架构和导出边界见 [AGENT-ARCHITECTURE](AGENT-ARCHITECTURE.md)，实际数据准入见 [DATA-READINESS](DATA-READINESS.md)。
+
+真实 DeepSeek 验证使用原平台凭据、同一个现有生成候选与 AB RNA 背景，推理不提供实测 MIC。前两次分别因前言/数字 MIC 漏引用、嵌套 provenance 路径引用错误被拒绝，报告保存且 MIC 未发布。补明确输出契约、机制查询独立 source_id 与已核验路径示例后，第三次完成规划→检索分析→科学审查，`completed`、引用通过、审查接受；活性 uncertain、MIC null、confidence 未校准。有效公开轨迹导出为 3 条 needs_review 记录。
+
+完整报告保留在本地 `reports/llm_live/agent_smoke_grounded_20261007/001.json`，工程元数据见 [engineering_verification_20261007.json](../reports/llm_platform/engineering_verification_20261007.json)。53 隔离环境的验证使用真实 RNA 与明确标为离线 fixture 的模型回复，没有远程外部 LLM 调用；不能混作真实模型验证。现有第三方组学缺失时 CI 会跳过对应真实文件用例，其余契约测试仍运行。
+
 ## 2.1 纯 LLM 与组学入口
 
 当前 CI 安装 `.[dev,api,chemistry,omics]`，运行智能体框架、组学加载、LLM 证据校验、页面 API 和保留的基础兼容测试。2026-10-06 本地同一选择集 **474 passed**；Ruff 和 `git diff --check` 通过。其中 41 条组学测试包含小型真实 H5AD 文件、损坏哈希/形状边界、来源和未给药数组隔离，89 条 LLM 分析测试验证引用拒绝、一次格式纠正与多轮思考历史。

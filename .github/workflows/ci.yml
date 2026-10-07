@@ -16,7 +16,8 @@ jobs:
       - run: python -m ruff check praxis2 praxis_virtualcell tests
       - run: praxis-vc --help
       - run: >-
-          python -m pytest -q tests/agent_runtime tests/omics tests/llm_prediction tests/test_llm_platform.py
+          python -m pytest -q tests/agent_runtime tests/omics tests/llm_prediction tests/datasets tests/knowledge
+          tests/test_llm_platform.py tests/test_llm_platform_agents.py tests/test_llm_platform_ui.py
           tests/mdr_gnb/unit/test_abstain.py
           tests/mdr_gnb/unit/test_features.py
           tests/mdr_gnb/unit/test_ensembler.py

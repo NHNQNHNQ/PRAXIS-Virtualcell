@@ -56,7 +56,7 @@ def _reference(ref: EvidenceReference, calls: dict[str, dict]) -> tuple[Any, dic
     if source != ref.source_id:
         raise ValueError("source_id_does_not_match_tool")
     gene = next((v for v in reversed(ancestors)
-                 if isinstance(v, dict) and v.get("gene_id")), None)
+                 if isinstance(v, dict) and (v.get("gene_id") or v.get("feature_id") or v.get("protein_id"))), None)
     return actual, gene
 
 
@@ -103,6 +103,7 @@ def validate_evidence(
     refs = [(ref, ["mic_estimate", "evidence_refs", i])
             for i, ref in enumerate(assessment.mic_estimate.evidence_refs)]
     available_genes: set[str] = set()
+    available_features: set[str] = set()
     available_targets: set[str] = set()
     expression_values: set[float] = set()
     source_ids: set[str] = set()
@@ -133,8 +134,11 @@ def validate_evidence(
     for call in tool_calls:
         if call.get("ok"):
             collect_sources(call.get("data"))
-        if call.get("ok") and call.get("name") in {"query_genes", "search_annotations"}:
-            for gene in call.get("data", {}).get("genes", []):
+        if call.get("ok") and call.get("name") in {"query_genes", "search_annotations", "query_features", "search_features"}:
+            data = call.get("data", {})
+            for gene in data.get("genes", data.get("features", [])):
+                if gene.get("feature_id") or gene.get("gene_id") or gene.get("protein_id"):
+                    available_features.add(gene.get("feature_id") or gene.get("gene_id") or gene["protein_id"])
                 if gene.get("gene_id"):
                     available_genes.add(gene["gene_id"])
                     available_targets.add(gene["gene_id"])
@@ -143,7 +147,7 @@ def validate_evidence(
                 measured = gene.get("expression_value")
                 if isinstance(measured, (int, float)) and not isinstance(measured, bool) and math.isfinite(measured):
                     expression_values.add(float(measured))
-    if not available_genes:
+    if not available_features:
         flag("no_gene_observations_loaded", [])
 
     for section_name in ("supporting_evidence", "counterevidence"):
@@ -163,9 +167,9 @@ def validate_evidence(
                     pointer_field = ref.pointer.rsplit("/", 1)[-1].replace("~1", "/").replace("~0", "~")
                     if pointer_field != observation.field:
                         flag("observation_field_does_not_match_pointer", location + ["field"], ref)
-                    if gene and observation.gene_id != gene["gene_id"]:
+                    if gene and gene.get("gene_id") and observation.gene_id != gene["gene_id"]:
                         flag("observation_gene_does_not_match_tool", location + ["gene_id"], ref)
-                    if observation.gene_id and (not gene or observation.gene_id not in available_genes):
+                    if observation.gene_id and (not gene or observation.gene_id != gene.get("gene_id")):
                         flag("observation_gene_not_loaded", location + ["gene_id"], ref)
                 except (KeyError, IndexError, TypeError, ValueError):
                     # The reference-specific reason is collected below as well.
@@ -200,7 +204,8 @@ def validate_evidence(
     for ref, location in refs:
         try:
             _, gene = _reference(ref, calls)
-            if location[0] == "mic_estimate" and gene:
+            if (location[0] == "mic_estimate" and gene and calls[ref.tool_call_id].get("name")
+                    in {"query_genes", "search_annotations", "query_features", "search_features"}):
                 mic_has_gene_evidence = True
         except (KeyError, IndexError, TypeError, ValueError) as exc:
             reason = str(exc) if isinstance(exc, ValueError) else "unresolved_evidence_pointer"
@@ -248,3 +253,36 @@ def validate_evidence(
     if any(not observed_display(quantity) for quantity in quantities):
         flag("expression_quantity_in_text_not_observed", ["public_text"])
     return sorted(set(issues))
+
+
+def validate_modality_coverage(assessment: Assessment, tool_calls: list[dict], selected: list[str]) -> list[str]:
+    """Every selected modality must actually be read and cited as an observation.
+
+    Declaring a modality in an overview does not establish its use. Only exact
+    references to successful feature/gene tool rows count, including zero values.
+    """
+    calls = {call["tool_call_id"]: call for call in tool_calls}
+    observed: set[str] = set()
+    cited: set[str] = set()
+    names = {"query_genes", "search_annotations", "query_features", "search_features"}
+    for call in tool_calls:
+        if call.get("ok") and call.get("name") in names:
+            data = call.get("data", {})
+            for row in data.get("genes", data.get("features", [])):
+                observed.add(row.get("modality") or data.get("modality") or "transcriptome")
+    for item in (*assessment.supporting_evidence, *assessment.counterevidence):
+        for observation in item.observations:
+            ref = observation.evidence_ref
+            call = calls.get(ref.tool_call_id, {})
+            if call.get("name") not in names:
+                continue
+            try:
+                _, row = _reference(ref, calls)
+                if row and _equal(observation.value, ref.value):
+                    cited.add(row.get("modality") or call.get("data", {}).get("modality") or "transcriptome")
+            except (KeyError, IndexError, ValueError, TypeError):
+                continue
+    return [issue for modality in selected for issue in (
+        *([f"selected_modality_not_observed:{modality}"] if modality not in observed else []),
+        *([f"selected_modality_not_cited:{modality}"] if modality not in cited else []),
+    )]

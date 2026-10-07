@@ -1,0 +1,130 @@
+{
+  "schema_version": "praxis.engineering-verification.v1",
+  "date": "2026-10-07",
+  "model": "deepseek-v4-pro",
+  "workflow": "planning_analysis_review_revision",
+  "profile": "AB5075-AZI000",
+  "modalities": [
+    "transcriptome"
+  ],
+  "offline_tests_passed": 778,
+  "ruff": "passed",
+  "experimental_labels_used_for_inference": false,
+  "independent_drug_accuracy_evaluated": false,
+  "calibrated": false,
+  "source_matrices_copied": false,
+  "live_api_runs": [
+    {
+      "run": "agent_smoke_20261007",
+      "status": "unsupported",
+      "evidence_validation": {
+        "status": "failed",
+        "issues": [
+          "numeric_mic_requires_verified_gene_evidence"
+        ]
+      },
+      "stages": [
+        {
+          "stage": "planning",
+          "status": "completed"
+        },
+        {
+          "stage": "analysis",
+          "status": "failed"
+        }
+      ],
+      "tool_calls": 13,
+      "token_usage": {
+        "prompt_tokens": 184624,
+        "completion_tokens": 16453,
+        "total_tokens": 201077
+      },
+      "numeric_mic_released": false,
+      "review_resolution": "failed"
+    },
+    {
+      "run": "agent_smoke_retry_20261007",
+      "status": "unsupported",
+      "evidence_validation": {
+        "status": "failed",
+        "issues": [
+          "invalid_observation_reference",
+          "unresolved_evidence_pointer"
+        ]
+      },
+      "stages": [
+        {
+          "stage": "planning",
+          "status": "completed"
+        },
+        {
+          "stage": "analysis",
+          "status": "failed"
+        }
+      ],
+      "tool_calls": 14,
+      "token_usage": {
+        "prompt_tokens": 103249,
+        "completion_tokens": 20048,
+        "total_tokens": 123297
+      },
+      "numeric_mic_released": false,
+      "review_resolution": "failed"
+    },
+    {
+      "run": "agent_smoke_grounded_20261007",
+      "status": "completed",
+      "evidence_validation": {
+        "status": "passed",
+        "issues": []
+      },
+      "stages": [
+        {
+          "stage": "planning",
+          "status": "completed"
+        },
+        {
+          "stage": "analysis",
+          "status": "completed"
+        },
+        {
+          "stage": "review",
+          "status": "completed"
+        }
+      ],
+      "tool_calls": 11,
+      "token_usage": {
+        "prompt_tokens": 75875,
+        "completion_tokens": 14301,
+        "total_tokens": 90176
+      },
+      "numeric_mic_released": false,
+      "review_resolution": "accepted"
+    }
+  ],
+  "server_verification": {
+    "host_alias": "53",
+    "actual_rna_columns": 2,
+    "biosamples": 1,
+    "gpu_count": 8,
+    "gpu_model": "A100-SXM4-40GB",
+    "offline_agent_protocol": "passed",
+    "remote_external_model_calls": 0,
+    "trained": false
+  },
+  "data_readiness": {
+    "historical_mic_labels": 11650,
+    "ab5075_single_agent_mic_labels": 52,
+    "matched_omics_labels": 0,
+    "measured_proteome_profiles": 0,
+    "genome_reference_profiles": 19,
+    "source_grounded_review_candidates": 22,
+    "approved_training_candidates": 0
+  },
+  "limitations": [
+    "The passing live run releases no numeric MIC; activity remains uncertain and targets remain hypotheses.",
+    "Citation validation and LLM review do not establish biological causality or potency accuracy.",
+    "Two original RNA columns share one BioSample and are not established independent biological samples.",
+    "Source-grounded seeds and live trajectories remain unapproved supervision candidates."
+  ]
+}

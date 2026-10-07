@@ -1,0 +1,8 @@
+{
+  "schema_version": "praxis.mechanistic-knowledge.v1",
+  "catalog_id": "empty-example-no-biological-evidence",
+  "created_at": "2026-10-07",
+  "records": [],
+  "limitations": ["This example contains no evidence records; empty retrieval cannot support a target claim."],
+  "excluded_assets": []
+}

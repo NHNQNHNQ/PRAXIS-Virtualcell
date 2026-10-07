@@ -31,8 +31,30 @@ def render_report(result: dict[str, Any]) -> str:
         assessment["rationale_summary"], "",
         f"MIC 依据：{mic['reason']}",
     ]
+    selected = profile.get("selected_modalities") or result.get("analysis_plan", {}).get("selected_modalities")
+    if selected:
+        lines.insert(4, f"- 本次组学输入：{'、'.join(selected)}")
     if mic["evidence_refs"]:
         lines.append(f"引用：{_citations(mic['evidence_refs'])}")
+    stages = result.get("agent_trace", {}).get("stages", [])
+    review = result.get("agent_review")
+    if stages or review:
+        lines.extend(["", "## 智能体阶段与审核", ""])
+        names = {"planning": "规划", "analysis": "分析", "review": "审核", "revision": "修订"}
+        for stage in stages:
+            name = names.get(stage.get("stage"), stage.get("stage", "未知阶段"))
+            lines.append(f"- {name}：{stage.get('status', '未知')}" +
+                         (f"；模型 {stage['model']}" if stage.get("model") else ""))
+        if review:
+            lines.append(f"- 审核决定：{review.get('decision', '未知')}；处理结果：{result.get('review_resolution', '未记录')}")
+            lines.extend(["", review.get("summary", "")])
+            for issue in review.get("issues", []):
+                lines.append(f"- [{issue.get('severity', 'warning')}] {issue.get('code', '')}：{issue.get('finding', '')}")
+                if issue.get("evidence_refs"):
+                    lines.append(f"  - 引用：{_citations(issue['evidence_refs'])}")
+            changes = review.get("recommended_changes", [])
+            if changes:
+                lines.append("建议修改：" + "；".join(changes))
     for title, key in (("支持证据", "supporting_evidence"), ("反证", "counterevidence")):
         lines.extend(["", f"## {title}", ""])
         for item in assessment[key]:

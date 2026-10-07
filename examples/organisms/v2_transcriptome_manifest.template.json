@@ -1,0 +1,62 @@
+{
+  "schema_version": "praxis.organism-profile.v2",
+  "profile_id": "YOUR-PROFILE-ID",
+  "species": {
+    "scientific_name": "REPLACE_WITH_VERIFIED_SPECIES",
+    "taxonomy_id": "REPLACE_WITH_VERIFIED_TAXON"
+  },
+  "strain": "REPLACE_WITH_VERIFIED_STRAIN",
+  "genotype": null,
+  "condition": {
+    "condition_id": "REPLACE_WITH_NATIVE_BASELINE_CONDITION",
+    "role": "pre_treatment_baseline",
+    "medium": null,
+    "time_h": null,
+    "temperature_c": null,
+    "growth_phase": null
+  },
+  "pairing": null,
+  "modalities": {
+    "transcriptome": {
+      "species": {
+        "scientific_name": "REPLACE_WITH_VERIFIED_SPECIES",
+        "taxonomy_id": "REPLACE_WITH_VERIFIED_TAXON"
+      },
+      "strain": "REPLACE_WITH_VERIFIED_STRAIN",
+      "genotype": null,
+      "condition": {
+        "condition_id": "REPLACE_WITH_NATIVE_BASELINE_CONDITION",
+        "role": "pre_treatment_baseline",
+        "medium": null,
+        "time_h": null,
+        "temperature_c": null,
+        "growth_phase": null
+      },
+      "sample_id": "REPLACE_WITH_NATIVE_SAMPLE_ID",
+      "pairing_id": null,
+      "assay": "RNA_seq",
+      "feature_namespace": "REPLACE_WITH_NATIVE_FEATURE_NAMESPACE",
+      "unit": "REPLACE_WITH_ORIGINAL_UNIT",
+      "scale": "REPLACE_WITH_ORIGINAL_SCALE",
+      "value_semantics": "REPLACE_WITH_MEASUREMENT_DEFINITION",
+      "observation_unit": "measured_baseline_sample",
+      "features": {
+        "path": "transcriptome.csv",
+        "format": "csv",
+        "size_bytes": 1,
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "provenance": {
+        "study_id": "REPLACE_WITH_SOURCE_STUDY",
+        "source_samples": ["REPLACE_WITH_NATIVE_SAMPLE_ID"],
+        "citation": "REPLACE_WITH_SOURCE_CITATION",
+        "terms": {
+          "usage": "REPLACE_WITH_ALLOWED_USAGE",
+          "redistribution_approved": false,
+          "license_status": "REPLACE_WITH_VERIFIED_LICENSE_STATUS"
+        },
+        "input_role": "measured_pre_treatment"
+      }
+    }
+  }
+}
