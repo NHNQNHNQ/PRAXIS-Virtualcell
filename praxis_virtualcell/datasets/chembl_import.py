@@ -10,11 +10,13 @@ import hashlib
 import json
 import math
 import re
+import time
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping
-from urllib.parse import urlencode, urlparse
+from typing import Any, Callable, Mapping
+from urllib.parse import parse_qs, urlencode, urlparse
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from .curation import canonical_identity, conditions_from_assay, organism_from_assay
@@ -179,9 +181,35 @@ def curate_activity(activity: Mapping[str, Any], assay: Mapping[str, Any], docum
 class NativeCache:
     """Cache public official responses once, with URL, hash, time and pagination receipts."""
 
-    def __init__(self, root: str | Path):
+    def __init__(self, root: str | Path, *, reuse_roots: tuple[str | Path, ...] = ()):
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
+        self.reuse_roots = tuple(Path(path).resolve() for path in reuse_roots)
+        self.source_version: str | None = None
+
+    @staticmethod
+    def _read(path: Path, receipt_path: Path, expected_url: str | None = None) -> tuple[dict, dict]:
+        body = path.read_bytes()
+        receipt = json.loads(receipt_path.read_text())
+        if (expected_url is not None and receipt.get("url") != expected_url
+                or receipt.get("sha256") != hashlib.sha256(body).hexdigest()
+                or Path(receipt.get("file", path)).resolve() != path.resolve()):
+            raise ValueError("native_cache_integrity_mismatch")
+        return json.loads(body), receipt
+
+    def verified_paths(self) -> list[Path]:
+        """Verify only native receipts in the supplied cache roots; never copy them."""
+        paths = []
+        for root in (self.root, *self.reuse_roots):
+            for receipt_path in sorted(root.glob("*.receipt.json")):
+                if receipt_path.name.startswith("._"):
+                    continue
+                path = receipt_path.with_name(receipt_path.name.replace(".receipt.json", ".json"))
+                _, receipt = self._read(path, receipt_path)
+                if receipt.get("chembl_db_version") and self.source_version and receipt["chembl_db_version"] != self.source_version:
+                    raise ValueError("native_cache_source_version_mismatch")
+                paths.append(path)
+        return paths
 
     def fetch(self, resource: str, params: Mapping[str, Any] | None = None) -> tuple[dict, dict]:
         if not re.fullmatch(r"(?:status|target|activity|assay|document|molecule)(?:/CHEMBL\d+)?", resource):
@@ -191,26 +219,35 @@ class NativeCache:
         if parsed.scheme != "https" or parsed.hostname != "www.ebi.ac.uk":
             raise ValueError("official_chembl_urls_only")
         key = hashlib.sha256(url.encode()).hexdigest()[:24]
+        for root in (self.root, *self.reuse_roots):
+            path, receipt_path = root / f"{key}.json", root / f"{key}.receipt.json"
+            if path.exists() and receipt_path.exists():
+                data, receipt = self._read(path, receipt_path, url)
+                if receipt.get("chembl_db_version") and self.source_version and receipt["chembl_db_version"] != self.source_version:
+                    raise ValueError("native_cache_source_version_mismatch")
+                return data, receipt
+            if path.exists() or receipt_path.exists():
+                raise ValueError("incomplete_native_cache_requires_explicit_repair")
         path, receipt_path = self.root / f"{key}.json", self.root / f"{key}.receipt.json"
-        if path.exists() and receipt_path.exists():
-            body = path.read_bytes()
-            receipt = json.loads(receipt_path.read_text())
-            if receipt.get("url") != url or receipt.get("sha256") != hashlib.sha256(body).hexdigest():
-                raise ValueError("native_cache_integrity_mismatch")
-            return json.loads(body), receipt
-        if path.exists() or receipt_path.exists():
-            raise ValueError("incomplete_native_cache_requires_explicit_repair")
-        with urlopen(Request(url, headers={"User-Agent": "PRAXIS-virtualcell-public-data-curation/1.0",
-                                            "Accept": "application/json"}), timeout=45) as response:
-            if urlparse(response.url).hostname != "www.ebi.ac.uk":
-                raise ValueError("unexpected_chembl_redirect")
-            body = response.read()
-            data = json.loads(body)
-            receipt = {"schema_version": "praxis.native-download-receipt.v1", "url": url,
-                       "retrieved_at": datetime.now(timezone.utc).isoformat(), "http_status": response.status,
-                       "sha256": hashlib.sha256(body).hexdigest(), "bytes": len(body), "file": str(path.resolve()),
-                       "page_meta": data.get("page_meta"), "license": LICENSE,
-                       "license_url": "https://chembl.gitbook.io/chembl-interface-documentation/frequently-asked-questions/general-questions"}
+        for attempt in range(3):
+            try:
+                with urlopen(Request(url, headers={"User-Agent": "PRAXIS-virtualcell-public-data-curation/1.0",
+                                                    "Accept": "application/json"}), timeout=45) as response:
+                    if urlparse(response.url).hostname != "www.ebi.ac.uk":
+                        raise ValueError("unexpected_chembl_redirect")
+                    body = response.read()
+                    data = json.loads(body)
+                    receipt = {"schema_version": "praxis.native-download-receipt.v1", "url": url,
+                               "retrieved_at": datetime.now(timezone.utc).isoformat(), "http_status": response.status,
+                               "sha256": hashlib.sha256(body).hexdigest(), "bytes": len(body), "file": str(path.resolve()),
+                               "page_meta": data.get("page_meta"), "license": LICENSE,
+                               "chembl_db_version": self.source_version,
+                               "license_url": "https://chembl.gitbook.io/chembl-interface-documentation/frequently-asked-questions/general-questions"}
+                break
+            except (HTTPError, URLError, TimeoutError, OSError) as exc:
+                if attempt == 2 or isinstance(exc, HTTPError) and exc.code not in {408, 429, 500, 502, 503, 504}:
+                    raise
+                time.sleep(2 ** attempt)
         path.write_bytes(body)
         receipt_path.write_text(_dump(receipt) + "\n")
         return data, receipt
@@ -229,6 +266,41 @@ def metadata_index(paths: list[Path], *, kind: str) -> dict[str, tuple[dict, dic
                 result.setdefault(row[id_key], (row, {"file": str(path.resolve()),
                                                      "pointer": f"/{index}" if isinstance(data, list) else f"/{kind}/{index}"}))
     return result
+
+
+def _validate_activity_page(data: Mapping[str, Any], *, offset: int, limit: int, total: int | None,
+                            target_ids: list[str], seen_ids: set[str]) -> int:
+    """Reject inconsistent pagination before constructing experimental records."""
+    rows, page = data.get("activities"), data.get("page_meta")
+    if not isinstance(rows, list) or not isinstance(page, dict):
+        raise ValueError("invalid_native_activity_page")
+    reported_total = page.get("total_count")
+    if (page.get("offset") != offset or page.get("limit") != limit or not isinstance(reported_total, int)
+            or isinstance(reported_total, bool) or reported_total < offset + len(rows) or len(rows) > limit):
+        raise ValueError("native_activity_pagination_mismatch")
+    if total is not None and reported_total != total:
+        raise ValueError("native_activity_total_count_changed")
+    for row in rows:
+        native_id = row.get("activity_id")
+        if (isinstance(native_id, bool) or not str(native_id).isdigit() or int(native_id) <= 0
+                or str(native_id) in seen_ids):
+            raise ValueError("native_activity_page_duplicate_or_invalid_id")
+        if row.get("target_chembl_id") not in target_ids or row.get("standard_type") != "MIC":
+            raise ValueError("native_activity_page_filter_mismatch")
+        seen_ids.add(str(native_id))
+    following = page.get("next")
+    if following:
+        parsed = urlparse(following)
+        params = parse_qs(parsed.query)
+        if (parsed.scheme and (parsed.scheme != "https" or parsed.hostname != "www.ebi.ac.uk")
+                or parsed.path != "/chembl/api/data/activity.json"
+                or params.get("offset") != [str(offset + len(rows))]
+                or params.get("limit") != [str(limit)] or params.get("standard_type") != ["MIC"]
+                or params.get("target_chembl_id__in") != [",".join(target_ids)] or not rows):
+            raise ValueError("native_activity_next_page_identity_mismatch")
+    elif offset + len(rows) != reported_total:
+        raise ValueError("native_activity_missing_next_page")
+    return reported_total
 
 
 def write_import(records: list[ExperimentRecord], exclusions: list[dict], output: str | Path,
@@ -287,30 +359,46 @@ def write_import(records: list[ExperimentRecord], exclusions: list[dict], output
 def acquire_species_mic(repo_root: str | Path, output: str | Path, *,
                         taxon_ids: tuple[int, ...] = (562, 573, 287), per_species_limit: int = 300,
                         archive_root: str | Path | None = None,
-                        reused_label_paths: tuple[str | Path, ...] = ()) -> dict:
-    """Fetch one bounded activity page per species and only missing linked metadata.
+                        reused_label_paths: tuple[str | Path, ...] = (),
+                        reuse_cache_roots: tuple[str | Path, ...] = (), page_size: int = 1000,
+                        progress: Callable[[dict], None] | None = None) -> dict:
+    """Fetch bounded continuous activity pages and only missing linked metadata.
 
     This callable is intentionally separate from any inference or training path.
     Existing native caches are reused with hash verification. No broad organism
     aliases, activity value joins or primary-paper text mining are performed.
     """
-    if not 1 <= per_species_limit <= 500 or len(set(taxon_ids)) != len(taxon_ids):
-        raise ValueError("unique_species_and_limit_1_to_500_required")
+    if (not 1 <= per_species_limit <= 50000 or not 1 <= page_size <= 1000
+            or len(set(taxon_ids)) != len(taxon_ids)):
+        raise ValueError("unique_species_limit_1_to_50000_and_page_size_1_to_1000_required")
     if any(taxon_id not in SPECIES for taxon_id in taxon_ids):
         raise ValueError("unsupported_taxon")
     root, output = Path(repo_root).resolve(), Path(output).resolve()
-    cache = NativeCache(output / "nativecache")
+    cache = NativeCache(output / "nativecache", reuse_roots=reuse_cache_roots)
+    # A new snapshot checks the live release in its own cache, rather than
+    # treating a prior snapshot's cached status as today's release assertion.
+    status, status_receipt = NativeCache(output / "nativecache").fetch("status")
+    db_version = status.get("chembl_db_version")
+    if not isinstance(db_version, str) or not db_version:
+        raise ValueError("missing_official_chembl_version")
+    cache.source_version = db_version
+    native_paths = cache.verified_paths()
+    for path in native_paths:
+        data = json.loads(path.read_text())
+        if data.get("chembl_db_version") and data["chembl_db_version"] != db_version:
+            raise ValueError("native_cache_source_version_mismatch")
     indexes = {}
     for kind in ("assays", "documents", "molecules"):
         paths = [root / "data/antibacterial/abaumannii/curated" / f"chembl_{kind}.json"]
         if archive_root is not None and kind == "molecules":
             paths += sorted((Path(archive_root) / "pan_bacterial_phase1_review/raw").glob("chembl_*.json"))
-        indexes[kind] = metadata_index([path for path in paths if path.exists()], kind=kind)
-    status, status_receipt = cache.fetch("status")
+        indexes[kind] = metadata_index([path for path in paths if path.exists()] + native_paths, kind=kind)
     version = str(status.get("chembl_db_version", "chembl-live")).lower().replace("_", "")
     acquisition = [{"resource": "status", "receipt": status_receipt, "status": status}]
     inventory = {"exact_metadata_ids_available_before_download": {k: len(v) for k, v in indexes.items()},
                  "archive_root": str(Path(archive_root).resolve()) if archive_root is not None else None,
+                 "reused_native_cache_roots": [str(Path(path).resolve()) for path in reuse_cache_roots],
+                 "chembl_db_version": db_version, "cumulative_activity_limit_per_species": per_species_limit,
                  "legacy_ec_activity_file": {"path": str(root / "data/mdr_gnb/raw/compound_activity/escherichia_coli_mic_raw.jsonl"),
                                              "qualification": "Missing activity/assay/document IDs; not matched by SMILES or MIC value."}}
     records, exclusions = [], []
@@ -335,13 +423,29 @@ def acquire_species_mic(repo_root: str | Path, output: str | Path, *,
         if not selected_targets:
             exclusions.append({"taxon_id": taxon_id, "reasons": ["no_exact_official_organism_target"]})
             continue
-        data, activity_receipt = cache.fetch("activity", {"target_chembl_id__in": ",".join(selected_targets),
-                                                          "standard_type": "MIC", "limit": per_species_limit})
-        activities = data.get("activities", [])
-        page = data.get("page_meta", {})
-        acquisition.append({"resource": "MIC_activities", "taxon_id": taxon_id,
-                            "retrieved_rows": len(activities), "reported_total_count": page.get("total_count"),
-                            "complete": page.get("next") is None, "receipt": activity_receipt})
+        native_items, seen_ids = [], set()
+        offset, total = 0, None
+        while offset < per_species_limit:
+            limit = min(300 if offset == 0 else page_size, per_species_limit - offset)
+            params = {"target_chembl_id__in": ",".join(selected_targets), "standard_type": "MIC", "limit": limit}
+            if offset:
+                params["offset"] = offset
+            data, activity_receipt = cache.fetch("activity", params)
+            total = _validate_activity_page(data, offset=offset, limit=limit, total=total,
+                                            target_ids=selected_targets, seen_ids=seen_ids)
+            activities = data["activities"]
+            native_items.extend((activity, activity_receipt, index) for index, activity in enumerate(activities))
+            acquisition.append({"resource": "MIC_activities", "taxon_id": taxon_id, "offset": offset,
+                                "retrieved_rows": len(activities), "reported_total_count": total,
+                                "complete": data["page_meta"].get("next") is None, "receipt": activity_receipt,
+                                "reused_external_cache": Path(activity_receipt["file"]).parent.resolve() != cache.root.resolve()})
+            offset += len(activities)
+            if progress:
+                progress({"stage": "activity_page", "taxon_id": taxon_id, "cumulative_rows": offset,
+                          "target_rows": per_species_limit, "reported_total_count": total})
+            if not data["page_meta"].get("next"):
+                break
+        activities = [item[0] for item in native_items]
         for kind, resource, id_key in (("assays", "assay", "assay_chembl_id"),
                                         ("documents", "document", "document_chembl_id"),
                                         ("molecules", "molecule", "molecule_chembl_id")):
@@ -350,13 +454,20 @@ def acquire_species_mic(repo_root: str | Path, output: str | Path, *,
                 batch = wanted[start:start + 100]
                 metadata, metadata_receipt = cache.fetch(resource, {id_key + "__in": ",".join(batch), "limit": 100})
                 returned = metadata.get(kind, [])
+                ids = [row.get(id_key) for row in returned]
+                if len(set(ids)) != len(ids) or set(ids) - set(batch):
+                    raise ValueError("native_metadata_batch_identity_mismatch")
                 acquisition.append({"resource": kind, "taxon_id": taxon_id, "requested_ids": len(batch),
                                     "returned_rows": len(returned), "receipt": metadata_receipt,
-                                    "complete": metadata.get("page_meta", {}).get("next") is None})
+                                    "complete": metadata.get("page_meta", {}).get("next") is None,
+                                    "missing_ids": sorted(set(batch) - set(ids))})
                 for index, row in enumerate(returned):
                     indexes[kind][row[id_key]] = (row, {"file": metadata_receipt["file"],
-                                                       "pointer": f"/{kind}/{index}", "download_sha256": metadata_receipt["sha256"]})
-        for index, activity in enumerate(activities):
+                                                       "pointer": f"/{kind}/{index}"})
+                if progress:
+                    progress({"stage": "metadata_batch", "taxon_id": taxon_id, "resource": kind,
+                              "processed_missing_ids": min(start + 100, len(wanted)), "total_missing_ids": len(wanted)})
+        for activity, activity_receipt, index in native_items:
             linked = {}
             locator = {"file": activity_receipt["file"], "pointer": f"/activities/{index}",
                        "download_sha256": activity_receipt["sha256"], "native_activity_id": activity.get("activity_id"),
@@ -407,5 +518,14 @@ def acquire_species_mic(repo_root: str | Path, output: str | Path, *,
         else:
             unique_records.append(record)
     inventory["new_activities_already_present_in_canonical_labels"] = reused_duplicates
-    return write_import(unique_records, exclusions, output, reused_existing_labels=reused,
-                        acquisition=acquisition, inventory=inventory)
+    summary = write_import(unique_records, exclusions, output, reused_existing_labels=reused,
+                           acquisition=acquisition, inventory=inventory)
+    summary["coverage"] = "Bounded continuous pages with verified offsets, unique native activity IDs and stable source totals; not a complete ChEMBL export."
+    summary["source_issues"] = [{"resource": row["resource"], "taxon_id": row.get("taxon_id"),
+                                "missing_ids": row["missing_ids"], "receipt_file": row["receipt"]["file"]}
+                               for row in acquisition if row.get("missing_ids")]
+    summary["cumulative_activity_counts"] = dict(Counter({str(taxon_id): sum(row["retrieved_rows"] for row in acquisition
+                                                                             if row["resource"] == "MIC_activities" and row["taxon_id"] == taxon_id)
+                                                          for taxon_id in taxon_ids}))
+    (output / "summary.json").write_text(_dump(summary) + "\n")
+    return summary

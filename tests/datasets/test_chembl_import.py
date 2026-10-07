@@ -1,11 +1,15 @@
 """Native source identity and conservative MIC admission, without network access."""
 from copy import deepcopy
 import json
+import hashlib
+from pathlib import Path
+from urllib.parse import parse_qs, urlencode, urlparse
 
 import pytest
 
 from praxis_virtualcell.datasets.chembl_import import (
     AdmissionError, NativeCache, acquire_species_mic, curate_activity, metadata_index, mic_endpoint, write_import,
+    BASE_URL, _validate_activity_page,
 )
 from praxis_virtualcell.datasets.labels import ExperimentRecord
 
@@ -213,7 +217,9 @@ def test_bounded_acquisition_complete_links_partial_coverage_and_legacy_exclusio
     payloads = {"status": {"chembl_db_version": "ChEMBL_37"},
                 "target": {"targets": [{"tax_id": 562, "organism": "Escherichia coli", "target_type": "ORGANISM",
                                         "target_chembl_id": "CHEMBL400"}], "page_meta": {"next": None, "total_count": 1}},
-                "activity": {"activities": [source["activity"]], "page_meta": {"next": "/next", "total_count": 10000}},
+                "activity": {"activities": [source["activity"]], "page_meta": {"offset": 0, "limit": 1,
+                    "next": "/chembl/api/data/activity.json?offset=1&limit=1&standard_type=MIC&target_chembl_id__in=CHEMBL400",
+                    "total_count": 10000}},
                 "assay": {"assays": [source["assay"]], "page_meta": {"next": None}},
                 "document": {"documents": [source["document"]], "page_meta": {"next": None}},
                 "molecule": {"molecules": [source["molecule"]], "page_meta": {"next": None}}}
@@ -234,7 +240,7 @@ def test_bounded_acquisition_complete_links_partial_coverage_and_legacy_exclusio
     summary = acquire_species_mic(tmp_path, tmp_path / "out", taxon_ids=(562,), per_species_limit=1)
     assert summary["new_taxon_counts"] == {"562": 1}
     assert summary["excluded_legacy_source_rows"] == 1
-    assert summary["coverage"].startswith("Bounded first pages")
+    assert summary["coverage"].startswith("Bounded continuous pages")
     page = next(row for row in summary["source_acquisition"] if row["resource"] == "MIC_activities")
     assert page["complete"] is False and page["reported_total_count"] == 10000
     assert calls[2] == ("activity", {"target_chembl_id__in": "CHEMBL400", "standard_type": "MIC", "limit": 1})
@@ -261,7 +267,166 @@ def test_bounded_acquisition_complete_links_partial_coverage_and_legacy_exclusio
     assert conflict["exclusion_reason_counts"]["native_activity_conflicts_with_existing_canonical_label"] == 1
 
 
-@pytest.mark.parametrize("taxon_ids,limit", [((562, 562), 1), ((562,), 0), ((562,), 501), ((999,), 1)])
+@pytest.mark.parametrize("taxon_ids,limit", [((562, 562), 1), ((562,), 0), ((562,), 50001), ((999,), 1)])
 def test_acquisition_rejects_unbounded_or_untrusted_taxa(tmp_path, taxon_ids, limit):
     with pytest.raises(ValueError):
         acquire_species_mic(tmp_path, tmp_path / "out", taxon_ids=taxon_ids, per_species_limit=limit)
+
+
+def _cached_native(root, resource, payload, params=None, version="ChEMBL_37"):
+    root.mkdir(parents=True, exist_ok=True)
+    url = BASE_URL + resource + ".json" + ("?" + urlencode(sorted(params.items())) if params else "")
+    key = hashlib.sha256(url.encode()).hexdigest()[:24]
+    path = root / f"{key}.json"
+    body = json.dumps(payload).encode()
+    path.write_bytes(body)
+    (root / f"{key}.receipt.json").write_text(json.dumps({"url": url, "file": str(path),
+        "sha256": hashlib.sha256(body).hexdigest(), "chembl_db_version": version, "bytes": len(body)}))
+    return path
+
+
+def _activity_page(rows, offset, limit, total=10000):
+    next_url = (f"/chembl/api/data/activity.json?offset={offset + len(rows)}&limit={limit}"
+                "&standard_type=MIC&target_chembl_id__in=CHEMBL400") if offset + len(rows) < total else None
+    return {"activities": rows, "page_meta": {"offset": offset, "limit": limit, "total_count": total, "next": next_url}}
+
+
+def test_cache_fallback_reads_original_files_without_copying(tmp_path, monkeypatch):
+    import praxis_virtualcell.datasets.chembl_import as module
+    old, new = tmp_path / "old", tmp_path / "new"
+    path = _cached_native(old, "status", {"chembl_db_version": "ChEMBL_37"})
+    before = {p: p.read_bytes() for p in old.iterdir()}
+    monkeypatch.setattr(module, "urlopen", lambda *a, **k: pytest.fail("native cache must be reused"))
+    cache = NativeCache(new, reuse_roots=(old,))
+    cache.source_version = "ChEMBL_37"
+    data, receipt = cache.fetch("status")
+    assert data["chembl_db_version"] == "ChEMBL_37" and receipt["file"] == str(path)
+    assert list(new.iterdir()) == []
+    assert cache.verified_paths() == [path]
+    assert {p: p.read_bytes() for p in old.iterdir()} == before
+
+
+def test_new_snapshot_stops_on_version_conflict_before_activity_fetch(tmp_path, monkeypatch):
+    old = tmp_path / "old"
+    _cached_native(old, "status", {"chembl_db_version": "ChEMBL_36"}, version="ChEMBL_36")
+    calls = []
+    def fetch(cache, resource, params=None):
+        calls.append(resource)
+        return {"chembl_db_version": "ChEMBL_37"}, {"file": str(cache.root / "status.json")}
+    monkeypatch.setattr(NativeCache, "fetch", fetch)
+    with pytest.raises(ValueError, match="native_cache_source_version_mismatch"):
+        acquire_species_mic(tmp_path, tmp_path / "out", reuse_cache_roots=(old,))
+    assert calls == ["status"]
+    assert not (tmp_path / "out/summary.json").exists()
+
+
+def test_paginated_expansion_reuses_first_page_metadata_and_canonical_labels(source, tmp_path, monkeypatch):
+    import praxis_virtualcell.datasets.chembl_import as module
+    old = tmp_path / "old"
+    first = [dict(source["activity"], activity_id=1000 + index) for index in range(300)]
+    first_params = {"target_chembl_id__in": "CHEMBL400", "standard_type": "MIC", "limit": 300}
+    first_path = _cached_native(old, "activity", _activity_page(first, 0, 300), first_params)
+    _cached_native(old, "status", {"chembl_db_version": "ChEMBL_37"})
+    _cached_native(old, "target", {"targets": [{"target_chembl_id": "CHEMBL400", "tax_id": 562,
+        "organism": "Escherichia coli", "target_type": "ORGANISM"}], "page_meta": {"next": None}},
+        {"tax_id": 562, "target_type": "ORGANISM", "limit": 20})
+    for kind, singular, key in (("assays", "assay", "assay_chembl_id"),
+                                ("documents", "document", "document_chembl_id"),
+                                ):
+        _cached_native(old, singular, {kind: [source[singular]]}, {key + "__in": source[singular][key], "limit": 100})
+    canonical = tmp_path / "canonical.jsonl"
+    canonical.write_text("".join(curate_activity(activity, source["assay"], source["document"], source["molecule"],
+        taxon_id=562, native_locator={"file": str(first_path), "pointer": f"/activities/{index}"},
+        source_version="chembl37").model_dump_json() + "\n" for index, activity in enumerate(first)))
+    before = {p: p.read_bytes() for p in old.iterdir()}
+    calls, progress = [], []
+    class Response:
+        status = 200
+        def __init__(self, url, data):
+            self.url, self.body = url, json.dumps(data).encode()
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return None
+        def read(self):
+            return self.body
+    def download(request, timeout):
+        url = request.full_url
+        calls.append(url)
+        if url.endswith("status.json"):
+            return Response(url, {"chembl_db_version": "ChEMBL_37"})
+        if "/molecule.json?" in url:
+            return Response(url, {"molecules": [source["molecule"]], "page_meta": {"next": None}})
+        params = parse_qs(urlparse(url).query)
+        assert params["offset"] == ["300"] and params["limit"] == ["2"]
+        return Response(url, _activity_page([dict(source["activity"], activity_id=1300 + i) for i in range(2)], 300, 2))
+    monkeypatch.setattr(module, "urlopen", download)
+    output = tmp_path / "out"
+    summary = acquire_species_mic(tmp_path, output, taxon_ids=(562,), per_species_limit=302,
+        reuse_cache_roots=(old,), reused_label_paths=(canonical,), progress=progress.append)
+    assert len(calls) == 3  # Fresh version, incremental activities and missing molecule metadata.
+    assert summary["cumulative_activity_counts"] == {"562": 302}
+    assert summary["new_label_count"] == 2 and summary["source_issues"] == []
+    assert summary["local_source_inventory"]["new_activities_already_present_in_canonical_labels"] == 300
+    assert [row["record_count"] for row in summary["label_files"]] == [2, 300]
+    assert [row["offset"] for row in summary["source_acquisition"] if row["resource"] == "MIC_activities"] == [0, 300]
+    assert next(row for row in reversed(progress) if row["stage"] == "activity_page")["cumulative_rows"] == 302
+    assert {p: p.read_bytes() for p in old.iterdir()} == before
+    # A resumed/offline rebuild consumes completed cache pages and metadata.
+    label_hashes = {row["path"]: hashlib.sha256(Path(row["path"]).read_bytes()).hexdigest()
+                    for row in summary["label_files"]}
+    monkeypatch.setattr(module, "urlopen", lambda *a, **k: pytest.fail("offline rebuild must not download"))
+    again = acquire_species_mic(tmp_path, output, taxon_ids=(562,), per_species_limit=302,
+        reuse_cache_roots=(old,), reused_label_paths=(canonical,))
+    assert again["new_label_count"] == 2 and again["cumulative_activity_counts"] == {"562": 302}
+    assert {row["path"]: hashlib.sha256(Path(row["path"]).read_bytes()).hexdigest()
+            for row in again["label_files"]} == label_hashes
+
+
+@pytest.mark.parametrize("mutation,expected", [
+    (lambda d: d["page_meta"].update(offset=1), "pagination_mismatch"),
+    (lambda d: d["page_meta"].update(limit=2), "pagination_mismatch"),
+    (lambda d: d["page_meta"].update(total_count=101), "total_count_changed"),
+    (lambda d: d["page_meta"].update(next=None), "missing_next_page"),
+    (lambda d: d["page_meta"].update(next="https://example.com/next"), "next_page_identity_mismatch"),
+    (lambda d: d["page_meta"].update(next="/chembl/api/data/activity.json?offset=2&limit=1&standard_type=MIC&target_chembl_id__in=CHEMBL400"), "next_page_identity_mismatch"),
+    (lambda d: d["activities"][0].update(target_chembl_id="CHEMBL999"), "filter_mismatch"),
+    (lambda d: d["activities"][0].update(activity_id=True), "duplicate_or_invalid_id"),
+])
+def test_pagination_identity_and_total_changes_are_rejected(source, mutation, expected):
+    page = _activity_page([source["activity"]], 0, 1, total=100)
+    mutation(page)
+    with pytest.raises(ValueError, match=expected):
+        _validate_activity_page(page, offset=0, limit=1, total=100, target_ids=["CHEMBL400"], seen_ids=set())
+
+
+def test_overlap_between_pages_is_rejected(source):
+    page = _activity_page([source["activity"]], 1, 1, total=100)
+    with pytest.raises(ValueError, match="duplicate_or_invalid_id"):
+        _validate_activity_page(page, offset=1, limit=1, total=100, target_ids=["CHEMBL400"], seen_ids={"123"})
+
+
+def test_transient_download_timeout_retries_before_writing_a_valid_cache(tmp_path, monkeypatch):
+    import praxis_virtualcell.datasets.chembl_import as module
+    calls, delays = [], []
+    class Response:
+        url, status = BASE_URL + "status.json", 200
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return None
+        def read(self):
+            return b'{"chembl_db_version":"ChEMBL_37"}'
+    def download(request, timeout):
+        calls.append(request.full_url)
+        if len(calls) == 1:
+            raise TimeoutError("synthetic timeout")
+        return Response()
+    monkeypatch.setattr(module, "urlopen", download)
+    monkeypatch.setattr(module.time, "sleep", delays.append)
+    cache = NativeCache(tmp_path)
+    data, receipt = cache.fetch("status")
+    assert data["chembl_db_version"] == "ChEMBL_37"
+    assert len(calls) == 2 and delays == [1]
+    assert receipt["sha256"] == hashlib.sha256(Path(receipt["file"]).read_bytes()).hexdigest()
+    assert cache.fetch("status")[0] == data and len(calls) == 2

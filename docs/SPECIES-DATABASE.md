@@ -75,6 +75,8 @@
 
 下载器保存官方响应、完整 URL、时间、页信息和内容校验收据，优先使用本机原生 ID 对应的元数据缓存。当前是每物种有限首批，不是全库覆盖。已有缓存可以离线重建；取新的在线版本应使用新的输出目录，保留旧版本的来源与评估引用。
 
+继续扩容可指定 `--per-species-limit 5000 --page-size 1000 --reuse-cache local/species_reference_20261007/mic/nativecache`，并把旧 `summary.json` 中的全部标签路径传给 `--reuse-labels`。累计上限计原生活动，准入数由来源规则决定。旧缓存和 canonical 标签只读复用；新目录只保存新增响应和新增标签。分页必须保持物种过滤、连续 offset、来源版本和活动身份一致，不能把有限页数称为完整导出。
+
 后续 `analyze --profile AB-SPECIES-REFERENCE`、Web 和 MCP 使用同一加载入口。只有实际可用的模态可选；缺少蛋白组时不会生成空的“完整组学”参考。
 
 ## 监督与评估含义
@@ -84,3 +86,33 @@
 相同分子—物种的多个 MIC 是实验异质性，不能逐行随机分割到训练与测试。先按化学骨架和研究来源冻结评估，再为相同划分生成不同模态视图。比较“药物＋物种”与各参考模态及组合，并使用错误物种参考对照，能够检验额外信息的预测收益；固定参考不能证明同物种内菌株个体差异或组学因果机制。
 
 MIC、生长抑制、MBC、蛋白结合和杀菌曲线仍是独立终点。MIC 标签不能直接提供作用靶点真值，老师 LLM 的解释也不能自动作为实验金标。
+
+## 冻结物种参考评估与监督队列
+
+物种参考数据库使用专用冻结入口。分组在全部物种上统一进行：`compound` 协议禁止同一归一化结构跨集合，`scaffold` 协议禁止同一骨架跨集合，换一个物种也不能绕过分组。`compound`、`scaffold`、`study` 分别回答新分子、新骨架、新研究的问题；`scaffold_study` 将共享骨架或研究传递连接，检查同时隔离这两者时的可用数据。前三种协议不能宣称同时隔离所有来源。空骨架统一视为一组，多个 MIC 测量分别保留。
+
+```bash
+.venv/bin/praxis-vc freeze-species-evaluation \
+  --database local/species_reference_expansion_20261007/database/v2/praxis_species_reference.sqlite3 \
+  --grouping scaffold \
+  --output local/species_reference_expansion_20261007/evaluation/scaffold
+
+.venv/bin/praxis-vc prepare-species-supervision \
+  --manifest local/species_reference_expansion_20261007/evaluation/scaffold/manifest.json \
+  --limit-per-species 8 \
+  --output local/species_reference_expansion_20261007/supervision/scaffold_review_v1
+
+# 预测结果保存后，评分才读取单份 canonical 标签
+.venv/bin/praxis-vc score-species-evaluation \
+  --manifest local/species_reference_expansion_20261007/evaluation/scaffold/manifest.json \
+  --predictions local/predictions.jsonl --split test \
+  --output local/species_reference_expansion_20261007/evaluation/scaffold/score.json
+```
+
+冻结目录包含无终点的 `inputs.jsonl`、私有位置索引 `answers.index.jsonl`、排除记录及 manifest。manifest 绑定数据库、原标签、原生参考 manifest/特征和集合指针的版本；后续修改任一来源会阻止该版本的监督准备与评分。比例按独立组分配，各物种的行数、分子数和组数分别报告；巨型连通组、缺席物种和不足三个分组的情况不会隐藏。
+
+评分同时报告总体、各物种和宏平均。宏平均对有对应分母的物种等权，并列出实际参与物种数；错误率要与数值回答覆盖率一起阅读。相同分子—物种的多条实验记录只增加观测次数，不增加独立分子数。
+
+每种协议对应自己的训练、验证和测试集合。一个实验在不同协议下可能得到不同 split，因此不能合并不同协议的训练队列，也不能把按一种协议训练的权重在另一种协议上的结果称为独立测试。主训练与组学消融必须始终绑定同一份冻结 manifest；其余协议先用于数据结构诊断，若正式评估则分别训练。
+
+监督准备只选择被冻结为 `train` 的候选，按物种与结构去重后保留这些结构的全部训练记录位置。`observations.jsonl` 每个物种—模态组合只保存一次真实工具观察，`queue.jsonl` 引用这些视图和私有答案位置。它们是待审核模板，包含真实来源、单位、缺失值及身份不确定性，不是模型轨迹或人工金标。正式训练前需要审核并物化训练目标；不能把这批工具格式示例当作已完成的药效微调数据。

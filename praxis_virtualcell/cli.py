@@ -145,11 +145,27 @@ def main(argv=None):
     species_inputs = sub.add_parser("export-species-inputs", help="Export species-reference inputs without endpoints or assay labels")
     species_inputs.add_argument("--database", required=True)
     species_inputs.add_argument("--output", required=True)
+    species_freeze = sub.add_parser("freeze-species-evaluation", help="Freeze species-reference inputs by global compound, scaffold or study groups")
+    species_freeze.add_argument("--database", required=True)
+    species_freeze.add_argument("--output", required=True)
+    species_freeze.add_argument("--grouping", choices=["compound", "scaffold", "study", "scaffold_study"], default="scaffold")
+    species_freeze.add_argument("--seed", type=int, default=20261007)
+    species_score = sub.add_parser("score-species-evaluation", help="Score frozen species-reference predictions with per-species coverage")
+    species_score.add_argument("--manifest", required=True)
+    species_score.add_argument("--predictions", required=True)
+    species_score.add_argument("--split", choices=["train", "validation", "test"], default="test")
+    species_score.add_argument("--output", required=True)
+    supervision = sub.add_parser("prepare-species-supervision", help="Prepare reviewed-later tool observations and train-only experimental answer pointers")
+    supervision.add_argument("--manifest", required=True, help="Frozen species evaluation manifest")
+    supervision.add_argument("--output", required=True)
+    supervision.add_argument("--limit-per-species", type=int, default=8)
     acquire = sub.add_parser("acquire-species-mic", help="Reuse native metadata and acquire bounded official MIC pages for curation")
     acquire.add_argument("--repo-root", default=str(Path(__file__).resolve().parents[1]))
     acquire.add_argument("--archive-root", help="Existing archived AB project, for native molecule metadata reuse")
     acquire.add_argument("--taxon-ids", nargs="+", type=int, choices=[470, 562, 573, 287], default=[562, 573, 287])
-    acquire.add_argument("--per-species-limit", type=int, default=300, help="Bounded first page, 1–500 records per species")
+    acquire.add_argument("--per-species-limit", type=int, default=300, help="Cumulative maximum native activities to inspect per species")
+    acquire.add_argument("--page-size", type=int, default=1000, help="Maximum activities in each continuation page")
+    acquire.add_argument("--reuse-cache", nargs="*", default=[], help="Existing native cache roots reused without copying responses")
     acquire.add_argument("--reuse-labels", nargs="*", default=[], help="Canonical experimental JSONL files referenced without copying")
     acquire.add_argument("--output", required=True)
     args = parser.parse_args(argv)
@@ -158,7 +174,26 @@ def main(argv=None):
             from praxis_virtualcell.datasets.chembl_import import acquire_species_mic
             result = acquire_species_mic(args.repo_root, args.output, taxon_ids=tuple(args.taxon_ids),
                                          per_species_limit=args.per_species_limit, archive_root=args.archive_root,
-                                         reused_label_paths=tuple(args.reuse_labels))
+                                         reused_label_paths=tuple(args.reuse_labels),
+                                         reuse_cache_roots=tuple(args.reuse_cache), page_size=args.page_size)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "freeze-species-evaluation":
+            from praxis_virtualcell.datasets.species_evaluation import freeze_species_evaluation
+            result = freeze_species_evaluation(args.database, args.output, grouping=args.grouping, seed=args.seed)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0 if result["status"] == "ready" else 2
+        if args.command == "score-species-evaluation":
+            from praxis_virtualcell.datasets.species_evaluation import score_species_evaluation
+            result = score_species_evaluation(args.manifest, args.predictions, split=args.split)
+            output = Path(args.output)
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+            print(json.dumps({key: value for key, value in result.items() if key != "details"}, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "prepare-species-supervision":
+            from praxis_virtualcell.datasets.species_supervision import prepare_species_supervision
+            result = prepare_species_supervision(args.manifest, args.output, limit_per_species=args.limit_per_species)
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return 0
         if args.command == "build-species-db":
