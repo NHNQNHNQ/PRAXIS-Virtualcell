@@ -20,6 +20,7 @@ spec.loader.exec_module(guard)
 class FakeSystemd:
     def __init__(self, tmp_path, monkeypatch, *, corrupt=None, finish="success", existing=False, orphan=False):
         self.commands = []
+        self.timeouts = []
         self.description = "unrelated existing unit"
         self.launched = False
         self.stopped = False
@@ -43,8 +44,9 @@ class FakeSystemd:
         monkeypatch.setattr(guard, "PROC_ROOT", self.proc)
         monkeypatch.setattr(guard, "_command", self.command)
 
-    def command(self, argv):
+    def command(self, argv, timeout=15):
         self.commands.append(argv)
+        self.timeouts.append((argv, timeout))
         if argv[0] == "systemd-run":
             assert not self.existing
             self.launched = True
@@ -177,10 +179,10 @@ def test_unit_replaced_during_monitoring_is_never_killed(tmp_path, monkeypatch):
     systemd = FakeSystemd(tmp_path, monkeypatch, finish="running")
     original = systemd.command
 
-    def replaced(argv):
+    def replaced(argv, timeout=15):
         if argv[:3] == ["systemctl", "--user", "show"] and systemd.gate and systemd.gate.exists():
             systemd.description = "another owner"
-        return original(argv)
+        return original(argv, timeout=timeout)
 
     monkeypatch.setattr(guard, "_command", replaced)
     code, report = run(tmp_path)
@@ -193,8 +195,8 @@ def test_launch_timeout_still_cleans_up_unit_that_was_created(tmp_path, monkeypa
     systemd = FakeSystemd(tmp_path, monkeypatch)
     original = systemd.command
 
-    def timed_out(argv):
-        result = original(argv)
+    def timed_out(argv, timeout=15):
+        result = original(argv, timeout=timeout)
         if argv[0] == "systemd-run":
             raise subprocess.TimeoutExpired(argv, 15)
         return result
@@ -248,6 +250,33 @@ def test_deadline_stops_training_without_waiting_for_runtime_cap(tmp_path, monke
     code, report = run(tmp_path)
     assert code == 1 and report["outcome"] == "deadline"
     assert systemd.stopped
+
+
+def test_cleanup_ignores_duplicate_signals_and_uses_five_second_commands(tmp_path, monkeypatch):
+    systemd = FakeSystemd(tmp_path, monkeypatch, finish="running")
+    original = guard._stop_owned_unit
+    def cleanup(unit, description):
+        for signum in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+            assert signal.getsignal(signum) == signal.SIG_IGN
+        return original(unit, description)
+    monkeypatch.setattr(guard, "_stop_owned_unit", cleanup)
+    monkeypatch.setattr(guard.time, "sleep", lambda _: signal.getsignal(signal.SIGTERM)(signal.SIGTERM, None))
+    code, report = run(tmp_path)
+    assert code == 1 and report["cleanup_owned_unit"] is True
+    assert all(timeout == 5 for _, timeout in systemd.timeouts[-4:])
+
+
+def test_cleanup_timeout_cannot_be_reported_as_success(tmp_path, monkeypatch):
+    systemd = FakeSystemd(tmp_path, monkeypatch)
+    original = systemd.command
+    def timed_out_stop(argv, timeout=15):
+        if argv[:3] == ["systemctl", "--user", "stop"]:
+            assert timeout == 5
+            raise subprocess.TimeoutExpired(argv, timeout)
+        return original(argv, timeout=timeout)
+    monkeypatch.setattr(guard, "_command", timed_out_stop)
+    code, report = run(tmp_path)
+    assert code == 1 and report["outcome"] == "cleanup_failed" and report["cleanup_error"]
 
 
 def test_worker_does_not_execute_until_gate_exists(tmp_path):

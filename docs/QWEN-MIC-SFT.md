@@ -1,6 +1,28 @@
 # Qwen MIC 工具对话微调准备
 
-当前结构监督候选为 **2026-10-08 v4_compact**，从封版 v3 独立衍生。53 工作区为 `/home/zkyd/data1/mzy/qwen-PRAXIS-MIC`，候选数据在 `data/processed/qwen_joint_sft_v4_compact`，结构样例在 `data/processed/qwen_joint_inspection_v4_compact`。v3 保留；下文 v2/v1 为历史记录。**用户已授权工程试训，正式全量训练仍暂停**。真实 cold checkpoint 烟测已在 53 通过：0 optimizer 步、0 backward，896 个 LoRA 张量均有限，确定性扰动被检出，重载后 shard 与 forward 精确恢复；cold 结束后全部 GPU 已释放，主机可用内存约 492 GiB。guarded stop1 实际训练、完整断点保存及适配器重载检查也已通过，结束后 GPU 释放已核实。checkpoint1→6 的受保护恢复测试已通过，step6 结束后的 GPU 释放已核实。最终 checkpoint6→12 恢复及总计 12 步工程测试已通过，已生成仅供工程验证的 trial adapter：`outputs/qwen3_32b_joint_lora_v4_guarded_20261008/adapter`。尚未做独立 MIC 预测评估，正式全量训练继续暂停。结果见 [v4_compact 试训验证报告](../reports/llm_platform/qwen_v4_compact_trial_verification_20261008.json)。
+当前训练数据为 **2026-10-08 v4_compact**，从封版 v3 独立衍生。53 工作区为 `/home/zkyd/data1/mzy/qwen-PRAXIS-MIC`，数据在 `data/processed/qwen_joint_sft_v4_compact`，结构样例在 `data/processed/qwen_joint_inspection_v4_compact`。v3 保留；下文 v2/v1 为历史记录。用户已授权首轮正式训练。12 步工程试训已完成最长样本反向、完整保存、checkpoint1→6→12 恢复及适配器扰动重载；它不代表正式模型或 MIC 准确率。结果见 [试训验证报告](../reports/llm_platform/qwen_v4_compact_trial_verification_20261008.json)。
+
+## 首轮基线、正式微调与配对验证
+
+2026-10-08 20:23（北京时间）已在 53 启动 `praxis-qwen-first-formal-contract-20261008.service`，启动时 8 张 GPU 均空闲、主机可用内存 492.47 GiB。当前首先运行原始 Qwen3-32B 的 64 条验证基线；基线全部尝试并独立评分后，才开始全量正式训练。最终训练和准确率结果仍待运行完成。
+
+固定 pilot 在 `data/processed/evaluation_pilot_v4_contract_20261008`：四物种各 8 条有组学、8 条无组学，共 64 条，覆盖 7 个参考菌株。两项消融各保留相同 32 条参考记录的 SMILES、菌株、条件和 ID，分别去掉组学或结构证据。211 次现成工具调用已用真实平台重放，公共结果全部一致；结构 bootstrap 明确为物种背景知识。官方 tokenizer 的最长公共输入为 25,199 token，不截断。公开请求包含平台真实 Assessment JSON schema，推理只读公共输入，MIC 仅在预测文件完整后由独立评分器读取；评分沿用原封版 v3 和已审阅的 v3 assay audit。
+
+[流程控制器](../scripts/finetuning/run_qwen_pipeline.py) 顺序执行原始模型基线 → [正式训练控制器](../scripts/finetuning/run_qwen_formal.py) → 同组微调模型验证 → 两项配对消融 → 比较报告。正式模型从原始基座创建全新 LoRA，使用全部 7,193 条数据、BF16、r=16、八卡 FSDP，225 个优化步；分布式尾部补齐 7 个槽位。75 个三步段始终保留同一个完整学习率调度，恢复 Adam、scheduler、RNG 和 Trainer 状态，三份完整检查点滚动保留。正式输出为 `outputs/qwen3_32b_joint_lora_v4_compact_formal_20261008/adapter`；旧 trial adapter 保留。
+
+每个 GPU 段在加载权重前核验真实 `memory.max=300 GiB/high=260 GiB/swap=0/oom.group=1`，外部监控保留至少 160 GiB 主机可用内存，单段硬限 40 分钟。控制器自身限 512 MiB，SSH 断开后继续运行。资源越界、GPU OOM、失败或不完整断点会停止流程，不自动重试。预测逐条落盘，恢复时核对输入、模型资产和生成设置；失败、超时和截断均计入覆盖率。无组学消融的合法数值报告可独立评分，但原平台缺组学拒绝原因全部保留，`platform_eligible=false`，不能把验证门槛造成的缺失误称为组学收益。
+
+进展和结果在 `reports/first_formal_contract_pipeline_20261008`：`pipeline.json` 为阶段状态；`training/runner.json` 为实际完成步数；`*.predictions.jsonl`、`*.score.json` 和 `comparison.json` 分别为原始生成、独立分数和配对比较。当前没有机制人工金标，因此不会产生机制准确率。
+
+查看阶段与日志：
+
+```bash
+cd /home/zkyd/data1/mzy/qwen-PRAXIS-MIC
+cat reports/first_formal_contract_pipeline_20261008/pipeline.json
+journalctl --user -u praxis-qwen-first-formal-contract-20261008.service --no-pager -n 30
+```
+
+如需停止本次流程，执行 `systemctl --user stop praxis-qwen-first-formal-contract-20261008.service`，控制器会向正在运行的 guard 传递停止信号。
 
 ## v4_compact：与智能体一致的结构监督
 
@@ -10,13 +32,13 @@
 
 v4 使用 manifest 的相对路径共享 v3 原始来源索引、隔离索引和留出答案，新增字节索引指向衍生训练文件。验证/测试保持原划分与公开组学轨迹，不加入实测答案或教师结构答案。目录复制到别处时需一起保留 v3、结构 catalog 及相对路径。
 
-配置 `qwen3_32b_joint_lora_v4_compact.yaml` 的正式训练仍暂停；工程试训使用独立短试训配置。投影＋CE 分块与二维连续投影输入已部署。此前 CPU 数值验证完成原生、分块、offload＋gradient checkpointing 各 4 个案例，共 222 项梯度比较，最大 loss 差异 4.77e-7、最大梯度差异 2.98e-8。第一次 GPU 尝试在 RMSNorm 重计算申请 620 MiB 时 OOM，第二次三维输出头发生 checkpoint 元数据不匹配，均为 0 步。第三次使用 `pin_memory=True` 完成最长样本反向与 3 个 optimizer 步后，断点保存挂起；锁页缓存按尺寸取整并保留多组缓冲，主机可用内存降至约 9 GiB、swap 仅余 4 KiB，随后 SSH 连接超时，用户重启服务器。该次 checkpoint 目录为空，没有可恢复断点。
+配置 `qwen3_32b_joint_lora_v4_compact.yaml` 已用于首轮正式流程；以下工程试训使用独立短试训配置。投影＋CE 分块与二维连续投影输入已部署。此前 CPU 数值验证完成原生、分块、offload＋gradient checkpointing 各 4 个案例，共 222 项梯度比较，最大 loss 差异 4.77e-7、最大梯度差异 2.98e-8。第一次 GPU 尝试在 RMSNorm 重计算申请 620 MiB 时 OOM，第二次三维输出头发生 checkpoint 元数据不匹配，均为 0 步。第三次使用 `pin_memory=True` 完成最长样本反向与 3 个 optimizer 步后，断点保存挂起；锁页缓存按尺寸取整并保留多组缓冲，主机可用内存降至约 9 GiB、swap 仅余 4 KiB，随后 SSH 连接超时，用户重启服务器。该次 checkpoint 目录为空，没有可恢复断点。
 
 当前部署使用 `save_on_cpu(pin_memory=False)`；非锁页 CPU 转存的 222 项梯度比较通过，真实 cold checkpoint 保存与扰动后重载通过。cold 烟测未执行 backward 或 optimizer 更新。随后 guarded stop1 返回 `stopped_at_checkpoint`、`optimizer_steps=1`：每 rank 完成 4 个 backward microbatch，8 个 rank 均覆盖最长 31,740 token；梯度有限、LoRA 更新量为 4.99994e-5。checkpoint-1 完整包含 LoRA、Adam、scheduler、8 rank RNG 与 manifest；推理适配器的 896 个 LoRA 张量精确一致且有限，扰动被检出，重载参数与 forward 精确恢复。训练 cgroup 的 1 秒采样最高观察值为 187.47 GiB，全机最低可用内存为 304.18 GiB，OOM/high/max 事件均为 0，swap 为 0。stop1 结束后的 GPU 释放已核实。
 
 checkpoint1→6 恢复测试已通过：恢复了 896 份 optimizer 状态，恢复时 step 的最小值和最大值均为 1，moments 有限且非零，scheduler 与 8 rank RNG 恢复通过。该段新增 5 个 optimizer 步、每 rank 20 个 backward microbatch，8 rank 均覆盖最长 31,740 token。checkpoint-6 完整，896 个推理适配器张量有限且精确一致，扰动后参数与 forward 精确恢复。该阶段 GPU 分配峰值每 rank 最高 28.755 GiB；训练 cgroup 的 1 秒采样最高观察值为 196.39 GiB，全机最低可用内存为 295.26 GiB，high/max/OOM 事件及 swap 均为 0。step6 结束后全部 GPU 已释放。
 
-最终 checkpoint6→12 恢复测试通过，返回 `status=trained`、`optimizer_steps=12`，指本次短工程配方完成。本段恢复了 896 份 Adam 状态，恢复时 step 最小值和最大值均为 6，moments 有限且非零，scheduler 与 8 rank RNG 恢复通过；新增 6 个 optimizer 步、每 rank 24 个 backward microbatch，8 rank 均覆盖最长 31,740 token。推理适配器的 896 个 LoRA 张量有限且精确一致，扰动被检出，重载后 shard 与 forward 精确恢复，误差为 0。该阶段 GPU 分配峰值每 rank 最高 28.755 GiB，cgroup 的 1 秒采样最高观察值为 199.225 GiB，全机最低可用内存为 292.069 GiB，high/max/OOM 事件均为 0、swap 为 0。结束后所有 GPU 与服务 MainPID 均为 0，SSH 正常，主机可用内存约 492 GiB。trial adapter 位于 53 的 `outputs/qwen3_32b_joint_lora_v4_guarded_20261008/adapter`，仅供工程验证；尚未做独立 MIC 预测评估，正式全量训练仍暂停。
+最终 checkpoint6→12 恢复测试通过，返回 `status=trained`、`optimizer_steps=12`，指本次短工程配方完成。本段恢复了 896 份 Adam 状态，恢复时 step 最小值和最大值均为 6，moments 有限且非零，scheduler 与 8 rank RNG 恢复通过；新增 6 个 optimizer 步、每 rank 24 个 backward microbatch，8 rank 均覆盖最长 31,740 token。推理适配器的 896 个 LoRA 张量有限且精确一致，扰动被检出，重载后 shard 与 forward 精确恢复，误差为 0。该阶段 GPU 分配峰值每 rank 最高 28.755 GiB，cgroup 的 1 秒采样最高观察值为 199.225 GiB，全机最低可用内存为 292.069 GiB，high/max/OOM 事件均为 0、swap 为 0。结束后所有 GPU 与服务 MainPID 均为 0，SSH 正常，主机可用内存约 492 GiB。trial adapter 位于 53 的 `outputs/qwen3_32b_joint_lora_v4_guarded_20261008/adapter`，仅供工程验证；工程测试结束时尚未做独立 MIC 预测评估。首轮正式流程见前节。
 
 当前 36 条结构事实全为 `species_prior`；没有新菌株结构、蛋白定位金标或候选通透性标签。机制人工金标仍为 0。工程验证不证明结构或组学已经提高药效准确率，后续需结构消融及独立留出评估。
 
@@ -58,7 +80,7 @@ cat "$qwen_cold_guard_report"
 cat "$qwen_cold_model_report"
 ```
 
-下面 v3 的训练/服务命令记录预定接口，真实运行仍须使用上述保护入口。cold 断点只验证未更新权重的保存与重载；当前已生成 12 步工程试训的 trial adapter，尚未做独立 MIC 预测评估，正式全量训练须另行授权。
+下面 v3 的训练/服务命令记录预定接口，真实运行仍须使用上述保护入口。cold 断点只验证未更新权重的保存与重载；当前已生成 12 步工程试训的 trial adapter，工程测试结束时尚未做独立 MIC 预测评估；现已获得首轮正式授权，采用前节的受保护流程。
 
 ## v3：SMILES、完整报告与可恢复训练
 

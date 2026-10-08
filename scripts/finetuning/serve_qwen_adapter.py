@@ -2,22 +2,64 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from pathlib import Path
+import sys
 from uuid import uuid4
 
 from praxis_virtualcell.llm_prediction.qwen_serving import parse_completion, smiles_messages
 
 
+def validate_memory_guard(**kwargs):
+    """Reuse the trainer's stdlib-only guard, before importing any model runtime."""
+    original_path = sys.path[:]
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    try:
+        from train_qwen_lora import validate_memory_guard as validate
+        return validate(**kwargs)
+    finally:
+        sys.path[:] = original_path
+
+
+def _model_identity(base, adapter, model_name, max_context):
+    # Base shards were verified during download; fingerprint their immutable
+    # local metadata instead of rereading all 32B weights on every service start.
+    def fingerprint(path, *, contents):
+        if contents:
+            digest = hashlib.sha256()
+            with path.open("rb") as stream:
+                for block in iter(lambda: stream.read(1024 * 1024), b""):
+                    digest.update(block)
+            return {"name": path.name, "sha256": digest.hexdigest()}
+        stat = path.stat()
+        return {"name": path.name, "bytes": stat.st_size, "mtime_ns": stat.st_mtime_ns}
+    metadata = ("config.json", "generation_config.json", "model.safetensors.index.json",
+                "tokenizer_config.json", "tokenizer.json", "vocab.json", "merges.txt")
+    assets = {"base_dir": str(base.resolve()), "adapter_dir": str(adapter.resolve()) if adapter else None,
+              "model": model_name, "max_context": max_context,
+              "base": [fingerprint(base / name, contents=True) for name in metadata if (base / name).is_file()],
+              "base_weights": [fingerprint(path, contents=False) for path in sorted(base.glob("*.safetensors"))]}
+    if adapter:
+        assets["adapter"] = [fingerprint(path, contents=True) for path in sorted(adapter.iterdir())
+                             if path.is_file() and (path.name in {"adapter_config.json", "tokenizer_config.json",
+                                                                  "tokenizer.json", "adapter_model.bin"}
+                                                    or path.name.endswith(".safetensors"))]
+    return hashlib.sha256(json.dumps(assets, sort_keys=True).encode()).hexdigest()
+
+
 class AdapterGenerator:
     def __init__(self, base_dir: str, adapter_dir: str | None = None, *, model_name: str, max_context: int = 32768):
+        self.memory_guard = validate_memory_guard()
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         base, adapter = Path(base_dir), Path(adapter_dir) if adapter_dir is not None else None
         if not (base / "config.json").is_file() or adapter is not None and not (adapter / "adapter_config.json").is_file():
             raise ValueError("local_base_and_adapter_required")
+        if isinstance(max_context, bool) or not isinstance(max_context, int) or max_context < 1:
+            raise ValueError("invalid_max_context")
         tokenizer_dir = adapter if adapter is not None and (adapter / "tokenizer_config.json").is_file() else base
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_dir, local_files_only=True)
         placement = {}
@@ -27,14 +69,16 @@ class AdapterGenerator:
             placement["max_memory"] = {index: int(torch.cuda.mem_get_info(index)[0] * 0.75)
                                         for index in range(torch.cuda.device_count())}
         model = AutoModelForCausalLM.from_pretrained(base, local_files_only=True, torch_dtype=torch.bfloat16,
-                                                    device_map="auto", attn_implementation="sdpa", **placement)
+                                                    device_map="balanced", attn_implementation="sdpa", **placement)
         self.adapter_loaded = adapter is not None
         if adapter is not None:
             from peft import PeftModel
             model = PeftModel.from_pretrained(model, adapter, local_files_only=True, is_trainable=False)
         self.model = model.eval()
         self.model.config.use_cache = True
-        self.model_name, self.max_context = model_name, max_context
+        native_context = getattr(self.model.config, "max_position_embeddings", max_context)
+        self.model_name, self.max_context = model_name, min(max_context, native_context)
+        self.model_identity = _model_identity(base, adapter, model_name, self.max_context)
 
     def complete(self, payload: dict) -> dict:
         import torch
@@ -46,15 +90,17 @@ class AdapterGenerator:
         options = payload.get("chat_template_kwargs", {})
         if options.get("enable_thinking", False) is not False or payload.get("thinking", {}).get("type") == "enabled":
             raise ValueError("this_adapter_requires_nonthinking_generation")
-        budget = payload.get("max_tokens", 12288)
-        if isinstance(budget, bool) or not isinstance(budget, int) or budget < 1:
+        requested_budget = payload.get("max_tokens", 12288)
+        if isinstance(requested_budget, bool) or not isinstance(requested_budget, int) or requested_budget < 1:
             raise ValueError("invalid_max_tokens")
         text = self.tokenizer.apply_chat_template(smiles_messages(payload.get("messages")), tools=payload.get("tools"),
                                                   tokenize=False, add_generation_prompt=True, enable_thinking=False)
         inputs = self.tokenizer(text, add_special_tokens=False, return_tensors="pt", truncation=False)
         prompt_tokens = inputs["input_ids"].shape[-1]
-        if prompt_tokens + budget > self.max_context:
+        remaining = self.max_context - prompt_tokens
+        if remaining < 1:
             raise ValueError("context_budget_exceeded_no_truncation")
+        budget = min(requested_budget, remaining)
         inputs = {key: value.to(self.model.get_input_embeddings().weight.device) for key, value in inputs.items()}
         with torch.inference_mode():
             generated = self.model.generate(**inputs, max_new_tokens=budget, do_sample=False,
@@ -76,7 +122,11 @@ class AdapterGenerator:
         return {"id": "chatcmpl_" + uuid4().hex, "object": "chat.completion", "model": self.model_name,
                 "choices": [{"index": 0, "message": message, "finish_reason": finish}],
                 "usage": {"prompt_tokens": prompt_tokens, "completion_tokens": len(tokens),
-                          "total_tokens": prompt_tokens + len(tokens)}}
+                          "total_tokens": prompt_tokens + len(tokens)},
+                "generation_budget": {"requested_max_tokens": requested_budget, "max_new_tokens": budget,
+                                      "prompt_tokens": prompt_tokens, "max_context": self.max_context,
+                                      "remaining_context_tokens": remaining, "reduced": budget < requested_budget,
+                                      "input_truncated": False}}
 
 
 def create_handler(generator):
@@ -94,7 +144,9 @@ def create_handler(generator):
                 self.reply(404, {"error": "not_found"})
                 return
             self.reply(200, {"status": "ok", "model": generator.model_name,
-                             "adapter_loaded": generator.adapter_loaded, "enable_thinking": False})
+                             "adapter_loaded": generator.adapter_loaded, "enable_thinking": False,
+                             "model_identity": generator.model_identity, "max_context": generator.max_context,
+                             "memory_guard": generator.memory_guard, "generation": "greedy_remaining_context.v1"})
 
         def do_POST(self):
             if self.path != "/v1/chat/completions":
@@ -108,10 +160,12 @@ def create_handler(generator):
                 if not isinstance(payload, dict):
                     raise ValueError("request_must_be_object")
                 self.reply(200, generator.complete(payload))
-            except (ValueError, TypeError, KeyError):
-                self.reply(400, {"error": "invalid_generation_request"})
-            except Exception:
-                self.reply(500, {"error": "adapter_generation_failed"})
+            except (ValueError, TypeError, KeyError) as exc:
+                self.reply(400, {"error": "invalid_generation_request", "reason": str(exc)})
+            except Exception as exc:
+                name = type(exc).__name__
+                self.reply(500, {"error": "cuda_out_of_memory" if name == "OutOfMemoryError"
+                                else "adapter_generation_failed", "exception_type": name})
 
         def log_message(self, *_args):
             pass

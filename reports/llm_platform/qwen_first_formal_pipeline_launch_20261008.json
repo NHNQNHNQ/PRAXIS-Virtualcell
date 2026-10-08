@@ -1,0 +1,135 @@
+{
+  "schema_version": "praxis.qwen-first-formal-launch.v1",
+  "status": "running_baseline_formal_sft_queued",
+  "launch": {
+    "unit": "praxis-qwen-first-formal-contract-20261008.service",
+    "started_at": "2026-10-08T12:23:54.370134+00:00",
+    "pilot_manifest_sha256": "523c221210ada9bcdd27360752becf96ca927a9ae0cb5d70fc89464e65b90a83",
+    "host_available_gib_before": 492.46649169921875,
+    "GPU_MiB_before": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "controller_properties": {
+      "RuntimeMaxUSec": "2d",
+      "MainPID": "33556",
+      "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-first-formal-contract-20261008.service",
+      "MemoryHigh": "402653184",
+      "MemoryMax": "536870912",
+      "MemorySwapMax": "0",
+      "KillMode": "mixed",
+      "ActiveState": "active",
+      "SubState": "running"
+    }
+  },
+  "snapshot": {
+    "checked_at": "2026-10-08T12:26:34.448615+00:00",
+    "pipeline_status": "running",
+    "stage": "baseline",
+    "processed_baseline_records": 1,
+    "baseline_status_counts": {
+      "completed": 1
+    },
+    "latest_predictions": [
+      {
+        "status": "completed",
+        "reason": null,
+        "elapsed_seconds": 32.806,
+        "turns": 1
+      }
+    ],
+    "host_available_gib": 489.8428153991699,
+    "gpu_workers": [
+      {
+        "unit": "praxis-qwen-6a6139099d444f36.service",
+        "properties": {
+          "MainPID": "33561",
+          "OOMPolicy": "kill",
+          "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-6a6139099d444f36.service",
+          "KillMode": "control-group",
+          "Description": "PRAXIS Qwen guard e4eca78148974bd09c0eb5a350c6d683",
+          "ActiveState": "active"
+        },
+        "kernel_memory": {
+          "memory.max": "322122547200",
+          "memory.high": "279172874240",
+          "memory.swap.max": "0",
+          "memory.oom.group": "1",
+          "memory.current": "1713782784",
+          "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0"
+        }
+      }
+    ],
+    "formal_training_started": false
+  },
+  "public_token_census": {
+    "status": "passed",
+    "model_loaded": false,
+    "MIC_answers_opened": false,
+    "views": {
+      "validation.inputs.jsonl": {
+        "records": 64,
+        "max_prompt_tokens": 25199,
+        "min_completion_room": 7569
+      },
+      "without_structure.inputs.jsonl": {
+        "records": 32,
+        "max_prompt_tokens": 21425,
+        "min_completion_room": 11343
+      },
+      "without_omics.inputs.jsonl": {
+        "records": 32,
+        "max_prompt_tokens": 8120,
+        "min_completion_room": 24648
+      }
+    }
+  },
+  "data": {
+    "train_records": 7193,
+    "train_sha256": "5da28e1abac12fe55b6f5ce7a5c78f717ae47f81c349ffc60ee053162b26ad77",
+    "baseline_records": 64,
+    "paired_ablation_records_per_view": 32,
+    "reference_strains": 7,
+    "input_identity": "SMILES, exact strain and requested conditions",
+    "assessment_schema_matches_runtime": true,
+    "MIC_answers_opened_during_generation": false,
+    "scoring_dataset": "data/processed/qwen_joint_sft_v3",
+    "scoring_audit": "reports/v3_validation_assay_audit.json",
+    "raw_data_and_base_weights_reused": true
+  },
+  "training_plan": {
+    "precision": "bf16",
+    "algorithm": "LoRA SFT",
+    "lora_r": 16,
+    "world_size": 8,
+    "epoch": 1,
+    "optimizer_steps": 225,
+    "segment_steps": 3,
+    "rank_padding_slots": 7,
+    "checkpoint_resume": "LoRA, Adam, scheduler, Trainer and per-rank RNG",
+    "checkpoint_limit": 3,
+    "fresh_adapter_from_base": true,
+    "output_dir": "outputs/qwen3_32b_joint_lora_v4_compact_formal_20261008",
+    "automatic_retry_after_failure": false
+  },
+  "local_validation": {
+    "passed": 109,
+    "skipped": 9,
+    "skip_reason": "Torch/HF-dependent tests require the remote pinned runtime",
+    "ruff": "passed",
+    "git_diff_check": "passed"
+  },
+  "limitations": [
+    "Launch is not completed training or a final MIC accuracy result.",
+    "The baseline must finish and be scored before formal training starts.",
+    "Pilot results are development validation, not final heldout test results.",
+    "Mechanism human gold is still absent.",
+    "Missing-omics experiment reports remain ineligible for platform admission; mechanical missing-input flags are retained separately from numerical scoring."
+  ]
+}

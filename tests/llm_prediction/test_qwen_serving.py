@@ -3,11 +3,14 @@ from contextlib import nullcontext
 from io import BytesIO
 import sys
 from types import SimpleNamespace
+from pathlib import Path
+import subprocess
 
 import pytest
 
 from praxis_virtualcell.llm_prediction.qwen_serving import QwenAnalysisClient, native_messages, parse_completion, smiles_messages
 from scripts.finetuning.serve_qwen_adapter import AdapterGenerator, create_handler
+from scripts.finetuning import serve_qwen_adapter as serving
 
 
 TOOLS = [{"type": "function", "function": {"name": "query_features"}}]
@@ -57,6 +60,7 @@ def test_serving_loads_existing_base_and_adapter_without_network_or_merging(tmp_
     (adapter / "adapter_config.json").write_text("{}")
     (adapter / "tokenizer_config.json").write_text("{}")
     calls = []
+    monkeypatch.setattr(serving, "validate_memory_guard", lambda: {"verified": True})
     model = SimpleNamespace(config=SimpleNamespace(use_cache=False))
     model.eval = lambda: model
     def load_tokenizer(path, **kwargs):
@@ -69,7 +73,8 @@ def test_serving_loads_existing_base_and_adapter_without_network_or_merging(tmp_
         assert received_model is model
         calls.append(("adapter", path, kwargs))
         return model
-    monkeypatch.setitem(sys.modules, "torch", SimpleNamespace(bfloat16="bf16"))
+    monkeypatch.setitem(sys.modules, "torch", SimpleNamespace(bfloat16="bf16", cuda=SimpleNamespace(
+        is_available=lambda: True, device_count=lambda: 8, mem_get_info=lambda _: (1024 ** 3, 1024 ** 3))))
     monkeypatch.setitem(sys.modules, "transformers", SimpleNamespace(
         AutoTokenizer=SimpleNamespace(from_pretrained=load_tokenizer),
         AutoModelForCausalLM=SimpleNamespace(from_pretrained=load_base)))
@@ -79,9 +84,32 @@ def test_serving_loads_existing_base_and_adapter_without_network_or_merging(tmp_
     assert all(call[2]["local_files_only"] for call in calls)
     assert calls[-1][2]["is_trainable"] is False and generated.model.config.use_cache is True
     assert generated.adapter_loaded is True
+    assert generated.memory_guard == {"verified": True}
+    assert calls[1][2]["device_map"] == "balanced"
+    assert calls[1][2]["max_memory"] == {index: 3 * 1024 ** 3 // 4 for index in range(8)}
     calls.clear()
     baseline = AdapterGenerator(str(base), model_name="base")
     assert [call[0] for call in calls] == ["tokenizer", "base"] and baseline.adapter_loaded is False
+    assert baseline.model_identity != generated.model_identity
+
+
+def test_model_loading_is_refused_before_runtime_import_when_memory_guard_fails(monkeypatch):
+    def refused():
+        raise ValueError("bounded cgroup required")
+    monkeypatch.setattr(serving, "validate_memory_guard", refused)
+    monkeypatch.setitem(sys.modules, "transformers", SimpleNamespace(
+        AutoModelForCausalLM=SimpleNamespace(from_pretrained=lambda *a, **k: pytest.fail("loaded weights"))))
+    with pytest.raises(ValueError, match="bounded cgroup"):
+        AdapterGenerator("unused", model_name="baseline")
+
+
+def test_shared_memory_guard_import_does_not_import_torch():
+    code = ("import sys; from scripts.finetuning.serve_qwen_adapter import validate_memory_guard\n"
+            "try: validate_memory_guard()\n"
+            "except ValueError: pass\n"
+            "assert 'torch' not in sys.modules\n")
+    subprocess.run([sys.executable, "-c", code], cwd=Path(__file__).resolve().parents[2], check=True,
+                   capture_output=True, text=True)
 
 
 def test_http_handler_exposes_openai_completion_shape_without_loading_weights():
@@ -98,6 +126,22 @@ def test_http_handler_exposes_openai_completion_shape_without_loading_weights():
     handler.reply = lambda status, body: replies.append((status, body))
     handler.do_POST()
     assert replies[0][0] == 200 and replies[0][1]["choices"][0]["finish_reason"] == "stop"
+
+
+@pytest.mark.parametrize("name,error", [("OutOfMemoryError", "cuda_out_of_memory"),
+                                       ("RuntimeError", "adapter_generation_failed")])
+def test_http_generation_failures_identify_cuda_oom_for_pipeline_stop(name, error):
+    exception = type(name, (RuntimeError,), {})
+    def complete(_payload):
+        raise exception("generation stopped")
+    Handler = create_handler(SimpleNamespace(model_name="baseline", complete=complete))
+    handler = Handler.__new__(Handler)
+    raw = b'{"model":"baseline"}'
+    handler.path, handler.headers, handler.rfile = "/v1/chat/completions", {"Content-Length": str(len(raw))}, BytesIO(raw)
+    replies = []
+    handler.reply = lambda status, body: replies.append((status, body))
+    handler.do_POST()
+    assert replies == [(500, {"error": error, "exception_type": name})]
 
 
 def test_serving_candidate_requires_structure_and_strips_private_name_and_id():
@@ -144,3 +188,48 @@ def test_exhausted_generation_preserves_length_status_and_decoder_keeps_tool_del
         {"role": "user", "content": '{"candidate":{"smiles":"CCO"}}'}]})
     assert result["choices"][0]["finish_reason"] == "length"
     assert result["choices"][0]["message"]["content"] == "<tool_call>{"
+
+
+@pytest.mark.parametrize("prompt_tokens", [8, 10])
+def test_long_prompt_uses_remaining_context_without_truncation_and_keeps_length_failure(monkeypatch, prompt_tokens):
+    monkeypatch.setitem(sys.modules, "torch", SimpleNamespace(inference_mode=nullcontext))
+    class Tensor:
+        shape = (1, prompt_tokens)
+        def to(self, _device):
+            return self
+    class Tokens(list):
+        def tolist(self):
+            return list(self)
+    class Generated:
+        def __getitem__(self, _key):
+            return Tokens([7, 8])
+    class Tokenizer:
+        pad_token_id, eos_token_id = 0, 2
+        def apply_chat_template(self, messages, **kwargs):
+            return "full prompt"
+        def __call__(self, _text, **kwargs):
+            assert kwargs["truncation"] is False
+            return {"input_ids": Tensor()}
+        def decode(self, _tokens, **kwargs):
+            return '{"partial":'
+    calls = []
+    def generate(**kwargs):
+        calls.append(kwargs)
+        assert kwargs["max_new_tokens"] == 2 and kwargs["input_ids"].shape == (1, 8)
+        return Generated()
+    generator = AdapterGenerator.__new__(AdapterGenerator)
+    generator.model_name, generator.max_context, generator.tokenizer = "baseline", 10, Tokenizer()
+    generator.model = SimpleNamespace(generation_config=SimpleNamespace(eos_token_id=2), generate=generate,
+        get_input_embeddings=lambda: SimpleNamespace(weight=SimpleNamespace(device="cpu")))
+    payload = {"model": "baseline", "max_tokens": 12288,
+               "messages": [{"role": "user", "content": '{"candidate":{"smiles":"CCO"}}'}]}
+    if prompt_tokens == 10:
+        with pytest.raises(ValueError, match="context_budget_exceeded_no_truncation"):
+            generator.complete(payload)
+        assert not calls
+    else:
+        result = generator.complete(payload)
+        assert result["generation_budget"] == {"requested_max_tokens": 12288, "max_new_tokens": 2,
+            "prompt_tokens": 8, "max_context": 10, "remaining_context_tokens": 2, "reduced": True,
+            "input_truncated": False}
+        assert result["choices"][0]["finish_reason"] == "length"

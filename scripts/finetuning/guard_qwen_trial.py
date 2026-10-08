@@ -31,14 +31,14 @@ PROPERTIES = ("Id", "Description", "LoadState", "ActiveState", "SubState", "Resu
               "ControlGroup", "KillMode", "OOMPolicy", "ExecMainStatus")
 
 
-def _command(argv):
-    return subprocess.run(argv, check=True, capture_output=True, text=True, timeout=15)
+def _command(argv, timeout=15):
+    return subprocess.run(argv, check=True, capture_output=True, text=True, timeout=timeout)
 
 
-def _unit_properties(unit):
+def _unit_properties(unit, timeout=15):
     try:
         result = _command(["systemctl", "--user", "show", unit,
-                           "--property=" + ",".join(PROPERTIES)])
+                           "--property=" + ",".join(PROPERTIES)], timeout=timeout)
     except subprocess.CalledProcessError as exc:
         if "LoadState=not-found" not in (exc.stdout or "").splitlines():
             raise
@@ -103,7 +103,7 @@ def _cgroup_members(props):
 
 def _stop_owned_unit(unit, description):
     # A failed launch must never kill an unrelated unit that reused the name.
-    props = _unit_properties(unit)
+    props = _unit_properties(unit, timeout=5)
     if props.get("Id") != unit or props.get("Description") != description:
         return False
     actions = []
@@ -113,7 +113,7 @@ def _stop_owned_unit(unit, description):
     errors = []
     for action in actions:
         try:
-            _command(["systemctl", "--user", *action])
+            _command(["systemctl", "--user", *action], timeout=5)
         except (OSError, subprocess.SubprocessError) as exc:
             errors.append(str(exc))
     if errors:
@@ -239,10 +239,12 @@ def run_guard(args):
     except (Exception, KeyboardInterrupt) as exc:
         report["failure_reason"] = str(exc)
     finally:
+        for signum in old_handlers:
+            signal.signal(signum, signal.SIG_IGN)
         if launched:
             try:
                 report["cleanup_owned_unit"] = _stop_owned_unit(unit, description)
-                final = _unit_properties(unit)
+                final = _unit_properties(unit, timeout=5)
                 report["cleanup_result"] = final.get("Result")
                 report["result"] = report["result"] or final.get("Result")
                 report["cleanup_active_state"] = final.get("ActiveState")

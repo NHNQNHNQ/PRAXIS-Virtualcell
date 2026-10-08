@@ -1,17 +1,13 @@
-# Formal full training remains paused; only the separate engineering trial is authorized.
-# Chunked projection+CE and contiguous 2D head passed longest-context backward on 53.
-# CPU: 4 native + 4 chunk + 4 offload/GC cases, 222 gradient comparisons passed.
-# Max loss/gradient differences: 4.77e-7 / 2.98e-8; 7,193-row preflight passed (31,740 tokens).
-# GPU attempts 1/2 stopped at 0 steps: RMSNorm OOM, then 3D-head checkpoint metadata mismatch.
-# Pinned offload hung at the first save after 3 steps; user rebooted, checkpoint was empty.
-# Unpinned CPU offload is deployed; 222 gradient checks and guarded cold save/reload passed.
-# GPU entry requires verified cgroup limits; guarded 12-step save/resume/export trial passed.
-# Trial success establishes engineering operation, not independent MIC prediction accuracy.
+# Authorized first formal epoch: all 7,193 records, fresh LoRA in a new output.
+# Guarded 12-step save/resume/export and full 31,740-token backward passed.
+# One 225-step LR schedule is retained across guarded three-step segments.
+# Each segment has max300GiB/high260GiB/swap0/host160GiB and a 40-minute deadline.
+# Engineering verification does not establish independent MIC prediction accuracy.
 # Verification: reports/llm_platform/qwen_v4_compact_trial_verification_20261008.json
 model_id: Qwen/Qwen3-32B
 model_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/models/Qwen3-32B
 data_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/qwen_joint_sft_v4_compact
-output_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_compact
+output_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_compact_formal_20261008
 require_assessment_supervision: true
 sampling:
   # Each source component is visited once per epoch. Mechanism rows are not repeated.
@@ -41,6 +37,7 @@ lora:
 training:
   ddp_timeout: 600
   num_train_epochs: 1
+  max_steps: 225
   learning_rate: 0.00005
   per_device_train_batch_size: 1
   gradient_accumulation_steps: 4
@@ -49,12 +46,12 @@ training:
   lr_scheduler_type: cosine
   weight_decay: 0.0
   max_grad_norm: 1.0
-  logging_steps: 10
+  logging_steps: 1
   seed: 20261008
   data_seed: 20261008
   optim: adamw_torch
   save_strategy: 'steps'
-  save_steps: 25
+  save_steps: 3
   save_total_limit: 3
   eval_strategy: 'no'
   report_to: 'none'

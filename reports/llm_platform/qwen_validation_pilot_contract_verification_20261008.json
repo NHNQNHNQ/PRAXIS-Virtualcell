@@ -1,0 +1,94 @@
+{
+  "schema": "praxis.public-validation-pilot-contract-verification.v1",
+  "date": "2026-10-08",
+  "status": "public_platform_contract_added_same_records_and_evidence",
+  "pilot_dir": "local/joint_dataset_20261008/evaluation_pilot_v4_contract_20261008",
+  "manifest_sha256": "523c221210ada9bcdd27360752becf96ca927a9ae0cb5d70fc89464e65b90a83",
+  "old_pilot_dir": "local/joint_dataset_20261008/evaluation_pilot_v4_20261008",
+  "old_manifest_sha256": "1aa8e1a3835f8a0938a2872eb30b08ce0ca6d3cf8cd93753b163b0128a852061",
+  "record_count": 64,
+  "paired_ablation_record_count": 32,
+  "view_counts": {
+    "validation.inputs.jsonl": 64,
+    "without_omics.inputs.jsonl": 32,
+    "without_structure.inputs.jsonl": 32
+  },
+  "seed_unchanged": true,
+  "main_ID_order_unchanged": true,
+  "paired_ID_order_unchanged": true,
+  "all_views_exactly_unchanged_except_user_assessment_schema": true,
+  "assessment_schema": {
+    "source": "Assessment.model_json_schema(); same public contract as platform workflow",
+    "sha256": "e215a40fb8b6200aef23ee0787c4a366e54f1df73d305c41a34e3e713bc577e0",
+    "all_views_same_contract": true
+  },
+  "schema_validation": "exact equality to Assessment.model_json_schema(), rejecting added labels or changed numerical defaults",
+  "schema_matches_runtime_workflow": true,
+  "schema_source": "praxis_virtualcell.llm_prediction.schemas.Assessment; workflow request assessment_schema",
+  "retained_tool_messages_compared": 422,
+  "tool_messages_exactly_unchanged": true,
+  "tools_and_system_messages_exactly_unchanged": true,
+  "prior_live_tool_replay_receipt": {
+    "path": "reports/llm_platform/qwen_validation_pilot_verification_20261008.json",
+    "sha256": "e79ccf986410f0b9de5bdd44cf2a17306dc7fd1278612ac788d597553ef13fdd",
+    "calls_replayed": 211,
+    "mismatches": 0,
+    "inherited_by_exact_public_tool_message_equality": true,
+    "repeated_211_tool_check": false
+  },
+  "files": {
+    "validation.inputs.jsonl": {
+      "sha256": "ca9f68efde69e4b5e5ba3b145e07704727370944f0e61c901e76932deacb8bf7",
+      "records": 64
+    },
+    "without_structure.inputs.jsonl": {
+      "sha256": "6b7544bb5dc3f2c8e7103b89dbec87f4c38948c7600e5382df5427c6a9b2d021",
+      "records": 32
+    },
+    "without_omics.inputs.jsonl": {
+      "sha256": "9e3fef7c8235739ef4967aef78ecc995bac05df921cfeb737b777835811203d2",
+      "records": 32
+    }
+  },
+  "species_reference_counts": {
+    "287:auxiliary": 8,
+    "287:omics": 8,
+    "470:auxiliary": 8,
+    "470:omics": 8,
+    "562:auxiliary": 8,
+    "562:omics": 8,
+    "573:auxiliary": 8,
+    "573:omics": 8
+  },
+  "reference_profile_counts": {
+    "STRAIN-287-ATCC-27853-1743eb40dbce-REFERENCE": 8,
+    "STRAIN-470-AYE-176f14b18ad5-REFERENCE": 2,
+    "STRAIN-562-ATCC-25922-7beb95c60304-REFERENCE": 8,
+    "STRAIN-573-ATCC-10031-7bc56c4210de-REFERENCE": 8,
+    "AB5075-STRAIN-REFERENCE": 2,
+    "STRAIN-470-ATCC-19606-0015a2b95dd6-REFERENCE": 2,
+    "STRAIN-470-ATCC-17978-22717771efbd-REFERENCE": 2
+  },
+  "private_answers_opened": 0,
+  "MIC_labels_opened": 0,
+  "raw_assets_copied": false,
+  "prediction_runs": 0,
+  "training_runs": 0,
+  "original_v3_v4_modified": false,
+  "formal_training_record_count": 7193,
+  "formal_training_SHA256": "5da28e1abac12fe55b6f5ce7a5c78f717ae47f81c349ffc60ee053162b26ad77",
+  "tests": {
+    "passed": 11,
+    "ruff": "passed"
+  },
+  "scoring": {
+    "dataset": "data/processed/qwen_joint_sft_v3",
+    "audit": "reports/v3_validation_assay_audit.json",
+    "pilot_subset": true,
+    "source_path_map": "data/source_refs/source_path_map.json"
+  },
+  "limitations": [
+    "This adds the public response schema only; it is not evidence of prediction accuracy.",
+    "Historical failed baseline inputs/outputs and the original pilot report remain preserved."
+  ]
+}
