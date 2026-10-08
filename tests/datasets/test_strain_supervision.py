@@ -80,6 +80,29 @@ def test_inference_messages_exclude_private_answers_and_answer_papers(tmp_path, 
             assert forbidden not in input_text
 
 
+def test_source_context_quarantine_keeps_valid_measurement_in_same_group(tmp_path, monkeypatch):
+    summary, _, _ = source_cases(tmp_path, monkeypatch)
+    output = tmp_path / "training"
+    result = prepare_strain_supervision(
+        summary, output, exclude_training_records={"experiment:2": "co-agent assay"})
+    assert result["training_record_count"] == 2
+    assert result["training_MIC_measurement_count"] == 2
+    assert result["quarantined_training_measurement_count"] == 1
+    rows = [json.loads(line) for line in (output / "mic_sft.jsonl").read_text().splitlines()]
+    assert {case for row in rows for case in row["case_ids"]} == {"opaque-1", "opaque-3"}
+    assert "999" not in (output / "mic_sft.jsonl").read_text()
+    quarantine = json.loads((output / "quarantined_training_measurements.jsonl").read_text())
+    assert quarantine["case_id"] == "opaque-2"
+
+
+@pytest.mark.parametrize("record_id", ["experiment:4", "experiment:missing"])
+def test_quarantine_must_identify_a_training_measurement(tmp_path, monkeypatch, record_id):
+    summary, _, _ = source_cases(tmp_path, monkeypatch)
+    with pytest.raises(ValueError, match="quarantine_requires"):
+        prepare_strain_supervision(summary, tmp_path / "training",
+                                  exclude_training_records={record_id: "review required"})
+
+
 def test_source_changes_and_wrong_record_locator_stop_training(tmp_path, monkeypatch):
     summary, cases, labels = source_cases(tmp_path, monkeypatch)
     labels.write_text(labels.read_text() + "\n")

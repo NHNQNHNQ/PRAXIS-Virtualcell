@@ -1,5 +1,6 @@
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 
@@ -109,3 +110,59 @@ def test_joint_rejects_unbound_answers_or_changed_source(pilot, mutation):
     with pytest.raises(ValueError):
         prepare_joint_supervision(source, literature, reviews, output)
     assert not output.exists()
+
+
+def test_joint_native_DOI_case_differences_preserve_original_metadata(pilot):
+    source, literature, reviews, output, annotation, _, _ = pilot
+    article = literature / "article.xml"
+    article.write_text(article.read_text().replace("10.1/pilot", "10.1/PILOT"))
+    asset = {"file": str(article), "sha256": hashlib.sha256(article.read_bytes()).hexdigest()}
+    parsed = parse_jats(article.read_bytes(), paper_id="paper:pilot", source=asset)
+    (literature / "passages.jsonl").write_text("".join(json.dumps(row) + "\n" for row in parsed["passages"]))
+    paper = json.loads((literature / "papers.jsonl").read_text())
+    paper["article"] = asset
+    (literature / "papers.jsonl").write_text(json.dumps(paper) + "\n")
+    annotation["doi"] = "10.1/Pilot"
+    reviews.write_text(json.dumps({"schema_version": "praxis.literature-reviews.v1", "annotations": [annotation]}))
+    result = prepare_joint_supervision(source, literature, reviews, output)
+    assert result["record_count"] == 1
+    private = json.loads((output / "private_literature_reviews.jsonl").read_text())
+    assert private["annotation"]["doi"] == "10.1/Pilot"
+    assert private["binding_evidence"][0]["doi"] == "10.1/pilot"
+    assert parsed["identifiers"]["doi"] == "10.1/PILOT"
+
+
+def test_joint_groups_MIC_sources_but_binds_mechanism_to_explicit_paper_subset(pilot):
+    source, literature, reviews, output, annotation, _, component = pilot
+    private_path = source / 'private_training_sources.jsonl'
+    private = json.loads(private_path.read_text())
+    first = private['private_sources'][0]['locator']
+    answer_path = Path(first['path'])
+    original = answer_path.read_bytes()
+    second = {'record_id': 'label-two', 'molecule': {'source_molecule_id': 'CHEMBL2', 'canonical_smiles': 'CCO'},
+              'source': {'document_id': 'DOC2'}}
+    answer_path.write_bytes(original + (json.dumps(second) + '\n').encode())
+    digest = hashlib.sha256(answer_path.read_bytes()).hexdigest()
+    first['sha256'] = digest
+    private['private_sources'].append({'case_id': 'case-two', 'locator': {
+        'path': str(answer_path), 'sha256': digest, 'byte_offset': len(original), 'record_id': 'label-two'}})
+    private_path.write_text(json.dumps(private) + '\n')
+    component.update(case_ids=['case-one', 'case-two'], source_case_count=2)
+    component['messages'][-1]['content'] = json.dumps({'endpoint': 'MIC', 'observations': [{'value': 2}, {'value': 4}]})
+    (source / 'mic_sft.jsonl').write_text(json.dumps(component) + '\n')
+    annotation.update(case_ids=['case-one', 'case-two'], mechanism_case_ids=['case-one'])
+    reviews.write_text(json.dumps({'schema_version': 'praxis.literature-reviews.v1', 'annotations': [annotation]}))
+    summary_path = source / 'summary.json'
+    summary = json.loads(summary_path.read_text())
+    for name in summary['files']:
+        summary['files'][name]['sha256'] = hashlib.sha256((source / name).read_bytes()).hexdigest()
+    summary_path.write_text(json.dumps(summary))
+    report = prepare_joint_supervision(source, literature, reviews, output)
+    assert report['MIC_measurement_count'] == 2
+    target = json.loads(json.loads((output / 'joint_sft.jsonl').read_text())['messages'][-1]['content'])
+    assert target['observations'] == [{'value': 2}, {'value': 4}]
+    # The second MIC publication cannot impersonate the first paper's mechanism.
+    annotation['mechanism_case_ids'] = ['case-two']
+    reviews.write_text(json.dumps({'schema_version': 'praxis.literature-reviews.v1', 'annotations': [annotation]}))
+    with pytest.raises(ValueError, match='bound_to_paper'):
+        prepare_joint_supervision(source, literature, reviews, output.parent / 'bad-subset')

@@ -31,19 +31,29 @@ class Quote(_Strict):
 class Claim(_Strict):
     statement: str = Field(min_length=1)
     evidence_grade: Literal["experimental", "genetic", "author_proposed", "class_background", "unresolved"]
-    experiment_type: Literal["phenotypic_rescue", "time_kill", "target_binding", "genetic", "author_hypothesis", "class_background", "not_identified"]
+    experiment_type: Literal["phenotypic_rescue", "time_kill", "checkerboard_synergy", "target_binding", "enzyme_inhibition", "enzyme_hydrolysis", "genetic", "author_hypothesis", "class_background", "not_identified"]
+    mechanism_role: Literal["drug_target", "resistance_mechanism", "activity_modifier", "unresolved"] = "unresolved"
     target_names: list[str]
     quotes: list[Quote] = Field(min_length=1)
 
     @model_validator(mode="after")
     def preserve_experiment_grade(self):
         expected = {"phenotypic_rescue": "experimental", "time_kill": "experimental", "target_binding": "experimental",
+                    "enzyme_inhibition": "experimental",
+                    "enzyme_hydrolysis": "experimental",
+                    "checkerboard_synergy": "experimental",
                     "genetic": "genetic", "author_hypothesis": "author_proposed",
                     "class_background": "class_background", "not_identified": "unresolved"}
         if self.evidence_grade != expected[self.experiment_type]:
             raise ValueError("mechanism_experiment_and_grade_conflict")
         if self.experiment_type == "target_binding" and not self.target_names:
             raise ValueError("target_binding_requires_identified_target")
+        if self.experiment_type == "enzyme_inhibition" and not self.target_names:
+            raise ValueError("enzyme_inhibition_requires_identified_enzyme")
+        if self.experiment_type == "enzyme_hydrolysis" and (not self.target_names or self.mechanism_role != "resistance_mechanism"):
+            raise ValueError("hydrolysis_requires_resistance_enzyme_not_drug_target")
+        if self.experiment_type == "checkerboard_synergy" and self.mechanism_role != "activity_modifier":
+            raise ValueError("checkerboard_synergy_is_activity_modifier_not_binding")
         if self.experiment_type == "not_identified" and self.target_names:
             raise ValueError("unresolved_mechanism_cannot_supply_verified_target")
         return self
@@ -58,6 +68,9 @@ class CompoundMapping(_Strict):
 class Annotation(_Strict):
     component_record_id: str
     case_ids: list[str] = Field(min_length=1)
+    # One grouped MIC component may contain the same compound reported in
+    # several papers. Mechanism evidence belongs to an explicit source subset.
+    mechanism_case_ids: list[str] | None = Field(default=None, min_length=1)
     doi: str
     compound_paper_name: str = Field(min_length=1)
     compound_mapping: CompoundMapping
@@ -96,7 +109,7 @@ def prepare_joint_supervision(supervision_dir, literature_dir, reviews_path, out
     components = {row["record_id"]: row for row in _rows(source / "mic_sft.jsonl")}
     private_sources = {row["record_id"]: row["private_sources"] for row in _rows(source / "private_training_sources.jsonl")}
     queue = {row["MIC_training_record_id"]: row for row in _rows(source / "joint_review_queue.jsonl")}
-    papers = {row["doi"]: row for row in _rows(literature / "papers.jsonl")}
+    papers = {row["doi"].strip().casefold(): row for row in _rows(literature / "papers.jsonl")}
     passages = {row["passage_id"]: row for row in _rows(literature / "passages.jsonl")}
     reviews = Reviews.model_validate_json(Path(reviews_path).read_text())
     seen, native_passages = set(), {}
@@ -112,8 +125,11 @@ def prepare_joint_supervision(supervision_dir, literature_dir, reviews_path, out
         if asset not in native_passages:
             if _digest(Path(asset[0])) != asset[1]:
                 raise ValueError("reviewed_literature_source_changed")
-            from .literature import parse_jats
-            parsed = parse_jats(Path(asset[0]).read_bytes(), paper_id=paper["paper_id"], source=locator)
+            from .literature import parse_article_source
+            native_source = {**paper["article"], "file": asset[0], "sha256": asset[1]}
+            parsed = parse_article_source(Path(asset[0]).read_bytes(), paper_id=paper["paper_id"], source=native_source)
+            if str(parsed["identifiers"].get("doi") or "").strip().casefold() != paper["doi"].strip().casefold():
+                raise ValueError("reviewed_article_DOI_mismatch")
             native_passages[asset] = {item["passage_id"]: item for item in parsed["passages"]}
         if native_passages[asset].get(quote.passage_id) != passage:
             raise ValueError("reviewed_passage_does_not_match_native_article")
@@ -130,8 +146,10 @@ def prepare_joint_supervision(supervision_dir, literature_dir, reviews_path, out
             raise ValueError("joint_supervision_requires_train_component")
         if set(annotation.case_ids) != set(component["case_ids"]):
             raise ValueError("joint_annotation_must_cover_all_grouped_cases")
-        paper = papers[annotation.doi]
-        if not set(annotation.case_ids).issubset(paper["case_ids"]):
+        paper = papers[annotation.doi.strip().casefold()]
+        mechanism_cases = set(annotation.mechanism_case_ids or annotation.case_ids)
+        if (not mechanism_cases or not mechanism_cases.issubset(annotation.case_ids)
+                or not mechanism_cases.issubset(paper["case_ids"])):
             raise ValueError("joint_review_case_not_bound_to_paper")
         if paper["status"] != "open_fulltext_parsed":
             raise ValueError("joint_review_requires_verified_fulltext")
@@ -151,9 +169,10 @@ def prepare_joint_supervision(supervision_dir, literature_dir, reviews_path, out
                 stream.seek(locator["byte_offset"])
                 answer = json.loads(stream.readline())
             if (answer["record_id"] != locator["record_id"]
-                    or native["molecule_chembl_id"] != answer["molecule"]["source_molecule_id"]
-                    or native["document_chembl_id"] != answer["source"]["document_id"]
-                    or answer["molecule"]["canonical_smiles"] != pending["input"]["candidate"]["smiles"]):
+                    or answer["molecule"]["canonical_smiles"] != pending["input"]["candidate"]["smiles"]
+                    or member["case_id"] in mechanism_cases and (
+                        native["molecule_chembl_id"] != answer["molecule"]["source_molecule_id"]
+                        or native["document_chembl_id"] != answer["source"]["document_id"])):
                 raise ValueError("joint_compound_structure_or_document_mismatch")
         bindings = [verify(quote, paper) for quote in annotation.binding_quotes]
         claims = []

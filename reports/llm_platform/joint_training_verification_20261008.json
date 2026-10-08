@@ -1,0 +1,267 @@
+{
+  "schema_version": "praxis.joint-training-preparation-verification.v1",
+  "date": "2026-10-08",
+  "status": "prepared_verified_not_trained",
+  "server_workspace": "zkyd@10.102.106.53:/home/zkyd/data1/mzy/qwen-PRAXIS-MIC",
+  "data_dir": "data/processed/qwen_joint_sft_v2",
+  "inspection_dir": "data/processed/qwen_joint_inspection_v2",
+  "training": {
+    "training_record_count": 7204,
+    "training_MIC_measurement_count": 7394,
+    "mechanism_training_records": 104,
+    "training_with_omics_records": 1950,
+    "training_omics_view_count": 7,
+    "upstream_quarantined_MIC_measurement_count": 380,
+    "upstream_quarantine_reason_counts": {
+      "confirmed_cotreatment_requires_structured_combination_input": 174,
+      "pending_native_strain_identity_review": 30,
+      "unencoded_complemented_construct": 29,
+      "unencoded_distinct_gene_mutants": 18,
+      "unencoded_gene_deficient_derivative": 3,
+      "unencoded_additional_plasmid_construct": 5,
+      "unencoded_distinct_plasmid_constructs": 17,
+      "unencoded_distinct_gene_constructs": 14,
+      "unencoded_reference_construct": 27,
+      "in_vivo_endpoint_requires_confirmation": 4,
+      "source_stated_resistant_background_requires_identity_review": 7,
+      "confirmed_post_exposure_subculture_history_endpoint": 27,
+      "confirmed_in_vivo_endpoint_not_standard_MIC": 2,
+      "confirmed_other_drug_MIC_at_fixed_candidate_concentration": 4,
+      "MIC measured on bacteria after serial passage under clarithromycin; 2/6/9 days denote resistance-evolution history, not incubation duration. The resultant population is a derived resistant AB5075 lineage and lacks exact matching omics; do not join untreated baseline AB5075 reference omics.": 3,
+      "other_drug_MIC_at_fixed_candidate_dose": 8,
+      "unencoded_vector_or_complemented_derivative": 2,
+      "unencoded_distinct_reference_constructs": 3,
+      "unencoded_reference_transformant": 2,
+      "unencoded_transformant": 1
+    },
+    "mechanism_claim_grades": {
+      "unresolved": 50,
+      "author_proposed": 15,
+      "experimental": 37,
+      "class_background": 6,
+      "genetic": 20
+    },
+    "heldout_native_assay_context_review": "pending_before_formal_scoring"
+  },
+  "joint": {
+    "MIC_measurement_count": 110,
+    "table_counts": {
+      "record": 104,
+      "drug": 104,
+      "strain": 4,
+      "profile": 4,
+      "paper": 7,
+      "record_case": 110
+    },
+    "modalities": {
+      "genome+proteome+transcriptome": 35,
+      "genome": 69
+    },
+    "strain_records": {
+      "AB5075": 35,
+      "ATCC 19606": 43,
+      "ATCC 17978": 18,
+      "AYE": 8
+    },
+    "mechanism_claim_count": 128,
+    "rows_with_named_target_or_resistance_enzyme": 51,
+    "rows_without_named_target": 53,
+    "human_gold": false
+  },
+  "source_condition_enrichment_records": 332,
+  "native_source_verification": {
+    "schema_version": "praxis.joint-native-source-verification.v1",
+    "status": "passed",
+    "training_records_checked": 7204,
+    "training_MIC_measurements_checked": 7394,
+    "joint_records_checked": 104,
+    "mechanism_source_subset_cases_checked": 104,
+    "mechanism_claims_checked": 128,
+    "native_quotes_checked": 380,
+    "mechanism_claim_grades": {
+      "unresolved": 50,
+      "genetic": 20,
+      "class_background": 6,
+      "experimental": 37,
+      "author_proposed": 15
+    },
+    "native_source_files_checked": 21,
+    "native_articles_checked": 7,
+    "quarantined_components_checked": 0,
+    "human_gold_mechanism_records": 0,
+    "heldout_MIC_answers_opened": 0,
+    "raw_omics_or_legacy_SQLite_required": false,
+    "path_map_changes_bytes": false,
+    "original_article_locators_preserved": true,
+    "LLM_calls": 0,
+    "training_runs": 0,
+    "dataset_manifest": {
+      "path": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/qwen_joint_sft_v2/manifest.json",
+      "sha256": "84bd6ed9735d9fa7f0c7c0dbd4145cd09fbbdfec1a6e67c93033b71b68992925"
+    }
+  },
+  "qwen_preflight": {
+    "status": "tokenizer_and_mask_passed",
+    "train_path": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/qwen_joint_sft_v2/train.jsonl",
+    "record_count": 7204,
+    "max_length": 24576,
+    "training_runs": 0,
+    "large_model_loaded": false,
+    "source_trajectory_count": 1950,
+    "heldout_inputs_used_for_training": false,
+    "package_versions": {
+      "torch": "2.6.0",
+      "transformers": "4.57.6",
+      "peft": "0.18.1",
+      "trl": "0.28.0",
+      "accelerate": "1.12.0",
+      "datasets": "4.5.0"
+    },
+    "mask_self_test": {
+      "tokens": 207,
+      "assistant_loss_tokens": 27,
+      "serialized_role_tokens": {
+        "system": 112,
+        "user": 53,
+        "assistant": 37
+      },
+      "status": "passed",
+      "trl_collator_labels_verified": true,
+      "system_user_tool_loss_tokens": 0,
+      "native_template_unchanged": true,
+      "chatml_special_token_offsets_verified": true,
+      "assistant_tool_call_tokens_verified": true
+    },
+    "sparse_assistant_loss_self_test": {
+      "status": "passed",
+      "model": "random_tiny_Qwen3",
+      "device": "cpu",
+      "numeric_cases": 4,
+      "parameter_gradient_comparisons": 74,
+      "max_loss_absolute_error": 4.76837158203125e-07,
+      "max_gradient_absolute_error": 0.0,
+      "full_context_preserved": true,
+      "dense_and_peft_checked": true,
+      "optimizer_steps": 0
+    },
+    "loss_mask_checked": true,
+    "token_lengths_checked": true,
+    "max_observed_tokens": 22227,
+    "total_tokens": 13837997,
+    "assistant_loss_tokens": 710643,
+    "nonassistant_loss_tokens": 0,
+    "truncation_performed": false,
+    "native_template_unchanged": true,
+    "mask_method": "native_chatml_fast_token_offsets",
+    "loss_method": "native_Qwen3_logits_to_keep_and_shift_labels"
+  },
+  "actual_profile_loader_verification": {
+    "status": "passed",
+    "profiles": [
+      {
+        "profile_id": "AB5075-STRAIN-REFERENCE",
+        "strain": "AB5075",
+        "species": {
+          "scientific_name": "Acinetobacter baumannii",
+          "taxonomy_id": "NCBITaxon:470"
+        },
+        "available_modalities": [
+          "genome",
+          "transcriptome",
+          "proteome"
+        ]
+      },
+      {
+        "profile_id": "STRAIN-470-ATCC-19606-0015a2b95dd6-REFERENCE",
+        "strain": "ATCC 19606",
+        "species": {
+          "scientific_name": "Acinetobacter baumannii",
+          "taxonomy_id": "NCBITaxon:470"
+        },
+        "available_modalities": [
+          "genome"
+        ]
+      },
+      {
+        "profile_id": "STRAIN-470-ATCC-17978-22717771efbd-REFERENCE",
+        "strain": "ATCC 17978",
+        "species": {
+          "scientific_name": "Acinetobacter baumannii",
+          "taxonomy_id": "NCBITaxon:470"
+        },
+        "available_modalities": [
+          "genome"
+        ]
+      },
+      {
+        "profile_id": "STRAIN-470-AYE-176f14b18ad5-REFERENCE",
+        "strain": "AYE",
+        "species": {
+          "scientific_name": "Acinetobacter baumannii",
+          "taxonomy_id": "NCBITaxon:470"
+        },
+        "available_modalities": [
+          "genome"
+        ]
+      },
+      {
+        "profile_id": "STRAIN-562-ATCC-25922-7beb95c60304-REFERENCE",
+        "strain": "ATCC 25922",
+        "species": {
+          "scientific_name": "Escherichia coli",
+          "taxonomy_id": "NCBITaxon:562"
+        },
+        "available_modalities": [
+          "genome"
+        ]
+      },
+      {
+        "profile_id": "STRAIN-287-ATCC-27853-1743eb40dbce-REFERENCE",
+        "strain": "ATCC 27853",
+        "species": {
+          "scientific_name": "Pseudomonas aeruginosa",
+          "taxonomy_id": "NCBITaxon:287"
+        },
+        "available_modalities": [
+          "genome"
+        ]
+      },
+      {
+        "profile_id": "STRAIN-573-ATCC-10031-7bc56c4210de-REFERENCE",
+        "strain": "ATCC 10031",
+        "species": {
+          "scientific_name": "Klebsiella pneumoniae",
+          "taxonomy_id": "NCBITaxon:573"
+        },
+        "available_modalities": [
+          "genome"
+        ]
+      }
+    ],
+    "training_runs": 0
+  },
+  "tests": {
+    "focused_tests_passed": 169,
+    "ruff": "passed"
+  },
+  "training_runs": 0,
+  "LLM_calls": 0,
+  "raw_asset_storage": {
+    "canonical_MIC_labels": "reuse_existing_seven_files",
+    "new_NCBI_raw": "downloaded_once_on_53",
+    "runtime_normalized_omics": "shared_via_Linux_hardlinks",
+    "new_literature_and_mapping_assets": "content_addressed_single_copy",
+    "inspection_SQLite": "summaries_and_locators_only"
+  },
+  "limitations": [
+    "Mechanism paraphrases were source-reviewed by an agent, not a human gold annotation team.",
+    "Same-strain reference omics are not samples paired to the MIC measurement.",
+    "The fixed tool trajectories do not supervise adaptive feature selection.",
+    "Frozen MIC evaluation does not establish held-out mechanism accuracy.",
+    "joint.train.jsonl is an alternative subset of train.jsonl, not an additional training source.",
+    "Joint components replace numeric components; component and measurement counts are not inflated.",
+    "Full held-out native assay context review is pending before formal scoring.",
+    "Current 104 joint records cover four Acinetobacter baumannii strains; other species lack this batch of record-bound mechanism supervision.",
+    "Reference genome CDS annotations do not establish functional resistance or complete variant status."
+  ]
+}

@@ -1,6 +1,61 @@
 # Qwen MIC 工具对话微调准备
 
-本导出训练一个数值组件：分子结构、明确菌株身份、已知条件、实际可用的同株参考组学 → 条件化 MIC 观测分布。它不是完整的活性、杀菌、靶点与机制 `Assessment`，尚未训练模型，也不证明组学改善药效准确率。
+当前联合版本为 **2026-10-08 v2**。53 上存放于 `/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/qwen_joint_sft_v2`，检查索引位于同级 `qwen_joint_inspection_v2`。下文保留 2026-10-07 数值版本的准备记录；它的统计不能代替当前版本。
+
+## 联合版本 v2：药物—菌株—组学—MIC—文献机制
+
+| 范围 | 当前数量 |
+|---|---:|
+| 混合训练组件 / 原始 MIC 测量 | 7,204 / 7,394 |
+| 有同菌株参考组学的组件 / 菌株 | 1,950 / 7 |
+| 五项齐全的联合组件 / MIC 测量 | 104 / 110 |
+| 联合样本的菌株 / 论文 / 机制声明 | 4 / 7 / 128 |
+| 联合样本的单基因组 / 三种参考组学输入 | 69 / 35 |
+| 因实验上下文或身份疑点暂不入训的源测量 | 380 |
+| 补充来源明确实验条件的源记录 | 332 |
+
+联合样本为 AB5075 35 个、ATCC 19606 43 个、ATCC 17978 18 个、AYE 8 个，目前均为鲍曼不动杆菌。混合训练中的另外三个有组学菌株是大肠杆菌 ATCC 25922、铜绿假单胞菌 ATCC 27853、肺炎克雷伯菌 ATCC 10031；它们目前提供 MIC 与参考基因组监督，还没有本批逐化合物核验的文献机制目标。AB5075 使用基因组、转录组、蛋白组参考，其余六株只有基因组参考。新增基因组视图记录 CDS 注释与明确的注释假基因，不等同于完整变异检测、基因功能实验或确定的耐药表型。
+
+128 条机制声明分为实验支持 37、遗传证据 20、作者提出 15、类别背景 6、靶点未确定 50。来源证据的实验物种和条件保留在声明及限制中；其他物种的酶实验或突变实验不改写为目标菌株的直接证据。声明另有 `mechanism_role`，区分药物靶点、耐药机制、活性调节及未确定机制。耐药酶水解证据不能冒充药物杀伤靶点，联用增敏实验也不能替代单药 MIC。
+
+这些是智能体依据原文核对后编写的机制弱监督，**人工金标为 0**。同株参考组学来自独立采集的样本或条件，没有声称与 MIC 培养物配对。工具轨迹复用实际平台的 overview/search/query 返回，但目前是固定查询模板，不能证明模型已学会自适应选择组学特征。这套目标是条件化 MIC 分布及有等级的机制声明，仍不是完整平台 `Assessment`，也没有模型性能或组学有效性结果。
+
+| 文件 | 使用方法 |
+|---|---|
+| `train.jsonl` | 7,204 个混合工具对话；104 个联合目标替换对应数值目标 |
+| `joint.train.jsonl` | 104 个联合目标的替代子集，**不要与 train.jsonl 一起加载** |
+| `source_refs.jsonl` | 私有 MIC 定位、药物与文献绑定、原文证据跨度 |
+| `quarantined_measurements.index.jsonl` | 380 条逐测量隔离原因与来源定位；同组正常测量保留 |
+| `manifest.json` | 数量、文件指纹、证据等级、限制与冻结评估子集 |
+| `qwen_joint_inspection_v2/joint_index.sqlite` | 药物、菌株、组学档案、论文与联合记录的关系索引 |
+| `qwen_joint_inspection_v2/inspection_samples.json` | 10 个可直接检查的结构化样例 |
+
+原始 MIC 文件复用已有单份标签；新文献和化合物映射按内容哈希存于 `data/source_refs/joint_literature_20261008`。新增 NCBI 原件仅下载到 53 的 `data/source_refs/joint_strain_omics_20261008`，平台读取的规范组学资产通过硬链接共享文件。SQLite 只保存小型摘要及 JSONL 的字节定位，不复制完整组学和论文。原始路径保留用于证据身份，53 的实际物理路径由 `source_path_map.json` 映射；来源路径、实测 MIC 和论文原文均不会作为推理答案输入模型。
+
+监督仍仅计算 assistant 工具调用和最终目标的损失，未知实验条件保留为空；原文明确的培养补充、培养基和剂量才补入输入。相同公开输入下的正常重复 MIC 保留为多条实测观测，不取平均、不制造预测置信区间。联用、撤药后培养、其他药物 MIC、动物终点、未编码构建体以及待核菌株歧义均暂不进入混合训练。验证/测试保留原 scaffold 分配及无答案输入，尚未完成全部留出记录的原生实验上下文审阅，正式评分前仍需做这一轮审阅；当前没有独立机制金标测试集。
+
+在 53 工作区运行独立来源核验及全量 tokenizer 预检：
+
+```bash
+cd /home/zkyd/data1/mzy/qwen-PRAXIS-MIC
+
+PYTHONPATH=runtime .venv/bin/python scripts/datasets/verify_joint_sources.py \
+  --dataset-dir data/processed/qwen_joint_sft_v2 \
+  --source-path-map data/source_refs/joint_literature_20261008/source_path_map.json \
+  --report reports/joint_native_sources_20261008.json
+
+.venv/bin/python scripts/finetuning/preflight_qwen.py \
+  --config configs/finetuning/qwen3_32b_joint_lora.yaml \
+  --report reports/joint_qwen_preflight_20261008.json
+```
+
+联合配置沿用官方 Qwen3-32B BF16、LoRA r=16、八卡 FSDP、assistant-only 损失及不截断的 24,576 token 上限；数据和输出路径与 v1 分开，基座共享。上述命令不会启动 32B 训练。正式微调前先抽查联合机制样例，确认监督范围与证据等级；工具模板与完整智能体报告监督还需要后续扩充。
+
+53 实际来源核验通过全部 7,204 个训练组件、7,394 次 MIC、104 个联合组件和 128 条机制声明，逐一检查原文件、字节定位、化合物、菌株及原文跨度。全量官方 tokenizer 与 assistant mask 预检通过，最长 **22,227 token**，没有截断；system/user/tool 的监督 token 为 0。相关本地测试 **169 passed**，Ruff 通过。没有加载或训练原始 32B 模型；之前 v1 的八卡前向结果不能替代当前最长样本的反向传播显存验证。汇总结果见 [实际验证报告](../reports/llm_platform/joint_training_verification_20261008.json)。
+
+## 原数值版本 v1
+
+2026-10-07 导出的是数值组件：分子结构、明确菌株身份、已知条件、实际可用的同株参考组学 → 条件化 MIC 观测分布。它不是完整的活性、杀菌、靶点与机制 `Assessment`，尚未训练模型，也不证明组学改善药效准确率。
 
 下面的重新导出命令在保留原始 `local/strain_training_20261007` 的本机工程中运行。53 已有独立导出的训练文件，使用后文的预检与训练命令，不依赖复制整套原始工程数据。
 

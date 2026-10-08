@@ -88,7 +88,8 @@ def _view(profile_id: str, root: Path) -> dict:
                             "Reference modalities share strain identity, not an experimental sample or condition."]}
 
 
-def prepare_strain_supervision(dataset_summary: str | Path, output_dir: str | Path) -> dict:
+def prepare_strain_supervision(dataset_summary: str | Path, output_dir: str | Path, *,
+                               exclude_training_records: dict[str, str] | None = None) -> dict:
     """Export source-verified numeric targets and linked actual tool views.
 
 No validation/test answer is opened. Training targets intentionally materialize
@@ -105,6 +106,12 @@ The component contract retains every censoring relation and repeated observation
     if destination == summary_path.parent or destination.is_relative_to(summary_path.parent / "profiles"):
         raise ValueError("training_output_must_be_separate_from_source_indexes")
     all_cases = _rows(summary_path.parent / "cases.jsonl")
+    exclusions = exclude_training_records or {}
+    train_source_ids = {case["private_answer"]["record_id"] for case in all_cases if case["split"] == "train"}
+    if (set(exclusions) - train_source_ids or any(not isinstance(reason, str) or not reason.strip()
+                                               for reason in exclusions.values())):
+        raise ValueError("quarantine_requires_known_training_source_and_reason")
+    quarantined = []
     groups, auxiliary = defaultdict(list), Counter()
     case_splits = {}
     selected_profiles = {}
@@ -113,6 +120,13 @@ The component contract retains every censoring relation and repeated observation
             raise ValueError("duplicate_strain_case")
         case_splits[case["case_id"]] = case["split"]
         if case["split"] != "train":
+            continue
+        source_id = case["private_answer"]["record_id"]
+        if source_id in exclusions:
+            quarantined.append({"case_id": case["case_id"], "source_record_id": source_id,
+                                "locator": case["private_answer"], "literature": case["literature"],
+                                "reason": exclusions[source_id], "training_eligible": False})
+            auxiliary["source_context_quarantined"] += 1
             continue
         request = _request(case)
         strain = case["strain"]
@@ -192,6 +206,7 @@ The component contract retains every censoring relation and repeated observation
               "tool_call_count": sum(len(view["tool_calls"]) for view in views.values()),
               "verified_evidence_reference_count": sum(len(view["evidence_refs"]) for view in views.values()),
               "joint_review_record_count": len(joint_queue), "joint_trainable_record_count": 0,
+              "quarantined_training_measurement_count": len(quarantined),
               "excluded": dict(auxiliary), "validation_test_targets_materialized": 0,
               "LLM_calls": 0, "training_runs": 0, "original_assets_copied": False,
               "limitations": ["This exports a conditional numeric component, not a complete Assessment or mechanism target.",
@@ -203,5 +218,8 @@ The component contract retains every censoring relation and repeated observation
         (destination / filename).write_text("".join(_json(row) + "\n" for row in data), encoding="utf-8")
     report["files"] = {name: {"sha256": _digest(destination / name)} for name in
                        ("mic_sft.jsonl", "private_training_sources.jsonl", "observation_views.jsonl", "joint_review_queue.jsonl")}
+    quarantine_path = destination / "quarantined_training_measurements.jsonl"
+    quarantine_path.write_text("".join(_json(row) + "\n" for row in quarantined), encoding="utf-8")
+    report["quarantined_training_measurements"] = {"path": str(quarantine_path), "sha256": _digest(quarantine_path)}
     (destination / "summary.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
     return report

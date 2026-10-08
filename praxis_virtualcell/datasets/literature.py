@@ -284,6 +284,18 @@ def parse_jats(data: bytes, *, paper_id: str, source: Mapping[str, Any]) -> dict
     return {"identifiers": ids, "licenses": licenses, "passages": passages, "supplementary_refs": supplementary}
 
 
+def parse_article_source(data: bytes, *, paper_id: str, source: Mapping[str, Any]) -> dict[str, Any]:
+    """Verify passages against original JATS or an original official PMC HTML.
+
+    The formats retain distinct native locators; HTML is never converted into
+    fabricated JATS. The HTML parser requires official article and DOI identity.
+    """
+    if data.lstrip().lower().startswith((b"<!doctype html", b"<html")):
+        from .literature_html import parse_pmc_html
+        return parse_pmc_html(data, paper_id=paper_id, source=source)
+    return parse_jats(data, paper_id=paper_id, source=source)
+
+
 def _classification(text: str) -> str:
     if re.search(r"\b(?:may|might|suggest\w*|propos\w*|hypothes\w*|supposed|putative|docking|predicted|in silico)\b", text, re.I):
         return "author_proposed"
