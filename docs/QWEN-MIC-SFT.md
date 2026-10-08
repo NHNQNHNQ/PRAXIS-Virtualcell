@@ -1,6 +1,89 @@
 # Qwen MIC 工具对话微调准备
 
-当前联合版本为 **2026-10-08 v2**。53 上存放于 `/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/qwen_joint_sft_v2`，检查索引位于同级 `qwen_joint_inspection_v2`。下文保留 2026-10-07 数值版本的准备记录；它的统计不能代替当前版本。
+当前结构监督候选为 **2026-10-08 v4_compact**，从封版 v3 独立衍生。53 工作区为 `/home/zkyd/data1/mzy/qwen-PRAXIS-MIC`，候选数据在 `data/processed/qwen_joint_sft_v4_compact`，结构样例在 `data/processed/qwen_joint_inspection_v4_compact`。v3 保留；下文 v2/v1 为历史记录。**训练依用户要求保持暂停**。此前三次真实 32B 试训未完成最长样本反向传播，optimizer 步数均为 0，没有适配器或可恢复断点。CPU 预检通过不表示显存或恢复训练验证通过。
+
+## v4_compact：与智能体一致的结构监督
+
+平台先维护有来源的细胞结构，再让模型学习使用查询结果。实现与覆盖见 [CELL-STRUCTURE](CELL-STRUCTURE.md)。7,193 个组件、7,372 次 MIC、104 个机制报告保持原值；1,950 条组学报告增加真实 `query_cell_structure` 返回和结构弱监督，5,243 条无组学辅助行保持原字节。
+
+完整九条结构视图保留在 `qwen_joint_sft_v4`：45 条超出 32,768，最长 33,701，未截断。独立 `v4_compact` 查询全部五个区室节点，运行时仍可检索完整邻接图。全量官方 tokenizer/TRL collator 检查通过：最长 **31,740**、最长最终回答 **10,890**，system/user/tool 的 loss token 为 0；共 33,159,672 输入 token、13,084,824 监督 token。原生 MIC、文献与 380 段引用来源核验通过。所有检查仅用 CPU，没有加载 32B 权重或训练。
+
+v4 使用 manifest 的相对路径共享 v3 原始来源索引、隔离索引和留出答案，新增字节索引指向衍生训练文件。验证/测试保持原划分与公开组学轨迹，不加入实测答案或教师结构答案。目录复制到别处时需一起保留 v3、结构 catalog 及相对路径。
+
+新增配置 `qwen3_32b_joint_lora_v4_compact.yaml` 是暂停的候选配方。它的 `loss_chunk_tokens` 对应本地新增投影＋CE 分块实现，该训练修复尚未同步到 53；新实现的 CPU 数值验证、真实 GPU backward、optimizer 更新与 checkpoint 恢复均未完成。上面的全量 CPU 预检使用 53 原有训练辅助实现，其数值自检不能代替新实现的验证。当前 36 条结构事实全为 `species_prior`；没有新菌株结构、蛋白定位金标或候选通透性标签。机制人工金标仍为 0。数据与原生 tokenizer 验证不证明结构或组学已经提高药效准确率，后续需结构消融及独立留出评估。
+
+下面 v3 的训练/服务命令记录预定接口；目前没有可供加载的 trial adapter。恢复训练须先修复并验证最长样本的反向传播、保存和恢复，不直接开始正式训练。
+
+## v3：SMILES、完整报告与可恢复训练
+
+公开候选分子只有经过 RDKit 校验的 `candidate.smiles`，保留键连接、手性和源结构的盐形式。化合物名字、ChEMBL 分子编号、论文内编号只作私有溯源，不替代结构或进入候选特征。菌株身份、基因 ID 和事实引用 ID 有独立用途。
+
+六项 MIC 条件 `medium/medium_supplements/temperature_c/exposure_hours/method/inoculum` 从 Web/CLI 贯穿实际推理各阶段，未知为 `null`；不与参考组学采样条件相互填补。
+
+| 项目 | 数量 |
+|---|---:|
+| 训练组件 / 原始 MIC 测量 | 7,193 / 7,372 |
+| 通过实际组学引用检查的报告 / 菌株 | 1,950 / 7 |
+| 无组学辅助报告 | 5,243 |
+| 联合机制报告 / 机制声明 | 104 / 128 |
+| 新增背景待核隔离组件 / 测量 | 11 / 22 |
+| 合计隔离原始测量 | 402 |
+| 独立机制人工待标注候选 / 已完成人工金标 | 32 / 0 |
+
+全部答案统一 `praxis.assessment-supervision.v1`，对应平台 Assessment，保留 `mic_observations`、机制证据等级/范围及实际工具引用。只有全部精确且同值的观测提供点值；异质或删失观测保留原值与开闭边界，点估计为 null。报告是来源核验后保守构建的**弱监督**，不是专家推理金标。无组学辅助报告明确无组学证据，不能声称通过平台组学校验。
+
+检索词依据 SMILES 粗结构线索及训练时来源审核的机制选择，只引用实际命中的 feature。留出输入只用结构线索，不读取机制答案。当前有 41 种 profile+query 视图；确定性教师轨迹尚不证明模型学会自适应选择特征或组学提高准确率。未注明质粒不推定为野生型，相关背景冲突来源已隔离待原文复核。
+
+`train.jsonl` 是唯一混合训练来源。`joint.train.jsonl` 是其中 104 条的替代子集，不能再次合并。`omics.train.index.jsonl` 定位 1,950 条 canonical 记录，不复制长轨迹。原始 MIC、组学、论文、基座继续复用单份资产。
+
+检查包中 `inspection_samples.json` 有 7 条实际报告，`human_mechanism_annotation.queue.jsonl` 有 32 条冻结 validation 候选（四物种各 8 条，其中 8 条 source_unseen，标签空、pending），`training_mechanism_review.queue.jsonl` 独立保存 104 条训练审阅。
+
+训练沿用 Qwen3-32B BF16、LoRA r=16/alpha=32、八卡 FSDP，assistant-only，不 packing、不截断。序列上限 **32,768**；官方 tokenizer 全量预检最长 **27,342** token，最长最终答案 **9,150** token。监督 token 份额为辅助 18.23%、组学报告 74.94%、联合机制 6.83%，初版每条每轮一次，根据验证结果决定后续混采。
+
+正式配置 `configs/finetuning/qwen3_32b_joint_lora.yaml` 每 25 步保存断点，保留三份，包含 LoRA、optimizer、scheduler、RNG、Trainer 状态；不重复落盘基座。最终推理适配器为 `output_dir/adapter`，只有 adapter 不是完整可恢复断点。短试训配置为 `qwen3_32b_joint_lora_trial.yaml`，12 步、warmup=0、显式覆盖最长样本；第 6 步暂停，再恢复到 12。短试训只验证工程链路，不能当作完成正式微调。
+
+```bash
+cd /home/zkyd/data1/mzy/qwen-PRAXIS-MIC
+PYTHONPATH=runtime .venv/bin/python scripts/datasets/verify_joint_sources.py \
+  --dataset-dir data/processed/qwen_joint_sft_v3 \
+  --source-path-map data/source_refs/joint_literature_20261008/source_path_map.json \
+  --report reports/joint_v3_native_sources_20261008.json
+.venv/bin/python scripts/finetuning/preflight_qwen.py \
+  --config configs/finetuning/qwen3_32b_joint_lora.yaml \
+  --report reports/joint_v3_qwen_preflight_20261008.json
+```
+
+原 scaffold 分配保持冻结：validation 1,419、test 2,382 组件。保守扫描原生 assay 元数据后，暂不评分未编码组合、衍生背景或动物来源；分别保留 **1,343 / 2,324** 组件。隔离名单为 `reports/v3_validation_assay_audit.json` 和 `reports/v3_test_assay_audit.json`。扫描不是人工机制金标。
+
+独立生成器 `scripts/finetuning/predict_qwen.py` 只接受 `.inputs.jsonl`，不读答案索引或实测标签；实际组学工具仍受精确 profile 与事实引用校验。基线和适配器使用同一 `serve_qwen_adapter.py`，省略 `--adapter-dir` 即为未微调基线。服务从本地读取权重，禁用 thinking，不下载、不默默截断；Qwen 分析输出预算 **12,288**。
+
+```bash
+PYTHONPATH=runtime .venv/bin/python scripts/finetuning/serve_qwen_adapter.py \
+  --base-dir models/Qwen3-32B --model-name qwen3-praxis-joint --port 8790 \
+  --adapter-dir outputs/qwen3_32b_joint_lora_v3_trial/adapter
+PYTHONPATH=runtime .venv/bin/python scripts/finetuning/predict_qwen.py \
+  --inputs data/processed/qwen_joint_sft_v3/validation.inputs.jsonl \
+  --output reports/adapter.validation.predictions.jsonl \
+  --base-url http://127.0.0.1:8790 --model qwen3-praxis-joint
+PYTHONPATH=runtime .venv/bin/python scripts/datasets/score_qwen.py \
+  --dataset-dir data/processed/qwen_joint_sft_v3 --split validation \
+  --predictions reports/adapter.validation.predictions.jsonl \
+  --source-path-map data/source_refs/joint_literature_20261008/source_path_map.json \
+  --audit reports/v3_validation_assay_audit.json --report reports/adapter.validation.metrics.json
+```
+
+少量输入试运行可用评分 `--pilot-subset`，输出明确标为 pilot；正式默认覆盖整个冻结集合，缺失/失败计入覆盖率。精确 MIC 用 log2 及稀释误差，删失保留边界不取中点，多观测顺序无关比较并报告数量/关系匹配。经验列表不是校准分布；机制准确率仍为 null，须完成独立人工标签。
+
+平台分析/修订可单独接 Qwen，规划/审阅保留现有基础服务：
+
+```text
+PRAXIS_ANALYSIS_MODEL=qwen3-praxis-joint
+PRAXIS_ANALYSIS_BASE_URL=http://127.0.0.1:8790
+PRAXIS_ANALYSIS_PROVIDER=qwen
+PRAXIS_ANALYSIS_MAX_OUTPUT_TOKENS=12288
+```
+
+## v2 历史准备记录
 
 ## 联合版本 v2：药物—菌株—组学—MIC—文献机制
 

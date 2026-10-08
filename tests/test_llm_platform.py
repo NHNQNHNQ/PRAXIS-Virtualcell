@@ -20,6 +20,10 @@ def test_settings_reuse_one_local_key_without_exposing_it(tmp_path):
     assert budget.max_output_tokens == 32768 and budget.reasoning_effort == "low"
     with pytest.raises(ValueError):
         LLMSettings.load(path, environ={"PRAXIS_MAX_OUTPUT_TOKENS": "0"})
+    routed = LLMSettings.load(path, environ={"PRAXIS_ANALYSIS_MODEL": "qwen-adapter",
+        "PRAXIS_ANALYSIS_BASE_URL": "http://127.0.0.1:8790", "PRAXIS_ANALYSIS_API_KEY": "private-analysis-key"})
+    assert routed.analysis_model == "qwen-adapter" and routed.analysis_provider == "qwen"
+    assert routed.analysis_max_output_tokens == 12288 and "private-analysis-key" not in repr(routed)
 
 
 def test_candidate_import_excludes_old_prediction_scores(tmp_path):

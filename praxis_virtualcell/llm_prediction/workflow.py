@@ -14,7 +14,7 @@ from praxis2.llm.client import LLMClient
 
 from .diagnostics import rejected_draft, schema_diagnostics
 from .evidence import _reference, validate_evidence, validate_modality_coverage
-from .schemas import Assessment, EvidenceReference, empty_assessment
+from .schemas import Assessment, EvidenceReference, MICConditions, empty_assessment
 
 DEFAULT_PROFILE = "AB5075-STRAIN-REFERENCE"
 DEFAULT_MODEL = "deepseek-v4-pro"
@@ -37,7 +37,7 @@ def normalize_molecule(smiles: str, *, candidate_id: str = "candidate") -> dict[
     if mol is None:
         raise ValueError("invalid_smiles")
     return {
-        "source_id": f"molecule:{candidate_id}",
+        "source_id": "molecule:candidate",
         "canonical_smiles": Chem.MolToSmiles(mol, isomericSmiles=True),
         "formula": rdMolDescriptors.CalcMolFormula(mol),
         "molecular_weight": float(Descriptors.MolWt(mol)),
@@ -50,6 +50,48 @@ def normalize_molecule(smiles: str, *, candidate_id: str = "candidate") -> dict[
         "fragment_count": len(Chem.GetMolFrags(mol)),
         "method": "RDKit deterministic normalization and molecular descriptors",
     }
+
+
+def public_candidate(molecule: dict) -> dict:
+    """Only the validated molecular structure identifies the candidate to a model."""
+    return {"smiles": molecule["canonical_smiles"]}
+
+
+def reasoning_options(provider: str, reasoning_effort: str) -> dict:
+    if provider == "qwen":
+        return {"thinking": {"type": "disabled"}}
+    if provider != "deepseek":
+        raise ValueError("unsupported_llm_provider")
+    return {"thinking": {"type": "enabled"}, "reasoning_effort": reasoning_effort}
+
+
+def validate_assessment_evidence(assessment: Assessment, calls: list[dict], *, diagnostics=None,
+                                 require_structure: bool = False) -> list[str]:
+    from .evidence import validate_structure_evidence
+
+    issues = validate_evidence(assessment, calls, diagnostics=diagnostics)
+    issues.extend(validate_structure_evidence(assessment, calls, diagnostics=diagnostics))
+    if require_structure and assessment.structure_analysis is None:
+        code = "cell_structure_analysis_required"
+        issues.append(code)
+        if diagnostics is not None:
+            diagnostics.append({"location": ["structure_analysis"], "code": code, "message": code})
+    if assessment.mic_observations:
+        indexed = {call["tool_call_id"]: call for call in calls}
+        observed = False
+        for ref in assessment.mic_estimate.evidence_refs:
+            try:
+                _, row = _reference(ref, indexed)
+                observed |= bool(row and indexed[ref.tool_call_id].get("name") in {
+                    "query_genes", "search_annotations", "query_features", "search_features"})
+            except (KeyError, IndexError, TypeError, ValueError):
+                pass
+        if not observed:
+            code = "mic_observations_require_verified_gene_evidence"
+            issues.append(code)
+            if diagnostics is not None:
+                diagnostics.append({"location": ["mic_observations"], "code": code, "message": code})
+    return sorted(set(issues))
 
 
 def _tool(name: str, description: str, properties: dict, required: list[str]) -> dict:
@@ -94,7 +136,42 @@ AGENT_TOOLS = MULTIOMICS_TOOLS + [
            "limit": {"type": "integer", "minimum": 1, "maximum": 30}}, ["record_ids"]),
 ]
 
+CELL_STRUCTURE_TOOLS = [
+    _tool("cell_structure_overview", "Read sourced cell compartments and topology for this profile. Species priors remain distinct from exact-strain evidence; unknown structure or state stays unknown.", {}, []),
+    _tool("query_cell_structure", "Retrieve sourced compartments, adjacency or protein localization within this profile's taxon and strain identity. Gene presence does not establish protein localization or permeability.",
+          {"structure_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1, "maxItems": 30},
+           "protein_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1, "maxItems": 30},
+           "protein_namespace": {"type": "string", "minLength": 1, "maxLength": 200},
+           "compartment": {"type": "string", "minLength": 1, "maxLength": 200},
+           "limit": {"type": "integer", "minimum": 1, "maximum": 30}}, []),
+]
+
+CELL_STRUCTURE_SYSTEM = """
+Cell structure is an independent evidence layer. The supplied context-cell-structure result and
+cell_structure_overview/query_cell_structure tools describe sourced compartments and topology.
+Return structure_analysis, including relevant compartment_hypotheses, accessibility_barriers and
+limitations. Cite exact structure rows using their structure_id, compartment, evidence_scope and
+evidence_type. Each structural hypothesis MUST cite /structures/N/compartment with that exact
+compartment value. Its evidence_refs contain structure-tool references only; put related gene,
+RNA or protein observations in supporting_evidence/counterevidence instead. A statement citation
+alone does not bind a compartment. species_prior is reference knowledge, not a measurement of this strain or current
+cell state. strain_evidence retains its exact taxon, strain namespace, genotype and source conditions.
+Never infer protein localization from gene presence, expression or abundance alone. Missing location
+is unknown. Compartments or barriers do not establish that this candidate reaches or binds a target.
+Accessibility judgments are hypotheses; measured permeability and intracellular concentration are
+unknown unless actually sourced. Do not invent a numeric permeability, wall thickness or morphology.
+Keep requested MIC conditions separate from structure and omics source conditions. If structure is
+unavailable, use empty structure hypotheses with explicit limitations, preserving remaining evidence.
+Keep the report concise: discuss one to three relevant compartments and one or two barriers,
+with brief limitations. supporting_evidence/counterevidence entries MUST include nonempty
+structured observations, not only evidence_refs. Include one correctly cited observation per
+selected modality. Use native IDs only when actually returned; do not name hypothetical missing IDs.
+"""
+
 SYSTEM = """You analyze one candidate molecule against one explicitly selected organism profile.
+The candidate is identified only by its validated SMILES structure, never a compound name or identifier.
+conditions are the requested MIC assay conditions, independent of reference omics sampling conditions.
+Null assay fields remain unknown; never substitute reference culture conditions for them.
 Make your own LLM estimate using the candidate structure and the supplied observed omics. No MIC,
 AMR, QSAR, perturbation, world-model predictors or experimental MIC lookups are available or allowed.
 You MUST call query_genes or search_annotations and actually read gene rows before a final answer.
@@ -130,6 +207,12 @@ omics gene/protein row, explaining which observation informed your estimate. Ref
 do not satisfy this field. These references do not make MIC measured or validate potency. If you
 cannot justify a numeric estimate from available observations, use null rather than an empty citation list.
 confidence.calibrated must be false. State important data gaps and counterevidence explicitly.
+mic_observations preserves multiple conditional estimates in ug/mL, including censoring and bounds;
+these are uncalibrated estimates, not measurements or calibrated prediction intervals. Use a point
+mic_estimate.value only when every supplied mic_observation is exact and equal; otherwise use null.
+mic_observations requires the same exact omics evidence_refs as a numeric MIC estimate.
+mechanism_claims retain evidence grade, experiment type, role and scope; a resistance enzyme must
+not become a drug-killing target. Do not invent literature DOI/locator sources not supplied as evidence.
 All observed factual evidence must appear as structured observations. A citation has tool_call_id,
 pointer (JSON Pointer into that tool result's data), source_id from the same ancestor object, and value
 copied EXACTLY from that field. For gene observations use that row's native gene_id, field, value and
@@ -182,7 +265,7 @@ def _json(value: Any) -> str:
 
 
 def _execute(name: str, args: dict, profile: Any, molecule: dict, candidate_id: str,
-             knowledge_catalog_path: Any = None) -> dict:
+             knowledge_catalog_path: Any = None, structure_catalog_path: Any = None) -> dict:
     if not isinstance(args, dict):
         raise ValueError("tool_arguments_not_object")
     allowed = {"overview": set(), "query_genes": {"gene_ids", "limit"},
@@ -190,7 +273,9 @@ def _execute(name: str, args: dict, profile: Any, molecule: dict, candidate_id: 
                "query_features": {"modality", "feature_ids", "limit"},
                "search_features": {"modality", "query", "limit"},
                "search_mechanistic_evidence": {"query", "native_ids", "candidate_interactions_only", "limit"},
-               "query_mechanistic_evidence": {"record_ids", "limit"}}
+               "query_mechanistic_evidence": {"record_ids", "limit"},
+               "cell_structure_overview": set(),
+               "query_cell_structure": {"structure_ids", "protein_ids", "protein_namespace", "compartment", "limit"}}
     if name not in allowed:
         raise ValueError("tool_not_allowed")
     if set(args) - allowed[name]:
@@ -200,6 +285,11 @@ def _execute(name: str, args: dict, profile: Any, molecule: dict, candidate_id: 
         raise ValueError("invalid_query_limit")
     if name == "overview":
         return profile.overview()
+    if name in {"cell_structure_overview", "query_cell_structure"}:
+        from praxis_virtualcell.cell_structure import cell_structure_overview, query_cell_structure
+        if name == "cell_structure_overview":
+            return cell_structure_overview(profile.overview(), catalog_path=structure_catalog_path)
+        return query_cell_structure(profile.overview(), catalog_path=structure_catalog_path, **args)
     if name in {"search_mechanistic_evidence", "query_mechanistic_evidence"}:
         from praxis_virtualcell.knowledge import query_mechanistic_evidence, search_mechanistic_evidence
         overview = profile.overview()
@@ -310,9 +400,9 @@ def _citation_examples(call: dict) -> list[dict]:
     for name, summary in data.get("modalities", {}).items():
         if summary.get("source_id") and "input_role" in summary.get("provenance", {}):
             candidates.append((f"/modalities/{name}/provenance/input_role", summary["source_id"], summary["provenance"]["input_role"]))
-    for key in ("genes", "features", "records"):
+    for key in ("genes", "features", "records", "structures"):
         for index, row in enumerate(data.get(key, [])[:3]):
-            for field in ("expression_value", "abundance_value", "presence", "claim"):
+            for field in ("expression_value", "abundance_value", "presence", "claim", "statement", "compartment", "evidence_scope"):
                 if field in row and row.get("source_id"):
                     candidates.append((f"/{key}/{index}/{field}", row["source_id"], row[field]))
     examples = []
@@ -358,6 +448,10 @@ async def analyze_candidate(
     capture_messages: bool = False,
     _profile: Any = None,
     knowledge_catalog_path: Any = None,
+    conditions: dict | MICConditions | None = None,
+    provider: str = "deepseek",
+    include_cell_structure: bool = False,
+    structure_catalog_path: Any = None,
 ) -> dict[str, Any]:
     """Analyze without numerical predictor fallbacks or experimental-label input.
 
@@ -371,6 +465,8 @@ async def analyze_candidate(
     turn disables new tools without relaxing schema or observed-evidence checks.
     """
     _validate_limits(max_turns, max_output_tokens, reasoning_effort)
+    assay_conditions = MICConditions.model_validate(conditions if conditions is not None else {}).model_dump()
+    request_options = reasoning_options(provider, reasoning_effort)
     cid = candidate_id or "candidate"
     trace = {"model": model, "turns": 0, "tool_calls": [], "token_usage": {}, "events": [],
              "limits": {"max_turns": max_turns, "max_output_tokens": max_output_tokens,
@@ -379,6 +475,7 @@ async def analyze_candidate(
         "schema_version": "llm-antibacterial-v1", "status": "error",
         "candidate": {"id": cid, "smiles": smiles, "canonical_smiles": None, "properties": {}},
         "profile": {"profile_id": profile_id},
+        "conditions": assay_conditions,
         "assessment": empty_assessment("analysis_not_completed"),
         "evidence_validation": {"status": "not_evaluated", "issues": []},
         "execution_trace": trace,
@@ -445,6 +542,10 @@ async def analyze_candidate(
     ):
         active_tools = MULTIOMICS_TOOLS
         system = MULTIOMICS_SYSTEM
+    multiomics_enabled = active_tools is MULTIOMICS_TOOLS or active_tools is AGENT_TOOLS
+    if include_cell_structure:
+        active_tools = active_tools + CELL_STRUCTURE_TOOLS
+        system = system.replace("Use only the four supplied tools.", "Use only the supplied tools.") + CELL_STRUCTURE_SYSTEM
     await progress("profile_loaded")
     trace["tool_calls"].extend([
         {"tool_call_id": "context-molecule", "name": "normalize_molecule", "arguments": {"smiles": smiles},
@@ -458,12 +559,24 @@ async def analyze_candidate(
         trace["tool_calls"].append({"tool_call_id": "context-candidate-interactions",
                                     "name": "search_mechanistic_evidence", "arguments": arguments,
                                     "ok": True, "data": data, "origin": "bootstrap"})
+    if include_cell_structure:
+        try:
+            data = _execute("cell_structure_overview", {}, profile, molecule, cid,
+                            structure_catalog_path=structure_catalog_path)
+            if data.get("profile_id") != profile_id:
+                raise ValueError("structure_profile_identity_mismatch")
+            result["cell_structure"] = data
+            trace["tool_calls"].append({"tool_call_id": "context-cell-structure", "name": "cell_structure_overview",
+                                        "arguments": {}, "ok": True, "data": data, "origin": "bootstrap"})
+        except Exception as exc:
+            trace["events"].append({"error": "cell_structure_unavailable", "exception_type": type(exc).__name__})
+            return finish("error", "cell_structure_catalog_invalid")
     for call in trace["tool_calls"]:
         call["citation_examples"] = _citation_examples(call)
     if client is None:
         return finish("error", "llm_client_required")
     messages = [{"role": "user", "content": _json({
-        "candidate": result["candidate"], "selected_profile_id": profile_id,
+        "candidate": public_candidate(molecule), "conditions": assay_conditions, "selected_profile_id": profile_id,
         "max_turns": max_turns,
         "observed_context": trace["tool_calls"],
         "assessment_schema": Assessment.model_json_schema(),
@@ -530,7 +643,7 @@ async def analyze_candidate(
         try:
             response = await client.messages(
                 model=model, messages=messages, system=system, tools=None if final_turn else active_tools,
-                max_tokens=max_output_tokens, thinking={"type": "enabled"}, reasoning_effort=reasoning_effort,
+                max_tokens=max_output_tokens, **request_options,
             )
             choice = response["choices"][0]
             message = choice["message"]
@@ -586,7 +699,7 @@ async def analyze_candidate(
                     record["arguments"] = args
                     if name not in {tool["function"]["name"] for tool in active_tools}:
                         raise ValueError("tool_not_allowed")
-                    data = _execute(name, args, profile, molecule, cid, knowledge_catalog_path)
+                    data = _execute(name, args, profile, molecule, cid, knowledge_catalog_path, structure_catalog_path)
                     if not isinstance(data, dict):
                         raise ValueError("invalid_tool_result")
                     if name != "normalize_molecule" and data.get("profile_id") != profile_id:
@@ -630,8 +743,9 @@ async def analyze_candidate(
                 continue
             return finish("unsupported", "invalid_assessment_schema")
         diagnostics = []
-        issues = validate_evidence(assessment, trace["tool_calls"], diagnostics=diagnostics)
-        if active_tools is MULTIOMICS_TOOLS or active_tools is AGENT_TOOLS:
+        issues = validate_assessment_evidence(assessment, trace["tool_calls"], diagnostics=diagnostics,
+                                              require_structure=include_cell_structure)
+        if multiomics_enabled:
             coverage_issues = validate_modality_coverage(assessment, trace["tool_calls"], overview["selected_modalities"])
             issues.extend(coverage_issues)
             diagnostics.extend({"location": [], "code": issue, "message": issue} for issue in coverage_issues)
@@ -664,6 +778,8 @@ async def analyze_candidates(
     on_progress: Callable[[dict[str, Any]], Any] | None = None,
     max_output_tokens: int = 65536,
     reasoning_effort: str = "high",
+    conditions: dict | MICConditions | None = None,
+    provider: str = "deepseek",
 ) -> dict[str, Any]:
     """Run bounded analyses sequentially, preserving input order and failures."""
     _validate_limits(max_turns, max_output_tokens, reasoning_effort)
@@ -671,12 +787,15 @@ async def analyze_candidates(
     for index, candidate in enumerate(candidates, start=1):
         if isinstance(candidate, str):
             smiles, cid = candidate, f"candidate-{index}"
+            requested_conditions = conditions
         else:
             smiles = candidate.get("smiles")
             cid = candidate.get("candidate_id") or candidate.get("id") or f"candidate-{index}"
+            requested_conditions = candidate.get("conditions", conditions)
         results.append(await analyze_candidate(smiles, profile_id, client, model, data_root,
                                                max_turns=max_turns, candidate_id=cid, on_progress=on_progress,
-                                               max_output_tokens=max_output_tokens, reasoning_effort=reasoning_effort))
+                                               max_output_tokens=max_output_tokens, reasoning_effort=reasoning_effort,
+                                               conditions=requested_conditions, provider=provider))
     return {"schema_version": "llm-antibacterial-batch-v1", "profile_id": profile_id,
             "model": model, "results": results,
             "counts": {status: sum(r["status"] == status for r in results)

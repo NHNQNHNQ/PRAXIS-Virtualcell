@@ -130,7 +130,7 @@ async def test_seven_views_run_review_and_export_without_hidden_reasoning(select
     client = Client([response(plan(selected)), tool_response(selected), response(assessment(selected)), response(review())])
     events = []
     result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected,
-                                       max_turns=2, on_progress=events.append)
+                                       max_turns=2, on_progress=events.append, include_cell_structure=False)
     assert result["status"] == "completed"
     assert result["review_resolution"] == "accepted"
     assert result["profile"]["selected_modalities"] == selected
@@ -154,7 +154,7 @@ async def test_once_revised_answer_requires_second_review_and_rejected_draft_is_
     revised = assessment(selected)
     client = Client([response(plan(selected)), tool_response(selected), response(assessment(selected, 8)),
                      response(review("revise")), response(revised), response(review())])
-    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2)
+    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2, include_cell_structure=False)
     assert result["status"] == "completed"
     assert result["review_resolution"] == "revised"
     assert result["assessment"]["mic_estimate"]["value"] is None
@@ -172,7 +172,7 @@ async def test_second_review_cannot_trigger_another_revision_or_release_numeric_
     selected = ["transcriptome"]
     client = Client([response(plan(selected)), tool_response(selected), response(assessment(selected, 8)),
                      response(review("revise")), response(assessment(selected, 4)), response(review(decision))])
-    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2)
+    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2, include_cell_structure=False)
     assert result["status"] == "unsupported"
     assert result["assessment"]["mic_estimate"]["value"] is None
     assert len(client.requests) == 6
@@ -182,7 +182,7 @@ async def test_second_review_cannot_trigger_another_revision_or_release_numeric_
 async def test_review_abstention_does_not_release_an_analysis_draft():
     selected = ["proteome"]
     client = Client([response(plan(selected)), tool_response(selected), response(assessment(selected, 8)), response(review("abstain"))])
-    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2)
+    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2, include_cell_structure=False)
     assert result["status"] == "unsupported"
     assert result["review_resolution"] == "abstained"
     assert result["assessment"]["targets"] == []
@@ -193,7 +193,7 @@ async def test_review_abstention_does_not_release_an_analysis_draft():
 @pytest.mark.parametrize("bad_plan", [{"selected_modalities": ["transcriptome"], "questions": []}, plan(["genome"])])
 async def test_invalid_plan_stops_before_analysis(bad_plan):
     client = Client([response(bad_plan)])
-    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=["transcriptome"])
+    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=["transcriptome"], include_cell_structure=False)
     assert result["status"] == "unsupported"
     assert len(client.requests) == 1
     assert result["agent_trace"]["stages"][0]["rejected"] is True
@@ -204,7 +204,7 @@ async def test_invalid_plan_stops_before_analysis(bad_plan):
 async def test_inconsistent_review_fails_closed(review_value):
     selected = ["transcriptome"]
     client = Client([response(plan(selected)), tool_response(selected), response(assessment(selected, 8)), response(review_value)])
-    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2)
+    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2, include_cell_structure=False)
     assert result["status"] == "unsupported"
     assert result["evidence_validation"]["issues"] == ["review_failed"]
     assert result["assessment"]["mic_estimate"]["value"] is None
@@ -216,16 +216,79 @@ async def test_reviewer_cannot_invent_a_citation():
     value["issues"] = [{"code": "warning", "severity": "warning", "finding": "数据不足。",
                         "evidence_refs": [{"tool_call_id": "nonexistent", "pointer": "/value", "source_id": "fake", "value": 1}]}]
     client = Client([response(plan(selected)), tool_response(selected), response(assessment(selected)), response(value)])
-    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2)
+    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2, include_cell_structure=False)
     assert result["status"] == "unsupported"
     assert result["agent_trace"]["stages"][-1]["error"] == "invalid_review_reference"
+
+
+async def test_review_examples_preserve_native_nested_namespace_and_optional_issue_citations(monkeypatch):
+    from praxis_virtualcell.llm_prediction.evidence import _reference
+    from praxis_virtualcell.llm_prediction.schemas import EvidenceReference
+
+    selected = ["proteome"]
+    native_namespace = "Author proteinGroup IDs; unresolved native groups; no ABUW mapping"
+    native_pointer = "/modalities/proteome/modalities/proteome/feature_namespace"
+
+    class NativeProfile(Profile):
+        def select_modalities(self, selected=None):
+            return NativeProfile(selected or self.selected)
+
+        def overview(self):
+            value = super().overview()
+            source = "omics:test-strain:proteome:profile"
+            # This is the real v2 overview nesting, not a flattened display field.
+            value["modalities"]["proteome"] = {"source_id": source, "modalities": {"proteome": {
+                "source_id": source, "feature_namespace": native_namespace}}}
+            return value
+
+    monkeypatch.setattr(workflow, "_load_organism", lambda profile_id, data_root: NativeProfile(selected))
+
+    class CitationReviewer(Client):
+        def __init__(self, mode):
+            super().__init__([response(plan(selected)), tool_response(selected), response(assessment(selected))])
+            self.mode = mode
+
+        async def messages(self, **kwargs):
+            if "Your role is a scientific reviewer" not in kwargs.get("system", ""):
+                return await super().messages(**kwargs)
+            self.requests.append(deepcopy(kwargs))
+            payload = json.loads(kwargs["messages"][0]["content"])
+            examples = payload["citation_examples"]
+            assert 1 <= len(examples) <= 12
+            calls = {call["tool_call_id"]: call for call in payload["observed_tool_results"]}
+            for example in examples:
+                _reference(EvidenceReference.model_validate(example), calls)
+            namespace_ref = next(ref for ref in examples if ref["pointer"] == native_pointer)
+            assert namespace_ref["value"] == native_namespace
+            assert native_pointer in kwargs["system"]
+            assert "omit that issue's evidence_refs" in kwargs["system"]
+            issue = {"code": "unverified_identifier_bridge", "severity": "blocking",
+                     "finding": "来源没有 ABUW 标识符桥，应分别保留两个命名空间。"}
+            if self.mode != "omit":
+                issue["evidence_refs"] = [deepcopy(namespace_ref)]
+            if self.mode == "invalid":
+                issue["evidence_refs"][0]["pointer"] = "/modalities/proteome/feature_namespace"
+            return response({"decision": "abstain", "summary": "该标识符桥未经验证。", "issues": [issue]})
+
+    for mode in ("exact", "omit", "invalid"):
+        client = CitationReviewer(mode)
+        result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected,
+                                           max_turns=2, include_cell_structure=False)
+        stage = result["agent_trace"]["stages"][-1]
+        if mode == "invalid":
+            assert stage["error"] == "invalid_review_reference"
+            assert stage["output"]["issues"][0]["evidence_refs"][0]["pointer"] == "/modalities/proteome/feature_namespace"
+        else:
+            assert result["evidence_validation"]["issues"] == ["review_abstained"]
+            assert result["agent_review"]["issues"][0]["code"] == "unverified_identifier_bridge"
+            assert stage["status"] == "completed"
 
 
 async def test_reading_modalities_without_citing_each_one_is_rejected():
     selected = MODALITIES
     value = assessment(["transcriptome"])
     client = Client([response(plan(selected)), tool_response(selected), response(value)])
-    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2)
+    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2, include_cell_structure=False)
     assert result["status"] == "unsupported"
     assert "selected_modality_not_cited:genome" in result["evidence_validation"]["issues"]
     assert "selected_modality_not_cited:proteome" in result["evidence_validation"]["issues"]
@@ -235,7 +298,7 @@ async def test_reading_modalities_without_citing_each_one_is_rejected():
 async def test_unselected_modality_tool_cannot_read_its_data():
     selected = ["transcriptome"]
     client = Client([response(plan(selected)), tool_response(["proteome"]), response(assessment(["proteome"]))])
-    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2)
+    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2, include_cell_structure=False)
     assert result["status"] == "unsupported"
     call = result["execution_trace"]["tool_calls"][-1]
     assert call["ok"] is False
@@ -249,7 +312,7 @@ async def test_revision_with_forged_measurement_stops_before_second_review():
     invalid["supporting_evidence"][0]["observations"][0]["value"] = 99
     client = Client([response(plan(selected)), tool_response(selected), response(assessment(selected)),
                      response(review("revise")), response(invalid)])
-    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2)
+    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected, max_turns=2, include_cell_structure=False)
     assert result["status"] == "unsupported"
     assert result["evidence_validation"]["issues"] == ["revision_evidence_failed"]
     assert len(client.requests) == 5
@@ -257,11 +320,11 @@ async def test_revision_with_forged_measurement_stops_before_second_review():
 
 async def test_missing_client_or_invalid_selection_never_calls_an_llm():
     client = Client([])
-    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=["unknown"])
+    result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=["unknown"], include_cell_structure=False)
     assert result["status"] == "error"
     assert result["evidence_validation"]["issues"] == ["profile_or_modalities_unavailable"]
     assert not client.requests
-    result = await analyze_with_agents("CCO", "test-strain")
+    result = await analyze_with_agents("CCO", "test-strain", include_cell_structure=False)
     assert result["evidence_validation"]["issues"] == ["llm_client_required"]
 
 
@@ -271,7 +334,7 @@ async def test_callback_failure_does_not_break_valid_analysis():
     async def progress(event):
         raise RuntimeError("callback failed")
     result = await analyze_with_agents("CCO", "test-strain", client=client, modalities=selected,
-                                       max_turns=2, on_progress=progress)
+                                       max_turns=2, on_progress=progress, include_cell_structure=False)
     assert result["status"] == "completed"
     assert result["agent_trace"]["events"][0]["event"] == "progress_callback_failed"
 
@@ -292,7 +355,7 @@ async def test_existing_measured_v1_profile_runs_through_new_roles_and_export(mo
     value["supporting_evidence"] = [{"claim": "读取该参考背景的原生表达观察。", "observations": [
         {"gene_id": "ABUW_0001", "field": "expression_value", "value": gene["expression_value"], "evidence_ref": ref}]}]
     client = Client([response(plan(["transcriptome"])), tool, response(value), response(review())])
-    result = await analyze_with_agents("CCO", "AB5075-AZI000", client=client, max_turns=2)
+    result = await analyze_with_agents("CCO", "AB5075-AZI000", client=client, max_turns=2, include_cell_structure=False)
     assert result["status"] == "completed"
     assert result["profile"]["selected_modalities"] == ["transcriptome"]
     assert result["execution_trace"]["tool_calls"][-1]["data"]["features"][0]["expression_value"] == gene["expression_value"]

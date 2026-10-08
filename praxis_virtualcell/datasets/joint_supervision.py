@@ -142,6 +142,8 @@ def prepare_joint_supervision(supervision_dir, literature_dir, reviews_path, out
             raise ValueError("duplicate_joint_component_review")
         seen.add(key)
         component, pending = components[key], queue[key]
+        from .assessment_supervision import validate_candidate
+        validate_candidate(pending["input"]["candidate"])
         if component["split"] != "train" or not component["trainable"]:
             raise ValueError("joint_supervision_requires_train_component")
         if set(annotation.case_ids) != set(component["case_ids"]):

@@ -9,9 +9,10 @@ from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from praxis_virtualcell.settings import LLMSettings
+from praxis_virtualcell.llm_prediction.schemas import MICConditions
 
 Modality = Literal["genome", "transcriptome", "proteome"]
 
@@ -24,6 +25,14 @@ class AnalysisRequest(BaseModel):
     max_output_tokens: int | None = Field(default=None, ge=1024, le=131072)
     reasoning_effort: Literal["low", "high", "max"] | None = None
     modalities: list[Modality] | None = Field(default=None, min_length=1, max_length=3)
+    conditions: MICConditions | None = None
+    include_cell_structure: bool = True
+
+    @field_validator("smiles")
+    @classmethod
+    def validated_smiles(cls, value):
+        from praxis_virtualcell.llm_prediction.workflow import normalize_molecule
+        return normalize_molecule(value)["canonical_smiles"]
 
 
 class GeneRequest(BaseModel):
@@ -36,11 +45,13 @@ class FeatureRequest(BaseModel):
     modality: Modality
 
 
-def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None, knowledge_catalog_path=None) -> FastAPI:
+def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None,
+               knowledge_catalog_path=None, structure_catalog_path=None) -> FastAPI:
     from praxis_virtualcell.omics import list_profiles, load_profile
     from praxis_virtualcell.llm_prediction import analyze_with_agents, render_report
     from praxis_virtualcell.llm_prediction.workflow import DEFAULT_PROFILE
     from praxis2.llm.client import LLMClient
+    from praxis_virtualcell.llm_prediction.qwen_serving import analysis_client
 
     app = FastAPI(title="PRAXIS VirtualCell", version="2.1.0")
     settings = LLMSettings.load(env_file)
@@ -86,7 +97,9 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
     async def health():
         choices = profile_choices()
         return {"status": "ok", "inference": "llm_only", "model": settings.model,
+                "analysis_model": settings.analysis_model or settings.model,
                 "workflow": "planning_analysis_review_revision",
+                "cell_structure": "sourced_context",
                 "credential_configured": bool(settings.api_key),
                 "profile_count": len(choices), "default_profile_id": default_profile_id(choices)}
 
@@ -98,6 +111,14 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
     @app.get("/api/profiles/{profile_id}")
     async def overview(profile_id: str, modalities: list[Modality] | None = Query(default=None)):
         return selected_profile(profile_id, modalities).overview()
+
+    @app.get("/api/profiles/{profile_id}/cell-structure")
+    async def cell_structure(profile_id: str):
+        from praxis_virtualcell.cell_structure import cell_structure_overview
+        try:
+            return cell_structure_overview(profile(profile_id).overview(), catalog_path=structure_catalog_path)
+        except ValueError as exc:
+            raise HTTPException(422, "Cell structure catalog is invalid") from exc
 
     @app.post("/api/profiles/{profile_id}/genes")
     async def genes(profile_id: str, request: GeneRequest):
@@ -141,6 +162,7 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
             raise HTTPException(503, "Configure DEEPSEEK_API_KEY locally")
         async with gate:
             client = LLMClient(settings.api_key, settings.base_url, timeout_s=180)
+            qwen_client = analysis_client(settings)
             def progress(event):
                 logging.getLogger("uvicorn.error").info("Analysis progress: %s", json.dumps(
                     {"candidate_id": request.candidate_id, **event}, ensure_ascii=False))
@@ -148,6 +170,16 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
                 selection = {"modalities": request.modalities} if request.modalities is not None else {}
                 if knowledge_catalog_path is not None:
                     selection["knowledge_catalog_path"] = knowledge_catalog_path
+                if request.conditions is not None or analyzer is None:
+                    selection["conditions"] = (request.conditions or MICConditions()).model_dump()
+                if analyzer is None or not request.include_cell_structure or structure_catalog_path is not None:
+                    selection["include_cell_structure"] = request.include_cell_structure
+                if structure_catalog_path is not None:
+                    selection["structure_catalog_path"] = structure_catalog_path
+                if qwen_client is not None:
+                    selection.update(analysis_client=qwen_client, analysis_model=settings.analysis_model,
+                                     analysis_provider=settings.analysis_provider,
+                                     analysis_max_output_tokens=request.max_output_tokens or settings.analysis_max_output_tokens)
                 result = await run(request.smiles, chosen_id, client=client,
                                    model=settings.model, data_root=data_root,
                                    max_turns=request.max_turns, candidate_id=request.candidate_id,
@@ -159,6 +191,8 @@ def create_app(*, data_root=None, env_file=None, report_root=None, analyzer=None
                 raise HTTPException(502, "LLM analysis failed; no prediction was substituted") from exc
             finally:
                 await client.aclose()
+                if qwen_client is not None:
+                    await qwen_client.aclose()
         report_id = str(uuid4())
         destination.mkdir(parents=True, exist_ok=True)
         payload = {**result, "report_id": report_id}

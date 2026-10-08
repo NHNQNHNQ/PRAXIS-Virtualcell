@@ -21,7 +21,7 @@ from .strain_supervision import _identity, _request, _rows, _view
 
 SCHEMA = "praxis.qwen-MIC-chat.v1"
 _COMPONENT_FILES = {"mic_sft.jsonl", "private_training_sources.jsonl", "observation_views.jsonl", "joint_review_queue.jsonl"}
-_TOOLS = {"overview", "search_features", "query_features"}
+_TOOLS = {"overview", "search_features", "query_features", "cell_structure_overview", "query_cell_structure"}
 _OBSERVATION_FIELDS = ("relation", "value", "lower", "upper", "lower_closed", "upper_closed")
 _COHORTS = ("frozen_scaffold", "compound_unseen", "strain_unseen", "source_unseen", "compound_strain_source_unseen")
 
@@ -39,6 +39,10 @@ def qwen_messages(messages: list[dict]) -> list[dict]:
             message["content"] = ""
         if not isinstance(message.get("content"), str):
             raise ValueError("chat_content_must_be_text")
+        if message["role"] == "user":
+            from .assessment_supervision import validate_candidate
+            request = json.loads(message["content"])
+            validate_candidate(request["candidate"])
         for call in message.get("tool_calls", []):
             if message["role"] != "assistant" or call.get("type") != "function":
                 raise ValueError("invalid_assistant_tool_call")

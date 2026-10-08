@@ -14,8 +14,9 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from .evidence import validate_evidence, validate_modality_coverage
+from .evidence import validate_modality_coverage
 from .schemas import Assessment
+from .workflow import validate_assessment_evidence
 
 STAGES = {"planning", "analysis", "review", "revision"}
 _CREDENTIAL_FIELDS = {
@@ -197,7 +198,9 @@ def _supervision(value: Mapping[str, Any] | None, result: Mapping[str, Any]) -> 
             raise ValueError("invalid_gold_assessment_schema") from exc
         calls = result.get("execution_trace", {}).get("tool_calls", [])
         try:
-            issues = validate_evidence(assessment, calls)
+            require_structure = result.get("cell_structure") is not None or any(
+                call.get("name") in {"cell_structure_overview", "query_cell_structure"} for call in calls)
+            issues = validate_assessment_evidence(assessment, calls, require_structure=require_structure)
             selected = result.get("profile", {}).get("selected_modalities")
             if selected is not None:
                 issues.extend(validate_modality_coverage(assessment, calls, selected))

@@ -149,7 +149,7 @@ class ExperimentRecord(StrictRecord):
     def analysis_input(self) -> dict[str, Any]:
         """Explicit whitelist: no endpoints, descriptions, labels or supervision."""
         return {
-            "candidate": {"id": self.molecule.source_molecule_id, "smiles": self.molecule.canonical_smiles},
+            "candidate": {"smiles": self.molecule.canonical_smiles},
             "organism": {"species": self.organism.species, "taxon_id": self.organism.taxon_id,
                          "strain": self.organism.strain, "strain_namespace": self.organism.strain_namespace,
                          "isolate_id": self.organism.isolate_id},

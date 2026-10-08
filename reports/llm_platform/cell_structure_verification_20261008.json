@@ -1,0 +1,357 @@
+{
+  "schema_version": "praxis.cell-structure-verification.v1",
+  "date": "2026-10-08",
+  "status": "integration_implemented_training_paused",
+  "platform": {
+    "default_agent_structure_context": true,
+    "tools": [
+      "cell_structure_overview",
+      "query_cell_structure"
+    ],
+    "exact_compartment_reference_required": true,
+    "species_strain_scope_checked": true,
+    "protein_namespace_checked": true,
+    "human_supervision_uses_same_structure_validation": true,
+    "structure_ablation_available": true,
+    "CLI_inspect_checked": true,
+    "web_structure_endpoint_and_report_tested": true,
+    "experimental_MIC_inference_lookup": false
+  },
+  "catalog": {
+    "file": "data/cell_structure/catalog.json",
+    "sha256": "888b5278aa87e630c967ecde8586f82ebc1febd6bc387173faa544ffeb0e209d",
+    "taxon_count": 4,
+    "facts": 36,
+    "species_prior": 36,
+    "strain_evidence": 0,
+    "protein_localization": 0,
+    "current_state_supported": false,
+    "coverage_limitation": "Four Gram-negative species priors; not measured structure differences of the seven training strains."
+  },
+  "dataset": {
+    "server_dir": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/qwen_joint_sft_v4_compact",
+    "manifest_sha256": "46e92fef333f5f9b690a207f3011d5a82346bfcdaa2f7b5ef773899529222e7b",
+    "train_sha256": "5da28e1abac12fe55b6f5ce7a5c78f717ae47f81c349ffc60ee053162b26ad77",
+    "training_records": 7193,
+    "training_MIC_measurements": 7372,
+    "structure_records": 1950,
+    "unchanged_auxiliary_records": 5243,
+    "mechanism_records": 104,
+    "mechanism_claims": 128,
+    "human_gold_mechanism_records": 0,
+    "structure_view": "all_compartment_nodes",
+    "native_runtime_compartments_per_supported_taxon": 5,
+    "runtime_topology_facts_per_supported_taxon": 9,
+    "raw_assets_copied": false,
+    "shared_source_indexes_copied": false,
+    "sealed_v3_unchanged": true,
+    "heldout_structure_answers_added": false,
+    "inspection_sample_count": 7,
+    "inspection_file": "local/joint_dataset_20261008/qwen_joint_inspection_v4_compact/structure_samples.json"
+  },
+  "native_source_verification": {
+    "schema_version": "praxis.joint-native-source-verification.v1",
+    "status": "passed",
+    "training_records_checked": 7193,
+    "training_MIC_measurements_checked": 7372,
+    "joint_records_checked": 104,
+    "mechanism_source_subset_cases_checked": 104,
+    "mechanism_claims_checked": 128,
+    "native_quotes_checked": 380,
+    "mechanism_claim_grades": {
+      "unresolved": 50,
+      "genetic": 20,
+      "class_background": 6,
+      "experimental": 37,
+      "author_proposed": 15
+    },
+    "native_source_files_checked": 21,
+    "native_articles_checked": 7,
+    "quarantined_components_checked": 11,
+    "human_gold_mechanism_records": 0,
+    "heldout_MIC_answers_opened": 0,
+    "raw_omics_or_legacy_SQLite_required": false,
+    "path_map_changes_bytes": false,
+    "original_article_locators_preserved": true,
+    "LLM_calls": 0,
+    "training_runs": 0,
+    "dataset_manifest": {
+      "path": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/qwen_joint_sft_v4_compact/manifest.json",
+      "sha256": "46e92fef333f5f9b690a207f3011d5a82346bfcdaa2f7b5ef773899529222e7b"
+    }
+  },
+  "CPU_preflight": {
+    "status": "tokenizer_and_mask_passed",
+    "train_path": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/qwen_joint_sft_v4_compact/train.jsonl",
+    "record_count": 7193,
+    "max_length": 32768,
+    "training_runs": 0,
+    "large_model_loaded": false,
+    "source_trajectory_count": 1950,
+    "heldout_inputs_used_for_training": false,
+    "package_versions": {
+      "torch": "2.6.0",
+      "transformers": "4.57.6",
+      "peft": "0.18.1",
+      "trl": "0.28.0",
+      "accelerate": "1.12.0",
+      "datasets": "4.5.0"
+    },
+    "mask_self_test": {
+      "tokens": 207,
+      "assistant_loss_tokens": 27,
+      "final_assistant_tokens": 12,
+      "record_id": "unnamed",
+      "serialized_role_tokens": {
+        "system": 112,
+        "user": 53,
+        "assistant": 37
+      },
+      "status": "passed",
+      "trl_collator_labels_verified": true,
+      "system_user_tool_loss_tokens": 0,
+      "native_template_unchanged": true,
+      "chatml_special_token_offsets_verified": true,
+      "assistant_tool_call_tokens_verified": true
+    },
+    "sparse_assistant_loss_self_test": {
+      "status": "passed",
+      "model": "random_tiny_Qwen3",
+      "device": "cpu",
+      "numeric_cases": 4,
+      "parameter_gradient_comparisons": 148,
+      "max_loss_absolute_error": 4.76837158203125e-07,
+      "max_gradient_absolute_error": 0.0,
+      "full_context_preserved": true,
+      "dense_and_peft_checked": true,
+      "chunked_numeric_cases": 4,
+      "optimizer_steps": 0
+    },
+    "loss_mask_checked": true,
+    "token_lengths_checked": true,
+    "max_observed_tokens": 31740,
+    "total_tokens": 33159672,
+    "assistant_loss_tokens": 13084824,
+    "nonassistant_loss_tokens": 0,
+    "truncation_performed": false,
+    "native_template_unchanged": true,
+    "mask_method": "native_chatml_fast_token_offsets",
+    "loss_method": "native_Qwen3_logits_to_keep_and_shift_labels",
+    "training_data_sha256": "5da28e1abac12fe55b6f5ce7a5c78f717ae47f81c349ffc60ee053162b26ad77",
+    "task_supervision": {
+      "strain_conditioned_Assessment_auxiliary": {
+        "records": 5243,
+        "tokens": 4972577,
+        "supervised_tokens": 1716697,
+        "max_tokens": 1384,
+        "max_final_assistant_tokens": 455,
+        "target_contracts": {
+          "praxis.assessment-supervision.v1": 5243
+        },
+        "record_fraction": 0.7289031002363409,
+        "supervised_token_fraction": 0.1311975613886744
+      },
+      "strain_reference_Assessment": {
+        "records": 1846,
+        "tokens": 26077760,
+        "supervised_tokens": 10532197,
+        "max_tokens": 31222,
+        "max_final_assistant_tokens": 10193,
+        "target_contracts": {
+          "praxis.assessment-supervision.v1": 1846
+        },
+        "record_fraction": 0.2566383984429306,
+        "supervised_token_fraction": 0.8049169786311225
+      },
+      "strain_reference_Assessment_mechanism": {
+        "records": 104,
+        "tokens": 2109335,
+        "supervised_tokens": 835930,
+        "max_tokens": 31740,
+        "max_final_assistant_tokens": 10890,
+        "target_contracts": {
+          "praxis.assessment-supervision.v1": 104
+        },
+        "record_fraction": 0.014458501320728486,
+        "supervised_token_fraction": 0.06388545998020302
+      }
+    },
+    "max_final_assistant_tokens": 10890,
+    "max_token_record_id": "joint:b8aba014b72a44eab5cedf4e40cd4d298b7b5b23a3ce9cadf226dab162353046",
+    "max_final_assistant_record_id": "joint:b8aba014b72a44eab5cedf4e40cd4d298b7b5b23a3ce9cadf226dab162353046"
+  },
+  "full_structure_view": {
+    "status": "failed_32768_limit",
+    "preserved": true,
+    "records": 7193,
+    "over_limit_records": 45,
+    "max_observed_tokens": 33701,
+    "truncation_performed": false
+  },
+  "tests": {
+    "passed": 690,
+    "skipped": 4,
+    "scope": "cell_structure, llm_prediction, platform API/UI, datasets, finetuning preparation",
+    "Ruff": "passed",
+    "git_diff_check": "passed"
+  },
+  "real_LLM_integration": {
+    "status": "passed_bounded_revision_and_review_with_replayed_prior_stages",
+    "training_runs": 0,
+    "experimental_MIC_lookups": 0,
+    "accuracy_evaluation": false,
+    "human_gold": false,
+    "attempts": [
+      {
+        "report": "reports/llm_live/structure_smoke_20261008.json",
+        "kind": "fresh_live_pipeline",
+        "output_budget": 8192,
+        "status": "incomplete",
+        "evidence_issues": [
+          "llm_output_truncated"
+        ],
+        "review_resolution": "failed",
+        "stages": [
+          {
+            "stage": "planning",
+            "status": "completed"
+          },
+          {
+            "stage": "analysis",
+            "status": "failed"
+          }
+        ]
+      },
+      {
+        "report": "reports/llm_live/structure_smoke_20261008_retry.json",
+        "kind": "fresh_live_pipeline",
+        "output_budget": 12288,
+        "status": "unsupported",
+        "evidence_issues": [
+          "review_failed"
+        ],
+        "review_resolution": "failed",
+        "stages": [
+          {
+            "stage": "planning",
+            "status": "completed"
+          },
+          {
+            "stage": "analysis",
+            "status": "completed"
+          },
+          {
+            "stage": "review",
+            "status": "failed",
+            "error": "invalid_review_reference"
+          }
+        ]
+      },
+      {
+        "report": "reports/llm_live/structure_review_replay_20261008.json",
+        "kind": "real_review_and_revision_of_recorded_analysis",
+        "output_budget": 12288,
+        "status": "unsupported",
+        "evidence_issues": [
+          "revision_failed"
+        ],
+        "review_resolution": "failed",
+        "stages": [
+          {
+            "stage": "planning",
+            "status": "completed",
+            "replayed_from": "reports/llm_live/structure_smoke_20261008_retry.json"
+          },
+          {
+            "stage": "analysis",
+            "status": "completed",
+            "replayed_from": "reports/llm_live/structure_smoke_20261008_retry.json"
+          },
+          {
+            "stage": "review",
+            "status": "completed"
+          },
+          {
+            "stage": "revision",
+            "status": "failed",
+            "error": "agent_role_failed"
+          }
+        ],
+        "actual_API_calls": 2,
+        "actual_API_usage": {
+          "prompt_tokens": 92730,
+          "completion_tokens": 20557,
+          "total_tokens": 113287
+        }
+      },
+      {
+        "report": "reports/llm_live/structure_revision_budget_replay_20261008.json",
+        "kind": "real_revision_and_final_review_of_recorded_analysis_and_initial_review",
+        "output_budget": 24576,
+        "status": "completed",
+        "evidence_issues": [],
+        "review_resolution": "revised",
+        "stages": [
+          {
+            "stage": "planning",
+            "status": "completed",
+            "replayed_from": "reports/llm_live/structure_smoke_20261008_retry.json"
+          },
+          {
+            "stage": "analysis",
+            "status": "completed",
+            "replayed_from": "reports/llm_live/structure_smoke_20261008_retry.json"
+          },
+          {
+            "stage": "review",
+            "status": "completed",
+            "replayed_from": "reports/llm_live/structure_review_replay_20261008.json"
+          },
+          {
+            "stage": "revision",
+            "status": "completed"
+          },
+          {
+            "stage": "review",
+            "status": "completed"
+          }
+        ],
+        "actual_API_calls": 2,
+        "actual_API_usage": {
+          "prompt_tokens": 93256,
+          "completion_tokens": 16061,
+          "total_tokens": 109317
+        }
+      }
+    ],
+    "model": "deepseek-v4-pro",
+    "final_activity": "uncertain",
+    "final_MIC_value": null,
+    "confidence_calibrated": false,
+    "single_fresh_end_to_end_case_passed": false,
+    "limitation": "Final successful run reuses the recorded real planning, analysis and initial review; only revision and final review were called again with a larger output budget. Earlier rejected and truncated attempts are retained. This is one public case, not an accuracy evaluation."
+  },
+  "training": {
+    "status": "paused_by_user",
+    "runs_during_structure_work": 0,
+    "previous_32B_successful_optimizer_steps": 0,
+    "previous_trials_saved_adapter": false,
+    "large_Qwen_model_loaded_during_structure_work": false,
+    "server_GPU_memory_MiB_observed": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "pending_local_trainer_fix": "Projection plus CE chunk implementation is local, not deployed; new implementation numeric CPU, real GPU backward, optimizer, checkpoint recovery remain unverified."
+  },
+  "limitations": [
+    "Exact citations establish traceability, not potency accuracy or target causality.",
+    "Structure priors and deterministic teacher queries do not demonstrate an omics or structure performance gain.",
+    "Reference omics retain independent sampling conditions; they are not a matched current MIC culture."
+  ]
+}

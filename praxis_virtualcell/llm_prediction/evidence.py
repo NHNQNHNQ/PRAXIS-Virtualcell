@@ -223,6 +223,10 @@ def validate_evidence(
     texts.extend(item.claim for item in (*assessment.supporting_evidence, *assessment.counterevidence))
     texts.extend(target.hypothesis + " " + target.name for target in assessment.targets)
     texts.extend(item.hypothesis for item in assessment.mechanism_hypotheses)
+    if assessment.structure_analysis is not None:
+        structure = assessment.structure_analysis
+        texts.extend(item.hypothesis for item in (*structure.compartment_hypotheses, *structure.accessibility_barriers))
+        texts.extend(structure.limitations)
     mentioned = set(re.findall(r"\bABUW_[A-Za-z0-9]+\b", " ".join(texts)))
     if mentioned - available_genes:
         flag("gene_in_text_not_observed", ["public_text"])
@@ -286,3 +290,81 @@ def validate_modality_coverage(assessment: Assessment, tool_calls: list[dict], s
         *([f"selected_modality_not_observed:{modality}"] if modality not in observed else []),
         *([f"selected_modality_not_cited:{modality}"] if modality not in cited else []),
     )]
+
+
+def validate_structure_evidence(
+    assessment: Assessment, tool_calls: list[dict], *, diagnostics: list[dict] | None = None,
+) -> list[str]:
+    """Bind structure hypotheses to exact rows without inferring protein location.
+
+    This supplements the omics validator. Structure priors never satisfy its
+    gene-observation, modality-coverage, or numeric-MIC requirements.
+    """
+    analysis = assessment.structure_analysis
+    if analysis is None:
+        return []
+    calls = {call["tool_call_id"]: call for call in tool_calls}
+    issues: list[str] = []
+    structure_calls = [call for call in tool_calls if call.get("ok") and
+                       call.get("name") in {"cell_structure_overview", "query_cell_structure"}]
+    available = any(call.get("data", {}).get("structures") for call in structure_calls)
+    grounded = False
+
+    def flag(code: str, location: list[str | int], ref: EvidenceReference | None = None) -> None:
+        issues.append(code)
+        if diagnostics is not None:
+            entry = {"location": location, "code": code, "message": code}
+            if ref is not None:
+                entry["offending_reference"] = _public_value(ref.model_dump())
+                entry["matching_value_pointers"] = matching_value_pointers(ref, calls)
+            if entry not in diagnostics:
+                diagnostics.append(entry)
+
+    for section in ("compartment_hypotheses", "accessibility_barriers"):
+        for index, claim in enumerate(getattr(analysis, section)):
+            location = ["structure_analysis", section, index]
+            compartment_bound = False
+            for ref_index, ref in enumerate(claim.evidence_refs):
+                ref_location = location + ["evidence_refs", ref_index]
+                try:
+                    actual, _ = _reference(ref, calls)
+                    call = calls[ref.tool_call_id]
+                    if call.get("name") not in {"cell_structure_overview", "query_cell_structure"}:
+                        flag("structure_reference_requires_structure_tool", ref_location, ref)
+                        continue
+                    _, ancestors = _pointer(call["data"], ref.pointer)
+                    row = next((value for value in reversed(ancestors)
+                                if isinstance(value, dict) and value.get("structure_id")), None)
+                    if row is None or row.get("structure_id") != claim.structure_id:
+                        flag("structure_identity_not_bound_to_reference", ref_location, ref)
+                        continue
+                    if row.get("compartment") != claim.compartment:
+                        flag("structure_compartment_does_not_match_tool", location + ["compartment"], ref)
+                    if row.get("evidence_scope") != claim.evidence_scope:
+                        flag("structure_scope_does_not_match_tool", location + ["evidence_scope"], ref)
+                    if row.get("evidence_type") != claim.evidence_type:
+                        flag("structure_evidence_type_does_not_match_tool", location + ["evidence_type"], ref)
+                    # A copied statement or ID alone does not bind a location.
+                    # The actual compartment field must be cited explicitly.
+                    field = ref.pointer.rsplit("/", 1)[-1].replace("~1", "/").replace("~0", "~")
+                    if field == "compartment" and ancestors[-2] is row and _equal(actual, claim.compartment):
+                        compartment_bound = True
+                    if claim.protein_id is not None:
+                        if row.get("kind") != "protein_localization":
+                            flag("protein_localization_not_observed", location + ["protein_id"], ref)
+                        elif (row.get("protein_id") != claim.protein_id or
+                              row.get("protein_namespace") != claim.protein_namespace):
+                            flag("protein_identity_does_not_match_structure", location + ["protein_id"], ref)
+                except (KeyError, IndexError, TypeError, ValueError) as exc:
+                    reason = str(exc) if isinstance(exc, ValueError) else "unresolved_evidence_pointer"
+                    flag(reason, ref_location, ref)
+            if not compartment_bound:
+                flag("structure_compartment_requires_exact_reference", location + ["evidence_refs"])
+            grounded |= compartment_bound
+    if not structure_calls:
+        flag("structure_analysis_requires_structure_tool", ["structure_analysis"])
+    if available and not grounded:
+        flag("available_structure_requires_grounded_hypothesis", ["structure_analysis"])
+    if not available and not analysis.limitations:
+        flag("structure_missing_data_requires_limitation", ["structure_analysis", "limitations"])
+    return sorted(set(issues))

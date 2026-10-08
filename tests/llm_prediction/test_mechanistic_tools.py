@@ -278,7 +278,7 @@ async def test_default_orchestration_passes_catalog_to_planning_and_analysis(tmp
     client = Client([response(analysis_plan()), response(None, tool_calls=[
         tool_call("query_features", {"modality": "transcriptome", "feature_ids": ["GENE_1"]}, "read-rna")]),
         response(feature_assessment()), response(review)])
-    result = await analyze_with_agents("OCC", "fixture-profile", client=client, max_turns=2, knowledge_catalog_path=path)
+    result = await analyze_with_agents("OCC", "fixture-profile", client=client, max_turns=2, knowledge_catalog_path=path, include_cell_structure=False)
     assert result["status"] == "completed"
     planner = json.loads(client.requests[0]["messages"][0]["content"])
     assert planner["mechanistic_catalog"]["catalog_id"] == "integration-test-only"

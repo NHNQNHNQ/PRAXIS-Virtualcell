@@ -123,6 +123,35 @@ def test_joint_replaces_component_preserves_MIC_and_isolates_quotes_paths_and_an
     assert validate_joint_qwen_sft(output)["schema_version"] == report["schema_version"]
 
 
+def test_assessment_export_unifies_outputs_preserves_private_MIC_and_has_no_heldout_gold(joint_source, tmp_path):
+    from praxis_virtualcell.datasets.assessment_supervision import CONTRACT, prepare_assessment_review
+    from praxis_virtualcell.llm_prediction.schemas import Assessment
+    source, joint, component, _, _, _, _ = joint_source
+    output = tmp_path / "assessment"
+    report = prepare_joint_qwen_sft(source, joint, output, assessment_targets=True)
+    rows = [json.loads(line) for line in (output / "train.jsonl").read_text().splitlines()]
+    assert report["assessment_schema_records"] == 2 and report["assessment_supervision"] is True
+    assert report["omics_grounded_report_count"] == 0  # Fixture has no actual feature rows.
+    assert report["omics_incomplete_report_count"] == 2
+    assert {row["target_contract"] for row in rows} == {CONTRACT}
+    for row in rows:
+        target = Assessment.model_validate_json(row["messages"][-1]["content"])
+        if row["source_record_id"] == component["record_id"]:
+            assert target.mic_estimate.value is None
+            assert len(target.mic_observations) == 2
+            assert target.mechanism_claims[0].evidence_grade == "author_proposed"
+    private = [json.loads(line) for line in (output / "source_refs.jsonl").read_text().splitlines()]
+    assert all(row["human_gold"] is False and "mic_supervision" in row for row in private)
+    for split in ("validation", "test"):
+        heldout = json.loads((output / f"{split}.inputs.jsonl").read_text())
+        assert heldout["target_contract"] == CONTRACT
+        assert heldout["messages"][-1]["role"] == "user"
+        assert "777.0" not in json.dumps(heldout) and "999.0" not in json.dumps(heldout)
+    review = prepare_assessment_review(output, tmp_path / "review")
+    assert review["heldout_mechanism_gold_records"] == 0 and review["heldout_MIC_answers_opened"] == 0
+    assert review["training_mechanism_review_candidates"] == 1
+
+
 def test_explicit_quarantine_removes_component_and_measurements_without_new_split(joint_source, tmp_path):
     source, joint, _, other, _, _, _ = joint_source
     output = tmp_path / "quarantined"

@@ -148,7 +148,8 @@ def _joint_target(row: dict) -> dict:
 
 def prepare_joint_qwen_sft(component_dir: str | Path, joint_dirs: str | Path | list[str | Path],
                            output_dir: str | Path, *, base_qwen_dir: str | Path | None = None,
-                           exclude_component_ids: dict[str, str] | set[str] | list[str] | None = None) -> dict:
+                           exclude_component_ids: dict[str, str] | set[str] | list[str] | None = None,
+                           assessment_targets: bool = False) -> dict:
     """Prepare native Qwen chat, replacing reviewed MIC components exactly once.
 
     Existing frozen numeric evaluation is retained. Mechanism claims are train
@@ -254,10 +255,31 @@ def prepare_joint_qwen_sft(component_dir: str | Path, joint_dirs: str | Path | l
                                  mechanism_admission="agent_source_reviewed", human_gold=False,
                                  inference_eligible=False)
             private.append(reference)
-        joint_train = [row for row in train if row["source_record_id"] in replacements]
         quarantine = [{**deepcopy(provenance[key]), "component_id": key, "reason": reason,
                        "training_eligible": False} for key, reason in sorted(excluded.items())]
         excluded_measurements = sum(len(row["source_refs"]) for row in quarantine)
+        upstream_quarantine_count = len(source_quarantine)
+        upstream_quarantine_reasons = dict(Counter(row["reason"].partition(":")[0] for row in source_quarantine))
+        for row in quarantine:
+            source_quarantine.extend({"case_id": item["case_id"], "source_record_id": item["locator"]["record_id"],
+                                      "locator": deepcopy(item["locator"]), "literature": deepcopy(item["literature"]),
+                                      "reason": row["reason"], "training_eligible": False}
+                                     for item in row["source_refs"])
+        assessment_cache, assessment_roots = {}, {}
+        if assessment_targets:
+            from .assessment_supervision import convert_assessment_row
+            dataset = Path(component_summary["dataset_summary"]).parent
+            for case in _rows(dataset / "cases.jsonl"):
+                if case.get("profile_id"):
+                    native = next(iter(case["reference_profiles"].values()))
+                    assessment_roots[case["profile_id"]] = Path(native["manifest_path"]).parent.parent
+            for index, (row, reference) in enumerate(zip(train, private, strict=True)):
+                converted, annotation = convert_assessment_row(row, assessment_roots, assessment_cache, training=True)
+                paths = reference["public_asset_paths"]
+                converted["messages"] = _public_messages(converted["messages"], paths)
+                train[index] = converted
+                reference.update(annotation)
+        joint_train = [row for row in train if row["source_record_id"] in replacements]
         report = {"schema_version": SCHEMA, "status": "prepared_not_trained",
                   "training_record_count": len(train),
                   "training_MIC_measurement_count": numeric_manifest["training_MIC_measurement_count"] - excluded_measurements,
@@ -269,9 +291,9 @@ def prepare_joint_qwen_sft(component_dir: str | Path, joint_dirs: str | Path | l
                   "training_omics_view_count": component_summary["observation_view_count"],
                   "quarantined_component_count": len(excluded),
                   "quarantined_MIC_measurement_count": excluded_measurements,
-                  "upstream_quarantined_MIC_measurement_count": len(source_quarantine),
-                  "upstream_quarantine_reason_counts": dict(Counter(
-                      row["reason"].partition(":")[0] for row in source_quarantine)),
+                  "upstream_quarantined_MIC_measurement_count": upstream_quarantine_count,
+                  "total_quarantined_MIC_measurement_count": len(source_quarantine),
+                  "upstream_quarantine_reason_counts": upstream_quarantine_reasons,
                   "duplicate_MIC_components": 0, "source_reviewed_mechanisms": True,
                   "human_gold_mechanism_records": 0, "heldout_mechanism_gold_records": 0,
                   "complete_agent_report_count": 0, "raw_assets_copied": False,
@@ -292,10 +314,34 @@ def prepare_joint_qwen_sft(component_dir: str | Path, joint_dirs: str | Path | l
                                    "Frozen MIC evaluation does not establish held-out mechanism accuracy.",
                                    "joint.train.jsonl is an alternative subset of train.jsonl, not an additional training source.",
                                    "Joint components replace numeric components; component and measurement counts are not inflated."]}
+        if assessment_targets:
+            report.update(assessment_supervision=True, assessment_schema_records=len(train),
+                          omics_grounded_report_count=sum(row["omics_evidence_status"] == "passed" for row in private),
+                          omics_incomplete_report_count=sum(row["omics_evidence_status"] == "incomplete" for row in private),
+                          auxiliary_assessment_records=sum(row["omics_evidence_status"] == "not_applicable" for row in private),
+                          source_reviewed_derived_reports=True, human_gold_assessment_records=0,
+                          complete_agent_report_count=sum(row["omics_evidence_status"] == "passed" for row in private),
+                          report_origin="deterministic_weakly_derived_supervision",
+                          MIC_point_rule="all_observations_exact_and_equal_else_null",
+                          feature_search_policy="SMILES_structural_cues_and_record_bound_mechanism_terms",
+                          candidate_input_fields=["smiles"], training_observation_view_count=len(assessment_cache),
+                          training_task_scopes=dict(Counter(row["task_scope"] for row in train)))
+            report["limitations"] = [item for item in report["limitations"] if "fixed tool trajectories" not in item]
+            report["limitations"].extend([
+                "Reports are deterministic weakly derived supervision, not human reasoning gold or calibrated predictions.",
+                "Structure/annotation-specific feature queries are deterministic examples, not adaptive LLM policies.",
+                "Auxiliary reports have no same-strain omics and do not pass the platform omics evidence check.",
+                "Unverified conflicting plasmid backgrounds are quarantined without assuming unannotated assays are wildtype."])
         output.mkdir(parents=True, exist_ok=True)
         prepared_rows = (("train.jsonl", train), ("joint.train.jsonl", joint_train), ("source_refs.jsonl", private),
                          ("quarantined_components.index.jsonl", quarantine),
                          ("quarantined_measurements.index.jsonl", source_quarantine))
+        if assessment_targets:
+            from .assessment_supervision import omics_subset_indices
+            passed, incomplete = omics_subset_indices(train, private)
+            prepared_rows += (("omics.train.index.jsonl", passed), ("omics.incomplete.index.jsonl", incomplete))
+            report["omics_grounded_subset"] = "omics.train.index.jsonl"
+            report["omics_incomplete_subset"] = "omics.incomplete.index.jsonl"
         for name, records in prepared_rows:
             (output / name).write_text("".join(_json(row) + "\n" for row in records), encoding="utf-8")
         files = {name: len(records) for name, records in prepared_rows}
@@ -304,6 +350,9 @@ def prepare_joint_qwen_sft(component_dir: str | Path, joint_dirs: str | Path | l
         for name in _EVALUATION_FILES:
             records = _rows(numeric / name)
             if name.endswith(".inputs.jsonl"):
+                if assessment_targets:
+                    records = [convert_assessment_row(row, assessment_roots, assessment_cache, training=False)[0]
+                               for row in records]
                 for row in records:
                     row["messages"] = _public_messages(row["messages"], {})
             (output / name).write_text("".join(_json(row) + "\n" for row in records), encoding="utf-8")
@@ -315,15 +364,17 @@ def prepare_joint_qwen_sft(component_dir: str | Path, joint_dirs: str | Path | l
 
 
 def validate_joint_qwen_sft(output_dir: str | Path) -> dict:
+    from .paths import dataset_file
     root = Path(output_dir)
     manifest = json.loads((root / "manifest.json").read_text())
     if manifest.get("schema_version") != SCHEMA:
         raise ValueError("invalid_joint_qwen_manifest")
     components, mechanism_count = set(), 0
     for name, receipt in manifest["files"].items():
-        if _digest(root / name) != receipt["sha256"]:
+        path = dataset_file(root, name, manifest)
+        if _digest(path) != receipt["sha256"]:
             raise ValueError("prepared_joint_Qwen_file_changed")
-        records = _rows(root / name)
+        records = _rows(path)
         if len(records) != receipt["records"]:
             raise ValueError("prepared_joint_Qwen_count_changed")
         if name == "train.jsonl":
@@ -335,7 +386,13 @@ def validate_joint_qwen_sft(output_dir: str | Path) -> dict:
                 target = json.loads(row["messages"][-1]["content"])
                 if row["messages"][-1]["role"] != "assistant":
                     raise ValueError("joint_training_requires_final_assistant")
-                if row["target_contract"] == TARGET_CONTRACT:
+                from .assessment_supervision import CONTRACT, validate_candidate
+                validate_candidate(json.loads(row["messages"][1]["content"])["candidate"])
+                if row["target_contract"] == CONTRACT:
+                    from praxis_virtualcell.llm_prediction.schemas import Assessment
+                    Assessment.model_validate(target)
+                    mechanism_count += bool(target["mechanism_claims"])
+                elif row["target_contract"] == TARGET_CONTRACT:
                     mechanism_count += 1
                     if set(target) != {"endpoint", "unit", "observations", "mechanism_claims", "mechanism_limitations"}:
                         raise ValueError("invalid_joint_training_target")
@@ -351,6 +408,8 @@ def validate_joint_qwen_sft(output_dir: str | Path) -> dict:
         elif name.endswith(".inputs.jsonl"):
             for row in records:
                 qwen_messages(row["messages"])
+                from .assessment_supervision import validate_candidate
+                validate_candidate(json.loads(row["messages"][1]["content"])["candidate"])
                 if row["messages"][-1]["role"] == "assistant":
                     raise ValueError("heldout_answer_in_joint_inference_messages")
                 if _LOCAL_PATH.search(_json(row["messages"])):
@@ -360,7 +419,8 @@ def validate_joint_qwen_sft(output_dir: str | Path) -> dict:
     mixed = {row["record_id"]: row for row in _rows(root / "train.jsonl")}
     subset = _rows(root / "joint.train.jsonl")
     if (len(subset) != mechanism_count or len({row["record_id"] for row in subset}) != len(subset)
-            or any(row != mixed.get(row["record_id"]) or row["target_contract"] != TARGET_CONTRACT for row in subset)):
+            or any(row != mixed.get(row["record_id"]) or row["source_record_id"] not in {
+                "mic:" + key.removeprefix("joint:") for key in manifest["joint_training_record_ids"]} for row in subset)):
         raise ValueError("joint_training_subset_does_not_match_mixed_export")
     return manifest
 
@@ -373,6 +433,7 @@ def main() -> None:
     parser.add_argument("--exclude-components", help="JSON object mapping quarantined component IDs to reasons")
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--validate-only", action="store_true")
+    parser.add_argument("--assessment-targets", action="store_true", help="Export conservative complete Assessment reports")
     args = parser.parse_args()
     if args.validate_only:
         result = validate_joint_qwen_sft(args.output_dir)
@@ -381,6 +442,7 @@ def main() -> None:
             parser.error("--component-dir and --joint-dir are required for export")
         result = prepare_joint_qwen_sft(args.component_dir, args.joint_dir, args.output_dir,
                                        base_qwen_dir=args.base_qwen_dir,
+                                       assessment_targets=args.assessment_targets,
                                        exclude_component_ids=json.loads(Path(args.exclude_components).read_text())
                                        if args.exclude_components else None)
     print(json.dumps(result, ensure_ascii=False, indent=2))

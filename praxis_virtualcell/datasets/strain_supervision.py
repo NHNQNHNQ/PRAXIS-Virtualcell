@@ -14,7 +14,7 @@ import json
 from pathlib import Path
 
 from praxis_virtualcell.datasets.labels import ExperimentRecord
-from praxis_virtualcell.datasets.seeds import SEED_TOOLS, _SEARCH_TERMS, _call
+from praxis_virtualcell.datasets.seeds import SEED_TOOLS, _call
 from praxis_virtualcell.datasets.species_registry import _digest, _json
 from praxis_virtualcell.llm_prediction.evidence import _reference
 from praxis_virtualcell.llm_prediction.schemas import EvidenceReference
@@ -37,6 +37,8 @@ def _rows(path):
 def _request(case: dict) -> dict:
     """Explicit inference-compatible whitelist, excluding literature and answers."""
     strain = case["strain"]
+    from .assessment_supervision import validate_candidate
+    validate_candidate({"smiles": case["candidate"]["smiles"]})
     return {
         "candidate": {"smiles": case["candidate"]["smiles"]},
         "organism": {key: strain.get(key) for key in
@@ -53,7 +55,7 @@ def _identity(request: dict) -> str:
     return hashlib.sha256(_json(request).encode()).hexdigest()
 
 
-def _view(profile_id: str, root: Path) -> dict:
+def _view(profile_id: str, root: Path, search_terms: tuple[str, ...] | None = None) -> dict:
     profile = load_profile(profile_id, root)
     messages, calls = [], []
     overview = _call(profile, "overview", {}, messages, calls)
@@ -62,15 +64,17 @@ def _view(profile_id: str, root: Path) -> dict:
     refs = []
     for modality in overview["data"]["selected_modalities"]:
         found = []
-        for term in ("gyr", "efflux", "ribosomal", "membrane", *_SEARCH_TERMS):
-            search = _call(profile, "search_features", {"modality": modality, "query": term, "limit": 3}, messages, calls)
+        # Candidate-aware exports supply structure/record-bound mechanism terms.
+        # A missing relevant feature stays unknown; no alphabetic fallback is used.
+        for term in search_terms or ("efflux", "porin", "membrane", "transport"):
+            search = _call(profile, "search_features", {"modality": modality, "query": term, "limit": 1}, messages, calls)
             for feature in search["data"]["features"]:
                 if feature["feature_id"] not in found:
                     found.append(feature["feature_id"])
             if len(found) >= 3:
                 break
         if not found:
-            raise ValueError("selected_strain_modality_has_no_searchable_features")
+            continue
         query = _call(profile, "query_features", {"modality": modality, "feature_ids": found[:3], "limit": 3}, messages, calls)
         for index, row in enumerate(query["data"]["features"]):
             if row["modality"] != modality:
@@ -84,7 +88,8 @@ def _view(profile_id: str, root: Path) -> dict:
                 refs.append(ref.model_dump())
     return {"view_id": profile_id, "profile_id": profile_id, "messages": messages,
             "tool_calls": calls, "evidence_refs": refs,
-            "limitations": ["A few queried native features demonstrate tool use; they are not a full cellular-state analysis.",
+            "search_terms": list(search_terms or ("efflux", "porin", "membrane", "transport")),
+            "limitations": ["Structure/annotation-related queried features are contextual observations, not target causality.",
                             "Reference modalities share strain identity, not an experimental sample or condition."]}
 
 

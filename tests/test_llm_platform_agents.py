@@ -182,6 +182,53 @@ def test_cli_agents_receive_selected_modalities(platform, monkeypatch, tmp_path)
     assert output.with_suffix(".md").read_text() == "Public agent report"
 
 
+def test_web_conditions_and_qwen_route_reach_analyzer_with_validated_smiles(platform, monkeypatch, tmp_path):
+    from praxis_virtualcell.web.app import create_app
+    import praxis_virtualcell.llm_prediction as prediction
+    import praxis_virtualcell.llm_prediction.qwen_serving as serving
+    env = platform[1]
+    env.write_text(env.read_text() + "PRAXIS_ANALYSIS_MODEL=qwen-adapter\nPRAXIS_ANALYSIS_BASE_URL=http://127.0.0.1:8790\n")
+    seen = []
+    class LocalClient:
+        closed = False
+        async def aclose(self):
+            self.closed = True
+    local = LocalClient()
+    monkeypatch.setattr(serving, "analysis_client", lambda settings: local)
+    async def agents(smiles, profile_id, **kwargs):
+        seen.append((smiles, kwargs))
+        return {"status": "completed"}
+    monkeypatch.setattr(prediction, "analyze_with_agents", agents)
+    with TestClient(create_app(env_file=env, report_root=tmp_path / "reports")) as client:
+        result = client.post("/api/analyze", json={"smiles": "OCC", "conditions": {
+            "medium": "CAMHB", "medium_supplements": ["serum"], "temperature_c": 37,
+            "exposure_hours": 24, "method": "broth_microdilution", "inoculum": "5e5 CFU/mL"}})
+        assert result.status_code == 200
+        assert client.post("/api/analyze", json={"smiles": "aspirin"}).status_code == 422
+        assert client.post("/api/analyze", json={"candidate_id": "aspirin"}).status_code == 422
+    smiles, kwargs = seen[0]
+    assert len(seen) == 1 and smiles == "CCO"
+    assert kwargs["conditions"]["exposure_hours"] == 24 and kwargs["conditions"]["medium_supplements"] == ["serum"]
+    assert kwargs["analysis_model"] == "qwen-adapter" and kwargs["analysis_provider"] == "qwen"
+    assert kwargs["analysis_client"] is local and local.closed
+
+
+def test_cli_all_assay_fields_reach_analyzer(platform, monkeypatch, tmp_path):
+    import praxis_virtualcell.llm_prediction as prediction
+    seen = []
+    async def agents(smiles, profile_id, **kwargs):
+        seen.append((smiles, kwargs["conditions"]))
+        return {"status": "completed"}
+    monkeypatch.setattr(prediction, "analyze_with_agents", agents)
+    args = ["--env-file", str(platform[1]), "analyze", "--smiles", "OCC", "--medium", "CAMHB",
+            "--medium-supplement", "serum", "--medium-supplement", "NaCl", "--temperature-c", "37",
+            "--exposure-hours", "20", "--method", "broth_microdilution", "--inoculum", "5e5 CFU/mL",
+            "--output", str(tmp_path / "conditions.json")]
+    assert main(args) == 0
+    assert seen == [("CCO", {"medium": "CAMHB", "medium_supplements": ["serum", "NaCl"], "temperature_c": 37,
+                              "exposure_hours": 20, "method": "broth_microdilution", "inoculum": "5e5 CFU/mL"})]
+
+
 def test_cli_inspect_selected_view_without_credentials(platform, capsys):
     assert main(["inspect", "--profile", "test-profile", "--modalities", "proteome"]) == 0
     assert json.loads(capsys.readouterr().out)["selected_modalities"] == ["proteome"]

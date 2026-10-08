@@ -144,7 +144,6 @@ def freeze_evaluation(
         for record in sorted(members, key=lambda item: item.record_id):
             case_id = f"case-{len(inputs) + 1:06d}"
             request = record.analysis_input()
-            request["candidate"]["id"] = case_id
             inputs.append({"case_id": case_id, "split": split, "group_id": group_id, "input": request})
             answers.append({"case_id": case_id, "split": split, "group_id": group_id, "record_id": record.record_id})
             split_counts[split] += 1

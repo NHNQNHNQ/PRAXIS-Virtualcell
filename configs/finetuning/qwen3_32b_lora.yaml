@@ -35,8 +35,10 @@ training:
   seed: 20261007
   data_seed: 20261007
   optim: adamw_torch
-  save_strategy: 'no'
+  save_strategy: 'steps'
+  save_steps: 25
+  save_total_limit: 3
   eval_strategy: 'no'
   report_to: 'none'
   save_safetensors: true
-  save_only_model: true
+  save_only_model: false

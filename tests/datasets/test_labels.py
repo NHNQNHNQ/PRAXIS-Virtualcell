@@ -81,6 +81,7 @@ def test_analysis_whitelist_excludes_labels_descriptions_and_unpaired_reference(
     value["conditions"]["provenance"] = {"medium": "Description also reports MIC=64."}
     record = ExperimentRecord.model_validate(value)
     inputs = record.analysis_input()
+    assert inputs["candidate"] == {"smiles": "CCO"}
     assert set(inputs) == {"candidate", "organism", "conditions", "omics_profile_ids"}
     assert inputs["omics_profile_ids"] == []
     text = json.dumps(inputs)

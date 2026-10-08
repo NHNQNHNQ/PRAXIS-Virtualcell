@@ -212,6 +212,62 @@ def test_invalid_gold_citations_do_not_become_targets():
         export_trajectories(run(), approval(gold_assessment=assessment(16.0)))
 
 
+def test_curated_gold_uses_real_structure_scope_and_preserves_legacy_compatibility():
+    from praxis_virtualcell.cell_structure import cell_structure_overview
+
+    legacy = run()
+    assert export_trajectories(legacy, approval(gold_assessment=assessment()))["records"][0]["supervision"]["prediction_is_gold"]
+
+    source = run()
+    data = cell_structure_overview({"profile_id": "sample", "input_role": "species_reference",
+                                    "species": {"taxonomy_id": "NCBITaxon:470"}, "strain": None,
+                                    "strain_namespace": None, "genotype": None})
+    fact = data["structures"][0]
+    structure_call = {"tool_call_id": "structure-1", "name": "cell_structure_overview",
+                      "arguments": {}, "ok": True, "data": data}
+    source["cell_structure"] = data
+    source["execution_trace"]["tool_calls"].append(structure_call)
+    accepted = assessment()
+    accepted["structure_analysis"] = {"compartment_hypotheses": [{
+        "structure_id": fact["structure_id"], "compartment": fact["compartment"],
+        "evidence_scope": fact["evidence_scope"], "evidence_type": fact["evidence_type"],
+        "hypothesis": "Species topology is background; candidate transport remains unknown.",
+        "evidence_refs": [{"tool_call_id": "structure-1", "pointer": "/structures/0/compartment",
+                           "source_id": fact["source_id"], "value": fact["compartment"]}],
+    }], "limitations": data["gaps"]}
+    source["assessment"] = accepted
+    stage = source["agent_trace"]["stages"][0]
+    stage["tools"].append({"type": "function", "function": {"name": "cell_structure_overview", "parameters": {}}})
+    stage["messages"][-1:-1] = [
+        {"role": "assistant", "content": None, "tool_calls": [{"id": "structure-1", "type": "function",
+          "function": {"name": "cell_structure_overview", "arguments": "{}"}}]},
+        {"role": "tool", "tool_call_id": "structure-1", "content": json.dumps(structure_call)},
+    ]
+    stage["messages"][-1]["content"] = json.dumps(accepted)
+    gold = deepcopy(accepted)
+    gold["rationale_summary"] = "Curator retained source scope and unknown candidate transport."
+    original = deepcopy(source)
+    record = export_trajectories(source, approval(gold_assessment=gold))["records"][0]
+    assert record["supervision"]["prediction_is_gold"] is True
+    assert json.loads(record["messages"][-1]["content"])["structure_analysis"]["compartment_hypotheses"][0]["evidence_scope"] == "species_prior"
+    assert source == original
+
+    forged = deepcopy(gold)
+    forged["structure_analysis"]["compartment_hypotheses"][0]["evidence_refs"][0]["source_id"] = "structure:forged"
+    with pytest.raises(ValueError, match="invalid_gold_assessment_evidence"):
+        export_trajectories(source, approval(gold_assessment=forged))
+    missing = deepcopy(gold)
+    del missing["structure_analysis"]
+    for enabled_by in ("metadata", "tool"):
+        enabled = deepcopy(source)
+        if enabled_by == "metadata":
+            enabled["execution_trace"]["tool_calls"].remove(structure_call)
+        else:
+            del enabled["cell_structure"]
+        with pytest.raises(ValueError, match="invalid_gold_assessment_evidence"):
+            export_trajectories(enabled, approval(gold_assessment=missing))
+
+
 def test_gold_preserves_selected_modality_coverage_even_when_mic_is_unknown():
     source = run()
     source["profile"]["selected_modalities"] = ["transcriptome", "proteome"]

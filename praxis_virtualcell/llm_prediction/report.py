@@ -13,6 +13,36 @@ def _source_citation(citation: str) -> str:
     return re.sub(r"https?://[^\s;,，；]+", lambda match: f"[作者来源](<{match[0]}>)", citation)
 
 
+def _structure_report(analysis: dict | None) -> list[str]:
+    lines = ["", "## 细胞结构与可达性假说", ""]
+    if analysis is None:
+        return lines + ["未知（本报告未提供经引用核验的结构分析）；蛋白定位与当前细胞结构状态未知。"]
+    scopes = {"species_prior": "物种背景（species_prior）；当前菌株结构与状态未知",
+              "strain_evidence": "菌株来源证据（strain_evidence）；当前细胞状态仍未验证"}
+    types = {"reference_knowledge": "参考知识", "source_annotation": "来源注释", "measured": "来源测定"}
+    access = {"unknown": "可达性未知", "potentially_accessible": "可能可达（假说）",
+              "potential_barrier": "可能构成屏障（假说）"}
+    for section in ("compartment_hypotheses", "accessibility_barriers"):
+        for claim in analysis.get(section, []):
+            lines.append(f"- 已知（来源记录）：{claim['structure_id']} / {claim['compartment']}；"
+                         f"{scopes[claim['evidence_scope']]}；{types[claim['evidence_type']]}。")
+            if claim.get("protein_id"):
+                lines.append(f"  - 来源中的蛋白定位：{claim['protein_id']}（{claim['protein_namespace']}）/ "
+                             f"{claim['compartment']}；不由基因存在推断。")
+            else:
+                lines.append("  - 蛋白定位：未知（未提供原始蛋白定位记录）。")
+            label = access[claim["accessibility"]] if section == "accessibility_barriers" else "区室假说"
+            lines.append(f"  - {label}：{claim['hypothesis']}；不表示已验证该候选分子的穿透或结合。")
+            lines.append(f"  - 精确引用：{_citations(claim['evidence_refs'])}")
+    if not analysis.get("compartment_hypotheses") and not analysis.get("accessibility_barriers"):
+        lines.append("结构与可达性：未知（未提供可引用的结构条目）。")
+    lines.append("结构分析限制：")
+    lines.extend(f"- {limitation}" for limitation in analysis.get("limitations", []))
+    if not analysis.get("limitations"):
+        lines.append("- 未列出额外限制；候选可达性与当前细胞状态仍未验证。")
+    return lines
+
+
 def render_report(result: dict[str, Any]) -> str:
     if "results" in result:
         return "\n\n---\n\n".join(render_report(item) for item in result["results"])
@@ -115,6 +145,7 @@ def render_report(result: dict[str, Any]) -> str:
             lines.append(f"  - 反证引用：{_citations(mechanism['counterevidence_refs'])}")
     if not assessment["targets"] and not assessment["mechanism_hypotheses"]:
         lines.append("未知。")
+    lines.extend(_structure_report(assessment.get("structure_analysis")))
     lines.extend(["", "## 缺口", ""])
     lines.extend(f"- {gap}" for gap in assessment["gaps"])
     if not assessment["gaps"]:

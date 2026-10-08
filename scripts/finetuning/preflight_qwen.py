@@ -8,6 +8,7 @@ All source messages reject reserved control tokens before rendering.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -16,7 +17,7 @@ from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
 
-DEFAULT_CONFIG = Path(__file__).resolve().parents[2] / "configs/finetuning/qwen3_32b_lora.yaml"
+DEFAULT_CONFIG = Path(__file__).resolve().parents[2] / "configs/finetuning/qwen3_32b_joint_lora.yaml"
 _MESSAGE_FIELDS = {"role", "content", "tool_calls", "tool_call_id"}
 _RECORD_FIELDS = {"record_id", "source_record_id", "task_scope", "target_contract", "messages", "tools"}
 _CONTROL = ("<|im_start|>", "<|im_end|>", "<|endoftext|>", "<think>", "</think>")
@@ -200,8 +201,15 @@ def tokenize_record(record: dict, tokenizer: Any, max_length: int) -> tuple[dict
         by_role[role] += len(indices)
     if not any(mask):
         raise ValueError("empty_assistant_loss_mask")
-    return {"input_ids": ids, "labels": labels, "assistant_masks": mask}, {
-        "tokens": len(ids), "assistant_loss_tokens": sum(mask), "serialized_role_tokens": dict(by_role)}
+    final_start, final_end = assistant[-1]
+    final_tokens = sum(selected and start >= final_start and end <= final_end
+                       for (start, end), selected in zip(offsets, mask, strict=True))
+    return {"input_ids": ids, "labels": labels, "assistant_masks": mask,
+            "record_id": record.get("record_id", "unnamed"),
+            "task_scope": record.get("task_scope", "unspecified"),
+            "target_contract": record.get("target_contract", "unspecified")}, {
+        "tokens": len(ids), "assistant_loss_tokens": sum(mask), "final_assistant_tokens": final_tokens,
+        "record_id": record.get("record_id", "unnamed"), "serialized_role_tokens": dict(by_role)}
 
 
 def mask_self_test(tokenizer: Any) -> dict:
@@ -277,6 +285,9 @@ def load_local_tokenizer(config: dict):
 def preflight(config: dict, *, schema_only: bool = False) -> tuple[dict, list[dict], Any]:
     path = Path(config["data_dir"]) / "train.jsonl"
     records = read_training_records(path)
+    if config.get("require_assessment_supervision") and any(
+            row.get("target_contract") != "praxis.assessment-supervision.v1" for row in records):
+        raise ValueError("this recipe requires Assessment supervision on every training record")
     report = {"status": "schema_passed" if schema_only else "tokenizer_and_mask_passed", "train_path": str(path),
               "record_count": len(records), "max_length": config["max_length"], "training_runs": 0,
               "large_model_loaded": False, "source_trajectory_count": sum(bool(row["tools"]) for row in records),
@@ -288,17 +299,42 @@ def preflight(config: dict, *, schema_only: bool = False) -> tuple[dict, list[di
     report["mask_self_test"] = mask_self_test(tokenizer)
     from train_qwen_lora import assistant_loss_self_test
     report["sparse_assistant_loss_self_test"] = assistant_loss_self_test()
-    features, sizes = [], []
+    features, sizes, task_stats = [], [], {}
     for record in records:
         feature, size = tokenize_record(record, tokenizer, config["max_length"])
         features.append(feature)
         sizes.append(size)
+        scope = feature["task_scope"]
+        stats = task_stats.setdefault(scope, {"records": 0, "tokens": 0, "supervised_tokens": 0,
+                                            "max_tokens": 0, "max_final_assistant_tokens": 0,
+                                            "target_contracts": {}})
+        stats["records"] += 1
+        stats["tokens"] += size["tokens"]
+        stats["supervised_tokens"] += size["assistant_loss_tokens"]
+        stats["max_tokens"] = max(stats["max_tokens"], size["tokens"])
+        stats["max_final_assistant_tokens"] = max(stats["max_final_assistant_tokens"], size["final_assistant_tokens"])
+        contract = feature["target_contract"]
+        stats["target_contracts"][contract] = stats["target_contracts"].get(contract, 0) + 1
+    total_supervised = sum(size["assistant_loss_tokens"] for size in sizes)
+    for stats in task_stats.values():
+        stats["record_fraction"] = stats["records"] / len(records)
+        stats["supervised_token_fraction"] = stats["supervised_tokens"] / total_supervised
+    # A small training JSONL identity is necessary to reject a resume after data
+    # changes. The 65 GB base checkpoint is never rehashed by this entrypoint.
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
     report.update(loss_mask_checked=True, token_lengths_checked=True, max_observed_tokens=max(size["tokens"] for size in sizes),
                   total_tokens=sum(size["tokens"] for size in sizes),
                   assistant_loss_tokens=sum(size["assistant_loss_tokens"] for size in sizes),
                   nonassistant_loss_tokens=0, truncation_performed=False,
                   native_template_unchanged=True, mask_method="native_chatml_fast_token_offsets",
-                  loss_method="native_Qwen3_logits_to_keep_and_shift_labels")
+                  loss_method="native_Qwen3_logits_to_keep_and_shift_labels",
+                  training_data_sha256=digest.hexdigest(), task_supervision=task_stats,
+                  max_final_assistant_tokens=max(size["final_assistant_tokens"] for size in sizes),
+                  max_token_record_id=max(sizes, key=lambda size: size["tokens"])["record_id"],
+                  max_final_assistant_record_id=max(sizes, key=lambda size: size["final_assistant_tokens"])["record_id"])
     return report, features, tokenizer
 
 

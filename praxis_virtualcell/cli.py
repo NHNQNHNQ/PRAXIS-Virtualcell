@@ -37,30 +37,46 @@ def write_result(result: dict, output: str | Path) -> None:
 async def run_analysis(args):
     from praxis2.llm.client import LLMClient
     from praxis_virtualcell.llm_prediction import analyze_with_agents
+    from praxis_virtualcell.llm_prediction.schemas import MICConditions
+    from praxis_virtualcell.llm_prediction.qwen_serving import analysis_client
+    from praxis_virtualcell.llm_prediction.workflow import normalize_molecule
     settings = LLMSettings.load(args.env_file)
     settings.require_key()
     model = args.model or settings.model
     output_override = getattr(args, "max_output_tokens", None)
     limits = {"max_output_tokens": settings.max_output_tokens if output_override is None else output_override,
               "reasoning_effort": getattr(args, "reasoning_effort", None) or settings.reasoning_effort}
+    limits["conditions"] = MICConditions(**{name: getattr(args, name, None) for name in (
+        "medium", "medium_supplements", "temperature_c", "exposure_hours", "method", "inoculum")}).model_dump()
     if getattr(args, "modalities", None) is not None:
         limits["modalities"] = args.modalities
     if getattr(args, "knowledge_catalog", None) is not None:
         limits["knowledge_catalog_path"] = args.knowledge_catalog
+    limits["include_cell_structure"] = not getattr(args, "without_cell_structure", False)
+    if getattr(args, "structure_catalog", None) is not None:
+        limits["structure_catalog_path"] = args.structure_catalog
     client = LLMClient(settings.api_key, settings.base_url, timeout_s=180)
+    qwen_client = analysis_client(settings)
+    if qwen_client is not None:
+        limits.update(analysis_client=qwen_client, analysis_model=settings.analysis_model,
+                      analysis_provider=settings.analysis_provider,
+                      analysis_max_output_tokens=output_override or settings.analysis_max_output_tokens)
     def progress(candidate_id):
         def emit(event):
             print(json.dumps({"candidate_id": candidate_id, "progress": event}, ensure_ascii=False), flush=True)
         return emit
     try:
         if args.command == "analyze":
-            result = await analyze_with_agents(args.smiles, args.profile, client=client, model=model,
+            smiles = normalize_molecule(args.smiles)["canonical_smiles"]
+            result = await analyze_with_agents(smiles, args.profile, client=client, model=model,
                                              data_root=args.data_root, max_turns=args.max_turns,
                                              candidate_id=args.candidate_id, on_progress=progress(args.candidate_id), **limits)
             write_result(result, args.output)
             print(json.dumps({"status": result["status"], "report": str(Path(args.output).resolve())}, ensure_ascii=False))
             return 0 if result["status"] == "completed" else 2
         candidates = read_candidates(args.input, args.limit)
+        for candidate in candidates:
+            candidate["smiles"] = normalize_molecule(candidate["smiles"])["canonical_smiles"]
         destination = Path(args.output)
         destination.mkdir(parents=True, exist_ok=True)
         gate = asyncio.Semaphore(args.concurrency)
@@ -82,6 +98,8 @@ async def run_analysis(args):
         return 0 if all(item["status"] == "completed" for item in summary) else 2
     finally:
         await client.aclose()
+        if qwen_client is not None:
+            await qwen_client.aclose()
 
 
 def main(argv=None):
@@ -89,11 +107,13 @@ def main(argv=None):
     parser.add_argument("--data-root", help="Organism profile directory (default: data/organisms)")
     parser.add_argument("--env-file", help="Local credential file (default: .env)")
     parser.add_argument("--knowledge-catalog", help="Curated mechanism catalog; never experimental MIC labels")
+    parser.add_argument("--structure-catalog", help="Sourced cell structure catalog; species priors and strain facts remain separate")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("profiles", help="List locally available organism profiles")
     inspect = sub.add_parser("inspect", help="Inspect real profile identity and omics coverage")
     inspect.add_argument("--profile", default="AB5075-STRAIN-REFERENCE")
     inspect.add_argument("--modalities", nargs="+", choices=["genome", "transcriptome", "proteome"])
+    inspect.add_argument("--cell-structure", action="store_true", help="Include sourced structural context without calling an LLM")
     for command in ("analyze", "batch"):
         item = sub.add_parser(command)
         item.add_argument("--profile", default="AB5075-STRAIN-REFERENCE")
@@ -103,6 +123,13 @@ def main(argv=None):
         item.add_argument("--max-turns", type=int, default=8)
         item.add_argument("--max-output-tokens", type=int, help="Per-call reasoning and answer budget (1024–131072)")
         item.add_argument("--reasoning-effort", choices=["low", "high", "max"])
+        item.add_argument("--without-cell-structure", action="store_true", help="Omit structural context for a deliberate comparison")
+        item.add_argument("--medium", help="Requested MIC assay medium; omics sampling conditions remain independent")
+        item.add_argument("--medium-supplement", dest="medium_supplements", action="append")
+        item.add_argument("--temperature-c", type=float)
+        item.add_argument("--exposure-hours", type=float)
+        item.add_argument("--method", help="MIC assay method")
+        item.add_argument("--inoculum", help="MIC assay inoculum, preserving its unit")
         if command == "analyze":
             item.add_argument("--smiles", required=True)
             item.add_argument("--candidate-id", default="candidate-001")
@@ -285,6 +312,9 @@ def main(argv=None):
                 if args.modalities is not None:
                     profile = profile.select_modalities(args.modalities)
                 result = profile.overview()
+                if args.cell_structure:
+                    from praxis_virtualcell.cell_structure import cell_structure_overview
+                    result["cell_structure"] = cell_structure_overview(result, catalog_path=args.structure_catalog)
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return 0
         if args.command == "export-sft":
@@ -300,7 +330,8 @@ def main(argv=None):
             import uvicorn
             from praxis_virtualcell.web.app import create_app
             uvicorn.run(create_app(data_root=args.data_root, env_file=args.env_file,
-                                   knowledge_catalog_path=args.knowledge_catalog), host=args.host, port=args.port)
+                                   knowledge_catalog_path=args.knowledge_catalog,
+                                   structure_catalog_path=args.structure_catalog), host=args.host, port=args.port)
             return 0
         if not 1 <= args.max_turns <= 20:
             raise ValueError("max-turns must be between 1 and 20")

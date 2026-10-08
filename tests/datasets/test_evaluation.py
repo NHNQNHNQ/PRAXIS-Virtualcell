@@ -168,7 +168,7 @@ def test_model_visible_inputs_do_not_contain_endpoint_or_source_labels(tmp_path)
     text = (folder / "inputs.jsonl").read_text()
     for item in rows(folder / "inputs.jsonl"):
         assert set(item["input"]) == {"candidate", "organism", "conditions", "omics_profile_ids"}
-        assert item["input"]["candidate"]["id"] == item["case_id"]
+        assert set(item["input"]["candidate"]) == {"smiles"}
         assert item["input"]["omics_profile_ids"] == []
     for forbidden in ["private-label", "DO_NOT_EXPOSE_LABEL_SENTINEL", "endpoint", "raw", "conversion",
                       "activity_id", "native_locator", "measured_qualifier", "admission", "MIC", "64.0", "TEST_UNPAIRED_REFERENCE"]:

@@ -59,6 +59,10 @@ const context={document:{getElementById:get,createElement:()=>element()},URLSear
 vm.createContext(context);new vm.Script(SCRIPT).runInContext(context);
 (async()=>{
  await context.init();
+ const unknownConditions=context.readMICConditions();
+ get('mic-medium').value='CAMHB';get('mic-supplements').value='serum; NaCl';
+ get('mic-temperature').value='37';get('mic-exposure').value='20';
+ get('mic-method').value='broth_microdilution';get('mic-inoculum').value='5e5 CFU/mL';
  const first=inputs.map(i=>({value:i.value,disabled:i.disabled,checked:i.checked}));
  for(const i of inputs)i.checked=false;
  await context.selectionChanged();
@@ -70,7 +74,7 @@ vm.createContext(context);new vm.Script(SCRIPT).runInContext(context);
  for(const i of inputs)i.checked=['genome','proteome'].includes(i.value);
  await context.selectionChanged();
  await get('analyze').listeners.click();
- process.stdout.write(JSON.stringify({first,emptyDisabled,submitted,
+ process.stdout.write(JSON.stringify({first,emptyDisabled,submitted,unknownConditions,
   stages:get('agent-stages').children.map(x=>x.textContent),review:get('agent-review').textContent,
   summary:get('profile-summary').textContent}));
 })().catch(error=>{console.error(error);process.exitCode=1;});
@@ -85,6 +89,11 @@ vm.createContext(context);new vm.Script(SCRIPT).runInContext(context);
     assert state["emptyDisabled"] is True
     assert state["submitted"]["modalities"] == ["genome", "proteome"]
     assert state["submitted"]["smiles"] == "CCO"
+    assert state["unknownConditions"] == {"medium": None, "medium_supplements": None, "temperature_c": None,
+                                            "exposure_hours": None, "method": None, "inoculum": None}
+    assert state["submitted"]["conditions"] == {"medium": "CAMHB", "medium_supplements": ["serum", "NaCl"],
+                                                 "temperature_c": 37, "exposure_hours": 20,
+                                                 "method": "broth_microdilution", "inoculum": "5e5 CFU/mL"}
     assert "规划 · completed" in state["stages"]
     assert "修订 · completed" in state["stages"]
     assert "审核决定：revise" in state["review"]

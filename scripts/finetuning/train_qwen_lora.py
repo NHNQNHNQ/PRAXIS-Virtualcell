@@ -3,18 +3,96 @@
 
 Launch --train or --gpu-forward through the checked-in 8-GPU Accelerate FSDP
 configuration. Native Qwen serialization is preserved; prepared labels supervise
-assistant text and calls while masking system/user/tool text. Only the final
-LoRA adapter is saved. Answer-free heldout inputs are never an eval_dataset.
+assistant text and calls while masking system/user/tool text. Intermediate
+checkpoints restore LoRA, optimizer, scheduler and RNG; base weights stay local
+and are never written into checkpoints. Heldout inputs are never an eval_dataset.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
 from pathlib import Path
 
 from preflight_qwen import DEFAULT_CONFIG, load_config, package_versions, preflight
+
+CHECKPOINT_MANIFEST = "praxis_checkpoint.json"
+
+
+def training_identity(config: dict, data_sha256: str, features: list[dict]) -> str:
+    recipe = {key: config.get(key) for key in ("model_id", "model_dir", "expected_packages", "lora",
+                                             "training", "sampling", "short_trial", "loss_chunk_tokens",
+                                             "fsdp_bf16_lora_inputs", "max_length", "bf16",
+                                             "attn_implementation", "loss_mask", "packing")}
+    recipe["training_implementation"] = "qwen3_projection_chunk_ce.v1"
+    recipe.update(training_data_sha256=data_sha256,
+                  selected_records=[row.get("record_id", "unnamed") for row in features])
+    return hashlib.sha256(json.dumps(recipe, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def checkpoint_files(world_size: int, *, fsdp: bool = True) -> list[str]:
+    names = (["pytorch_model_fsdp.bin", "optimizer.bin"] if fsdp
+             else ["adapter_model.safetensors", "optimizer.pt"])
+    return names + ["scheduler.pt", "trainer_state.json"] + (
+        [f"rng_state_{rank}.pth" for rank in range(world_size)] if world_size > 1 else ["rng_state.pth"])
+
+
+def validate_resume_checkpoint(path: str | Path, output: str | Path, identity: str,
+                               world_size: int = 8) -> dict:
+    """Reject adapter-only, incomplete, other-data and other-recipe restarts."""
+    checkpoint, root = Path(path).resolve(), Path(output).resolve()
+    if checkpoint.parent != root or not checkpoint.name.startswith("checkpoint-"):
+        raise ValueError("resume must select a checkpoint-N directory in the configured output_dir")
+    marker = checkpoint / CHECKPOINT_MANIFEST
+    if not marker.is_file():
+        raise ValueError("checkpoint has no completed-state manifest; an empty output or adapter is not resumable")
+    report = json.loads(marker.read_text(encoding="utf-8"))
+    if (report.get("schema") != "praxis.fsdp-lora-checkpoint.v1" or report.get("training_identity") != identity
+            or report.get("world_size") != world_size or report.get("state_dict_type") != "FULL_STATE_DICT"):
+        raise ValueError("checkpoint data, recipe, world size or state format differs from this run")
+    expected = checkpoint_files(world_size, fsdp=report.get("fsdp", True))
+    if any(not (checkpoint / name).is_file() or (checkpoint / name).stat().st_size == 0 for name in expected):
+        raise ValueError("checkpoint is missing model, optimizer, scheduler, Trainer or per-rank RNG state")
+    recorded_sizes = report.get("files")
+    if recorded_sizes is not None and any(recorded_sizes.get(name) != (checkpoint / name).stat().st_size
+                                          for name in expected):
+        raise ValueError("checkpoint recovery files differ from the completed-state manifest")
+    state = json.loads((checkpoint / "trainer_state.json").read_text(encoding="utf-8"))
+    if state.get("global_step") != report.get("global_step") or checkpoint.name != f"checkpoint-{state['global_step']}":
+        raise ValueError("checkpoint completion manifest and Trainer progress disagree")
+    return report
+
+
+def select_training_features(config: dict, features: list[dict], world_size: int = 8) -> tuple[list[dict], dict]:
+    """Formal mixing visits each record once; the trial starts with a capacity probe."""
+    if config.get("sampling", {}).get("strategy", "shuffled_once") != "shuffled_once":
+        raise ValueError("the initial mixed recipe must use shuffled_once without task oversampling")
+    longest = max(features, key=lambda row: len(row["input_ids"]))
+    if not config.get("short_trial"):
+        return features, {"strategy": "shuffled_once", "task_oversampling": False, "records": len(features)}
+    limit = int(config["short_trial"].get("records", 64))
+    if limit < world_size * 2:
+        raise ValueError("short_trial.records must leave room for the longest-record probe and mixed tasks")
+    # First global microbatch puts the actual longest context on every rank.
+    # These diagnostic repetitions are exclusive to the disposable short trial.
+    selected = [longest] * world_size
+    groups = {}
+    for row in features:
+        if row is not longest:
+            groups.setdefault(row.get("task_scope", "unspecified"), []).append(row)
+    for rows in groups.values():
+        rows.sort(key=lambda row: (len(row["input_ids"]), row.get("record_id", "")))
+    while len(selected) < limit and any(groups.values()):
+        for scope in sorted(groups):
+            if groups[scope] and len(selected) < limit:
+                selected.append(groups[scope].pop(0))
+    return selected, {"strategy": "sequential_mixed_capacity_trial", "records": len(selected),
+                      "longest_record_id": longest.get("record_id"), "longest_tokens": len(longest["input_ids"]),
+                      "longest_record_repetitions": world_size, "formal_task_oversampling": False,
+                      "task_records": {scope: sum(row.get("task_scope", "unspecified") == scope for row in selected)
+                                       for scope in sorted({row.get("task_scope", "unspecified") for row in selected})}}
 
 
 def assistant_loss_inputs(inputs: dict) -> dict:
@@ -41,19 +119,208 @@ def assistant_loss_inputs(inputs: dict) -> dict:
             "shift_labels": shifted.index_select(1, keep)}
 
 
+def install_chunked_training_loss(model, chunk_tokens: int) -> None:
+    """Scope projection/CE recomputation to this Qwen instance's training path.
+
+    The official decoder receives the entire unchanged context. Projecting and
+    reducing each selected hidden-state chunk together avoids both full logits
+    and their full backward buffers. Evaluation/generation use native forward.
+    """
+    from types import MethodType
+    import torch
+    from torch.nn.functional import cross_entropy, pad
+    from torch.utils.checkpoint import checkpoint
+    from transformers.modeling_outputs import CausalLMOutputWithPast
+    if type(chunk_tokens) is not int or chunk_tokens < 1:
+        raise ValueError("loss_chunk_tokens must be a positive integer")
+    if model.config.model_type != "qwen3":
+        raise ValueError("chunked training loss requires the official Qwen3 causal model")
+    original_forward = model.forward
+
+    def forward(self, input_ids=None, attention_mask=None, position_ids=None, past_key_values=None,
+                inputs_embeds=None, labels=None, use_cache=None, cache_position=None, logits_to_keep=0, **kwargs):
+        if not self.training or labels is None:
+            return original_forward(input_ids=input_ids, attention_mask=attention_mask, position_ids=position_ids,
+                                    past_key_values=past_key_values, inputs_embeds=inputs_embeds, labels=labels,
+                                    use_cache=use_cache, cache_position=cache_position,
+                                    logits_to_keep=logits_to_keep, **kwargs)
+        num_items_in_batch = kwargs.pop("num_items_in_batch", None)
+        shift_labels = kwargs.pop("shift_labels", None)
+        outputs = self.model(input_ids=input_ids, attention_mask=attention_mask, position_ids=position_ids,
+                             past_key_values=past_key_values, inputs_embeds=inputs_embeds, use_cache=use_cache,
+                             cache_position=cache_position, **kwargs)
+        positions = slice(-logits_to_keep, None) if isinstance(logits_to_keep, int) else logits_to_keep
+        selected = outputs.last_hidden_state[:, positions, :]
+        targets = (pad(labels, (0, 1), value=-100)[:, 1:][:, positions]
+                   if shift_labels is None else shift_labels).to(selected.device)
+        if targets.shape != selected.shape[:2]:
+            raise ValueError("selected hidden states and causal targets differ")
+        denominator = num_items_in_batch if num_items_in_batch is not None else targets.ne(-100).sum()
+        if torch.is_tensor(denominator):
+            denominator = denominator.to(selected.device)
+        def projected_ce(values, target):
+            logits = self.lm_head(values)
+            return cross_entropy(logits.float().reshape(-1, self.config.vocab_size), target.reshape(-1),
+                                 ignore_index=-100, reduction="sum")
+        pieces = []
+        for start in range(0, selected.shape[1], chunk_tokens):
+            values, target = selected[:, start:start + chunk_tokens], targets[:, start:start + chunk_tokens]
+            if torch.is_grad_enabled() and values.requires_grad:
+                pieces.append(checkpoint(projected_ce, values, target, use_reentrant=False))
+            else:
+                pieces.append(projected_ce(values, target))
+        return CausalLMOutputWithPast(loss=torch.stack(pieces).sum() / denominator,
+                                     past_key_values=outputs.past_key_values,
+                                     hidden_states=outputs.hidden_states, attentions=outputs.attentions)
+
+    model.forward = MethodType(forward, model)
+
+
 def sparse_trainer_class():
+    import torch
+    from peft import get_peft_model_state_dict
+    from safetensors.torch import load_file
+    from torch.utils.data import SequentialSampler
     from transformers import Trainer
     from trl import SFTTrainer
 
     class SparseAssistantSFTTrainer(SFTTrainer):
         def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+            inputs = dict(inputs)
+            lengths = inputs.pop("_audit_lengths", None)
+            evidence = getattr(self, "runtime_evidence", None)
+            if evidence is not None and model.training:
+                evidence["training_microbatches_per_rank"] += 1
+                if lengths is not None:
+                    evidence["max_training_tokens_local"] = max(evidence["max_training_tokens_local"],
+                                                                 int(lengths.max()))
             # Retain HF's gradient-accumulation/global-token normalization. TRL
             # 0.28 entropy/accuracy assumes logits span the entire input, so its
             # optional metrics are bypassed rather than reporting wrong values.
-            return Trainer.compute_loss(self, model, assistant_loss_inputs(inputs),
-                                        return_outputs=return_outputs, num_items_in_batch=num_items_in_batch)
+            loss, outputs = Trainer.compute_loss(self, model, assistant_loss_inputs(inputs),
+                                                 return_outputs=True, num_items_in_batch=num_items_in_batch)
+            if evidence is not None:
+                finite = self.accelerator.reduce(torch.isfinite(loss.detach()).all().to(torch.int64), reduction="sum")
+                if int(finite) != self.accelerator.num_processes:
+                    raise ValueError("nonfinite loss on one or more ranks")
+            return (loss, outputs) if return_outputs else loss
+
+        def _get_train_sampler(self, train_dataset=None):
+            if getattr(self, "capacity_trial", False):
+                return SequentialSampler(train_dataset if train_dataset is not None else self.train_dataset)
+            return super()._get_train_sampler(train_dataset)
+
+        def save_model(self, output_dir=None, _internal_call=False):
+            if _internal_call and self.is_fsdp_enabled:
+                # HF's next checkpoint operation saves adapter_only FSDP weights
+                # and optimizer state. Avoid a second full gather/public export.
+                return
+            return super().save_model(output_dir, _internal_call=_internal_call)
+
+        def _save(self, output_dir=None, state_dict=None):
+            super()._save(output_dir, state_dict)
+            if getattr(self, "verify_adapter_export", False):
+                model = self.accelerator.unwrap_model(self.model)
+                expected = get_peft_model_state_dict(model, state_dict=state_dict)
+                loaded = load_file(str(Path(output_dir) / "adapter_model.safetensors"))
+                if expected.keys() != loaded.keys():
+                    raise ValueError("saved/reloaded adapter tensor keys differ")
+                for name, value in loaded.items():
+                    if not bool(torch.isfinite(value).all()) or not torch.equal(value, expected[name].cpu()):
+                        raise ValueError(f"saved/reloaded adapter tensor differs: {name}")
+                self.runtime_evidence["adapter_tensor_reload"] = {
+                    "status": "passed", "tensor_count": len(loaded), "all_finite": True, "exact_match": True}
+
+        def _save_checkpoint(self, model, trial):
+            super()._save_checkpoint(model, trial)
+            self.accelerator.wait_for_everyone()
+
+            path = Path(self.args.output_dir) / f"checkpoint-{self.state.global_step}"
+            if self.is_world_process_zero():
+                names = checkpoint_files(self.accelerator.num_processes, fsdp=self.is_fsdp_enabled)
+                if any(not (path / name).is_file() or (path / name).stat().st_size == 0 for name in names):
+                    raise ValueError("checkpoint save did not produce every recovery state file")
+                report = {"schema": "praxis.fsdp-lora-checkpoint.v1", "training_identity": self.training_identity,
+                          "world_size": self.accelerator.num_processes, "global_step": self.state.global_step,
+                          "state_dict_type": "FULL_STATE_DICT", "fsdp": self.is_fsdp_enabled,
+                          "files": {name: (path / name).stat().st_size for name in names}}
+                temporary = path / f"{CHECKPOINT_MANIFEST}.tmp"
+                temporary.write_text(json.dumps(report, sort_keys=True) + "\n", encoding="utf-8")
+                temporary.replace(path / CHECKPOINT_MANIFEST)
+            self.accelerator.wait_for_everyone()
+
+        def _load_rng_state(self, checkpoint):
+            super()._load_rng_state(checkpoint)
+            if hasattr(self, "runtime_evidence"):
+                self.runtime_evidence["rng_state_restored"] = True
 
     return SparseAssistantSFTTrainer
+
+
+def runtime_audit_callback(trainer, *, stop_after_steps: int | None = None):
+    import torch
+    from transformers import TrainerCallback
+
+    class RuntimeAuditCallback(TrainerCallback):
+        def on_train_begin(self, args, state, control, model=None, optimizer=None, **kwargs):
+            self.samples = {}
+            self.previous_microbatches = 0
+            trainer.runtime_evidence["microbatches_per_optimizer_step"] = []
+            for name, parameter in model.named_parameters():
+                if parameter.requires_grad and parameter.numel():
+                    indices = torch.linspace(0, parameter.numel() - 1, min(64, parameter.numel()),
+                                             device=parameter.device).long().unique()
+                    self.samples[name] = (indices, parameter.detach().flatten()[indices].clone())
+            trainer.runtime_evidence["resumed_global_step"] = state.global_step
+            if state.global_step:
+                states = list(optimizer.state.values())
+                steps = [float(value["step"]) for value in states if "step" in value]
+                if not steps or min(steps) != state.global_step:
+                    raise ValueError("resume did not restore Adam optimizer step state")
+                moments = [value["exp_avg"] for value in states if "exp_avg" in value]
+                local_moments = torch.stack((torch.stack([torch.isfinite(value).all() for value in moments]).all(),
+                                             torch.stack([value.ne(0).any() for value in moments]).any())).to(torch.int64)
+                restored_flags = trainer.accelerator.reduce(local_moments, reduction="sum")
+                if int(restored_flags[0]) != trainer.accelerator.num_processes or int(restored_flags[1]) == 0:
+                    raise ValueError("resume restored invalid or globally empty optimizer moments")
+                trainer.runtime_evidence["optimizer_state_restored"] = {
+                    "parameter_states": len(states), "minimum_step": min(steps), "maximum_step": max(steps),
+                    "moments_finite": True, "nonzero_moments_restored": True}
+                if trainer.lr_scheduler.state_dict().get("last_epoch") != state.global_step:
+                    raise ValueError("resume did not restore scheduler progress")
+                trainer.runtime_evidence["scheduler_state_restored"] = True
+
+        def on_pre_optimizer_step(self, args, state, control, model=None, **kwargs):
+            observed = trainer.runtime_evidence["training_microbatches_per_rank"]
+            trainer.runtime_evidence["microbatches_per_optimizer_step"].append(observed - self.previous_microbatches)
+            self.previous_microbatches = observed
+            gradients = [parameter.grad for parameter in model.parameters()
+                         if parameter.requires_grad and parameter.grad is not None]
+            if not gradients:
+                local = torch.zeros(2, dtype=torch.int64, device=trainer.accelerator.device)
+            else:
+                local = torch.stack((torch.stack([torch.isfinite(g).all() for g in gradients]).all(),
+                                     torch.stack([g.ne(0).any() for g in gradients]).any())).to(torch.int64)
+            global_flags = trainer.accelerator.reduce(local, reduction="sum")
+            if int(global_flags[0]) != trainer.accelerator.num_processes or int(global_flags[1]) == 0:
+                raise ValueError("optimizer received nonfinite or globally empty/zero LoRA gradients")
+            trainer.runtime_evidence["finite_gradient_checks"] += 1
+
+        def on_optimizer_step(self, args, state, control, model=None, **kwargs):
+            parameters = dict(model.named_parameters())
+            changes = [parameters[name].detach().flatten()[indices].sub(before).abs().max()
+                       for name, (indices, before) in self.samples.items()]
+            largest = torch.stack(changes).max() if changes else torch.zeros((), device=trainer.accelerator.device)
+            gathered = trainer.accelerator.gather(largest.reshape(1))
+            trainer.runtime_evidence["max_sampled_lora_update"] = max(
+                trainer.runtime_evidence["max_sampled_lora_update"], float(gathered.max()))
+
+        def on_step_end(self, args, state, control, **kwargs):
+            if stop_after_steps is not None and state.global_step >= stop_after_steps:
+                control.should_training_stop = True
+            return control
+
+    return RuntimeAuditCallback()
 
 
 def assistant_loss_self_test() -> dict:
@@ -75,7 +342,7 @@ def assistant_loss_self_test() -> dict:
                           head_dim=8, attention_dropout=0.0, max_position_embeddings=64, use_cache=False)
     settings._attn_implementation = "sdpa"
     previous_threads = torch.get_num_threads()
-    max_loss_error, max_gradient_error, comparisons, cases = 0.0, 0.0, 0, 0
+    max_loss_error, max_gradient_error, comparisons, cases, chunk_cases = 0.0, 0.0, 0, 0, 0
     try:
         torch.set_num_threads(1)
         with torch.random.fork_rng(devices=[]):
@@ -123,12 +390,27 @@ def assistant_loss_self_test() -> dict:
                             max_gradient_error = max(max_gradient_error, float((compared - gradient).abs().max()))
                             comparisons += 1
                     cases += 1
+                    chunked = deepcopy(base)
+                    chunked.train()
+                    loss_model = chunked.get_base_model() if peft_model else chunked
+                    install_chunked_training_loss(loss_model, 3)
+                    chunk_loss = trainer_type.compute_loss(state, chunked, batch, num_items_in_batch=denominator)
+                    torch.testing.assert_close(chunk_loss, ordinary.loss, rtol=3e-5, atol=2e-6)
+                    chunk_loss.backward()
+                    other = dict(chunked.named_parameters())
+                    for name, parameter in full.named_parameters():
+                        if parameter.grad is not None:
+                            torch.testing.assert_close(other[name].grad, parameter.grad, rtol=3e-5, atol=2e-6)
+                            max_gradient_error = max(max_gradient_error, float((other[name].grad - parameter.grad).abs().max()))
+                            comparisons += 1
+                    max_loss_error = max(max_loss_error, float((chunk_loss - ordinary.loss).detach().abs()))
+                    chunk_cases += 1
     finally:
         torch.set_num_threads(previous_threads)
     return {"status": "passed", "model": "random_tiny_Qwen3", "device": "cpu", "numeric_cases": cases,
             "parameter_gradient_comparisons": comparisons, "max_loss_absolute_error": max_loss_error,
             "max_gradient_absolute_error": max_gradient_error, "full_context_preserved": True,
-            "dense_and_peft_checked": True, "optimizer_steps": 0}
+            "dense_and_peft_checked": True, "chunked_numeric_cases": chunk_cases, "optimizer_steps": 0}
 
 
 def validate_runtime(config: dict) -> None:
@@ -146,16 +428,32 @@ def validate_runtime(config: dict) -> None:
 
 
 def run_model(config: dict, features: list[dict], tokenizer, *, forward_only: bool = False,
-              max_steps: int | None = None) -> dict:
+              max_steps: int | None = None, resume_from_checkpoint: str | None = None,
+              stop_after_steps: int | None = None, data_sha256: str = "") -> dict:
     """Explicit large-model operation; caller must have completed mask preflight."""
     validate_runtime(config)
     if not features or tokenizer is None:
         raise ValueError("model operation requires tokenized and mask-checked training data")
     if max_steps is not None and (type(max_steps) is not int or max_steps < 1):
         raise ValueError("max_steps must be a positive integer")
+    if stop_after_steps is not None and (type(stop_after_steps) is not int or stop_after_steps < 1):
+        raise ValueError("stop_after_steps must be a positive absolute optimizer step")
+    features, sampling_report = select_training_features(config, features)
+    training = dict(config["training"])
+    if max_steps is not None:
+        training["max_steps"] = max_steps
+    effective_config = {**config, "training": training}
+    identity = training_identity(effective_config, data_sha256, features)
     output = Path(config["output_dir"])
-    if not forward_only and output.exists() and any(output.iterdir()):
-        raise ValueError("output_dir is not empty; choose a new adapter directory")
+    resume_report = None
+    if resume_from_checkpoint:
+        if forward_only:
+            raise ValueError("resume requires training, not forward-only preflight")
+        resume_report = validate_resume_checkpoint(resume_from_checkpoint, output, identity)
+        if stop_after_steps is not None and stop_after_steps <= resume_report["global_step"]:
+            raise ValueError("stop_after_steps must exceed the resumed step")
+    elif not forward_only and output.exists() and any(output.iterdir()):
+        raise ValueError("output_dir is not empty; select a completed checkpoint to resume or choose a new directory")
     # Local checkpoint and packages only. No hub download or telemetry is needed.
     os.environ["HF_HUB_OFFLINE"] = "1"
     os.environ["TRANSFORMERS_OFFLINE"] = "1"
@@ -164,6 +462,7 @@ def run_model(config: dict, features: list[dict], tokenizer, *, forward_only: bo
     import torch
     from datasets import Dataset
     from peft import LoraConfig
+    from peft.helpers import disable_input_dtype_casting
     from peft.utils.other import fsdp_auto_wrap_policy
     from transformers import AutoModelForCausalLM, set_seed
     from trl import SFTConfig
@@ -171,13 +470,13 @@ def run_model(config: dict, features: list[dict], tokenizer, *, forward_only: bo
 
     if not torch.cuda.is_available() or not torch.cuda.is_bf16_supported():
         raise ValueError("CUDA with native BF16 support is required")
-    training = dict(config["training"])
-    # Prevent a YAML edit from silently enabling full checkpoints or online eval.
-    if (training.get("save_strategy") != "no" or training.get("eval_strategy") != "no"
-            or training.get("report_to") != "none" or training.get("save_only_model") is not True):
-        raise ValueError("this recipe requires no intermediate checkpoints, no Trainer eval and no remote reporting")
-    if max_steps is not None:
-        training["max_steps"] = max_steps
+    if (training.get("save_strategy") != "steps" or training.get("save_only_model") is not False
+            or not isinstance(training.get("save_steps"), int) or training["save_steps"] < 1
+            or training.get("eval_strategy") != "no" or training.get("report_to") != "none"):
+        raise ValueError("training requires recovery checkpoints, no Trainer eval and no remote reporting")
+    if config.get("short_trial") and (training.get("warmup_ratio") != 0 or
+                                      not 10 <= training.get("max_steps", -1) <= 20):
+        raise ValueError("short_trial requires zero warmup and 10–20 optimizer steps")
     args = SFTConfig(
         output_dir=str(output), bf16=True, fp16=False,
         max_length=None, packing=False, padding_free=False,
@@ -199,28 +498,48 @@ def run_model(config: dict, features: list[dict], tokenizer, *, forward_only: bo
         local_files_only=True, trust_remote_code=False,
     )
     model.config.use_cache = False
+    if config.get("loss_chunk_tokens"):
+        install_chunked_training_loss(model, config["loss_chunk_tokens"])
     if model.config.model_type != "qwen3":
         raise ValueError("checkpoint must be the official dense Qwen3 causal language model")
     lora = LoraConfig(task_type="CAUSAL_LM", bias="none", **config["lora"])
     collator = DataCollatorForLanguageModeling(pad_token_id=tokenizer.pad_token_id,
                                              completion_only_loss=False)
+    def audited_collator(rows):
+        batch = collator(rows)
+        batch["_audit_lengths"] = torch.tensor([len(row["input_ids"]) for row in rows], dtype=torch.long)
+        return batch
     trainer = sparse_trainer_class()(
         model=model, args=args, train_dataset=Dataset.from_list(features),
-        processing_class=tokenizer, peft_config=lora, data_collator=collator,
+        processing_class=tokenizer, peft_config=lora, data_collator=audited_collator,
     )
     plugin = getattr(trainer.accelerator.state, "fsdp_plugin", None)
     if plugin is None or not trainer.is_fsdp_enabled or plugin.use_orig_params:
         raise ValueError("PEFT requires the configured FSDP plugin with use_orig_params=false")
     plugin.auto_wrap_policy = fsdp_auto_wrap_policy(trainer.model)
+    if "FULL_STATE_DICT" not in str(plugin.state_dict_type):
+        raise ValueError("the pinned recovery recipe requires FULL_STATE_DICT for optimizer restoration")
+    trainer.training_identity = identity
+    trainer.capacity_trial = bool(config.get("short_trial"))
+    trainer.runtime_evidence = {"training_microbatches_per_rank": 0, "max_training_tokens_local": 0,
+                                "finite_gradient_checks": 0, "max_sampled_lora_update": 0.0,
+                                "gradient_accumulation_steps": args.gradient_accumulation_steps,
+                                "rng_state_restored": False}
+    trainer.add_callback(runtime_audit_callback(trainer, stop_after_steps=stop_after_steps))
     trainable = sum(p.numel() for p in trainer.model.parameters() if p.requires_grad)
     total = sum(p.numel() for p in trainer.model.parameters())
-    if not trainable or trainable >= total:
+    if (not trainable or trainable >= total or any("lora_" not in name for name, parameter
+                                                 in trainer.model.named_parameters() if parameter.requires_grad)):
         raise ValueError("only nonempty LoRA adapter parameters may be trainable")
     report = {"base_model": config["model_id"], "precision": "bf16", "attention": "sdpa",
               "world_size": trainer.accelerator.num_processes, "trainable_parameters": trainable,
               "total_parameters": total, "native_template_unchanged": True,
-              "heldout_inputs_used_for_training": False, "loss": "native_sparse_assistant_causal_CE",
-              "full_context_preserved": True}
+              "base_parameters_frozen": True,
+              "heldout_inputs_used_for_training": False, "loss": "checkpointed_chunked_sparse_assistant_causal_CE",
+              "loss_chunk_tokens": config.get("loss_chunk_tokens"),
+              "fsdp_bf16_lora_inputs": bool(config.get("fsdp_bf16_lora_inputs")),
+              "chunked_output_projection": bool(config.get("loss_chunk_tokens")),
+              "full_context_preserved": True, "sampling": sampling_report, "training_identity": identity}
     torch.cuda.reset_peak_memory_stats()
     if forward_only:
         model = trainer.accelerator.prepare_model(trainer.model)
@@ -241,14 +560,54 @@ def run_model(config: dict, features: list[dict], tokenizer, *, forward_only: bo
                       optimizer_steps=0, backward_runs=0, saved_adapter=False)
         trainer.accelerator.end_training()
         return report
-    result = trainer.train()
-    # Official PEFT/FSDP save path gathers state to rank 0 CPU and writes the
-    # adapter through PeftModel.save_pretrained, without merging or copying base.
+    # FSDP's child LoRA Linear wrappers cast weights to BF16. The parent PEFT
+    # layer sees FP32 master views before those child hooks and would otherwise
+    # allocate FP32 long MLP inputs/dropout; the official helper defers to FSDP.
+    with disable_input_dtype_casting(trainer.model, active=bool(config.get("fsdp_bf16_lora_inputs"))):
+        result = trainer.train(resume_from_checkpoint=resume_from_checkpoint)
+    checkpoint = output / f"checkpoint-{trainer.state.global_step}"
+    if not (checkpoint / CHECKPOINT_MANIFEST).is_file():
+        trainer._save_checkpoint(trainer.model, None)
+    maxima = trainer.accelerator.gather(torch.tensor([trainer.runtime_evidence["max_training_tokens_local"]],
+                                                    device=trainer.accelerator.device)).cpu().tolist()
+    trainer.runtime_evidence["max_training_tokens_per_rank"] = maxima
+    trainer.runtime_evidence["backward_microbatches_per_rank"] = trainer.runtime_evidence["training_microbatches_per_rank"]
+    if trainer.runtime_evidence["max_sampled_lora_update"] <= 0:
+        raise ValueError("optimizer steps completed without a measurable LoRA weight update")
+    if config.get("short_trial") and any(value != sampling_report["longest_tokens"] for value in maxima):
+        raise ValueError("short trial did not backpropagate the longest sample on every rank")
+    if config.get("short_trial") and any(value != args.gradient_accumulation_steps
+                                         for value in trainer.runtime_evidence["microbatches_per_optimizer_step"]):
+        raise ValueError("short trial did not execute the configured gradient accumulation on every optimizer step")
+    if resume_from_checkpoint and not trainer.runtime_evidence["rng_state_restored"]:
+        raise ValueError("resume did not restore RNG state")
+    # Final public export is separate from resumable Trainer checkpoints.
+    adapter_output = output / "adapter"
+    trainer.verify_adapter_export = True
     plugin.set_state_dict_type("FULL_STATE_DICT")
-    trainer.save_model(str(output))
+    trainer.save_model(str(adapter_output))
+    if config.get("short_trial"):
+        from accelerate.utils.fsdp_utils import load_fsdp_model
+        probe = collator([min(features, key=lambda row: len(row["input_ids"]))])
+        probe = assistant_loss_inputs({key: value.to(trainer.accelerator.device) for key, value in probe.items()})
+        trainer.model.eval()
+        with torch.no_grad(), trainer.accelerator.autocast():
+            before = trainer.model(**probe).logits.detach()
+        load_fsdp_model(plugin, trainer.accelerator, trainer.model, str(checkpoint), adapter_only=True)
+        with torch.no_grad(), trainer.accelerator.autocast():
+            after = trainer.model(**probe).logits.detach()
+        torch.testing.assert_close(after, before, rtol=1e-4, atol=1e-5)
+        trainer.runtime_evidence["fsdp_adapter_reload_forward"] = {"status": "passed", "checkpoint": str(checkpoint),
+                                                                  "max_logit_error": float((after - before).abs().max())}
     trainer.accelerator.wait_for_everyone()
-    report.update(status="trained", optimizer_steps=trainer.state.global_step,
-                  train_loss=float(result.training_loss), saved_adapter=True, output_dir=str(output))
+    peaks = trainer.accelerator.gather(torch.tensor([torch.cuda.max_memory_allocated()],
+                                                   device=trainer.accelerator.device)).cpu().tolist()
+    report.update(status="stopped_at_checkpoint" if stop_after_steps else "trained",
+                  optimizer_steps=trainer.state.global_step, train_loss=float(result.training_loss), saved_adapter=True,
+                  output_dir=str(output), adapter_dir=str(adapter_output), resumable_checkpoint=str(checkpoint),
+                  resumed_from=resume_from_checkpoint, runtime_evidence=trainer.runtime_evidence,
+                  peak_allocated_GiB_per_rank=[round(value / 1024**3, 3) for value in peaks])
+    report["optimizer_steps_this_run"] = trainer.state.global_step - trainer.runtime_evidence["resumed_global_step"]
     trainer.accelerator.end_training()
     return report
 
@@ -263,19 +622,25 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--schema-only", action="store_true")
     result.add_argument("--train", action="store_true", help="Explicitly permit optimizer steps and adapter saving")
     result.add_argument("--max-steps", type=int, help="Optional explicit short training run; requires --train")
+    result.add_argument("--resume-from-checkpoint", help="Completed checkpoint-N in output_dir; requires --train")
+    result.add_argument("--stop-after-steps", type=int, help="Stop at an absolute optimizer step, retaining the full schedule")
     result.add_argument("--report", help="Optional local readiness/result JSON path")
     return result
 
 
 def main(argv=None) -> int:
     args = parser().parse_args(argv)
-    if args.train and args.schema_only or args.max_steps is not None and not args.train:
+    if args.train and args.schema_only or any(value is not None for value in
+                                            (args.max_steps, args.resume_from_checkpoint, args.stop_after_steps)) and not args.train:
         raise ValueError("--train requires full preflight; --max-steps requires explicit --train")
     config = load_config(args.config, model_dir=args.model_dir, data_dir=args.data_dir, output_dir=args.output_dir,
                          max_length=args.max_length)
     report, features, tokenizer = preflight(config, schema_only=args.schema_only)
     if args.train:
-        report["training"] = run_model(config, features, tokenizer, max_steps=args.max_steps)
+        report["training"] = run_model(config, features, tokenizer, max_steps=args.max_steps,
+                                       resume_from_checkpoint=args.resume_from_checkpoint,
+                                       stop_after_steps=args.stop_after_steps,
+                                       data_sha256=report["training_data_sha256"])
         report["training_runs"] = 1
         report["large_model_loaded"] = True
     if int(os.environ.get("RANK", "0")) == 0:

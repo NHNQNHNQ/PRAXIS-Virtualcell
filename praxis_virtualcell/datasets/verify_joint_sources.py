@@ -16,10 +16,12 @@ from urllib.parse import urlparse
 from .joint_qwen_sft import SCHEMA, TARGET_CONTRACT
 from .joint_supervision import Annotation
 from .labels import ExperimentRecord
+from .paths import dataset_file
 from .literature import normalize_doi, parse_article_source
 from .qwen_sft import qwen_messages
 from .species_registry import _digest
 from .strain_supervision import _rows
+from praxis_virtualcell.llm_prediction.schemas import Assessment
 
 _OBSERVATION_FIELDS = ("relation", "value", "lower", "upper", "lower_closed", "upper_closed")
 
@@ -100,10 +102,10 @@ def verify_joint_sources(dataset_dir: str | Path, source_path_map: dict[str, str
         raise ValueError("source_verifier_requires_joint_Qwen_dataset")
     required = ("train.jsonl", "joint.train.jsonl", "source_refs.jsonl", "quarantined_components.index.jsonl")
     for name in required:
-        if _digest(root / name) != manifest["files"][name]["sha256"]:
+        if _digest(dataset_file(root, name, manifest)) != manifest["files"][name]["sha256"]:
             raise ValueError("exported_training_source_changed")
     train = _rows(root / "train.jsonl")
-    references = _rows(root / "source_refs.jsonl")
+    references = _rows(dataset_file(root, "source_refs.jsonl", manifest))
     sources = {row["record_id"]: row for row in references}
     if len(sources) != len(references) or len({row["record_id"] for row in train}) != len(train):
         raise ValueError("duplicate_exported_training_source")
@@ -138,8 +140,16 @@ def verify_joint_sources(dataset_dir: str | Path, source_path_map: dict[str, str
         components.add(component_id)
         request = json.loads(record["messages"][1]["content"])
         target = json.loads(record["messages"][-1]["content"])
-        if record["messages"][-1]["role"] != "assistant" or target.get("endpoint") != "MIC" or target.get("unit") != "ug/mL":
+        assessment_target = record.get("target_contract") == "praxis.assessment-supervision.v1"
+        if record["messages"][-1]["role"] != "assistant":
             raise ValueError("source_verifier_requires_MIC_assistant_target")
+        if assessment_target:
+            Assessment.model_validate(target)
+            target_observations = target["mic_observations"]
+        else:
+            if target.get("endpoint") != "MIC" or target.get("unit") != "ug/mL":
+                raise ValueError("source_verifier_requires_MIC_assistant_target")
+            target_observations = target["observations"]
         _check_tool_strain_boundaries(record, request["organism"], request.get("profile_id"))
         native_answers, observations = {}, []
         for source in private["source_refs"]:
@@ -162,10 +172,11 @@ def verify_joint_sources(dataset_dir: str | Path, source_path_map: dict[str, str
                 raise ValueError("native_MIC_strain_differs_from_public_input")
             native_answers[case_id] = answer
             observations.append({field: getattr(answer.endpoint, field) for field in _OBSERVATION_FIELDS})
-        if observations != target["observations"]:
+        if observations != target_observations:
             raise ValueError("exported_MIC_observations_differ_from_native_answers")
         measurement_count += len(observations)
-        if record["target_contract"] != TARGET_CONTRACT:
+        is_joint = ("literature_review" in private if assessment_target else record["target_contract"] == TARGET_CONTRACT)
+        if not is_joint:
             if "literature_review" in private:
                 raise ValueError("numeric_component_has_unbound_mechanism_review")
             continue
@@ -242,11 +253,12 @@ def verify_joint_sources(dataset_dir: str | Path, source_path_map: dict[str, str
             claim_count += 1
             grades[checked.evidence_grade] += 1
     subset = _rows(root / "joint.train.jsonl")
-    joint_train = {row["record_id"]: row for row in train if row["target_contract"] == TARGET_CONTRACT}
+    joint_train = {row["record_id"]: row for row in train
+                   if row["target_contract"] == TARGET_CONTRACT or "literature_review" in sources[row["record_id"]]}
     if (len(subset) != len(joint_train) or len({row["record_id"] for row in subset}) != len(subset)
             or any(row != joint_train.get(row["record_id"]) for row in subset)):
         raise ValueError("independently_verified_joint_subset_mismatch")
-    quarantine = _rows(root / "quarantined_components.index.jsonl")
+    quarantine = _rows(dataset_file(root, "quarantined_components.index.jsonl", manifest))
     for row in quarantine:
         if row["component_id"] in components or row.get("training_eligible") is not False or not row.get("reason"):
             raise ValueError("quarantined_component_is_not_isolated_from_training")
