@@ -1,6 +1,12 @@
-# PAUSED CANDIDATE: data-only CPU checks do not validate 32B training.
-# Requires the matching local projection+CE chunk trainer; not deployed to 53.
-# Its numeric CPU check, GPU backward, optimizer and checkpoint resume are pending.
+# Formal full training remains paused; only the separate engineering trial is authorized.
+# Chunked projection+CE and contiguous 2D head passed longest-context backward on 53.
+# CPU: 4 native + 4 chunk + 4 offload/GC cases, 222 gradient comparisons passed.
+# Max loss/gradient differences: 4.77e-7 / 2.98e-8; 7,193-row preflight passed (31,740 tokens).
+# GPU attempts 1/2 stopped at 0 steps: RMSNorm OOM, then 3D-head checkpoint metadata mismatch.
+# Pinned offload exhausted host memory at the first save; stop request/SSH remain unconfirmed.
+# Unpinned CPU offload correction is local, awaiting deployment/numeric/GPU verification.
+# No completed save/resume/export success is claimed. Formal training remains paused.
+# Verification: reports/llm_platform/qwen_v4_compact_trial_verification_20261008.json
 model_id: Qwen/Qwen3-32B
 model_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/models/Qwen3-32B
 data_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/qwen_joint_sft_v4_compact
@@ -19,6 +25,7 @@ expected_packages:
 bf16: true
 attn_implementation: sdpa
 fsdp_bf16_lora_inputs: true
+activation_cpu_offload: true
 loss_chunk_tokens: 256
 # Validate this joint dataset with the actual tokenizer before training.
 # Batch padding follows observed length, rather than padding every row to this cap.

@@ -1,18 +1,20 @@
 # Qwen MIC 工具对话微调准备
 
-当前结构监督候选为 **2026-10-08 v4_compact**，从封版 v3 独立衍生。53 工作区为 `/home/zkyd/data1/mzy/qwen-PRAXIS-MIC`，候选数据在 `data/processed/qwen_joint_sft_v4_compact`，结构样例在 `data/processed/qwen_joint_inspection_v4_compact`。v3 保留；下文 v2/v1 为历史记录。**训练依用户要求保持暂停**。此前三次真实 32B 试训未完成最长样本反向传播，optimizer 步数均为 0，没有适配器或可恢复断点。CPU 预检通过不表示显存或恢复训练验证通过。
+当前结构监督候选为 **2026-10-08 v4_compact**，从封版 v3 独立衍生。53 工作区为 `/home/zkyd/data1/mzy/qwen-PRAXIS-MIC`，候选数据在 `data/processed/qwen_joint_sft_v4_compact`，结构样例在 `data/processed/qwen_joint_inspection_v4_compact`。v3 保留；下文 v2/v1 为历史记录。**用户已授权工程试训，正式全量训练仍暂停**。本轮完整最长样本已完成反向传播，日志确认至少 2 个 optimizer 步；首次断点保存时主机内存耗尽风险触发停止请求，SSH 随后持续握手超时，停止与资源释放尚未确认。第 6 步保存、恢复至 12 步及适配器验证均未完成。结果见 [v4_compact 试训验证报告](../reports/llm_platform/qwen_v4_compact_trial_verification_20261008.json)。
 
 ## v4_compact：与智能体一致的结构监督
 
 平台先维护有来源的细胞结构，再让模型学习使用查询结果。实现与覆盖见 [CELL-STRUCTURE](CELL-STRUCTURE.md)。7,193 个组件、7,372 次 MIC、104 个机制报告保持原值；1,950 条组学报告增加真实 `query_cell_structure` 返回和结构弱监督，5,243 条无组学辅助行保持原字节。
 
-完整九条结构视图保留在 `qwen_joint_sft_v4`：45 条超出 32,768，最长 33,701，未截断。独立 `v4_compact` 查询全部五个区室节点，运行时仍可检索完整邻接图。全量官方 tokenizer/TRL collator 检查通过：最长 **31,740**、最长最终回答 **10,890**，system/user/tool 的 loss token 为 0；共 33,159,672 输入 token、13,084,824 监督 token。原生 MIC、文献与 380 段引用来源核验通过。所有检查仅用 CPU，没有加载 32B 权重或训练。
+完整九条结构视图保留在 `qwen_joint_sft_v4`：45 条超出 32,768，最长 33,701，未截断。独立 `v4_compact` 查询全部五个区室节点，运行时仍可检索完整邻接图。最新全量官方 tokenizer/TRL collator 预检通过：7,193 条、最长 **31,740**、最长最终回答 **10,890**，system/user/tool 的 loss token 为 0；共 33,159,672 输入 token、13,084,824 监督 token。原生 MIC、文献与 380 段引用来源核验通过。这些数据、tokenizer 与来源检查仅用 CPU。
 
 v4 使用 manifest 的相对路径共享 v3 原始来源索引、隔离索引和留出答案，新增字节索引指向衍生训练文件。验证/测试保持原划分与公开组学轨迹，不加入实测答案或教师结构答案。目录复制到别处时需一起保留 v3、结构 catalog 及相对路径。
 
-新增配置 `qwen3_32b_joint_lora_v4_compact.yaml` 是暂停的候选配方。它的 `loss_chunk_tokens` 对应本地新增投影＋CE 分块实现，该训练修复尚未同步到 53；新实现的 CPU 数值验证、真实 GPU backward、optimizer 更新与 checkpoint 恢复均未完成。上面的全量 CPU 预检使用 53 原有训练辅助实现，其数值自检不能代替新实现的验证。当前 36 条结构事实全为 `species_prior`；没有新菌株结构、蛋白定位金标或候选通透性标签。机制人工金标仍为 0。数据与原生 tokenizer 验证不证明结构或组学已经提高药效准确率，后续需结构消融及独立留出评估。
+配置 `qwen3_32b_joint_lora_v4_compact.yaml` 的正式训练仍暂停；工程试训使用独立短试训配置。投影＋CE 分块、锁页 CPU 转存与二维连续投影输入已部署并运行。CPU 数值验证完成原生、分块、offload＋gradient checkpointing 各 4 个案例，共 222 项梯度比较，最大 loss 差异 4.77e-7、最大梯度差异 2.98e-8。第一次 GPU 尝试在 RMSNorm 重计算申请 620 MiB 时 OOM，第二次三维输出头发生 checkpoint 元数据不匹配，均为 0 步。第三次通过最长样本反向并进入第 3 步的断点保存，但锁页缓存按尺寸取整并保留多组缓冲，主机可用内存降至约 9 GiB、swap 仅余 4 KiB，随后新 SSH 连接超时。已请求精确停止该试训，尚未确认执行成功。
 
-下面 v3 的训练/服务命令记录预定接口；目前没有可供加载的 trial adapter。恢复训练须先修复并验证最长样本的反向传播、保存和恢复，不直接开始正式训练。
+当前本地实现改为 `save_on_cpu(pin_memory=False)`，避免锁页尺寸池持续累积；这个修正尚未部署或完成远端数值/GPU验证。旧试训文件保留，未经完整 manifest 检查不得当作可恢复断点。53 恢复后先确认进程退出与资源释放，再验证普通 CPU 转存，然后重跑完整 6→12 步链路。当前 36 条结构事实全为 `species_prior`；没有新菌株结构、蛋白定位金标或候选通透性标签。机制人工金标仍为 0。工程验证不证明结构或组学已经提高药效准确率，后续需结构消融及独立留出评估。
+
+下面 v3 的训练/服务命令记录预定接口；目前没有已验证可供加载的 trial adapter。当前工程试训需完成最长样本反向传播、保存和恢复验证，正式全量训练须另行授权。
 
 ## v3：SMILES、完整报告与可恢复训练
 

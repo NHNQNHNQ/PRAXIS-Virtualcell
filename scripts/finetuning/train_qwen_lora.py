@@ -24,9 +24,9 @@ CHECKPOINT_MANIFEST = "praxis_checkpoint.json"
 def training_identity(config: dict, data_sha256: str, features: list[dict]) -> str:
     recipe = {key: config.get(key) for key in ("model_id", "model_dir", "expected_packages", "lora",
                                              "training", "sampling", "short_trial", "loss_chunk_tokens",
-                                             "fsdp_bf16_lora_inputs", "max_length", "bf16",
+                                             "fsdp_bf16_lora_inputs", "activation_cpu_offload", "max_length", "bf16",
                                              "attn_implementation", "loss_mask", "packing")}
-    recipe["training_implementation"] = "qwen3_projection_chunk_ce.v1"
+    recipe["training_implementation"] = "qwen3_projection_chunk_ce_unpinned_offload.v2"
     recipe.update(training_data_sha256=data_sha256,
                   selected_records=[row.get("record_id", "unnamed") for row in features])
     return hashlib.sha256(json.dumps(recipe, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
@@ -159,12 +159,17 @@ def install_chunked_training_loss(model, chunk_tokens: int) -> None:
         if torch.is_tensor(denominator):
             denominator = denominator.to(selected.device)
         def projected_ce(values, target):
-            logits = self.lm_head(values)
+            # Force 2-D Linear in both passes: FSDP/offload can change strides
+            # and otherwise switch 3-D inputs between batched matmul and mm.
+            logits = self.lm_head(values.reshape(-1, values.shape[-1]))
             return cross_entropy(logits.float().reshape(-1, self.config.vocab_size), target.reshape(-1),
                                  ignore_index=-100, reduction="sum")
         pieces = []
         for start in range(0, selected.shape[1], chunk_tokens):
-            values, target = selected[:, start:start + chunk_tokens], targets[:, start:start + chunk_tokens]
+            # Keep the chunk contiguous before reshaping and CPU restoration,
+            # preserving the layout during PEFT/FSDP recomputation.
+            values = selected[:, start:start + chunk_tokens].contiguous()
+            target = targets[:, start:start + chunk_tokens]
             if torch.is_grad_enabled() and values.requires_grad:
                 pieces.append(checkpoint(projected_ce, values, target, use_reentrant=False))
             else:
@@ -197,8 +202,18 @@ def sparse_trainer_class():
             # Retain HF's gradient-accumulation/global-token normalization. TRL
             # 0.28 entropy/accuracy assumes logits span the entire input, so its
             # optional metrics are bypassed rather than reporting wrong values.
-            loss, outputs = Trainer.compute_loss(self, model, assistant_loss_inputs(inputs),
-                                                 return_outputs=True, num_items_in_batch=num_items_in_batch)
+            from contextlib import nullcontext
+            # Non-reentrant checkpoints save their boundary inputs before
+            # entering their own hooks. Offload those activations without
+            # changing Qwen's decoder or the full-context loss calculation.
+            offload = getattr(self, "activation_cpu_offload", False) and model.training
+            # Pinned host blocks are cached by rounded size. Eight ranks with
+            # varying 32k contexts exhaust host RAM across these size pools;
+            # ordinary CPU tensors release their storage after backward.
+            context = torch.autograd.graph.save_on_cpu(pin_memory=False) if offload else nullcontext()
+            with context:
+                loss, outputs = Trainer.compute_loss(self, model, assistant_loss_inputs(inputs),
+                                                     return_outputs=True, num_items_in_batch=num_items_in_batch)
             if evidence is not None:
                 finite = self.accelerator.reduce(torch.isfinite(loss.detach()).all().to(torch.int64), reduction="sum")
                 if int(finite) != self.accelerator.num_processes:
@@ -255,6 +270,62 @@ def sparse_trainer_class():
                 self.runtime_evidence["rng_state_restored"] = True
 
     return SparseAssistantSFTTrainer
+
+
+def fsdp_adapter_reload_probe(trainer, plugin, checkpoint: Path, probe: dict) -> dict:
+    """Prove a checkpoint restores an intentionally changed trainable LoRA shard."""
+    import torch
+    from accelerate.utils.fsdp_utils import load_fsdp_model
+
+    model, accelerator = trainer.model, trainer.accelerator
+    candidates = [(name, parameter) for name, parameter in model.named_parameters()
+                  if "lora_B" in name and parameter.requires_grad and parameter.numel()]
+
+    def all_ranks(condition: bool) -> bool:
+        flag = torch.tensor(int(condition), dtype=torch.int64, device=accelerator.device)
+        return int(accelerator.reduce(flag, reduction="sum")) == accelerator.num_processes
+
+    if not all_ranks(bool(candidates)):
+        raise ValueError("reload probe requires a nonempty trainable LoRA_B shard on every rank")
+    name, parameter = sorted(candidates, key=lambda item: item[0])[0]
+    original = parameter.detach().clone()
+    model.eval()
+    with torch.no_grad(), accelerator.autocast():
+        before = model(**probe).logits.detach()
+        parameter.add_(0.125)
+        perturbed = model(**probe).logits.detach()
+    changed = bool(torch.isfinite(before).all() and torch.isfinite(perturbed).all()
+                   and not torch.equal(perturbed, before))
+    if not all_ranks(changed):
+        raise ValueError("reload probe LoRA_B perturbation did not change finite forward outputs on every rank")
+    max_perturbed_error = float((perturbed - before).abs().max())
+    del perturbed
+    loaded = load_fsdp_model(plugin, accelerator, model, str(checkpoint), adapter_only=True)
+    missing_lora = [key for key in getattr(loaded, "missing_keys", []) if "lora_" in key]
+    unexpected = list(getattr(loaded, "unexpected_keys", []))
+    if not all_ranks(not missing_lora and not unexpected):
+        raise ValueError("reload probe checkpoint has missing LoRA keys or unexpected keys")
+    if not all_ranks(torch.equal(parameter.detach(), original)):
+        raise ValueError("reload probe did not restore the perturbed LoRA_B shard exactly")
+    with torch.no_grad(), accelerator.autocast():
+        after = model(**probe).logits.detach()
+    if not all_ranks(torch.allclose(after, before, rtol=1e-4, atol=1e-5)):
+        raise ValueError("reload probe did not restore the baseline forward outputs")
+    return {"status": "passed", "checkpoint": str(checkpoint), "perturbed_parameter": name,
+            "perturbation_delta": 0.125, "perturbation_detected": True, "restored_shard": True,
+            "restored_forward": True, "missing_lora_keys": missing_lora, "unexpected_keys": unexpected,
+            "max_perturbed_logit_error": max_perturbed_error,
+            "max_logit_error": float((after - before).abs().max())}
+
+
+def _training_loss_fields(trainer, hf_loss: float) -> dict:
+    steps = trainer.state.global_step - trainer.runtime_evidence["resumed_global_step"]
+    loss_sum = float(trainer._total_loss_scalar)
+    return {"train_loss": float(hf_loss), "train_loss_this_run": loss_sum / steps,
+            "loss_sum_this_run": loss_sum, "optimizer_steps_this_run": steps,
+            "train_loss_normalization": {
+                "train_loss": "HF current-invocation loss sum / cumulative global_step",
+                "train_loss_this_run": "current-invocation loss sum / optimizer_steps_this_run"}}
 
 
 def runtime_audit_callback(trainer, *, stop_after_steps: int | None = None):
@@ -342,7 +413,7 @@ def assistant_loss_self_test() -> dict:
                           head_dim=8, attention_dropout=0.0, max_position_embeddings=64, use_cache=False)
     settings._attn_implementation = "sdpa"
     previous_threads = torch.get_num_threads()
-    max_loss_error, max_gradient_error, comparisons, cases, chunk_cases = 0.0, 0.0, 0, 0, 0
+    max_loss_error, max_gradient_error, comparisons, cases, chunk_cases, offload_cases = 0.0, 0.0, 0, 0, 0, 0
     try:
         torch.set_num_threads(1)
         with torch.random.fork_rng(devices=[]):
@@ -405,12 +476,34 @@ def assistant_loss_self_test() -> dict:
                             comparisons += 1
                     max_loss_error = max(max_loss_error, float((chunk_loss - ordinary.loss).detach().abs()))
                     chunk_cases += 1
+                    offloaded = deepcopy(base)
+                    offloaded.train()
+                    offloaded.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+                    install_chunked_training_loss(offloaded.get_base_model() if peft_model else offloaded, 3)
+                    state.activation_cpu_offload = True
+                    offload_loss = trainer_type.compute_loss(state, offloaded, batch, num_items_in_batch=denominator)
+                    state.activation_cpu_offload = False
+                    torch.testing.assert_close(offload_loss, ordinary.loss, rtol=3e-5, atol=2e-6)
+                    offload_loss.backward()
+                    other = dict(offloaded.named_parameters())
+                    for name, parameter in full.named_parameters():
+                        if (parameter.grad is None) != (other[name].grad is None):
+                            raise ValueError("full_and_offloaded_gradient_presence_differs")
+                        if parameter.grad is not None:
+                            torch.testing.assert_close(other[name].grad, parameter.grad, rtol=3e-5, atol=2e-6)
+                            max_gradient_error = max(max_gradient_error, float((other[name].grad - parameter.grad).abs().max()))
+                            comparisons += 1
+                    max_loss_error = max(max_loss_error, float((offload_loss - ordinary.loss).detach().abs()))
+                    offload_cases += 1
     finally:
         torch.set_num_threads(previous_threads)
     return {"status": "passed", "model": "random_tiny_Qwen3", "device": "cpu", "numeric_cases": cases,
             "parameter_gradient_comparisons": comparisons, "max_loss_absolute_error": max_loss_error,
             "max_gradient_absolute_error": max_gradient_error, "full_context_preserved": True,
-            "dense_and_peft_checked": True, "chunked_numeric_cases": chunk_cases, "optimizer_steps": 0}
+            "dense_and_peft_checked": True, "chunked_numeric_cases": chunk_cases,
+            "activation_offload_numeric_cases": offload_cases, "nonreentrant_checkpoint_checked": True,
+            "activation_offload_pin_memory": False,
+            "optimizer_steps": 0}
 
 
 def validate_runtime(config: dict) -> None:
@@ -520,6 +613,7 @@ def run_model(config: dict, features: list[dict], tokenizer, *, forward_only: bo
     if "FULL_STATE_DICT" not in str(plugin.state_dict_type):
         raise ValueError("the pinned recovery recipe requires FULL_STATE_DICT for optimizer restoration")
     trainer.training_identity = identity
+    trainer.activation_cpu_offload = bool(config.get("activation_cpu_offload", False))
     trainer.capacity_trial = bool(config.get("short_trial"))
     trainer.runtime_evidence = {"training_microbatches_per_rank": 0, "max_training_tokens_local": 0,
                                 "finite_gradient_checks": 0, "max_sampled_lora_update": 0.0,
@@ -539,6 +633,8 @@ def run_model(config: dict, features: list[dict], tokenizer, *, forward_only: bo
               "loss_chunk_tokens": config.get("loss_chunk_tokens"),
               "fsdp_bf16_lora_inputs": bool(config.get("fsdp_bf16_lora_inputs")),
               "chunked_output_projection": bool(config.get("loss_chunk_tokens")),
+              "activation_cpu_offload": trainer.activation_cpu_offload,
+              "activation_cpu_offload_pin_memory": False,
               "full_context_preserved": True, "sampling": sampling_report, "training_identity": identity}
     torch.cuda.reset_peak_memory_stats()
     if forward_only:
@@ -587,27 +683,19 @@ def run_model(config: dict, features: list[dict], tokenizer, *, forward_only: bo
     plugin.set_state_dict_type("FULL_STATE_DICT")
     trainer.save_model(str(adapter_output))
     if config.get("short_trial"):
-        from accelerate.utils.fsdp_utils import load_fsdp_model
         probe = collator([min(features, key=lambda row: len(row["input_ids"]))])
         probe = assistant_loss_inputs({key: value.to(trainer.accelerator.device) for key, value in probe.items()})
-        trainer.model.eval()
-        with torch.no_grad(), trainer.accelerator.autocast():
-            before = trainer.model(**probe).logits.detach()
-        load_fsdp_model(plugin, trainer.accelerator, trainer.model, str(checkpoint), adapter_only=True)
-        with torch.no_grad(), trainer.accelerator.autocast():
-            after = trainer.model(**probe).logits.detach()
-        torch.testing.assert_close(after, before, rtol=1e-4, atol=1e-5)
-        trainer.runtime_evidence["fsdp_adapter_reload_forward"] = {"status": "passed", "checkpoint": str(checkpoint),
-                                                                  "max_logit_error": float((after - before).abs().max())}
+        trainer.runtime_evidence["fsdp_adapter_reload_forward"] = fsdp_adapter_reload_probe(
+            trainer, plugin, checkpoint, probe)
     trainer.accelerator.wait_for_everyone()
     peaks = trainer.accelerator.gather(torch.tensor([torch.cuda.max_memory_allocated()],
                                                    device=trainer.accelerator.device)).cpu().tolist()
     report.update(status="stopped_at_checkpoint" if stop_after_steps else "trained",
-                  optimizer_steps=trainer.state.global_step, train_loss=float(result.training_loss), saved_adapter=True,
+                  optimizer_steps=trainer.state.global_step, saved_adapter=True,
                   output_dir=str(output), adapter_dir=str(adapter_output), resumable_checkpoint=str(checkpoint),
                   resumed_from=resume_from_checkpoint, runtime_evidence=trainer.runtime_evidence,
                   peak_allocated_GiB_per_rank=[round(value / 1024**3, 3) for value in peaks])
-    report["optimizer_steps_this_run"] = trainer.state.global_step - trainer.runtime_evidence["resumed_global_step"]
+    report.update(_training_loss_fields(trainer, result.training_loss))
     trainer.accelerator.end_training()
     return report
 

@@ -148,6 +148,9 @@ def test_random_tiny_qwen_native_dense_and_sparse_losses_and_gradients_are_equiv
     assert report["full_context_preserved"] is True
     assert report["dense_and_peft_checked"] is True
     assert report["chunked_numeric_cases"] == 4
+    assert report["activation_offload_numeric_cases"] == 4
+    assert report["nonreentrant_checkpoint_checked"] is True
+    assert report["activation_offload_pin_memory"] is False
 
 
 def test_resume_rejects_adapter_only_partial_state_and_changed_recipe(tmp_path):
@@ -274,6 +277,86 @@ def test_tiny_lora_checkpoint_resume_restores_optimizer_rng_and_matches_continuo
         assert resumed.runtime_evidence["adapter_tensor_reload"]["exact_match"] is True
     finally:
         torch.set_num_threads(previous_threads)
+
+
+@pytest.mark.parametrize("mode,error", [
+    ("restored", None),
+    ("ignored_reload", "did not restore the perturbed LoRA_B shard"),
+    ("missing_lora", "missing LoRA keys or unexpected keys"),
+    ("unexpected", "missing LoRA keys or unexpected keys"),
+    ("no_forward_effect", "perturbation did not change finite forward outputs"),
+])
+def test_fsdp_reload_probe_detects_noop_restore_and_preserves_frozen_base(monkeypatch, tmp_path, mode, error):
+    from contextlib import nullcontext
+    from types import SimpleNamespace
+
+    torch = pytest.importorskip("torch")
+    fsdp = pytest.importorskip("accelerate.utils.fsdp_utils")
+
+    class Adapter(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.base = torch.nn.Linear(3, 4, bias=False)
+            self.base.requires_grad_(False)
+            self.lora_A = torch.nn.Linear(3, 2, bias=False)
+            self.lora_B = torch.nn.Linear(2, 4, bias=False)
+            with torch.no_grad():
+                self.base.weight.fill_(0.5)
+                self.lora_A.weight.fill_(0.0 if mode == "no_forward_effect" else 0.25)
+                self.lora_B.weight.fill_(0.0625)
+
+        def forward(self, values):
+            return SimpleNamespace(logits=self.base(values) + self.lora_B(self.lora_A(values)))
+
+    model = Adapter()
+    original = {key: value.detach().clone() for key, value in model.state_dict().items()}
+    saved_adapter = {key: value for key, value in original.items() if "lora_" in key}
+    accelerator = SimpleNamespace(device=torch.device("cpu"), num_processes=1,
+                                  reduce=lambda value, reduction: value, autocast=nullcontext)
+    trainer = SimpleNamespace(model=model, accelerator=accelerator)
+    reloads = []
+
+    def load(plugin, accelerator, target, path, adapter_only):
+        assert target is model and adapter_only is True
+        assert not torch.equal(model.lora_B.weight, original["lora_B.weight"])
+        reloads.append(path)
+        if mode == "ignored_reload":
+            return torch.nn.modules.module._IncompatibleKeys(["base.weight"], [])
+        state = dict(saved_adapter)
+        if mode == "missing_lora":
+            del state["lora_B.weight"]
+        if mode == "unexpected":
+            state["invented_adapter_key"] = torch.zeros(1)
+        return model.load_state_dict(state, strict=False)
+
+    monkeypatch.setattr(fsdp, "load_fsdp_model", load)
+    probe = {"values": torch.ones(2, 3)}
+    if error:
+        with pytest.raises(ValueError, match=error):
+            training.fsdp_adapter_reload_probe(trainer, object(), tmp_path, probe)
+    else:
+        report = training.fsdp_adapter_reload_probe(trainer, object(), tmp_path, probe)
+        assert report["perturbation_detected"] is report["restored_shard"] is report["restored_forward"] is True
+        assert report["max_perturbed_logit_error"] > 0 and report["max_logit_error"] == 0
+        assert report["missing_lora_keys"] == report["unexpected_keys"] == []
+        assert all(torch.equal(model.state_dict()[key], value) for key, value in original.items())
+    assert torch.equal(model.base.weight, original["base.weight"])
+    assert len(reloads) == (0 if mode == "no_forward_effect" else 1)
+
+
+def test_resumed_loss_fields_keep_hf_value_and_use_only_this_run_optimizer_steps():
+    from types import SimpleNamespace
+
+    trainer = SimpleNamespace(state=SimpleNamespace(global_step=12), _total_loss_scalar=30.0,
+                              runtime_evidence={"resumed_global_step": 6})
+    fields = training._training_loss_fields(trainer, 2.5)
+    assert fields["train_loss"] == 2.5
+    assert fields["optimizer_steps_this_run"] == 6
+    assert fields["loss_sum_this_run"] == 30.0 and fields["train_loss_this_run"] == 5.0
+    assert "cumulative global_step" in fields["train_loss_normalization"]["train_loss"]
+    assert "optimizer_steps_this_run" in fields["train_loss_normalization"]["train_loss_this_run"]
+    trainer.runtime_evidence["resumed_global_step"] = 0
+    assert training._training_loss_fields(trainer, 2.5)["train_loss_this_run"] == 2.5
 
 
 def test_bf16_lora_inputs_defer_casting_without_changing_fp32_master_or_gradients():

@@ -1,0 +1,143 @@
+{
+  "schema": "praxis.qwen-engineering-trial.v1",
+  "date": "2026-10-08",
+  "status": "engineering_trial_incomplete_remote_ssh_unavailable",
+  "authorization": {
+    "engineering_training_test": true,
+    "formal_full_training": false
+  },
+  "workspace": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC",
+  "hardware": {
+    "gpus": 8,
+    "model": "NVIDIA A100-SXM4-40GB",
+    "memory_MiB_per_gpu": 40960
+  },
+  "base_model": "Qwen/Qwen3-32B",
+  "recipe": {
+    "precision": "BF16",
+    "method": "LoRA r=16 alpha=32, FSDP FULL_SHARD",
+    "activation_cpu_offload": true,
+    "loss_chunk_tokens": 256,
+    "projection_input_dimensions": 2,
+    "max_steps": 12,
+    "stop_then_resume_step": 6,
+    "gradient_accumulation_steps": 4,
+    "capacity_trial_records": 64,
+    "formal_task_oversampling": false,
+    "activation_offload_pin_memory": false,
+    "implementation": "qwen3_projection_chunk_ce_unpinned_offload.v2",
+    "deployment_status": "unpinned correction prepared locally, not yet deployed"
+  },
+  "data": {
+    "record_count": 7193,
+    "source_trajectory_count": 1950,
+    "training_data_sha256": "5da28e1abac12fe55b6f5ce7a5c78f717ae47f81c349ffc60ee053162b26ad77",
+    "max_observed_tokens": 31740,
+    "max_final_assistant_tokens": 10890,
+    "nonassistant_loss_tokens": 0,
+    "truncation_performed": false,
+    "native_template_unchanged": true,
+    "heldout_inputs_used_for_training": false
+  },
+  "cpu_numerical_check": {
+    "status": "passed",
+    "model": "random_tiny_Qwen3",
+    "device": "cpu",
+    "numeric_cases": 4,
+    "parameter_gradient_comparisons": 222,
+    "max_loss_absolute_error": 4.76837158203125e-07,
+    "max_gradient_absolute_error": 2.9802322387695312e-08,
+    "full_context_preserved": true,
+    "dense_and_peft_checked": true,
+    "chunked_numeric_cases": 4,
+    "activation_offload_numeric_cases": 4,
+    "nonreentrant_checkpoint_checked": true,
+    "optimizer_steps": 0,
+    "tested_offload_pin_memory": true,
+    "unpinned_correction_check": "pending remote runtime availability; local environment has no Torch"
+  },
+  "failed_attempts": [
+    {
+      "report_log": "reports/joint_v4_compact_trial_stage1_20261008.log",
+      "optimizer_steps": 0,
+      "error": "CUDA OOM: checkpoint recomputation in Qwen3 post_attention_layernorm requested 620 MiB; allocated 37.31 GiB.",
+      "activation_cpu_offload": false,
+      "saved_adapter": false,
+      "completed_checkpoint": false
+    },
+    {
+      "report_log": "reports/joint_v4_compact_trial_offload_stage1_20261008.log",
+      "optimizer_steps": 0,
+      "error": "CheckpointError: frozen lm_head saved [1,5120,151936] but recomputed [5120,151936] with CPU-offloaded inputs.",
+      "activation_cpu_offload": true,
+      "projection_input_dimensions": 3,
+      "saved_adapter": false,
+      "completed_checkpoint": false
+    },
+    {
+      "report_log": "reports/joint_v4_compact_trial_offload_2d_stage1_20261008.log",
+      "optimizer_steps_confirmed_from_loss_log": 2,
+      "first_scheduled_checkpoint_save_started": 3,
+      "longest_sample_tokens": 31740,
+      "full_longest_backpropagation_completed": true,
+      "loss_log": [
+        {
+          "step": 1,
+          "loss": 0.2602,
+          "grad_norm": 0.06241144612431526
+        },
+        {
+          "step": 2,
+          "loss": 0.3213,
+          "grad_norm": 0.07075031101703644
+        }
+      ],
+      "activation_cpu_offload": true,
+      "offload_pin_memory": true,
+      "projection_input_dimensions": 2,
+      "host_memory_pressure": {
+        "total_GiB": 503,
+        "shared_GiB_observed": 410,
+        "available_GiB_first_observed": 37,
+        "available_kB_later": 9057912,
+        "swap_free_kB_later": 4,
+        "dev_shm_used_MiB": 57
+      },
+      "cause_assessment": "Pinned host cache rounds allocations up to powers of two and keeps separate size pools; sufficient to explain memory growth. Complete per-process attribution unavailable.",
+      "stop_request": "SIGTERM only processes whose command matches this trial report path",
+      "stop_confirmed": false,
+      "checkpoint_completion_verified": false,
+      "adapter_export_verified": false,
+      "current_remote_state": "new SSH connections time out during banner exchange; no successful final report retrieved"
+    }
+  ],
+  "fixes": [
+    "CPU offload of checkpoint boundary activations during forward; full decoder context retained.",
+    "Use unpinned CPU activations so freed tensors do not accumulate in CUDA pinned host size pools; remote numeric/GPU verification pending.",
+    "Contiguous two-dimensional chunks before module-based frozen lm_head projection, preserving CE target order and normalization.",
+    "Adapter reload proof perturbs a LoRA shard, checks changed outputs, and requires shard/output restoration.",
+    "Resumed loss reports distinguish current-invocation steps from cumulative HF global_step."
+  ],
+  "limitations": [
+    "Engineering trial does not establish MIC prediction accuracy or a benefit from omics/cell structure.",
+    "The 64-record trial repeats the longest record across all ranks for capacity testing; the formal recipe does not repeat tasks.",
+    "Reported GPU peak covers training plus checkpoint export and reload probes.",
+    "Formal full-dataset training remains paused."
+  ],
+  "primary_implementation_sources": [
+    "https://raw.githubusercontent.com/pytorch/pytorch/v2.6.0/aten/src/ATen/core/CachingHostAllocator.h",
+    "https://raw.githubusercontent.com/pytorch/pytorch/v2.6.0/torch/autograd/graph.py"
+  ],
+  "remaining_checks": [
+    "Confirm exact trial processes have exited and all GPU/host resources are released.",
+    "Deploy and numerically verify unpinned CPU correction.",
+    "Restart 12-step test, stop at 6 with completed checkpoint, resume to 12.",
+    "Require nonzero LoRA updates, all-rank full-length evidence, accumulation=4, optimizer/scheduler/RNG restoration and perturb/reload/export checks."
+  ],
+  "local_checks": {
+    "pytest_passed": 10,
+    "pytest_skipped": 9,
+    "skip_reason": "local Torch/HF unavailable",
+    "ruff": "passed"
+  }
+}
