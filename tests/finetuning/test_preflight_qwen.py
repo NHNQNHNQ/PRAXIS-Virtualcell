@@ -104,6 +104,97 @@ def test_model_runtime_requires_all_eight_fsdp_ranks_before_loading(monkeypatch)
         training.validate_runtime(config)
 
 
+def test_checkpoint_smoke_is_explicit_and_not_a_training_or_resume_run(monkeypatch, capsys):
+    run_model = training.run_model
+    monkeypatch.setattr(training, "load_config", lambda *a, **k: {})
+    monkeypatch.setattr(training, "preflight", lambda *a, **k: (
+        {"training_runs": 0, "large_model_loaded": False, "training_data_sha256": "data"}, ["row"], "tokenizer"))
+    calls = []
+    def smoke(config, features, tokenizer, **kwargs):
+        calls.append((features, tokenizer, kwargs))
+        return {"status": "checkpoint_smoke_passed", "optimizer_steps": 0, "backward_runs": 0,
+                "saved_adapter": False, "resumable_checkpoint": False}
+    monkeypatch.setattr(training, "run_model", smoke)
+    assert training.main(["--checkpoint-smoke"]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert calls == [(["row"], "tokenizer", {"checkpoint_smoke": True, "data_sha256": "data"})]
+    assert report["training_runs"] == 0 and report["large_model_loaded"] is True
+    assert report["checkpoint_smoke"]["resumable_checkpoint"] is False
+    for extra in (["--train"], ["--schema-only"], ["--max-steps", "1"],
+                  ["--resume-from-checkpoint", "checkpoint-3"], ["--stop-after-steps", "3"]):
+        with pytest.raises(ValueError):
+            training.main(["--checkpoint-smoke", *extra])
+    with pytest.raises(ValueError, match="training progress/resume"):
+        run_model({}, [], None, checkpoint_smoke=True, max_steps=1)
+
+
+def _memory_guard_files(tmp_path, monkeypatch):
+    monkeypatch.setattr(training.sys, "platform", "linux")
+    root = tmp_path / "cgroup"
+    unit = root / "guard.slice/smoke.service"
+    unit.mkdir(parents=True)
+    for name, value in {"memory.max": 300 * 1024**3, "memory.high": 260 * 1024**3,
+                        "memory.swap.max": 0, "memory.oom.group": 1}.items():
+        (unit / name).write_text(str(value))
+    proc = tmp_path / "proc_cgroup"
+    proc.write_text("0::/guard.slice/smoke.service\n")
+    info = tmp_path / "meminfo"
+    info.write_text(f"MemAvailable: {160 * 1024**2} kB\n")
+    return {"cgroup_root": root, "proc_cgroup": proc, "meminfo": info}, unit
+
+
+def test_memory_guard_reads_actual_cgroup_limits_and_host_available(tmp_path, monkeypatch):
+    paths, unit = _memory_guard_files(tmp_path, monkeypatch)
+    report = training.validate_memory_guard(**paths)
+    assert report["cgroup_path"] == str(unit)
+    assert report["memory_max_bytes"] == 300 * 1024**3
+    assert report["host_mem_available_bytes"] == 160 * 1024**3
+    paths["meminfo"].write_text(f"MemAvailable: {160 * 1024**2 - 1} kB\n")
+    with pytest.raises(ValueError, match="160GiB"):
+        training.validate_memory_guard(**paths)
+
+
+def test_memory_guard_requires_linux_unified_membership_and_readable_limits(tmp_path, monkeypatch):
+    paths, unit = _memory_guard_files(tmp_path, monkeypatch)
+    monkeypatch.setattr(training.sys, "platform", "darwin")
+    with pytest.raises(ValueError, match="Linux cgroup"):
+        training.validate_memory_guard(**paths)
+    monkeypatch.setattr(training.sys, "platform", "linux")
+    paths["proc_cgroup"].write_text("1:memory:/legacy\n")
+    with pytest.raises(ValueError, match="unified cgroup-v2"):
+        training.validate_memory_guard(**paths)
+    paths["proc_cgroup"].write_text("0::/guard.slice/smoke.service\n")
+    (unit / "memory.max").unlink()
+    with pytest.raises(ValueError, match="readable, bounded"):
+        training.validate_memory_guard(**paths)
+
+
+@pytest.mark.parametrize(("name", "value"), [
+    ("memory.max", "max"), ("memory.max", "0"), ("memory.max", str(301 * 1024**3)),
+    ("memory.high", "max"), ("memory.high", "0"), ("memory.high", str(261 * 1024**3)),
+    ("memory.swap.max", "1"), ("memory.oom.group", "0"),
+])
+def test_memory_guard_rejects_unbounded_or_unsafe_units(tmp_path, monkeypatch, name, value):
+    paths, unit = _memory_guard_files(tmp_path, monkeypatch)
+    (unit / name).write_text(value)
+    with pytest.raises(ValueError, match="memory guard"):
+        training.validate_memory_guard(**paths)
+
+
+def test_large_model_runtime_cannot_bypass_memory_guard(monkeypatch):
+    config = preflight.load_config(preflight.DEFAULT_CONFIG)
+    monkeypatch.setattr(training, "package_versions", lambda: config["expected_packages"])
+    monkeypatch.setenv("WORLD_SIZE", "8")
+    monkeypatch.setenv("ACCELERATE_USE_FSDP", "true")
+    monkeypatch.setenv("FSDP_CPU_RAM_EFFICIENT_LOADING", "true")
+    def unguarded():
+        raise ValueError("memory guard absent")
+    monkeypatch.setattr(training, "validate_memory_guard", unguarded)
+    for kwargs in ({}, {"checkpoint_smoke": True}):
+        with pytest.raises(ValueError, match="memory guard absent"):
+            training.run_model(config, [], None, **kwargs)
+
+
 def test_recipe_avoids_transformers_sharded_save_only_model_incompatibility():
     import yaml
     config = preflight.load_config(preflight.DEFAULT_CONFIG, max_length=32768)

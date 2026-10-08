@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Preflight local Qwen3-32B data; train only with explicit --train.
 
-Launch --train or --gpu-forward through the checked-in 8-GPU Accelerate FSDP
+Launch --train or --checkpoint-smoke through the guarded 8-GPU Accelerate FSDP
 configuration. Native Qwen serialization is preserved; prepared labels supervise
 assistant text and calls while masking system/user/tool text. Intermediate
 checkpoints restore LoRA, optimizer, scheduler and RNG; base weights stay local
@@ -506,7 +506,40 @@ def assistant_loss_self_test() -> dict:
             "optimizer_steps": 0}
 
 
-def validate_runtime(config: dict) -> None:
+def validate_memory_guard(*, cgroup_root="/sys/fs/cgroup", proc_cgroup="/proc/self/cgroup",
+                          meminfo="/proc/meminfo") -> dict:
+    """Require real cgroup-v2 limits before any large-model operation."""
+    if sys.platform != "linux":
+        raise ValueError("large-model operations require the Linux cgroup memory guard")
+    root = Path(cgroup_root).resolve()
+    try:
+        paths = [line[3:] for line in Path(proc_cgroup).read_text().splitlines() if line.startswith("0::")]
+        if len(paths) != 1 or not paths[0].startswith("/"):
+            raise ValueError("memory guard requires one unified cgroup-v2 path")
+        cgroup = (root / paths[0].lstrip("/")).resolve()
+        if not cgroup.is_relative_to(root):
+            raise ValueError("memory guard cgroup path escapes the mounted hierarchy")
+        names = ("memory.max", "memory.high", "memory.swap.max", "memory.oom.group")
+        values = {name: int((cgroup / name).read_text().strip()) for name in names}
+        available = next(line.split() for line in Path(meminfo).read_text().splitlines()
+                         if line.startswith("MemAvailable:"))
+        if len(available) != 3 or available[2] != "kB":
+            raise ValueError("memory guard requires MemAvailable in kB")
+        available_bytes = int(available[1]) * 1024
+    except (OSError, ValueError, StopIteration) as error:
+        raise ValueError(f"memory guard requires readable, bounded cgroup-v2 limits: {error}") from error
+    if (not 0 < values["memory.max"] <= 300 * 1024**3
+            or not 0 < values["memory.high"] <= 260 * 1024**3
+            or values["memory.swap.max"] != 0 or values["memory.oom.group"] != 1):
+        raise ValueError("memory guard requires max<=300GiB, high<=260GiB, swap=0 and oom.group=1")
+    if available_bytes < 160 * 1024**3:
+        raise ValueError("memory guard requires at least 160GiB host MemAvailable before model loading")
+    return {"cgroup_path": str(cgroup), "memory_max_bytes": values["memory.max"],
+            "memory_high_bytes": values["memory.high"], "memory_swap_max_bytes": values["memory.swap.max"],
+            "memory_oom_group": values["memory.oom.group"], "host_mem_available_bytes": available_bytes}
+
+
+def validate_runtime(config: dict) -> dict:
     """Fail before loading 32B weights when the pinned FSDP runtime is absent."""
     installed = package_versions()
     expected = config.get("expected_packages", {})
@@ -518,13 +551,17 @@ def validate_runtime(config: dict) -> None:
             or os.environ.get("ACCELERATE_USE_FSDP", "").lower() != "true"
             or os.environ.get("FSDP_CPU_RAM_EFFICIENT_LOADING", "").lower() != "true"):
         raise ValueError("launch using configs/finetuning/fsdp_a100_8gpu.yaml: eight ranks and RAM-efficient FSDP are required")
+    return validate_memory_guard()
 
 
 def run_model(config: dict, features: list[dict], tokenizer, *, forward_only: bool = False,
               max_steps: int | None = None, resume_from_checkpoint: str | None = None,
-              stop_after_steps: int | None = None, data_sha256: str = "") -> dict:
+              stop_after_steps: int | None = None, data_sha256: str = "", checkpoint_smoke: bool = False) -> dict:
     """Explicit large-model operation; caller must have completed mask preflight."""
-    validate_runtime(config)
+    if checkpoint_smoke and (forward_only or any(value is not None for value in
+                                               (max_steps, resume_from_checkpoint, stop_after_steps))):
+        raise ValueError("checkpoint smoke cannot use forward-only or training progress/resume options")
+    memory_guard = validate_runtime(config)
     if not features or tokenizer is None:
         raise ValueError("model operation requires tokenized and mask-checked training data")
     if max_steps is not None and (type(max_steps) is not int or max_steps < 1):
@@ -635,8 +672,51 @@ def run_model(config: dict, features: list[dict], tokenizer, *, forward_only: bo
               "chunked_output_projection": bool(config.get("loss_chunk_tokens")),
               "activation_cpu_offload": trainer.activation_cpu_offload,
               "activation_cpu_offload_pin_memory": False,
-              "full_context_preserved": True, "sampling": sampling_report, "training_identity": identity}
+              "full_context_preserved": True, "sampling": sampling_report, "training_identity": identity,
+              "memory_guard": memory_guard}
     torch.cuda.reset_peak_memory_stats()
+    if checkpoint_smoke:
+        from accelerate.utils.fsdp_utils import save_fsdp_model
+        accelerator = trainer.accelerator
+        model = accelerator.prepare_model(trainer.model)
+        trainer.model = trainer.model_wrapped = model
+        smoke_dir = output / "checkpoint-smoke"
+        save_fsdp_model(plugin, accelerator, model, str(smoke_dir), adapter_only=True)
+        accelerator.wait_for_everyone()
+        valid, tensor_count = True, 0
+        if accelerator.is_main_process:
+            try:
+                weights_path = smoke_dir / "pytorch_model_fsdp.bin"
+                if not weights_path.is_file() or not weights_path.stat().st_size:
+                    raise ValueError("checkpoint smoke produced no nonempty FSDP weights file")
+                weights = torch.load(weights_path, map_location="cpu", weights_only=True)
+                tensor_count = len(weights)
+                valid = bool(weights) and all(isinstance(name, str) and "lora_" in name
+                                             and torch.is_tensor(value) and bool(torch.isfinite(value).all())
+                                             for name, value in weights.items())
+                del weights
+            except Exception:
+                # Propagate rank-0 validation failure through the collective,
+                # rather than leaving other ranks waiting at a later barrier.
+                valid = False
+        checked = accelerator.reduce(torch.tensor([int(valid), tensor_count], dtype=torch.int64,
+                                                   device=accelerator.device), reduction="sum")
+        if int(checked[0]) != accelerator.num_processes:
+            raise ValueError("checkpoint smoke requires finite, nonempty LoRA-only FSDP weights")
+        probe = collator([min(features, key=lambda row: len(row["input_ids"]))])
+        probe = assistant_loss_inputs({key: value.to(accelerator.device) for key, value in probe.items()})
+        restored = fsdp_adapter_reload_probe(trainer, plugin, smoke_dir, probe)
+        accelerator.wait_for_everyone()
+        peaks = accelerator.gather(torch.tensor([torch.cuda.max_memory_allocated()],
+                                               device=accelerator.device)).cpu().tolist()
+        report.update(status="checkpoint_smoke_passed", optimizer_steps=0, backward_runs=0,
+                      saved_adapter=False, resumable_checkpoint=False, fsdp_adapter_weights_saved=True,
+                      weights_only_smoke_dir=str(smoke_dir), fsdp_adapter_tensor_count=int(checked[1]),
+                      fsdp_adapter_weights_only_lora=True, fsdp_adapter_weights_finite=True,
+                      fsdp_adapter_reload_forward=restored,
+                      peak_allocated_GiB_per_rank=[round(value / 1024**3, 3) for value in peaks])
+        accelerator.end_training()
+        return report
     if forward_only:
         model = trainer.accelerator.prepare_model(trainer.model)
         model.eval()
@@ -709,6 +789,8 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--max-length", type=int)
     result.add_argument("--schema-only", action="store_true")
     result.add_argument("--train", action="store_true", help="Explicitly permit optimizer steps and adapter saving")
+    result.add_argument("--checkpoint-smoke", action="store_true",
+                        help="Explicitly load the model for cold FSDP LoRA weights save/reload; no training")
     result.add_argument("--max-steps", type=int, help="Optional explicit short training run; requires --train")
     result.add_argument("--resume-from-checkpoint", help="Completed checkpoint-N in output_dir; requires --train")
     result.add_argument("--stop-after-steps", type=int, help="Stop at an absolute optimizer step, retaining the full schedule")
@@ -718,12 +800,18 @@ def parser() -> argparse.ArgumentParser:
 
 def main(argv=None) -> int:
     args = parser().parse_args(argv)
+    if args.checkpoint_smoke and (args.train or args.schema_only):
+        raise ValueError("--checkpoint-smoke requires full preflight and cannot combine with --train or --schema-only")
     if args.train and args.schema_only or any(value is not None for value in
                                             (args.max_steps, args.resume_from_checkpoint, args.stop_after_steps)) and not args.train:
         raise ValueError("--train requires full preflight; --max-steps requires explicit --train")
     config = load_config(args.config, model_dir=args.model_dir, data_dir=args.data_dir, output_dir=args.output_dir,
                          max_length=args.max_length)
     report, features, tokenizer = preflight(config, schema_only=args.schema_only)
+    if args.checkpoint_smoke:
+        report["checkpoint_smoke"] = run_model(config, features, tokenizer, checkpoint_smoke=True,
+                                               data_sha256=report["training_data_sha256"])
+        report["large_model_loaded"] = True
     if args.train:
         report["training"] = run_model(config, features, tokenizer, max_steps=args.max_steps,
                                        resume_from_checkpoint=args.resume_from_checkpoint,

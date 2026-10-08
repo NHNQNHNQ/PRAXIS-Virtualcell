@@ -1,6 +1,6 @@
 # 菌株上下文中的细胞结构
 
-2026-10-08 接入版：结构由平台维护为有来源的事实，LLM 负责条件化分析。工程试训已获授权并执行，正式全量训练仍暂停；最长样本反向已完成，但主机内存压力与 SSH 超时阻断保存/恢复验证，尚无已验证的专用适配器。
+2026-10-08 接入版：结构由平台维护为有来源的事实，LLM 负责条件化分析。53 上八卡 Qwen3-32B 的 12 步 LoRA 工程测试已通过，包括最长样本反向、断点恢复与适配器保存/重载。试训适配器位于 `outputs/qwen3_32b_joint_lora_v4_guarded_20261008/adapter`，仅供工程验证；独立 MIC 预测评估尚未执行，正式全量训练继续暂停。
 
 设计参考 [Towards the construction of a virtual yeast](https://www.nature.com/articles/s41586-026-10574-9) 将机制知识、亚细胞结构、动态状态分别组织的思路。本平台当前实现有来源的结构上下文与条件化推理，尚无动态细胞状态模拟或实验闭环。
 
@@ -44,7 +44,9 @@ v4 共享 v3 的 MIC/机制私有来源索引、留出答案索引与隔离索�
 
 结构目标是可追溯的弱监督：候选特异可达性明确 unknown，不编造新的 MIC 或机制金标。当前物种模板与教师查询尚不证明结构提高准确率；后续需同药物—菌株—条件的结构消融和独立留出评估。
 
-完整九条结构视图 `qwen_joint_sft_v4` 有 45 条超过 32,768，上限检查失败记录保留。独立候选 `qwen_joint_sft_v4_compact` 使用真实查询选择全部五个区室节点，运行时仍提供完整邻接图。最新 7,193 条全量 CPU 预检通过，最长 31,740，最长最终回答 10,890，未截断数据。八卡试训已完成最长样本反向，日志确认至少 2 个 optimizer 步；首次断点保存遇到主机内存压力，新 SSH 连接超时，停止请求尚未确认。普通 CPU 转存修正已写入本地，待远端验证；工程链路未通过，正式全量训练仍暂停。来源与结构接入检查见 [接入验证报告](../reports/llm_platform/cell_structure_verification_20261008.json)，工程测试状态见 [v4_compact 试训验证报告](../reports/llm_platform/qwen_v4_compact_trial_verification_20261008.json)。
+完整九条结构视图 `qwen_joint_sft_v4` 有 45 条超过 32,768，上限检查失败记录保留。独立候选 `qwen_joint_sft_v4_compact` 通过真实查询选择全部五个区室节点，运行时仍提供完整邻接图。7,193 条全量预检通过，最长 31,740，最长最终回答 10,890，未截断数据。非锁页 CPU 转存已通过 222 项梯度比较与真实八卡工程测试；checkpoint1→6→12 正确恢复 Adam、scheduler 和各 rank RNG，896 个 LoRA 张量及扰动后参数/输出重载检查通过。训练期间全机最低可用内存的观测值为 292.07 GiB，无 OOM 或 swap，结束后显存和进程已释放。完整阶段结果及旧失败记录见 [试训验证报告](../reports/llm_platform/qwen_v4_compact_trial_verification_20261008.json)，结构来源检查见 [接入验证报告](../reports/llm_platform/cell_structure_verification_20261008.json)。
+
+训练运行使用训练 cgroup 外的独立 supervisor；真实限额为硬上限 300 GiB、high 260 GiB、swap 0、`memory.oom.group=1`，训练入口在权重加载前要求有效硬限制。主机可用内存低于 160 GiB 时停止整个本次训练组；guard 的 observed peak 来自 1 秒采样。NCCL heartbeat 为 120 秒、DDP timeout 为 600 秒，cold 烟测最长 900 秒。已通过的 stop1 及两段恢复工程测试均使用非锁页 CPU 转存，具体入口见 [QWEN-MIC-SFT](QWEN-MIC-SFT.md)。
 
 ## 实际接入验证
 

@@ -3,9 +3,10 @@
 # CPU: 4 native + 4 chunk + 4 offload/GC cases, 222 gradient comparisons passed.
 # Max loss/gradient differences: 4.77e-7 / 2.98e-8; 7,193-row preflight passed (31,740 tokens).
 # GPU attempts 1/2 stopped at 0 steps: RMSNorm OOM, then 3D-head checkpoint metadata mismatch.
-# Pinned offload exhausted host memory at the first save; stop request/SSH remain unconfirmed.
-# Unpinned CPU offload correction is local, awaiting deployment/numeric/GPU verification.
-# No completed save/resume/export success is claimed. Formal training remains paused.
+# Pinned offload hung at the first save after 3 steps; user rebooted, checkpoint was empty.
+# Unpinned CPU offload is deployed; 222 gradient checks and guarded cold save/reload passed.
+# GPU entry requires verified cgroup limits; guarded 12-step save/resume/export trial passed.
+# Trial success establishes engineering operation, not independent MIC prediction accuracy.
 # Verification: reports/llm_platform/qwen_v4_compact_trial_verification_20261008.json
 model_id: Qwen/Qwen3-32B
 model_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/models/Qwen3-32B
@@ -38,6 +39,7 @@ lora:
   lora_dropout: 0.05
   target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
 training:
+  ddp_timeout: 600
   num_train_epochs: 1
   learning_rate: 0.00005
   per_device_train_batch_size: 1

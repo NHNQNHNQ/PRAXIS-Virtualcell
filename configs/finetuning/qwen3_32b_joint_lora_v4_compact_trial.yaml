@@ -1,9 +1,9 @@
-# Authorized engineering trial only: 12 optimizer steps, stop at 6 then resume.
+# Authorized engineering trial only: first stop at 1; later validate 6 -> 12 recovery.
 # First global microbatch covers the unchanged longest v4_compact record on all ranks.
 model_id: Qwen/Qwen3-32B
 model_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/models/Qwen3-32B
 data_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/qwen_joint_sft_v4_compact
-output_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_compact_trial_cpu_2d_20261008
+output_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008
 require_assessment_supervision: true
 sampling:
   strategy: shuffled_once
@@ -35,6 +35,7 @@ lora:
   - up_proj
   - down_proj
 training:
+  ddp_timeout: 600
   num_train_epochs: 1
   learning_rate: 5.0e-05
   per_device_train_batch_size: 1

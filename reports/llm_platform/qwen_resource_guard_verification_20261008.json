@@ -1,0 +1,883 @@
+{
+  "schema": "praxis.training-resource-guard.v1",
+  "date": "2026-10-08",
+  "status": "passed",
+  "training_group_limits": {
+    "memory_max_GiB": 300,
+    "memory_high_GiB": 260,
+    "memory_swap_max_bytes": 0,
+    "memory_oom_group": 1,
+    "kill_mode": "control-group",
+    "minimum_host_available_GiB": 160
+  },
+  "supervision": {
+    "separate_process_and_cgroup": true,
+    "GPU_cold_save_supervisor": "praxis-qwen-watch-cold-20261008.service",
+    "GPU_cold_save_unit": "praxis-qwen-cold-20261008.service",
+    "monitor_poll_seconds": 1,
+    "GPU_cold_save_runtime_limit_seconds": 900,
+    "NCCL_heartbeat_seconds": 120,
+    "DDP_timeout_seconds": 600,
+    "GPU_step1_supervisor": "praxis-qwen-watch-step1-20261008.service",
+    "GPU_step1_unit": "praxis-qwen-step1-20261008.service",
+    "GPU_step1_runtime_limit_seconds": 2400,
+    "GPU_step6_supervisor": "praxis-qwen-watch-step6-20261008.service",
+    "GPU_step6_unit": "praxis-qwen-step6-20261008.service",
+    "GPU_step6_runtime_limit_seconds": 2400,
+    "GPU_step12_supervisor": "praxis-qwen-watch-step12-20261008.service",
+    "GPU_step12_unit": "praxis-qwen-step12-20261008.service",
+    "GPU_step12_runtime_limit_seconds": 2400
+  },
+  "hard_limit_probe": {
+    "unit": "praxis-qwen-hard-oom-probe-20261008.service",
+    "command": [
+      ".venv/bin/python",
+      "reports/resource_guard_probe_20261008/praxis_guard_memory_probe.py",
+      "reports/resource_guard_probe_20261008/hard_oom"
+    ],
+    "started_at": "2026-10-08T09:20:08.538783+00:00",
+    "limits_verified": true,
+    "gate_released": true,
+    "outcome": "cgroup_oom",
+    "phase": "monitor",
+    "requested_limits": {
+      "memory.max": 67108864,
+      "memory.high": 67108864,
+      "memory.swap.max": 0
+    },
+    "min_host_available_gib": 492.74254608154297,
+    "cgroup_peak_gib": 0.00417327880859375,
+    "memory_events": {
+      "low": 0,
+      "high": 0,
+      "max": 0,
+      "oom": 0,
+      "oom_kill": 0
+    },
+    "result": "oom-kill",
+    "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-hard-oom-probe-20261008.service",
+    "actual_limits": {
+      "memory.max": 67108864,
+      "memory.high": 67108864,
+      "memory.swap.max": 0,
+      "memory.oom.group": 1
+    },
+    "cgroup_peak_source": "sampled_memory_current",
+    "active_state": "failed",
+    "sub_state": "failed",
+    "main_pid": 0,
+    "service_exit_status": "9",
+    "final_memory_snapshot_unavailable": true,
+    "remaining_cgroup_pids": [],
+    "cleanup_owned_unit": true,
+    "cleanup_result": "oom-kill",
+    "cleanup_active_state": "failed",
+    "finished_at": "2026-10-08T09:20:09.614679+00:00"
+  },
+  "hard_limit_probe_parent_and_child_gone_verified": true,
+  "soft_limit_and_orphan_cleanup_probe": {
+    "unit": "praxis-qwen-memory-probe-20261008.service",
+    "command": [
+      ".venv/bin/python",
+      "reports/resource_guard_probe_20261008/praxis_guard_memory_probe.py",
+      "reports/resource_guard_probe_20261008"
+    ],
+    "started_at": "2026-10-08T09:18:35.833559+00:00",
+    "limits_verified": true,
+    "gate_released": true,
+    "outcome": "orphaned_children",
+    "phase": "monitor",
+    "requested_limits": {
+      "memory.max": 67108864,
+      "memory.high": 50331648,
+      "memory.swap.max": 0
+    },
+    "min_host_available_gib": 492.69561767578125,
+    "cgroup_peak_gib": 0.05385589599609375,
+    "memory_events": {
+      "low": 0,
+      "high": 959,
+      "max": 0,
+      "oom": 0,
+      "oom_kill": 0
+    },
+    "result": "success",
+    "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-memory-probe-20261008.service",
+    "actual_limits": {
+      "memory.max": 67108864,
+      "memory.high": 50331648,
+      "memory.swap.max": 0,
+      "memory.oom.group": 1
+    },
+    "cgroup_peak_source": "sampled_memory_current",
+    "active_state": "active",
+    "sub_state": "exited",
+    "main_pid": 0,
+    "service_exit_status": "0",
+    "remaining_cgroup_pids": [
+      11664
+    ],
+    "failure_reason": "completed service still contains live child processes",
+    "cleanup_owned_unit": true,
+    "cleanup_result": "success",
+    "cleanup_active_state": "inactive",
+    "finished_at": "2026-10-08T09:19:06.193117+00:00"
+  },
+  "host_SSH_after_probes": "successful; approximately 492GiB available and swap unused",
+  "unpinned_cpu_numeric": {
+    "status": "passed",
+    "model": "random_tiny_Qwen3",
+    "device": "cpu",
+    "numeric_cases": 4,
+    "parameter_gradient_comparisons": 222,
+    "max_loss_absolute_error": 4.76837158203125e-07,
+    "max_gradient_absolute_error": 2.9802322387695312e-08,
+    "full_context_preserved": true,
+    "dense_and_peft_checked": true,
+    "chunked_numeric_cases": 4,
+    "activation_offload_numeric_cases": 4,
+    "nonreentrant_checkpoint_checked": true,
+    "activation_offload_pin_memory": false,
+    "optimizer_steps": 0
+  },
+  "unpinned_cpu_guard": {
+    "unit": "praxis-qwen-unpinned-cpu-20261008.service",
+    "command": [
+      "/usr/bin/env",
+      "CUDA_VISIBLE_DEVICES=",
+      "PYTHONPATH=scripts/finetuning:runtime",
+      ".venv/bin/python",
+      "-c",
+      "import json;from pathlib import Path;import train_qwen_lora as m;r=m.assistant_loss_self_test();Path(\"reports/unpinned_cpu_selftest_20261008.json\").write_text(json.dumps(r,indent=2)+\"\\n\");print(json.dumps(r))"
+    ],
+    "started_at": "2026-10-08T09:21:36.686566+00:00",
+    "limits_verified": true,
+    "gate_released": true,
+    "outcome": "success",
+    "phase": "monitor",
+    "requested_limits": {
+      "memory.max": 2147483648,
+      "memory.high": 1610612736,
+      "memory.swap.max": 0
+    },
+    "min_host_available_gib": 492.32577896118164,
+    "cgroup_peak_gib": 1.0088920593261719,
+    "memory_events": {
+      "low": 0,
+      "high": 0,
+      "max": 0,
+      "oom": 0,
+      "oom_kill": 0
+    },
+    "result": "success",
+    "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-unpinned-cpu-20261008.service",
+    "actual_limits": {
+      "memory.max": 2147483648,
+      "memory.high": 1610612736,
+      "memory.swap.max": 0,
+      "memory.oom.group": 1
+    },
+    "cgroup_peak_source": "sampled_memory_current",
+    "active_state": "active",
+    "sub_state": "exited",
+    "main_pid": 0,
+    "service_exit_status": "0",
+    "final_memory_snapshot_unavailable": true,
+    "remaining_cgroup_pids": [],
+    "cleanup_owned_unit": true,
+    "cleanup_result": "success",
+    "cleanup_active_state": "inactive",
+    "finished_at": "2026-10-08T09:21:44.833126+00:00"
+  },
+  "gpu_cold_save": {
+    "status": "passed",
+    "training": {
+      "base_model": "Qwen/Qwen3-32B",
+      "precision": "bf16",
+      "attention": "sdpa",
+      "world_size": 8,
+      "trainable_parameters": 134217728,
+      "total_parameters": 32896340992,
+      "native_template_unchanged": true,
+      "base_parameters_frozen": true,
+      "heldout_inputs_used_for_training": false,
+      "loss": "checkpointed_chunked_sparse_assistant_causal_CE",
+      "loss_chunk_tokens": 256,
+      "fsdp_bf16_lora_inputs": true,
+      "chunked_output_projection": true,
+      "activation_cpu_offload": true,
+      "activation_cpu_offload_pin_memory": false,
+      "full_context_preserved": true,
+      "sampling": {
+        "strategy": "sequential_mixed_capacity_trial",
+        "records": 64,
+        "longest_record_id": "joint:b8aba014b72a44eab5cedf4e40cd4d298b7b5b23a3ce9cadf226dab162353046",
+        "longest_tokens": 31740,
+        "longest_record_repetitions": 8,
+        "formal_task_oversampling": false,
+        "task_records": {
+          "strain_conditioned_Assessment_auxiliary": 19,
+          "strain_reference_Assessment": 19,
+          "strain_reference_Assessment_mechanism": 26
+        }
+      },
+      "training_identity": "e91da66eea0db526de4293eb214a0b9ed279a8f0cb9057187497d8a84320e92d",
+      "memory_guard": {
+        "cgroup_path": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-cold-20261008.service",
+        "memory_max_bytes": 322122547200,
+        "memory_high_bytes": 279172874240,
+        "memory_swap_max_bytes": 0,
+        "memory_oom_group": 1,
+        "host_mem_available_bytes": 509630164992
+      },
+      "status": "checkpoint_smoke_passed",
+      "optimizer_steps": 0,
+      "backward_runs": 0,
+      "saved_adapter": false,
+      "resumable_checkpoint": false,
+      "fsdp_adapter_weights_saved": true,
+      "weights_only_smoke_dir": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_cold_save_guarded_20261008/checkpoint-smoke",
+      "fsdp_adapter_tensor_count": 896,
+      "fsdp_adapter_weights_only_lora": true,
+      "fsdp_adapter_weights_finite": true,
+      "fsdp_adapter_reload_forward": {
+        "status": "passed",
+        "checkpoint": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_cold_save_guarded_20261008/checkpoint-smoke",
+        "perturbed_parameter": "_fsdp_wrapped_module.base_model.model.model.layers.0._fsdp_wrapped_module.mlp.down_proj.lora_B.default._fsdp_wrapped_module._flat_param",
+        "perturbation_delta": 0.125,
+        "perturbation_detected": true,
+        "restored_shard": true,
+        "restored_forward": true,
+        "missing_lora_keys": [],
+        "unexpected_keys": [],
+        "max_perturbed_logit_error": 10.3310546875,
+        "max_logit_error": 0.0
+      },
+      "peak_allocated_GiB_per_rank": [
+        13.486,
+        13.486,
+        13.486,
+        13.486,
+        13.486,
+        13.486,
+        13.486,
+        13.486
+      ]
+    },
+    "guard": {
+      "unit": "praxis-qwen-cold-20261008.service",
+      "command": [
+        ".venv/bin/accelerate",
+        "launch",
+        "--config_file",
+        "configs/finetuning/fsdp_a100_8gpu.yaml",
+        "scripts/finetuning/train_qwen_lora.py",
+        "--config",
+        "configs/finetuning/qwen3_32b_joint_lora_v4_compact_trial.yaml",
+        "--checkpoint-smoke",
+        "--output-dir",
+        "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_cold_save_guarded_20261008",
+        "--report",
+        "reports/guarded_cold_checkpoint_20261008.json"
+      ],
+      "started_at": "2026-10-08T09:23:34.797413+00:00",
+      "limits_verified": true,
+      "gate_released": true,
+      "outcome": "success",
+      "phase": "monitor",
+      "requested_limits": {
+        "memory.max": 322122547200,
+        "memory.high": 279172874240,
+        "memory.swap.max": 0
+      },
+      "min_host_available_gib": 345.7321548461914,
+      "cgroup_peak_gib": 207.15029525756836,
+      "memory_events": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0
+      },
+      "result": "success",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-cold-20261008.service",
+      "actual_limits": {
+        "memory.max": 322122547200,
+        "memory.high": 279172874240,
+        "memory.swap.max": 0,
+        "memory.oom.group": 1
+      },
+      "cgroup_peak_source": "sampled_memory_current",
+      "active_state": "active",
+      "sub_state": "exited",
+      "main_pid": 0,
+      "service_exit_status": "0",
+      "final_memory_snapshot_unavailable": true,
+      "remaining_cgroup_pids": [],
+      "cleanup_owned_unit": true,
+      "cleanup_result": "success",
+      "cleanup_active_state": "inactive",
+      "finished_at": "2026-10-08T09:29:37.838546+00:00"
+    },
+    "all_eight_GPUs_released_verified": true,
+    "host_available_after_GiB_approx": 492
+  },
+  "local_tests": {
+    "passed": 46,
+    "skipped": 9,
+    "skip_reason": "local Torch/HF unavailable"
+  },
+  "limitations": [
+    "Fast OOM probe cgroup was removed before final sampling; systemd Result=oom-kill and both PIDs absent establish termination, while zero last-sampled events do not represent final event counts.",
+    "Kernel 5.15 has no memory.peak on this host; cgroup_peak_gib is a one-second sampled maximum, not an exact allocator peak.",
+    "Twelve-step capacity/recovery testing does not establish MIC accuracy or omics/structure benefit.",
+    "Formal full-dataset training remains paused."
+  ],
+  "gpu_longest_backward": {
+    "status": "passed",
+    "training": {
+      "base_model": "Qwen/Qwen3-32B",
+      "precision": "bf16",
+      "attention": "sdpa",
+      "world_size": 8,
+      "trainable_parameters": 134217728,
+      "total_parameters": 32896340992,
+      "native_template_unchanged": true,
+      "base_parameters_frozen": true,
+      "heldout_inputs_used_for_training": false,
+      "loss": "checkpointed_chunked_sparse_assistant_causal_CE",
+      "loss_chunk_tokens": 256,
+      "fsdp_bf16_lora_inputs": true,
+      "chunked_output_projection": true,
+      "activation_cpu_offload": true,
+      "activation_cpu_offload_pin_memory": false,
+      "full_context_preserved": true,
+      "sampling": {
+        "strategy": "sequential_mixed_capacity_trial",
+        "records": 64,
+        "longest_record_id": "joint:b8aba014b72a44eab5cedf4e40cd4d298b7b5b23a3ce9cadf226dab162353046",
+        "longest_tokens": 31740,
+        "longest_record_repetitions": 8,
+        "formal_task_oversampling": false,
+        "task_records": {
+          "strain_conditioned_Assessment_auxiliary": 19,
+          "strain_reference_Assessment": 19,
+          "strain_reference_Assessment_mechanism": 26
+        }
+      },
+      "training_identity": "e91da66eea0db526de4293eb214a0b9ed279a8f0cb9057187497d8a84320e92d",
+      "memory_guard": {
+        "cgroup_path": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-step1-20261008.service",
+        "memory_max_bytes": 322122547200,
+        "memory_high_bytes": 279172874240,
+        "memory_swap_max_bytes": 0,
+        "memory_oom_group": 1,
+        "host_mem_available_bytes": 509505236992
+      },
+      "status": "stopped_at_checkpoint",
+      "optimizer_steps": 1,
+      "saved_adapter": true,
+      "output_dir": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008",
+      "adapter_dir": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008/adapter",
+      "resumable_checkpoint": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008/checkpoint-1",
+      "resumed_from": null,
+      "runtime_evidence": {
+        "training_microbatches_per_rank": 4,
+        "max_training_tokens_local": 31740,
+        "finite_gradient_checks": 1,
+        "max_sampled_lora_update": 4.999939847039059e-05,
+        "gradient_accumulation_steps": 4,
+        "rng_state_restored": false,
+        "microbatches_per_optimizer_step": [
+          4
+        ],
+        "resumed_global_step": 0,
+        "max_training_tokens_per_rank": [
+          31740,
+          31740,
+          31740,
+          31740,
+          31740,
+          31740,
+          31740,
+          31740
+        ],
+        "backward_microbatches_per_rank": 4,
+        "adapter_tensor_reload": {
+          "status": "passed",
+          "tensor_count": 896,
+          "all_finite": true,
+          "exact_match": true
+        },
+        "fsdp_adapter_reload_forward": {
+          "status": "passed",
+          "checkpoint": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008/checkpoint-1",
+          "perturbed_parameter": "_fsdp_wrapped_module.base_model.model.model.layers.0._fsdp_wrapped_module.mlp.down_proj.lora_B.default._fsdp_wrapped_module._flat_param",
+          "perturbation_delta": 0.125,
+          "perturbation_detected": true,
+          "restored_shard": true,
+          "restored_forward": true,
+          "missing_lora_keys": [],
+          "unexpected_keys": [],
+          "max_perturbed_logit_error": 6.6953125,
+          "max_logit_error": 0.0
+        }
+      },
+      "peak_allocated_GiB_per_rank": [
+        28.63,
+        28.63,
+        28.63,
+        28.63,
+        28.63,
+        28.63,
+        28.63,
+        28.63
+      ],
+      "train_loss": 0.26024317741394043,
+      "train_loss_this_run": 0.26024317741394043,
+      "loss_sum_this_run": 0.26024317741394043,
+      "optimizer_steps_this_run": 1,
+      "train_loss_normalization": {
+        "train_loss": "HF current-invocation loss sum / cumulative global_step",
+        "train_loss_this_run": "current-invocation loss sum / optimizer_steps_this_run"
+      }
+    },
+    "guard": {
+      "unit": "praxis-qwen-step1-20261008.service",
+      "command": [
+        ".venv/bin/accelerate",
+        "launch",
+        "--config_file",
+        "configs/finetuning/fsdp_a100_8gpu.yaml",
+        "scripts/finetuning/train_qwen_lora.py",
+        "--config",
+        "configs/finetuning/qwen3_32b_joint_lora_v4_compact_trial.yaml",
+        "--train",
+        "--stop-after-steps",
+        "1",
+        "--output-dir",
+        "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008",
+        "--report",
+        "reports/guarded_step1_20261008.json"
+      ],
+      "started_at": "2026-10-08T09:33:36.552124+00:00",
+      "limits_verified": true,
+      "gate_released": true,
+      "outcome": "success",
+      "phase": "monitor",
+      "requested_limits": {
+        "memory.max": 322122547200,
+        "memory.high": 279172874240,
+        "memory.swap.max": 0
+      },
+      "min_host_available_gib": 304.17777252197266,
+      "cgroup_peak_gib": 187.47290802001953,
+      "memory_events": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0
+      },
+      "result": "success",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-step1-20261008.service",
+      "actual_limits": {
+        "memory.max": 322122547200,
+        "memory.high": 279172874240,
+        "memory.swap.max": 0,
+        "memory.oom.group": 1
+      },
+      "cgroup_peak_source": "sampled_memory_current",
+      "active_state": "active",
+      "sub_state": "exited",
+      "main_pid": 0,
+      "service_exit_status": "0",
+      "final_memory_snapshot_unavailable": true,
+      "remaining_cgroup_pids": [],
+      "cleanup_owned_unit": true,
+      "cleanup_result": "success",
+      "cleanup_active_state": "inactive",
+      "finished_at": "2026-10-08T09:42:16.628183+00:00"
+    },
+    "all_eight_GPUs_released_verified": true
+  },
+  "recovery_trial": {
+    "status": "passed_checkpoint1_to6_and_checkpoint6_to12",
+    "step6": {
+      "base_model": "Qwen/Qwen3-32B",
+      "precision": "bf16",
+      "attention": "sdpa",
+      "world_size": 8,
+      "trainable_parameters": 134217728,
+      "total_parameters": 32896340992,
+      "native_template_unchanged": true,
+      "base_parameters_frozen": true,
+      "heldout_inputs_used_for_training": false,
+      "loss": "checkpointed_chunked_sparse_assistant_causal_CE",
+      "loss_chunk_tokens": 256,
+      "fsdp_bf16_lora_inputs": true,
+      "chunked_output_projection": true,
+      "activation_cpu_offload": true,
+      "activation_cpu_offload_pin_memory": false,
+      "full_context_preserved": true,
+      "sampling": {
+        "strategy": "sequential_mixed_capacity_trial",
+        "records": 64,
+        "longest_record_id": "joint:b8aba014b72a44eab5cedf4e40cd4d298b7b5b23a3ce9cadf226dab162353046",
+        "longest_tokens": 31740,
+        "longest_record_repetitions": 8,
+        "formal_task_oversampling": false,
+        "task_records": {
+          "strain_conditioned_Assessment_auxiliary": 19,
+          "strain_reference_Assessment": 19,
+          "strain_reference_Assessment_mechanism": 26
+        }
+      },
+      "training_identity": "e91da66eea0db526de4293eb214a0b9ed279a8f0cb9057187497d8a84320e92d",
+      "memory_guard": {
+        "cgroup_path": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-step6-20261008.service",
+        "memory_max_bytes": 322122547200,
+        "memory_high_bytes": 279172874240,
+        "memory_swap_max_bytes": 0,
+        "memory_oom_group": 1,
+        "host_mem_available_bytes": 509486043136
+      },
+      "status": "stopped_at_checkpoint",
+      "optimizer_steps": 6,
+      "saved_adapter": true,
+      "output_dir": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008",
+      "adapter_dir": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008/adapter",
+      "resumable_checkpoint": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008/checkpoint-6",
+      "resumed_from": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008/checkpoint-1",
+      "runtime_evidence": {
+        "training_microbatches_per_rank": 20,
+        "max_training_tokens_local": 31740,
+        "finite_gradient_checks": 5,
+        "max_sampled_lora_update": 0.00020876878988929093,
+        "gradient_accumulation_steps": 4,
+        "rng_state_restored": true,
+        "microbatches_per_optimizer_step": [
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "resumed_global_step": 1,
+        "optimizer_state_restored": {
+          "parameter_states": 896,
+          "minimum_step": 1.0,
+          "maximum_step": 1.0,
+          "moments_finite": true,
+          "nonzero_moments_restored": true
+        },
+        "scheduler_state_restored": true,
+        "max_training_tokens_per_rank": [
+          31740,
+          31740,
+          31740,
+          31740,
+          31740,
+          31740,
+          31740,
+          31740
+        ],
+        "backward_microbatches_per_rank": 20,
+        "adapter_tensor_reload": {
+          "status": "passed",
+          "tensor_count": 896,
+          "all_finite": true,
+          "exact_match": true
+        },
+        "fsdp_adapter_reload_forward": {
+          "status": "passed",
+          "checkpoint": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008/checkpoint-6",
+          "perturbed_parameter": "_fsdp_wrapped_module.base_model.model.model.layers.0._fsdp_wrapped_module.mlp.down_proj.lora_B.default._fsdp_wrapped_module._flat_param",
+          "perturbation_delta": 0.125,
+          "perturbation_detected": true,
+          "restored_shard": true,
+          "restored_forward": true,
+          "missing_lora_keys": [],
+          "unexpected_keys": [],
+          "max_perturbed_logit_error": 4.859375,
+          "max_logit_error": 0.0
+        }
+      },
+      "peak_allocated_GiB_per_rank": [
+        28.755,
+        28.755,
+        28.755,
+        28.755,
+        28.755,
+        28.755,
+        28.755,
+        28.755
+      ],
+      "train_loss": 0.24064925064643225,
+      "train_loss_this_run": 0.28877910077571867,
+      "loss_sum_this_run": 1.4438955038785934,
+      "optimizer_steps_this_run": 5,
+      "train_loss_normalization": {
+        "train_loss": "HF current-invocation loss sum / cumulative global_step",
+        "train_loss_this_run": "current-invocation loss sum / optimizer_steps_this_run"
+      }
+    },
+    "step6_guard": {
+      "unit": "praxis-qwen-step6-20261008.service",
+      "command": [
+        ".venv/bin/accelerate",
+        "launch",
+        "--config_file",
+        "configs/finetuning/fsdp_a100_8gpu.yaml",
+        "scripts/finetuning/train_qwen_lora.py",
+        "--config",
+        "configs/finetuning/qwen3_32b_joint_lora_v4_compact_trial.yaml",
+        "--train",
+        "--resume-from-checkpoint",
+        "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008/checkpoint-1",
+        "--stop-after-steps",
+        "6",
+        "--report",
+        "reports/guarded_step6_20261008.json"
+      ],
+      "started_at": "2026-10-08T09:43:36.942209+00:00",
+      "limits_verified": true,
+      "gate_released": true,
+      "outcome": "success",
+      "phase": "monitor",
+      "requested_limits": {
+        "memory.max": 322122547200,
+        "memory.high": 279172874240,
+        "memory.swap.max": 0
+      },
+      "min_host_available_gib": 295.2628517150879,
+      "cgroup_peak_gib": 196.3942413330078,
+      "memory_events": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0
+      },
+      "result": "success",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-step6-20261008.service",
+      "actual_limits": {
+        "memory.max": 322122547200,
+        "memory.high": 279172874240,
+        "memory.swap.max": 0,
+        "memory.oom.group": 1
+      },
+      "cgroup_peak_source": "sampled_memory_current",
+      "active_state": "active",
+      "sub_state": "exited",
+      "main_pid": 0,
+      "service_exit_status": "0",
+      "final_memory_snapshot_unavailable": true,
+      "remaining_cgroup_pids": [],
+      "cleanup_owned_unit": true,
+      "cleanup_result": "success",
+      "cleanup_active_state": "inactive",
+      "finished_at": "2026-10-08T10:02:11.699968+00:00"
+    },
+    "step6_all_GPUs_released_verified": true,
+    "step12_training_report": "reports/guarded_step12_20261008.json",
+    "step12_guard_report": "reports/guarded_step12_guard_20261008.json",
+    "step12": {
+      "base_model": "Qwen/Qwen3-32B",
+      "precision": "bf16",
+      "attention": "sdpa",
+      "world_size": 8,
+      "trainable_parameters": 134217728,
+      "total_parameters": 32896340992,
+      "native_template_unchanged": true,
+      "base_parameters_frozen": true,
+      "heldout_inputs_used_for_training": false,
+      "loss": "checkpointed_chunked_sparse_assistant_causal_CE",
+      "loss_chunk_tokens": 256,
+      "fsdp_bf16_lora_inputs": true,
+      "chunked_output_projection": true,
+      "activation_cpu_offload": true,
+      "activation_cpu_offload_pin_memory": false,
+      "full_context_preserved": true,
+      "sampling": {
+        "strategy": "sequential_mixed_capacity_trial",
+        "records": 64,
+        "longest_record_id": "joint:b8aba014b72a44eab5cedf4e40cd4d298b7b5b23a3ce9cadf226dab162353046",
+        "longest_tokens": 31740,
+        "longest_record_repetitions": 8,
+        "formal_task_oversampling": false,
+        "task_records": {
+          "strain_conditioned_Assessment_auxiliary": 19,
+          "strain_reference_Assessment": 19,
+          "strain_reference_Assessment_mechanism": 26
+        }
+      },
+      "training_identity": "e91da66eea0db526de4293eb214a0b9ed279a8f0cb9057187497d8a84320e92d",
+      "memory_guard": {
+        "cgroup_path": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-step12-20261008.service",
+        "memory_max_bytes": 322122547200,
+        "memory_high_bytes": 279172874240,
+        "memory_swap_max_bytes": 0,
+        "memory_oom_group": 1,
+        "host_mem_available_bytes": 510282436608
+      },
+      "status": "trained",
+      "optimizer_steps": 12,
+      "saved_adapter": true,
+      "output_dir": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008",
+      "adapter_dir": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008/adapter",
+      "resumable_checkpoint": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008/checkpoint-12",
+      "resumed_from": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008/checkpoint-6",
+      "runtime_evidence": {
+        "training_microbatches_per_rank": 24,
+        "max_training_tokens_local": 31740,
+        "finite_gradient_checks": 6,
+        "max_sampled_lora_update": 6.948082591407001e-05,
+        "gradient_accumulation_steps": 4,
+        "rng_state_restored": true,
+        "microbatches_per_optimizer_step": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "resumed_global_step": 6,
+        "optimizer_state_restored": {
+          "parameter_states": 896,
+          "minimum_step": 6.0,
+          "maximum_step": 6.0,
+          "moments_finite": true,
+          "nonzero_moments_restored": true
+        },
+        "scheduler_state_restored": true,
+        "max_training_tokens_per_rank": [
+          31740,
+          31740,
+          31740,
+          31740,
+          31740,
+          31740,
+          31740,
+          31740
+        ],
+        "backward_microbatches_per_rank": 24,
+        "adapter_tensor_reload": {
+          "status": "passed",
+          "tensor_count": 896,
+          "all_finite": true,
+          "exact_match": true
+        },
+        "fsdp_adapter_reload_forward": {
+          "status": "passed",
+          "checkpoint": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008/checkpoint-12",
+          "perturbed_parameter": "_fsdp_wrapped_module.base_model.model.model.layers.0._fsdp_wrapped_module.mlp.down_proj.lora_B.default._fsdp_wrapped_module._flat_param",
+          "perturbation_delta": 0.125,
+          "perturbation_detected": true,
+          "restored_shard": true,
+          "restored_forward": true,
+          "missing_lora_keys": [],
+          "unexpected_keys": [],
+          "max_perturbed_logit_error": 8.59375,
+          "max_logit_error": 0.0
+        }
+      },
+      "peak_allocated_GiB_per_rank": [
+        28.755,
+        28.755,
+        28.755,
+        28.755,
+        28.755,
+        28.755,
+        28.755,
+        28.755
+      ],
+      "train_loss": 0.1278556560476621,
+      "train_loss_this_run": 0.2557113120953242,
+      "loss_sum_this_run": 1.5342678725719452,
+      "optimizer_steps_this_run": 6,
+      "train_loss_normalization": {
+        "train_loss": "HF current-invocation loss sum / cumulative global_step",
+        "train_loss_this_run": "current-invocation loss sum / optimizer_steps_this_run"
+      }
+    },
+    "step12_guard": {
+      "unit": "praxis-qwen-step12-20261008.service",
+      "command": [
+        ".venv/bin/accelerate",
+        "launch",
+        "--config_file",
+        "configs/finetuning/fsdp_a100_8gpu.yaml",
+        "scripts/finetuning/train_qwen_lora.py",
+        "--config",
+        "configs/finetuning/qwen3_32b_joint_lora_v4_compact_trial.yaml",
+        "--train",
+        "--resume-from-checkpoint",
+        "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_guarded_20261008/checkpoint-6",
+        "--report",
+        "reports/guarded_step12_20261008.json"
+      ],
+      "started_at": "2026-10-08T10:04:00.952059+00:00",
+      "limits_verified": true,
+      "gate_released": true,
+      "outcome": "success",
+      "phase": "monitor",
+      "requested_limits": {
+        "memory.max": 322122547200,
+        "memory.high": 279172874240,
+        "memory.swap.max": 0
+      },
+      "min_host_available_gib": 292.0685615539551,
+      "cgroup_peak_gib": 199.2254638671875,
+      "memory_events": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0
+      },
+      "result": "success",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-step12-20261008.service",
+      "actual_limits": {
+        "memory.max": 322122547200,
+        "memory.high": 279172874240,
+        "memory.swap.max": 0,
+        "memory.oom.group": 1
+      },
+      "cgroup_peak_source": "sampled_memory_current",
+      "active_state": "active",
+      "sub_state": "exited",
+      "main_pid": 0,
+      "service_exit_status": "0",
+      "final_memory_snapshot_unavailable": true,
+      "remaining_cgroup_pids": [],
+      "cleanup_owned_unit": true,
+      "cleanup_result": "success",
+      "cleanup_active_state": "inactive",
+      "finished_at": "2026-10-08T10:25:20.444424+00:00"
+    }
+  },
+  "engineering_trial_summary": {
+    "optimizer_steps_total": 12,
+    "backward_microbatches_per_rank_total": 48,
+    "gradient_accumulation_steps": 4,
+    "longest_training_tokens_all_ranks": 31740,
+    "all_guards_success": true,
+    "min_observed_host_available_GiB": 292.0685615539551,
+    "max_observed_training_cgroup_GiB": 199.2254638671875,
+    "max_torch_GPU_allocated_GiB_per_rank": 28.755,
+    "all_training_memory_events_zero": true,
+    "all_checkpoint_export_reload_checks_passed": true,
+    "all_eight_GPUs_released_verified": true,
+    "all_trial_and_monitor_MainPIDs_zero_verified": true,
+    "host_available_after_GiB_approx": 492,
+    "host_swap_used_after_bytes": 0,
+    "retained_checkpoints": [
+      "checkpoint-6",
+      "checkpoint-9",
+      "checkpoint-12"
+    ],
+    "checkpoint_retention_note": "Trainer save_total_limit=3 pruned historical checkpoint-1 and checkpoint-3 after their completed recovery tests. Raw source data and original model weights remain single-copy."
+  }
+}
