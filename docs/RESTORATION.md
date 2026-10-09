@@ -54,6 +54,10 @@ The restored baseline also receives the following repository preparation fixes:
   [docker-compose.yml](../docker-compose.yml) bind to `127.0.0.1` for local use.
 - [PROVENANCE.md](../PROVENANCE.md) retains the upstream commit and derivation
   record while removing machine-specific absolute paths.
+- CI prepares hash-locked Python build and locked npm caches before the two
+  offline wheel builds; the byte-comparison gate remains enabled.
+- Browser tests use the platform's resolved temporary directory on macOS and
+  Linux instead of a fixed macOS path.
 
 
 The original host records and configuration remain in existing Git history.
