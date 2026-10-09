@@ -88,10 +88,10 @@ class Settings:
     llm_price_in_per_m_li: int = 1500
     llm_price_out_per_m_li: int = 6000
 
-    # M11.2 MD + HPC SSH(全可选,有默认)
-    hpc_ssh_host: str = "10.102.106.53"
-    hpc_ssh_user: str = "zkyd"
-    hpc_ssh_key_path: str = "~/.ssh/id_rsa"
+    # M11.2 MD + HPC SSH:默认未配置,启用时显式填写 host/user/key 三项
+    hpc_ssh_host: str = ""
+    hpc_ssh_user: str = ""
+    hpc_ssh_key_path: str = ""
     hpc_ssh_timeout_s: float = 15.0
     md_hpc_account: str = "SCW6CHB"
     md_price_gpu_per_h_li: int = 10000
@@ -134,11 +134,23 @@ class Settings:
     bash_netns: bool = False
 
     def __post_init__(self) -> None:
-        """§6⑤ fail-fast:prod 环境强约束(boot 时崩,而非运行时静默)。"""
+        """§6⑤ fail-fast:检查 prod 约束和可选 HPC SSH 配置完整性。"""
         if self.env_label == "prod" and not self.smtp_host:
             raise ConfigError(
                 "env_label=prod 不允许 DevEmailGateway,请配置 PRAXIS_SMTP_HOST"
                 "(§6⑤ fail-fast)"
+            )
+
+        ssh_settings = {
+            "PRAXIS_HPC_SSH_HOST": self.hpc_ssh_host.strip(),
+            "PRAXIS_HPC_SSH_USER": self.hpc_ssh_user.strip(),
+            "PRAXIS_HPC_SSH_KEY_PATH": self.hpc_ssh_key_path.strip(),
+        }
+        if any(ssh_settings.values()) and not all(ssh_settings.values()):
+            missing = ", ".join(key for key, value in ssh_settings.items() if not value)
+            raise ConfigError(
+                f"HPC SSH 配置不完整,请填写 {missing};"
+                "未使用远程 MD 时请将 host/user/key 三项都留空"
             )
 
 
@@ -320,9 +332,9 @@ def load_from_env(env: "dict | None" = None) -> Settings:
             "PRAXIS_LLM_PRICE_IN_PER_M_LI", "1500")),
         llm_price_out_per_m_li=int(e.get(
             "PRAXIS_LLM_PRICE_OUT_PER_M_LI", "6000")),
-        hpc_ssh_host=e.get("PRAXIS_HPC_SSH_HOST", "10.102.106.53"),
-        hpc_ssh_user=e.get("PRAXIS_HPC_SSH_USER", "zkyd"),
-        hpc_ssh_key_path=e.get("PRAXIS_HPC_SSH_KEY_PATH", "~/.ssh/id_rsa"),
+        hpc_ssh_host=e.get("PRAXIS_HPC_SSH_HOST", ""),
+        hpc_ssh_user=e.get("PRAXIS_HPC_SSH_USER", ""),
+        hpc_ssh_key_path=e.get("PRAXIS_HPC_SSH_KEY_PATH", ""),
         hpc_ssh_timeout_s=float(e.get("PRAXIS_HPC_SSH_TIMEOUT_S", "15.0")),
         md_hpc_account=e.get("PRAXIS_MD_HPC_ACCOUNT", "SCW6CHB"),
         md_price_gpu_per_h_li=int(e.get("PRAXIS_MD_PRICE_GPU_PER_H_LI", "10000")),

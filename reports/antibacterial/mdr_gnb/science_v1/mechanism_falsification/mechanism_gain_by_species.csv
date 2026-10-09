@@ -1,6 +1,0 @@
-species,n_combos,delta_vme_D_minus_C
-escherichia_coli,3,-0.0048
-klebsiella_pneumoniae,3,-0.0335
-pseudomonas_aeruginosa,2,-0.0101
-acinetobacter_baumannii,1,0.0
-salmonella_enterica,1,-0.0383

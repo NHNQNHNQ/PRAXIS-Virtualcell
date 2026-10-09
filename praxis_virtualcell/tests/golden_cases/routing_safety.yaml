@@ -1,0 +1,26 @@
+# Safety case:治理必须拒绝/降级/弃权,绝不 accept。守 KPI unsafe-accept=0。
+cases:
+  - case_id: bacteria_gene_expression_reject
+    description: 铁律—哺乳类 scRNA predictor 不适用微生物表达→abstain
+    input: {species: bacteria, perturbation_object: gene, target_output: expression, perturbation_targets: [b0720]}
+    expect: {engine: reject, disposition: abstain}
+  - case_id: yeast_gene_expression_reject
+    description: 酵母表达无适用 scRNA predictor→abstain
+    input: {species: yeast, perturbation_object: gene, target_output: expression, perturbation_targets: [YBR166C]}
+    expect: {engine: reject, disposition: abstain}
+  - case_id: mammalian_growth_downgrade
+    description: 哺乳类 growth 无机制 GEM 接入→downgrade(data-gated),不假装
+    input: {species: human, perturbation_object: gene, target_output: growth, perturbation_targets: [MYC]}
+    expect: {engine: gem_fba, disposition: downgrade, data_gated: true}
+  - case_id: human_ligand_expression_downgrade
+    description: 配体签名模型未接入→downgrade(data-gated)
+    input: {species: human, perturbation_object: ligand, target_output: expression, perturbation_targets: [TNF]}
+    expect: {engine: embedding, disposition: downgrade, data_gated: true}
+  - case_id: bacteria_state_reject
+    description: 微生物细胞状态无适用引擎→abstain
+    input: {species: bacteria, perturbation_object: gene, target_output: state, perturbation_targets: [b0720]}
+    expect: {engine: reject, disposition: abstain}
+  - case_id: bacteria_communication_reject
+    description: 微生物细胞通讯无适用引擎→abstain
+    input: {species: bacteria, perturbation_object: ligand, target_output: communication, perturbation_targets: [FLIC]}
+    expect: {engine: reject, disposition: abstain}

@@ -1,0 +1,14 @@
+schema_version: vc.pack.v0.1
+pack_id: invalid-path-traversal
+pack_version: 0.1.0
+taxon: {ontology_id: "NCBITaxon:9606", scientific_name: "Homo sapiens"}
+assembly: {name: GRCh38, accession: "GCF_000001405.40"}
+identity: {observation_key: cell_id, feature_key: gene_id}
+modality: {name: scRNA, ontology_id: "EFO:0008913"}
+feature_namespace: {name: EnsemblGene, version: GRCh38}
+assets:
+  - {id: outside, path: ../outside_asset.txt, media_type: text/plain, sha256: 13b24455acfc777a7ccacf8a5e7a0e83883d719bbe98ce78af5ef2e248533bf9, size_bytes: 22}
+condition: {field: condition, values: [control], control: control}
+split: {field: split, strategy: predefined, values: [train]}
+provenance: {source: fixture, created_by: PRAXIS-VirtualCell, citation: "none"}
+license: {id: CC0-1.0, name: CC0}

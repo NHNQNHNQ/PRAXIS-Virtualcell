@@ -1,0 +1,37 @@
+# M1-M8 支持度矩阵(human)。support ∈ strong/medium/weak/unsupported。
+# 权威适用性/词汇留 model_applicability.yaml + route_table;本文件只加"模块维度"视图。
+species: human
+modules:
+  membrane_system:
+    support: weak
+    reason: 暂无膜系统专用引擎;仅脂质通路规则/transporter 注释间接证据
+    tools: [lipid_pathway_rules, transporter_annotation]
+  genetic_hub:
+    support: strong
+    reason: 原生 scRNA predictor(donor_predictor);Perturb-seq 领地
+    models: [donor_predictor]
+  mitochondrial_energy_metabolism:
+    support: medium
+    reason: 无机制 GEM 接入;表达层代谢通路 tendency 评分(pathway_scoring)
+    models: [pathway_scoring]
+  cytoplasmic_metabolism:
+    support: medium
+    reason: 哺乳类无机制 GEM;pathway_scoring tendency
+    models: [pathway_scoring]
+  biosynthetic_network:
+    support: weak
+    reason: 暂无蛋白丰度/折叠预测引擎;未来 AlphaFold/PLM
+    tools: [ribosome_upr_gene_set]
+  cytoskeletal_framework:
+    support: weak
+    reason: spatial_niche 仅间接;无 morphology foundation model
+    models: [spatial_niche]
+  stress_processor:
+    support: medium
+    reason: state_scoring + 药物签名(LINCS)覆盖应激状态
+    models: [state_scoring, embedding]
+  degradation_machinery:
+    support: weak
+    reason: 暂无降解通路引擎;proteasome/autophagy 基因集规则
+    tools: [proteostasis_gene_set]
+biological_mismatch: []

@@ -1,0 +1,69 @@
+# Version-control and local tooling state
+.git
+.github
+.claude
+.playwright-mcp
+.vscode
+.idea
+
+# Credentials and mutable runtime state must never reach a builder
+.env
+.env.*
+**/.env
+**/.env.*
+secrets
+**/secrets
+runs
+**/runs
+*.pem
+*.key
+*.log
+*.local
+**/*.pem
+**/*.key
+**/*.log
+**/*.local
+
+# Python build/test artifacts
+.venv
+venv
+__pycache__
+**/__pycache__
+*.py[cod]
+.pytest_cache
+.ruff_cache
+.mypy_cache
+*.egg-info
+**/*.egg-info
+build
+dist
+
+# Frontend dependencies and generated/test artifacts
+# Retain the inherited frontend path explicitly as well as the repo-wide rule.
+frontend/node_modules
+**/node_modules
+praxis_vc_react/dist
+praxis_vc_react/test-results
+praxis_vc_react/playwright-report
+praxis_vc_react/.vite
+
+# Root research data contains multi-GB ignored inputs and is not a release
+# dependency. Reviewed default resources live under praxis_virtualcell/data.
+data
+examples
+brains
+
+# Source-only material not copied into the release stages
+docs
+tests
+praxis_virtualcell/tests
+_audit
+reports
+deploy/hpc_submit_account.toml
+进度与下一步.md
+string.jpeg
+
+# OS metadata
+.DS_Store
+**/.DS_Store
+**/._*

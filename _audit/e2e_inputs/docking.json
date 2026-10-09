@@ -1,0 +1,217 @@
+{
+  "vina_gnina_dock": {
+    "brain": "dock",
+    "contract_keys": [
+      "redock_self_test",
+      "best_pose",
+      "n_poses"
+    ],
+    "inputs": {
+      "receptor_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+      "ligand_smiles": "Cc1ccc(cc1Nc2nccc(n2)c3cccnc3)NC(=O)c4ccc(cc4)CN5CCN(CC5)C",
+      "box_center": [
+        22.5,
+        4.2,
+        17.3
+      ],
+      "box_size": [
+        22,
+        22,
+        22
+      ],
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "energy_range": 4.0,
+      "redock_self_test": false,
+      "use_gnina": false,
+      "gnina_remote": false,
+      "n_seeds": 1,
+      "seed": 42,
+      "simulate": false
+    },
+    "skip": false,
+    "_note": "1iep = Abl+imatinib STI 晶体结构。box_center 取 STI 质心近似值。redock_self_test=false + use_gnina=false 避免 e2e 需外部 GPU/crystal SDF；只跑 Vina 本地路径验 real() 主逻辑。"
+  },
+  "covalent_docking": {
+    "brain": "dock",
+    "contract_keys": [
+      "best_affinity",
+      "n_covalent_compatible_poses",
+      "runtime_sec"
+    ],
+    "inputs": {
+      "receptor_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+      "ligand_smiles": "C=CC(=O)Nc1ccc(cc1)C(=O)Nc2cccc(c2)C#N",
+      "reactive_residue": "Cys154",
+      "warhead_pattern": "acrylamide",
+      "distance_constraint_A": 2.0,
+      "off_target_cys_panel": false,
+      "docker": "vina_covalent",
+      "simulate": false,
+      "ligand_sdf": "/home/zkyd/data1/praxis2-e2e-inputs/covalent_lig.sdf"
+    },
+    "skip": false,
+    "_note": "status=skeleton;run.py real() 尚未实现,harness 预期返回 not-implemented / N-A。ligand 为丙烯酰胺 warhead 示例配体;Cys154 为占位真值(1iep 实际为 Abl,不含 Cys12,但 run.py skeleton 不校验残基存在性)。"
+  },
+  "flexpepdock_peptide": {
+    "brain": "dock",
+    "contract_keys": [
+      "best_affinity",
+      "poses",
+      "runtime_sec"
+    ],
+    "inputs": {
+      "receptor_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+      "peptide_sequence": "ACDEFG",
+      "binding_cleft_residues": [
+        250,
+        315,
+        350,
+        380
+      ],
+      "peptide_secondary_structure": "extended",
+      "n_trajectories": 200,
+      "receptor_flex_residues": [
+        250,
+        315,
+        350,
+        380
+      ],
+      "post_dock_md_check": false,
+      "simulate": false
+    },
+    "skip": false,
+    "_note": "status=skeleton;run.py real() 尚未实现,harness 预期 N-A。peptide_sequence 用 6aa 占位序列(长度符合 ≤20aa gate);binding_cleft_residues 取 Abl kinase activation loop 近似残基号。"
+  },
+  "induced_fit_docking": {
+    "brain": "dock",
+    "contract_keys": [
+      "best_affinity",
+      "poses",
+      "runtime_sec"
+    ],
+    "inputs": {
+      "receptor_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+      "ligand_smiles": "Cc1ccc(cc1Nc2nccc(n2)c3cccnc3)NC(=O)c4ccc(cc4)CN5CCN(CC5)C",
+      "binding_site_residues_5A": [
+        250,
+        315,
+        350,
+        380,
+        396,
+        402
+      ],
+      "flex_residues": [
+        250,
+        315,
+        350,
+        380
+      ],
+      "n_initial_poses": 20,
+      "max_flex_residues": 6,
+      "tool": "rosetta_ligand",
+      "remote_gpu": false,
+      "simulate": false
+    },
+    "skip": false,
+    "_note": "status=skeleton;run.py real() 尚未实现。tool=rosetta_ligand(开源路径);Schrödinger IFD-MD 商业,预期 N-A。给真输入让 harness 真跑出 N-A 证据。"
+  },
+  "pose_buster_validate": {
+    "brain": "dock",
+    "contract_keys": [
+      "overall_pass",
+      "failed_checks",
+      "per_check"
+    ],
+    "inputs": {
+      "receptor_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+      "ligand_sdf_or_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/imatinib.sdf",
+      "checks_to_run": [
+        "all"
+      ],
+      "simulate": false
+    },
+    "skip": false,
+    "_note": "status=usable;run.py real() 完整实现。ligand_sdf_or_pdb 指向 1iep STI 配体 SDF(与受体文件同目录,部署时一并放置)。real() 会校验文件存在性;文件缺失时返回 ok=false + FileNotFoundError,harness 记 ERROR 而非 SKIP。"
+  },
+  "protein_na_docking": {
+    "brain": "dock",
+    "contract_keys": [
+      "best_affinity",
+      "poses",
+      "runtime_sec"
+    ],
+    "inputs": {
+      "protein_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+      "na_3d_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/rna_placeholder.pdb",
+      "na_sequence": "ACGUACGU",
+      "na_strandedness": "ss",
+      "sequence_specificity": "random",
+      "expected_motif_or_PAM": "",
+      "tool": "hdock",
+      "remote_gpu": false,
+      "simulate": false
+    },
+    "skip": false,
+    "_note": "status=skeleton;run.py real() 尚未实现,harness 预期 N-A。na_3d_pdb 为占位 PDB(harness 不校验其物理存在性,skeleton real() 返回 not-implemented 前不读文件)。na_sequence 取 8nt 随机 RNA。"
+  },
+  "redock_benchmark": {
+    "brain": "dock",
+    "contract_keys": [
+      "top1_le_2A_rate",
+      "passes_threshold",
+      "n_complexes_tested"
+    ],
+    "inputs": {
+      "receptor_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+      "crystal_complexes": [
+        {
+          "complex_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+          "ligand_chain": "B",
+          "ligand_resname": "STI"
+        }
+      ],
+      "docker": "vina_gnina_dock",
+      "min_top1_le_2A_rate": 0.3,
+      "n_complexes_required": 1,
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "simulate": false
+    },
+    "skip": false,
+    "_note": "status=skeleton;run.py real() 已有 vina 循环实现(非 pure stub)。用 1iep 自身做单复合物 self-redock;n_complexes_required=1 降为最小测试集。ligand_chain/ligand_resname 按 1iep 晶体 PDB 头信息填(STI=imatinib)。"
+  },
+  "snugdock_antibody": {
+    "brain": "dock",
+    "contract_keys": [
+      "best_affinity",
+      "poses",
+      "runtime_sec"
+    ],
+    "inputs": {
+      "start_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+      "n_decoys": 10,
+      "cdr_h3_length": 12,
+      "simulate": false
+    },
+    "skip": false,
+    "_note": "run.py real() 使用 start_pdb(合并 Ab+Ag PDB),与 SKILL.md 分字段契约不同。status=usable but 依赖 PyRosetta license;harness 预期在 staging 上因 PyRosetta 缺失返回 EnvUnavailable / N-A。n_decoys=10 最小跑量。1iep 非抗体复合物,仅作占位——real() 在读文件后进 PyRosetta 时报错,不是 payload 解析错误。"
+  },
+  "af3_complex_predict": {
+    "brain": "dock",
+    "contract_keys": [
+      "model_path",
+      "plddt_mean",
+      "iptm"
+    ],
+    "inputs": {
+      "input_path": "/home/zkyd/data1/praxis2-e2e-inputs/boltz_input.yaml",
+      "use_msa_server": false,
+      "recycling_steps": 3,
+      "diffusion_samples": 1,
+      "simulate": false
+    },
+    "skip": true,
+    "_note": "status=usable but GPU 权重重型(Boltz-1 / AF3 params 数十 GB)。run.py real() 使用 input_path(boltz YAML 格式),非 SKILL.md 的 receptor_sequences/ligand_input。标 skip=true,harness 记 SKIPPED 跳过实际执行。boltz_input.yaml 部署阶段与其他 e2e 输入文件一并放置。"
+  }
+}

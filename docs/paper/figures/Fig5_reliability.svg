@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="467.15545pt" height="230.616pt" viewBox="0 0 467.15545 230.616" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-06-14T15:23:42.844283</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.9, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 230.616 
+L 467.15545 230.616 
+L 467.15545 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 113.542321 54.091317 
+Q 129.739898 48.279929 144.885122 42.846104 
+" clip-path="url(#pb26e9f6d9c)" style="fill: none; stroke: #4d4d4d; stroke-linecap: round"/>
+    <path d="M 141.77683 42.473922 
+L 144.885122 42.846104 
+L 142.722401 45.109428 
+z
+" clip-path="url(#pb26e9f6d9c)" style="fill: #4d4d4d; stroke: #4d4d4d; stroke-linecap: round"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 270.340049 54.76752 
+Q 278.385578 54.76752 285.313074 54.76752 
+" clip-path="url(#pb26e9f6d9c)" style="fill: none; stroke: #4d4d4d; stroke-linecap: round"/>
+    <path d="M 282.513074 53.36752 
+L 285.313074 54.76752 
+L 282.513074 56.16752 
+z
+" clip-path="url(#pb26e9f6d9c)" style="fill: #4d4d4d; stroke: #4d4d4d; stroke-linecap: round"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 206.655283 95.084476 
+Q 182.469762 119.072296 169.154718 149.207562 
+" clip-path="url(#pb26e9f6d9c)" style="fill: none; stroke: #e28e2c; stroke-linecap: round"/>
+    <path d="M 171.566909 147.212233 
+L 169.154718 149.207562 
+L 169.005769 146.080612 
+z
+" clip-path="url(#pb26e9f6d9c)" style="fill: #e28e2c; stroke: #e28e2c; stroke-linecap: round"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 343.449085 90.936166 
+Q 314.538702 127.655006 275.061492 150.510701 
+" clip-path="url(#pb26e9f6d9c)" style="fill: none; stroke: #9a9a9a; stroke-linecap: round"/>
+    <path d="M 278.186134 150.319369 
+L 275.061492 150.510701 
+L 276.783211 147.896188 
+z
+" clip-path="url(#pb26e9f6d9c)" style="fill: #9a9a9a; stroke: #9a9a9a; stroke-linecap: round"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 15.315552 76.38912 
+L 111.577248 76.38912 
+Q 111.6576 76.38912 111.6576 76.345877 
+L 111.6576 33.189163 
+Q 111.6576 33.14592 111.577248 33.14592 
+L 15.315552 33.14592 
+Q 15.2352 33.14592 15.2352 33.189163 
+L 15.2352 76.345877 
+Q 15.2352 76.38912 15.315552 76.38912 
+z
+" clip-path="url(#pb26e9f6d9c)" style="fill: #0f4d92; stroke: #272727; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 147.896352 50.4432 
+L 268.263648 50.4432 
+Q 268.344 50.4432 268.344 50.399957 
+L 268.344 24.540523 
+Q 268.344 24.49728 268.263648 24.49728 
+L 147.896352 24.49728 
+Q 147.816 24.49728 147.816 24.540523 
+L 147.816 50.399957 
+Q 147.816 50.4432 147.896352 50.4432 
+z
+" clip-path="url(#pb26e9f6d9c)" style="fill: #e28e2c; stroke: #e28e2c; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 5.3px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(168.164789 49.990675)">all-rejected · species-unsupported</text>
+    <text style="font-size: 5.3px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(158.504297 55.736041)">core-predictor-failed * · disagreement &gt; τ *</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 147.896352 89.36208 
+L 268.263648 89.36208 
+Q 268.344 89.36208 268.344 89.318837 
+L 268.344 67.783723 
+Q 268.344 67.74048 268.263648 67.74048 
+L 147.896352 67.74048 
+Q 147.816 67.74048 147.816 67.783723 
+L 147.816 89.318837 
+Q 147.816 89.36208 147.896352 89.36208 
+z
+" clip-path="url(#pb26e9f6d9c)" style="fill: #9a9a9a; stroke: #272727; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 5.3px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; text-anchor: middle; fill: #272727" x="208.08" y="93.976695" transform="rotate(-0 208.08 93.976695)">disagreement * · cell-type-unsupported *</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 6.4px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; text-anchor: middle; fill: #4d4d4d" x="208.08" y="18.54672" transform="rotate(-0 208.08 18.54672)">ReliabilityAgent</text>
+   </g>
+   <g id="patch_9">
+    <path d="M 288.512352 87.19992 
+L 400.844448 87.19992 
+Q 400.9248 87.19992 400.9248 87.156677 
+L 400.9248 22.378363 
+Q 400.9248 22.33512 400.844448 22.33512 
+L 288.512352 22.33512 
+Q 288.432 22.33512 288.432 22.378363 
+L 288.432 87.156677 
+Q 288.432 87.19992 288.512352 87.19992 
+z
+" clip-path="url(#pb26e9f6d9c)" style="fill: #ffffff; stroke: #0f4d92; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 55.491552 180.1728 
+L 175.858848 180.1728 
+Q 175.9392 180.1728 175.9392 180.129557 
+L 175.9392 154.270123 
+Q 175.9392 154.22688 175.858848 154.22688 
+L 55.491552 154.22688 
+Q 55.4112 154.22688 55.4112 154.270123 
+L 55.4112 180.129557 
+Q 55.4112 180.1728 55.491552 180.1728 
+z
+" clip-path="url(#pb26e9f6d9c)" style="fill: #e28e2c; stroke: #e28e2c; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 196.107552 180.1728 
+L 316.474848 180.1728 
+Q 316.5552 180.1728 316.5552 180.129557 
+L 316.5552 154.270123 
+Q 316.5552 154.22688 316.474848 154.22688 
+L 196.107552 154.22688 
+Q 196.0272 154.22688 196.0272 154.270123 
+L 196.0272 180.129557 
+Q 196.0272 180.1728 196.107552 180.1728 
+z
+" clip-path="url(#pb26e9f6d9c)" style="fill: #9a9a9a; stroke: #272727; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 328.688352 180.1728 
+L 400.844448 180.1728 
+Q 400.9248 180.1728 400.9248 180.129557 
+L 400.9248 154.270123 
+Q 400.9248 154.22688 400.844448 154.22688 
+L 328.688352 154.22688 
+Q 328.608 154.22688 328.608 154.270123 
+L 328.608 180.129557 
+Q 328.608 180.1728 328.688352 180.1728 
+z
+" clip-path="url(#pb26e9f6d9c)" style="fill: #e3e3e3; stroke: #272727; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 5.8px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; text-anchor: middle; fill: #4d4d4d" x="208.08" y="135.708881" transform="rotate(-0 208.08 135.708881)">ReportAgent — separated so a downgrade is never misread as an abstention</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 5.2px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; text-anchor: start; fill: #c0392b" x="15.2352" y="211.78854" transform="rotate(-0 15.2352 211.78854)">*  declarative mechanism: proven activatable by hand-written unit tests; does not fire in the offline mock end-to-end path (finding_w6). Real activation awaits a real disagreeing / failable predictor.</text>
+   </g>
+   <g id="text_6">
+    <text style="font-weight: 700; font-size: 5.6px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #ffffff" transform="translate(34.199525 41.819511)">EnsembleCoordinator</text>
+    <text style="font-weight: 700; font-size: 5.6px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #ffffff" transform="translate(63.4464 47.534267)"/>
+    <text style="font-weight: 700; font-size: 5.6px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #ffffff" transform="translate(33.804463 53.249023)">model disagreement =</text>
+    <text style="font-weight: 700; font-size: 5.6px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #ffffff" transform="translate(22.365588 59.037279)">mean pairwise cosine distance</text>
+    <text style="font-weight: 700; font-size: 5.6px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #ffffff" transform="translate(30.1509 64.752036)">zero-vector pairs audited</text>
+    <text style="font-weight: 700; font-size: 5.6px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #ffffff" transform="translate(22.138525 70.545279)">threshold τ = 0.5 (configurable)</text>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="208.08" y="39.02274" transform="rotate(-0 208.08 39.02274)">ABSTAIN triggers</text>
+   </g>
+   <g id="text_8">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="208.08" y="80.10378" transform="rotate(-0 208.08 80.10378)">DOWNGRADE triggers</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 5.2px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(308.411244 34.639051)">CriticAgent  ·  7 trace invariants</text>
+    <text style="font-size: 5.2px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(344.6784 40.013861)"/>
+    <text style="font-size: 5.2px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(309.421588 45.400614)">1  retrieve-before-predict order</text>
+    <text style="font-size: 5.2px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(314.184056 50.732239)">2  no rejected in ensemble</text>
+    <text style="font-size: 5.2px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(305.657275 56.179929)">3  prediction present if not abstain</text>
+    <text style="font-size: 5.2px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(307.5374 61.493801)">4  rules referenced if not abstain</text>
+    <text style="font-size: 5.2px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(318.6654 66.807673)">5  uncertainty reported</text>
+    <text style="font-size: 5.2px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(305.946525 72.200236)">6  species supported in ensemble</text>
+    <text style="font-size: 5.2px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(304.115556 77.586989)">7  abstain iff no surviving prediction</text>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 5.6px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #ffffff" transform="translate(84.7107 165.716781)">report.abstain_reasons</text>
+    <text style="font-weight: 700; font-size: 5.6px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #ffffff" transform="translate(90.4717 171.512649)">(true refusals only)</text>
+   </g>
+   <g id="text_11">
+    <text style="font-weight: 700; font-size: 5.6px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #ffffff" transform="translate(220.1957 165.681343)">report.downgrade_reasons</text>
+    <text style="font-weight: 700; font-size: 5.6px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #ffffff" transform="translate(212.727575 171.548087)">(reliability lowered, still predicts)</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 5px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(350.034759 163.354801)">caution_flags</text>
+    <text style="font-size: 5px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(341.421088 168.522887)">model_disagreement</text>
+    <text style="font-size: 5px; font-family: 'Arial', 'Helvetica', 'DejaVu Sans', 'Liberation Sans', sans-serif; fill: #272727" transform="translate(347.8164 173.690973)">critic_violations</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pb26e9f6d9c">
+   <rect x="7.2" y="7.2" width="401.76" height="216.216"/>
+  </clipPath>
+ </defs>
+</svg>

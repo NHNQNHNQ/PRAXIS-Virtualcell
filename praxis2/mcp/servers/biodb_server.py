@@ -1,7 +1,7 @@
 """MCP stdio server — 生物数据库实时查询(PubMed/UniProt/PDB/ChEMBL/PubChem)。
 
 让 agent 实时核实真实文献/序列/结构/化合物,补强反幻觉(不编 DOI、能查真实
-UniProt 序列/PDB 结构/ChEMBL 化合物元数据)。纯 urllib 标准库,不依赖 npx,规避 .53
+UniProt 序列/PDB 结构/ChEMBL 活性)。纯 urllib 标准库,不依赖 npx,规避 .53
 node 约束。
 
 启动(praxis2 env python,有 mcp lib):

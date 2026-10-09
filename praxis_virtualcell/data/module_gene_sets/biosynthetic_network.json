@@ -1,0 +1,10 @@
+{
+  "module": "M5",
+  "module_id": "biosynthetic_network",
+  "source": "project-authored advisory mapping informed by public GO/Reactome concepts",
+  "license": "MIT (this qualitative mapping only)",
+  "note": "rule-based advisory only; qualitative membership, no numeric delta",
+  "gene_set": ["RPL5", "RPL11", "RPL23", "RPS3", "RPS6", "RPS19", "XBP1", "ATF6", "ERN1",
+               "HSPA5", "EIF2AK3", "DDIT3", "HSP90AA1", "CALR", "EIF4E", "EIF2S1", "MTOR",
+               "PDIA3"]
+}

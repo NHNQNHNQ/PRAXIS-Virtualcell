@@ -1,5 +1,5 @@
-recursive-include praxis_virtualcell *.yaml *.json *.md
-prune praxis_virtualcell/mdr_gnb/tests
-prune praxis_virtualcell/mdr_gnb/tests_real
+recursive-include praxis_virtualcell *.yaml *.json *.txt *.md *.gz *.h5ad
+recursive-include praxis_vc_react/dist *
+prune praxis_virtualcell/tests
 global-exclude ._*
 global-exclude .DS_Store

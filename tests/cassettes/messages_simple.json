@@ -1,0 +1,9 @@
+{
+  "id": "msg_01",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-opus-4-7",
+  "content": [{"type": "text", "text": "hello from cassette"}],
+  "stop_reason": "end_turn",
+  "usage": {"input_tokens": 10, "output_tokens": 5}
+}

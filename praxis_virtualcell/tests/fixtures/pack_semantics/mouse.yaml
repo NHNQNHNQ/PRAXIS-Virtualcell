@@ -1,0 +1,47 @@
+schema_version: vc.pack.v0.2
+pack_id: p4-mouse-tiny
+pack_version: 0.2.0
+taxon: {ontology_id: "NCBITaxon:10090", scientific_name: "Mus musculus"}
+assembly: {name: GRCm39, accession: "GCF_000001635.27"}
+identity: {observation_key: observation_id, feature_key: var_names}
+modality: {name: scRNA, ontology_id: "EFO:0008913"}
+feature_namespace: {name: EnsemblGene, version: GRCm39}
+feature_semantics:
+  id_source: var_names
+  id_format: ensembl_gene
+  symbol_field: feature_symbol
+cell_semantics:
+  identity: cell_identity_id
+  state: [cell_state_id]
+  context: [tissue_id]
+  local_terms:
+    - {id: "VCSTATE:resting", role: state, label: resting, definition: "Resting state for the tiny mouse fixture."}
+conditions:
+  field: condition_id
+  values: ["condition:mouse-train-control", "condition:mouse-train-perturbed", "condition:mouse-test-control", "condition:mouse-test-perturbed"]
+  matched_control_field: matched_control_id
+  dose: {value_field: dose_value, unit_field: dose_unit}
+  time: {value_field: time_value, unit_field: time_unit}
+perturbations:
+  field: perturbation_id
+  values:
+    - {id: "perturbation:mouse-train-control", kind: control, targets: []}
+    - {id: "perturbation:Trp53-KO", kind: genetic, targets: ["ENSMUSG00000059552"]}
+    - {id: "perturbation:mouse-test-control", kind: control, targets: []}
+    - {id: "perturbation:Myc-KO", kind: genetic, targets: ["ENSMUSG00000022346"]}
+split:
+  name: target-holdout-v1
+  field: split
+  strategy: predefined
+  values: [train, test]
+  leakage_guard: [donor_id, condition_id, perturbation_id, target_ids]
+provenance: {source: "synthetic P4 mouse fixture", created_by: PRAXIS-VirtualCell, citation: none}
+license: {id: CC0-1.0, name: CC0}
+fixture_features:
+  - {id: "ENSMUSG00000059552", feature_symbol: Trp53}
+  - {id: "ENSMUSG00000022346", feature_symbol: Myc}
+fixture_observations:
+  - {obs_name: mouse-1, observation_id: mouse-1, cell_identity_id: "CL:0000540", cell_state_id: "VCSTATE:resting", tissue_id: "UBERON:0000955", condition_id: "condition:mouse-train-control", perturbation_id: "perturbation:mouse-train-control", matched_control_id: "condition:mouse-train-control", dose_value: 0, dose_unit: "1", time_value: 24, time_unit: h, donor_id: mouse-train, split: train}
+  - {obs_name: mouse-2, observation_id: mouse-2, cell_identity_id: "CL:0000540", cell_state_id: "VCSTATE:resting", tissue_id: "UBERON:0000955", condition_id: "condition:mouse-train-perturbed", perturbation_id: "perturbation:Trp53-KO", matched_control_id: "condition:mouse-train-control", dose_value: 1, dose_unit: "1", time_value: 24, time_unit: h, donor_id: mouse-train, split: train}
+  - {obs_name: mouse-3, observation_id: mouse-3, cell_identity_id: "CL:0000540", cell_state_id: "VCSTATE:resting", tissue_id: "UBERON:0000955", condition_id: "condition:mouse-test-control", perturbation_id: "perturbation:mouse-test-control", matched_control_id: "condition:mouse-test-control", dose_value: 0, dose_unit: "1", time_value: 24, time_unit: h, donor_id: mouse-test, split: test}
+  - {obs_name: mouse-4, observation_id: mouse-4, cell_identity_id: "CL:0000540", cell_state_id: "VCSTATE:resting", tissue_id: "UBERON:0000955", condition_id: "condition:mouse-test-perturbed", perturbation_id: "perturbation:Myc-KO", matched_control_id: "condition:mouse-test-control", dose_value: 1, dose_unit: "1", time_value: 24, time_unit: h, donor_id: mouse-test, split: test}

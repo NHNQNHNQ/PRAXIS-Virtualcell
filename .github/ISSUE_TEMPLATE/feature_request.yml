@@ -1,0 +1,25 @@
+name: Feature request
+description: Propose a scoped contract, product, or engineering change.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and exact scope
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Minimal proposal
+      description: State contracts, non-goals, fail-closed behavior, and compatibility impact.
+    validations:
+      required: true
+  - type: dropdown
+    id: external
+    attributes:
+      label: Does this require external data, compute, experiments, promotion, release, or deployment?
+      options: ["No", "Yes — separate authorization required"]
+    validations:
+      required: true

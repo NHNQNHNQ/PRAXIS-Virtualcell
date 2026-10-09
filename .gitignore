@@ -1,36 +1,55 @@
-._*
-.DS_Store
+.venv/
 __pycache__/
-*.py[cod]
+*.pyc
 .pytest_cache/
 .ruff_cache/
-.venv/
-.venv
-*.egg-info/
-build/
-dist/
-*.whl
 .env
+*.egg-info/
+# v0.8 打包:wheel/sdist 构建产物(pip wheel / python -m build)不入库
+build/
+/dist/
+*.whl
+praxis_vc_react/dist/
+praxis_vc_react/node_modules/
+._*
+.DS_Store
+deploy/hpc_submit_account.toml
+
+# M9:frontend(v2 方案 B v2-email-auth)
+frontend/node_modules/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+.gstack/
+
+# v0.4 W3:LINCS L1000 原始签名库(大,~30MB)—— 只提交 curated_subset.json + provenance
+data/drug_signatures/*.txt
+
+# v0.4 W5.2:cell-state 大数据(pertpy 缓存在 home,不入库);只提交 subset+provenance
+data/cellstate/*.h5ad
+
+data/*.h5ad
+
+# squidpy/scanpy 缓存数据(大),只提交 subset
+data/anndata/
+data/paul15/
+
+# v0.6 job 输出
+runs/
 *.key
 secrets/
-node_modules/
-models/
-local/
-runs/
-.staging_agent_tests/
-data/mdr_gnb/
-data/antibacterial/
-data/organisms/
-reports/llm_live/
-research/mdr_gnb/mic_discovery/
-*.joblib
-*.pt
-*.npy
-*.npz
-*.parquet
-*.xlsx
-*.fna
-*.gff3
-*.zip
-*.tar.gz
-deploy/hpc_submit_account.toml
+
+# P10.D:phase10 junit 测试报告(生成物,同 dist 不入库)
+reports/phase10/junit-*.xml
+reports/phase10/trace_bundle.json
+
+# D-B playwright 生成物
+praxis_vc_react/test-results/
+praxis_vc_react/playwright-report/
+praxis_vc_react/blob-report/
+
+# 浏览器 MCP 会话日志/页面快照(A0 已 checksum 归档,非确定性项目资产)
+.playwright-mcp/
+
+# Generated raw host audit output contains local machine and network metadata.
+_audit/host_raw.txt
+_audit/host_inventory.json

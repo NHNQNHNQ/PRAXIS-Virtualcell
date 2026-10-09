@@ -1,0 +1,439 @@
+[
+  {
+    "skill": "amplicon_minimal_real",
+    "brain": "microbiome",
+    "verdict": "RED",
+    "evidence": {
+      "execution_plan": {
+        "brain": "microbiome",
+        "skill": "amplicon_minimal_real",
+        "host_env": "praxis-microbiome-dada2-r",
+        "status": "ready",
+        "skill_md_path": "brains/microbiome/skills/workflows/amplicon_minimal_real/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "fastq_dir": "/data/microbiome/amplicon/paired_fastq",
+          "_note_fastq_dir": "含 paired-end 16S amplicon FASTQ 的目录,文件名须含 _1.fastq/_2.fastq;无真实数据则 INCOMPLETE",
+          "out_dir": "/tmp/dada2_test",
+          "timeout_s": 7200,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": false,
+      "error": "ssh/远端命令失败(rc=127)",
+      "stderr": "bash: line 1: python: command not found\n",
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": "ssh/远端命令失败(rc=127)"
+  },
+  {
+    "skill": "cultured_isolate_wgs_real",
+    "brain": "microbiome",
+    "verdict": "INCOMPLETE",
+    "evidence": {
+      "execution_plan": {
+        "brain": "microbiome",
+        "skill": "cultured_isolate_wgs_real",
+        "host_env": "praxis-microbiome-kraken",
+        "status": "ready",
+        "skill_md_path": "brains/microbiome/skills/workflows/cultured_isolate_wgs_real/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "fastq_1": "/data/microbiome/isolate/sample_1.fastq.gz",
+          "_note_fastq_1": "单菌 WGS paired-end R1 FASTQ;需配套 fastq_2 + kraken2 DB;无真实数据则 INCOMPLETE",
+          "fastq_2": "/data/microbiome/isolate/sample_2.fastq.gz",
+          "_note_fastq_2": "单菌 WGS R2 FASTQ",
+          "db_path": "/data/db/kraken2_standard",
+          "_note_db_path": "kraken2 标准 DB 路径;staging 上是否有此 DB 需确认",
+          "out_dir": "/tmp/kraken2_isolate",
+          "threads": 8,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "fastq_1 不存在: '/data/microbiome/isolate/sample_1.fastq.gz'",
+        "diagnostics": {
+          "brain": "microbiome",
+          "skill": "cultured_isolate_wgs_real",
+          "archetype": "microbiome_pipeline",
+          "tool": "kraken2+bracken",
+          "out_dir": "/tmp/kraken2_isolate"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "da_compositional_real",
+    "brain": "microbiome",
+    "verdict": "DONE_real",
+    "evidence": {
+      "execution_plan": {
+        "brain": "microbiome",
+        "skill": "da_compositional_real",
+        "host_env": "praxis-microbiome-da-v2",
+        "status": "ready",
+        "skill_md_path": "brains/microbiome/skills/workflows/da_compositional_real/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "abundance_csv": "/home/zkyd/data1/praxis2-e2e-inputs/da/da_abundance.csv",
+          "_note_abundance_csv": "合成 24 样本(Healthy/Disease 各 12)× 12 taxa,taxon_1..3 在 Disease 升高/4..6 降低(/tmp/gen_da_csv.py 确定性生成,rsync 到 staging)",
+          "metadata_csv": "/home/zkyd/data1/praxis2-e2e-inputs/da/da_metadata.csv",
+          "_note_metadata_csv": "含 group 列(Healthy/Disease)的样本元数据",
+          "group_col": "group",
+          "method": "maaslin2",
+          "_note_method": "da-v2 env 有 Maaslin2 但 phyloseq=FALSE(ancombc 路径 library(phyloseq) 会挂);走 maaslin2 路径",
+          "out_dir": "/tmp/da_test",
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": true,
+        "skill_id": "da_compositional_real",
+        "n_samples": 0,
+        "taxonomy_table": "/tmp/da_test/da_results.csv",
+        "diversity_metrics": {
+          "shannon": 0.0,
+          "observed_otus": 12
+        },
+        "runtime_sec": 1.68,
+        "diagnostics": {
+          "brain": "microbiome",
+          "skill": "da_compositional_real",
+          "archetype": "microbiome_pipeline",
+          "tool": "maaslin2",
+          "out_dir": "/tmp/da_test",
+          "subprocess": {
+            "wall_sec": 1.68,
+            "rc": 0
+          }
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "humann_functional",
+    "brain": "microbiome",
+    "verdict": "INCOMPLETE",
+    "evidence": {
+      "execution_plan": {
+        "brain": "microbiome",
+        "skill": "humann_functional",
+        "host_env": "praxis-microbiome-humann",
+        "status": "ready",
+        "skill_md_path": "brains/microbiome/skills/workflows/humann_functional/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "input_fastq": "/data/microbiome/shotgun/sample_merged.fastq.gz",
+          "_note_input_fastq": "shotgun 宏基因组单端 FASTQ(humann 要求 merged R1+R2 或单端);无真实测序数据则 INCOMPLETE",
+          "out_dir": "/tmp/humann_test",
+          "threads": 8,
+          "timeout_s": 14400,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "需要 input_fastq",
+        "diagnostics": {
+          "brain": "microbiome",
+          "skill": "humann_functional",
+          "archetype": "microbiome_pipeline",
+          "tool": "humann",
+          "out_dir": "/tmp/humann_test"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "humann_functional_real",
+    "brain": "microbiome",
+    "verdict": "INCOMPLETE",
+    "evidence": {
+      "execution_plan": {
+        "brain": "microbiome",
+        "skill": "humann_functional_real",
+        "host_env": "praxis-microbiome-humann",
+        "status": "ready",
+        "skill_md_path": "brains/microbiome/skills/workflows/humann_functional_real/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "input_fastq": "/data/microbiome/shotgun/sample_merged.fastq.gz",
+          "_note_input_fastq": "与 humann_functional 相同实现;需 shotgun FASTQ + humann DB;无真实测序数据则 INCOMPLETE",
+          "out_dir": "/tmp/humann_real_test",
+          "threads": 8,
+          "timeout_s": 14400,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "需要 input_fastq",
+        "diagnostics": {
+          "brain": "microbiome",
+          "skill": "humann_functional_real",
+          "archetype": "microbiome_pipeline",
+          "tool": "humann",
+          "out_dir": "/tmp/humann_real_test"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "its_fungal_real",
+    "brain": "microbiome",
+    "verdict": "INCOMPLETE",
+    "evidence": {
+      "execution_plan": {
+        "brain": "microbiome",
+        "skill": "its_fungal_real",
+        "host_env": "praxis-microbiome-kraken",
+        "status": "ready",
+        "skill_md_path": "brains/microbiome/skills/workflows/its_fungal_real/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "fastq_1": "/data/microbiome/its/its_sample_1.fastq.gz",
+          "_note_fastq_1": "ITS 扩增子 R1 FASTQ;需 ITS-专用 kraken2 DB(UNITE 构建);无则 INCOMPLETE",
+          "fastq_2": "/data/microbiome/its/its_sample_2.fastq.gz",
+          "_note_fastq_2": "ITS R2 FASTQ",
+          "db_path": "/data/db/kraken2_unite_fungi",
+          "_note_db_path": "UNITE-based kraken2 DB;普通细菌 DB 无真菌 ITS",
+          "out_dir": "/tmp/kraken2_its",
+          "threads": 8,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "fastq_1 不存在: '/data/microbiome/its/its_sample_1.fastq.gz'",
+        "diagnostics": {
+          "brain": "microbiome",
+          "skill": "its_fungal_real",
+          "archetype": "microbiome_pipeline",
+          "tool": "kraken2+bracken",
+          "out_dir": "/tmp/kraken2_its"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "mag_assembly_real",
+    "brain": "microbiome",
+    "verdict": "N-A",
+    "evidence": {
+      "execution_plan": {
+        "brain": "microbiome",
+        "skill": "mag_assembly_real",
+        "host_env": "praxis-microbiome-checkm2",
+        "status": "ready",
+        "skill_md_path": "brains/microbiome/skills/workflows/mag_assembly_real/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "_note": "real() 硬编码返回 ok=False(N/A);host 无 megahit/spades + binning;无论什么输入都会 N/A",
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "N/A — host 无 megahit/spades + binning;只有 checkm2/gtdbtk",
+        "fallback": "pass simulate=true",
+        "diagnostics": {
+          "brain": "microbiome",
+          "skill": "mag_assembly_real",
+          "archetype": "microbiome_pipeline",
+          "na_reason": "no assembler/binner"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "scfa_butyrate_screen_real",
+    "brain": "microbiome",
+    "verdict": "INCOMPLETE",
+    "evidence": {
+      "execution_plan": {
+        "brain": "microbiome",
+        "skill": "scfa_butyrate_screen_real",
+        "host_env": "praxis-microbiome-humann",
+        "status": "ready",
+        "skill_md_path": "brains/microbiome/skills/workflows/scfa_butyrate_screen_real/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "input_fastq": "/data/microbiome/shotgun/sample_merged.fastq.gz",
+          "_note_input_fastq": "shotgun 宏基因组 FASTQ;与 humann_functional 相同上游,再筛 BUT/butyrate pathway;无则 INCOMPLETE",
+          "out_dir": "/tmp/scfa_test",
+          "threads": 8,
+          "timeout_s": 14400,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "需要 input_fastq",
+        "diagnostics": {
+          "brain": "microbiome",
+          "skill": "scfa_butyrate_screen_real",
+          "archetype": "microbiome_pipeline",
+          "tool": "humann+scfa-filter",
+          "out_dir": "/tmp/scfa_test"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "shotgun_taxonomy",
+    "brain": "microbiome",
+    "verdict": "INCOMPLETE",
+    "evidence": {
+      "execution_plan": {
+        "brain": "microbiome",
+        "skill": "shotgun_taxonomy",
+        "host_env": "praxis-microbiome-kraken",
+        "status": "ready",
+        "skill_md_path": "brains/microbiome/skills/workflows/shotgun_taxonomy/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "fastq_1": "/data/microbiome/shotgun/sample_R1.fastq.gz",
+          "_note_fastq_1": "shotgun 宏基因组 R1 FASTQ;需 kraken2 DB;无则 INCOMPLETE",
+          "fastq_2": "/data/microbiome/shotgun/sample_R2.fastq.gz",
+          "_note_fastq_2": "shotgun R2 FASTQ(可省略走 single)",
+          "db_path": "/data/db/kraken2_standard",
+          "_note_db_path": "kraken2 标准 DB",
+          "out_dir": "/tmp/kraken2_shotgun",
+          "threads": 8,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "fastq_1 不存在: '/data/microbiome/shotgun/sample_R1.fastq.gz'",
+        "diagnostics": {
+          "brain": "microbiome",
+          "skill": "shotgun_taxonomy",
+          "archetype": "microbiome_pipeline",
+          "tool": "kraken2+bracken",
+          "out_dir": "/tmp/kraken2_shotgun"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "shotgun_taxonomy_real",
+    "brain": "microbiome",
+    "verdict": "INCOMPLETE",
+    "evidence": {
+      "execution_plan": {
+        "brain": "microbiome",
+        "skill": "shotgun_taxonomy_real",
+        "host_env": "praxis-microbiome-kraken",
+        "status": "ready",
+        "skill_md_path": "brains/microbiome/skills/workflows/shotgun_taxonomy_real/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "fastq_1": "/data/microbiome/shotgun/sample_R1.fastq.gz",
+          "_note_fastq_1": "与 shotgun_taxonomy 完全相同实现;需 shotgun FASTQ + kraken2 DB;无则 INCOMPLETE",
+          "fastq_2": "/data/microbiome/shotgun/sample_R2.fastq.gz",
+          "db_path": "/data/db/kraken2_standard",
+          "out_dir": "/tmp/kraken2_shotgun_real",
+          "threads": 8,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "fastq_1 不存在: '/data/microbiome/shotgun/sample_R1.fastq.gz'",
+        "diagnostics": {
+          "brain": "microbiome",
+          "skill": "shotgun_taxonomy_real",
+          "archetype": "microbiome_pipeline",
+          "tool": "kraken2+bracken",
+          "out_dir": "/tmp/kraken2_shotgun_real"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "strain_tracking_real",
+    "brain": "microbiome",
+    "verdict": "RED",
+    "evidence": {
+      "execution_plan": {
+        "brain": "microbiome",
+        "skill": "strain_tracking_real",
+        "host_env": "praxis-microbiome-humann",
+        "status": "ready",
+        "skill_md_path": "brains/microbiome/skills/workflows/strain_tracking_real/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "sample_sam2": [
+            "/data/microbiome/strain/sample1.sam.bz2",
+            "/data/microbiome/strain/sample2.sam.bz2"
+          ],
+          "_note_sample_sam2": "metaphlan --sam_out 生成的 .sam.bz2 文件列表;需先跑 metaphlan 得到 SAM 输出;无真实 WGS 数据则 INCOMPLETE",
+          "out_dir": "/tmp/strainphlan_test",
+          "threads": 8,
+          "timeout_s": 7200,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "binary not found: 'strainphlan'",
+        "stderr": "[Errno 2] No such file or directory: 'strainphlan'",
+        "diagnostics": {
+          "brain": "microbiome",
+          "skill": "strain_tracking_real",
+          "archetype": "microbiome_pipeline",
+          "tool": "strainphlan",
+          "n_samples": 0,
+          "out_dir": "/tmp/strainphlan_test",
+          "subprocess": {
+            "wall_sec": 0.001,
+            "rc": -1
+          }
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  }
+]

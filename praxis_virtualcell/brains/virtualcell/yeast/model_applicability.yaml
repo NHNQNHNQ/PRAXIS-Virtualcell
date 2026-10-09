@@ -1,0 +1,25 @@
+# yeast (Saccharomyces cerevisiae) — 单细胞真核微生物。
+# 现有 Mock* predictor 全部是 mammalian scRNA perturbation 模型,对 yeast 不适用:
+#   - supported_species 不含 yeast => ModelApplicabilityAgent 的 species 检查失败 => rejected
+# 这里显式列出三者(而非靠目录缺失静默拒绝),让"为何被拒"在 brain 中可审计。
+# yeast 真正支持的扰动类型(gene_deletion / overexpression / genetic_interaction)
+# 暂无对应的 offline predictor,本期只做 routing + rejection,不接新 ML predictor。
+MockCPA:
+  supported_species: [human]          # 不含 yeast => yeast 请求被拒
+  supported_modalities: [scRNA]
+  supported_tasks: [predict_delta_expression]
+  supported_perturbations: [gene, drug]
+  reject_reason_for_yeast: mammalian_scrna_predictor_not_applicable
+MockGEARS:
+  supported_species: [human]          # 不含 yeast => yeast 请求被拒
+  supported_modalities: [scRNA]
+  supported_tasks: [predict_delta_expression]
+  supported_perturbations: [gene, gene_combination]
+  reject_if: [gene_not_in_graph_vocabulary]
+  reject_reason_for_yeast: mammalian_scrna_predictor_not_applicable
+MockLinear:
+  supported_species: [human]          # 不含 yeast => yeast 请求被拒
+  supported_modalities: [scRNA]
+  supported_tasks: [predict_delta_expression]
+  supported_perturbations: [gene, drug]
+  reject_reason_for_yeast: mammalian_scrna_predictor_not_applicable

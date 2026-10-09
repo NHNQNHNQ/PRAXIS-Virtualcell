@@ -1,0 +1,134 @@
+{
+  "schema_version": "praxis.golden-additive-train-only-protocol.v1",
+  "record_role": "candidate_2_train_only_build_protocol_not_scientific_evidence",
+  "frozen_on": "2026-08-17",
+  "identity": {
+    "payload_sha256": "05e41f779b75c62ededf2c02c3ffa4582c1a6d696a952476d1a0f18a633b622c",
+    "payload_hash_algorithm": "sha256(canonical_json(protocol_with_identity.payload_sha256_set_to_null))",
+    "builder_path": "scripts/build_golden_additive_train_only_candidate.py",
+    "builder_sha256": "8f6d50dde18c435da827865cc4b86474da13d3e1c648b583ac1e71a79ed1a6bb",
+    "base_gears_builder_sha256": "f6fff4f1585ba4ca0762de58aa758fba753fd55f2e9f16e23fd3288ab878cde6",
+    "base_gears_train_runner_sha256": "635db2e12fcfaa1668414c8bc812e6a015ac95aea39640def3884b2e28ff6582"
+  },
+  "candidate": {
+    "name": "norman_additive_ridge_train_only_alpha_0_1",
+    "algorithm": "condition_level_additive_ridge_selected_on_frozen_inner_train_only_split",
+    "prediction": "linear_intercept_plus_sum_of_target_rows_from_linear_coefficients",
+    "feature_axis": {
+      "namespace": "EnsemblGene",
+      "count": 5045,
+      "sha256": "ecca6c636629e35ae5f5a0ec6fe84c1a7983e1adb263fbbcaea70a0c5495b2b7"
+    },
+    "target_axis": {
+      "namespace": "EnsemblGene",
+      "symbol_mapping_source": "exact_prepare_v4_var_gene_name_to_var_names",
+      "count": 68,
+      "target_ids_sha256": "2bc167c08c3b7a822ddfa626af55e515078a29ba13463607d70419692f777e57",
+      "target_symbols_sha256": "0b386c66f34557efa721dc4857903a1789b483a7c305bda3dc08da8d7ab4831b",
+      "target_id_symbol_pairs_sha256": "feed4e4e33bad71b498c95345e396dfce1fdadccac0768448c5df7c8e8e8fb37"
+    }
+  },
+  "train_only_source": {
+    "base_gears_protocol_path": "data/golden/norman_2019/gears_train_only_protocol.json",
+    "base_gears_protocol_payload_sha256": "58285f730f46dc7fe7f5aad752a80cb8d22184171ff9186fd93e4040280388ef",
+    "exact_prepare_v4": {
+      "candidate_record": {
+        "size_bytes": 5594,
+        "sha256": "10d65ac0a47af10f3eda34e81baba4b0913cf2c5263bf27b9114a99381ec2337"
+      },
+      "native_train_only_h5ad": {
+        "size_bytes": 153256772,
+        "sha256": "8c14761e0cc760386ef6564e542d80865caefc1bc0152b11f765218e49f95cf0"
+      }
+    },
+    "allowed_expression_scope": "exact_prepare_v4_native_train_only_h5ad_only",
+    "golden_validation_expression_or_truth_allowed": false,
+    "golden_test_expression_or_truth_allowed": false
+  },
+  "training": {
+    "condition_aggregation": "condition_mean_X_minus_outer_train_ctrl_mean_X",
+    "aggregation_dtype": "float64_before_sparse_or_dense_reduction",
+    "fit_unit": "equal_weight_canonical_condition_means",
+    "alpha_grid": [
+      0.01,
+      0.03,
+      0.1,
+      0.3,
+      1.0,
+      3.0,
+      10.0,
+      30.0,
+      100.0
+    ],
+    "comparator_alpha": 1.0,
+    "selection_split": {
+      "source": "frozen_GEARS_internal_93_train_11_validation_condition_split",
+      "train_condition_count": 93,
+      "train_condition_labels_sha256": "e4bc4a817af6f0396aa4253113a63da1e0d2d6fb83495ce5690d7061a821b181",
+      "validation_condition_count": 11,
+      "validation_condition_labels_sha256": "3bfd42ed57271ce8c88ccd571bf2ba057e4396d72c8234a082fa0c2748a1c08f",
+      "validation_single_condition_count": 6,
+      "validation_combination_condition_count": 5,
+      "controls_are_fit_only": true
+    },
+    "selection_metric": "minimize_max(single_condition_macro_mse/0.0021203121,combination_condition_macro_mse/0.0025272989)",
+    "selection_thresholds": {
+      "single": 0.0021203121,
+      "combination": 0.0025272989
+    },
+    "selection_requirement": "selected_alpha_strictly_improves_both_single_and_combination_macro_mse_over_alpha_1",
+    "expected_selected_alpha": 0.1,
+    "expected_selected_internal_metrics": {
+      "single_condition_macro_mse": 0.0014123708647141543,
+      "combination_condition_macro_mse": 0.0007054424993826308,
+      "normalized_max_score": 0.6661146086532045,
+      "absolute_tolerance": 1e-15
+    },
+    "final_refit": {
+      "canonical_outer_train_condition_count": 104,
+      "canonical_outer_train_condition_labels_sha256": "2ded1296d5d3d43b49f556716779b1f0cb9725c00c9d1e65b37b037d3dff7d50",
+      "refit_after_selection": true,
+      "alpha": 0.1
+    }
+  },
+  "decision_path_exposure": {
+    "prior_gears_golden_validation_result_exposed": true,
+    "prior_gears_golden_validation_result_sha256": "7a1ed0310dda4c48b2850dfc3486ed0d0f1852e6370a9f5c3da8f3bf90fb846f",
+    "golden_validation_is_now_a_reused_development_set": true,
+    "candidate_development_is_independent_of_golden_validation": false,
+    "builder_reads_prior_golden_validation_artifact": false,
+    "prior_existing_golden_test_report_accidentally_read_only_exposed_during_collaborative_audit": true,
+    "prior_existing_golden_test_report_used_for_candidate_choice_parameters_or_gate": false,
+    "builder_reads_golden_test_expression_truth_or_report": false,
+    "prospective_test_blinding": false,
+    "no_golden_test_values_are_recorded_in_this_protocol": true
+  },
+  "execution_boundary": {
+    "runtime_validation": "reuse_exact_frozen_GEARS_venv_environment_and_module_origin_gate_before_any_H5AD_or_NumPy_processing",
+    "input_policy": "exact_prepare_v4_identity_only",
+    "output_policy": "write_new_atomic_no_replace_directory",
+    "output_inventory": [
+      "baseline.json",
+      "linear_coefficients.npy",
+      "linear_intercept.npy",
+      "candidate-record.json"
+    ],
+    "numpy_load_allow_pickle": false,
+    "network_required": false,
+    "registry_or_default_route_changes": false
+  },
+  "validation_gate": {
+    "evaluator_status": "PENDING_NOT_EXECUTABLE",
+    "independent_confirmation": false,
+    "golden_validation_role": "exposed_reused_development_validation"
+  },
+  "claim_ceiling": {
+    "output_schema_version": "praxis.golden-additive-train-only-candidate.v1",
+    "output_record_role": "train_only_candidate_2_and_contamination_audit_not_scientific_evidence",
+    "benchmark_status": "NOT_RUN",
+    "benchmark_passed": null,
+    "scientifically_validated": false,
+    "promotion_eligible": false,
+    "production_promoted": false
+  }
+}

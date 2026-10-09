@@ -1,7 +1,0 @@
-{
-  "species": "escherichia_coli",
-  "drug_panel": [{"drug": "candidate-example", "drug_class": "unknown"}],
-  "requested_outputs": ["activity"],
-  "amr_profile": {},
-  "smiles": "CC(=O)OC1=CC=CC=C1C(=O)O"
-}

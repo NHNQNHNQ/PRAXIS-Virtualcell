@@ -1,57 +1,139 @@
 # PRAXIS-VirtualCell
 
-加载具体菌株的真实组学数据，由 LLM 直接预测候选分子的抗菌活性、MIC，并提出有数据依据的靶点与机制假说。默认使用 DeepSeek；组学查询与结构处理工具不承担药效预测。
+A programmable platform and agent framework for reproducible virtual cell
+experiments. PRAXIS-VirtualCell connects biological data, specialized predictive
+models, perturbations, adapters, execution environments, and validation evidence
+through explicit contracts.
 
-## 当前入口
+This repository is the VirtualCell platform described in
+[PRAXIS-VirtualCell: A Programmable and Trustworthy Framework for Agentic Virtual Cell Experiments](https://arxiv.org/abs/2609.29221v1)
+by Zhenyu Ma and Xukai Jiang. See the [paper PDF](https://arxiv.org/pdf/2609.29221v1),
+[citation metadata](CITATION.cff), and [restoration record](docs/RESTORATION.md).
 
-- `praxis_virtualcell/data_packs/`：从原平台恢复的 AnnData/MuData 校验、只读矩阵读取与显式特征对齐。
-- `praxis_virtualcell/omics/`：菌株/样本输入包与 NPZ 转录组适配；首包是 AB5075 历史未给药参考 `AB5075-AZI000`。
-- `praxis_virtualcell/llm_prediction/`：组学与结构工具调用、LLM 预测、事实引用校验、JSON/Markdown 报告。
-- `praxis2/llm/`：复用原平台客户端，支持 DeepSeek 思考模式与连续工具调用。
-- `praxis_virtualcell/web/`：选择菌株样本、输入候选结构、查看组学概览与分析报告的本地页面。
+## How it works
 
-旧 MIC、AMR、QSAR、扰动和世界模型不进入新预测入口。实测 MIC 记录不作为推理输入或查表答案。历史工具保留在 `praxis-mdr` 和独立组件中，已有结果保持原科学范围。
+A biological question becomes a structured virtual experiment:
 
-## 启动
+**Ask → Review → Route → Run → Results**
 
-安装见 [INSTALL](docs/INSTALL.md)。本地 `.env` 保存凭据并被 Git 忽略：
+The agent interprets the question, proposes routes, and explains results.
+The deterministic runtime checks biological compatibility, compiles the
+experiment, invokes registered scientific predictors, and records the result or
+structured abstention. Numerical predictions come from the selected predictor.
 
-```text
-DEEPSEEK_API_KEY=自己的本地凭据
-PRAXIS_ANTHROPIC_BASE_URL=https://api.deepseek.com
-PRAXIS_MODEL=deepseek-v4-pro
-```
+The runtime preserves the request, data and model identities, adapter,
+environment, evidence scope, execution trace, and provenance. Missing assets,
+incompatible inputs, and unsupported perturbations remain explicit.
 
-`PRAXIS_ANTHROPIC_BASE_URL` 是原框架兼容配置名，实际使用 OpenAI-compatible Chat Completions。凭据只在服务端读取。
+## Platform components
+
+| Component | Source | Purpose |
+|---|---|---|
+| VirtualCellPack | [data_packs](praxis_virtualcell/data_packs/) | Biological identity, conditions, features, controls, omics, and provenance |
+| Experiment runtime | [core/runtime.py](praxis_virtualcell/core/runtime.py), [virtual_experiment.py](praxis_virtualcell/virtual_experiment.py) | Structured execution, compatibility checks, and experiment DAGs |
+| Model registry and Adapter SDK | [model_zoo](praxis_virtualcell/model_zoo/) | Separate model, artifact, adapter, environment, evidence, and policy identities |
+| Scientific predictors | [predictors](praxis_virtualcell/predictors/) | Task-specific mechanistic and data-driven model execution |
+| Agent orchestration | [agents](praxis_virtualcell/agents/), [agents_llm](praxis_virtualcell/agents_llm/) | Interpretation, routing, reliability checks, and report generation |
+| API and local interface | [praxis_vc_api](praxis_vc_api/), [praxis_vc_react](praxis_vc_react/) | Local experiment workflow and auditable results |
+| General agent framework | [praxis2](praxis2/), [brains](brains/) | Shared tools, skills, messaging, memory, and domain brains |
+
+## Install from source
+
+Python 3.11 or newer is supported by package metadata. Use Python 3.13 for the
+checked-in dependency locks; see [installation](docs/INSTALL.md) and
+[locked environments](requirements/README.md).
 
 ```bash
-.venv/bin/praxis-vc profiles
-.venv/bin/praxis-vc inspect --profile AB5075-AZI000
-.venv/bin/praxis-vc serve --port 8787
+git clone https://github.com/NHNQNHNQ/PRAXIS-Virtualcell.git
+cd PRAXIS-Virtualcell
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e ".[api]"
+praxis-vc --version
 ```
 
-打开 `http://127.0.0.1:8787`。页面显示实际输入包的身份与数据覆盖；分析后可查看报告、工具轨迹以及 JSON/Markdown；带报告编号的页面链接可重新打开，无需再次调用模型。
+Add `mechanistic` for COBRApy/GEM models or `omics` for AnnData/MuData:
+`python -m pip install -e ".[api,mechanistic,omics]"`.
+
+## Run an offline experiment
+
+The default mode requires no LLM API key.
 
 ```bash
-.venv/bin/praxis-vc batch --profile AB5075-AZI000 --input candidates/synthemol_20260923/repeat_1/molecules.csv --limit 1 --output reports/llm_live/first-candidate
+praxis-vc run \
+  --request examples/ahr_k562.json \
+  --mode offline \
+  --out runs/ahr
+
+praxis-vc ask \
+  --text "在 human K562 里敲掉 AHR 会怎么样" \
+  --mode offline \
+  --yes \
+  --out runs/ahr-question
 ```
 
-批量导入只读取 SMILES 和候选编号，忽略 CSV 的历史 score/Q_value 与终点字段。去掉 `--limit` 可处理完整候选集；每个候选都会调用配置的 LLM。
+The output directory contains the report and structured experiment records.
+These examples demonstrate the runtime and its evidence checks; they are not a
+reproduction of the paper's quantitative benchmarks.
 
-## 数据与结果语义
+## Open the local platform
 
-首包含真实转录组参考与参考注释，不宣称拥有实测蛋白组、代谢组或新分离株当前状态。未知时间、温度、基因型和生长期保持未知。处理后表达、实际 delta 和 MIC 标签不进入新候选工具结果。
+Build the React interface, then start the API from the repository root:
 
-MIC 是未经校准的 LLM 估计，可以为未知；它表示生长抑制，不等于杀伤率。靶点与机制保留假说身份。引用校验只证明观察值与工具返回一致，不证明药效正确或靶点因果关系。无实际组学查询或事实引用校验失败时返回 `unsupported`，不调用其他预测器补数值。
+```bash
+cd praxis_vc_react
+npm ci
+npm run build
+cd ..
+praxis-vc serve --host 127.0.0.1 --port 8000
+```
 
-大型数据只存本地 `data/organisms/`，对应归档路径保留引用。数据准备与复现见 [OMICS](docs/OMICS.md)。本地 `.env` 与完整实时报告不进入 GitHub。
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000).
+The source checkout serves the built React interface at the same origin.
+The optional Streamlit interface is available with the `web` extra and
+`praxis-vc web` while the API is running.
 
-## 验证与后续
+## Optional LLM assistance
 
-离线测试覆盖实际文件读取、样本/特征对应、未来数据隔离、多轮工具历史与事实引用。真实 API 运行验证工程链路，尚不构成独立药效准确率评估。当前使用基础 API 模型，尚未训练专用微调模型。
+Set `DEEPSEEK_API_KEY` in your environment and use `--mode llm-assisted` with
+`praxis-vc ask` or `praxis-vc run`. Missing credentials or provider failures
+fall back to the offline path. See [.env.example](.env.example).
 
-2026-10-06 已完成现有 24 个候选的实际批量处理：23 份通过引用校验，1 份被拒绝；474 条本地测试通过。详细结果与限制见 [TESTING](docs/TESTING.md)。完整实时报告保留在本地，不进入 GitHub。
+The LLM can assist with parsing, routing proposals, critique, and wording.
+It cannot alter predictor outputs, invent feature mappings, issue validation
+evidence, or override the runtime's compatibility checks and final verdict.
 
-作者药物生成器及外部资产仍需恢复。现有 24 个候选结构已接入同一接口；重复记录不计为 48 个不同分子。
+## Biological tasks and evidence scope
 
-历史整合与来源见 [CONSOLIDATION](docs/CONSOLIDATION.md)、[DATA-ASSETS](docs/DATA-ASSETS.md)、[DATA-LICENSES](docs/DATA-LICENSES.md)。代码许可 MIT；第三方数据遵循原来源许可。
+| System | Representative task | Repository entry points |
+|---|---|---|
+| E. coli | Gene knockout → growth | [E. coli GEM predictor](praxis_virtualcell/predictors/mechanistic/ecoli_gem.py), [growth contract](praxis_virtualcell/model_zoo/ecoli_growth_contract.py) |
+| S. cerevisiae | Gene deletion → fitness | [yeast GEM predictor](praxis_virtualcell/predictors/mechanistic/yeast_gem.py), [fitness contract](praxis_virtualcell/model_zoo/yeast_deletion_fitness_contract.py) |
+| Human K562 | Genetic perturbation → expression response | [Golden Norman benchmark](praxis_virtualcell/benchmarks/golden_norman.py), [research adapter](praxis_virtualcell/model_zoo/golden_additive_research.py) |
+
+A valid Pack, compatible model, successful execution, benchmark performance, and
+scientific validation are separate facts. Research-only releases and historical
+failed gates retain their recorded status. The default catalog does not imply
+that every listed task or model is installed or scientifically validated.
+
+The paper reports cross-species experiments. The restored source includes K562
+protocols, evaluation scripts, and result records; large data and trained assets
+remain external. The complete microbial benchmark pipelines are not packaged in
+this snapshot. Follow [reproducibility](docs/REPRODUCIBILITY.md) for the available
+paths and their limits.
+
+## Documentation and contribution
+
+For developers, [P17 compilation](docs/runbooks/VIRTUALCELL-VIRTUAL-EXPERIMENT-DAG.md)
+is the planning interface. [U1 direct-v2 execution](docs/ADR-0009-virtualcell-model-zoo-v2.md)
+defines the explicit factory execution boundary for the local, unreleased generic
+research path; see the [Adapter SDK runbook](docs/runbooks/VIRTUALCELL-MODEL-ADAPTER-SDK.md)
+for caller contracts.
+
+- [Install](docs/INSTALL.md) · [Test](docs/TESTING.md) · [Documentation index](docs/INDEX.md)
+- [Foundation platform operations](docs/runbooks/FOUNDATION-PLATFORM-OPERATIONS.md)
+- [Reproducibility](docs/REPRODUCIBILITY.md) · [Restoration](docs/RESTORATION.md)
+- [Contributing](CONTRIBUTING.md) · [Support](SUPPORT.md) · [Provenance](PROVENANCE.md)
+
+Licensed under [MIT](LICENSE). Cite the preprint and the exact software commit
+or release used in your work; [CITATION.cff](CITATION.cff) provides the metadata.

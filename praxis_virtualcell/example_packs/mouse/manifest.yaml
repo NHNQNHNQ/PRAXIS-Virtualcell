@@ -1,0 +1,95 @@
+schema_version: vc.pack.v0.2
+pack_id: p8-mouse-tiny
+pack_version: 1.0.0
+taxon:
+  ontology_id: NCBITaxon:10090
+  scientific_name: Mus musculus
+assembly:
+  name: GRCm39
+  accession: GCF_000001635.27
+identity:
+  observation_key: observation_id
+  feature_key: var_names
+modality:
+  name: scRNA
+  ontology_id: EFO:0008913
+feature_namespace:
+  name: EnsemblGene
+  version: GRCm39
+feature_semantics:
+  id_source: var_names
+  id_format: ensembl_gene
+  symbol_field: feature_symbol
+cell_semantics:
+  identity: cell_identity_id
+  state:
+  - cell_state_id
+  context:
+  - tissue_id
+  local_terms:
+  - id: VCSTATE:resting
+    role: state
+    label: resting
+    definition: Resting state for the tiny mouse fixture.
+conditions:
+  field: condition_id
+  values:
+  - condition:mouse-train-control
+  - condition:mouse-train-perturbed
+  - condition:mouse-test-control
+  - condition:mouse-test-perturbed
+  matched_control_field: matched_control_id
+  dose:
+    value_field: dose_value
+    unit_field: dose_unit
+  time:
+    value_field: time_value
+    unit_field: time_unit
+perturbations:
+  field: perturbation_id
+  values:
+  - id: perturbation:mouse-train-control
+    kind: control
+    targets: []
+  - id: perturbation:Trp53-KO
+    kind: genetic
+    targets:
+    - ENSMUSG00000059552
+  - id: perturbation:mouse-test-control
+    kind: control
+    targets: []
+  - id: perturbation:Myc-KO
+    kind: genetic
+    targets:
+    - ENSMUSG00000022346
+split:
+  name: target-holdout-v1
+  field: split
+  strategy: predefined
+  values:
+  - train
+  - test
+  leakage_guard:
+  - donor_id
+  - condition_id
+  - perturbation_id
+  - target_ids
+provenance:
+  source: synthetic P8 product fixture; no P7 data
+  created_by: PRAXIS-VirtualCell
+  citation: none
+license:
+  id: CC0-1.0
+  name: CC0
+assets:
+- id: expression
+  path: tiny.h5ad
+  media_type: application/vnd.anndata+hdf5
+  sha256: 73078395a3d3ce3335ffbefb0c7e84edaed458bffdac1ce3bf96fc9d490177f6
+  size_bytes: 43848
+matrix:
+  asset: expression
+  location: X
+  shape:
+  - 4
+  - 2

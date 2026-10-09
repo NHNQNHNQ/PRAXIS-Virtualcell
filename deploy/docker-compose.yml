@@ -1,0 +1,65 @@
+# §6⑤/§11.4 本地 PG+Redis+backend(M8 Task 11 真起,本机无 docker 自动 skip)
+# 用法:
+#   cd deploy && docker compose up -d
+#   docker compose logs -f backend
+#   docker compose down       # 保留 volume(pgdata)
+#   docker compose down -v    # 清 volume(慎用)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-praxis2}
+      POSTGRES_USER: ${POSTGRES_USER:-praxis2}
+      # B.5 (reviewer M0/M8 C2):密码必须 env 必填,防 dev-only 默认值随 push 上 staging
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD env variable before docker compose up}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U praxis2"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      PRAXIS_ANTHROPIC_API_KEY: ${PRAXIS_ANTHROPIC_API_KEY}
+      PRAXIS_ANTHROPIC_BASE_URL: ${PRAXIS_ANTHROPIC_BASE_URL:-https://api.anthropic.com}
+      PRAXIS_MODEL: ${PRAXIS_MODEL:-claude-3-5-sonnet-20241022}
+      PRAXIS_MAX_TOKENS: "4096"
+      PRAXIS_MAX_TURNS: "30"
+      PRAXIS_RECOVERY_BUDGET: "3"
+      PRAXIS_MAX_OUTPUT_RECOVERY: "2"
+      PRAXIS_HOST: "0.0.0.0"
+      PRAXIS_PORT: "8000"
+      PRAXIS_WORKERS: "2"
+      PRAXIS_MAX_CONCURRENT_PER_USER: "5"
+      PRAXIS_USER_QPS: "10.0"
+      PRAXIS_GLOBAL_LLM_INFLIGHT: "100"
+      PRAXIS_QUOTA_GLOBAL_MAX_QUEUED: "200"
+      PRAXIS_MAX_HEAVY_JOBS_PER_USER: "0"
+    ports:
+      - "8000:8000"
+
+volumes:
+  pgdata:
