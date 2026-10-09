@@ -154,6 +154,21 @@ def run_guard(args):
             report["outcome"] = "host_low_memory"
             raise RuntimeError("host MemAvailable is below the required reserve")
 
+    def read_state(timeout=15):
+        props = _unit_properties(unit, timeout=timeout)
+        if props.get("Id") != unit or props.get("Description") != description:
+            raise RuntimeError("service identity changed during monitoring")
+        if props.get("ControlGroup") and props["ControlGroup"] != report["control_group"]:
+            raise RuntimeError("service ControlGroup changed during monitoring")
+        report["active_state"], report["result"] = props.get("ActiveState"), props.get("Result")
+        report["sub_state"] = props.get("SubState")
+        report["main_pid"] = int(props.get("MainPID", "0"))
+        report["service_exit_status"] = props.get("ExecMainStatus")
+        terminal = props.get("ActiveState") in {"inactive", "failed"} or (
+            props.get("ActiveState") == "active" and props.get("SubState") == "exited"
+            and report["main_pid"] == 0)
+        return props, terminal
+
     args.report.parent.mkdir(parents=True, exist_ok=True)
     try:
         for signum in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
@@ -199,35 +214,44 @@ def run_guard(args):
             gate.touch(exist_ok=False)
             report["gate_released"] = True
             report["phase"] = "monitor"
+            missing_deadline = None
             while True:
                 sample_host()
-                props = _unit_properties(unit)
-                report["active_state"], report["result"] = props.get("ActiveState"), props.get("Result")
-                report["sub_state"] = props.get("SubState")
-                report["main_pid"] = int(props.get("MainPID", "0"))
-                report["service_exit_status"] = props.get("ExecMainStatus")
-                if props.get("Id") != unit or props.get("Description") != description:
-                    raise RuntimeError("service identity changed during monitoring")
-                if props.get("ControlGroup") and props["ControlGroup"] != report["control_group"]:
-                    raise RuntimeError("service ControlGroup changed during monitoring")
-                terminal = props.get("ActiveState") in {"inactive", "failed"} or (
-                    props.get("ActiveState") == "active" and props.get("SubState") == "exited"
-                    and report["main_pid"] == 0)
+                timeout = 15
+                if missing_deadline is not None:
+                    remaining = missing_deadline - time.monotonic()
+                    if remaining <= 0:
+                        report["outcome"] = "cgroup_missing"
+                        raise RuntimeError("active service cgroup remains unavailable after bounded exit-race retries")
+                    timeout = min(1, remaining)
+                props, terminal = read_state(timeout=timeout)
                 try:
                     peak, events = _memory_snapshot(cgroup)
                     report["cgroup_peak_gib"] = max(report["cgroup_peak_gib"], peak / GIB)
                     report["memory_events"] = events
+                    missing_deadline = None
                 except FileNotFoundError:
                     report["final_memory_snapshot_unavailable"] = True
+                    # The process may exit between systemctl show and this
+                    # read. Refresh ownership and state before classifying it.
+                    missing_deadline = missing_deadline or min(time.monotonic() + 3, deadline)
+                    sample_host()
+                    remaining = missing_deadline - time.monotonic()
+                    if remaining <= 0:
+                        report["outcome"] = "cgroup_missing"
+                        raise RuntimeError("service cgroup disappeared without confirmed terminal state")
+                    props, terminal = read_state(timeout=min(1, remaining))
                     if not terminal:
-                        raise
+                        time.sleep(min(.1, max(0, missing_deadline - time.monotonic())))
+                        continue
                 if terminal:
                     members = _cgroup_members(props)
                     report["remaining_cgroup_pids"] = members
                     if members:
                         report["outcome"] = "orphaned_children"
                         raise RuntimeError("completed service still contains live child processes")
-                    success = props.get("Result") == "success" and props.get("ExecMainStatus") == "0"
+                    success = (report["main_pid"] == 0 and props.get("Result") == "success"
+                               and props.get("ExecMainStatus") == "0")
                     report["outcome"] = "success" if success else "service_failed"
                     if report["memory_events"].get("oom_kill", 0) or props.get("Result") == "oom-kill":
                         report["outcome"] = "cgroup_oom"

@@ -198,8 +198,43 @@ def run_pipeline(args):
     previous = json.loads(status_path.read_text()) if status_path.exists() else {}
     if previous and previous.get("identity") != identity:
         raise ValueError("pipeline_identity_changed")
+    resume = getattr(args, "resume_from_checkpoint", None)
+    training_reports = getattr(args, "training_reports", None) or args.reports / "training"
     if previous.get("status") == "failed":
-        raise ValueError("failed_pipeline_requires_review_before_retry")
+        if (resume is None or previous.get("stage") != "formal_sft"
+                or "baseline" not in previous.get("completed_stages", [])
+                or getattr(args, "training_reports", None) is None):
+            raise ValueError("failed_pipeline_requires_review_before_retry")
+        count, expected = completed_count(pilot_files["validation"], args.reports / "baseline.predictions.jsonl")
+        baseline_score = args.reports / "baseline.score.json"
+        if (count != expected or not baseline_score.is_file()
+                or json.loads(baseline_score.read_text()).get("status") != "scored"):
+            raise ValueError("reviewed_recovery_requires_completed_scored_baseline")
+        if training_reports.exists() and any(training_reports.iterdir()):
+            raise ValueError("recovery_training_reports_must_be_new")
+        import yaml
+        output = Path(yaml.safe_load(args.config.read_text())["output_dir"]).resolve()
+        marker = resume / "praxis_checkpoint.json"
+        if resume.resolve().parent != output or not marker.is_file():
+            raise ValueError("recovery_requires_completed_checkpoint_in_formal_output")
+        receipt = json.loads(marker.read_text())
+        if (receipt.get("schema") != "praxis.fsdp-lora-checkpoint.v1"
+                or receipt.get("world_size") != 8 or not 0 < receipt.get("global_step", 0) < 225):
+            raise ValueError("recovery_checkpoint_metadata_invalid")
+        # The formal runner and trainer verify every state file, data digest,
+        # full recipe and RNG restoration before accepting this checkpoint.
+        archive = args.reports / f"pipeline.attempt-{len(previous.get('recoveries', [])) + 1}.json"
+        if archive.exists():
+            raise FileExistsError("previous_pipeline_attempt_must_not_be_overwritten")
+        write_json(archive, previous)
+        previous.setdefault("recoveries", []).append({
+            "previous_attempt": str(archive), "checkpoint": str(resume),
+            "from_optimizer_step": receipt["global_step"], "training_reports": str(training_reports),
+            "reviewed_at": datetime.now(timezone.utc).isoformat()})
+        for name in ("failure_type", "failure_reason", "finished_at"):
+            previous.pop(name, None)
+    elif resume is not None:
+        raise ValueError("checkpoint_recovery_requires_a_reviewed_failed_formal_stage")
     status = previous or {"schema_version": "praxis.qwen-pipeline.v1", "identity": identity,
                           "started_at": datetime.now(timezone.utc).isoformat(), "completed_stages": []}
 
@@ -214,9 +249,11 @@ def run_pipeline(args):
         score(args, "baseline", baseline)
         status["completed_stages"] = ["baseline"]
         stage("formal_sft")
-        checked_command([sys.executable, "-u", str(args.root / "scripts/finetuning/run_qwen_formal.py"),
-                         "--root", str(args.root), "--config", str(args.config),
-                         "--reports", str(args.reports / "training")], cwd=args.root)
+        formal = [sys.executable, "-u", str(args.root / "scripts/finetuning/run_qwen_formal.py"),
+                  "--root", str(args.root), "--config", str(args.config), "--reports", str(training_reports)]
+        if resume is not None:
+            formal += ["--resume-from-checkpoint", str(resume)]
+        checked_command(formal, cwd=args.root)
         status["completed_stages"].append("formal_sft")
         import yaml
         adapter = Path(yaml.safe_load(args.config.read_text())["output_dir"]) / "adapter"
@@ -247,6 +284,10 @@ def main():
     parser.add_argument("--scoring-dataset", type=Path)
     parser.add_argument("--audit", type=Path)
     parser.add_argument("--source-path-map", type=Path)
+    parser.add_argument("--resume-from-checkpoint", type=Path,
+                        help="Explicit reviewed recovery of a failed formal stage; never automatic")
+    parser.add_argument("--training-reports", type=Path,
+                        help="New training receipts directory required for checkpoint recovery")
     parser.add_argument("--port", type=int, default=8790)
     parser.add_argument("--worker", action="store_true")
     parser.add_argument("--inputs", type=Path)
@@ -263,6 +304,10 @@ def main():
         value = getattr(args, name)
         if isinstance(value, Path):
             setattr(args, name, value.resolve())
+    for name in ("resume_from_checkpoint", "training_reports"):
+        value = getattr(args, name)
+        if value is not None:
+            setattr(args, name, (value if value.is_absolute() else args.root / value).resolve())
     os.environ["PYTHONPATH"] = str(args.root / "runtime")
 
     def interrupted(signum, _frame):

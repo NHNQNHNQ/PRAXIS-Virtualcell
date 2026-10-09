@@ -229,6 +229,92 @@ def test_service_oom_is_failed_even_if_cgroup_already_disappeared(tmp_path, monk
     assert not any(command[2] == "kill" for command in systemd.commands if command[0] == "systemctl")
 
 
+@pytest.mark.parametrize(("finish", "outcome", "code", "oom_kill"), [
+    ("success", "success", 0, False), ("oom-kill", "cgroup_oom", 1, False),
+    ("exit-code", "service_failed", 1, False), ("success", "cgroup_oom", 1, True),
+])
+def test_cgroup_disappears_after_stale_running_props_requires_fresh_terminal_state(
+        tmp_path, monkeypatch, finish, outcome, code, oom_kill):
+    systemd = FakeSystemd(tmp_path, monkeypatch, finish="running", corrupt=(
+        {"memory.events": "low 0\nhigh 0\nmax 0\noom 1\noom_kill 1\n"} if oom_kill else None))
+    original = guard._memory_snapshot
+    calls = 0
+    def exited_during_snapshot(cgroup):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return original(cgroup)
+        systemd.finish = finish
+        (cgroup / "memory.current").unlink(missing_ok=True)
+        raise FileNotFoundError("process exited after systemctl showed running")
+    monkeypatch.setattr(guard, "_memory_snapshot", exited_during_snapshot)
+    actual_code, report = run(tmp_path)
+    assert actual_code == code and report["outcome"] == outcome
+    assert report["result"] == finish and report["main_pid"] == 0
+    assert report["sub_state"] in {"exited", "failed"}
+    assert report["remaining_cgroup_pids"] == [] and report["final_memory_snapshot_unavailable"]
+    assert systemd.stopped and report["cleanup_owned_unit"]
+
+
+def test_active_missing_cgroup_retries_are_bounded_and_keep_monitoring_host(tmp_path, monkeypatch):
+    systemd = FakeSystemd(tmp_path, monkeypatch, finish="running")
+    original = guard._memory_snapshot
+    clock, samples, snapshots = [0.0], [0], [0]
+    monkeypatch.setattr(guard.time, "monotonic", lambda: clock[0])
+    monkeypatch.setattr(guard.time, "sleep", lambda seconds: clock.__setitem__(0, clock[0] + seconds))
+    def host_available():
+        samples[0] += 1
+        return 500 * guard.GIB
+    def vanished(cgroup):
+        snapshots[0] += 1
+        if snapshots[0] == 1:
+            return original(cgroup)
+        raise FileNotFoundError("still-active cgroup is unavailable")
+    monkeypatch.setattr(guard, "_host_available", host_available)
+    monkeypatch.setattr(guard, "_memory_snapshot", vanished)
+    code, report = run(tmp_path)
+    assert code == 1 and report["outcome"] == "cgroup_missing"
+    assert 2.9 <= clock[0] <= 3.01 and snapshots[0] > 1 and samples[0] > 3
+    assert report["main_pid"] == 123 and report["active_state"] == "active"
+    assert systemd.stopped and report["cleanup_owned_unit"]
+    assert ["systemctl", "--user", "kill", "--kill-who=all", "--signal=SIGKILL", systemd.unit] in systemd.commands
+
+
+def test_missing_cgroup_retry_still_stops_immediately_for_low_host_memory(tmp_path, monkeypatch):
+    systemd = FakeSystemd(tmp_path, monkeypatch, finish="running")
+    original = guard._memory_snapshot
+    calls = 0
+    def vanished(cgroup):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return original(cgroup)
+        (systemd.proc / "meminfo").write_text(f"MemAvailable: {159 * guard.GIB // 1024} kB\n")
+        raise FileNotFoundError("cgroup unavailable during host pressure")
+    monkeypatch.setattr(guard, "_memory_snapshot", vanished)
+    code, report = run(tmp_path)
+    assert code == 1 and report["outcome"] == "host_low_memory"
+    assert report["min_host_available_gib"] == 159 and systemd.stopped
+
+
+def test_exit_race_cannot_pass_when_fresh_unit_identity_has_changed(tmp_path, monkeypatch):
+    systemd = FakeSystemd(tmp_path, monkeypatch, finish="running")
+    original = guard._memory_snapshot
+    calls = 0
+    def replaced_during_snapshot(cgroup):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return original(cgroup)
+        systemd.finish = "success"
+        systemd.description = "unrelated replacement"
+        raise FileNotFoundError("unit replaced during exit")
+    monkeypatch.setattr(guard, "_memory_snapshot", replaced_during_snapshot)
+    code, report = run(tmp_path)
+    assert code == 1 and "identity changed" in report["failure_reason"]
+    assert report["cleanup_owned_unit"] is False and not systemd.stopped
+
+
 @pytest.mark.parametrize("signum", [signal.SIGTERM, signal.SIGINT, signal.SIGHUP])
 def test_supervisor_signals_clean_up_owned_service_and_preserve_failure_phase(tmp_path, monkeypatch, signum):
     systemd = FakeSystemd(tmp_path, monkeypatch, finish="running")

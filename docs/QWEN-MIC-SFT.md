@@ -4,7 +4,11 @@
 
 ## 首轮基线、正式微调与配对验证
 
-2026-10-08 20:23（北京时间）已在 53 启动 `praxis-qwen-first-formal-contract-20261008.service`，启动时 8 张 GPU 均空闲、主机可用内存 492.47 GiB。当前首先运行原始 Qwen3-32B 的 64 条验证基线；基线全部尝试并独立评分后，才开始全量正式训练。最终训练和准确率结果仍待运行完成。
+2026-10-08 20:23（北京时间）在 53 启动首轮流程。原始 Qwen3-32B 的 64 条基线已全部生成并独立评分：64 条符合 Assessment schema，但 MIC 点值和 observation 列表均为空；32 条辅助报告 completed，32 条有组学报告因证据引用失败 unsupported。报告覆盖率 50% 不是 MIC 准确率；数值预测覆盖率为 0，MAE 与稀释误差准确率均为 null。
+
+正式训练随后完成 **3/225 步**，保存完整 `checkpoint-3` 和可重载适配器。2026-10-08 22:50，guard 在训练进程成功退出时遇到 cgroup 文件消失竞态，误报失败并停止流水线；这次没有 OOM，段内最低主机可用内存 319.75 GiB、GPU 分配峰值 28.583 GiB。第 3 步 train loss 为 0.46822，属于 token 交叉熵，不能表示 MIC 精度。旧 `training/runner.json` 因 guard 拒收该段而记为 0；实际完成步数依据完整检查点和 `step-3.train.json`。
+
+2026-10-09 08:06，退出竞态修复通过 46 项相关测试及 53 上 64 MiB 的 CPU 退出探针后，已启动 `praxis-qwen-first-formal-resume-20261009.service`，从完整第 3 步检查点继续同一 225 步配方。基线复用、旧失败状态归档为 `pipeline.attempt-1.json`，新训练凭据保存在 `training_resume_20261009`；数据、学习率调度和资源上限未变。当前阶段为 formal_sft，第 3→6 步段已启动；正式完成和微调后准确率尚待验证。进度快照见 [恢复凭据](../reports/llm_platform/qwen_first_formal_recovery_20261009.json)。
 
 固定 pilot 在 `data/processed/evaluation_pilot_v4_contract_20261008`：四物种各 8 条有组学、8 条无组学，共 64 条，覆盖 7 个参考菌株。两项消融各保留相同 32 条参考记录的 SMILES、菌株、条件和 ID，分别去掉组学或结构证据。211 次现成工具调用已用真实平台重放，公共结果全部一致；结构 bootstrap 明确为物种背景知识。官方 tokenizer 的最长公共输入为 25,199 token，不截断。公开请求包含平台真实 Assessment JSON schema，推理只读公共输入，MIC 仅在预测文件完整后由独立评分器读取；评分沿用原封版 v3 和已审阅的 v3 assay audit。
 
@@ -12,17 +16,17 @@
 
 每个 GPU 段在加载权重前核验真实 `memory.max=300 GiB/high=260 GiB/swap=0/oom.group=1`，外部监控保留至少 160 GiB 主机可用内存，单段硬限 40 分钟。控制器自身限 512 MiB，SSH 断开后继续运行。资源越界、GPU OOM、失败或不完整断点会停止流程，不自动重试。预测逐条落盘，恢复时核对输入、模型资产和生成设置；失败、超时和截断均计入覆盖率。无组学消融的合法数值报告可独立评分，但原平台缺组学拒绝原因全部保留，`platform_eligible=false`，不能把验证门槛造成的缺失误称为组学收益。
 
-进展和结果在 `reports/first_formal_contract_pipeline_20261008`：`pipeline.json` 为阶段状态；`training/runner.json` 为实际完成步数；`*.predictions.jsonl`、`*.score.json` 和 `comparison.json` 分别为原始生成、独立分数和配对比较。当前没有机制人工金标，因此不会产生机制准确率。
+进展和结果在 `reports/first_formal_contract_pipeline_20261008`：`pipeline.json` 为阶段状态；本次恢复的 `training_resume_20261009/runner.json` 记录已接纳的完整步数，`step-*.train.json` 与 checkpoint manifest 保存实际训练证据；`*.predictions.jsonl`、`*.score.json` 和 `comparison.json` 分别为原始生成、独立分数和配对比较。失败不自动重试；只有人工核验完成的基线、原配方与完整检查点后，显式传入 `--resume-from-checkpoint` 和全新的 `--training-reports` 才允许恢复。当前没有机制人工金标，因此不会产生机制准确率。
 
 查看阶段与日志：
 
 ```bash
 cd /home/zkyd/data1/mzy/qwen-PRAXIS-MIC
 cat reports/first_formal_contract_pipeline_20261008/pipeline.json
-journalctl --user -u praxis-qwen-first-formal-contract-20261008.service --no-pager -n 30
+journalctl --user -u praxis-qwen-first-formal-resume-20261009.service --no-pager -n 30
 ```
 
-如需停止本次流程，执行 `systemctl --user stop praxis-qwen-first-formal-contract-20261008.service`，控制器会向正在运行的 guard 传递停止信号。
+如需停止本次流程，执行 `systemctl --user stop praxis-qwen-first-formal-resume-20261009.service`，控制器会向正在运行的 guard 传递停止信号。
 
 ## v4_compact：与智能体一致的结构监督
 
