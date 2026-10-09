@@ -1,0 +1,1269 @@
+{
+  "schema_version": "praxis.cell-structure-catalog.v1",
+  "catalog_id": "bacterial-envelope-priors-20261008",
+  "structures": [
+    {
+      "structure_id": "cell:470:cytoplasm",
+      "kind": "compartment",
+      "compartment": "cytoplasm",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The cytoplasm is the internal region enclosed by the cytoplasmic membrane.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:470",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/mbio.01480-21",
+      "source_url": "https://journals.asm.org/doi/10.1128/mbio.01480-21",
+      "source_locator": {
+        "section": "Introduction: cell envelope paragraph",
+        "figure": "Figure 6: envelope model"
+      },
+      "source_context": {
+        "source_strains": [
+          "Acinetobacter baumannii ATCC 19606",
+          "Acinetobacter baumannii ATCC 17978"
+        ],
+        "method": "Anatomical reference model in an original structural and cell-fractionation study",
+        "interpretation": "Only the introductory species envelope topology is retained; BonA localization and source mutant phenotypes are not transferred."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:470:inner_membrane",
+      "kind": "compartment",
+      "compartment": "inner_membrane",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The inner (cytoplasmic) membrane bounds the cytoplasm.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:470",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/mbio.01480-21",
+      "source_url": "https://journals.asm.org/doi/10.1128/mbio.01480-21",
+      "source_locator": {
+        "section": "Introduction: cell envelope paragraph",
+        "figure": "Figure 6: envelope model"
+      },
+      "source_context": {
+        "source_strains": [
+          "Acinetobacter baumannii ATCC 19606",
+          "Acinetobacter baumannii ATCC 17978"
+        ],
+        "method": "Anatomical reference model in an original structural and cell-fractionation study",
+        "interpretation": "Only the introductory species envelope topology is retained; BonA localization and source mutant phenotypes are not transferred."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:470:periplasm",
+      "kind": "compartment",
+      "compartment": "periplasm",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The periplasm lies between the inner and outer membranes and includes the peptidoglycan layer.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:470",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/mbio.01480-21",
+      "source_url": "https://journals.asm.org/doi/10.1128/mbio.01480-21",
+      "source_locator": {
+        "section": "Introduction: cell envelope paragraph",
+        "figure": "Figure 6: envelope model"
+      },
+      "source_context": {
+        "source_strains": [
+          "Acinetobacter baumannii ATCC 19606",
+          "Acinetobacter baumannii ATCC 17978"
+        ],
+        "method": "Anatomical reference model in an original structural and cell-fractionation study",
+        "interpretation": "Only the introductory species envelope topology is retained; BonA localization and source mutant phenotypes are not transferred."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:470:outer_membrane",
+      "kind": "compartment",
+      "compartment": "outer_membrane",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The outer membrane forms the external membrane of this envelope model.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:470",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/mbio.01480-21",
+      "source_url": "https://journals.asm.org/doi/10.1128/mbio.01480-21",
+      "source_locator": {
+        "section": "Introduction: cell envelope paragraph",
+        "figure": "Figure 6: envelope model"
+      },
+      "source_context": {
+        "source_strains": [
+          "Acinetobacter baumannii ATCC 19606",
+          "Acinetobacter baumannii ATCC 17978"
+        ],
+        "method": "Anatomical reference model in an original structural and cell-fractionation study",
+        "interpretation": "Only the introductory species envelope topology is retained; BonA localization and source mutant phenotypes are not transferred."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:470:extracellular",
+      "kind": "compartment",
+      "compartment": "extracellular",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "Extracellular space is outside the outer membrane in this topology model.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:470",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/mbio.01480-21",
+      "source_url": "https://journals.asm.org/doi/10.1128/mbio.01480-21",
+      "source_locator": {
+        "section": "Introduction: cell envelope paragraph",
+        "figure": "Figure 6: envelope model"
+      },
+      "source_context": {
+        "source_strains": [
+          "Acinetobacter baumannii ATCC 19606",
+          "Acinetobacter baumannii ATCC 17978"
+        ],
+        "method": "Anatomical reference model in an original structural and cell-fractionation study",
+        "interpretation": "Only the introductory species envelope topology is retained; BonA localization and source mutant phenotypes are not transferred."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:470:cytoplasm--inner_membrane",
+      "kind": "adjacency",
+      "compartment": "cytoplasm",
+      "adjacent_to": "inner_membrane",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places cytoplasm next to inner membrane.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:470",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/mbio.01480-21",
+      "source_url": "https://journals.asm.org/doi/10.1128/mbio.01480-21",
+      "source_locator": {
+        "section": "Introduction: cell envelope paragraph",
+        "figure": "Figure 6: envelope model"
+      },
+      "source_context": {
+        "source_strains": [
+          "Acinetobacter baumannii ATCC 19606",
+          "Acinetobacter baumannii ATCC 17978"
+        ],
+        "method": "Anatomical reference model in an original structural and cell-fractionation study",
+        "interpretation": "Only the introductory species envelope topology is retained; BonA localization and source mutant phenotypes are not transferred."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:470:inner_membrane--periplasm",
+      "kind": "adjacency",
+      "compartment": "inner_membrane",
+      "adjacent_to": "periplasm",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places inner membrane next to periplasm.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:470",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/mbio.01480-21",
+      "source_url": "https://journals.asm.org/doi/10.1128/mbio.01480-21",
+      "source_locator": {
+        "section": "Introduction: cell envelope paragraph",
+        "figure": "Figure 6: envelope model"
+      },
+      "source_context": {
+        "source_strains": [
+          "Acinetobacter baumannii ATCC 19606",
+          "Acinetobacter baumannii ATCC 17978"
+        ],
+        "method": "Anatomical reference model in an original structural and cell-fractionation study",
+        "interpretation": "Only the introductory species envelope topology is retained; BonA localization and source mutant phenotypes are not transferred."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:470:periplasm--outer_membrane",
+      "kind": "adjacency",
+      "compartment": "periplasm",
+      "adjacent_to": "outer_membrane",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places periplasm next to outer membrane.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:470",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/mbio.01480-21",
+      "source_url": "https://journals.asm.org/doi/10.1128/mbio.01480-21",
+      "source_locator": {
+        "section": "Introduction: cell envelope paragraph",
+        "figure": "Figure 6: envelope model"
+      },
+      "source_context": {
+        "source_strains": [
+          "Acinetobacter baumannii ATCC 19606",
+          "Acinetobacter baumannii ATCC 17978"
+        ],
+        "method": "Anatomical reference model in an original structural and cell-fractionation study",
+        "interpretation": "Only the introductory species envelope topology is retained; BonA localization and source mutant phenotypes are not transferred."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:470:outer_membrane--extracellular",
+      "kind": "adjacency",
+      "compartment": "outer_membrane",
+      "adjacent_to": "extracellular",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places outer membrane next to extracellular.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:470",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/mbio.01480-21",
+      "source_url": "https://journals.asm.org/doi/10.1128/mbio.01480-21",
+      "source_locator": {
+        "section": "Introduction: cell envelope paragraph",
+        "figure": "Figure 6: envelope model"
+      },
+      "source_context": {
+        "source_strains": [
+          "Acinetobacter baumannii ATCC 19606",
+          "Acinetobacter baumannii ATCC 17978"
+        ],
+        "method": "Anatomical reference model in an original structural and cell-fractionation study",
+        "interpretation": "Only the introductory species envelope topology is retained; BonA localization and source mutant phenotypes are not transferred."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:562:cytoplasm",
+      "kind": "compartment",
+      "compartment": "cytoplasm",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The cytoplasm is the internal region enclosed by the cytoplasmic membrane.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:562",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:562:inner_membrane",
+      "kind": "compartment",
+      "compartment": "inner_membrane",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The inner (cytoplasmic) membrane bounds the cytoplasm.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:562",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:562:periplasm",
+      "kind": "compartment",
+      "compartment": "periplasm",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The periplasm lies between the inner and outer membranes and includes the peptidoglycan layer.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:562",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:562:outer_membrane",
+      "kind": "compartment",
+      "compartment": "outer_membrane",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The outer membrane forms the external membrane of this envelope model.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:562",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:562:extracellular",
+      "kind": "compartment",
+      "compartment": "extracellular",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "Extracellular space is outside the outer membrane in this topology model.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:562",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:562:cytoplasm--inner_membrane",
+      "kind": "adjacency",
+      "compartment": "cytoplasm",
+      "adjacent_to": "inner_membrane",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places cytoplasm next to inner membrane.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:562",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:562:inner_membrane--periplasm",
+      "kind": "adjacency",
+      "compartment": "inner_membrane",
+      "adjacent_to": "periplasm",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places inner membrane next to periplasm.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:562",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:562:periplasm--outer_membrane",
+      "kind": "adjacency",
+      "compartment": "periplasm",
+      "adjacent_to": "outer_membrane",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places periplasm next to outer membrane.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:562",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:562:outer_membrane--extracellular",
+      "kind": "adjacency",
+      "compartment": "outer_membrane",
+      "adjacent_to": "extracellular",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places outer membrane next to extracellular.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:562",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:287:cytoplasm",
+      "kind": "compartment",
+      "compartment": "cytoplasm",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The cytoplasm is the internal region enclosed by the cytoplasmic membrane.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:287",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:287:inner_membrane",
+      "kind": "compartment",
+      "compartment": "inner_membrane",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The inner (cytoplasmic) membrane bounds the cytoplasm.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:287",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:287:periplasm",
+      "kind": "compartment",
+      "compartment": "periplasm",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The periplasm lies between the inner and outer membranes and includes the peptidoglycan layer.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:287",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:287:outer_membrane",
+      "kind": "compartment",
+      "compartment": "outer_membrane",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The outer membrane forms the external membrane of this envelope model.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:287",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:287:extracellular",
+      "kind": "compartment",
+      "compartment": "extracellular",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "Extracellular space is outside the outer membrane in this topology model.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:287",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:287:cytoplasm--inner_membrane",
+      "kind": "adjacency",
+      "compartment": "cytoplasm",
+      "adjacent_to": "inner_membrane",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places cytoplasm next to inner membrane.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:287",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:287:inner_membrane--periplasm",
+      "kind": "adjacency",
+      "compartment": "inner_membrane",
+      "adjacent_to": "periplasm",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places inner membrane next to periplasm.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:287",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:287:periplasm--outer_membrane",
+      "kind": "adjacency",
+      "compartment": "periplasm",
+      "adjacent_to": "outer_membrane",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places periplasm next to outer membrane.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:287",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:287:outer_membrane--extracellular",
+      "kind": "adjacency",
+      "compartment": "outer_membrane",
+      "adjacent_to": "extracellular",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places outer membrane next to extracellular.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:287",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1128/JB.185.20.6112-6118.2003",
+      "source_url": "https://journals.asm.org/doi/10.1128/jb.185.20.6112-6118.2003",
+      "source_locator": {
+        "section": "Results and Discussion: Cell envelope; Frozen-hydrated thin sections",
+        "figures": "Figures 4-8"
+      },
+      "source_context": {
+        "source_strains": [
+          "Escherichia coli K-12",
+          "Pseudomonas aeruginosa PAO1"
+        ],
+        "method": "High-pressure freezing and cryo-transmission electron microscopy",
+        "interpretation": "Species topology prior abstracted from the imaged source strains; not a measurement of the requested strain."
+      },
+      "condition": {
+        "medium": "Trypticase soy broth with 15% sucrose",
+        "temperature_c": 37,
+        "growth_phase": "mid-exponential",
+        "time_h": null
+      }
+    },
+    {
+      "structure_id": "cell:573:cytoplasm",
+      "kind": "compartment",
+      "compartment": "cytoplasm",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The cytoplasm is the internal region enclosed by the cytoplasmic membrane.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:573",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1371/journal.pone.0041505",
+      "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0041505",
+      "source_locator": {
+        "section": "Introduction: first paragraph; OMP Preparation",
+        "figure": "Figure 6: separate outer and inner membrane fractions"
+      },
+      "source_context": {
+        "source_strains": [
+          "Klebsiella pneumoniae NTUH-K2044"
+        ],
+        "method": "Anatomical reference description and membrane fractionation in an original porin study",
+        "interpretation": "Only the introductory layered envelope model is used as a species prior; strain-specific porin and MIC experiments are not imported."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:573:inner_membrane",
+      "kind": "compartment",
+      "compartment": "inner_membrane",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The inner (cytoplasmic) membrane bounds the cytoplasm.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:573",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1371/journal.pone.0041505",
+      "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0041505",
+      "source_locator": {
+        "section": "Introduction: first paragraph; OMP Preparation",
+        "figure": "Figure 6: separate outer and inner membrane fractions"
+      },
+      "source_context": {
+        "source_strains": [
+          "Klebsiella pneumoniae NTUH-K2044"
+        ],
+        "method": "Anatomical reference description and membrane fractionation in an original porin study",
+        "interpretation": "Only the introductory layered envelope model is used as a species prior; strain-specific porin and MIC experiments are not imported."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:573:periplasm",
+      "kind": "compartment",
+      "compartment": "periplasm",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The periplasm lies between the inner and outer membranes and includes the peptidoglycan layer.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:573",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1016/j.str.2011.11.002",
+      "source_url": "https://www.sciencedirect.com/science/article/pii/S096921261100414X",
+      "source_locator": {
+        "section": "Introduction",
+        "figure": "Figure 1A: outer membrane and periplasmic peptidoglycan model"
+      },
+      "source_context": {
+        "source_strains": [],
+        "method": "Anatomical reference model in an original single-molecule force spectroscopy study",
+        "interpretation": "Species topology context from the KpOmpA envelope model; no native strain identifier or localization record is inferred."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:573:outer_membrane",
+      "kind": "compartment",
+      "compartment": "outer_membrane",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The outer membrane forms the external membrane of this envelope model.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:573",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1371/journal.pone.0041505",
+      "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0041505",
+      "source_locator": {
+        "section": "Introduction: first paragraph; OMP Preparation",
+        "figure": "Figure 6: separate outer and inner membrane fractions"
+      },
+      "source_context": {
+        "source_strains": [
+          "Klebsiella pneumoniae NTUH-K2044"
+        ],
+        "method": "Anatomical reference description and membrane fractionation in an original porin study",
+        "interpretation": "Only the introductory layered envelope model is used as a species prior; strain-specific porin and MIC experiments are not imported."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:573:extracellular",
+      "kind": "compartment",
+      "compartment": "extracellular",
+      "adjacent_to": null,
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "Extracellular space is outside the outer membrane in this topology model.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:573",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1371/journal.pone.0041505",
+      "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0041505",
+      "source_locator": {
+        "section": "Introduction: first paragraph; OMP Preparation",
+        "figure": "Figure 6: separate outer and inner membrane fractions"
+      },
+      "source_context": {
+        "source_strains": [
+          "Klebsiella pneumoniae NTUH-K2044"
+        ],
+        "method": "Anatomical reference description and membrane fractionation in an original porin study",
+        "interpretation": "Only the introductory layered envelope model is used as a species prior; strain-specific porin and MIC experiments are not imported."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:573:cytoplasm--inner_membrane",
+      "kind": "adjacency",
+      "compartment": "cytoplasm",
+      "adjacent_to": "inner_membrane",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places cytoplasm next to inner membrane.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:573",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1371/journal.pone.0041505",
+      "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0041505",
+      "source_locator": {
+        "section": "Introduction: first paragraph; OMP Preparation",
+        "figure": "Figure 6: separate outer and inner membrane fractions"
+      },
+      "source_context": {
+        "source_strains": [
+          "Klebsiella pneumoniae NTUH-K2044"
+        ],
+        "method": "Anatomical reference description and membrane fractionation in an original porin study",
+        "interpretation": "Only the introductory layered envelope model is used as a species prior; strain-specific porin and MIC experiments are not imported."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:573:inner_membrane--periplasm",
+      "kind": "adjacency",
+      "compartment": "inner_membrane",
+      "adjacent_to": "periplasm",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places inner membrane next to periplasm.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:573",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1016/j.str.2011.11.002",
+      "source_url": "https://www.sciencedirect.com/science/article/pii/S096921261100414X",
+      "source_locator": {
+        "section": "Introduction",
+        "figure": "Figure 1A: outer membrane and periplasmic peptidoglycan model"
+      },
+      "source_context": {
+        "source_strains": [],
+        "method": "Anatomical reference model in an original single-molecule force spectroscopy study",
+        "interpretation": "Species topology context from the KpOmpA envelope model; no native strain identifier or localization record is inferred."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:573:periplasm--outer_membrane",
+      "kind": "adjacency",
+      "compartment": "periplasm",
+      "adjacent_to": "outer_membrane",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places periplasm next to outer membrane.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:573",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1016/j.str.2011.11.002",
+      "source_url": "https://www.sciencedirect.com/science/article/pii/S096921261100414X",
+      "source_locator": {
+        "section": "Introduction",
+        "figure": "Figure 1A: outer membrane and periplasmic peptidoglycan model"
+      },
+      "source_context": {
+        "source_strains": [],
+        "method": "Anatomical reference model in an original single-molecule force spectroscopy study",
+        "interpretation": "Species topology context from the KpOmpA envelope model; no native strain identifier or localization record is inferred."
+      },
+      "condition": null
+    },
+    {
+      "structure_id": "cell:573:outer_membrane--extracellular",
+      "kind": "adjacency",
+      "compartment": "outer_membrane",
+      "adjacent_to": "extracellular",
+      "protein_id": null,
+      "protein_namespace": null,
+      "statement": "The anatomical model places outer membrane next to extracellular.",
+      "evidence_scope": "species_prior",
+      "scope": {
+        "taxonomy_id": "NCBITaxon:573",
+        "strain": null,
+        "strain_namespace": null,
+        "genotype": null,
+        "genotype_scope": "not_reported"
+      },
+      "evidence_type": "reference_knowledge",
+      "source_id": "doi:10.1371/journal.pone.0041505",
+      "source_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0041505",
+      "source_locator": {
+        "section": "Introduction: first paragraph; OMP Preparation",
+        "figure": "Figure 6: separate outer and inner membrane fractions"
+      },
+      "source_context": {
+        "source_strains": [
+          "Klebsiella pneumoniae NTUH-K2044"
+        ],
+        "method": "Anatomical reference description and membrane fractionation in an original porin study",
+        "interpretation": "Only the introductory layered envelope model is used as a species prior; strain-specific porin and MIC experiments are not imported."
+      },
+      "condition": null
+    }
+  ]
+}

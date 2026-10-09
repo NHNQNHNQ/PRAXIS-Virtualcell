@@ -1,0 +1,178 @@
+{
+  "schema_version": "praxis.strain-training-verification.v1",
+  "date": "2026-10-07",
+  "status": "prepared_supervision_components_not_trained",
+  "strain_dataset": {
+    "records": 24792,
+    "named_strain_records": 11973,
+    "strain_identity_count": 917,
+    "strain_omics_records": 52,
+    "strain_omics_identity_count": 1,
+    "unknown_strain_auxiliary_records": 12819,
+    "strain_doi_records": 11941,
+    "native_collection_count": 24,
+    "missing_conditions": {
+      "medium": 24789,
+      "medium_supplements": 24791,
+      "temperature_c": 24792,
+      "exposure_hours": 20930,
+      "method": 18275,
+      "inoculum": 24792
+    }
+  },
+  "source_database": {
+    "path": "/Volumes/T7/PRAXIS-virtualcell/local/species_reference_expansion_20261007/database/v2/praxis_species_reference.sqlite3",
+    "sha256": "33862d27135c9cf2c7c8a82c36888d503eaf0184daf05b74a180bea85e06ce15"
+  },
+  "frozen_manifest": {
+    "path": "/Volumes/T7/PRAXIS-virtualcell/local/species_reference_expansion_20261007/evaluation/scaffold/manifest.json",
+    "sha256": "905bc9d2c1610488c3cd74aa8e3bd3fe4e3c86262093c7ad61cad6555d4d963a"
+  },
+  "split_counts": {
+    "train": 15553,
+    "validation": 3021,
+    "test": 6218
+  },
+  "MIC_components": {
+    "training_record_count": 7227,
+    "training_MIC_measurement_count": 7774,
+    "MIC_with_omics_records": 48,
+    "MIC_without_omics_auxiliary_records": 7179,
+    "relations": {
+      ">": 2255,
+      "=": 5278,
+      ">=": 109,
+      "<=": 67,
+      "<": 44,
+      "interval": 21
+    },
+    "observation_view_count": 1,
+    "tool_call_count": 10,
+    "verified_evidence_reference_count": 159,
+    "excluded": {
+      "unknown_strain_not_admitted_to_strain_sft": 7779
+    },
+    "validation_test_targets_materialized": 0
+  },
+  "repeated_conditioned_MIC_groups": 380,
+  "largest_repeated_group": 10,
+  "runtime": {
+    "collection_count": 24,
+    "API_requests": 73,
+    "selected_view_count": 42,
+    "feature_queries": 30,
+    "checked_reference_fields": 554,
+    "no_LLM_calls": true
+  },
+  "literature": {
+    "paper_count": 25,
+    "paper_status_counts": {
+      "metadata_only": 7,
+      "open_fulltext_parsed": 4,
+      "source_error_or_fulltext_unavailable": 14
+    },
+    "passage_count": 1210,
+    "candidate_count": 73,
+    "candidate_kind_counts": {
+      "conditions": 16,
+      "mechanism": 57
+    },
+    "gold_count": 0,
+    "supplementary_status_counts": {
+      "not_checked": 14,
+      "not_requested_non_open_access": 5,
+      "skip_supplements_current_pilot": 4,
+      "unavailable_no_pmcid": 2
+    }
+  },
+  "literature_verification": {
+    "schema_version": "praxis.literature-verification.v1",
+    "selected_papers": 25,
+    "fulltext_sources_verified": 4,
+    "native_xpath_passages_verified": 1210,
+    "quoted_spans_verified": 73,
+    "native_compound_record_mappings_verified": 39,
+    "all_case_links_train_only": true,
+    "offline_rebuilds": 2,
+    "network_calls_allowed": false,
+    "all_output_files_byte_identical": true,
+    "output_sha256": {
+      "selection.json": "7008ee24fbed15a88f9b517dbc3a881f40c7f8596ee6b1256c301f25f8e58c9a",
+      "papers.jsonl": "74af53944c8c9300d2875816f5796aa06d17e1898f51483d7d14813953dbf1f3",
+      "passages.jsonl": "5dd933e173be7334041c7610ce22a017fda7a53bc46918b9d44f8891c5b2cfff",
+      "extraction_candidates.jsonl": "7e7f09de2c57959c54f6cf9457dd1bf065f6511ce3f8f21abcc2ced9f2181044",
+      "summary.json": "56af59e9e58272307ee31a01a3ac9948eead551dc4cf3176832ff62aff334a60",
+      "compound_bindings.jsonl": "da34babb9b3da61de6bf8562d4a9b07d247aa8a87eca823d0e84762a2da4869c",
+      "compound_bindings.summary.json": "20d4cc1e213644922c6f761193a50a75314eef27e9a455f88a7944a4c6057555"
+    },
+    "automatic_gold_count": 0,
+    "supplementary_policy": "skip_supplements_current_pilot",
+    "source_failure_scope": "14 EuropePMC 502/503; each associated verified PMCID one official PMC OAI request, all HTTP400; no further retries/sources",
+    "native_cache_success_receipts": 17,
+    "native_cache_failure_receipts": 32,
+    "receipt_count_excludes_filesystem_appledouble": true
+  },
+  "joint_components": {
+    "record_count": 3,
+    "MIC_measurement_count": 3,
+    "claim_count": 3,
+    "source_reviewed": true,
+    "model_generated_literature_paraphrases": true,
+    "model_generated_MIC_targets": false,
+    "human_reviewed": false,
+    "complete_agent_report_count": 0
+  },
+  "joint_mechanism_examples": {
+    "phenotypic_rescue_experimental": 1,
+    "author_proposed_pathway": 1,
+    "unresolved": 1,
+    "direct_target_binding": 0
+  },
+  "source_verified_omics_strains_in_train": 1,
+  "all_numeric_target_measurements_train_only": true,
+  "original_MIC_files_copied": false,
+  "original_omics_files_copied": false,
+  "full_papers_uploaded_to_Git": false,
+  "paid_LLM_API_calls": 0,
+  "training_runs": 0,
+  "MIC_accuracy_measured": false,
+  "omics_gain_measured": false,
+  "source_versions": {
+    "dataset_summary_sha256": "86c88d0e142b0a27bea4027a75abc3df12ec6d6947f664af5f5ca95ca1476993",
+    "MIC_files": {
+      "mic_sft.jsonl": {
+        "sha256": "bb16c22395230955e91a821468995ee9f0258e434f2e3bc63583cf1b74fa8069"
+      },
+      "private_training_sources.jsonl": {
+        "sha256": "a057980e39ab5d5c61d8ccc42c68a6086b35184f2f1361b0aa8a81485ccaf81e"
+      },
+      "observation_views.jsonl": {
+        "sha256": "7451b30c77646b7863fb4381e0a3567cfcfa1ac39874d2bfa88909c193200db6"
+      },
+      "joint_review_queue.jsonl": {
+        "sha256": "b997b3f6fa1bf71819669bae1454fa0e363793ee4a5dbb90a45a56a3d5227f58"
+      }
+    },
+    "joint_input_files": {
+      "/Volumes/T7/PRAXIS-virtualcell/local/strain_training_20261007/supervision/v1/mic_sft.jsonl": "bb16c22395230955e91a821468995ee9f0258e434f2e3bc63583cf1b74fa8069",
+      "/Volumes/T7/PRAXIS-virtualcell/local/strain_training_20261007/supervision/v1/joint_review_queue.jsonl": "b997b3f6fa1bf71819669bae1454fa0e363793ee4a5dbb90a45a56a3d5227f58",
+      "/Volumes/T7/PRAXIS-virtualcell/local/strain_training_20261007/literature/papers.jsonl": "74af53944c8c9300d2875816f5796aa06d17e1898f51483d7d14813953dbf1f3",
+      "/Volumes/T7/PRAXIS-virtualcell/local/strain_training_20261007/literature/passages.jsonl": "5dd933e173be7334041c7610ce22a017fda7a53bc46918b9d44f8891c5b2cfff",
+      "local/strain_training_20261007/literature/source_reviews.v1.json": "a3caca2065a17ff37a84e923b063cf8da56bf3231cb666dd58eb8fd51339e1e6"
+    }
+  },
+  "limitations": [
+    "Named study-local identities are not 917 independently de-duplicated biological strains.",
+    "48 numeric components have actual same-strain omics; other named-strain components are auxiliary without omics.",
+    "Three source-reviewed joint components extend three existing MIC cases, not three additional experiments.",
+    "Mechanism paraphrases are agent-authored and source-checked, not human gold or independent target validation.",
+    "Only four full texts were obtained; 14 articles have confirmed IDs but actual API failures, not a permanent absence conclusion.",
+    "The component contracts are not complete runtime Assessment/agent training trajectories.",
+    "Original scaffold split remains unchanged; no new strain/study holdout claim is made."
+  ],
+  "software_checks": {
+    "CI_same_selection_passed": 1019,
+    "ruff": "passed",
+    "diff_check": "passed"
+  }
+}

@@ -20,6 +20,10 @@ def test_settings_reuse_one_local_key_without_exposing_it(tmp_path):
     assert budget.max_output_tokens == 32768 and budget.reasoning_effort == "low"
     with pytest.raises(ValueError):
         LLMSettings.load(path, environ={"PRAXIS_MAX_OUTPUT_TOKENS": "0"})
+    routed = LLMSettings.load(path, environ={"PRAXIS_ANALYSIS_MODEL": "qwen-adapter",
+        "PRAXIS_ANALYSIS_BASE_URL": "http://127.0.0.1:8790", "PRAXIS_ANALYSIS_API_KEY": "private-analysis-key"})
+    assert routed.analysis_model == "qwen-adapter" and routed.analysis_provider == "qwen"
+    assert routed.analysis_max_output_tokens == 12288 and "private-analysis-key" not in repr(routed)
 
 
 def test_candidate_import_excludes_old_prediction_scores(tmp_path):
@@ -53,7 +57,7 @@ async def test_batch_bounds_concurrency_and_preserves_input_order(tmp_path, monk
         return {"status": "completed", "candidate": {"id": kwargs["candidate_id"]},
                 "assessment": {"activity": "uncertain", "mic_estimate": {"value": None}}}
     monkeypatch.setattr(llm, "LLMClient", Client)
-    monkeypatch.setattr(prediction, "analyze_candidate", analyze)
+    monkeypatch.setattr(prediction, "analyze_with_agents", analyze)
     monkeypatch.setattr(prediction, "render_report", lambda result: result["candidate"]["id"])
     args = argparse.Namespace(command="batch", env_file=env, model=None, input=source,
                               limit=None, output=tmp_path / "reports", concurrency=2,
@@ -91,7 +95,7 @@ def test_web_profile_selection_and_no_key_failure(tmp_path, web_profiles):
         assert client.get("/").status_code == 200
         assert client.get("/api/profiles").json()["profiles"][0]["strain"] == "AB5075"
         assert client.get("/api/profiles/wrong-strain").status_code == 404
-        response = client.post("/api/analyze", json={"smiles": "CCO"})
+        response = client.post("/api/analyze", json={"smiles": "CCO", "profile_id": "AB5075-AZI000"})
         assert response.status_code == 503
 
 

@@ -1,0 +1,347 @@
+{
+  "schema_version": "praxis.qwen-first-formal-recovery.v1",
+  "checked_at": "2026-10-09T00:07:16.552872+00:00",
+  "baseline": {
+    "generated": 64,
+    "assessment_schema_valid": 64,
+    "status_counts": {
+      "completed": 32,
+      "unsupported": 32
+    },
+    "platform_eligible_count": 0,
+    "score_status": "scored",
+    "metrics": {
+      "record_count": 64,
+      "valid_report_count": 32,
+      "report_coverage": 0.5,
+      "point_prediction_count": 0,
+      "point_coverage": 0.0,
+      "point_exact_measurements_scored": 0,
+      "point_mae_log2": null,
+      "point_within_one_dilution": null,
+      "point_within_two_dilutions": null,
+      "censored_point_measurements_scored": 0,
+      "censored_point_consistency": null,
+      "observation_count_match_rate": 0.0,
+      "observation_relation_multiset_match_rate": 0.0,
+      "exact_observation_list_records_scored": 0,
+      "exact_observation_list_mae_log2": null,
+      "censored_boundary_records_scored": 0,
+      "censored_boundary_mae_log2": null,
+      "invalid_or_failed_records": {
+        "unsupported": 32
+      }
+    },
+    "evidence_issues": {
+      "available_structure_requires_grounded_hypothesis": 32,
+      "invalid_observation_reference": 28,
+      "selected_modality_not_cited:genome": 31,
+      "structure_compartment_requires_exact_reference": 32,
+      "target_identity_not_bound_to_evidence": 14,
+      "unresolved_evidence_pointer": 15,
+      "quoted_value_does_not_match_tool": 14,
+      "selected_modality_not_cited:proteome": 2,
+      "selected_modality_not_cited:transcriptome": 2,
+      "source_id_does_not_match_tool": 4
+    },
+    "source": "reports/first_formal_contract_pipeline_20261008/baseline.predictions.jsonl",
+    "score_source": "reports/first_formal_contract_pipeline_20261008/baseline.score.json"
+  },
+  "first_formal_segment": {
+    "status": "stopped_at_checkpoint",
+    "optimizer_steps": 3,
+    "training_identity": "9661817c0749f462f9950c8118a5aca7c2b441bf27a3b815eba3da9d2e4f0c44",
+    "precision": "bf16",
+    "sampling": {
+      "strategy": "shuffled_once",
+      "task_oversampling": false,
+      "records": 7193
+    },
+    "runtime_evidence": {
+      "training_microbatches_per_rank": 12,
+      "max_training_tokens_local": 14309,
+      "finite_gradient_checks": 3,
+      "max_sampled_lora_update": 2.148886960640084e-05,
+      "gradient_accumulation_steps": 4,
+      "rng_state_restored": false,
+      "microbatches_per_optimizer_step": [
+        4,
+        4,
+        4
+      ],
+      "resumed_global_step": 0,
+      "max_training_tokens_per_rank": [
+        14309,
+        14900,
+        31409,
+        14292,
+        14381,
+        13923,
+        1042,
+        14490
+      ],
+      "backward_microbatches_per_rank": 12,
+      "adapter_tensor_reload": {
+        "status": "passed",
+        "tensor_count": 896,
+        "all_finite": true,
+        "exact_match": true
+      }
+    },
+    "peak_allocated_GiB_per_rank": [
+      19.369,
+      19.809,
+      28.583,
+      19.417,
+      19.49,
+      19.286,
+      13.486,
+      19.465
+    ],
+    "train_loss_this_run": 0.46822258830070496,
+    "checkpoint": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_compact_formal_20261008/checkpoint-3",
+    "guard": {
+      "unit": "praxis-qwen-formal-bbc1245529e4.service",
+      "command": [
+        "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/.venv/bin/python",
+        "-m",
+        "accelerate.commands.launch",
+        "--config_file",
+        "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/configs/finetuning/fsdp_a100_8gpu.yaml",
+        "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/scripts/finetuning/train_qwen_lora.py",
+        "--config",
+        "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/reports/first_formal_contract_pipeline_20261008/training/recipe.yaml",
+        "--train",
+        "--max-steps",
+        "225",
+        "--stop-after-steps",
+        "3",
+        "--report",
+        "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/reports/first_formal_contract_pipeline_20261008/training/step-3.train.json"
+      ],
+      "started_at": "2026-10-08T14:39:14.217224+00:00",
+      "limits_verified": true,
+      "gate_released": true,
+      "outcome": "error",
+      "phase": "monitor",
+      "requested_limits": {
+        "memory.max": 322122547200,
+        "memory.high": 279172874240,
+        "memory.swap.max": 0
+      },
+      "min_host_available_gib": 319.74588775634766,
+      "cgroup_peak_gib": 173.58047103881836,
+      "memory_events": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0
+      },
+      "result": "success",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-formal-bbc1245529e4.service",
+      "actual_limits": {
+        "memory.max": 322122547200,
+        "memory.high": 279172874240,
+        "memory.swap.max": 0,
+        "memory.oom.group": 1
+      },
+      "cgroup_peak_source": "sampled_memory_current",
+      "active_state": "active",
+      "sub_state": "running",
+      "main_pid": 57679,
+      "service_exit_status": "0",
+      "final_memory_snapshot_unavailable": true,
+      "failure_reason": "[Errno 2] No such file or directory: '/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-formal-bbc1245529e4.service/memory.current'",
+      "cleanup_owned_unit": true,
+      "cleanup_result": "success",
+      "cleanup_active_state": "inactive",
+      "finished_at": "2026-10-08T14:50:42.884183+00:00"
+    }
+  },
+  "exit_probe": {
+    "unit": "praxis-qwen-exit-probe-20261009.service",
+    "command": [
+      ".venv/bin/python",
+      "-c",
+      "print(42)"
+    ],
+    "started_at": "2026-10-09T00:04:36.003623+00:00",
+    "limits_verified": true,
+    "gate_released": true,
+    "outcome": "success",
+    "phase": "monitor",
+    "requested_limits": {
+      "memory.max": 67108864,
+      "memory.high": 50331648,
+      "memory.swap.max": 0
+    },
+    "min_host_available_gib": 492.3910140991211,
+    "cgroup_peak_gib": 0.00429534912109375,
+    "memory_events": {
+      "low": 0,
+      "high": 0,
+      "max": 0,
+      "oom": 0,
+      "oom_kill": 0
+    },
+    "result": "success",
+    "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-exit-probe-20261009.service",
+    "actual_limits": {
+      "memory.max": 67108864,
+      "memory.high": 50331648,
+      "memory.swap.max": 0,
+      "memory.oom.group": 1
+    },
+    "cgroup_peak_source": "sampled_memory_current",
+    "active_state": "active",
+    "sub_state": "exited",
+    "main_pid": 0,
+    "service_exit_status": "0",
+    "final_memory_snapshot_unavailable": true,
+    "remaining_cgroup_pids": [],
+    "cleanup_owned_unit": true,
+    "cleanup_result": "success",
+    "cleanup_active_state": "inactive",
+    "finished_at": "2026-10-09T00:04:37.092504+00:00"
+  },
+  "recovery_launch": {
+    "unit": "praxis-qwen-first-formal-resume-20261009.service",
+    "command": [
+      "systemd-run",
+      "--user",
+      "--unit=praxis-qwen-first-formal-resume-20261009.service",
+      "--service-type=exec",
+      "--property=MemoryMax=512M",
+      "--property=MemoryHigh=384M",
+      "--property=MemorySwapMax=0",
+      "--property=OOMPolicy=kill",
+      "--property=KillMode=mixed",
+      "--property=TimeoutStopSec=45s",
+      "--property=RuntimeMaxSec=48h",
+      "--property=WorkingDirectory=/home/zkyd/data1/mzy/qwen-PRAXIS-MIC",
+      "--setenv=PYTHONPATH=/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/runtime",
+      "--setenv=PYTHONUNBUFFERED=1",
+      "--",
+      "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/.venv/bin/python",
+      "-u",
+      "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/scripts/finetuning/run_qwen_pipeline.py",
+      "--root",
+      "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC",
+      "--reports",
+      "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/reports/first_formal_contract_pipeline_20261008",
+      "--pilot",
+      "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/evaluation_pilot_v4_contract_20261008",
+      "--config",
+      "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/configs/finetuning/qwen3_32b_joint_lora_v4_compact.yaml",
+      "--scoring-dataset",
+      "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/qwen_joint_sft_v3",
+      "--audit",
+      "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/reports/v3_validation_assay_audit.json",
+      "--source-path-map",
+      "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/source_refs/source_path_map.json",
+      "--resume-from-checkpoint",
+      "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_compact_formal_20261008/checkpoint-3",
+      "--training-reports",
+      "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/reports/first_formal_contract_pipeline_20261008/training_resume_20261009"
+    ],
+    "host_available_gib_before": 492.39445877075195,
+    "GPU_MiB_before": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "pipeline": {
+    "schema_version": "praxis.qwen-pipeline.v1",
+    "identity": {
+      "pilot_files": {
+        "validation": "ca9f68efde69e4b5e5ba3b145e07704727370944f0e61c901e76932deacb8bf7",
+        "without_omics": "9e3fef7c8235739ef4967aef78ecc995bac05df921cfeb737b777835811203d2",
+        "without_structure": "6b7544bb5dc3f2c8e7103b89dbec87f4c38948c7600e5382df5427c6a9b2d021"
+      },
+      "formal_config_sha256": "2a6603e57b9699b4937881fe3964b48b9bad5ff82aee3f8ea9a0c8d5205f8311",
+      "root": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC",
+      "scoring_dataset": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/qwen_joint_sft_v3",
+      "audit_sha256": "a161c6c9f05e39d9362ac417753900d98611de8d45a739566acf225cb40b0d6c",
+      "source_path_map_sha256": "1825829d8f9dd86788e107d63aa2aa9e1a6c0b4bd4a013f073716a0bbbfcab62"
+    },
+    "started_at": "2026-10-08T12:23:54.435578+00:00",
+    "completed_stages": [
+      "baseline"
+    ],
+    "status": "running",
+    "stage": "formal_sft",
+    "updated_at": "2026-10-09T00:06:11.224474+00:00",
+    "recoveries": [
+      {
+        "previous_attempt": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/reports/first_formal_contract_pipeline_20261008/pipeline.attempt-1.json",
+        "checkpoint": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_compact_formal_20261008/checkpoint-3",
+        "from_optimizer_step": 3,
+        "training_reports": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/reports/first_formal_contract_pipeline_20261008/training_resume_20261009",
+        "reviewed_at": "2026-10-09T00:06:11.153376+00:00"
+      }
+    ]
+  },
+  "runner": {
+    "schema": "praxis.qwen-formal-segments.v1",
+    "status": "running",
+    "schedule": {
+      "records": 7193,
+      "world_size": 8,
+      "microbatches_per_rank": 900,
+      "optimizer_steps": 225,
+      "rank_padding_slots": 7,
+      "train_sha256": "5da28e1abac12fe55b6f5ce7a5c78f717ae47f81c349ffc60ee053162b26ad77",
+      "segment_steps": 3
+    },
+    "output_dir": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_compact_formal_20261008",
+    "completed_optimizer_steps": 3,
+    "segments": [
+      {
+        "from_step": 3,
+        "through_step": 6,
+        "status": "running",
+        "unit": "praxis-qwen-formal-00b9e260be52.service",
+        "guard_report": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/reports/first_formal_contract_pipeline_20261008/training_resume_20261009/step-6.guard.json",
+        "train_report": "/home/zkyd/data1/mzy/qwen-PRAXIS-MIC/reports/first_formal_contract_pipeline_20261008/training_resume_20261009/step-6.train.json"
+      }
+    ],
+    "started_at": "2026-10-09T00:06:11.326807+00:00",
+    "recipe_sha256": "1fad7f2ff980bbe451d8a1a6c2fa71c7eda9e30fb8857a235a96e74195acc3f4"
+  },
+  "snapshot": {
+    "host_available_gib": 482.8485298156738,
+    "worker_unit": "praxis-qwen-formal-00b9e260be52.service",
+    "worker_properties": {
+      "MainPID": "94127",
+      "OOMPolicy": "kill",
+      "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/praxis-qwen-formal-00b9e260be52.service",
+      "MemoryHigh": "279172874240",
+      "MemoryMax": "322122547200",
+      "MemorySwapMax": "0",
+      "KillMode": "control-group",
+      "ActiveState": "active",
+      "SubState": "running"
+    }
+  },
+  "local_validation": {
+    "passed": 46,
+    "ruff": "passed",
+    "git_diff_check": "passed"
+  },
+  "limitations": [
+    "Token cross entropy is not MIC accuracy.",
+    "Baseline numerical MIC predictions are absent; MIC error and dilution accuracy are null.",
+    "50% baseline report coverage is not accuracy.",
+    "The active formal epoch and matched post-SFT evaluations are incomplete.",
+    "The pilot is development validation, not the final heldout test.",
+    "No independently reviewed mechanism gold exists.",
+    "Raw data and base weights remain single-copy; only summary receipts are exported."
+  ]
+}

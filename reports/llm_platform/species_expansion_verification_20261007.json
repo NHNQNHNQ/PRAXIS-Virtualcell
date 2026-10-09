@@ -1,0 +1,895 @@
+{
+  "schema_version": "praxis.species-expansion-verification.v1",
+  "database_integrity": "ok",
+  "foreign_key_errors": 0,
+  "MIC_records": 24792,
+  "unique_structure_species_inputs": 14068,
+  "protocols": {
+    "compound": {
+      "status": "ready",
+      "records": 24792,
+      "unique_input_count": 14068,
+      "independent_groups": 10715,
+      "excluded_records": 0,
+      "largest_group_records": 664,
+      "largest_group_fraction": 0.026782833171990966,
+      "splits": {
+        "train": {
+          "records": 17553,
+          "independent_molecules": 7500,
+          "unique_input_count": 9878,
+          "groups": 7500,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 3274,
+              "independent_molecules": 1833,
+              "groups": 1833
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 8257,
+              "independent_molecules": 4005,
+              "groups": 4005
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 3022,
+              "independent_molecules": 1671,
+              "groups": 1671
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 3000,
+              "independent_molecules": 2267,
+              "groups": 2267
+            }
+          ],
+          "absent_species": []
+        },
+        "validation": {
+          "records": 2337,
+          "independent_molecules": 1072,
+          "unique_input_count": 1397,
+          "groups": 1072,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 423,
+              "independent_molecules": 245,
+              "groups": 245
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 1009,
+              "independent_molecules": 588,
+              "groups": 588
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 419,
+              "independent_molecules": 228,
+              "groups": 228
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 486,
+              "independent_molecules": 325,
+              "groups": 325
+            }
+          ],
+          "absent_species": []
+        },
+        "test": {
+          "records": 4902,
+          "independent_molecules": 2143,
+          "unique_input_count": 2793,
+          "groups": 2143,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 857,
+              "independent_molecules": 515,
+              "groups": 515
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 2384,
+              "independent_molecules": 1153,
+              "groups": 1153
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 778,
+              "independent_molecules": 456,
+              "groups": 456
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 883,
+              "independent_molecules": 650,
+              "groups": 650
+            }
+          ],
+          "absent_species": []
+        },
+        "unassigned": {
+          "records": 0,
+          "independent_molecules": 0,
+          "unique_input_count": 0,
+          "groups": 0,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            }
+          ],
+          "absent_species": [
+            287,
+            470,
+            562,
+            573
+          ]
+        }
+      },
+      "cross_split_shared_identity_counts": {
+        "compound": 0,
+        "scaffold": 868,
+        "study": 696
+      },
+      "required_identity_overlap": 0
+    },
+    "scaffold": {
+      "status": "ready",
+      "records": 24792,
+      "unique_input_count": 14068,
+      "independent_groups": 3415,
+      "excluded_records": 0,
+      "largest_group_records": 1190,
+      "largest_group_fraction": 0.04799935463052597,
+      "splits": {
+        "train": {
+          "records": 15553,
+          "independent_molecules": 7019,
+          "unique_input_count": 8979,
+          "groups": 2390,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 2664,
+              "independent_molecules": 1499,
+              "groups": 551
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 7878,
+              "independent_molecules": 3918,
+              "groups": 1399
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 2389,
+              "independent_molecules": 1429,
+              "groups": 510
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 2622,
+              "independent_molecules": 2056,
+              "groups": 650
+            }
+          ],
+          "absent_species": []
+        },
+        "validation": {
+          "records": 3021,
+          "independent_molecules": 1276,
+          "unique_input_count": 1665,
+          "groups": 342,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 576,
+              "independent_molecules": 334,
+              "groups": 83
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 1436,
+              "independent_molecules": 661,
+              "groups": 186
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 524,
+              "independent_molecules": 296,
+              "groups": 76
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 485,
+              "independent_molecules": 353,
+              "groups": 95
+            }
+          ],
+          "absent_species": []
+        },
+        "test": {
+          "records": 6218,
+          "independent_molecules": 2420,
+          "unique_input_count": 3424,
+          "groups": 683,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 1314,
+              "independent_molecules": 760,
+              "groups": 139
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 2336,
+              "independent_molecules": 1167,
+              "groups": 397
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 1306,
+              "independent_molecules": 630,
+              "groups": 147
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 1262,
+              "independent_molecules": 833,
+              "groups": 185
+            }
+          ],
+          "absent_species": []
+        },
+        "unassigned": {
+          "records": 0,
+          "independent_molecules": 0,
+          "unique_input_count": 0,
+          "groups": 0,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            }
+          ],
+          "absent_species": [
+            287,
+            470,
+            562,
+            573
+          ]
+        }
+      },
+      "cross_split_shared_identity_counts": {
+        "compound": 0,
+        "scaffold": 0,
+        "study": 622
+      },
+      "required_identity_overlap": 0
+    },
+    "study": {
+      "status": "ready",
+      "records": 24792,
+      "unique_input_count": 14068,
+      "independent_groups": 895,
+      "excluded_records": 0,
+      "largest_group_records": 500,
+      "largest_group_fraction": 0.02016779606324621,
+      "splits": {
+        "train": {
+          "records": 16652,
+          "independent_molecules": 7427,
+          "unique_input_count": 9723,
+          "groups": 626,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 3026,
+              "independent_molecules": 1793,
+              "groups": 155
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 7738,
+              "independent_molecules": 3864,
+              "groups": 321
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 2925,
+              "independent_molecules": 1737,
+              "groups": 120
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 2963,
+              "independent_molecules": 2246,
+              "groups": 215
+            }
+          ],
+          "absent_species": []
+        },
+        "validation": {
+          "records": 3052,
+          "independent_molecules": 1306,
+          "unique_input_count": 1799,
+          "groups": 90,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 487,
+              "independent_molecules": 342,
+              "groups": 20
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 1638,
+              "independent_molecules": 754,
+              "groups": 51
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 389,
+              "independent_molecules": 228,
+              "groups": 16
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 538,
+              "independent_molecules": 454,
+              "groups": 27
+            }
+          ],
+          "absent_species": []
+        },
+        "test": {
+          "records": 5088,
+          "independent_molecules": 2265,
+          "unique_input_count": 2987,
+          "groups": 179,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 1041,
+              "independent_molecules": 573,
+              "groups": 42
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 2274,
+              "independent_molecules": 1240,
+              "groups": 94
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 905,
+              "independent_molecules": 506,
+              "groups": 33
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 868,
+              "independent_molecules": 649,
+              "groups": 54
+            }
+          ],
+          "absent_species": []
+        },
+        "unassigned": {
+          "records": 0,
+          "independent_molecules": 0,
+          "unique_input_count": 0,
+          "groups": 0,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            }
+          ],
+          "absent_species": [
+            287,
+            470,
+            562,
+            573
+          ]
+        }
+      },
+      "cross_split_shared_identity_counts": {
+        "compound": 228,
+        "scaffold": 166,
+        "study": 0
+      },
+      "required_identity_overlap": 0
+    },
+    "scaffold_study": {
+      "status": "ready",
+      "records": 24792,
+      "unique_input_count": 14068,
+      "independent_groups": 169,
+      "excluded_records": 0,
+      "largest_group_records": 22207,
+      "largest_group_fraction": 0.895732494353017,
+      "splits": {
+        "train": {
+          "records": 24119,
+          "independent_molecules": 10332,
+          "unique_input_count": 13628,
+          "groups": 118,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 4469,
+              "independent_molecules": 2519,
+              "groups": 18
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 11210,
+              "independent_molecules": 5490,
+              "groups": 71
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 4155,
+              "independent_molecules": 2325,
+              "groups": 21
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 4285,
+              "independent_molecules": 3162,
+              "groups": 37
+            }
+          ],
+          "absent_species": []
+        },
+        "validation": {
+          "records": 402,
+          "independent_molecules": 230,
+          "unique_input_count": 278,
+          "groups": 17,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 59,
+              "independent_molecules": 55,
+              "groups": 4
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 281,
+              "independent_molecules": 173,
+              "groups": 13
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 36,
+              "independent_molecules": 24,
+              "groups": 3
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 26,
+              "independent_molecules": 26,
+              "groups": 4
+            }
+          ],
+          "absent_species": []
+        },
+        "test": {
+          "records": 271,
+          "independent_molecules": 153,
+          "unique_input_count": 162,
+          "groups": 34,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 26,
+              "independent_molecules": 19,
+              "groups": 4
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 159,
+              "independent_molecules": 83,
+              "groups": 19
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 28,
+              "independent_molecules": 6,
+              "groups": 3
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 58,
+              "independent_molecules": 54,
+              "groups": 11
+            }
+          ],
+          "absent_species": []
+        },
+        "unassigned": {
+          "records": 0,
+          "independent_molecules": 0,
+          "unique_input_count": 0,
+          "groups": 0,
+          "species": [
+            {
+              "taxon_id": 287,
+              "scientific_name": "Pseudomonas aeruginosa",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            },
+            {
+              "taxon_id": 470,
+              "scientific_name": "Acinetobacter baumannii",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            },
+            {
+              "taxon_id": 562,
+              "scientific_name": "Escherichia coli",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            },
+            {
+              "taxon_id": 573,
+              "scientific_name": "Klebsiella pneumoniae",
+              "records": 0,
+              "independent_molecules": 0,
+              "groups": 0
+            }
+          ],
+          "absent_species": [
+            287,
+            470,
+            562,
+            573
+          ]
+        }
+      },
+      "cross_split_shared_identity_counts": {
+        "compound": 0,
+        "scaffold": 0,
+        "study": 0
+      },
+      "required_identity_overlap": 0
+    }
+  },
+  "heterogeneous_labels": [
+    {
+      "taxon_id": 287,
+      "unique_structure_species_inputs": 2630,
+      "inputs_with_multiple_MIC_records": 909,
+      "inputs_with_multiple_exact_MICs": 762,
+      "exact_input_groups_with_any_value_disagreement": 621,
+      "exact_input_groups_spanning_more_than_one_twofold_step": 414,
+      "exact_input_groups_spanning_more_than_two_twofold_steps": 284
+    },
+    {
+      "taxon_id": 470,
+      "unique_structure_species_inputs": 5774,
+      "inputs_with_multiple_MIC_records": 1307,
+      "inputs_with_multiple_exact_MICs": 895,
+      "exact_input_groups_with_any_value_disagreement": 666,
+      "exact_input_groups_spanning_more_than_one_twofold_step": 385,
+      "exact_input_groups_spanning_more_than_two_twofold_steps": 252
+    },
+    {
+      "taxon_id": 562,
+      "unique_structure_species_inputs": 2378,
+      "inputs_with_multiple_MIC_records": 808,
+      "inputs_with_multiple_exact_MICs": 662,
+      "exact_input_groups_with_any_value_disagreement": 452,
+      "exact_input_groups_spanning_more_than_one_twofold_step": 289,
+      "exact_input_groups_spanning_more_than_two_twofold_steps": 229
+    },
+    {
+      "taxon_id": 573,
+      "unique_structure_species_inputs": 3286,
+      "inputs_with_multiple_MIC_records": 456,
+      "inputs_with_multiple_exact_MICs": 394,
+      "exact_input_groups_with_any_value_disagreement": 301,
+      "exact_input_groups_spanning_more_than_one_twofold_step": 184,
+      "exact_input_groups_spanning_more_than_two_twofold_steps": 129
+    }
+  ],
+  "inference_inputs_are_whitelisted": true,
+  "model_predictions_evaluated": false,
+  "limitations": [
+    "Repeated MIC records remain separate experimental observations; numeric spread is a data property, not model performance.",
+    "Each split protocol establishes only its declared isolation; overlap diagnostics expose the other shared identities.",
+    "Fixed species references cannot represent the experimental strain and condition variability behind repeated MICs."
+  ],
+  "coverage": {
+    "MIC_records": 24792,
+    "unique_compounds": 10813,
+    "species": [
+      {
+        "taxon_id": 287,
+        "scientific_name": "Pseudomonas aeruginosa",
+        "profile_id": "PA-SPECIES-REFERENCE",
+        "MIC_records": 4554,
+        "unique_compounds": 2630,
+        "studies": 217,
+        "available_modalities": [
+          "genome",
+          "proteome",
+          "transcriptome"
+        ],
+        "missing_modalities": [],
+        "species_reference_input_records": 4554,
+        "censoring": {
+          "exact": 3647,
+          "left": 20,
+          "right": 887
+        }
+      },
+      {
+        "taxon_id": 470,
+        "scientific_name": "Acinetobacter baumannii",
+        "profile_id": "AB-SPECIES-REFERENCE",
+        "MIC_records": 11650,
+        "unique_compounds": 5774,
+        "studies": 466,
+        "available_modalities": [
+          "genome",
+          "proteome",
+          "transcriptome"
+        ],
+        "missing_modalities": [],
+        "species_reference_input_records": 11650,
+        "censoring": {
+          "exact": 7835,
+          "interval": 117,
+          "left": 160,
+          "right": 3538
+        }
+      },
+      {
+        "taxon_id": 562,
+        "scientific_name": "Escherichia coli",
+        "profile_id": "EC-SPECIES-REFERENCE",
+        "MIC_records": 4219,
+        "unique_compounds": 2378,
+        "studies": 169,
+        "available_modalities": [
+          "genome",
+          "proteome",
+          "transcriptome"
+        ],
+        "missing_modalities": [],
+        "species_reference_input_records": 4219,
+        "censoring": {
+          "exact": 3446,
+          "left": 176,
+          "right": 597
+        }
+      },
+      {
+        "taxon_id": 573,
+        "scientific_name": "Klebsiella pneumoniae",
+        "profile_id": "KP-SPECIES-REFERENCE",
+        "MIC_records": 4369,
+        "unique_compounds": 3286,
+        "studies": 296,
+        "available_modalities": [
+          "genome",
+          "proteome",
+          "transcriptome"
+        ],
+        "missing_modalities": [],
+        "species_reference_input_records": 4369,
+        "censoring": {
+          "exact": 3676,
+          "left": 77,
+          "right": 616
+        }
+      }
+    ],
+    "excluded": {},
+    "duplicate_native_experiments_skipped": 0,
+    "raw_assets_copied": false,
+    "MIC_values_copied": false
+  },
+  "source_acquisition": {
+    "verified_new_records": 12342,
+    "verified_new_source_links": 49368,
+    "endpoint_raw_and_censoring_verified_count": 12342,
+    "canonical_labels_byte_identical_after_two_offline_rebuilds": true,
+    "original_canonical_labels_unchanged": true,
+    "new_native_response_files": 93,
+    "new_native_response_bytes": 46760246,
+    "source_version": "ChEMBL_37",
+    "source_issues": [],
+    "qualification": "Database reports with exact native links; no independent repeat experiment, full-text primary-paper verification or strict MIC/omics pairing is asserted.",
+    "cumulative_activity_counts": {
+      "562": 5000,
+      "573": 5000,
+      "287": 5000
+    },
+    "excluded_activity_count": 1858,
+    "exclusion_reason_counts": {
+      "legacy_rows_missing_native_activity_assay_document_ids": 1,
+      "aggregate_combination_potentiation_or_nonexperimental_context": 318,
+      "missing_or_invalid_native_measurement": 160,
+      "unsupported_or_unverified_mass_unit": 817,
+      "source_data_validity_flag": 110,
+      "assay_description_species_conflict": 217,
+      "assay_species_taxon_not_exact": 112,
+      "missing_native_molecule_structure": 120,
+      "native_standard_value_mismatch": 4
+    },
+    "coverage": "Bounded continuous pages with verified offsets, unique native activity IDs and stable source totals; not a complete ChEMBL export."
+  },
+  "supervision": {
+    "schema_version": "praxis.species-supervision-verification.v1",
+    "source_and_pointer_checks": "passed",
+    "human_review_status": "needs_review",
+    "trainable": false,
+    "prediction_is_gold": false,
+    "frozen_grouping": "scaffold",
+    "observation_view_count": 28,
+    "replayed_real_tool_call_count": 172,
+    "queried_native_feature_occurrences": 48,
+    "validated_evidence_reference_count": 2364,
+    "quoted_null_count": 352,
+    "AB_inferred_proteome_view_count": 4,
+    "queue_record_count": 32,
+    "selected_structures_by_taxon": {
+      "287": 8,
+      "470": 8,
+      "562": 8,
+      "573": 8
+    },
+    "unique_selected_smiles_across_species": 30,
+    "validated_train_private_answer_locators": 48,
+    "validation_or_test_locators": 0,
+    "model_calls": 0,
+    "experimental_MIC_values_materialized_or_copied": 0,
+    "limitations": [
+      "Checks verify actual tool responses and exact frozen train/database pointers, not human-approved biology, target mechanisms or numeric efficacy predictions.",
+      "Queue cases share 28 modality views; neither record count nor modality count indicates independent biological samples.",
+      "AB A1 untreated identity remains inferred from author group design, not independently verified per-sample annotation."
+    ]
+  },
+  "primary_protocol": "scaffold",
+  "protocol_interpretation": "Each protocol requires its own training split. Do not combine training sets or evaluate weights trained with a different protocol as independent.",
+  "tests": {
+    "passed": 934,
+    "ruff": "passed",
+    "git_diff_check": "passed"
+  },
+  "model_calls_this_stage": 0,
+  "training_runs_this_stage": 0
+}

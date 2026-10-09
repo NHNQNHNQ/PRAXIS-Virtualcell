@@ -1,0 +1,84 @@
+{
+  "schema": "praxis.public-validation-pilot-verification.v1",
+  "date": "2026-10-08",
+  "status": "prepared_and_actual_tool_replay_passed",
+  "pilot_dir": "local/joint_dataset_20261008/evaluation_pilot_v4_20261008",
+  "manifest_sha256": "1aa8e1a3835f8a0938a2872eb30b08ce0ca6d3cf8cd93753b163b0128a852061",
+  "record_count": 64,
+  "paired_ablation_record_count": 32,
+  "species_reference_counts": {
+    "287:auxiliary": 8,
+    "287:omics": 8,
+    "470:auxiliary": 8,
+    "470:omics": 8,
+    "562:auxiliary": 8,
+    "562:omics": 8,
+    "573:auxiliary": 8,
+    "573:omics": 8
+  },
+  "reference_profile_counts": {
+    "STRAIN-287-ATCC-27853-1743eb40dbce-REFERENCE": 8,
+    "STRAIN-470-AYE-176f14b18ad5-REFERENCE": 2,
+    "STRAIN-562-ATCC-25922-7beb95c60304-REFERENCE": 8,
+    "STRAIN-573-ATCC-10031-7bc56c4210de-REFERENCE": 8,
+    "AB5075-STRAIN-REFERENCE": 2,
+    "STRAIN-470-ATCC-19606-0015a2b95dd6-REFERENCE": 2,
+    "STRAIN-470-ATCC-17978-22717771efbd-REFERENCE": 2
+  },
+  "distinct_exact_strain_identity_count": 38,
+  "reference_modality_counts": {
+    "genome": 30,
+    "genome+proteome+transcriptome": 2
+  },
+  "structure_catalog_sha256": "888b5278aa87e630c967ecde8586f82ebc1febd6bc387173faa544ffeb0e209d",
+  "structure_catalog_matches_training_derivation": true,
+  "structure_bootstrap_calls": 32,
+  "structure_rows_per_call": {
+    "9": 32
+  },
+  "bootstrap_current_state_supported": false,
+  "actual_live_tool_replay": {
+    "status": "passed",
+    "calls_replayed": 211,
+    "overview": 32,
+    "search_features": 111,
+    "query_features": 36,
+    "cell_structure_overview": 32,
+    "mismatches": 0,
+    "comparison": "entire public tool data, exact same profile and supplied arguments"
+  },
+  "files": {
+    "validation.inputs.jsonl": {
+      "sha256": "df72951c1906049a50f8b18d3298950ee4597c600a8be1af54db5b2281d5802a",
+      "records": 64
+    },
+    "without_structure.inputs.jsonl": {
+      "sha256": "88adcfacc975d171c7e82a8495f34a22f969f5504383951733fc1273ac1e00a1",
+      "records": 32
+    },
+    "without_omics.inputs.jsonl": {
+      "sha256": "1792c68e32e94362a50cf2159c866fa468810111449a98afa76992fc76f440f2",
+      "records": 32
+    }
+  },
+  "scoring": {
+    "dataset": "data/processed/qwen_joint_sft_v3",
+    "audit": "reports/v3_validation_assay_audit.json",
+    "pilot_subset": true,
+    "source_path_map": "data/source_refs/source_path_map.json"
+  },
+  "private_answers_opened": 0,
+  "MIC_labels_opened": 0,
+  "large_model_loaded": false,
+  "raw_assets_copied": false,
+  "prediction_runs": 0,
+  "training_runs": 0,
+  "tests": {
+    "passed": 9,
+    "ruff": "passed"
+  },
+  "limitations": [
+    "This balanced pilot is diagnostic, not a prevalence-weighted validation estimate.",
+    "Ablations retain compound, exact strain and requested conditions; no_omics clears selected modalities."
+  ]
+}

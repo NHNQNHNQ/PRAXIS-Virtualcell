@@ -1,0 +1,59 @@
+# Authorized first formal epoch: all 7,193 records, fresh LoRA in a new output.
+# Guarded 12-step save/resume/export and full 31,740-token backward passed.
+# One 225-step LR schedule is retained across guarded three-step segments.
+# Each segment has max300GiB/high260GiB/swap0/host160GiB and a 40-minute deadline.
+# Engineering verification does not establish independent MIC prediction accuracy.
+# Verification: reports/llm_platform/qwen_v4_compact_trial_verification_20261008.json
+model_id: Qwen/Qwen3-32B
+model_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/models/Qwen3-32B
+data_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/data/processed/qwen_joint_sft_v4_compact
+output_dir: /home/zkyd/data1/mzy/qwen-PRAXIS-MIC/outputs/qwen3_32b_joint_lora_v4_compact_formal_20261008
+require_assessment_supervision: true
+sampling:
+  # Each source component is visited once per epoch. Mechanism rows are not repeated.
+  strategy: shuffled_once
+expected_packages:
+  torch: 2.6.0
+  transformers: 4.57.6
+  peft: 0.18.1
+  trl: 0.28.0
+  accelerate: 1.12.0
+  datasets: 4.5.0
+bf16: true
+attn_implementation: sdpa
+fsdp_bf16_lora_inputs: true
+activation_cpu_offload: true
+loss_chunk_tokens: 256
+# Validate this joint dataset with the actual tokenizer before training.
+# Batch padding follows observed length, rather than padding every row to this cap.
+max_length: 32768
+packing: false
+loss_mask: assistant_only_native_offsets
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+training:
+  ddp_timeout: 600
+  num_train_epochs: 1
+  max_steps: 225
+  learning_rate: 0.00005
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 4
+  gradient_checkpointing: true
+  warmup_ratio: 0.03
+  lr_scheduler_type: cosine
+  weight_decay: 0.0
+  max_grad_norm: 1.0
+  logging_steps: 1
+  seed: 20261008
+  data_seed: 20261008
+  optim: adamw_torch
+  save_strategy: 'steps'
+  save_steps: 3
+  save_total_limit: 3
+  eval_strategy: 'no'
+  report_to: 'none'
+  save_safetensors: true
+  save_only_model: false

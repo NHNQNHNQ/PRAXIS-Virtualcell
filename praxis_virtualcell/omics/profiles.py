@@ -201,6 +201,8 @@ class OrganismProfile:
             "genotype": m.genotype,
             "condition": condition,
             "modality": m.modality,
+            "available_modalities": ["transcriptome"],
+            "selected_modalities": ["transcriptome"],
             "feature_namespace": m.feature_namespace,
             "feature_count": len(self._genes),
             "annotated_feature_count": len(self._annotations),
@@ -212,6 +214,31 @@ class OrganismProfile:
             "unknown_fields": unknown,
             "source_locator": {"manifest": f"{self.profile_id}/manifest.json"},
             "provenance": m.provenance.model_dump(),
+        }
+
+    def select_modalities(self, modalities: list[str] | None = None) -> OrganismProfile:
+        """The historical RNA profile never implies measured genome or proteome."""
+        from praxis_virtualcell.omics.multiomics import validate_selection
+
+        validate_selection(modalities, ("transcriptome",))
+        return self
+
+    def query_features(self, modality: str, feature_ids: list[str], limit: int = 30) -> dict:
+        self.select_modalities([modality])
+        result = self.query_genes(feature_ids, limit)
+        return {
+            "profile_id": self.profile_id, "modality": modality,
+            "features": [dict(row, feature_id=row["gene_id"], modality=modality) for row in result["genes"]],
+            "missing_feature_ids": result["missing_gene_ids"], "truncated": result["truncated"],
+        }
+
+    def search_features(self, modality: str, query: str, limit: int = 30) -> dict:
+        self.select_modalities([modality])
+        result = self.search_annotations(query, limit)
+        return {
+            "profile_id": self.profile_id, "modality": modality, "query": query,
+            "features": [dict(row, feature_id=row["gene_id"], modality=modality) for row in result["genes"]],
+            "match_count": result["match_count"], "truncated": result["truncated"],
         }
 
     def _gene(self, index: int) -> dict:
@@ -285,6 +312,37 @@ def list_profiles(data_root=None) -> list[dict]:
         return []
     profiles = []
     for path in sorted(root.glob("*/manifest.json")):
+        try:
+            version = json.loads(path.read_text(encoding="utf-8")).get("schema_version")
+        except (OSError, ValueError, AttributeError) as exc:
+            raise ProfileError(f"Invalid organism manifest: {path}") from exc
+        if version in {"praxis.species-reference.v1", "praxis.strain-reference.v1"}:
+            overview = load_profile(path.parent.name, root).overview()
+            strain_reference = overview["input_role"] == "strain_reference"
+            profiles.append({
+                key: overview[key] for key in ("profile_id", "species", "strain", "condition", "source_id",
+                                               "available_modalities", "selected_modalities", "input_role",
+                                               "relation", "prediction_scope")
+            } | {"name": f"{overview['species']['scientific_name']} / {overview['strain']}" if strain_reference
+                 else f"{overview['species']['scientific_name']} / species reference",
+                 "label": overview["label"] if strain_reference else f"{overview['species']['scientific_name']} · 物种参考组学",
+                 "modality": "+".join(overview["available_modalities"]), "unit": None, "scale": None,
+                 "observation_unit": "independent_strain_references" if strain_reference else "independent_species_references"}
+                | ({"strain_namespace": overview["strain_namespace"], "identity_basis": overview["identity_basis"]}
+                   if strain_reference else {}))
+            continue
+        if version == "praxis.organism-profile.v2":
+            from praxis_virtualcell.omics.multiomics import load_multiomics_profile
+
+            overview = load_multiomics_profile(path.parent, path.parent.name).overview()
+            profiles.append({
+                key: overview[key] for key in ("profile_id", "species", "strain", "condition", "source_id",
+                                               "available_modalities", "selected_modalities")
+            } | {"name": f"{overview['strain']} / {overview['condition']['condition_id']}",
+                 "label": f"{overview['strain']} · {overview['condition']['condition_id']}",
+                 "modality": "+".join(overview["available_modalities"]),
+                 "unit": None, "scale": None, "observation_unit": "declared_measured_modalities"})
+            continue
         m = _manifest(path, path.parent.name)
         profiles.append({
             "profile_id": m.profile_id,
@@ -294,6 +352,8 @@ def list_profiles(data_root=None) -> list[dict]:
             "strain": m.strain,
             "condition": m.condition.model_dump(),
             "modality": m.modality,
+            "available_modalities": ["transcriptome"],
+            "selected_modalities": ["transcriptome"],
             "unit": m.unit,
             "scale": m.scale,
             "observation_unit": m.observation_unit,
@@ -309,6 +369,22 @@ def load_profile(profile_id: str = DEFAULT_PROFILE_ID, data_root=None) -> Organi
     profile_root = root / profile_id
     if not profile_root.is_dir() or not profile_root.resolve().is_relative_to(root):
         raise ProfileError(f"Profile not found: {profile_id}")
+    try:
+        version = json.loads((profile_root / "manifest.json").read_text(encoding="utf-8")).get("schema_version")
+    except (OSError, ValueError, AttributeError) as exc:
+        raise ProfileError(f"Invalid organism manifest: {profile_root / 'manifest.json'}") from exc
+    if version == "praxis.species-reference.v1":
+        from praxis_virtualcell.omics.species_reference import load_species_reference
+
+        return load_species_reference(profile_root, profile_id)
+    if version == "praxis.strain-reference.v1":
+        from praxis_virtualcell.omics.strain_reference import load_strain_reference
+
+        return load_strain_reference(profile_root, profile_id)
+    if version == "praxis.organism-profile.v2":
+        from praxis_virtualcell.omics.multiomics import load_multiomics_profile
+
+        return load_multiomics_profile(profile_root, profile_id)
     m = _manifest(profile_root / "manifest.json", profile_id)
     expression = _asset(profile_root, m.expression)
     annotations_path = _asset(profile_root, m.annotations)

@@ -36,33 +36,53 @@ def write_result(result: dict, output: str | Path) -> None:
 
 async def run_analysis(args):
     from praxis2.llm.client import LLMClient
-    from praxis_virtualcell.llm_prediction import analyze_candidate
+    from praxis_virtualcell.llm_prediction import analyze_with_agents
+    from praxis_virtualcell.llm_prediction.schemas import MICConditions
+    from praxis_virtualcell.llm_prediction.qwen_serving import analysis_client
+    from praxis_virtualcell.llm_prediction.workflow import normalize_molecule
     settings = LLMSettings.load(args.env_file)
     settings.require_key()
     model = args.model or settings.model
     output_override = getattr(args, "max_output_tokens", None)
     limits = {"max_output_tokens": settings.max_output_tokens if output_override is None else output_override,
               "reasoning_effort": getattr(args, "reasoning_effort", None) or settings.reasoning_effort}
+    limits["conditions"] = MICConditions(**{name: getattr(args, name, None) for name in (
+        "medium", "medium_supplements", "temperature_c", "exposure_hours", "method", "inoculum")}).model_dump()
+    if getattr(args, "modalities", None) is not None:
+        limits["modalities"] = args.modalities
+    if getattr(args, "knowledge_catalog", None) is not None:
+        limits["knowledge_catalog_path"] = args.knowledge_catalog
+    limits["include_cell_structure"] = not getattr(args, "without_cell_structure", False)
+    if getattr(args, "structure_catalog", None) is not None:
+        limits["structure_catalog_path"] = args.structure_catalog
     client = LLMClient(settings.api_key, settings.base_url, timeout_s=180)
+    qwen_client = analysis_client(settings)
+    if qwen_client is not None:
+        limits.update(analysis_client=qwen_client, analysis_model=settings.analysis_model,
+                      analysis_provider=settings.analysis_provider,
+                      analysis_max_output_tokens=output_override or settings.analysis_max_output_tokens)
     def progress(candidate_id):
         def emit(event):
             print(json.dumps({"candidate_id": candidate_id, "progress": event}, ensure_ascii=False), flush=True)
         return emit
     try:
         if args.command == "analyze":
-            result = await analyze_candidate(args.smiles, args.profile, client=client, model=model,
+            smiles = normalize_molecule(args.smiles)["canonical_smiles"]
+            result = await analyze_with_agents(smiles, args.profile, client=client, model=model,
                                              data_root=args.data_root, max_turns=args.max_turns,
                                              candidate_id=args.candidate_id, on_progress=progress(args.candidate_id), **limits)
             write_result(result, args.output)
             print(json.dumps({"status": result["status"], "report": str(Path(args.output).resolve())}, ensure_ascii=False))
             return 0 if result["status"] == "completed" else 2
         candidates = read_candidates(args.input, args.limit)
+        for candidate in candidates:
+            candidate["smiles"] = normalize_molecule(candidate["smiles"])["canonical_smiles"]
         destination = Path(args.output)
         destination.mkdir(parents=True, exist_ok=True)
         gate = asyncio.Semaphore(args.concurrency)
         async def analyze_one(index, candidate):
             async with gate:
-                result = await analyze_candidate(candidate["smiles"], args.profile, client=client, model=model,
+                result = await analyze_with_agents(candidate["smiles"], args.profile, client=client, model=model,
                                                  data_root=args.data_root, max_turns=args.max_turns,
                                                  candidate_id=candidate["id"], on_progress=progress(candidate["id"]), **limits)
             report = destination / f"{index + 1:03d}.json"
@@ -78,23 +98,38 @@ async def run_analysis(args):
         return 0 if all(item["status"] == "completed" for item in summary) else 2
     finally:
         await client.aclose()
+        if qwen_client is not None:
+            await qwen_client.aclose()
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="PRAXIS: real strain omics with LLM-only antibacterial inference")
+    parser = argparse.ArgumentParser(description="PRAXIS: strain-reference omics with LLM-only antibacterial inference")
     parser.add_argument("--data-root", help="Organism profile directory (default: data/organisms)")
     parser.add_argument("--env-file", help="Local credential file (default: .env)")
+    parser.add_argument("--knowledge-catalog", help="Curated mechanism catalog; never experimental MIC labels")
+    parser.add_argument("--structure-catalog", help="Sourced cell structure catalog; species priors and strain facts remain separate")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("profiles", help="List locally available organism profiles")
     inspect = sub.add_parser("inspect", help="Inspect real profile identity and omics coverage")
-    inspect.add_argument("--profile", default="AB5075-AZI000")
+    inspect.add_argument("--profile", default="AB5075-STRAIN-REFERENCE")
+    inspect.add_argument("--modalities", nargs="+", choices=["genome", "transcriptome", "proteome"])
+    inspect.add_argument("--cell-structure", action="store_true", help="Include sourced structural context without calling an LLM")
     for command in ("analyze", "batch"):
         item = sub.add_parser(command)
-        item.add_argument("--profile", default="AB5075-AZI000")
+        item.add_argument("--profile", default="AB5075-STRAIN-REFERENCE")
+        item.add_argument("--modalities", nargs="+", choices=["genome", "transcriptome", "proteome"],
+                          help="One or more available profile modalities used by the agents")
         item.add_argument("--model")
         item.add_argument("--max-turns", type=int, default=8)
         item.add_argument("--max-output-tokens", type=int, help="Per-call reasoning and answer budget (1024–131072)")
         item.add_argument("--reasoning-effort", choices=["low", "high", "max"])
+        item.add_argument("--without-cell-structure", action="store_true", help="Omit structural context for a deliberate comparison")
+        item.add_argument("--medium", help="Requested MIC assay medium; omics sampling conditions remain independent")
+        item.add_argument("--medium-supplement", dest="medium_supplements", action="append")
+        item.add_argument("--temperature-c", type=float)
+        item.add_argument("--exposure-hours", type=float)
+        item.add_argument("--method", help="MIC assay method")
+        item.add_argument("--inoculum", help="MIC assay inoculum, preserving its unit")
         if command == "analyze":
             item.add_argument("--smiles", required=True)
             item.add_argument("--candidate-id", default="candidate-001")
@@ -107,17 +142,196 @@ def main(argv=None):
     serve = sub.add_parser("serve", help="Open the strain/candidate analysis platform")
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8787)
+    export = sub.add_parser("export-sft", help="Export public agent/tool trajectories from a saved report")
+    export.add_argument("--input", required=True, help="Saved report JSON")
+    export.add_argument("--output", required=True, help="Output training trajectory JSONL")
+    export.add_argument("--supervision", help="Optional explicit reviewed supervision JSON")
+    curate = sub.add_parser("curate-labels", help="Prepare independent measured labels, quarantining ambiguous contexts")
+    curate.add_argument("--repo-root", default=str(Path(__file__).resolve().parents[1]))
+    curate.add_argument("--output", required=True)
+    freeze = sub.add_parser("freeze-evaluation", help="Freeze grouped inputs and a separate private answer index")
+    freeze.add_argument("--labels", required=True)
+    freeze.add_argument("--output", required=True)
+    freeze.add_argument("--grouping", choices=["compound", "scaffold", "strain", "study", "joint"], default="compound")
+    freeze.add_argument("--seed", type=int, default=20261007)
+    freeze.add_argument("--paired-only", action="store_true")
+    score = sub.add_parser("score-evaluation", help="Score saved predictions after inference, with coverage and censoring")
+    score.add_argument("--manifest", required=True)
+    score.add_argument("--predictions", required=True)
+    score.add_argument("--split", choices=["train", "validation", "test"], default="test")
+    score.add_argument("--output", required=True)
+    seeds = sub.add_parser("prepare-seeds", help="Prepare source-grounded tool supervision candidates for review")
+    seeds.add_argument("--output", required=True)
+    seeds.add_argument("--limit", type=int, default=80)
+    species_db = sub.add_parser("build-species-db", help="Link canonical measured labels to one reference per species and modality")
+    species_db.add_argument("--references", required=True, help="Selected native reference profiles JSON")
+    species_db.add_argument("--labels", nargs="+", required=True, help="Existing canonical ExperimentRecord JSONL files")
+    species_db.add_argument("--output", required=True, help="New version directory for the derived SQLite database")
+    coverage = sub.add_parser("species-db", help="Inspect species/MIC/reference coverage without reading MIC answers")
+    coverage.add_argument("--database", required=True)
+    species_inputs = sub.add_parser("export-species-inputs", help="Export species-reference inputs without endpoints or assay labels")
+    species_inputs.add_argument("--database", required=True)
+    species_inputs.add_argument("--output", required=True)
+    species_freeze = sub.add_parser("freeze-species-evaluation", help="Freeze species-reference inputs by global compound, scaffold or study groups")
+    species_freeze.add_argument("--database", required=True)
+    species_freeze.add_argument("--output", required=True)
+    species_freeze.add_argument("--grouping", choices=["compound", "scaffold", "study", "scaffold_study"], default="scaffold")
+    species_freeze.add_argument("--seed", type=int, default=20261007)
+    species_score = sub.add_parser("score-species-evaluation", help="Score frozen species-reference predictions with per-species coverage")
+    species_score.add_argument("--manifest", required=True)
+    species_score.add_argument("--predictions", required=True)
+    species_score.add_argument("--split", choices=["train", "validation", "test"], default="test")
+    species_score.add_argument("--output", required=True)
+    supervision = sub.add_parser("prepare-species-supervision", help="Prepare reviewed-later tool observations and train-only experimental answer pointers")
+    supervision.add_argument("--manifest", required=True, help="Frozen species evaluation manifest")
+    supervision.add_argument("--output", required=True)
+    supervision.add_argument("--limit-per-species", type=int, default=8)
+    acquire = sub.add_parser("acquire-species-mic", help="Reuse native metadata and acquire bounded official MIC pages for curation")
+    acquire.add_argument("--repo-root", default=str(Path(__file__).resolve().parents[1]))
+    acquire.add_argument("--archive-root", help="Existing archived AB project, for native molecule metadata reuse")
+    acquire.add_argument("--taxon-ids", nargs="+", type=int, choices=[470, 562, 573, 287], default=[562, 573, 287])
+    acquire.add_argument("--per-species-limit", type=int, default=300, help="Cumulative maximum native activities to inspect per species")
+    acquire.add_argument("--page-size", type=int, default=1000, help="Maximum activities in each continuation page")
+    acquire.add_argument("--reuse-cache", nargs="*", default=[], help="Existing native cache roots reused without copying responses")
+    acquire.add_argument("--reuse-labels", nargs="*", default=[], help="Canonical experimental JSONL files referenced without copying")
+    acquire.add_argument("--output", required=True)
+    strain_db = sub.add_parser("build-strain-dataset", help="Build strain identities and same-strain omics links over frozen cases")
+    strain_db.add_argument("--database", required=True)
+    strain_db.add_argument("--frozen-manifest", required=True)
+    strain_db.add_argument("--enrichments", help="Source-anchored strain/condition enrichment sidecar")
+    strain_db.add_argument("--output", required=True)
+    strain_sft = sub.add_parser("prepare-strain-supervision", help="Export train-only measured MIC targets with actual strain tool observations")
+    strain_sft.add_argument("--dataset", required=True, help="Strain dataset summary JSON")
+    strain_sft.add_argument("--output", required=True)
+    literature = sub.add_parser("acquire-literature", help="Acquire bounded official full-text sources for training-only literature review")
+    literature.add_argument("--cases", required=True, help="Strain dataset cases JSONL")
+    literature.add_argument("--limit", type=int, default=25)
+    literature.add_argument("--offline", action="store_true")
+    literature.add_argument("--include-supplements", action="store_true", help="Also attempt bounded supplementary archives; default pilot uses metadata and full text")
+    literature.add_argument("--output", required=True)
+    joint = sub.add_parser("prepare-joint-supervision", help="Compile source-reviewed drug/strain literature annotation targets")
+    joint.add_argument("--supervision", required=True, help="Strain MIC supervision directory")
+    joint.add_argument("--literature", required=True, help="Official literature snapshot directory")
+    joint.add_argument("--reviews", required=True, help="Explicit record-bound source review JSON")
+    joint.add_argument("--output", required=True)
     args = parser.parse_args(argv)
     try:
-        if args.command in {"profiles", "inspect"}:
-            from praxis_virtualcell.omics import list_profiles, load_profile
-            result = list_profiles(args.data_root) if args.command == "profiles" else load_profile(args.profile, args.data_root).overview()
+        if args.command == "prepare-joint-supervision":
+            from praxis_virtualcell.datasets.joint_supervision import prepare_joint_supervision
+            result = prepare_joint_supervision(args.supervision, args.literature, args.reviews, args.output)
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return 0
+        if args.command == "build-strain-dataset":
+            from praxis_virtualcell.datasets.strain_dataset import build_strain_dataset
+            from praxis_virtualcell.omics.profiles import _data_root
+            result = build_strain_dataset(args.database, args.frozen_manifest, args.output,
+                                          profile_root=_data_root(args.data_root), enrichments_path=args.enrichments)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "prepare-strain-supervision":
+            from praxis_virtualcell.datasets.strain_supervision import prepare_strain_supervision
+            print(json.dumps(prepare_strain_supervision(args.dataset, args.output), ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "acquire-literature":
+            from praxis_virtualcell.datasets.literature import acquire_literature
+            result = acquire_literature(args.cases, args.output, limit=args.limit, offline=args.offline,
+                                        skip_supplements=not args.include_supplements)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "acquire-species-mic":
+            from praxis_virtualcell.datasets.chembl_import import acquire_species_mic
+            result = acquire_species_mic(args.repo_root, args.output, taxon_ids=tuple(args.taxon_ids),
+                                         per_species_limit=args.per_species_limit, archive_root=args.archive_root,
+                                         reused_label_paths=tuple(args.reuse_labels),
+                                         reuse_cache_roots=tuple(args.reuse_cache), page_size=args.page_size)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "freeze-species-evaluation":
+            from praxis_virtualcell.datasets.species_evaluation import freeze_species_evaluation
+            result = freeze_species_evaluation(args.database, args.output, grouping=args.grouping, seed=args.seed)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0 if result["status"] == "ready" else 2
+        if args.command == "score-species-evaluation":
+            from praxis_virtualcell.datasets.species_evaluation import score_species_evaluation
+            result = score_species_evaluation(args.manifest, args.predictions, split=args.split)
+            output = Path(args.output)
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+            print(json.dumps({key: value for key, value in result.items() if key != "details"}, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "prepare-species-supervision":
+            from praxis_virtualcell.datasets.species_supervision import prepare_species_supervision
+            result = prepare_species_supervision(args.manifest, args.output, limit_per_species=args.limit_per_species)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "build-species-db":
+            from praxis_virtualcell.datasets.species_registry import build_species_database
+            from praxis_virtualcell.omics.profiles import _data_root
+            result = build_species_database(args.references, args.labels, args.output, profile_root=_data_root(args.data_root))
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "species-db":
+            from praxis_virtualcell.datasets.species_registry import database_coverage
+            print(json.dumps(database_coverage(args.database), ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "export-species-inputs":
+            from praxis_virtualcell.datasets.species_registry import export_species_inputs
+            count = export_species_inputs(args.database, args.output)
+            print(json.dumps({"records": count, "output": str(Path(args.output).resolve()),
+                              "prediction_scope": "species_reference", "labels_included": False}, ensure_ascii=False))
+            return 0
+        if args.command == "curate-labels":
+            from praxis_virtualcell.datasets.curation import curate_existing_labels
+            print(json.dumps(curate_existing_labels(args.repo_root, args.output), ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "freeze-evaluation":
+            from praxis_virtualcell.datasets.evaluation import freeze_evaluation
+            result = freeze_evaluation(args.labels, args.output, grouping=args.grouping, seed=args.seed,
+                                       paired_only=args.paired_only)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0 if result["status"] == "ready" else 2
+        if args.command == "score-evaluation":
+            from praxis_virtualcell.datasets.evaluation import score_evaluation
+            result = score_evaluation(args.manifest, args.predictions, split=args.split)
+            output = Path(args.output)
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+            print(json.dumps({key: value for key, value in result.items() if key != "details"}, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "prepare-seeds":
+            from praxis_virtualcell.datasets.seeds import prepare_seed_queue
+            from praxis_virtualcell.omics.profiles import _data_root
+            print(json.dumps(prepare_seed_queue(_data_root(args.data_root), args.output, limit=args.limit), ensure_ascii=False, indent=2))
+            return 0
+        if args.command in {"profiles", "inspect"}:
+            from praxis_virtualcell.omics import list_profiles, load_profile
+            if args.command == "profiles":
+                result = list_profiles(args.data_root)
+            else:
+                profile = load_profile(args.profile, args.data_root)
+                if args.modalities is not None:
+                    profile = profile.select_modalities(args.modalities)
+                result = profile.overview()
+                if args.cell_structure:
+                    from praxis_virtualcell.cell_structure import cell_structure_overview
+                    result["cell_structure"] = cell_structure_overview(result, catalog_path=args.structure_catalog)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "export-sft":
+            from praxis_virtualcell.llm_prediction.trajectories import export_trajectories, write_trajectories_jsonl
+            report = json.loads(Path(args.input).read_text(encoding="utf-8"))
+            supervision = json.loads(Path(args.supervision).read_text(encoding="utf-8")) if args.supervision else None
+            exported = export_trajectories(report, supervision)
+            count = write_trajectories_jsonl(args.output, exported)
+            print(json.dumps({"records": count, "skipped": len(exported["skipped"]),
+                              "output": str(Path(args.output).resolve())}, ensure_ascii=False))
+            return 0 if count else 2
         if args.command == "serve":
             import uvicorn
             from praxis_virtualcell.web.app import create_app
-            uvicorn.run(create_app(data_root=args.data_root, env_file=args.env_file), host=args.host, port=args.port)
+            uvicorn.run(create_app(data_root=args.data_root, env_file=args.env_file,
+                                   knowledge_catalog_path=args.knowledge_catalog,
+                                   structure_catalog_path=args.structure_catalog), host=args.host, port=args.port)
             return 0
         if not 1 <= args.max_turns <= 20:
             raise ValueError("max-turns must be between 1 and 20")
