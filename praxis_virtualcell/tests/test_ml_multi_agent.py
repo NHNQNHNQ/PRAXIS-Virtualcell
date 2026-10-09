@@ -1,4 +1,4 @@
-"""Task 2(W4b):通用 MLPredictorAgent —— 5+1 predictor 包装预测 == donor 逐元素。仅远端。"""
+"""Tests for ml multi agent."""
 import os
 
 import pytest
@@ -20,9 +20,9 @@ def test_agent_prediction_equals_donor(name):
     model, _ = build_predictor_from_ckpt(stem)
     ds = load_norman(split="test", max_perts=4, max_cells=8)
 
-    # 选第一个 donor 模型支持的非 control 样本(PerturbationSample 属性访问)
+
     item = next((ds[i] for i in range(len(ds)) if ds[i].kind in model.perturbation_kinds), None)
-    assert item is not None, f"{name}: 需要至少一个 non-control 样本"
+    assert item is not None, f"{name}: At least one non-control sample is required"
     targets = tuple(item.perturbation.split("+"))
 
     from predictors.base import Context, Perturbation

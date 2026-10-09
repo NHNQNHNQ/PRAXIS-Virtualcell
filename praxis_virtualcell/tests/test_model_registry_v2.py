@@ -367,11 +367,11 @@ def test_artifact_identity_rejects_unknown_bad_hash_and_unsafe_paths(mutate):
 @pytest.mark.parametrize(
     ("field", "value"),
     [
-        ("release_id", "/Volumes/T7/secret/model"),
+        ("release_id", "/Volumes/test-fixtures/secret/model"),
         ("release_id", r"C:\Users\secret\model"),
         ("release_id", r"\\server\share\model"),
         ("release_id", "file:///private/model"),
-        ("model_version", "/Volumes/T7/secret/model-version"),
+        ("model_version", "/Volumes/test-fixtures/secret/model-version"),
     ],
 )
 def test_public_release_identifiers_reject_path_shaped_values(field, value):
@@ -391,7 +391,7 @@ def test_contract_text_rejects_non_utf8_surrogates_as_validation_error():
 
 @pytest.mark.parametrize(
     "secret_field",
-    ["/Volumes/T7/private-field", "api_key_ABC123", "secretToken123"],
+    ["/Volumes/test-fixtures/private-field", "api_key_ABC123", "secretToken123"],
 )
 def test_validation_error_redacts_every_unknown_field_name(secret_field):
     artifact = complete_registry_payload()["artifacts"][0]

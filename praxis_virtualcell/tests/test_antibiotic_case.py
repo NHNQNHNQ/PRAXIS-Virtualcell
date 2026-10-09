@@ -1,8 +1,4 @@
-"""R3(v0.5):Bacteria antibiotic → growth case —— iML1515 靶反应抑制 FBA(真跑)。
-
-断言真实机制:trimethoprim(靶 DHFR)/ sulfamethoxazole(靶 DHPS2)→ growth arrest;
-非代谢靶抗生素(ciprofloxacin→旋转酶)→ abstain(GEM 不适用,不虚构)。无 cobra 或 SBML 缺失时 skip。
-"""
+"""Tests for antibiotic case."""
 import pytest
 
 pytest.importorskip("cobra")
@@ -17,7 +13,7 @@ from praxis_virtualcell.predictors.mechanistic.antibiotic import (
 )
 
 if not _IML1515.is_file():
-    pytest.skip(f"iML1515 缺失({_IML1515})", allow_module_level=True)
+    pytest.skip(f"iML1515 unavailable({_IML1515})", allow_module_level=True)
 
 
 @pytest.fixture(scope="module")
@@ -41,7 +37,7 @@ def test_trimethoprim_growth_arrest(gem):
     d = report.to_dict()
     assert dec.engine == "gem_fba"
     r = d["raw_output"]["antibiotics"][0]
-    assert r["target_rxn"] == "DHFR" and r["growth_arrest"] is True   # 真实致死
+    assert r["target_rxn"] == "DHFR" and r["growth_arrest"] is True
     assert d["reliability_decision"]["disposition"] == "accept"
 
 
@@ -55,7 +51,7 @@ def test_sulfamethoxazole_growth_arrest(gem):
 
 
 def test_non_metabolic_target_abstains(gem):
-    # 喹诺酮靶 DNA 旋转酶(非代谢)→ GEM 不适用 → abstain
+
     report, _ = run_antibiotic_case({
         "species": "bacteria", "cell_type": "E. coli", "perturbation_object": "drug",
         "perturbation_targets": ["ciprofloxacin"], "target_output": "growth",

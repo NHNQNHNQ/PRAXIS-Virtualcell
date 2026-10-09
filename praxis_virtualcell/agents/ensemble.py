@@ -1,5 +1,6 @@
-"""只汇总 success 结果(rejected/failed 不进 ensemble)。Coordinator 仅通讯+汇总。
-另算 model disagreement(pairwise cosine distance,§8.3),供 ReliabilityAgent 降级/abstain。"""
+"""Aggregate successful predictor outputs only; rejected/failed outputs are excluded. The coordinator communicates
+and aggregates. Pairwise cosine disagreement informs reliability downgrade or abstention.
+"""
 from __future__ import annotations
 
 import itertools
@@ -17,9 +18,10 @@ from praxis_virtualcell.model_zoo.adapter_sdk import (
 
 
 def _disagreement(vecs: list) -> dict:
-    """多 predictor delta 向量的分歧度:mean pairwise (1-cos)/2 ∈ [0,1](0=同向, 0.5=正交, 1=反向)。
-    cosine 尺度不变(只看方向),阈值跨 bench 稳定。零向量对记中性 0.5 且单列 n_zero_vector_pairs 便于审计
-    (避免如 MockLinear 恒零产生的伪分歧被误读为真方向冲突)。注:1 维 delta 下只能检符号翻转,幅度分歧不可见。"""
+    """Mean pairwise (1-cos)/2 disagreement in [0,1]: 0 aligned, 0.5 orthogonal, 1 opposite. Cosine is scale
+    invariant. Zero-vector pairs score 0.5 and are counted separately in n_zero_vector_pairs. One-dimensional
+    deltas reveal sign reversal but not magnitude disagreement.
+    """
     k = len(vecs)
     if k < 2:
         return {"score": None, "metric": "pairwise_cosine_distance", "n_models": k,
@@ -60,7 +62,7 @@ class EnsembleCoordinatorAgent(BaseAgent):
         results = message.payload["results"]
         ok = [r for r in results if r["status"] == "success"]
         used = [r["agent_name"] for r in ok]
-        rejected = [r["agent_name"] for r in results if r["status"] != "success"]  # 含 failed,保 test 断言
+        rejected = [r["agent_name"] for r in results if r["status"] != "success"]
         failed = [r["agent_name"] for r in results if r["status"] == "failed"]
         ensemble = None
         adapter_output = None
@@ -114,8 +116,8 @@ class EnsembleCoordinatorAgent(BaseAgent):
                 rejected = list(dict.fromkeys([*rejected, *(r["agent_name"] for r in ok)]))
         disagreement = _disagreement(vecs) if vecs else {
             "score": None, "metric": "pairwise_cosine_distance", "n_models": 0, "reason": "no_models"}
-        # per-predictor caution(如机制模型 disposition=caution/abstain 的 caution_flags)表面化,
-        # 不参与裁决(ensemble 不在红线上),只为 provenance 如实透传。
+
+
         model_cautions = {r["agent_name"]: r["uncertainty"]["caution_flags"]
                           for r in results
                           if (r.get("uncertainty") or {}).get("caution_flags")}

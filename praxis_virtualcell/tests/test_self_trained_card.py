@@ -1,5 +1,4 @@
-"""Phase 2:self_trained 模型必须有 training_card(training_data/split/baseline/metrics/provenance)。
-铁律:无 provenance 的自训模型不入库(fail-closed)。测:合法通过;缺 card → ValueError;缺字段 → ValueError。"""
+"""Tests for self trained card."""
 import pytest
 
 from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
@@ -51,7 +50,7 @@ def test_self_trained_card_missing_field_is_rejected(tmp_path):
         "    training_card:\n"
         "      training_data: SGD deletion library\n"
         "      split: by-gene holdout\n"
-        # 缺 baseline / metrics / provenance
+
     )
     with pytest.raises(ValueError) as ei:
         ModelZooRegistry(registry_path=_write(tmp_path, card))
@@ -59,7 +58,7 @@ def test_self_trained_card_missing_field_is_rejected(tmp_path):
 
 
 def test_public_model_needs_no_card(tmp_path):
-    """public_model 不要求 training_card(只 self_trained 要求)。"""
+    """Verify public model needs no card."""
     p = tmp_path / "reg.yaml"
     p.write_text(
         "models:\n"

@@ -39,7 +39,7 @@
       "sirolimus",
       "vorinostat"
     ],
-    "content": "每药每剂量 top-150 共识基因(from LINCS terms)",
+    "content": "Top-150 consensus genes per drug and dose (from LINCS terms)",
     "purpose": "R2 dose-response"
   }
 }

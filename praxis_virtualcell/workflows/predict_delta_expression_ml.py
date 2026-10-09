@@ -1,8 +1,6 @@
-"""M2:真 ML predictor 版 runtime —— `MLBackedPredictorAgent` 替代 mock,端到端 communicative workflow。
-
-借用 Mock* 的 name 槽位(`ModelApplicability._CANDIDATES` + brain `model_applicability` 已含这些 name),
-predictor 实现换成真 donor 模型(linear/latent/gnn);其余 agent(brain/ensemble/reliability/critic/provenance/report)
-复用 Week 2 骨架。仅远端 virtualcell 环境(import torch + donor)。
+"""Communicative workflow using MLBackedPredictorAgent with real donor linear/latent/gnn models in existing Mock*
+registry slots. Reuse the brain/ensemble/reliability/critic/provenance/report stack; requires remote torch and
+donor dependencies.
 """
 from __future__ import annotations
 
@@ -33,7 +31,7 @@ def build_runtime_ml(ckpt_dir: str, *, config=None, norman_ds=None):
     rt = AgentRuntime(cfg, bus=MessageBus(), clock=Clock(), idgen=IdGen())
     ds = norman_ds if norman_ds is not None else load_norman(split="test", max_perts=2, max_cells=2)
 
-    # 真 model 借用 Mock* name 槽位:ModelApplicability._CANDIDATES + brain 规则已含,路由不变,实现换真。
+
     for name, (pn, expected_class) in ML_SLOT_CHECKPOINTS.items():
         checkpoint_stem = os.path.join(ckpt_dir, pn)
         model_version = checkpoint_model_version(

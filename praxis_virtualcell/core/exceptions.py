@@ -1,26 +1,26 @@
-"""praxis_virtualcell 主链路异常(均不依赖 praxis2)。"""
+"""VirtualCell execution exceptions independent of praxis2."""
 from __future__ import annotations
 
 
 class PraxisVCError(Exception):
-    """所有本包异常基类。"""
+    """Base exception for the package."""
 
 
 class InputValidationError(PraxisVCError):
-    """VirtualCellRequest 解析/校验失败。"""
+    """VirtualCellRequest parsing or validation failure."""
 
 
 class RetrieveBeforePredictError(PraxisVCError):
-    """反幻觉硬门:未先检索 brain 就尝试预测。"""
+    """Prediction attempted before brain retrieval, violating the retrieve-before-predict gate."""
 
 
 class UnknownAgentError(PraxisVCError):
-    """dispatch 到未注册的 agent。"""
+    """Dispatch targets an unregistered agent."""
 
 
 class SchemaError(PraxisVCError):
-    """message/handoff schema 校验失败(缺必需字段 / payload 非 dict / 自由文本 handoff)。"""
+    """Message/handoff schema violation: missing fields, nondictionary payload, or free-text handoff."""
 
 
 class UnsupportedEngine(PraxisVCError):
-    """B1 case 分发:请求的 engine/物种/扰动组合尚无接入的真实 case runner。"""
+    """No real case runner supports the requested engine/species/perturbation combination."""

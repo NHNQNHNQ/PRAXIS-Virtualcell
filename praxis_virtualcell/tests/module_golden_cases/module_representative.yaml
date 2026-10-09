@@ -1,5 +1,3 @@
-# module routing golden(representative):4 物种 × 代表应用,正常命中。
-# expect 为 ModuleRouter 实跑产出值(不猜;不符=真实 bug)。
 cases:
   # ---- human(8)----
   - case_id: human_gene_expression

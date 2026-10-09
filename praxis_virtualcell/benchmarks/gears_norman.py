@@ -1,40 +1,36 @@
-"""Week 4c Phase 1:GEARS 原生 norman 训练 + eval。
-
-仅在 `virtualcell` env 跑(torch 2.6 + PyG 2.8 + cell-gears 0.0.2)。用 donor norman h5ad 适配 GEARS
-`PertData`(避免 dataverse 慢下载),复用 donor 本地 gene2go/essential。sys.path 注入 donor(不 vendor)。
-
-GEARS 0.0.2 老包兼容坑(见 finding_w4c_gears):
-- monkey-patch `pd.Series.nonzero`(GEARS 用 sparse_X[pandas_Series_mask],新 scipy/pandas 不兼容)。
-- 过滤 IER5L(不在 GEARS GO graph,否则训练 KeyError)。
-
-复现:
-    conda activate virtualcell
-    python -m praxis_virtualcell.benchmarks.gears_norman 5    # epochs
-
-结果(5ep):pearson_de 0.8392(GEARS 指标,**与 donor delta_pearson 不可比**:指标/split 不同)。
+"""Native GEARS Norman training/evaluation in the virtualcell environment (torch 2.6, PyG 2.8, cell-gears 0.0.2).
+Adapt local donor H5AD and gene2go/essential assets; patch Series.nonzero and exclude IER5L for compatibility.
+Historical 5-epoch pearson_de=0.8392 uses a different metric/split from donor delta-Pearson and is not directly
+comparable.
 """
 from __future__ import annotations
 
+import os
 import sys
 import time
 
-_DONOR = "/home/zkyd/data1/mzy/Virtual cell"
+_DONOR = os.environ.get("PRAXIS_DONOR_SOURCE_ROOT", "").strip()
+if not _DONOR:
+    raise RuntimeError("Set PRAXIS_DONOR_SOURCE_ROOT to the external donor source checkout")
 if _DONOR not in sys.path:
     sys.path.insert(0, _DONOR)
 
 
-def main(epochs: int = 5, gears_data: str = "/home/zkyd/data1/mzy/gears_data",
+def main(epochs: int = 5, gears_data: str | None = None,
          save_dir: str | None = None) -> dict:
+    gears_data = gears_data or os.environ.get("GEARS_DATA_ROOT", "").strip()
+    if not gears_data:
+        raise RuntimeError("Set GEARS_DATA_ROOT or pass gears_data explicitly")
     import pandas as pd_pkg
     import scanpy as sc
 
-    pd_pkg.Series.nonzero = lambda self: self.to_numpy().nonzero()  # GEARS + 新 pandas 兼容
+    pd_pkg.Series.nonzero = lambda self: self.to_numpy().nonzero()
     from gears import GEARS, PertData
 
     t0 = time.time()
     ad = sc.read_h5ad(_DONOR + "/data/raw/tasks_data/unseen_perts/norman2019_comb_stack.h5ad")
     pert = ad.obs["perturbation"].astype(str)
-    ad = ad[(~pert.str.contains("IER5L")).values].copy()  # IER5L 不在 GEARS GO graph
+    ad = ad[(~pert.str.contains("IER5L")).values].copy()
     pert = ad.obs["perturbation"].astype(str)
     ad.obs["condition"] = [("ctrl" if p == "control" else (p if "+" in p else f"{p}+ctrl")) for p in pert]
     ad.obs["cell_type"] = "K562"
@@ -51,14 +47,14 @@ def main(epochs: int = 5, gears_data: str = "/home/zkyd/data1/mzy/gears_data",
     m, _ = compute_metrics(res)
     out = {k: round(float(m[k]), 4) for k in m if "pearson" in k.lower() or "mse" in k.lower()}
     print(f"GEARS_METRICS: {out} (t={time.time() - t0:.0f}s)")
-    if save_dir:  # 非空则落盘(GEARS.save_model 存 config.pkl + model.pt);默认仍只训练打印
+    if save_dir:
         g.save_model(save_dir)
         print(f"GEARS_SAVED: {save_dir}")
     return out
 
 
 if __name__ == "__main__":
-    # argv[1]=epochs;argv[2]=save_dir(可选,非空则训练后落盘)
+
     _epochs = int(sys.argv[1]) if len(sys.argv) > 1 else 5
     _save = sys.argv[2] if len(sys.argv) > 2 else None
     main(_epochs, save_dir=_save)

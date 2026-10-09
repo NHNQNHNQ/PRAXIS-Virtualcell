@@ -1,15 +1,9 @@
-"""W5.3(v0.4,Phase II):Human 代谢通路 tendency case —— 表达 → 糖酵解/OXPHOS 活性(scFEA/Compass 思想)。
-
-数据:Kang 2018 IFN-β PBMC 的代谢子集(`data/cellstate/kang_metabolic_subset.json`,glycolysis/oxphos/hk
-panels)。分析:每 cell 归一 → 通路活性评分(panel−hk)→ ctrl vs stim 的 Cohen's d。
-
-治理对照(R6 核心):**同一 IFN-β 扰动、同一批细胞**,ISG 激活强(d≈2.5 → accept,见 cell_state case),
-但代谢通路 tendency 在**表达层信号弱**(d≈0.1-0.3 → downgrade)。agent 按证据**分别裁决**、不一刀切——
-即"reliability-governed reporting prevents overclaiming":不为"跑通"而硬报一个不存在的代谢重编程。
-
-科学默认:CP10k+log1p;panel = 教科书糖酵解/OXPHOS 基因;效应阈 accept |d|≥0.8 / caution 0.3 / 否则
-downgrade;通路评分是**表达层代理**,非真实通量。
+"""Expression-level glycolysis/OXPHOS proxy analysis in the Kang 2018 IFN-beta subset. Normalize per cell, compute
+panel-minus-housekeeping scores, and compare ctrl/stim with Cohen's d. The same cells show strong ISG activation
+(d≈2.5) but weak metabolic expression effects (d≈0.1–0.3), requiring separate verdicts. Defaults: CP10k+log1p,
+accept |d|≥0.8, caution 0.3, otherwise downgrade. Scores are expression proxies, not measured flux.
 """
+
 from __future__ import annotations
 
 import json
@@ -22,13 +16,17 @@ from praxis_virtualcell.predictors.state.scoring import cohens_d, lognorm, panel
 
 _DEFAULT_SUBSET = Path(__file__).resolve().parents[3] / "data" / "cellstate" / "kang_metabolic_subset.json"
 _D_ACCEPT, _D_CAUTION = 0.8, 0.3
-_BOUNDARY = ("通路活性评分是**表达层代理**(CP10k+log1p,panel−housekeeping),**非**真实代谢通量(需 "
-             "scFEA/Compass/13C-flux 才是通量);Kang 2018 短时刺激 PBMC 子集;弱效应 downgrade 表'表达层"
-             "无足够证据支持代谢重编程',非'代谢无变化'(可能后转录层)。")
+_BOUNDARY = (
+    "Pathway scores are expression-level proxies (CP10k+log1p, panel−housekeeping), not "
+    "measured metabolic flux (which requires scFEA/Compass/13C-flux analysis); Kang 2018 "
+    "is a briefly stimulated PBMC subset; weak-effect downgrade means insufficient "
+    "expression-level evidence of metabolic reprogramming, not unchanged metabolism "
+    "(post-transcriptional effects may remain)."
+)
 
 
 class MetabolicDB:
-    """Kang 代谢通路子集(committed):glycolysis / oxphos / hk panels。"""
+    """Committed Kang glycolysis/oxphos/housekeeping pathway subset."""
 
     def __init__(self, json_path: str | Path | None = None) -> None:
         self._d = json.loads(Path(json_path or _DEFAULT_SUBSET).read_text(encoding="utf-8"))
@@ -51,18 +49,22 @@ class MetabolicDB:
             if s is None:
                 continue
             (stim if c["label"] == "stim" else ctrl).append(s)
-        return {"panel": panel, "n_ctrl": len(ctrl), "n_stim": len(stim),
-                "ctrl_mean": round(sum(ctrl) / len(ctrl), 4) if ctrl else None,
-                "stim_mean": round(sum(stim) / len(stim), 4) if stim else None,
-                "cohens_d": round(cohens_d(stim, ctrl), 3)}
+        return {
+            "panel": panel,
+            "n_ctrl": len(ctrl),
+            "n_stim": len(stim),
+            "ctrl_mean": round(sum(ctrl) / len(ctrl), 4) if ctrl else None,
+            "stim_mean": round(sum(stim) / len(stim), 4) if stim else None,
+            "cohens_d": round(cohens_d(stim, ctrl), 3),
+        }
 
 
 def run_metabolic_tendency_case(raw_req: dict, db: MetabolicDB | None = None):
-    """Human 代谢通路 tendency case → 7 部分 CaseReport(真实评分 + 受治理裁决)。"""
+    """Return a 7-part human metabolic-tendency report with observed scores and governance."""
     norm = normalize_request(raw_req)
     dec = route(norm)
     if dec.engine != "pathway_scoring":
-        raise ValueError(f"metabolic tendency case 期望 pathway_scoring,route 给了 {dec.engine}")
+        raise ValueError(f"metabolic tendency case expected pathway_scoring; routing selected {dec.engine}")
     db = db or MetabolicDB()
 
     shifts = [db.pathway_shift(p) for p in db.panels()]
@@ -79,17 +81,33 @@ def run_metabolic_tendency_case(raw_req: dict, db: MetabolicDB | None = None):
     return CaseReport(
         case_id=raw_req.get("case_id", "S_ifn_metabolic_tendency"),
         structured_input=dict(raw_req),
-        object_normalization={"species": norm["species"], "perturbation_object": norm["perturbation_object"],
-                              "normalized_targets": norm["perturbation_targets"],
-                              "target_output": norm["target_output"], "preprocessing": "CP10k + log1p"},
-        models_tools_selected={"engine": dec.engine, "tool": "Kang 2018 + 代谢通路 panel(糖酵解/OXPHOS)",
-                               "method": "表达层代谢通路活性评分(scFEA/Compass 思想)", "reason": dec.reason},
+        object_normalization={
+            "species": norm["species"],
+            "perturbation_object": norm["perturbation_object"],
+            "normalized_targets": norm["perturbation_targets"],
+            "target_output": norm["target_output"],
+            "preprocessing": "CP10k + log1p",
+        },
+        models_tools_selected={
+            "engine": dec.engine,
+            "tool": "Kang 2018 + metabolic pathway panels (glycolysis/OXPHOS)",
+            "method": "Expression-level metabolic pathway scoring (inspired by scFEA/Compass)",
+            "reason": dec.reason,
+        },
         raw_output={"pathway_shifts": shifts, "max_abs_cohens_d": round(max_d, 3)},
-        baseline_comparison={"baseline": "unstimulated (ctrl) 通路活性评分",
-                             "contrast_note": "对照 cell_state ISG 激活(同扰动 d≈2.5 accept):代谢层 d 弱 → 分别裁决"},
+        baseline_comparison={
+            "baseline": "Unstimulated (ctrl) pathway score",
+            "contrast_note": (
+                "Compare cell_state ISG activation (same perturbation, d≈2.5, accept): weak metabolic "
+                "effects receive an independent verdict"
+            ),
+        },
         reliability_decision={"disposition": disposition, "caution_flags": flags, "data_gated": False},
-        provenance_boundary={"tool": "pertpy Kang 2018 + pathway scoring",
-                             "source": "pertpy.data.kang_2018 (GSE96583)",
-                             "provenance_file": "data/cellstate/PROVENANCE.json",
-                             "rules_hit": [dec.reason], "boundary": _BOUNDARY},
+        provenance_boundary={
+            "tool": "pertpy Kang 2018 + pathway scoring",
+            "source": "pertpy.data.kang_2018 (GSE96583)",
+            "provenance_file": "data/cellstate/PROVENANCE.json",
+            "rules_hit": [dec.reason],
+            "boundary": _BOUNDARY,
+        },
     ), dec

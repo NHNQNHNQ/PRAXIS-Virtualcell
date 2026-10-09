@@ -20,6 +20,6 @@ def test_structured_fields_identical_offline_vs_llm_assisted():
     llm = build_runtime(cfg).run_workflow(VirtualCellRequest.from_dict(_HUMAN))
     for k in ("abstain", "prediction", "models_used", "models_rejected",
               "reliability", "abstain_reasons", "critic_violations"):
-        assert off[k] == llm[k], f"字段 {k} 在 llm_assisted 下被改了"
-    assert "narrative" in llm  # LLM 只新增叙述
+        assert off[k] == llm[k], f"Field {k} changed under llm_assisted"
+    assert "narrative" in llm
     assert "llm_route_suggestion" in llm["provenance"]

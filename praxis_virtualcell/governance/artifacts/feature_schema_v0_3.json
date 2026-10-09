@@ -16,5 +16,5 @@
     "delta_pearson",
     "per_predictor_delta_pearson"
   ],
-  "note": "runtime 只可用 model_features(推理期可得);labels_forbidden 严禁进入 runtime 特征(防泄漏)"
+  "note": "runtime may use only model_features available at inference; labels_forbidden must never enter runtime features (leakage prevention)"
 }

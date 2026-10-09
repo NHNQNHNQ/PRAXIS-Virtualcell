@@ -149,17 +149,17 @@ test("pack library exposes the factory lifecycle and registered catalog", async 
     page.getByRole("heading", { name: "VirtualCellPacks", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Pack Factory 生命周期", exact: true }),
+    page.getByRole("heading", { name: "Pack Factory lifecycle", exact: true }),
   ).toBeVisible();
-  await expect(page.getByLabel("Pack Factory 五层状态")).toContainText(
+  await expect(page.getByLabel("Pack Factory five-stage status")).toContainText(
     "1 · Quarantine",
   );
-  await expect(page.getByLabel("Pack Factory 五层状态")).toContainText(
+  await expect(page.getByLabel("Pack Factory five-stage status")).toContainText(
     "5 · Executable",
   );
   await expect(
     page.getByRole("heading", {
-      name: "VirtualCellPack 能力与验证",
+      name: "VirtualCellPack capabilities and validation",
       exact: true,
     }),
   ).toBeVisible();

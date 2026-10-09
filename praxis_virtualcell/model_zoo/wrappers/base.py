@@ -1,11 +1,6 @@
-"""ModelWrapper:model zoo 的统一模型契约。extends PredictorAgent(保留 fail-closed +
-retrieve-before-predict 门),补两个显式治理方法:
-
-- declare_scope() -> dict:声明该模型适用的 species/module/task/perturbation 边界,供治理读。
-- estimate_uncertainty(model_input, prediction) -> dict:显式不确定性。默认从 run_prediction 的
-  uncertainty 提取;若无(run_prediction 未产 uncertainty)→ available=False(诚实,不假造)。
-
-超出 scope 的输入由继承的 assess_applicability/handle 走 rejected,不硬预测。
+"""Uniform ModelWrapper contract retaining fail-closed and retrieve-before-predict behavior. declare_scope exposes
+species/module/task/perturbation limits. estimate_uncertainty reads predictor uncertainty and returns
+unavailable when absent. Out-of-scope requests are rejected rather than force-predicted.
 """
 from __future__ import annotations
 
@@ -184,14 +179,15 @@ class ModelWrapper(PredictorAgent):
 
     @abstractmethod
     def declare_scope(self) -> dict:
-        """返回 {species: list, module: str, task: list, perturbation?: list}。治理据此判 in/out of scope。"""
+        """Return species/module/task/optional perturbation scope metadata for governance."""
 
     def estimate_uncertainty(self, model_input: dict, prediction: dict | None) -> dict:
-        """默认:调 run_prediction 取 uncertainty(可能为 None → available=False,不假造)。
-        子类可覆写为更显式的估计(如 bootstrap CI / ensemble disagreement)。"""
+        """Default uncertainty comes from run_prediction; absent uncertainty yields available=False. Subclasses may
+        supply bootstrap or ensemble estimates.
+        """
         try:
             out = self.run_prediction(model_input)
-        except Exception as e:  # noqa: BLE001 — 不确定性估计失败视为不可用,fail-closed
+        except Exception as e:
             return {"available": False, "reason": f"uncertainty_estimation_failed: {e}"}
         unc = out.get("uncertainty")
         if unc is None:
@@ -199,7 +195,7 @@ class ModelWrapper(PredictorAgent):
         return {"available": True, "uncertainty": unc}
 
     def declare_provenance(self) -> dict:
-        """返回模型级 provenance(静态模型卡:训练数据/指标锚点/远端坐标/可分发性)。
-        默认空(机制模型如 GEM 无训练锚点);ML wrapper(GEARS/scGPT)覆写返回真锚点。
-        与运行时 PredictorResultMessage.provenance 正交(那是逐次预测的证据链)。"""
+        """Return static model-card provenance, distinct from per-prediction evidence chains. Default is empty; ML
+        wrappers supply training/metric/environment/distribution anchors.
+        """
         return {}

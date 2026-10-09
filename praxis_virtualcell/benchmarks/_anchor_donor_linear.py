@@ -1,23 +1,21 @@
-"""M1:远端加载 donor linear ckpt,EvalAgent 在 Norman test 上算 ΔPearson,对照 ckpt 记录的 S0。
-
-仅远端 `virtualcell` 环境跑(import torch + donor,sys.path 注入 donor 不 vendor)。
-用法:python -m praxis_virtualcell.benchmarks._anchor_donor_linear <ckpt_stem>
-
-复现配方(见 docs/findings/finding_w4a_env.md):
-- linear_additive deterministic 不可训 → ckpt + 同采样 = 逐位复现 S0=0.6638587
-- 训练时 test split 配置:max_cells_per_pert=200, rng_seed=seed+1=1, esm2 features(loader 默认)
+"""Load a donor linear checkpoint and evaluate Norman test delta-Pearson against its S0 anchor. Remote torch/donor
+execution only. The deterministic linear_additive checkpoint and identical sampling reproduce S0=0.6638587; test
+settings are max_cells_per_pert=200, rng_seed=seed+1=1, and loader-default esm2 features.
 """
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
-import torch
-
-_DONOR = "/home/zkyd/data1/mzy/Virtual cell"
+_DONOR = os.environ.get("PRAXIS_DONOR_SOURCE_ROOT", "").strip()
+if not _DONOR:
+    raise RuntimeError("Set PRAXIS_DONOR_SOURCE_ROOT to the external donor source checkout")
 if _DONOR not in sys.path:
     sys.path.insert(0, _DONOR)
+
+import torch  # noqa: E402
 
 
 def main(ckpt_stem: str) -> None:
@@ -27,13 +25,13 @@ def main(ckpt_stem: str) -> None:
     from predictors.linear_additive import LinearAdditivePredictor
 
     model = LinearAdditivePredictor(**cfg["kwargs"])
-    # .pt 是 bundle dict(含 state_dict);torch>=2.6 须 weights_only=False
+
     bundle = torch.load(ckpt_stem + ".pt", map_location="cpu", weights_only=False)
     state = bundle["state_dict"] if isinstance(bundle, dict) and "state_dict" in bundle else bundle
     model.load_state_dict(state)
     model.eval()
 
-    # 复现训练时 eval 配置:max_cells_per_pert=200, rng_seed=1
+
     ds = load_vcbench_split("norman_2019", "test", max_cells_per_pert=200, rng_seed=1)
     dev = "cuda" if torch.cuda.is_available() else "cpu"
     rep = EvalAgent(batch_size=64, device=dev).evaluate(model, ds)

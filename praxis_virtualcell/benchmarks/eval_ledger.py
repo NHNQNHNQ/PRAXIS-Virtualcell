@@ -1,14 +1,7 @@
-"""M1(v0.3):PRAXIS Eval Ledger —— 统一记录每次 communicative run 的逐样本治理信号。
-
-阶段2 自研模型(MoE Router / OOD Classifier / Abstain Head)的**训练数据骨架**:把每个请求经
-PRAXIS 通讯流跑出的 report 抽成结构化条目(参与/拒绝/失败的 predictor、ensemble 分歧、reliability、
-abstain、caution、可选 ground-truth 误差与 seen/unseen OOD 标签),落 jsonl。
-
-设计纪律(守 PRAXIS DNA):
-- **只记录 report 里真实存在的字段**(report.py 的结构),不编造结论;缺失用 None。
-- ground-truth 误差(delta_pearson)与 OOD 标签(seen_in_train)是**可选**外部信号,由调用方在评测时填;
-  不填就是 None(诚实:没评测就没有误差)。
-- 纯 Python、无 torch 依赖,Mac 可建/测;真实填充在远端 run_request_ml 后(阶段1 ③/④)。
+"""Per-sample governance ledger for communicative runs. Extract only fields present in reports; missing values
+remain None. Optional delta_pearson and seen_in_train are caller-supplied evaluation labels, never inferred
+without measurement. Plain Python serialization supports local construction; real model reports come from remote
+execution.
 """
 from __future__ import annotations
 
@@ -23,11 +16,11 @@ class LedgerEntry:
     species: str | None
     cell_type: str | None
     perturbation_targets: list[str]
-    # predictor 参与情况
+
     models_used: list[str]
     models_rejected: list[str]
     models_failed: list[str]
-    # ensemble 分歧(§8.3,真 predictor 上才有意义)
+
     disagreement_score: float | None
     disagreement_triggered: bool
     disagreement_n_models: int | None
@@ -39,9 +32,9 @@ class LedgerEntry:
     downgrade_reasons: list[str]
     critic_violations: list = field(default_factory=list)
     caution_flags: dict = field(default_factory=dict)
-    # 可选外部评测信号(有 ground-truth 时填;否则 None = 未评测)
-    delta_pearson: float | None = None                          # ensemble/整体该扰动准度
-    per_predictor_delta_pearson: dict | None = None             # {predictor_name: 该扰动 ΔPearson}(阶段2 router 训练标签)  # noqa: E501
+
+    delta_pearson: float | None = None
+    per_predictor_delta_pearson: dict | None = None
     seen_in_train: bool | None = None
 
     def as_dict(self) -> dict:
@@ -79,7 +72,7 @@ def _entry_from_report(report: dict, *, request: dict | None = None,
 
 
 class EvalLedger:
-    """逐样本治理账本。record() 从 report 抽条目;to_jsonl/from_jsonl 持久化;summary() 聚合。"""
+    """Per-sample governance ledger: record reports, persist to/from JSONL, and aggregate summaries."""
 
     def __init__(self) -> None:
         self.entries: list[LedgerEntry] = []

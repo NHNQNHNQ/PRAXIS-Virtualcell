@@ -1,6 +1,4 @@
-"""Phase 6:registry 公开模型声明(gears/scgpt)+ assets schema 校验。
-铁律:ckpt 挪出硬编码 → registry assets 声明(filename + sha256 占位 + source_note);
-assets 结构坏 → ValueError(fail-closed)。gears/scgpt 仍 planned(缺 torch/ckpt → broker fail-closed)。"""
+"""Tests for registry public models."""
 import pytest
 
 from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
@@ -16,17 +14,17 @@ def test_scgpt_entry_present_and_planned(reg):
     assert e["type"] == "public_model"
     assert e["module"] == "genetic_hub"
     assert "human" in e["species"]
-    assert e["status"] == "planned"                  # 缺 torch/ckpt → 仍 planned,不静默 available
+    assert e["status"] == "planned"
     assert e["wrapper"].endswith("scgpt_wrapper.ScgptWrapper")
 
 
 def test_gears_and_scgpt_have_assets_declared(reg):
     for name in ("gears", "scgpt"):
         e = reg.get(name)
-        assert e.get("assets"), f"{name} 缺 assets 声明(ckpt 须挪出硬编码进 registry)"
+        assert e.get("assets"), f"{name} missing assets declaration; checkpoints belong in the registry"
         for a in e["assets"]:
-            assert "filename" in a and "sha256" in a  # sha256 可为 null 占位,但键必须在
-            assert "source_note" in a                 # 远端获取路径(requires_manual_fetch 取数流程)
+            assert "filename" in a and "sha256" in a
+            assert "source_note" in a
 
 
 def test_gears_and_scgpt_have_provenance(reg):
@@ -41,22 +39,20 @@ def test_query_by_module_genetic_hub_includes_public_models(reg):
 
 
 def test_gears_and_scgpt_assets_sha256_backfilled(reg):
-    """Unit3:ckpt sha256 已从 .53 实测回填(非 null 占位),为合法 64 位 hex 版本锁。
-    诚实:status 仍 planned、broker 仍 fail-closed —— sha 是版本锚点,不代表可分发。
-    gears 文件名修正为真实 save_model 产物 model.pt + config.pkl(原 gears_model.pt 与实际不符)。"""
+    """Verify gears and scgpt assets sha256 backfilled."""
     import re
     hex64 = re.compile(r"^[0-9a-f]{64}$")
     for name in ("gears", "scgpt"):
         for a in reg.get(name)["assets"]:
-            assert a["sha256"] is not None, f"{name}/{a['filename']} sha256 未回填(仍 null)"
-            assert hex64.match(a["sha256"]), f"{name}/{a['filename']} sha256 非合法 64-hex"
+            assert a["sha256"] is not None, f"{name}/{a['filename']} sha256 must not be null"
+            assert hex64.match(a["sha256"]), f"{name}/{a['filename']} sha256 must contain 64 hexadecimal characters"
     gears_files = {a["filename"] for a in reg.get("gears")["assets"]}
-    assert gears_files == {"model.pt", "config.pkl"}, "gears assets 须为真实 GEARS save 产物"
-    assert reg.get("gears")["status"] == "planned"       # 填 sha 后仍 planned(不静默 available)
+    assert gears_files == {"model.pt", "config.pkl"}, "GEARS assets must be the actual artifacts produced by GEARS save"
+    assert reg.get("gears")["status"] == "planned"
 
 
 def test_illegal_assets_shape_is_rejected(tmp_path):
-    """assets 条目缺 filename/sha256 键 → ValueError(fail-closed)。"""
+    """Verify illegal assets shape is rejected."""
     bad = tmp_path / "bad.yaml"
     bad.write_text(
         "models:\n"
@@ -74,7 +70,7 @@ def test_illegal_assets_shape_is_rejected(tmp_path):
         "    requires: [torch]\n"
         "    reliability_policy: ml_disagreement\n"
         "    assets:\n"
-        "      - filename: w.pt\n"                    # 缺 sha256 键
+        "      - filename: w.pt\n"
         "        source_note: remote\n",
         encoding="utf-8")
     with pytest.raises(ValueError) as ei:

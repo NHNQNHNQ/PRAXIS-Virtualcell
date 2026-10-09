@@ -1,6 +1,4 @@
-"""Phase 7:registry training_card 内部字段类型校验(fail-closed 加固)。
-现有校验只校五键存在;本 task 加:metrics 须 dict、split/baseline/training_data/provenance 非空。
-坏 card(metrics 非 dict / 空 split)→ ValueError,不静默接受。合法(含 planned null metrics)→ 过。"""
+"""Tests for training card field validation."""
 import pytest
 
 from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
@@ -21,13 +19,13 @@ def _write(tmp_path, card_block: str) -> str:
 
 
 def test_metrics_non_dict_rejected(tmp_path):
-    """metrics 是 str(非 dict)→ ValueError(fail-closed 加固)。"""
+    """Verify metrics non dict rejected."""
     card = (
         "    training_card:\n"
         "      training_data: SGD deletion library\n"
         "      split: by-gene holdout\n"
         "      baseline: mean-fitness\n"
-        "      metrics: oops-not-a-dict\n"           # 坏:str 非 dict
+        "      metrics: oops-not-a-dict\n"
         "      provenance: planned\n"
     )
     with pytest.raises(ValueError) as ei:
@@ -36,11 +34,11 @@ def test_metrics_non_dict_rejected(tmp_path):
 
 
 def test_empty_split_rejected(tmp_path):
-    """split 空字符串 → ValueError(不静默接受空契约字段)。"""
+    """Verify empty split rejected."""
     card = (
         "    training_card:\n"
         "      training_data: SGD deletion library\n"
-        "      split: ''\n"                          # 坏:空
+        "      split: ''\n"
         "      baseline: mean-fitness\n"
         "      metrics: {pearson: null}\n"
         "      provenance: planned\n"
@@ -51,14 +49,13 @@ def test_empty_split_rejected(tmp_path):
 
 
 def test_planned_null_metrics_still_valid(tmp_path):
-    """planned 自训 metrics 值可 null(诚实未训),只要 metrics 是 dict + 其余字段非空 → 过。
-    关键:fail-closed 只拦'结构坏',不拦'诚实标注未训'(否则逼假造数字)。"""
+    """Verify planned null metrics still valid."""
     card = (
         "    training_card:\n"
         "      training_data: SGD deletion library (planned)\n"
         "      split: by-gene holdout (planned)\n"
         "      baseline: mean-fitness\n"
-        "      metrics: {pearson: null, note: planned}\n"   # dict + null 值 OK
+        "      metrics: {pearson: null, note: planned}\n"
         "      provenance: planned; no weights yet\n"
     )
     reg = ModelZooRegistry(registry_path=_write(tmp_path, card))
@@ -66,7 +63,7 @@ def test_planned_null_metrics_still_valid(tmp_path):
 
 
 def test_full_valid_card_still_loads(tmp_path):
-    """回归:合法全 card(与 test_self_trained_card 同款)仍过(不误伤现有)。"""
+    """Verify full valid card still loads."""
     card = (
         "    training_card:\n"
         "      training_data: donor norman_2019\n"

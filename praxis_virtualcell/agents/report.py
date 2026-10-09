@@ -1,6 +1,7 @@
-"""结构化报告:不得编造结构里没有的结论;保留 prediction/abstain/参与/拒绝/reliability/provenance。
-abstain_reasons 只装真 abstain 原因;非 abstain 的可靠性降级(downgrade: 前缀)单列 downgrade_reasons,
-避免 'abstain_reasons 非空 ⇒ 已弃权' 的下游误读(§8.4 报告诚实性)。"""
+"""Build a structured report without inventing conclusions. Preserve prediction/abstention, participation,
+rejection, reliability, and provenance. abstain_reasons contains actual abstention reasons; nonabstaining
+downgrades are recorded separately in downgrade_reasons.
+"""
 from __future__ import annotations
 
 from praxis_virtualcell.core.agent import BaseAgent
@@ -30,7 +31,7 @@ class ReportAgent(BaseAgent):
             "model_disagreement": rd.get("model_disagreement"),
             "critic_violations": p.get("critic_violations", []),
             "caution_flags": p.get("provenance", {}).get("ortholog_cautions", {}),
-            "learned_reliability": p.get("learned_reliability"),  # M2.1 Step6:learned 决策+provenance(rule 模式为 None)
+            "learned_reliability": p.get("learned_reliability"),
             "provenance": p.get("provenance", {}),
         }
         if p.get("adapter_output") is not None:

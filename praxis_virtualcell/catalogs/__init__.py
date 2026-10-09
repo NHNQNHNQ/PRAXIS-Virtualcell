@@ -1,5 +1,6 @@
-"""只读 cell/model 预设 catalog(展示层)。非权威词汇/治理——权威仍在
-species_schema/run_virtualcell_query 白名单 + model_applicability/reliability。"""
+"""Read-only display catalogs for cell/model presets. Schema allowlists, applicability, and reliability retain
+vocabulary and governance authority.
+"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -12,16 +13,15 @@ _CATALOG = Path(__file__).parent / "cell_catalog.yaml"
 
 
 def load_cell_presets() -> list[dict]:
-    """读 cell_catalog.yaml 的 presets。校验 species ∈ SUPPORTED_SPECIES + modules ∈ MODULE_ORDER
-    (防与单一真相源漂移)。"""
+    """Load cell presets and check species against SUPPORTED_SPECIES and modules against MODULE_ORDER."""
     from praxis_virtualcell.biological_modules.modules import MODULE_ORDER
     doc = yaml.safe_load(_CATALOG.read_text(encoding="utf-8")) or {}
     presets = doc.get("presets", [])
     bad = [p["id"] for p in presets if p.get("species") not in SUPPORTED_SPECIES]
     if bad:
-        raise ValueError(f"cell_catalog 预设 species 越白名单:{bad}")
+        raise ValueError(f"cell_catalog preset species outside allowlist:{bad}")
     bad_mod = [(p["id"], m) for p in presets for m in (p.get("modules") or [])
                if m not in MODULE_ORDER]
     if bad_mod:
-        raise ValueError(f"cell_catalog 预设 module 越白名单:{bad_mod}")
+        raise ValueError(f"cell_catalog preset module outside allowlist:{bad_mod}")
     return presets

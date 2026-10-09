@@ -1,12 +1,11 @@
-"""agent 间通讯消息 + predictor 结果 + 可靠性决策(全 @dataclass)。"""
+"""Dataclass records for agent messages, predictor results, and reliability decisions."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any
 
-# status 取值:success | rejected | failed
 PredictorStatus = str
-# reliability 取值:high | medium | low
+
 ReliabilityLevel = str
 
 
@@ -19,9 +18,9 @@ class AgentMessage:
     payload: dict[str, Any]
     timestamp: str
     parent_message_id: str | None = None
-    schema_version: str = "vc.msg.v1"   # 统一 message schema 版本
-    trace_id: str | None = None         # per-run 追踪 id(bus.send 回填)
-    task_id: str | None = None          # 任务标识(bus.send 回填)
+    schema_version: str = "vc.msg.v1"
+    trace_id: str | None = None
+    task_id: str | None = None
 
 
 @dataclass

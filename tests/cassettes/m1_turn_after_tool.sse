@@ -5,7 +5,7 @@ event: content_block_start
 data: {"type":"content_block_start","index":0,"content_block":{"type":"text"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"工具返回 hi,完成"}}
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"The tool returned hi; completed"}}
 
 event: content_block_stop
 data: {"type":"content_block_stop","index":0}

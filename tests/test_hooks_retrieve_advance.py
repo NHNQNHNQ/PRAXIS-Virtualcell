@@ -20,7 +20,7 @@ def _ok(tid="t"):
 def test_real_hit_advances_init_to_retrieve():
     st = State()  # INIT
     out = advance_phase_on_real_retrieval(_BrainQueryReal(), {"id": "t"}, _ok(), st)
-    assert out is None  # 永不替换 result
+    assert out is None
     assert get_phase(st) is Phase.RETRIEVE
 
 
@@ -33,7 +33,7 @@ def test_fixture_hit_does_not_advance():
 def test_idempotent_no_double_advance_no_phaseerror():
     st = State()
     advance_phase_on_real_retrieval(_BrainQueryReal(), {"id": "t"}, _ok(), st)
-    advance_phase_on_real_retrieval(_BrainQueryReal(), {"id": "t"}, _ok(), st)  # 再来不报错
+    advance_phase_on_real_retrieval(_BrainQueryReal(), {"id": "t"}, _ok(), st)
     assert get_phase(st) is Phase.RETRIEVE
 
 

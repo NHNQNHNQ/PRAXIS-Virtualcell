@@ -1,6 +1,4 @@
-"""Phase 2:ModelBrokerAgent —— 进 message bus,查 registry + cache/source → available/fail-closed。
-铁律:available 模型返回 wrapper;planned/missing/requires 不满足 → fail-closed(不 silent accept)。
-测:bus 消息结构、available、planned→降级、缺依赖→明确降级。"""
+"""Tests for model broker agent."""
 from praxis_virtualcell.agents.model_broker_agent import ModelBrokerAgent
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
@@ -13,7 +11,7 @@ def _ask(model_name):
 
 
 def test_available_model_returns_wrapper():
-    """ecoli_gem status=available 且 cobra 已装 → available=True + wrapper 类路径。"""
+    """Verify available model returns wrapper."""
     bus = MessageBus()
     ModelBrokerAgent().handle(_ask("ecoli_gem"), bus)
     res = bus.latest("model_broker_result")
@@ -25,7 +23,7 @@ def test_available_model_returns_wrapper():
 
 
 def test_planned_model_is_fail_closed():
-    """gears status=planned → available=False(不 silent accept),带 reason。"""
+    """Verify planned model is fail closed."""
     bus = MessageBus()
     ModelBrokerAgent().handle(_ask("gears"), bus)
     p = bus.latest("model_broker_result").payload
@@ -39,7 +37,7 @@ def test_unknown_model_is_fail_closed():
     ModelBrokerAgent().handle(_ask("no_such_model"), bus)
     p = bus.latest("model_broker_result").payload
     assert p["available"] is False
-    assert "unknown" in p["reason"] or "未知" in p["reason"]
+    assert "unknown" in p["reason"]
 
 
 def test_bus_message_structure():
@@ -52,7 +50,7 @@ def test_bus_message_structure():
 
 
 def test_missing_dependency_degrades_explicitly(monkeypatch):
-    """requires 依赖缺失(模拟 cobra 不可用)→ available=False + reason 点名缺的依赖(不 silent accept)。"""
+    """Verify missing dependency degrades explicitly."""
     import praxis_virtualcell.agents.model_broker_agent as mba
 
     monkeypatch.setattr(mba, "_dep_available", lambda dep: dep != "cobra")

@@ -1,7 +1,4 @@
-# bacteria 经典模式生物(E. coli)基因符号。
-# 仅用于让 bacteria mock request "被理解"(InputInterpreter/Normalizer 能识别为合法 gene 扰动),
-# 而不是把 mammalian human gene 误当 bacterial gene。注意:即使这些基因存在于本词表,
-# 现有 mammalian Mock* 仍因 supported_species 不含 bacteria 被拒(GPT §7.4:被理解但正确拒绝)。
+# Species-specific gene vocabulary for request normalization and routing; membership alone does not grant predictor applicability.
 genes:
   - lacZ
   - recA

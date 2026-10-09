@@ -1,5 +1,4 @@
-"""确定性 report.md 渲染器测试:9 段齐全 / verdict 正确 / abstain 不出数值 /
-缺字段防御 / 无 LLM / 可复现。"""
+"""Deterministic report rendering: nine sections, verdicts, abstention, missing fields, and reproducibility."""
 import pytest
 
 from praxis_virtualcell.io.report_markdown import render_report_md
@@ -67,33 +66,33 @@ def test_accept_has_all_nine_sections():
     md = render_report_md(_ACCEPT)
     assert md.startswith("# PRAXIS-VirtualCell Report")
     for s in _SECTIONS:
-        assert s in md, f"缺段:{s}"
+        assert s in md, f"Missing section: {s}"
     assert "verdict: **accept**" in md
     assert "AHR" in md and "MockLinear" in md
-    assert "0.3" in md  # prediction 数值出现
+    assert "0.3" in md
 
 
 def test_abstain_shows_no_prediction_number():
     md = render_report_md(_ABSTAIN)
     assert "verdict: **abstain**" in md
-    assert "弃权" in md
-    assert "no_perturbation_specified" in md  # 出现在 Governance/Limitations
-    # abstain 不得 dump prediction:无 json 代码块、无预测数值
+    assert "abstained" in md
+    assert "no_perturbation_specified" in md
+
     assert "```json" not in md
-    assert "不产出预测数值" in md
+    assert "produces no prediction values" in md
 
 
 def test_downgrade_reasons_in_output():
     md = render_report_md(_DOWNGRADE)
     assert "verdict: **downgrade**" in md
     assert "downgrade:model_disagreement_too_high" in md
-    # 跨物种(mouse) + caution flags 应进 Limitations
+
     assert "mouse" in md
 
 
 def test_mock_predictor_flagged_in_limitations():
     md = render_report_md(_ACCEPT)
-    assert "mock" in md.lower()  # Limitations 标注 mock predictor 非真跑数值
+    assert "mock" in md.lower()
 
 
 def test_minimal_job_does_not_crash():
@@ -132,8 +131,6 @@ def test_jobstore_writes_and_loads_report_md(tmp_path):
     assert "verdict: **accept**" in loaded["report_md"]
 
 
-# ===== Phase 5:证据记录 + 验证计划两段 =====
-
 _WITH_AL = {
     "mode": "offline",
     "request": {"request_id": "al_ahr", "species": "human", "cell_type": "K562",
@@ -167,38 +164,36 @@ _WITH_AL = {
 def test_evidence_record_section_present():
     from praxis_virtualcell.io.report_markdown import render_report_md
     md = render_report_md(_WITH_AL)
-    assert "证据记录" in md or "Evidence Record" in md
-    assert "E4" in md                      # evidence level 出现
+    assert "Evidence Record" in md
+    assert "E4" in md
     assert "ood_signal" in md or "OOD" in md
 
 
 def test_validation_plan_section_present():
     from praxis_virtualcell.io.report_markdown import render_report_md
     md = render_report_md(_WITH_AL)
-    assert "验证计划" in md or "Validation Plan" in md
-    assert "stress_processor@human:AHR" in md    # top 候选出现
-    assert "1.4" in md                            # information_gain 出现
+    assert "Validation Plan" in md
+    assert "stress_processor@human:AHR" in md
+    assert "1.4" in md
 
 
 def test_nine_sections_still_present_with_al():
     from praxis_virtualcell.io.report_markdown import render_report_md
     md = render_report_md(_WITH_AL)
     for s in _SECTIONS:
-        assert s in md, f"缺段:{s}"       # 现有 9 段编号不被打乱
+        assert s in md, f"Missing section: {s}"
 
 
 def test_missing_evidence_and_queue_shows_na():
-    """缺 evidence_level/learning_queue(如旧 job)→ 标 N/A,不崩,9 段仍在。"""
+    """Missing evidence_level/learning_queue fields display N/A and preserve all nine sections."""
     from praxis_virtualcell.io.report_markdown import render_report_md
-    md = render_report_md(_ACCEPT)          # _ACCEPT 无 evidence_level/learning_queue 键
-    assert "证据记录" in md or "Evidence Record" in md
-    assert "验证计划" in md or "Validation Plan" in md
+    md = render_report_md(_ACCEPT)
+    assert "Evidence Record" in md
+    assert "Validation Plan" in md
     assert "N/A" in md
     for s in _SECTIONS:
         assert s in md
 
-
-# ===== Phase 8:模块路由段(module_plan 展示层) =====
 
 _WITH_MODULE_PLAN = {
     "mode": "offline",
@@ -234,16 +229,16 @@ _WITH_MODULE_PLAN = {
 
 def test_module_routing_section_present():
     md = render_report_md(_WITH_MODULE_PLAN)
-    assert "模块路由" in md or "Module Routing" in md
-    assert "genetic_hub" in md or "Genetic Hub" in md   # primary 出现
-    assert "stress_processor" in md or "Stress Processor" in md  # secondary 出现
+    assert "Module Routing" in md
+    assert "genetic_hub" in md or "Genetic Hub" in md
+    assert "stress_processor" in md or "Stress Processor" in md
     assert "primary" in md and "secondary" in md
 
 
 def test_module_routing_missing_shows_na():
-    """无 module_plan(abstain/旧 job)→ 标 N/A,不崩,9 段仍在。"""
-    md = render_report_md(_ACCEPT)   # _ACCEPT 无 module_plan
-    assert "模块路由" in md or "Module Routing" in md
+    """Missing module_plan fields display N/A and preserve all nine sections."""
+    md = render_report_md(_ACCEPT)
+    assert "Module Routing" in md
     assert "N/A" in md
     for s in _SECTIONS:
         assert s in md
@@ -252,10 +247,7 @@ def test_module_routing_missing_shows_na():
 def test_module_routing_does_not_break_nine_sections():
     md = render_report_md(_WITH_MODULE_PLAN)
     for s in _SECTIONS:
-        assert s in md, f"缺段:{s}"
-
-
-# ===== Task 8.5:report tests 扩到 30(module/evidence/多物种/provenance 一致) =====
+        assert s in md, f"Missing section: {s}"
 
 
 @pytest.mark.parametrize("species", ["human", "mouse", "yeast", "bacteria"])
@@ -275,7 +267,7 @@ def test_report_all_species_render_nine_sections(species):
     for s in _SECTIONS:
         assert s in md
     if species != "human":
-        assert species in md  # 非 human 进 Limitations
+        assert species in md
 
 
 def test_non_human_species_downgrade_note_in_limitations():
@@ -285,7 +277,7 @@ def test_non_human_species_downgrade_note_in_limitations():
                "report": {"abstain": False, "reliability": "medium", "prediction": {"delta": [0.1]},
                           "models_used": ["MockLinear"], "provenance": {}}}
         md = render_report_md(job)
-        assert "跨物种" in md or "ortholog" in md.lower()
+        assert "cross-species" in md or "ortholog" in md.lower()
 
 
 def test_module_routing_caution_entry_verdict_shown():
@@ -341,7 +333,7 @@ def test_learning_queue_sorted_top5_only():
                       "models_used": ["MockLinear"],
                       "provenance": {"learning_queue": {"items": items, "notes": []}}}}
     md = render_report_md(job)
-    assert "c0" in md  # 前 5 项渲染(renderer 取 items[:5];此测钉现有 top-5 行为)
+    assert "c0" in md
 
 
 def test_provenance_module_plan_and_evidence_coexist():
@@ -352,9 +344,9 @@ def test_provenance_module_plan_and_evidence_coexist():
                                                         "rationale": [], "aligned_with_disposition": True},
                                      "learning_queue": {"items": [], "notes": []}}}}
     md = render_report_md(job)
-    assert ("模块路由" in md or "Module Routing" in md)
+    assert ("Module Routing" in md)
     assert "E3" in md
-    assert "证据记录" in md or "Evidence Record" in md
+    assert "Evidence Record" in md
 
 
 def test_report_md_ends_with_newline():
@@ -374,12 +366,12 @@ def test_empty_module_plan_entries_no_crash():
                       "provenance": {"module_plan": {"species": "human", "primary": "genetic_hub",
                           "secondary": [], "overall_verdict": "accept", "entries": [], "notes": []}}}}
     md = render_report_md(job)
-    assert "genetic_hub" in md  # primary 仍展示,即使 entries 空
+    assert "genetic_hub" in md
 
 
 def test_downgrade_with_module_plan_verdict_consistency():
     md = render_report_md(_WITH_MODULE_PLAN)
-    # overall_verdict=accept 出现在模块路由段
+
     assert "overall_verdict: **accept**" in md
 
 
@@ -389,7 +381,7 @@ def test_reproducible_with_module_plan():
 
 def test_module_routing_section_after_routing_decision():
     md = render_report_md(_WITH_MODULE_PLAN)
-    assert md.index("## 3. Routing Decision") < md.index("模块路由") < md.index("## 4. Result Summary")
+    assert md.index("## 3. Routing Decision") < md.index("Module Routing") < md.index("## 4. Result Summary")
 
 
 def test_all_four_species_with_module_plan_no_crash():

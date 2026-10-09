@@ -5,7 +5,7 @@ from praxis2.store.memory import InMemoryStore
 
 
 def test_namespace_requires_user_id():
-    # 总纲 §11.6:无 user_id 的 store 访问是 bug
+
     with pytest.raises(ValueError):
         Namespace(user_id="", scope="session")
 
@@ -24,7 +24,7 @@ async def test_tenant_isolation():
     a = Namespace(user_id="A", scope="memory")
     b = Namespace(user_id="B", scope="memory")
     await s.kv_set(a, "secret", b"a-only")
-    assert await s.kv_get(b, "secret") is None  # 跨租户读不到
+    assert await s.kv_get(b, "secret") is None
 
 
 async def test_blob_put_get():
@@ -48,14 +48,13 @@ async def test_meta_upsert_get_list_scoped_by_user():
 async def test_meta_upsert_requires_user_id_and_pk():
     s = InMemoryStore()
     with pytest.raises(ValueError):
-        await s.meta_upsert("sessions", {"pk": "s1"})  # 缺 user_id
+        await s.meta_upsert("sessions", {"pk": "s1"})
     with pytest.raises(ValueError):
-        await s.meta_upsert("sessions", {"user_id": "u1"})  # 缺 pk
+        await s.meta_upsert("sessions", {"user_id": "u1"})
 
 
 async def test_meta_get_returns_copy_not_internal_ref():
-    # meta_upsert 写入做了 dict(row) 防御拷贝;读出也必须拷贝,
-    # 否则调用方改返回值会静默污染内部状态(读写对称)
+
     s = InMemoryStore()
     await s.meta_upsert("sessions", {"user_id": "u1", "pk": "s1", "title": "A"})
     got = await s.meta_get("sessions", "u1", "s1")

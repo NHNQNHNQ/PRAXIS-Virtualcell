@@ -1,15 +1,7 @@
-"""W5.2(v0.4,Phase II):Human 免疫激活 cell-state case —— IFN-β 刺激 → ISG 激活 state 迁移。
-
-数据:Kang 2018 IFN-β PBMC(pertpy `pt.data.kang_2018`)的 committed 子集
-(`data/cellstate/kang_isg_subset.json`,2232 cells × 25 ISG + 8 housekeeping 基因,原始 counts;
-provenance `data/cellstate/PROVENANCE.json`)。
-
-分析:每 cell 归一(CP10k+log1p)→ **ISG 激活评分 = mean(ISG) − mean(housekeeping)** → ctrl vs stim
-的 state 迁移(Cohen's d + 阈值分类准确率)。治理(R6):marker 覆盖不足 → downgrade;迁移不显著
-(|d| 小)→ downgrade/caution;无 ctrl/stim 分组 → abstain。**不训练模型**,纯评分 + 受治理裁决。
-
-科学默认(写明依据):CP10k+log1p(scRNA 标准);ISG panel = 教科书 type-I IFN 响应基因;
-效应阈 accept d≥0.8 / caution 0.3≤d<0.8 / downgrade d<0.3;marker 覆盖阈 0.5。
+"""IFN-beta immune-state analysis in the committed Kang 2018 PBMC subset: 2232 cells, 25 ISGs, 8 housekeeping
+genes. Normalize CP10k+log1p and compute mean(ISG)−mean(housekeeping), then ctrl/stim Cohen's d and threshold
+accuracy. Missing groups abstain; low marker coverage or weak shifts downgrade/caution. Defaults: accept d≥0.8,
+caution 0.3≤d<0.8, downgrade d<0.3, coverage threshold 0.5. No model is trained.
 """
 from __future__ import annotations
 
@@ -24,19 +16,22 @@ from praxis_virtualcell.predictors.state.scoring import lognorm, panel_score
 
 _DEFAULT_SUBSET = Path(__file__).resolve().parents[3] / "data" / "cellstate" / "kang_isg_subset.json"
 
-# 教科书 type-I 干扰素刺激基因(ISG)
+
 ISG_PANEL = ["ISG15", "IFI6", "IFI27", "IFI44", "IFI44L", "IFIT1", "IFIT3", "ISG20", "MX1", "MX2",
              "OAS1", "OAS2", "OAS3", "RSAD2", "STAT1", "STAT2", "IRF7", "LY6E", "IFITM3", "BST2",
              "XAF1", "USP18", "HERC5", "EPSTI1", "CMPK2"]
 
 _D_ACCEPT, _D_CAUTION, _COV_MIN = 0.8, 0.3, 0.5
-_BOUNDARY = ("ISG 激活评分是 marker-based 相对量(CP10k+log1p,ISG−housekeeping),**非**绝对通路活性;"
-             "Kang 2018 是 PBMC scRNA 子集(2232 cells);效应/阈值为设定默认;downgrade 表'证据不足以"
-             "确证 state 迁移',非'无迁移'。")
+_BOUNDARY = (
+    'ISG activation is a relative marker score (CP10k+log1p, ISG−housekeeping), not '
+    'absolute pathway activity; Kang 2018 is a PBMC scRNA subset (2232 cells); '
+    'effects/thresholds are configured defaults; downgrade means insufficient evidence to '
+    'establish a state shift, not absence of a shift.'
+)
 
 
 class CellStateDB:
-    """Kang 2018 ISG 子集(committed)。提供归一 + ISG 激活评分。"""
+    """Committed Kang 2018 ISG subset with normalization and activation scoring."""
 
     def __init__(self, json_path: str | Path | None = None) -> None:
         self._d = json.loads(Path(json_path or _DEFAULT_SUBSET).read_text(encoding="utf-8"))
@@ -45,7 +40,7 @@ class CellStateDB:
         self._idx = {g: i for i, g in enumerate(self._isg + self._hk)}
 
     def score_cell(self, cell, isg_panel=None) -> float | None:
-        """ISG 激活评分 = mean(ISG present) − mean(housekeeping)。panel 覆盖为空 → None。"""
+        """Compute mean(present ISGs)−mean(housekeeping); absent panel coverage returns None."""
         ln = lognorm(cell["counts"], cell["total_counts"])
         isg = [self._idx[g] for g in (isg_panel or self._isg) if g in self._idx]
         hk = [self._idx[g] for g in self._hk if g in self._idx]
@@ -56,7 +51,7 @@ class CellStateDB:
         return sum(1 for g in panel if g in self._idx) / len(panel) if panel else 0.0
 
     def state_shift(self, isg_panel=None, cell_type=None) -> dict:
-        """ctrl vs stim 的 ISG 评分迁移(整体或指定 cell_type)。"""
+        """Compare ctrl/stim ISG scores for all cells or one cell_type."""
         ctrl, stim = [], []
         for c in self._d["cells"]:
             if cell_type and c["cell_type"] != cell_type:
@@ -76,11 +71,11 @@ class CellStateDB:
 
 
 def run_cellstate_case(raw_req: dict, db: CellStateDB | None = None, isg_panel=None):
-    """Human 免疫激活 cell-state case → 7 部分 CaseReport(真实 state 迁移 + 受治理裁决)。"""
+    """Return a 7-part human immune-state case report with observed shifts and governance."""
     norm = normalize_request(raw_req)
     dec = route(norm)
     if dec.engine != "state_scoring":
-        raise ValueError(f"cell-state case 期望 state_scoring,route 给了 {dec.engine}")
+        raise ValueError(f"cell-state case expected state_scoring; routing selected {dec.engine}")
     db = db or CellStateDB()
 
     coverage = db.marker_coverage(isg_panel)

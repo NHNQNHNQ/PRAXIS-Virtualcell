@@ -1,7 +1,11 @@
-# PHASE 10 TRACE/PROVENANCE AUDIT BUNDLE
+# Offline trace and provenance case results
 
-> 对 T10.3 16 case 请求集调 `run_query`(OFFLINE 确定性)导出。原始 JSON 见 `trace_bundle.json`。
-> `llm_used_for_prediction`:16/16 case 均为 False(OFFLINE 恒 False,无 LLM 参与预测)。
+These historical results cover 16 test cases representing 14 distinct requests.
+They mix mock, mechanistic, scoring, and advisory paths; they are not a benchmark
+of eight validated predictive models. The tests remain available under
+`praxis_virtualcell/tests/phase10`. Re-run them for current software validation.
+
+All 16 offline cases recorded `llm_used_for_prediction=False`. Mock values are test fixtures.
 
 | case | abstain | models_used | prediction | module_plan.primary | trace_len |
 |---|---|---|---|---|---|

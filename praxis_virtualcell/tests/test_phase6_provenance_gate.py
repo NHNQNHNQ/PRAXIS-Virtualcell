@@ -1,6 +1,4 @@
-"""Phase 6 完成闸门:registry 声明 ↔ wrapper 声明 跨源一致 + 可分发性齐全 + fail-closed 纵深。
-铁律:registry.provenance/scope 与 wrapper.declare_* 一致(防双真相源);每个公开模型
-assets+source_note+provenance 齐(ckpt 挪出硬编码可指认);缺依赖/缺 ckpt → broker fail-closed。"""
+"""Tests for provenance gate."""
 import importlib
 
 import pytest
@@ -20,7 +18,7 @@ def reg():
 
 @pytest.mark.parametrize("name", ["gears", "scgpt"])
 def test_registry_module_matches_wrapper_scope(reg, name):
-    """registry.module == wrapper.declare_scope()['module'](防双真相源)。"""
+    """Verify registry module matches wrapper scope."""
     e = reg.get(name)
     w = _wrapper_instance(e["wrapper"])
     assert w.declare_scope()["module"] == e["module"]
@@ -30,7 +28,7 @@ def test_registry_module_matches_wrapper_scope(reg, name):
 
 @pytest.mark.parametrize("name", ["gears", "scgpt"])
 def test_registry_anchor_matches_wrapper_provenance(reg, name):
-    """registry.provenance 锚点 == wrapper.declare_provenance() 锚点(数字一致)。"""
+    """Verify registry anchor matches wrapper provenance."""
     e = reg.get(name)
     w = _wrapper_instance(e["wrapper"])
     wp = w.declare_provenance()
@@ -46,21 +44,21 @@ def test_registry_anchor_matches_wrapper_provenance(reg, name):
 
 @pytest.mark.parametrize("name", ["gears", "scgpt"])
 def test_distributability_declared(reg, name):
-    """可分发性齐全:assets(含 source_note)+ provenance.distributable 标注,ckpt 可指认。"""
+    """Verify distributability declared."""
     e = reg.get(name)
     assert e["assets"] and all("source_note" in a for a in e["assets"])
-    assert e["provenance"]["distributable"] is False   # 需 torch+GPU+ckpt,缺则 fail-closed
+    assert e["provenance"]["distributable"] is False
 
 
 def test_public_models_wrapper_importable(reg):
-    """wrapper 类路径可 import(可分发性:装了 wheel 的人能拿到类,即便模型 unavailable)。"""
+    """Verify public models wrapper importable."""
     for name in ("gears", "scgpt"):
         w = _wrapper_instance(reg.get(name)["wrapper"])
         assert w.declare_scope()["module"] == "genetic_hub"
 
 
 def test_broker_fail_closed_depth_for_public_models():
-    """红线 6 纵深:本地 broker 对 gears/scgpt 全 available=False(缺 torch/ckpt),reason 非空。"""
+    """Verify broker fail closed depth for public models."""
     from praxis_virtualcell.agents.model_broker_agent import ModelBrokerAgent
     from praxis_virtualcell.core.bus import MessageBus
     from praxis_virtualcell.core.message import AgentMessage
@@ -71,4 +69,4 @@ def test_broker_fail_closed_depth_for_public_models():
             "q", "C", "ModelBrokerAgent", "model_request", {"model_name": name}, "t"), bus)
         p = bus.latest("model_broker_result").payload
         assert p["available"] is False and p["reason"]
-        assert p["wrapper"]                              # 不隐藏:类路径仍可见
+        assert p["wrapper"]

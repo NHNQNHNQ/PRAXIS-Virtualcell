@@ -9,9 +9,7 @@ def test_parse_empty_returns_empty_list():
 
 
 def test_parse_single_server():
-    specs = parse_mcp_servers(
-        '[{"name":"echo","command":"python","args":["-m","praxis2.mcp.echo_server"]}]'
-    )
+    specs = parse_mcp_servers('[{"name":"echo","command":"python","args":["-m","praxis2.mcp.echo_server"]}]')
     assert len(specs) == 1
     s = specs[0]
     assert s.name == "echo"
@@ -21,33 +19,24 @@ def test_parse_single_server():
 
 
 def test_parse_with_env():
-    specs = parse_mcp_servers(
-        '[{"name":"fs","command":"node","args":["x.js"],"env":{"KEY":"v"}}]'
-    )
+    specs = parse_mcp_servers('[{"name":"fs","command":"node","args":["x.js"],"env":{"KEY":"v"}}]')
     assert specs[0].env == {"KEY": "v"}
 
 
 def test_parse_per_server_startup_timeout():
-    specs = parse_mcp_servers(
-        '[{"name":"slow","command":"python","startup_timeout_s":1.0}]'
-    )
+    specs = parse_mcp_servers('[{"name":"slow","command":"python","startup_timeout_s":1.0}]')
     assert specs[0].startup_timeout_s == 1.0
 
 
-@pytest.mark.parametrize(
-    "value", ["true", "0", "-1", '"1"', "1e309", "1" + "0" * 400]
-)
+@pytest.mark.parametrize("value", ["true", "0", "-1", '"1"', "1e309", "1" + "0" * 400])
 def test_parse_invalid_startup_timeout_fails_closed(value):
     with pytest.raises(ValueError, match="startup_timeout_s"):
-        parse_mcp_servers(
-            f'[{{"name":"x","command":"python","startup_timeout_s":{value}}}]'
-        )
+        parse_mcp_servers(f'[{{"name":"x","command":"python","startup_timeout_s":{value}}}]')
 
 
 def test_parse_multiple_servers():
     specs = parse_mcp_servers(
-        '[{"name":"a","command":"python","args":[]},'
-        '{"name":"b","command":"node","args":["s.js"]}]'
+        '[{"name":"a","command":"python","args":[]},{"name":"b","command":"node","args":["s.js"]}]'
     )
     assert [s.name for s in specs] == ["a", "b"]
 
@@ -79,17 +68,20 @@ def test_parse_args_defaults_to_empty():
 
 def test_parse_args_non_list_raises():
     import pytest
-    with pytest.raises(ValueError, match="args 必须是 list"):
+
+    with pytest.raises(ValueError, match="args must be a list"):
         parse_mcp_servers('[{"name":"x","command":"python","args":"oops"}]')
 
 
 def test_parse_args_int_raises():
     import pytest
-    with pytest.raises(ValueError, match="args 必须是 list"):
+
+    with pytest.raises(ValueError, match="args must be a list"):
         parse_mcp_servers('[{"name":"x","command":"python","args":5}]')
 
 
 def test_parse_env_non_dict_raises():
     import pytest
-    with pytest.raises(ValueError, match="env 必须是 object"):
+
+    with pytest.raises(ValueError, match="env must be an object"):
         parse_mcp_servers('[{"name":"x","command":"python","env":"oops"}]')

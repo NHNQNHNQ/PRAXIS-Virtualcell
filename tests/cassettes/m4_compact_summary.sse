@@ -5,7 +5,7 @@ event: content_block_start
 data: {"type":"content_block_start","index":0,"content_block":{"type":"text"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"【前段摘要】用户最初要求 X;已检索 3 案例;当前 RETRIEVE 相位"}}
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"[Previous summary] The user requested X; three cases were retrieved; the current phase is RETRIEVE."}}
 
 event: content_block_stop
 data: {"type":"content_block_stop","index":0}

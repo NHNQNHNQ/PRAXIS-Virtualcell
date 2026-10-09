@@ -12,7 +12,7 @@ const CASES = [
 ];
 
 for (const responsiveCase of CASES) {
-  test(`${responsiveCase.name} 可完成选 cell → 直接报告`, async ({ page }) => {
+  test(`${responsiveCase.name} completes cell selection → direct report`, async ({ page }) => {
     const failures = collectBrowserFailures(page);
     await page.setViewportSize({
       width: responsiveCase.width,
@@ -21,7 +21,7 @@ for (const responsiveCase of CASES) {
     await selectCell(page, "K562");
     await expect(
       page.getByText(
-        /语言辅助只解析与解释文字；数据、模拟、数值与最终裁决由确定性后端完成。/,
+        /Language assistance only parses and explains text; the deterministic backend handles data, simulation, numerical results, and final decisions./,
       ),
     ).toBeVisible();
     if (responsiveCase.width <= 760) {
@@ -30,15 +30,15 @@ for (const responsiveCase of CASES) {
       ).toHaveText("Reports");
     }
 
-    const run = await runChat(page, "敲低 AHR");
+    const run = await runChat(page, "Knock down AHR");
     const result = page.getByRole("region", {
-      name: `结果 · job ${run.jobId}`,
+      name: `Results · job ${run.jobId}`,
       exact: true,
     });
     await expect(result).toBeVisible();
-    await result.getByRole("tab", { name: "数据与执行身份", exact: true }).click();
+    await result.getByRole("tab", { name: "Data and execution identity", exact: true }).click();
     await expect(
-      result.getByText("未绑定 VirtualCellPack", { exact: true }),
+      result.getByText("No VirtualCellPack bound", { exact: true }),
     ).toBeVisible();
     if (responsiveCase.width <= 760) {
       const mobileHistory = page.locator("details.chat-mobile-history");

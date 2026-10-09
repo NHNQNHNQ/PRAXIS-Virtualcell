@@ -1,7 +1,4 @@
-"""v0.6 P2:FastAPI 本地服务 —— offline 全链(health/parse/jobs/reports/trace/provenance)。
-
-无 fastapi 或无法 import praxis_vc_api(不在 path)时 skip。offline 不调 LLM。
-"""
+"""Tests for api."""
 
 import json
 from pathlib import Path
@@ -14,13 +11,13 @@ try:
 
     from praxis_vc_api.main import app
 except Exception:  # noqa: BLE001
-    pytest.skip("praxis_vc_api 不可导入(需 repo root 在 PYTHONPATH)", allow_module_level=True)
+    pytest.skip("praxis_vc_api cannot be imported; add the repository root to PYTHONPATH", allow_module_level=True)
 
 
 @pytest.fixture()
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("PRAXIS_VC_RUNS", str(tmp_path / "runs"))
-    # 强制 offline
+
     monkeypatch.delenv("PRAXIS_VIRTUALCELL_MODE", raising=False)
     import importlib
 
@@ -49,7 +46,7 @@ def test_health(client, monkeypatch):
 
 
 def test_parse_offline(client):
-    r = client.post("/api/parse", json={"text": "在 human 细胞敲 AHR", "mode": "offline"})
+    r = client.post("/api/parse", json={"text": "Knock down AHR in human cells", "mode": "offline"})
     assert r.status_code == 200
     d = r.json()
     assert d["llm_used"] is False and d["candidate_request"]["species"] == "human"
@@ -57,7 +54,7 @@ def test_parse_offline(client):
 
 def test_parse_surrogate_in_structured_input_returns_safe_clarification(client):
     text = (
-        "human AHR knockout\n结构化描述:"
+        "human AHR knockout\nStructured description:"
         '{"species":"human","perturbation_type":"gene",'
         '"perturbation_targets":["AHR"],"output_modality":"\ud800"}'
     )
@@ -138,7 +135,7 @@ def test_parse_deep_structured_candidate_is_response_safe(client):
     response = safe_client.post(
         "/api/parse",
         json={
-            "text": f"请核对深层输入\n结构化描述:{structured}",
+            "text": f"Review the deeply nested input\nStructured description:{structured}",
             "mode": "offline",
         },
     )
@@ -313,7 +310,7 @@ def test_job_endpoint_normalizes_finite_perturbation_dose(client):
 
 
 def test_list_jobs(client):
-    # 空 → []
+
     assert client.get("/api/jobs").json()["jobs"] == []
     req = {
         "species": "human",
@@ -370,7 +367,7 @@ def test_modules_catalog(client):
     mods = d["modules"]
     assert len(mods) == 8
     codes = [m["code"] for m in mods]
-    assert codes == ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8"]  # MODULE_ORDER 顺序
+    assert codes == ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8"]
     m2 = next(m for m in mods if m["code"] == "M2")
     assert m2["id"] == "genetic_hub" and m2["display_name"] == "Genetic Hub"
     assert "donor_predictor" in m2["engines"]
@@ -378,7 +375,7 @@ def test_modules_catalog(client):
 
 
 def test_module_plan_endpoint(client):
-    # 无 exact Pack 的正式请求会在模型路由前弃权，因此没有可执行模块路由。
+
     req = {
         "species": "human",
         "perturbation_type": "gene",
@@ -394,7 +391,7 @@ def test_module_plan_endpoint(client):
 
 
 def test_job_endpoint_rejects_missing_targets_before_module_plan(client):
-    # 已确认请求仍须经过后端最终校验，不能绕过 Review 直接执行空 targets。
+
     req = {
         "species": "human",
         "perturbation_type": "gene",

@@ -1,4 +1,4 @@
-"""Phase 1:八模块规范定义。测 8 模块齐全、code M1-M8、engines 合法、bacteria M3 术语别名。"""
+"""Tests for biological modules."""
 from praxis_virtualcell.agents.route_table import ENGINES
 from praxis_virtualcell.biological_modules import modules as M
 
@@ -21,14 +21,14 @@ def test_module_engines_are_known_engines():
     known = set(ENGINES)
     for mid in M.MODULE_ORDER:
         for eng in M.MODULES[mid]["engines"]:
-            assert eng in known, f"{mid} 引用未知 engine: {eng}"
+            assert eng in known, f"{mid} references an unknown engine: {eng}"
 
 
 def test_bacteria_m3_display_alias():
-    # 铁律:bacteria 不叫线粒体,前端显示 energy/redox
+
     assert M.display_name("mitochondrial_energy_metabolism", species="bacteria") \
         == "Energy metabolism / redox module"
-    # 其它物种保留原名
+
     assert "Mitochond" in M.display_name("mitochondrial_energy_metabolism", species="yeast")
 
 

@@ -1,4 +1,5 @@
-"""唯一通讯通道:agent 只经 bus 收发,不互调内部方法。bus 记全量 trace 可 replay。"""
+"""Message bus as the sole agent communication channel; record a complete replayable trace."""
+
 from __future__ import annotations
 
 import json
@@ -17,7 +18,7 @@ class MessageBus:
         self._ctx: dict[str, str] = {}
 
     def set_context(self, *, trace_id: str, task_id: str) -> None:
-        """runtime build/run 时注入本次 run 的 trace_id/task_id,供 send 回填。"""
+        """Inject the current run's trace_id/task_id during build/run for send() to populate."""
         self._ctx = {"trace_id": trace_id, "task_id": task_id}
 
     def _backfill(self, message: AgentMessage) -> None:
@@ -27,15 +28,15 @@ class MessageBus:
             message.task_id = self._ctx.get("task_id") or f"task_{message.message_id}"
 
     def _validate(self, message: AgentMessage) -> None:
-        # 硬字段用 falsy 判断:空串/None 均视为缺失(schema 化 handoff 要求非空)
-        # trace_id/task_id 不在此列,由 _backfill 兜底
+
         for f in _REQUIRED:
             if not getattr(message, f):
-                raise SchemaError(f"message 缺必需字段: {f}")
-        # payload 必须是结构化 dict:单独用 isinstance 校验(而非 falsy),以放行合法的空 dict {} 但拒绝自由文本字符串
+                raise SchemaError(f"message missing required field: {f}")
+
         if not isinstance(message.payload, dict):
             raise SchemaError(
-                f"payload 必须是 dict(禁止自由文本 handoff),实际: {type(message.payload).__name__}")
+                f"payload must be a dict (free-text handoffs are forbidden); received: {type(message.payload).__name__}"
+            )
 
     def send(self, message: AgentMessage) -> None:
         self._validate(message)

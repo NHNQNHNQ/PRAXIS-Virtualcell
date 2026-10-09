@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 本地起 PRAXIS-VirtualCell(offline)。需先 pip install '.[api]'。
+# Start the local offline service after installing the api extra.
 set -euo pipefail
 HOST="${HOST:-127.0.0.1}"
 PORT="${PORT:-8000}"

@@ -1,32 +1,26 @@
-"""evidence_level:E0–E5 证据等级映射(治理层之上的薄映射,纯函数,零 LLM/bus 依赖)。
-
-决策 B(路线图 §6-B):证据等级读现有 reliability/OOD/disagreement/learned 信号映射 E0–E5,
-**不重写治理、不回写 verdict**;E2=匹配扰动数据 in-domain→accept **与现有 disposition 对齐**
-(不领先治理:abstain/downgrade 请求不得映射成 E2/E3 accept 级)。
-
-runtime OOD 真实情况(实读 reliability.py:136):seen_in_train 多为 None → OOD proxy fail-closed
-退回 caution_flags/非母种代理,None 时记 unknown(不假装 in_domain,红线 6)。
+"""Conservative E0–E5 mapping above governance using existing reliability, OOD, disagreement, and learned signals.
+Do not mutate verdicts or promote abstain/downgrade into E2/E3 acceptance. Missing seen_in_train yields
+caution/species proxies or unknown rather than assuming in-domain support.
 """
 from __future__ import annotations
 
 from praxis_virtualcell.agents.reliability import _HARD_ABSTAIN
 
-# 硬拒 abstain 原因(→ E0):单一真相源 = reliability._HARD_ABSTAIN
-# (含 core_predictor_failed;复用消除两处常量漂移,新增硬拒原因只须改 reliability 一处)。
 _HARD_REJECT = _HARD_ABSTAIN
-# 提示跨物种/OOD 的 caution flag 关键词
+
 _OOD_CAUTION_KEYS = ("ortholog", "cross_species", "cross-species", "projected")
 
 
 def derive_ood_signal(report: dict) -> str:
-    """runtime OOD 信号:in_domain / ood / unknown。
-    seen_in_train 优先(True=in_domain,False=ood);None → 看 caution/物种 → unknown(不假装 in_domain)。"""
+    """Derive in_domain/ood/unknown: seen_in_train=True/False takes priority; absent values use caution/species
+    signals and otherwise remain unknown.
+    """
     seen = report.get("seen_in_train")
     if seen in (True, 1):
         return "in_domain"
     if seen in (False, 0):
         return "ood"
-    # None:runtime 常态 → 保守 unknown(即使 human 无 caution 也不当 in_domain)
+
     return "unknown"
 
 
@@ -40,7 +34,7 @@ def _has_ood_caution(report: dict) -> bool:
 
 
 def map_evidence_level(report: dict) -> dict:
-    """读 report 现有信号 → E0–E5(保守优先,不回写 verdict)。返回新 dict,不 mutate report。"""
+    """Map existing report signals conservatively to a new E0–E5 dictionary without mutating report or verdict."""
     abstain = bool(report.get("abstain"))
     reliability = report.get("reliability")
     downgrade = list(report.get("downgrade_reasons") or [])
@@ -52,7 +46,7 @@ def map_evidence_level(report: dict) -> dict:
     ood = derive_ood_signal(report)
     rationale: list[str] = []
 
-    # abstain 分支(E0/E1)
+
     if abstain:
         if any(r in _HARD_REJECT for r in abstain_reasons):
             rationale.append("hard_reject_abstain")
@@ -63,7 +57,7 @@ def map_evidence_level(report: dict) -> dict:
         return {"level": level, "rationale": rationale, "ood_signal": ood,
                 "aligned_with_disposition": True}
 
-    # 非 abstain:先处理降级/高不确定(E4/E5,不得被抬成 accept 级)
+
     if dis_triggered:
         rationale.append("disagreement_triggered")
     if learned_fallback:
@@ -72,13 +66,13 @@ def map_evidence_level(report: dict) -> dict:
         rationale.append("downgrade")
 
     if dis_triggered or learned_fallback or reliability == "low":
-        # 强分歧未 abstain / learned 退回 / 低可靠 → 最不确定的 accept 级
+
         rationale.append("high_uncertainty")
         level = "E5"
     elif downgrade:
         level = "E4"
     else:
-        # accept 级(E2/E3):现有 disposition 已 accept(非 abstain、无 downgrade)
+
         if ood == "in_domain" and not _has_ood_caution(report) and reliability == "high":
             rationale.append("in_domain_high_reliability")
             level = "E2"

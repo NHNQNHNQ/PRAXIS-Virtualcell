@@ -1,26 +1,19 @@
-# bacteria (大肠杆菌等原核生物) — 无 mammalian cell type、无真核 scRNA 转录组结构。
-# 现有三个 Mock* predictor 全部是 mammalian scRNA perturbation 模型,对 bacteria 完全不适用:
-#   - supported_species 显式只含 human(不含 bacteria)
-#     => ModelApplicabilityAgent 的 `req.species in supported_species` 检查失败 => rejected
-# 这里显式列出三者(而非靠 bacteria/ 目录缺失静默拒绝),让"为何被拒"在 brain 中可审计,
-# 并使 provenance.rules_referenced 指向本文件(GPT §7.5:trace 中可见 species brain 规则被引用)。
-# bacteria 真正支持的扰动(基因敲除 / 过表达 / 操纵子调控)暂无对应 offline predictor,
-# 本期只做 routing + rejection,不接新 ML predictor(参见 negative_transfer.yaml)。
+# Explicit predictor applicability. Mammalian mock predictors reject microbial species; mouse transfer requires ortholog cautions.
 MockCPA:
-  supported_species: [human]          # 不含 bacteria => bacteria 请求被拒
+  supported_species: [human]
   supported_modalities: [scRNA]
   supported_tasks: [predict_delta_expression]
   supported_perturbations: [gene, drug]
   reject_reason_for_bacteria: mammalian_scrna_predictor_not_applicable
 MockGEARS:
-  supported_species: [human]          # 不含 bacteria => bacteria 请求被拒
+  supported_species: [human]
   supported_modalities: [scRNA]
   supported_tasks: [predict_delta_expression]
   supported_perturbations: [gene, gene_combination]
   reject_if: [gene_not_in_graph_vocabulary]
   reject_reason_for_bacteria: mammalian_scrna_predictor_not_applicable
 MockLinear:
-  supported_species: [human]          # 不含 bacteria => bacteria 请求被拒
+  supported_species: [human]
   supported_modalities: [scRNA]
   supported_tasks: [predict_delta_expression]
   supported_perturbations: [gene, drug]

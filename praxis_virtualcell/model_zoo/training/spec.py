@@ -1,13 +1,8 @@
-"""SelfTrainingSpec:自训模型的声明式训练契约。
-
-把 registry.yaml training_card 的五字段(training_data/split/baseline/metrics/provenance)+
-训练脚本坐标(training_script)+ 远端环境(remote_env)结构化,fail-closed 校验:
-- 五文本字段须非空 str(空契约 → ValueError);
-- metrics 须是 dict(可含 null 值——planned 未训诚实标注,但结构须完整);
-- to_training_card() 产 registry.yaml training_card 五键 dict(单一真相源:registry 由 spec 派生)。
-
-与 registry._validate 互补:registry 校 yaml 静态字段存在性;spec 校语义 + 提供派生。零 LLM。
+"""Declarative self-training contract: training_data/split/baseline/metrics/provenance, training_script, and
+remote_env. Required text fields are nonempty strings; metrics has a complete dictionary structure and can
+retain null planned values. Derive the 5-key training card for registry validation; no LLM is used.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -27,19 +22,21 @@ class SelfTrainingSpec:
     remote_env: dict = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        # fail-closed:文本字段非空(空契约不静默接受)
+
         for f in ("name",) + _TEXT_FIELDS + ("training_script",):
             v = getattr(self, f)
             if not isinstance(v, str) or not v.strip():
-                raise ValueError(f"SelfTrainingSpec 字段 {f} 须非空 str(得 {v!r});fail-closed")
-        # metrics 须是 dict(可含 null 值,但结构须完整)
+                raise ValueError(f"SelfTrainingSpec field {f} must be a nonempty str (received {v!r});fail-closed")
+
         if not isinstance(self.metrics, dict) or not self.metrics:
-            raise ValueError(f"SelfTrainingSpec.metrics 须是非空 dict(得 {self.metrics!r});fail-closed")
+            raise ValueError(
+                f"SelfTrainingSpec.metrics must be a nonempty dict (received {self.metrics!r});fail-closed"
+            )
         if not isinstance(self.remote_env, dict):
-            raise ValueError(f"SelfTrainingSpec.remote_env 须是 dict(得 {self.remote_env!r})")
+            raise ValueError(f"SelfTrainingSpec.remote_env must be a dict (received {self.remote_env!r})")
 
     def to_training_card(self) -> dict:
-        """产 registry.yaml training_card 五键 dict(与 registry._validate required_card 一致)。"""
+        """Return the registry's 5-key training card matching required_card."""
         return {
             "training_data": self.training_data,
             "split": self.split,

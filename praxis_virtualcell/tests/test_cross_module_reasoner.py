@@ -1,5 +1,4 @@
-"""Phase 4:LLMCrossModuleReasoner(进 bus,复刻 LLMCritic)。FakeLLMClient 离线跑。
-铁律(决策 P4):只出 notes/flags,不改 module_plan;LLM 失败 → flags=[llm_unavailable/llm_parse_failed]。"""
+"""Tests for cross module reasoner."""
 import json
 
 from praxis_virtualcell.core.bus import MessageBus
@@ -32,17 +31,17 @@ def _run(content):
 
 
 def test_emits_notes_and_flags_only():
-    msg = _run(json.dumps({"notes": ["genetic_hub 与 stress 组合合理"], "flags": []}))
+    msg = _run(json.dumps({"notes": ["genetic_hub and stress form a reasonable combination"], "flags": []}))
     assert msg.message_type == "llm_cross_module_notes"
-    assert set(msg.payload) == {"notes", "flags"}      # 只 notes/flags,无 prediction/verdict
-    assert msg.payload["notes"] == ["genetic_hub 与 stress 组合合理"]
+    assert set(msg.payload) == {"notes", "flags"}
+    assert msg.payload["notes"] == ["genetic_hub and stress form a reasonable combination"]
 
 
 def test_does_not_mutate_module_plan():
-    """决策 P4:reasoner 不改 module_plan(原 dict 不被修改)。"""
+    """Verify does not mutate module plan."""
     before = json.dumps(_PLAN, sort_keys=True)
     _run(json.dumps({"notes": ["x"], "flags": ["y"]}))
-    assert json.dumps(_PLAN, sort_keys=True) == before  # plan 未被改
+    assert json.dumps(_PLAN, sort_keys=True) == before
 
 
 def test_empty_content_flags_unavailable():

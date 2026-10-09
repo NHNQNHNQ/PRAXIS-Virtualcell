@@ -1,13 +1,13 @@
-# M1-M8 支持度矩阵(mouse)。跨 human ortholog 迁移,普遍带 caution。
+# Module support is descriptive; authoritative applicability remains in model_applicability.yaml.
 species: mouse
 modules:
   membrane_system:
     support: weak
-    reason: 无膜系统引擎;ortholog 迁移间接
+    reason: no membrane-system engine; indirect ortholog transfer
     tools: [lipid_pathway_rules]
   genetic_hub:
     support: medium
-    reason: human predictor 迁移需 ortholog(caution);非原生
+    reason: human predictor transfer requires ortholog mapping (caution); not native
     models: [donor_predictor]
   mitochondrial_energy_metabolism:
     support: medium
@@ -19,18 +19,18 @@ modules:
     models: [pathway_scoring]
   biosynthetic_network:
     support: weak
-    reason: 无引擎;ortholog 迁移间接
+    reason: no engine; indirect ortholog transfer
     tools: [ribosome_upr_gene_set]
   cytoskeletal_framework:
     support: weak
-    reason: 无 morphology model
+    reason: no morphology model
     models: [spatial_niche]
   stress_processor:
     support: medium
-    reason: state_scoring ortholog 迁移
+    reason: state_scoring via ortholog transfer
     models: [state_scoring]
   degradation_machinery:
     support: weak
-    reason: 无降解引擎;基因集规则
+    reason: no degradation engine; gene-set rules only
     tools: [proteostasis_gene_set]
 biological_mismatch: []

@@ -1,29 +1,23 @@
-"""S2(W8):mean-perturbation naive baseline —— 同 donor norman split + 同 EvalAgent + per-cell ΔPearson。
-
-满足项目 ≥3 baseline 不变量,给统一准确性表一个 same-protocol 下界。仅远端 virtualcell env 跑。
-
-baseline 定义(扰动预测文献标准 naive):perturbation-agnostic,对任何扰动都预测
-`control + 训练集平均 delta`(mean_delta = 训练集所有非 control 细胞 (target-control) 的平均),
-忽略 pert_emb。它无法捕捉扰动特异效应,故应明显低于训练 predictor。
-
-实测(donor norman, max_cells=200, train seed=0 / test seed=1):
-    MEAN_BASELINE_DELTA_PEARSON = 0.4615  (cosine 0.9850, n=18874, mean_delta from n_train=25463)
-→ 低于 6 base(0.6183~0.6716)与 Coordinator(0.7039);亦高于 scGPT frozen 0.4407(诚实:冻结基础模型反不如平均 baseline)。
-
-用法:conda activate virtualcell; python -m praxis_virtualcell.benchmarks.mean_baseline
+"""Perturbation-agnostic mean baseline under the donor Norman split and EvalAgent protocol. Predict control plus
+the average training noncontrol delta, ignoring pert_emb. Historical max_cells=200, train seed=0/test seed=1:
+delta-Pearson=0.4615, cosine=0.9850, n=18874, n_train=25463. Six bases gave 0.6183–0.6716, Coordinator 0.7039,
+and frozen scGPT 0.4407; these are protocol-bound results.
 """
 from __future__ import annotations
 
+import os
 import sys
 from typing import Any
 
-_DONOR = "/home/zkyd/data1/mzy/Virtual cell"
+_DONOR = os.environ.get("PRAXIS_DONOR_SOURCE_ROOT", "").strip()
+if not _DONOR:
+    raise RuntimeError("Set PRAXIS_DONOR_SOURCE_ROOT to the external donor source checkout")
 if _DONOR not in sys.path:
     sys.path.insert(0, _DONOR)
 
 
 def _build_mean_predictor(mean_delta):
-    """构造 MeanPerturbationPredictor(在函数内 import donor base,避免 Mac 无 torch 时 import 失败)。"""
+    """Build MeanPerturbationPredictor with a lazy donor import so local imports work without torch."""
     import torch  # noqa: F401
     from predictors.base import Prediction, Predictor
 
@@ -56,7 +50,7 @@ def _build_mean_predictor(mean_delta):
 
 
 def compute_mean_delta(ds):
-    """训练集所有非 control 细胞 (target-control) 的平均 delta [n_genes]。返回 (mean_delta, n_used)。"""
+    """Average training noncontrol (target−control) deltas across cells; return (mean_delta, n_used)."""
     import torch
     from bench.vcbench.loader import collate_perturbation
     from torch.utils.data import DataLoader

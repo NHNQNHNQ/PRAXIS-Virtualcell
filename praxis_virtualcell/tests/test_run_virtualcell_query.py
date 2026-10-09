@@ -1,6 +1,6 @@
-"""v0.6:统一 query 服务层 —— 离线确定性 + validator + LLM 边界。
+"""Query service: deterministic offline execution, validation, and LLM boundaries.
 
-不需网络:OFFLINE 模式 parse 用确定性 fallback、run 用 mock runtime、LLM 不碰预测。
+No network required: offline parsing and mock execution preserve prediction authority.
 """
 
 import json
@@ -29,7 +29,7 @@ def test_validate_valid_human_gene():
         }
     )
     assert v["schema_valid"] and not v["missing_fields"] and not v["errors"]
-    assert v["normalized"]["perturbation_targets"] == ["AHR"]  # 归一大写
+    assert v["normalized"]["perturbation_targets"] == ["AHR"]
 
 
 def test_validate_unsupported_species():
@@ -57,7 +57,7 @@ def test_validate_missing_targets():
 
 
 def test_parse_offline_uses_deterministic_no_llm():
-    p = parse_query("在 human K562 里敲掉 AHR 会怎么样", config=_OFFLINE)
+    p = parse_query("What happens after knocking out AHR in human K562 cells?", config=_OFFLINE)
     assert p["llm_used"] is False and p["fallback_used"] is True
     assert p["parser"] == "deterministic"
     assert p["candidate_request"]["species"] == "human"
@@ -66,7 +66,7 @@ def test_parse_offline_uses_deterministic_no_llm():
 
 def test_parse_offline_never_populates_llm_metadata():
     p = parse_query("human AHR knockout", config=_OFFLINE)
-    assert p["llm_metadata"] == {}  # OFFLINE 完全不碰 LLM
+    assert p["llm_metadata"] == {}
 
 
 def test_parse_offline_reads_explicit_structured_description():
@@ -79,7 +79,7 @@ def test_parse_offline_reads_explicit_structured_description():
         }
     )
     p = parse_query(
-        f"请运行这个结构化请求\n物种:bacteria\n结构化描述:{structured}",
+        f"Run this structured request\nspecies: bacteria\nStructured description:{structured}",
         config=_OFFLINE,
     )
     assert p["schema_valid"] is True
@@ -98,7 +98,7 @@ def test_parse_offline_rejects_structured_description_output_outside_whitelist()
         }
     )
     p = parse_query(
-        f"请运行这个结构化请求\n结构化描述:{structured}",
+        f"Run this structured request\nStructured description:{structured}",
         config=_OFFLINE,
     )
     assert p["schema_valid"] is False
@@ -134,7 +134,7 @@ def test_parse_structured_description_overrides_llm_candidate(monkeypatch):
         }
     )
     p = parse_query(
-        f"请运行任务\n结构化描述:{structured}",
+        f"Run this request\nStructured description:{structured}",
         config=RuntimeConfig(mode=Mode.LLM_ASSISTED, llm_enabled=True, deepseek_api_key="stub-not-a-real-key"),
     )
     assert p["llm_used"] is True
@@ -146,7 +146,7 @@ def test_parse_structured_description_overrides_llm_candidate(monkeypatch):
 
 def test_parse_malformed_structured_description_forces_clarification_even_when_text_is_valid():
     p = parse_query(
-        'human AHR knockout\n结构化描述:{"species":"mouse"',
+        'human AHR knockout\nStructured description:{"species":"mouse"',
         config=_OFFLINE,
     )
     assert p["schema_valid"] is False
@@ -156,7 +156,7 @@ def test_parse_malformed_structured_description_forces_clarification_even_when_t
 
 def test_parse_non_object_structured_description_forces_clarification():
     p = parse_query(
-        'human AHR knockout\n结构化描述:["human", "AHR"]',
+        'human AHR knockout\nStructured description:["human", "AHR"]',
         config=_OFFLINE,
     )
     assert p["schema_valid"] is False
@@ -165,14 +165,14 @@ def test_parse_non_object_structured_description_forces_clarification():
 
 def test_parse_structured_description_rejects_unknown_fields_and_non_string_output():
     unknown = parse_query(
-        'human AHR knockout\n结构化描述:{"request_id":"user-controlled"}',
+        'human AHR knockout\nStructured description:{"request_id":"user-controlled"}',
         config=_OFFLINE,
     )
     assert unknown["schema_valid"] is False
     assert unknown["errors"] == ["structured_description_unknown_fields"]
 
     wrong_type = parse_query(
-        'human AHR knockout\n结构化描述:{"output_modality":{"bad":1}}',
+        'human AHR knockout\nStructured description:{"output_modality":{"bad":1}}',
         config=_OFFLINE,
     )
     assert wrong_type["schema_valid"] is False
@@ -181,7 +181,7 @@ def test_parse_structured_description_rejects_unknown_fields_and_non_string_outp
 
 def test_parse_structured_description_rejects_non_list_requested_outputs():
     parsed = parse_query(
-        'human AHR knockout\n结构化描述:{"requested_outputs":"growth"}',
+        'human AHR knockout\nStructured description:{"requested_outputs":"growth"}',
         config=_OFFLINE,
     )
     assert parsed["schema_valid"] is False
@@ -190,7 +190,7 @@ def test_parse_structured_description_rejects_non_list_requested_outputs():
 
 def test_parse_structured_description_rejects_requested_outputs_outside_whitelist():
     parsed = parse_query(
-        'human AHR knockout\n结构化描述:{"requested_outputs":["invented"]}',
+        'human AHR knockout\nStructured description:{"requested_outputs":["invented"]}',
         config=_OFFLINE,
     )
     assert parsed["schema_valid"] is False
@@ -199,7 +199,7 @@ def test_parse_structured_description_rejects_requested_outputs_outside_whitelis
 
 def test_parse_structured_description_rejects_mixed_target_types():
     parsed = parse_query(
-        'human AHR knockout\n结构化描述:{"perturbation_targets":[{"gene":"TP53"},"AHR"]}',
+        'human AHR knockout\nStructured description:{"perturbation_targets":[{"gene":"TP53"},"AHR"]}',
         config=_OFFLINE,
     )
     assert parsed["schema_valid"] is False
@@ -269,7 +269,7 @@ def test_run_query_offline_deterministic():
     out = run_query(req, config=_OFFLINE)
     assert out["llm_used_for_prediction"] is False
     assert "structured_report" in out and out["trace"]
-    assert out["narrative"] is None  # offline 无 narrative
+    assert out["narrative"] is None
     assert out["mode"] == "offline"
 
 
@@ -300,7 +300,7 @@ def test_formal_query_without_pack_abstains_without_legacy_mock_predictors():
 
 
 def test_run_full_query_offline_end_to_end():
-    out = run_full_query("在 human 细胞里敲掉 AHR", config=_OFFLINE)
+    out = run_full_query("Knock out AHR in human cells", config=_OFFLINE)
     assert out["stage"] in ("done", "clarification_required")
     if out["stage"] == "done":
         assert out["llm_used_for_prediction"] is False
@@ -308,6 +308,6 @@ def test_run_full_query_offline_end_to_end():
 
 
 def test_run_full_query_clarification_on_unparseable():
-    out = run_full_query("随便说点什么没有基因信息", config=_OFFLINE)
+    out = run_full_query("An unspecified question without gene information", config=_OFFLINE)
     assert out["stage"] == "clarification_required"
     assert out["missing_fields"]

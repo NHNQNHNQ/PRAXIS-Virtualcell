@@ -1,8 +1,3 @@
-"""M10.1 hotfix: LLM error message 透传到 SSE 前端。
-
-T13 user 报告:任何 LLM 异常都显示「内核不可恢复错误」,无法 debug。
-Fix: end event 带 message 字段 → sse.py 透传给前端。"""
-
 from __future__ import annotations
 
 
@@ -20,7 +15,7 @@ def test_kernel_end_error_without_message_falls_back():
 
     ev = {"type": "end", "reason": "error"}
     out = _map_kernel_event(ev)
-    assert out["message"] == "内核不可恢复错误"
+    assert out["message"] == "Unrecoverable kernel error"
 
 
 def test_thinking_event_maps_to_thinking_delta():

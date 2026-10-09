@@ -1,17 +1,7 @@
-"""W3.1(v0.4):Human drug response case —— LINCS L1000 药物签名 MOA 一致性分析。
-
-数据:Enrichr `LINCS_L1000_Chem_Pert_up/down`(公开,无凭证)的 curated 子集
-(`data/drug_signatures/curated_subset.json`,每药 consensus top-100 up/down 基因 + MOA 标注)。
-原始大库(~30MB)gitignore,provenance(URL+sha256)见 `data/drug_signatures/PROVENANCE.json`。
-
-分析:drug → 签名(up/down 基因集)→ 与**同 MOA** 药物签名相似度 vs **跨 MOA** 基线 → 富集比。
-治理(R6 防过度承诺):富集≥阈值→accept;富集<阈值(弱信号)→downgrade;无同 MOA 参考→downgrade;
-药不在库→abstain。**不训练模型**,纯签名检索 + 相似度 + 受治理裁决。
-
-科学默认(自定,写明依据):
-- 相似度 = (up-基因 Jaccard + down-基因 Jaccard)/2(签名双向一致才算像);
-- 富集阈值 = 1.5(同 MOA 相似度须比跨 MOA 均值高 ≥50% 才认"MOA-consistent");
-- consensus top-100(每药跨条件最频繁基因,抗单条件噪声)。
+"""Curated Enrichr LINCS L1000 drug-signature MOA analysis using consensus top-100 up/down genes. Similarity=(up
+Jaccard+down Jaccard)/2; enrichment compares the best same-MOA partner with the cross-MOA mean. Default
+threshold=1.5, requiring at least 50% higher similarity. Weak signals/no partner downgrade and missing drugs
+abstain. Raw library size is about 30MB; provenance stores URL/sha256. No model is trained.
 """
 from __future__ import annotations
 
@@ -25,9 +15,13 @@ from praxis_virtualcell.agents.species_schema import normalize_request
 _DEFAULT_SUBSET = Path(__file__).resolve().parents[3] / "data" / "drug_signatures" / "curated_subset.json"
 _ENRICH_THRESHOLD = 1.5
 
-_BOUNDARY = ("LINCS L1000 签名是 bulk/群体 consensus(方向级 up/down 基因集),噪声大,"
-             "**非** per-cell 表达预测;MOA 标注为 curated 教科书药理(非本文新发现);"
-             "富集阈值 1.5 为设定默认;弱信号/单例药主动降级,不代表药物无效,仅表'签名证据不足以确证 MOA 一致'。")
+_BOUNDARY = (
+    'LINCS L1000 signatures are noisy bulk/population consensus up/down gene sets, not '
+    'per-cell expression predictions. MOA annotations are curated pharmacological '
+    'knowledge, not new findings from this analysis; the enrichment threshold 1.5 is a '
+    'configured default. Weak signals or singleton drugs are downgraded for insufficient '
+    'MOA-consistency evidence, without implying drug inefficacy.'
+)
 
 
 def _jaccard(a, b) -> float:
@@ -36,7 +30,7 @@ def _jaccard(a, b) -> float:
 
 
 class DrugSignatureDB:
-    """curated LINCS L1000 药物签名库(consensus up/down + MOA)。药名小写为键。"""
+    """Curated LINCS L1000 consensus up/down signatures and MOA annotations, keyed by lowercase drug names."""
 
     def __init__(self, json_path: str | Path | None = None) -> None:
         self._db = json.loads(Path(json_path or _DEFAULT_SUBSET).read_text(encoding="utf-8"))
@@ -57,11 +51,13 @@ class DrugSignatureDB:
         return self._get(drug)["down"]
 
     def similarity(self, a: str, b: str) -> float:
-        """(up Jaccard + down Jaccard)/2 —— 双向签名一致性。"""
+        """Compute (up Jaccard+down Jaccard)/2 for bidirectional signature consistency."""
         return (_jaccard(self.up(a), self.up(b)) + _jaccard(self.down(a), self.down(b))) / 2
 
     def moa_enrichment(self, drug: str) -> dict:
-        """同 MOA 最相似伙伴 相似度 vs 跨 MOA 均值 → 富集比。无同 MOA 伙伴 → partner=None。"""
+        """Compare the best same-MOA similarity with the cross-MOA mean; absent same-MOA references return
+        partner=None.
+        """
         d = str(drug).strip().lower()
         moa = self.moa(d)
         same = [x for x in self._db if x != d and self._db[x]["moa"] == moa]
@@ -75,16 +71,16 @@ class DrugSignatureDB:
         return {"partner": partner, "same_sim": same_sim, "cross_mean": cross_mean, "enrichment": enr}
 
 
-_ORDER = {"accept": 0, "caution": 1, "downgrade": 2, "abstain": 3}   # 越大越保守
+_ORDER = {"accept": 0, "caution": 1, "downgrade": 2, "abstain": 3}
 
 
 def run_drug_response_case(raw_req: dict, db: DrugSignatureDB | None = None,
                            threshold: float = _ENRICH_THRESHOLD):
-    """Human drug response case → 7 部分 CaseReport(真实签名 + 受治理裁决)。返回 (CaseReport, RouteDecision)。"""
+    """Run the human drug-signature case and return a 7-part CaseReport with RouteDecision."""
     norm = normalize_request(raw_req)
     dec = route(norm)
     if dec.engine != "embedding":
-        raise ValueError(f"drug case 期望 embedding,route 给了 {dec.engine}")
+        raise ValueError(f"drug case expected embedding; routing selected {dec.engine}")
     db = db or DrugSignatureDB()
 
     per_drug, dispositions, flags = [], [], []
@@ -123,7 +119,10 @@ def run_drug_response_case(raw_req: dict, db: DrugSignatureDB | None = None,
                                "method": "signature MOA-consistency (Jaccard enrichment)", "reason": dec.reason},
         raw_output={"per_drug": per_drug, "enrichment_threshold": threshold},
         baseline_comparison={"baseline": "cross-MOA mean signature similarity",
-                             "interpretation": "同 MOA 相似度 / 跨 MOA 均值 = 富集;>阈值才认 MOA-consistent"},
+                             "interpretation": (
+                                 'Enrichment = within-MOA similarity / cross-MOA mean; MOA consistency requires '
+                                 'exceeding the threshold'
+                             )},
         reliability_decision={"disposition": disposition, "caution_flags": flags, "data_gated": False},
         provenance_boundary={"tool": "LINCS L1000 Chem Pert (Enrichr)",
                              "source": "https://maayanlab.cloud/Enrichr (LINCS_L1000_Chem_Pert_up/down)",

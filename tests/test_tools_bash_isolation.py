@@ -1,11 +1,10 @@
-"""BashTool 文件系统真隔离(unshare userns)单测(v0.18 子项目1)。"""
 import asyncio
 
 from praxis2.tools import bash as bashmod
 
 
 def test_userns_available_true_when_unshare_succeeds(monkeypatch):
-    """unshare 探测 returncode=0 → 可用。"""
+
     class _R:
         returncode = 0
 
@@ -15,7 +14,7 @@ def test_userns_available_true_when_unshare_succeeds(monkeypatch):
 
 
 def test_userns_available_false_when_unshare_fails(monkeypatch):
-    """unshare 探测非 0 / 抛异常 → 不可用。"""
+
     def _boom(*a, **k):
         raise OSError("no unshare")
 
@@ -47,7 +46,7 @@ def test_isolation_argv_structure():
     )
     assert argv[:5] == ["unshare", "--user", "--map-root-user", "--mount", "--"]
     assert argv[5:8] == ["/bin/sh", "-c", bashmod.SETUP_TEMPLATE]
-    # 位置参数:$0 名 + $1 sandbox / $2 files_root / $3 command / $4 mask / $5 cwd
+
     assert argv[8] == "praxis-bash"
     assert argv[9] == "/fr/u1"
     assert argv[10] == "/fr"
@@ -57,17 +56,21 @@ def test_isolation_argv_structure():
 
 
 def test_isolation_argv_command_injection_safe():
-    """恶意 command 只是 $3 的值,不破坏 SETUP 脚本结构。"""
+
     evil = 'x"; rm -rf /; "'
     argv = bashmod._isolation_argv(
-        command=evil, sandbox="/fr/u1", files_root="/fr", mask="", cwd="/fr/u1",
+        command=evil,
+        sandbox="/fr/u1",
+        files_root="/fr",
+        mask="",
+        cwd="/fr/u1",
     )
-    assert argv[11] == evil  # 原样作为位置参数,SETUP_TEMPLATE 不含它
+    assert argv[11] == evil
     assert evil not in bashmod.SETUP_TEMPLATE
 
 
 def test_mask_paths_no_empty_lines():
-    """空 extra 不产生空行(p.strip() 过滤)。"""
+
     paths = bashmod._mask_paths("")
     assert "" not in paths.split("\n")
 
@@ -77,7 +80,7 @@ def _run(tool, payload):
 
 
 def test_isolation_off_uses_shell(tmp_path, monkeypatch):
-    """isolation off(默认)→ create_subprocess_shell,零回归。"""
+
     captured = {}
 
     async def fake_shell(cmd, **kw):
@@ -90,11 +93,10 @@ def test_isolation_off_uses_shell(tmp_path, monkeypatch):
     r = _run(t, {"command": "echo hi"})
     assert captured["mode"] == "shell"
     assert captured["cmd"] == "echo hi"
-    assert r.ok is False  # spawn 失败兜底(stop-after-capture)
+    assert r.ok is False
 
 
 def test_isolation_on_uses_exec_unshare(tmp_path, monkeypatch):
-    """isolation on → create_subprocess_exec("unshare", ...)。"""
     captured = {}
 
     async def fake_exec(*argv, **kw):
@@ -106,5 +108,5 @@ def test_isolation_on_uses_exec_unshare(tmp_path, monkeypatch):
     r = _run(t, {"command": "echo hi"})
     assert captured["argv"][0] == "unshare"
     assert "--map-root-user" in captured["argv"]
-    assert captured["argv"][11] == "echo hi"  # 位置 11 = $3 command(防参数顺序变静默失效)
+    assert captured["argv"][11] == "echo hi"
     assert r.ok is False

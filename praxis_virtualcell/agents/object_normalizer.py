@@ -1,4 +1,4 @@
-"""第一版:gene symbol 去空格 + 大写(真 ortholog/别名归一化留后续)。"""
+"""Normalize gene symbols by stripping whitespace and uppercasing; ortholog and alias mapping are separate."""
 from __future__ import annotations
 
 from praxis_virtualcell.core.agent import BaseAgent

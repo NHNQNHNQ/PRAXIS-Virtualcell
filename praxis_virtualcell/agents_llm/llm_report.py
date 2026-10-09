@@ -1,4 +1,6 @@
-"""结构化报告 → 中文 NL 叙述。忠实保留 abstain/参与/拒绝/reliability/provenance,不编造。"""
+"""Convert a structured report to English prose while preserving abstention, used/rejected models, reliability, and
+provenance without fabrication.
+"""
 from __future__ import annotations
 
 import json
@@ -9,9 +11,12 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
 
 _SYS = (
-    "你把结构化的虚拟细胞预测报告改写成简洁中文科研叙述。必须忠实保留:是否 abstain、"
-    "用了/拒了哪些模型、reliability、provenance 要点;不得编造报告里没有的预测数值或结论。"
-    "只输出叙述文本,不要输出 JSON。"
+
+        'Rewrite the structured virtual cell prediction report as concise English scientific '
+        'prose. Faithfully preserve whether the system abstained, which models were used or '
+        'rejected, reliability, and key provenance. Do not invent numerical predictions or '
+        'conclusions absent from the report. Return narrative text only, without JSON.'
+
 )
 
 

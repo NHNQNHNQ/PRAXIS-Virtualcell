@@ -1,6 +1,6 @@
 data: {"id":"x","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
 
-data: {"id":"x","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"技能执行完成"},"finish_reason":null}]}
+data: {"id":"x","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Skill execution completed"},"finish_reason":null}]}
 
 data: {"id":"x","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":9,"completion_tokens":4,"total_tokens":13}}
 

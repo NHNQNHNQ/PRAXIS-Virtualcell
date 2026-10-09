@@ -1,5 +1,7 @@
-"""纯 DeepSeek LLM client(httpx,OpenAI 兼容 /chat/completions)。
-无 openai/anthropic SDK;无 key → disabled;complete() 不抛,失败返回 {error}。"""
+"""DeepSeek client using httpx and the OpenAI-compatible /chat/completions API. No OpenAI/Anthropic SDK is
+required. Missing credentials disable the client; complete() returns an error record rather than raising on
+provider failures.
+"""
 from __future__ import annotations
 
 from typing import Any
@@ -36,12 +38,12 @@ class LLMClient:
             r.raise_for_status()
             content = r.json()["choices"][0]["message"]["content"]
             return {"disabled": False, "content": content, "error": None}
-        except Exception as e:  # noqa: BLE001 — 不抛,调用方 fallback
+        except Exception as e:
             return {"disabled": False, "content": None, "error": str(e)}
 
 
 def make_llm_client(config: RuntimeConfig) -> LLMClient:
-    # Phase 4:enabled 认所有需要 LLM 的模式(assist + 编排 + 编排-strict),不再只认 LLM_ASSISTED。
+
     enabled = config.mode in LLM_MODES and bool(config.deepseek_api_key)
     return LLMClient(enabled=enabled, api_key=config.deepseek_api_key,
                      base_url=config.deepseek_base_url, model=config.deepseek_model)

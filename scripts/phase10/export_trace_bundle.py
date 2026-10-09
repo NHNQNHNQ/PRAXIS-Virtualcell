@@ -1,9 +1,3 @@
-"""Phase 10 trace/provenance audit bundle 导出 —— 对 T10.3 的 16 case 请求集调 run_query。
-
-权威请求集 = test_t10_3_end_to_end_cases 的 16 case（此处内嵌同一份,保持与 D-A 一致）。
-导出每请求的 trace[](8 字段/条)+ provenance(rules_referenced/models_used/n_messages/per_call_hashes)
-+ reliability_decision + 关键 structured_report 字段,落 PHASE10_TRACE_AUDIT.md。OFFLINE 确定性。
-"""
 from __future__ import annotations
 
 import json
@@ -19,11 +13,18 @@ _BASE = {"input_modality": "scRNA", "task_type": "predict_delta_expression"}
 
 
 def _req(name, species, ptype, targets, out="delta_expression"):
-    return (name, {**_BASE, "species": species, "perturbation_type": ptype,
-                   "perturbation_targets": targets, "output_modality": out})
+    return (
+        name,
+        {
+            **_BASE,
+            "species": species,
+            "perturbation_type": ptype,
+            "perturbation_targets": targets,
+            "output_modality": out,
+        },
+    )
 
 
-# 与 test_t10_3_end_to_end_cases 的 16 core case 一致(S2b 远端变体不含,延后)
 _CASES = [
     _req("S1_M1_membrane_FASN", "human", "gene", ["FASN"]),
     _req("S2_M2_genetic_AHR", "human", "gene", ["AHR"]),
@@ -70,18 +71,25 @@ def main() -> int:
     _OUT.mkdir(parents=True, exist_ok=True)
     bundles = [_bundle_one(n, r) for n, r in _CASES]
     (_OUT / "trace_bundle.json").write_text(
-        json.dumps(bundles, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
+        json.dumps(bundles, ensure_ascii=False, indent=1, default=str), encoding="utf-8"
+    )
     n_total = len(bundles)
     n_false = sum(b["llm_used_for_prediction"] is False for b in bundles)
-    md = ["# PHASE 10 TRACE/PROVENANCE AUDIT BUNDLE", "",
-          "> 对 T10.3 16 case 请求集调 `run_query`(OFFLINE 确定性)导出。原始 JSON 见 `trace_bundle.json`。",
-          f"> `llm_used_for_prediction`:{n_false}/{n_total} case 均为 False(OFFLINE 恒 False,无 LLM 参与预测)。", "",
-          "| case | abstain | models_used | prediction | module_plan.primary | trace_len |",
-          "|---|---|---|---|---|---|"]
+    md = [
+        "# PHASE 10 TRACE/PROVENANCE AUDIT BUNDLE",
+        "",
+        "> Deterministic offline run_query results for 16 end-to-end requests; raw records are in trace_bundle.json.",
+        f"> `llm_used_for_prediction`:{n_false}/{n_total} cases have False; the offline predictor does not use an LLM.",
+        "",
+        "| case | abstain | models_used | prediction | module_plan.primary | trace_len |",
+        "|---|---|---|---|---|---|",
+    ]
     for b in bundles:
         mp = b["module_plan"]
         prim = mp.get("primary") if mp else "None(unroutable)"
-        md.append(f"| {b['case']} | {b['abstain']} | {b['models_used']} | {b['prediction']} | {prim} | {b['trace_len']} |")
+        md.append(
+            f"| {b['case']} | {b['abstain']} | {b['models_used']} | {b['prediction']} | {prim} | {b['trace_len']} |"
+        )
     (_OUT / "PHASE10_TRACE_AUDIT.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print(f"[export_trace_bundle] wrote {_OUT / 'PHASE10_TRACE_AUDIT.md'} + trace_bundle.json ({len(bundles)} cases)")
     return 0

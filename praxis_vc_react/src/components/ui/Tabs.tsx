@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
 
-// 受控 segmented tabs(spec §2 Stage5 六 tab 容器复用)。走 components.css 的 .tabs / .tab / .tab.active。
-// 纯展示 + 单一 onChange 回调,不持有选中态(由父级控制)。
 
 export type TabItem = {
   id: string;

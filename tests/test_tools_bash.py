@@ -18,7 +18,7 @@ def test_echo_in_sandbox(tmp_path: Path):
 
 
 def test_nonzero_exit_still_ok(tmp_path: Path):
-    """命令跑完即 ok=True,exit_code 非零在 value(模型自判)。"""
+
     t = BashTool(sandbox_root=tmp_path)
     r = _run(t, {"command": "sh -c 'exit 3'"})
     assert r.ok
@@ -45,30 +45,30 @@ def test_cwd_escape_rejected(tmp_path: Path):
     r = _run(t, {"command": "pwd", "cwd": "../../etc"})
     assert not r.ok
     err = r.error or ""
-    assert "沙盒" in err or "越权" in err or "escape" in err.lower()
+    assert "\u6c99\u76d2" in err or "\u8d8a\u6743" in err or "escape" in err.lower()
 
 
 def test_timeout_kills(tmp_path: Path):
     t = BashTool(sandbox_root=tmp_path)
     r = _run(t, {"command": "sleep 5", "timeout_s": 1})
     assert not r.ok
-    assert "超时" in (r.error or "") or "timeout" in (r.error or "").lower()
+    assert "timed out" in (r.error or "") or "timeout" in (r.error or "").lower()
 
 
 def test_timeout_kills_shell_children(tmp_path: Path):
-    """超时必须杀整个 shell process group,不能留下稍后写文件的 orphan。"""
+
     import time as _time
 
     sentinel = tmp_path / "survived"
     t = BashTool(sandbox_root=tmp_path, default_timeout_s=1)
     r = _run(t, {"command": "(sleep 2; touch survived) & wait"})
     assert not r.ok
-    _time.sleep(2.0)  # 未被 group-kill 的旧实现会在第 2 秒写 sentinel。
+    _time.sleep(2.0)
     assert not sentinel.exists()
 
 
 def test_timeout_includes_wait_after_pipes_close(tmp_path: Path):
-    """子进程先关闭输出管道后,proc.wait 仍必须受同一 deadline 约束。"""
+
     import time as _time
 
     t = BashTool(sandbox_root=tmp_path, default_timeout_s=1)
@@ -76,20 +76,23 @@ def test_timeout_includes_wait_after_pipes_close(tmp_path: Path):
     r = _run(t, {"command": "exec >/dev/null 2>&1; sleep 5 & wait"})
     dt = _time.monotonic() - t0
     assert not r.ok
-    assert "超时" in (r.error or "") or "timeout" in (r.error or "").lower()
-    assert dt < 2, f"drain EOF 后的 proc.wait 也应受 1s deadline 约束,实际 {dt:.1f}s"
+    assert "timed out" in (r.error or "") or "timeout" in (r.error or "").lower()
+    assert dt < 2, f"proc.wait after EOF must respect the one-second deadline; observed {dt:.1f}s"
 
 
 def test_cancellation_kills_process_group_after_pipes_close(tmp_path: Path):
-    """上层取消必须 kill + reap,不能留下断开管道的后台进程。"""
+
     sentinel = tmp_path / "survived-cancel"
     t = BashTool(sandbox_root=tmp_path, default_timeout_s=10)
 
     async def _cancel() -> None:
-        task = asyncio.create_task(t.run({
-            "command": "exec >/dev/null 2>&1; "
-            "(sleep 1; touch survived-cancel) & wait",
-        }))
+        task = asyncio.create_task(
+            t.run(
+                {
+                    "command": "exec >/dev/null 2>&1; (sleep 1; touch survived-cancel) & wait",
+                }
+            )
+        )
         await asyncio.sleep(0.1)
         task.cancel()
         try:
@@ -97,7 +100,7 @@ def test_cancellation_kills_process_group_after_pipes_close(tmp_path: Path):
         except asyncio.CancelledError:
             pass
         else:
-            raise AssertionError("BashTool.run 应传播调用方的 CancelledError")
+            raise AssertionError("BashTool.run \u5e94\u4f20\u64ad\u8c03\u7528\u65b9\u7684 CancelledError")
         await asyncio.sleep(1.25)
 
     asyncio.run(_cancel())
@@ -140,31 +143,32 @@ def test_input_schema(tmp_path: Path):
 
 
 def test_timeout_clamped(tmp_path: Path):
-    """timeout_s 超上限被 clamp(不抛)。"""
+
     t = BashTool(sandbox_root=tmp_path, max_timeout_s=5.0)
     r = _run(t, {"command": "echo ok", "timeout_s": 9999})
     assert r.ok
 
 
 def test_huge_output_capped_not_ooming(tmp_path: Path):
-    """I-1 回归:无限输出的 shell 子进程被流式 drain 读够即停 + kill group,
-    buffer 有界(不读完无限流),truncated=True,且早停远快于 timeout(不是卡到超时)。"""
+
     import time as _time
+
     t = BashTool(sandbox_root=tmp_path, max_output_bytes=1000, default_timeout_s=10)
     t0 = _time.monotonic()
     # `& wait` guarantees a shell child on macOS and Linux; killing only the
     # direct shell would leave cat holding the pipes and make this time out.
-    r = _run(t, {"command": "cat /dev/zero & wait"})  # 无限输出
+    r = _run(t, {"command": "cat /dev/zero & wait"})
     dt = _time.monotonic() - t0
-    assert r.ok, f"应早停 + kill 返回 ok=True,得到 error={r.error}"
+    assert r.ok, f"Expected early termination with ok=True; error={r.error}"
     assert r.value["truncated"] is True
-    assert len(r.value["stdout"]) <= 1300, f"buffer 应有界(~max+chunk),得到 {len(r.value['stdout'])}"
-    assert dt < 5, f"应早停(读够 1000 字节即 kill),不应卡到 10s timeout,实际 {dt:.1f}s"
+    assert len(r.value["stdout"]) <= 1300, (
+        f"Buffer must be bounded by max plus one chunk; observed {len(r.value['stdout'])}"
+    )
+    assert dt < 5, f"Expected termination after 1000 bytes before the timeout; observed {dt:.1f}s"
 
 
 def test_drain_exception_returns_ok_false_not_raise(tmp_path: Path, monkeypatch):
-    """I-1 回归:drain 内 stream.read 抛非超时异常 → ok=False 兜底,不裸冒泡(防 500),
-    且无 task 泄漏 / 进程僵尸。"""
+
     import asyncio as _aio
     import time as _time
 
@@ -174,9 +178,10 @@ def test_drain_exception_returns_ok_false_not_raise(tmp_path: Path, monkeypatch)
 
     async def _patched(*a, **kw):
         proc = await real_create(*a, **kw)
-        # 让 stdout.read 抛 RuntimeError(模拟管道损坏)
+
         async def _boom(*_a, **_kw):
             raise RuntimeError("simulated pipe error")
+
         proc.stdout.read = _boom
         return proc
 
@@ -185,33 +190,32 @@ def test_drain_exception_returns_ok_false_not_raise(tmp_path: Path, monkeypatch)
     t0 = _time.monotonic()
     r = _run(t, {"command": "sleep 5"})
     dt = _time.monotonic() - t0
-    assert not r.ok  # 不冒泡,返回 ok=False
-    assert "读取命令输出失败" in (r.error or "") or "RuntimeError" in (r.error or "")
-    assert dt < 2, f"一侧 drain 失败后应立即 kill group,不应等另一侧 EOF,实际 {dt:.1f}s"
+    assert not r.ok
+    assert "\u8bfb\u53d6\u547d\u4ee4\u8f93\u51fa\u5931\u8d25" in (r.error or "") or "RuntimeError" in (r.error or "")
+    assert dt < 2, f"A failed drain must terminate the group before the other stream EOF; observed {dt:.1f}s"
 
 
 def test_subprocess_env_sanitized(tmp_path: Path, monkeypatch):
-    """I-1 回归:子进程 env 滤掉机密(PRAXIS_*/。*KEY/TOKEN/SECRET/PASSWORD),
-    防 BashTool 命令(env/printenv)读出上游 API key。非机密(PATH)保留。"""
+
     monkeypatch.setenv("PRAXIS_FAKE_SECRET", "leak-me-123")
     monkeypatch.setenv("MY_API_KEY", "key-456")
     monkeypatch.setenv("HARMLESS_VAR", "ok-789")
     t = BashTool(sandbox_root=tmp_path)
-    r = _run(t, {"command": "env"})  # 注:env 命令本身经 BashTool 执行(policy 在另一层)
+    r = _run(t, {"command": "env"})
     assert r.ok
     out = r.value["stdout"]
-    assert "leak-me-123" not in out, "PRAXIS_ 机密应被裁剪"
-    assert "key-456" not in out, "*KEY 机密应被裁剪"
-    assert "HARMLESS_VAR" in out or "ok-789" in out, "非机密应保留"
-    # PATH 必须保留(否则子进程找不到命令)
+    assert "leak-me-123" not in out, "PRAXIS_ \u673a\u5bc6\u5e94\u88ab\u88c1\u526a"
+    assert "key-456" not in out, "*KEY \u673a\u5bc6\u5e94\u88ab\u88c1\u526a"
+    assert "HARMLESS_VAR" in out or "ok-789" in out, "\u975e\u673a\u5bc6\u5e94\u4fdd\u7559"
+
     assert "PATH" in out
 
 
 def test_timeout_s_non_numeric_returns_recovery_hint(tmp_path: Path):
-    """timeout_s 非数字('abc')→ ok=False + recovery_hint(不裸抛 ValueError)。"""
+
     t = BashTool(sandbox_root=tmp_path)
     r = _run(t, {"command": "echo hi", "timeout_s": "abc"})
     assert r.ok is False
     assert "timeout_s" in (r.error or "")
     assert r.recovery_hint
-    assert "120" in r.recovery_hint  # hint 含上限提示,对模型可执行
+    assert "120" in r.recovery_hint

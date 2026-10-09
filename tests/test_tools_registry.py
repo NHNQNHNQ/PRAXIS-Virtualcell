@@ -22,7 +22,7 @@ def test_register_and_get():
 
 
 def test_builtin_wins_name_conflict():
-    # §7.3.4:名字冲突内建优先,后注册的非内建被忽略
+
     r = ToolRegistry()
     builtin = _Stub("dup", "builtin")
     external = _Stub("dup", "external")
@@ -33,19 +33,19 @@ def test_builtin_wins_name_conflict():
 
 def test_anthropic_tools_shape():
     r = ToolRegistry()
-    r.register(_Stub("echo", "回显"))
+    r.register(_Stub("echo", "\u56de\u663e"))
     tools = r.anthropic_tools()
     assert tools == [
         {
             "name": "echo",
-            "description": "回显",
+            "description": "\u56de\u663e",
             "input_schema": {"type": "object", "properties": {"x": {"type": "string"}}},
         }
     ]
 
 
 def test_openai_tools_shape():
-    """M10.5:openai_tools() 返 [{type:'function', function:{...}}] 形。"""
+
     r = ToolRegistry()
     r.register(_Stub("fake_tool", "Fake tool for test"))
     tools = r.openai_tools()
@@ -59,13 +59,13 @@ def test_openai_tools_shape():
 
 
 def test_openai_tools_empty_when_no_tools():
-    """openai_tools() 无注册工具时返空列表。"""
+
     r = ToolRegistry()
     assert r.openai_tools() == []
 
 
 def test_anthropic_tools_still_works():
-    """backward:M10.5 保留 anthropic_tools()(v0.12 cleanup window 删)。"""
+
     r = ToolRegistry()
     r.register(_Stub("f", "d"))
     out = r.anthropic_tools()

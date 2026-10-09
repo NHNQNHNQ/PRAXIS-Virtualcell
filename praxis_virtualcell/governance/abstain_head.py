@@ -1,10 +1,6 @@
-"""M2.1 Step3:Learned Abstain head —— 用 reliability 预测做选择性预测(risk-coverage)。
-
-把 v0.2 表 C 的"按 disagreement 弃权"升级为"按 **learned reliability** 弃权":按可靠性分数排序,
-弃权预测最差的扰动 → 保留集 dp 随 coverage 的曲线 + AUC。对照 learned / disagreement-only(v0.2)/
-OOD-only / random / oracle(真 dp 上界)。纯 Python,Mac;无泄漏(learned 用 OOF 预测,坑1);pert-level（坑2)。
-
-诚实:这是 **pert-level** risk-coverage(基于 ledger per-pert dp),≠ v0.2 的 per-cell 表 C,互补不替代。
+"""Perturbation-level selective prediction using learned reliability OOF estimates. Compare learned,
+disagreement-only, OOD-only, random, and oracle rankings through risk-coverage curves and AUC. This ledger-based
+perturbation analysis is distinct from per-cell evaluation; only inference-available features are used.
 """
 from __future__ import annotations
 
@@ -19,9 +15,9 @@ def _isnan(x):
 
 
 def risk_coverage(reliability_score, true_dp, coverages=COVERAGES):
-    """reliability_score 越大=越该保留;返回 [(coverage, 保留集平均真 dp)]。"""
+    """Larger reliability_score favors retention; return (coverage, retained mean true dp) pairs."""
     pairs = [(s, d) for s, d in zip(reliability_score, true_dp) if not (_isnan(s) or _isnan(d))]  # noqa: B905
-    pairs.sort(key=lambda x: -x[0])             # 最可靠的排前
+    pairs.sort(key=lambda x: -x[0])
     n = len(pairs)
     out = []
     for c in coverages:
@@ -32,7 +28,9 @@ def risk_coverage(reliability_score, true_dp, coverages=COVERAGES):
 
 
 def rc_auc(curve):
-    """risk-coverage 曲线下面积(按 coverage 梯形积分,归一化)。越大=选择性弃权越有效。"""
+    """Normalized trapezoidal area under the coverage curve; larger values indicate more effective selective
+    retention.
+    """
     pts = sorted(curve)
     if len(pts) < 2:
         return pts[0][1] if pts else _NAN
@@ -43,19 +41,19 @@ def rc_auc(curve):
 
 
 def evaluate_abstain(entries, *, k=5, coverages=COVERAGES):
-    """各排序信号的 risk-coverage 曲线 + AUC。learned 用 reliability OOF 预测(无泄漏)。"""
-    oof, y = rm.cv_reliability(entries, k=k)          # learned OOF 预测 dp
+    """Compute risk-coverage curves and AUC for ranking signals; learned scores use leakage-safe OOF predictions."""
+    oof, y = rm.cv_reliability(entries, k=k)
     X, _ = rm._matrix(entries)
     dis = [r[0] for r in X]                            # disagreement_score
     seen = [r[1] for r in X]                           # seen_in_train(1=seen)
     import random as _r
     rnd = _r.Random(0)
     signals = {
-        "learned": oof,                               # 预测 dp 高=保留
-        "disagreement_only": [(-d if not _isnan(d) else _NAN) for d in dis],  # 分歧高=弃权
-        "ood_only": [(0.5 if _isnan(s) else s) for s in seen],                # seen=保留
+        "learned": oof,
+        "disagreement_only": [(-d if not _isnan(d) else _NAN) for d in dis],
+        "ood_only": [(0.5 if _isnan(s) else s) for s in seen],
         "random": [rnd.random() for _ in y],
-        "oracle": y,                                  # 真 dp = 上界
+        "oracle": y,
     }
     res = {}
     for name, sc in signals.items():

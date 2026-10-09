@@ -1,4 +1,4 @@
-"""读 brains/virtualcell/<species>/ 的 yaml,产出 brain_context(检索先行的标记)。"""
+"""Read species brain YAML and produce brain_context with a retrieval-before-prediction marker."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,9 +10,6 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.config import RuntimeConfig
 from praxis_virtualcell.core.message import AgentMessage
 
-# species 级补充规则文件(存在才加载;进 brain_context.species_rules + rules_referenced 使审计链完整)。
-# ortholog_rules 被 ModelApplicabilityAgent 用于真 ortholog 投影(§7.3);其余暂作可审计声明(路由真相源仍是
-# generic.negative_transfer + per-species model_applicability),命中文件登记进 rules_referenced(§7.5)。
 _SPECIES_RULE_FILES = {
     "ortholog_rules": "ortholog_rules.yaml",
     "negative_transfer": "negative_transfer.yaml",
@@ -58,7 +55,7 @@ class SpeciesBrainAgent(BaseAgent):
             "model_applicability": _load_yaml(sp_dir / "model_applicability.yaml"),
             "object_vocabulary": _load_yaml(sp_dir / "object_vocabulary.yaml"),
             "species_rules": species_rules,
-            # §7.5:仅 supported species 写 species 级文件(含被真用的 ortholog_rules);未知 species 不写假路径。
+
             "rules_referenced": (([f"brains/virtualcell/{species}/model_applicability.yaml"] + extra_refs)
                                  if supported else [])
             + ["brains/virtualcell/generic/general_negative_transfer.yaml"],

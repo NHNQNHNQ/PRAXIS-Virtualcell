@@ -1,16 +1,7 @@
-"""Week 7 GPT §9:最小可发表 ablation —— A(ML-only Coordinator) ↔ D(Full PRAXIS) 两极。
-
-对抗验证(week7-ablation-design verdict, consistent=false)判定:4 档中 B 纯纸面、C≈D(同 agent 栈),
-实为 2.5 档;§9.2 性能不损害是集合恒等同义反复 + predictor 集合错配;abstain_gain 数值违反 manifest 制度。
-故采纳 verdict 的最小可发表方案:A↔D 两极 × 4 个 Mac 确定性可靠性/系统指标(已实跑验证, offline 全复现)。
-
-诚实边界(见 finding_w7):
-- 系统/可靠性维度 Mac offline 真测;性能维度只论证"communicative 包装对 predictor 前向零代价"(Week4b 等价
-  性 atol 1e-6), 不声称 D 系统跑出更高 Pearson(communicative 层不参与张量计算)。
-- A 用 Mac stub(无 bus/brain/species 检查)忠实模拟"无这些组件"——它确实没有, 非假装没有。
-- B(brain-guided 无 bus)/C(communicative 无 reliability/critic)未实现, 留 backlog(verdict 指出 B 纸面、C≈D)。
-- abstain_gain 数值(需 held-out OOD-pert split)未做:无 data/manifests 声明前不可发表(CLAUDE.md 不变量3)。
-core/ 不改, 无 torch, Mac 可 import/run。
+"""Compare A (ML-only coordinator stub) with D (full communicative runtime) on 4 deterministic reliability/system
+metrics. A omits bus/brain/species checks and calls 3 mock predictors; B/C are not implemented.
+Predictor-forward equivalence uses atol 1e-6, not a claim of improved Pearson. Numerical abstain_gain requires a
+declared held-out OOD split. No torch is required.
 """
 from __future__ import annotations
 
@@ -34,13 +25,14 @@ SEED_REQUESTS = [
     _req("empty_ood", "human", [], "s5"),
     _req("mouse_caution", "mouse", ["TRP53"], "s6"),
 ]
-_OOD_TAGS = {"bacteria_ood", "martian_ood", "empty_ood"}        # 应被 abstain
-_XSPECIES_OOD = {"bacteria_ood", "martian_ood"}                 # 不该用 mammalian predictor(wrong-model-use)
+_OOD_TAGS = {"bacteria_ood", "martian_ood", "empty_ood"}
+_XSPECIES_OOD = {"bacteria_ood", "martian_ood"}
 
 
 def run_group_A(request: dict) -> dict:
-    """A. ML-only Coordinator(Mac stub):无 bus/brain/communication/provenance。
-    直接调 3 mock predictor run_prediction + 手动平均;无 species/vocab 检查 → 对 OOD 一律硬预测。"""
+    """ML-only coordinator stub: call 3 mock predictors and average manually, without bus, brain, communication, or
+    provenance. No species/vocabulary check prevents forced OOD predictions.
+    """
     from praxis_virtualcell.predictors.mock_cpa import MockCPAAgent
     from praxis_virtualcell.predictors.mock_gears import MockGEARSAgent
     from praxis_virtualcell.predictors.mock_linear import MockLinearAgent
@@ -55,8 +47,9 @@ def run_group_A(request: dict) -> dict:
 
 
 def run_group_D(request: dict) -> dict:
-    """D. Full PRAXIS-VirtualCell:build_runtime 全 agent, 经 message bus, 有 brain/ensemble/
-    reliability/abstain/critic/provenance/report。"""
+    """Full build_runtime agent stack with message bus, brain, ensemble, reliability, abstention, critic,
+    provenance, and report.
+    """
     from praxis_virtualcell.core.request import VirtualCellRequest
     from praxis_virtualcell.workflows.predict_delta_expression import build_runtime
 
@@ -84,16 +77,16 @@ def _metrics_for(group_fn, requests) -> dict:
         return sum(1 for s in _STAGE_MARKERS if s in present) / len(_STAGE_MARKERS)
 
     return {
-        # OOD 请求被正确拒/弃答的比例(§9.3)
+
         "OOD_rejection_rate": sum(1 for r in ood if res[r["request_id"]]["abstain"]
                                   or not res[r["request_id"]]["models_used"]) / len(ood),
-        # 跨物种 OOD 请求误用 mammalian predictor 的比例(越低越好)
+
         "wrong_model_use_rate": sum(1 for r in xspecies if res[r["request_id"]]["models_used"]) / len(xspecies),
-        # provenance schema 字段齐全度(present-as-key 口径, 非内容非空)
+
         "provenance_completeness": round(sum(_prov(res[r["request_id"]]) for r in requests) / len(requests), 3),
-        # OOD 请求应弃答且弃答
+
         "abstain_correctness": sum(1 for r in ood if res[r["request_id"]]["abstain"]) / len(ood),
-        # trace stage 齐全度
+
         "trace_completeness": round(sum(_trace(res[r["request_id"]]) for r in requests) / len(requests), 3),
     }
 
@@ -110,9 +103,15 @@ def to_markdown(result: dict) -> str:
              "", "| arm | " + " | ".join(cols) + " |", "|---|" + "---|" * len(cols)]
     for arm, label in [("A_ML_only", "A ML-only"), ("D_Full", "D Full")]:
         lines.append(f"| {label} | " + " | ".join(str(result[arm][c]) for c in cols) + " |")
-    lines += ["", "性能维度: communicative 包装对 predictor 前向零代价(Week4b 等价性 atol 1e-6),",
-              "Full 不损害性能(不参与张量计算, Pearson 由共享 predictor 经 EvalAgent 给出)。",
-              "B/C 档 + abstain_gain 数值 + 远端性能锚定见 finding_w7(诚实 backlog)。"]
+    lines += ["", (
+        'Performance scope: the communicative wrapper adds no predictor-forward computation '
+        '(Week4b equivalence atol 1e-6); '
+    ),
+              (
+                  'Full preserves predictor performance (it performs no tensor computation; the shared '
+                  'predictor supplies Pearson through EvalAgent). '
+              ),
+              "B/C groups, numerical abstain_gain, and remote performance anchors remain documented in finding_w7."]
     return "\n".join(lines)
 
 

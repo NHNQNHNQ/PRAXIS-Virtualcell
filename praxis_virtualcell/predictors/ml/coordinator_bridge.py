@@ -1,13 +1,15 @@
-"""复用 donor SubAgent/Coordinator 构建 praxis 侧 Coordinator(sys.path 注入,不重写 MoE/Ensembler)。
-
-ADR-W4b-4:prototype-first,Coordinator 路由/ensembler 直接复用 donor。仅远端 virtualcell 环境。
+"""Build the praxis coordinator by reusing donor SubAgent/Coordinator routing and ensembling, without rewriting the
+ML implementation. Requires donor dependencies.
 """
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
-_DONOR = "/home/zkyd/data1/mzy/Virtual cell"
+_DONOR = os.environ.get("PRAXIS_DONOR_SOURCE_ROOT", "").strip()
+if not _DONOR:
+    raise RuntimeError("Set PRAXIS_DONOR_SOURCE_ROOT to the external donor source checkout")
 if _DONOR not in sys.path:
     sys.path.insert(0, _DONOR)
 
@@ -15,11 +17,9 @@ if _DONOR not in sys.path:
 def build_coordinator(ckpt_dir: str, predictor_names: list[str], *, bench_id: str = "norman_2019",
                       perturbation_kinds: frozenset[str] = frozenset({"gene_ko", "gene_combo"}),
                       device: str = "cpu"):
-    """加载 predictor_names 的 ckpt → 装进一个 bench Subagent(内部多 predictor)→ 组 donor Coordinator。
-
-    注(donor 真实 API):一个 `Subagent` 持有该 bench 的**多个** Predictor(内部 ensemble);
-    `Coordinator` 持有 Subagent 列表。`SubagentSpec(id, perturbation_kinds, bench_id)`。
-    Coordinator 非 nn.Module → 不被 EvalAgent.to(device) 递归,故须显式把 predictors 移到 device。
+    """Load named checkpoints into one benchmark Subagent containing multiple predictors, then build Coordinator
+    from Subagents. SubagentSpec uses id/perturbation_kinds/bench_id. Coordinator is not nn.Module, so move
+    predictors to the device explicitly rather than relying on EvalAgent.to recursion.
     """
     from agents.subagent import Subagent, SubagentSpec
     from coordinator.coordinator import Coordinator

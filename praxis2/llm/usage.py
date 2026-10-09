@@ -1,5 +1,3 @@
-"""用量追踪 + token 估算(总纲 §7.4.7)。缺它会导致 compact 盲目 + PTL 连锁。"""
-
 import json
 from collections.abc import Callable
 from typing import Any
@@ -31,15 +29,11 @@ class UsageTracker:
         return out
 
     def cost_is_known(self) -> bool:
-        # 语义:**至少一个**已用模型有价即 True。混用有价/无价模型时
-        # cost_usd() 会静默跳过无价模型 → 返回值是"不完整真实成本";
-        # M1+ failover 混模型时勿据此做完整成本判断(需更严格则改 all())。
+
         return any(m in self._price for m in self._by_model)
 
     def cost_usd(self) -> float:
-        # M0 简化:仅按 input/output 计价;cache_read(Anthropic ~0.1x)与
-        # cache_creation(~1.25x)有独立价位,暂未接入——M1+ 接真实计价时
-        # 必须扩展此方法,否则成本会偏低且难定位根因。
+
         cost = 0.0
         for model, acc in self._by_model.items():
             if model not in self._price:
@@ -55,12 +49,11 @@ def estimate_tokens(
     tools: list[dict[str, Any]] | None,
     api_count: Callable[[], int] | None,
 ) -> tuple[int, bool]:
-    """优先用 API count_tokens;不可用则降级粗估(~4 字节/token)。
-    返回 (tokens, is_estimate)。"""
+
     if api_count is not None:
         try:
             return int(api_count()), False
-        except Exception:  # noqa: BLE001 - 降级粗估
+        except Exception:  # noqa: BLE001
             pass
     blob = json.dumps(messages, ensure_ascii=False)
     if tools:
@@ -69,9 +62,5 @@ def estimate_tokens(
 
 
 def should_auto_compact(*, used: int, window: int, buffer: int) -> bool:
-    """已用 token 逼近上下文窗口(留 buffer)即触发(总纲 §7.4.5 触发条件之一)。
 
-    调用方需保证 buffer < window;buffer >= window 时阈值为负,任意 used 均触发
-    (有意语义:配置错误下宁可频繁 compact 也不越界)。
-    """
     return used >= (window - buffer)

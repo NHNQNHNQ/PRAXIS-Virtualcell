@@ -1,15 +1,12 @@
 import type { ReactNode } from "react";
 
-// 空态占位(加载完成但无数据时)。文案守 spec §3.5:中性、克制、无 AI/工程腔,
-// 默认给可复用的"暂无内容";具体页面按需传入更贴切的 title(如"未产生模块路由")。
-// hint 为可选的补充说明。纯展示原子,无副作用。
 
 export type EmptyStateProps = {
   title?: ReactNode;
   hint?: ReactNode;
 };
 
-export default function EmptyState({ title = "暂无内容", hint }: EmptyStateProps) {
+export default function EmptyState({ title = "No content yet", hint }: EmptyStateProps) {
   return (
     <div
       style={{

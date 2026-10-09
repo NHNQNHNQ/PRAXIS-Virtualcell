@@ -1,18 +1,15 @@
 # Security Policy
 
-## Supported surface
+## Reporting a vulnerability
 
-Only versions explicitly listed in a published release are security-supported. The current `1.7.0` bytes are a
-local release candidate until the separately authorized release window completes. Research adapters, private
-weights, `.53`, historical checkouts and disabled/experimental capabilities are not implied supported.
+Use the repository's private vulnerability reporting feature when available, or contact the
+repository owner privately. Include the affected version, impact, and a minimal reproduction.
+Do not post credentials, personal data, private biological data, or exploitable deployment
+details in a public issue.
 
-## Reporting
+The local CLI and API are intended for controlled research environments. Enable external
+services and LLM access deliberately, keep credentials outside version control, and run
+untrusted tool execution in an appropriate isolated environment.
 
-Do not file a public issue for a suspected vulnerability, exposed secret, private-data path or exploitable
-deployment detail. Use GitHub's private vulnerability reporting for the canonical repository when available;
-otherwise contact the repository owner privately. Include affected version/SHA, impact, minimal reproduction
-and whether sensitive data may have been accessed. Do not include real biological or personal data.
-
-Maintainers will acknowledge, triage, coordinate a fix and publish only the minimum safe advisory. No response
-time is guaranteed for an unpublished local candidate. Never test against production or external systems
-without explicit authorization.
+Scientific validity and software security are separate concerns. Consult
+[the reproducibility guide](docs/REPRODUCIBILITY.md) for model and evidence requirements.

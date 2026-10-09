@@ -1,6 +1,4 @@
-"""Phase 5:ActiveLearningAgent(进 bus,产 learning_queue)。
-红线:advisory 不碰裁决 —— 只读 report/evidence_level,只 emit learning_queue_ready,不改 report。
-learning_queue 用 disagreement/OOD/evidence/module 弱支持排序(information gain 降序)。"""
+"""Tests for active learning agent."""
 from praxis_virtualcell.active_learning.active_learning_agent import ActiveLearningAgent
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
@@ -49,7 +47,7 @@ def test_emits_learning_queue_ready():
 
 
 def test_weak_gated_module_ranks_higher():
-    """弱支持 + data_gated 的 stress_processor 该排在 strong genetic_hub 之前(information gain 高)。"""
+    """Verify weak gated module ranks higher."""
     msg = _run(_report())
     items = msg.payload["learning_queue"]["items"]
     mods = [it["module"] for it in items]
@@ -58,7 +56,7 @@ def test_weak_gated_module_ranks_higher():
 
 
 def test_does_not_mutate_report():
-    """红线:AL 不碰裁决 —— 跑前后 report 逐键不变。"""
+    """Verify does not mutate report."""
     r = _report()
     snap = {"abstain": r["abstain"], "reliability": r["reliability"],
             "prediction": dict(r["prediction"]), "provenance_keys": set(r["provenance"])}
@@ -66,36 +64,36 @@ def test_does_not_mutate_report():
     assert r["abstain"] == snap["abstain"]
     assert r["reliability"] == snap["reliability"]
     assert r["prediction"] == snap["prediction"]
-    assert set(r["provenance"]) == snap["provenance_keys"]   # AL 不往 report.provenance 塞键(由 runtime sidecar 挂)
+    assert set(r["provenance"]) == snap["provenance_keys"]
 
 
 def test_abstain_report_no_fabricated_accept():
-    """abstain 请求:AL 可建议补数据(候选来自弱模块),但绝不把 abstain 改 accept。"""
+    """Verify abstain report no fabricated accept."""
     r = _report(abstain=True, prediction=None, models_used=[],
                 abstain_reasons=["model_disagreement_too_high"])
     msg = _run(r, evidence_level={"level": "E1"})
-    assert r["abstain"] is True            # 不被改
+    assert r["abstain"] is True
     q = msg.payload["learning_queue"]
-    assert isinstance(q["items"], list)    # 空或含"补数据"候选,不虚构 accept
+    assert isinstance(q["items"], list)
 
 
 def test_no_module_plan_empty_queue_with_note():
-    """无 module_plan(不可路由请求)→ 空队列 + note,不崩不虚构(红线 6)。"""
+    """Verify no module plan empty queue with note."""
     r = _report(provenance={})
     msg = _run(r)
     q = msg.payload["learning_queue"]
     assert q["items"] == []
-    assert q["notes"]                      # 有 note 说明为何空
+    assert q["notes"]
 
 
 def test_high_disagreement_drives_gain():
-    """分歧触发 → 相关候选 information_gain 更高 + drivers 记 disagreement。"""
+    """Verify high disagreement drives gain."""
     msg = _run(_report(model_disagreement={"score": 0.95, "triggered": True},
                        reliability="medium",
                        downgrade_reasons=["downgrade:model_disagreement_too_high"]),
                evidence_level={"level": "E4"})
     items = msg.payload["learning_queue"]["items"]
-    assert items                           # 有候选
+    assert items
     drivers = [d for it in items for d in it["drivers"]]
     assert any("disagreement" in d for d in drivers)
 

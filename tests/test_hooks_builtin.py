@@ -13,64 +13,61 @@ class _T:
 
 
 def _ok(content):
-    return {"type": "tool_result", "tool_use_id": "tu1", "is_error": False,
-            "content": content}
+    return {"type": "tool_result", "tool_use_id": "tu1", "is_error": False, "content": content}
 
 
 def test_doi_required_vetoes_when_no_doi():
-    out = doi_required(_T(), {"id": "tu1"}, _ok("案例正文,无 DOI"), State())
+    out = doi_required(_T(), {"id": "tu1"}, _ok("\u6848\u4f8b\u6b63\u6587,\u65e0 DOI"), State())
     assert out is not None and out["is_error"] is True
     assert out["tool_use_id"] == "tu1"
-    assert "DOI" in out["content"] and "满足条件" in out["content"]  # 可执行满足条件
+    assert "DOI" in out["content"] and "Required condition" in out["content"]
 
 
 def test_doi_required_passes_when_doi_present():
-    out = doi_required(
-        _T(), {"id": "tu1"}, _ok("案例 doi:10.1000/xyz123 已引"), State()
-    )
-    assert out is None  # 不替换 → 放行
+    out = doi_required(_T(), {"id": "tu1"}, _ok("\u6848\u4f8b doi:10.1000/xyz123 \u5df2\u5f15"), State())
+    assert out is None
 
 
 def test_doi_required_ignores_already_error_result():
-    err = {"type": "tool_result", "tool_use_id": "tu1", "is_error": True,
-           "content": "工具本就失败"}
-    assert doi_required(_T(), {"id": "tu1"}, err, State()) is None  # 不二次否决
+    err = {
+        "type": "tool_result",
+        "tool_use_id": "tu1",
+        "is_error": True,
+        "content": "\u5de5\u5177\u672c\u5c31\u5931\u8d25",
+    }
+    assert doi_required(_T(), {"id": "tu1"}, err, State()) is None
 
 
 def test_evidence_chain_required_vetoes_when_field_missing():
-    out = evidence_chain_required(
-        _T(), {"id": "tu1"}, _ok("产出,但无 evidence 字段"), State()
-    )
+    out = evidence_chain_required(_T(), {"id": "tu1"}, _ok("\u4ea7\u51fa,\u4f46\u65e0 evidence \u5b57\u6bb5"), State())
     assert out is not None and out["is_error"] is True
-    assert "证据链" in out["content"] and "满足条件" in out["content"]
+    assert "evidence field" in out["content"] and "Required condition" in out["content"]
 
 
 def test_evidence_chain_required_passes_when_evidence_present():
-    out = evidence_chain_required(
-        _T(), {"id": "tu1"}, _ok('结果 evidence: ["case:42"] 已附'), State()
-    )
+    out = evidence_chain_required(_T(), {"id": "tu1"}, _ok('\u7ed3\u679c evidence: ["case:42"] \u5df2\u9644'), State())
     assert out is None
 
 
 def test_anti_retrieval_threshold_vetoes_below_ratio():
-    bad = _ok("反向用例 passed=1 total=4")  # 25% < 默认 0.8
+    bad = _ok("\u53cd\u5411\u7528\u4f8b passed=1 total=4")
     out = anti_retrieval_threshold(_T(), {"id": "tu1"}, bad, State())
     assert out is not None and out["is_error"] is True
-    assert "反向过滤" in out["content"] and "满足条件" in out["content"]
+    assert "Reverse filtering" in out["content"] and "Required condition" in out["content"]
 
 
 def test_anti_retrieval_threshold_passes_at_or_above_ratio():
-    good = _ok("反向用例 passed=4 total=4")
+    good = _ok("\u53cd\u5411\u7528\u4f8b passed=4 total=4")
     assert anti_retrieval_threshold(_T(), {"id": "tu1"}, good, State()) is None
 
 
 def test_stop_gate_vetoes_when_evidence_or_antifilter_incomplete():
     gate = make_rmcp_stop_gate()
-    st = State()  # 无 evidence_ok / anti_filter_ok
+    st = State()
     dec = gate(st)
     assert dec.veto is True
-    assert "证据链" in dec.message or "反向过滤" in dec.message
-    assert "满足条件" in dec.message
+    assert "Evidence chain" in dec.message or "Reverse filtering" in dec.message
+    assert "Required condition" in dec.message
 
 
 def test_stop_gate_passes_when_both_ok():

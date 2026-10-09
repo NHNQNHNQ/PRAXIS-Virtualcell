@@ -2,8 +2,8 @@
   "schema_version": "vc.model-registry-legacy-migration-fixture.v1",
   "model_registry": {
     "path": "praxis_virtualcell/model_zoo/registry.yaml",
-    "size_bytes": 12006,
-    "sha256": "435651dcb74b22e5a6091ddfc93ba8aa151fbf3926035e3aeb9cb6a49af463fc",
+    "size_bytes": 10239,
+    "sha256": "47840b3d1dcc5dd056dfe35099ea1275033b3136269e192808864ba3e46d8dd5",
     "expected_models": {
       "ecoli_gem": "available",
       "gears": "planned",
@@ -17,8 +17,8 @@
       "schema_version": "vc.model-registry-legacy-receipt.v1",
       "receipt_id": "p8-golden-norman-artifact-manifest",
       "source_path": "data/golden/norman_2019/artifact-manifest.json",
-      "size_bytes": 3864,
-      "sha256": "724b701beda574ad344b764de09dafb86648e49c9a327df717212aaf25cc71ac",
+      "size_bytes": 4140,
+      "sha256": "110276ce9cc74caaf396448319579ec0e1414dc7470ea31f9170a5d62ca4784c",
       "declared_pack_fingerprint": "42165e430bab3474cdc9e607770ff5e204608c4243f84e492c08e2c6442c55ee",
       "available": null,
       "benchmark_passed": null,

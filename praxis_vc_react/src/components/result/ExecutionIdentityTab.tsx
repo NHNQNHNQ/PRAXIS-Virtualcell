@@ -54,8 +54,8 @@ function IdentityTable({
       <table className="kv-table module-table">
         <thead>
           <tr>
-            <th style={{ width: "28%" }}>身份项</th>
-            <th>后端记录</th>
+            <th style={{ width: "28%" }}>Identity item</th>
+            <th>Backend record</th>
           </tr>
         </thead>
         <tbody>
@@ -73,18 +73,18 @@ function IdentityTable({
 
 function ModelTable({ models }: { models: ExecutionModelIdentity[] }) {
   if (models.length === 0) {
-    return <p style={{ margin: 0, color: "var(--text-muted)" }}>未记录模型身份</p>;
+    return <p style={{ margin: 0, color: "var(--text-muted)" }}>No model identity recorded</p>;
   }
   return (
     <div className="table-scroll">
       <table className="kv-table module-table">
         <thead>
           <tr>
-            <th>模型</th>
-            <th>版本</th>
-            <th>模型 fingerprint</th>
-            <th>兼容性 fingerprint</th>
-            <th>可执行</th>
+            <th>Model</th>
+            <th>Version</th>
+            <th>Model fingerprint</th>
+            <th>Compatibility fingerprint</th>
+            <th>Executable</th>
           </tr>
         </thead>
         <tbody>
@@ -118,7 +118,7 @@ export default function ExecutionIdentityTab({
 }) {
   if (prov == null) {
     return (
-      <Card title="数据与执行身份">
+      <Card title="Data and execution identity">
         <Skeleton lines={6} />
       </Card>
     );
@@ -130,11 +130,11 @@ export default function ExecutionIdentityTab({
   const legacy = identity.legacy_adapter === true;
   const rows: Array<{ label: string; value: ReactNode }> = [
     {
-      label: "执行适配模式",
+      label: "Execution adapter mode",
       value: hasRecordedIdentity(identity) ? (
         <Mono>{legacy ? "legacy_adapter" : "execution_plan"}</Mono>
       ) : (
-        "未记录 execution identity"
+        "No execution identity recorded"
       ),
     },
     {
@@ -146,10 +146,10 @@ export default function ExecutionIdentityTab({
           <Mono>{pack.fingerprint}</Mono>
         </span>
       ) : (
-        "未绑定 VirtualCellPack"
+        "No VirtualCellPack bound"
       ),
     },
-    { label: "Dataset", value: "未记录 dataset identity" },
+    { label: "Dataset", value: "No dataset identity recorded" },
   ];
 
   if (identity.schema_version) {
@@ -161,7 +161,7 @@ export default function ExecutionIdentityTab({
 
   return (
     <div style={stackStyle}>
-      <Card title="数据与执行身份">
+      <Card title="Data and execution identity">
         <div
           style={{
             padding: "var(--space-3) var(--space-4)",
@@ -173,18 +173,18 @@ export default function ExecutionIdentityTab({
             fontSize: 13,
           }}
         >
-          此处只展示后端保存的执行身份。Pack、模型兼容或 executable 状态均不推导科学验证。
+          This view shows execution identities saved by the backend. Pack validation, model compatibility, and executable status do not imply scientific validation.
         </div>
         <IdentityTable rows={rows} />
       </Card>
 
-      <Card title={legacy ? "模型身份（legacy）" : "模型身份"}>
+      <Card title={legacy ? "Model identity (legacy)" : "Model identity"}>
         <ModelTable models={models} />
       </Card>
 
-      <Card title="完整 execution identity JSON">
+      <Card title="Full execution identity JSON">
         <p style={{ margin: "0 0 var(--space-2)", color: "var(--text-muted)", fontSize: 13 }}>
-          以下为后端返回的完整执行身份载荷，供逐字审计。
+          The full execution identity payload returned by the backend is available for audit.
         </p>
         <pre style={jsonStyle}>{JSON.stringify(identity, null, 2)}</pre>
       </Card>

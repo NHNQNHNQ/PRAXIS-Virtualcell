@@ -21,9 +21,9 @@ function HistoryItems({
   activeJobId: string | null;
   onOpenJob: (jobId: string) => void;
 }) {
-  if (jobsError) return <p role="alert">报告目录不可用</p>;
-  if (jobs == null) return <p>加载中…</p>;
-  if (jobs.length === 0) return <p>还没有报告</p>;
+  if (jobsError) return <p role="alert">Report catalog unavailable</p>;
+  if (jobs == null) return <p>Loading…</p>;
+  if (jobs.length === 0) return <p>No reports yet</p>;
 
   return jobs.map((job) => (
     <button
@@ -37,8 +37,8 @@ function HistoryItems({
       onClick={() => onOpenJob(job.job_id)}
     >
       <strong>
-        {job.species ?? "未指定物种"} ·{" "}
-        {job.perturbation_targets.join("、") || "无扰动靶点"}
+        {job.species ?? "Species unspecified"} ·{" "}
+        {job.perturbation_targets.join(", ") || "No perturbation targets"}
       </strong>
       <small>{job.abstain ? "Abstained" : "Saved report"}</small>
       {job.pack_id && (
@@ -49,7 +49,7 @@ function HistoryItems({
       {job.execution_scope && (
         <small>
           {job.execution_scope} · science={String(job.scientifically_validated)}
-          {job.models_used.length ? ` · ${job.models_used.join("、")}` : ""}
+          {job.models_used.length ? ` · ${job.models_used.join(", ")}` : ""}
         </small>
       )}
     </button>
@@ -85,7 +85,7 @@ export default function JobSidebar({
         type="button"
         className="chat-brand"
         onClick={onNewChat}
-        aria-label="PRAXIS 新建对话"
+        aria-label="New PRAXIS conversation"
       >
         <span>P</span>
         <strong>PRAXIS VirtualCell</strong>
@@ -168,7 +168,7 @@ export default function JobSidebar({
                 ? "Backend unavailable"
                 : "Connecting…"}
           </strong>
-          <small>语言模型仅解析与解释，不参与模拟或最终裁决</small>
+          <small>Language models only parse and explain; they do not simulate or make final decisions</small>
         </div>
       </footer>
     </aside>

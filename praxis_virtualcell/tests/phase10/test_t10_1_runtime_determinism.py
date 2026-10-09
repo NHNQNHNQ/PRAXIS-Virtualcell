@@ -32,17 +32,17 @@ def test_bus_backfills_trace_and_task_from_context():
 
 
 def test_bus_backfills_deterministic_fallback_without_context():
-    bus = MessageBus()  # 未 set_context
+    bus = MessageBus()
     bus.send(AgentMessage("msg_0007", "A", "B", "ping", {"k": 1}, "t0001"))
     m = bus.trace[0]
-    assert m.trace_id == "trace_msg_0007"   # 确定性兜底,不 raise
+    assert m.trace_id == "trace_msg_0007"
     assert m.task_id == "task_msg_0007"
 
 
 def test_bus_rejects_non_dict_payload():
     bus = MessageBus()
     bus.set_context(trace_id="trace_abc", task_id="task_xyz")
-    bad = AgentMessage("msg_0001", "A", "B", "ping", "free text handoff", "t0001")  # payload 非 dict
+    bad = AgentMessage("msg_0001", "A", "B", "ping", "free text handoff", "t0001")
     with pytest.raises(SchemaError):
         bus.send(bad)
 
@@ -50,7 +50,7 @@ def test_bus_rejects_non_dict_payload():
 def test_bus_rejects_missing_hard_field():
     bus = MessageBus()
     bus.set_context(trace_id="trace_abc", task_id="task_xyz")
-    bad = AgentMessage("msg_0001", "", "B", "ping", {"k": 1}, "t0001")  # sender 空
+    bad = AgentMessage("msg_0001", "", "B", "ping", {"k": 1}, "t0001")
     with pytest.raises(SchemaError):
         bus.send(bad)
 
@@ -75,15 +75,15 @@ def _trace_ids(out):
 def test_trace_id_is_per_run_consistent():
     out = run_query(dict(_REQ), config=_CFG)
     ids = _trace_ids(out)
-    assert len(ids) == 1                 # 同一 run 所有 message 同一 trace_id
-    assert None not in ids               # 已回填
+    assert len(ids) == 1
+    assert None not in ids
     assert next(iter(ids)).startswith("trace_")
 
 
 def test_trace_id_deterministic_across_runs():
     a = _trace_ids(run_query(dict(_REQ), config=_CFG))
     b = _trace_ids(run_query(dict(_REQ), config=_CFG))
-    assert a == b                        # 两跑同 req → 同 trace_id
+    assert a == b
 
 
 def _canon_hash(obj) -> str:
@@ -105,8 +105,8 @@ def test_offline_rerun_byte_equal(req):
     outs = [run_query(dict(req), config=_CFG) for _ in range(3)]
     sr_hashes = {_canon_hash(o["structured_report"]) for o in outs}
     tr_hashes = {_canon_hash(o["trace"]) for o in outs}
-    assert len(sr_hashes) == 1, "structured_report 三跑不一致"
-    assert len(tr_hashes) == 1, "trace 三跑不一致"
+    assert len(sr_hashes) == 1, "structured_report differs across three runs"
+    assert len(tr_hashes) == 1, "trace differs across three runs"
 
 
 def test_trace_messages_schema_compliant():
@@ -115,13 +115,13 @@ def test_trace_messages_schema_compliant():
         assert isinstance(step, dict)
         for f in ("message_id", "sender", "receiver", "message_type", "timestamp",
                   "schema_version", "trace_id", "task_id"):
-            assert step.get(f), f"trace message 缺 {f}: {step}"
-        # 注:payload 不在对外 trace 摘要里(精简视图),其结构化(必为 dict)由 bus._validate
-        # 在 send 时保证,已由 Task 5 的 test_bus_rejects_non_dict_payload 覆盖。
+            assert step.get(f), f"trace message is missing {f}: {step}"
+
+
 
 
 def test_offline_report_provenance_fields_present():
     out = run_query(dict(_ACCEPT), config=_CFG)
     prov = out["provenance"]
     for f in ("rules_referenced", "models_used", "n_messages"):
-        assert f in prov, f"provenance 缺字段 {f}"
+        assert f in prov, f"provenance is missing field {f}"

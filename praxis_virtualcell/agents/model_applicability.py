@@ -1,10 +1,8 @@
-"""据 brain_context 把候选 predictor 分成 applicable / rejected_candidates；
-并计算 cross-species ortholog caution(§7.3)/ negative-transfer 命中(§7.5)/ 各 predictor 拒因,
-写入 brain_context.routing(随 payload 透传到 Provenance/Report,使路由依据在 trace 可审计)。
-
-§7.3 真投影:对 applicable+caution 的 predictor,用 species_rules.ortholog_rules.ortholog.map_upper
-把 target 映回母种;未映射 target 追加 unmapped_ortholog flag —— 使 OOV/不可映射基因与可映射基因
-拿到不同 caution(投影非纯声明)。最终路由权威在此(LLMRouter 只能建议,W3)。"""
+"""Use brain_context to classify applicable and rejected predictors, record ortholog caution and negative-transfer
+reasons, and attach auditable routing provenance. Applicable cross-species targets are projected through
+ortholog.map_upper; unmapped targets receive unmapped_ortholog. This agent has routing authority; LLMRouter
+provides suggestions only.
+"""
 from __future__ import annotations
 
 from praxis_virtualcell.agents.request_adapter import request_to_module_input
@@ -16,7 +14,7 @@ from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.predictors.case_dispatch import REAL_ENGINES, gears_available
 
 _LEGACY_CANDIDATES = ("MockLinear", "MockCPA", "MockGEARS")
-_DEFAULT_ORIGIN = "human"            # predictor 母种缺省(可被 model_applicability[name].native_host 覆盖)
+_DEFAULT_ORIGIN = "human"
 _GENE_PERTS = ("gene", "gene_combination")
 
 
@@ -26,17 +24,17 @@ class ModelApplicabilityAgent(BaseAgent):
     def handle(self, message: AgentMessage, bus: MessageBus) -> None:
         req = message.payload["request"]
         bc = message.payload["brain_context"]
-        # B1:真实 engine 请求 → 候选=单个 CaseRunner adapter,跳过 mock 枚举(其余 engine 走现状)
-        # 请求不合 species_schema(如空 targets/未知 species)→ 判不了 engine,原样落回现状 mock 枚举
-        # (mock 枚举本就正确处理这些边界:abstain/reject),不让分诊块抢先抛错崩溃既有行为。
+
+
+
         try:
             _norm = normalize_request(request_to_module_input(req))
             engine = route(_norm).engine
         except SchemaError:
             _norm, engine = None, None
-        # donor_predictor 经 ckpt 门控:.53(GEARS_CKPT+torch)→ 真实 CaseRunner;Mac→落回 mock 枚举。
-        # REAL_ENGINES 本体不改(donor_predictor 不进 REAL_ENGINES,避免 Mac 无 GEARS 时误判 abstain)。
-        # human 子守卫与 dispatch 门对称:仅 human gene→expression 走 GEARS;.53 上 mouse 等仍回 mock 枚举(不静默漂移)。
+
+
+
         if engine in REAL_ENGINES or (
                 engine == "donor_predictor" and (_norm or {}).get("species") == "human" and gears_available()):
             bc2 = {**bc, "routing": {"cautions": {}, "rejection_reasons": {},
@@ -59,7 +57,7 @@ class ModelApplicabilityAgent(BaseAgent):
         applicable, rejected = [], []
         cautions: dict[str, list] = {}            # §7.3 {predictor: [caution flags]}
         rejection_reasons: dict[str, dict] = {}   # §7.5 {predictor: {reason}}
-        rules_hit: list[str] = []                 # 本次命中的具体规则名
+        rules_hit: list[str] = []
 
         for name in _LEGACY_CANDIDATES:
             rules = appmap.get(name) or {}
@@ -82,7 +80,7 @@ class ModelApplicabilityAgent(BaseAgent):
                 caution = (rules.get("caution") or {}).get(species) or []
                 caution = list(caution) if isinstance(caution, list) else [caution]
                 if caution:
-                    # ortholog 真投影:未映射 target → unmapped flag(区分 OOV vs 可映射)§7.3
+
                     if ortholog_map and ptype in _GENE_PERTS:
                         unmapped = [g for g in targets if g not in ortholog_map]
                         if unmapped:

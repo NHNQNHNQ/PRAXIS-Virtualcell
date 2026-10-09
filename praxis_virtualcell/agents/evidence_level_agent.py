@@ -1,8 +1,5 @@
-"""EvidenceLevelAgent(插点 C,进 message bus):薄包装 governance.evidence_level.map_evidence_level。
-
-收 evidence_level_request({report})→ map_evidence_level(report) → emit evidence_level_ready
-(交 ActiveLearningAgent)。铁律:只读 report、只出 evidence_level dict(挂 provenance),
-不改 report 任何键、不回写 verdict(决策 B:治理层之上的薄映射)。零 LLM。
+"""Read report in evidence_level_request, map existing governance signals, and emit evidence_level_ready for
+ActiveLearningAgent. This thin deterministic mapping does not mutate report or its verdict and uses no LLM.
 """
 from __future__ import annotations
 

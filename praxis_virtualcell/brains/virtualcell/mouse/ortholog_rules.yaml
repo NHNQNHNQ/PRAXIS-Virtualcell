@@ -1,15 +1,10 @@
-# human predictor 迁 mouse 的 ortholog 投影规则(GPT §7.3 caution 的依据)。
-# 这是 trace 里被引用的"具体规则":mouse target 在送入 human-trained predictor 前,
-# 须经下表映回 human ortholog;映射不确定 → cross_species_uncertainty=high。
-# 本期 offline 不实 ortholog ML 投影,只声明规则 + 命中 caution,不改 core/路由判定。
+# Human-to-mouse transfer requires ortholog mapping and explicit cross-species uncertainty; unmapped targets remain cautionary.
 ortholog:
   direction: mouse_to_human
   required_before_predict: true
   caution_flag: ortholog_required
   uncertainty_when_transferred: high
-  default_when_unmapped: caution   # 未映射不直接 reject,降级为 caution(§7.3 区别于 §7.4 的 reject)
-  # mouse symbol(规范小写驼峰)→ human ortholog symbol。
-  # 注:routing 看到的 target 已被 normalizer 大写,故按大写 key 也列出便于人读匹配。
+  default_when_unmapped: caution
   map:
     Trp53: TP53
     Myc: MYC

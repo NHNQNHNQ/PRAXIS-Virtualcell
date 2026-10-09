@@ -1,9 +1,7 @@
-"""M2.1 Step2:轻量 Reliability Model(**纯 Python**,无 numpy/sklearn)。
-
-治理/学习层刻意轻量、Mac 原生(不依赖重 ML 栈;只操作 ledger 摘要)。预测扰动可靠性(dp 回归)+
-bad-perturbation 分类;pert-level CV(坑2);只用 ledger_features.INFERENCE_FEATURES(无泄漏,坑1);
-ridge(防过拟合,坑3)。对照 disagreement-only / OOD-only / random——learned ≥ disagreement-only 即有价值
-(disagreement-only 本身是 PRAXIS 强发现 r=−0.716)。
+"""Lightweight plain-Python ridge reliability regression and bad-perturbation classification. Use only
+INFERENCE_FEATURES and perturbation-level CV; regularization limits overfitting. Compare learned,
+disagreement-only, OOD-only, and random rankings. Historical disagreement correlation r=-0.716 is
+protocol-bound.
 """
 from __future__ import annotations
 
@@ -46,7 +44,7 @@ def _imp_std(X, mean, std):
 
 
 def _solve(A, b):
-    """高斯消元解小线性系统 A w = b(A 为 m×m list)。"""
+    """Solve a small m×m linear system A w=b by Gaussian elimination."""
     m = len(A)
     M = [A[i][:] + [b[i]] for i in range(m)]
     for col in range(m):
@@ -62,7 +60,7 @@ def _solve(A, b):
 
 
 def _ridge_fit(X, y, lam=1.0):
-    """X 已标准化;返回权重 w(含截距 w[0]),截距不正则。"""
+    """Fit ridge to standardized X; w[0] is the unregularized intercept."""
     n, d = len(X), len(X[0])
     Xb = [[1.0] + row for row in X]
     p = d + 1
@@ -77,7 +75,7 @@ def _pred(w, X):
 
 
 def cv_reliability(entries, *, k=5, lam=1.0):
-    """pert-level k-fold OOF 预测 dp。返回 (oof_pred, y)。"""
+    """Generate perturbation-level k-fold OOF dp predictions; return (oof_pred, y)."""
     X, y = _matrix(entries)
     oof = [_NAN] * len(y)
     for tr, te in lf.leave_perturbation_out_folds(entries, k):
@@ -91,18 +89,20 @@ def cv_reliability(entries, *, k=5, lam=1.0):
 
 
 def fit_full(entries, *, lam=1.0):
-    """全量训练(非 CV),返回冻结参数 dict:features/mean/std/weights。供 artifact 导出 + runtime 加载。"""
+    """Fit all rows without CV and return frozen features/mean/std/weights for artifact export and runtime loading."""
     X, y = _matrix(entries)
     mean, std = _col_stats(X)
     Xs = _imp_std(X, mean, std)
-    # 仅用有 label 的样本拟合
+
     idx = [i for i in range(len(y)) if not _isnan(y[i])]
     w = _ridge_fit([Xs[i] for i in idx], [y[i] for i in idx], lam)
     return {"features": list(FEATURES), "mean": mean, "std": std, "weights": w, "lam": lam}
 
 
 def predict_dp(params, feat: dict) -> float:
-    """用冻结参数对单条推理特征算预测 dp。缺失特征用训练均值填(provenance 另记)。"""
+    """Predict dp from one inference feature row using frozen parameters; impute missing features with training
+    means and record imputation separately.
+    """
     feats, mean, std, w = params["features"], params["mean"], params["std"], params["weights"]
     xs = []
     for j, f in enumerate(feats):
@@ -126,7 +126,7 @@ def _pearson(a, b):
 
 
 def _auroc(scores, labels):
-    """labels:1=bad;scores 越大越像 bad。手算 AUROC。"""
+    """Compute AUROC by hand; labels=1 means bad and larger scores indicate greater badness."""
     pos = [s for s, y in zip(scores, labels) if y == 1]  # noqa: B905
     neg = [s for s, y in zip(scores, labels) if y == 0]  # noqa: B905
     if not pos or not neg:
@@ -144,7 +144,9 @@ def _quantile(vals, q):
 
 
 def evaluate(entries, *, k=5, bad_quantile=0.25):
-    """对照:learned vs disagreement-only / OOD-only / random。回归 corr + bad-pert AUROC。"""
+    """Compare learned against disagreement-only/OOD-only/random using regression correlation and bad-perturbation
+    AUROC.
+    """
     oof, y = cv_reliability(entries, k=k)
     X, _ = _matrix(entries)
     dis = [r[0] for r in X]

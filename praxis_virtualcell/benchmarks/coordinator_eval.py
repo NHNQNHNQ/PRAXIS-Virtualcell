@@ -1,14 +1,15 @@
-"""praxis 侧:复用 donor Coordinator + EvalAgent 在 Norman 算分。
-
-证迁移到 praxis 后 Coordinator 分数与 donor 一致(复用同一 donor SubAgent/Coordinator/predictor)。
-仅远端。用法(实测多组合):python -m praxis_virtualcell.benchmarks.coordinator_eval <ckpt_dir>
+"""Evaluate the reused donor Coordinator/SubAgent/predictor stack on Norman with EvalAgent to check score
+preservation in the remote environment.
 """
 from __future__ import annotations
 
+import os
 import sys
 from typing import Any
 
-_DONOR = "/home/zkyd/data1/mzy/Virtual cell"
+_DONOR = os.environ.get("PRAXIS_DONOR_SOURCE_ROOT", "").strip()
+if not _DONOR:
+    raise RuntimeError("Set PRAXIS_DONOR_SOURCE_ROOT to the external donor source checkout")
 if _DONOR not in sys.path:
     sys.path.insert(0, _DONOR)
 

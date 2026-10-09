@@ -1,4 +1,4 @@
-"""graph generalization mock:gene 不在 vocabulary → rejected,不硬预测。"""
+"""Graph-generalization mock: genes outside the vocabulary are rejected."""
 from __future__ import annotations
 
 from praxis_virtualcell.predictors.base import PredictorAgent
@@ -24,4 +24,4 @@ class MockGEARSAgent(PredictorAgent):
     def run_prediction(self, model_input: dict) -> dict:
         return {"prediction": {"delta": [0.4 for _ in model_input["targets"]] or [0.4]},
                 "uncertainty": {"sigma": 0.25},
-                "evidence": ["mock"], "provenance": {"mock": True}}  # 自声明 mock,非真跑数值
+                "evidence": ["mock"], "provenance": {"mock": True}}

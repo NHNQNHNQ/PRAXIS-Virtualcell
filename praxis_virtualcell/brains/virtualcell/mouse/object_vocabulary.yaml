@@ -1,13 +1,10 @@
-# mouse gene symbol。规范小写驼峰(Trp53/Myc/...)记于 canonical_symbols 供人读;
-# genes 列表用大写,因 BioObjectNormalizerAgent 对 gene/gene_combination 目标做 .strip().upper(),
-# MockGEARS 的 reject_if=gene_not_in_graph_vocabulary 是用归一化(大写)后的 target 比对此列表。
-# 这些位点经 ortholog_rules.yaml 映回 human graph 词表(MYC/TP53/...)。
+# Species-specific gene vocabulary for request normalization and routing; membership alone does not grant predictor applicability.
 genes:
-  - TRP53   # 规范: Trp53  (human ortholog: TP53)
-  - MYC     # 规范: Myc    (human ortholog: MYC)
-  - AHR     # 规范: Ahr    (human ortholog: AHR)
-  - STAT1   # 规范: Stat1  (human ortholog: STAT1)
-  - GATA1   # 规范: Gata1  (human ortholog: GATA1)
+  - TRP53
+  - MYC
+  - AHR
+  - STAT1
+  - GATA1
 canonical_symbols:
   - Trp53
   - Myc

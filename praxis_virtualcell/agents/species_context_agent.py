@@ -1,8 +1,6 @@
-"""SpeciesContextAgent(插点 A):进 message bus,读 brains/virtualcell/<species>/module_support.yaml,
-对 8 个模块逐一给 support/verdict/display_name/models/tools,并暴露 biological_mismatch 查询表。
-
-供 ModuleRouterAgent 定 primary/secondary 模块的合法性前置。纯读 yaml,零 LLM、零管线依赖。
-铁律:未声明模块 → unsupported/reject(不静默);物种别名(bacteria M3=energy/redox)经 registry.display_name。
+"""Read species module_support.yaml and emit support, verdict, display name, models, tools, and mismatch queries
+for 8 modules. Undeclared modules are unsupported/rejected. Registry display_name handles species aliases such
+as bacterial M3 energy/redox. Read-only, with no LLM or pipeline dependency.
 """
 from __future__ import annotations
 
@@ -33,7 +31,7 @@ class SpeciesContextAgent(BaseAgent):
                 "tools": list(rec.get("tools", [])),
                 "reason": rec.get("reason", ""),
             }
-        # 暴露该物种声明的 biological_mismatch(query→verdict),供 router 命中降级
+
         mismatch_queries: dict[str, str] = {}
         for m in (self._reg._load(species).get("biological_mismatch") or []):
             if m.get("query"):

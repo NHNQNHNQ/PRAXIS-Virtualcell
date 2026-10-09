@@ -334,7 +334,7 @@ def test_compatibility_payload_has_no_server_paths(tmp_path):
 
 
 def test_missing_model_registry_path_is_redacted_from_catalog_error():
-    secret_path = "/Volumes/T7/PRIVATE-P12-REGISTRY-MISSING.yaml"
+    secret_path = "/Volumes/test-fixtures/private/missing-registry.yaml"
 
     with pytest.raises(ValueError, match="model_zoo registry is unavailable") as error:
         pack_catalog_payload(model_registry_path=secret_path)
@@ -437,7 +437,7 @@ def test_legacy_model_migration_abstains_and_job_identity_locks_fingerprints(tmp
 
 
 def test_unsafe_legacy_model_version_is_redacted_on_every_product_surface(tmp_path):
-    secret_version = "/Volumes/T7/private/model-version"
+    secret_version = "/Volumes/test-fixtures/private/model-version"
     registry_path, cache_root = _write_model_stack(
         tmp_path,
         model_version=secret_version,
@@ -489,7 +489,7 @@ def test_runtime_request_binding_matches_gene_normalization(tmp_path):
 
 
 def test_historical_job_load_projects_or_rejects_private_model_fields(tmp_path):
-    secret = "/Volumes/T7/private/legacy-model.bin"
+    secret = "/Volumes/test-fixtures/private/legacy-model.bin"
     job = tmp_path / "runs" / "legacy-job"
     job.mkdir(parents=True)
     (job / "status").write_text("done", encoding="utf-8")

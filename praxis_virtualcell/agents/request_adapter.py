@@ -1,6 +1,7 @@
-"""A 面 request(perturbation_type/output_modality/metadata.requested_outputs)确定性映射到
-module 路由期望的 B 面 raw(perturbation_object/target_output/perturbation_targets)。零 LLM。
-runtime 与 ModelApplicability/CaseRunner 共用。"""
+"""Deterministically map request perturbation_type, output_modality, and metadata.requested_outputs to
+module-routing perturbation_object, target_output, and perturbation_targets. Shared by runtime,
+ModelApplicability, and CaseRunner; no LLM is used.
+"""
 from __future__ import annotations
 
 _OUT_MAP = {"delta_expression": "expression", "pathway_response": "flux",

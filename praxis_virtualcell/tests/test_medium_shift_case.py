@@ -1,9 +1,4 @@
-"""W5.1(v0.4,Phase II):微生物 培养基/碳源切换 → growth case(环境扰动,真跑 GEM)。
-
-激活 schema 里的 `medium` 扰动对象(此前未用于 case);证明 agent 能处理**gene 以外的
-环境扰动**(碳源改变)并受治理产出。无 cobra 时 skip。断言真实 FBA:acetate << glucose
-(乙醛酸支路,弱碳源);碳源不在模型 exchange → abstain 不虚构。
-"""
+"""Tests for medium shift case."""
 import pytest
 
 pytest.importorskip("cobra")
@@ -30,7 +25,7 @@ def test_acetate_much_worse_than_glucose(gem):
     from praxis_virtualcell.predictors.mechanistic.medium_shift import carbon_growth
     glc = carbon_growth(gem, "glucose")
     ac = carbon_growth(gem, "acetate")
-    assert glc > 0.8 and ac < glc * 0.5      # 真实 FBA:acetate 远弱于 glucose
+    assert glc > 0.8 and ac < glc * 0.5
 
 
 def test_full_case_7parts_real_numbers(gem):
@@ -43,9 +38,9 @@ def test_full_case_7parts_real_numbers(gem):
     d = report.to_dict()
     assert dec.engine == "gem_fba"
     rows = {r["carbon"]: r for r in d["raw_output"]["carbon_sources"]}
-    assert rows["acetate"]["growth"] < rows["glucose"]["growth"]   # 真实数值,非 mock
+    assert rows["acetate"]["growth"] < rows["glucose"]["growth"]
     assert rows["acetate"]["ratio_vs_glucose"] < 0.5
-    assert d["reliability_decision"]["disposition"] == "accept"    # 全部碳源在模型内
+    assert d["reliability_decision"]["disposition"] == "accept"
 
 
 def test_unknown_carbon_abstains(gem):

@@ -1,7 +1,4 @@
-"""R2(v0.5):Drug dose-response case —— LINCS 剂量单调性(真跑,治理对照)。
-
-实测:geldanamycin 剂量-recall 单调(Spearman~0.9)→accept;sirolimus 无单调(Spearman<0)→downgrade。
-"""
+"""Tests for drug dose case."""
 import pytest
 
 from praxis_virtualcell.agents.case_report import validate_case_report
@@ -12,7 +9,7 @@ from praxis_virtualcell.predictors.embedding.drug_dose import (
 )
 
 if not _DEFAULT_SUBSET.is_file():
-    pytest.skip(f"dose 子集缺失({_DEFAULT_SUBSET})", allow_module_level=True)
+    pytest.skip(f"dose subset unavailable({_DEFAULT_SUBSET})", allow_module_level=True)
 
 
 @pytest.fixture(scope="module")
@@ -22,7 +19,7 @@ def db():
 
 def test_geldanamycin_monotonic_dose_response(db):
     dr = db.dose_response("geldanamycin")
-    assert dr["spearman"] >= 0.6            # 单调剂量-响应(实测 ~0.9)
+    assert dr["spearman"] >= 0.6
 
 
 def test_geldanamycin_case_accept(db):
@@ -37,7 +34,7 @@ def test_geldanamycin_case_accept(db):
 
 
 def test_sirolimus_case_downgrade(db):
-    # sirolimus 无剂量单调(Spearman<0.3)→ 不硬说剂量依赖
+
     report, _ = run_drug_dose_case({
         "species": "human", "perturbation_object": "drug",
         "perturbation_targets": ["sirolimus"], "target_output": "expression",

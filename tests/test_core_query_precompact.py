@@ -32,15 +32,20 @@ async def test_precompact_gate_fires_once_before_streaming():
 
     def gate(s):
         fired["n"] += 1
-        return fired["n"] == 1  # 第一轮判超阈值,之后不再
+        return fired["n"] == 1
 
     last = None
-    async for e in query(st, client=client, registry=ToolRegistry(),
-                         settings=_S(), runner=SerialToolRunner(
-                             ToolRegistry(), recovery_budget=3),
-                         compactor=cmp, precompact_gate=gate):
+    async for e in query(
+        st,
+        client=client,
+        registry=ToolRegistry(),
+        settings=_S(),
+        runner=SerialToolRunner(ToolRegistry(), recovery_budget=3),
+        compactor=cmp,
+        precompact_gate=gate,
+    ):
         last = e
-    assert cmp.calls == 1  # 主动 compact 恰一次(防无限)
+    assert cmp.calls == 1
     assert last == {"type": "end", "reason": TerminalReason.STOP.value}
     await client.aclose()
 
@@ -50,11 +55,15 @@ async def test_no_gate_behaves_exactly_as_m3():
     st = State()
     st.messages = [{"role": "user", "content": "q"}]
     last = None
-    async for e in query(st, client=client, registry=ToolRegistry(),
-                         settings=_S(), runner=SerialToolRunner(
-                             ToolRegistry(), recovery_budget=3),
-                         compactor=MinimalCompactor()):
+    async for e in query(
+        st,
+        client=client,
+        registry=ToolRegistry(),
+        settings=_S(),
+        runner=SerialToolRunner(ToolRegistry(), recovery_budget=3),
+        compactor=MinimalCompactor(),
+    ):
         last = e
     assert last == {"type": "end", "reason": TerminalReason.STOP.value}
-    assert st.turn_count == 1  # 不传 gate:与 M3 完全一致
+    assert st.turn_count == 1
     await client.aclose()

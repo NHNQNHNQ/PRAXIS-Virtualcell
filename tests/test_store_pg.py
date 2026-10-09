@@ -1,5 +1,3 @@
-"""PgStore 测试(integration testcontainers,需 docker)。"""
-
 from __future__ import annotations
 
 import pytest
@@ -15,9 +13,6 @@ def test_pg_store_imports_ok():
 @pytest.mark.asyncio
 async def test_pg_store_kv_set_get_delete():
     pytest.importorskip("testcontainers.postgres")
-    import os
-    import subprocess
-    import sys
 
     from testcontainers.postgres import PostgresContainer
 
@@ -26,13 +21,6 @@ async def test_pg_store_kv_set_get_delete():
 
     with PostgresContainer("postgres:16") as pg:
         url = pg.get_connection_url().replace("postgresql+psycopg2", "postgresql")
-        env = {**os.environ, "PRAXIS_DB_URL": url}
-        subprocess.run(
-            [sys.executable, "-m", "alembic", "upgrade", "head"],
-            env=env,
-            check=True,
-            timeout=60,
-        )
         pool = await make_pg_pool(url)
         st = PgStore(pool)
         ns = Namespace(user_id="u1", scope="session")
@@ -47,9 +35,6 @@ async def test_pg_store_kv_set_get_delete():
 @pytest.mark.asyncio
 async def test_pg_store_meta_upsert_list():
     pytest.importorskip("testcontainers.postgres")
-    import os
-    import subprocess
-    import sys
 
     from testcontainers.postgres import PostgresContainer
 
@@ -57,13 +42,6 @@ async def test_pg_store_meta_upsert_list():
 
     with PostgresContainer("postgres:16") as pg:
         url = pg.get_connection_url().replace("postgresql+psycopg2", "postgresql")
-        env = {**os.environ, "PRAXIS_DB_URL": url}
-        subprocess.run(
-            [sys.executable, "-m", "alembic", "upgrade", "head"],
-            env=env,
-            check=True,
-            timeout=60,
-        )
         pool = await make_pg_pool(url)
         st = PgStore(pool)
         await st.meta_upsert("sessions", {"user_id": "u1", "id": "s1", "title": "t1"})

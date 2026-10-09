@@ -21,8 +21,6 @@ async def test_redis_kv_roundtrip():
 async def test_pg_meta_roundtrip():
     from praxis2.store.backends import PgMetaStore
 
-    s = PgMetaStore(
-        dsn=os.environ.get("PRAXIS_PG_DSN", "postgresql://praxis:praxis@localhost:5432/praxis")
-    )
+    s = PgMetaStore(dsn=os.environ.get("PRAXIS_PG_DSN", "postgresql://praxis:praxis@localhost:5432/praxis"))
     await s.ping()
     await s.aclose()

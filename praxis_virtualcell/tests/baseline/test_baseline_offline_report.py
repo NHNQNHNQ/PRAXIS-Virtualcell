@@ -1,5 +1,4 @@
-"""Phase 0 基线特征化:pin v0.8 离线行为,升级过程若改变则红灯。
-只读断言现有行为;若与期望不符=升级引入的真实回归,停下排查,不改此测试迁就。"""
+"""Tests for baseline offline report."""
 import hashlib
 import json
 from pathlib import Path
@@ -26,7 +25,7 @@ def test_offline_run_is_zero_llm():
 def test_offline_ahr_accepts_and_reports_reliability():
     _, out = _offline_result()
     rd = out["reliability_decision"]
-    assert rd["abstain"] is False, "human AHR gene→expression 应可预测,非弃权"
+    assert rd["abstain"] is False, "human AHR gene→expression must produce a prediction rather than abstention"
     assert rd["reliability"] in {"high", "medium", "low"}
 
 
@@ -41,13 +40,14 @@ def test_offline_report_md_has_nine_sections():
     }
     md = render_report_md(job_like)
     for header in ("# PRAXIS-VirtualCell Report", "## 1. Question", "## 2. Cell Context"):
-        assert header in md, f"报告缺段落: {header}"
-    # 9 段:段落编号 1..9 全在
+        assert header in md, f"Report is missing section:  {header}"
+
     for n in range(1, 10):
-        assert f"## {n}." in md, f"报告缺第 {n} 段"
+        assert f"## {n}." in md, f"Report is missing section {n}"
 
 
 def test_offline_report_bytes_match_frozen_p0_hashes():
+    """Freeze structured numerical outputs and the English Markdown presentation."""
     req, out = _offline_result()
     structured = json.dumps(
         out["structured_report"],
@@ -70,5 +70,5 @@ def test_offline_report_bytes_match_frozen_p0_hashes():
         "27a16eef2493bf953c4e572f3480d9c80e4013b5f92ebca4b8bfe0f59722228b"
     )
     assert hashlib.sha256(markdown).hexdigest() == (
-        "ed4b03d12e9618a7685a19106609f2ec0b0461ccf533c6beec20e7318ec7898a"
+        "4584316659f225cd48d74f61d11605f10a169e89cddba74db886b2a792d934d8"
     )

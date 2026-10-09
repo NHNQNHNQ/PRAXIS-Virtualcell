@@ -2,7 +2,7 @@
   "schema_version": "vc.golden-artifact-manifest.v1",
   "benchmark_id": "norman-2019-k562-golden",
   "pack_version": "1.0.0",
-  "remote_root": "/home/zkyd/data1/mzy/praxis-virtualcell-data/golden/norman-2019",
+  "remote_root": "<PRAXIS_GOLDEN_ROOT>",
   "contract": {
     "canonical_sha256": "f34afa761239abc97033c78bb9d0c29a1c36a4c7d1a106a9cbbaa805a5196ff5",
     "checked_in_yaml": {
@@ -84,15 +84,24 @@
   "primary_test_scores": {
     "no_change": {
       "mse": 0.006206092317116851,
-      "ci95": [0.0052718065130143875, 0.007179895287520753]
+      "ci95": [
+        0.0052718065130143875,
+        0.007179895287520753
+      ]
     },
     "global_mean": {
       "mse": 0.0045820474227155905,
-      "ci95": [0.0038500612710327124, 0.005356276113731283]
+      "ci95": [
+        0.0038500612710327124,
+        0.005356276113731283
+      ]
     },
     "additive_linear": {
       "mse": 0.0032570634320908554,
-      "ci95": [0.0027929521401756927, 0.0037390136902566485]
+      "ci95": [
+        0.0027929521401756927,
+        0.0037390136902566485
+      ]
     }
   },
   "states": {
@@ -103,5 +112,7 @@
   "gears": {
     "run": false,
     "assets_accessed": false
-  }
+  },
+  "source_manifest_sha256": "724b701beda574ad344b764de09dafb86648e49c9a327df717212aaf25cc71ac",
+  "metadata_revision": "Public distribution uses a configurable asset root. Scientific file identities, scores, and validation states are unchanged."
 }

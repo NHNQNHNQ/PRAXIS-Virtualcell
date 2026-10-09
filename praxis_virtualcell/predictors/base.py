@@ -1,5 +1,6 @@
-"""predictor-agent 契约:能不能/为什么/用了什么/输出/不确定性/失败原因。
-执行前强制 retrieve-before-predict 门(bus 里须已有 brain_retrieved)。无 torch。"""
+"""Predictor-agent contract for applicability, reasons, inputs, outputs, uncertainty, and failures. Enforce
+brain_retrieved before prediction through the bus; base code requires no torch.
+"""
 from __future__ import annotations
 
 from abc import abstractmethod
@@ -17,14 +18,16 @@ class PredictorAgent(BaseAgent):
     model_version: str | None = None
 
     def _call_version(self, out: dict) -> str | None:
-        """per_call model_version:优先引擎动态 version(run_prediction 产出),否则类属性。"""
+        """Use the engine's dynamic prediction version for per_call model_version when available, otherwise the
+        class attribute.
+        """
         return (out.get("provenance") or {}).get("model_version") or self.model_version
 
     def assess_applicability(self, request: dict, brain_context: dict) -> tuple[float, str | None]:
-        """返回 (score, rejection_reason)。reason 非 None 表示拒。"""
+        """Return (score, rejection_reason); a non-None reason rejects the request."""
         rules = (brain_context.get("model_applicability") or {}).get(self.name, {})
         if not rules:
-            return 0.0, f"{self.name} 不在 {brain_context.get('species')} brain 的 model_applicability"
+            return 0.0, f"{self.name} is absent from {brain_context.get('species')} brain model_applicability"
         if request.get("species") not in rules.get("supported_species", []):
             return 0.0, "unsupported_species"
         if request.get("input_modality") not in rules.get("supported_modalities", []):
@@ -41,17 +44,18 @@ class PredictorAgent(BaseAgent):
 
     @abstractmethod
     def run_prediction(self, model_input: dict) -> dict:
-        """返回 {prediction, uncertainty}。"""
+        """Return prediction and uncertainty records."""
 
     def _result_status(self, out: dict) -> tuple[str, str | None]:
-        """据 run_prediction 输出改判最终状态,默认恒 success。子类可覆盖:
-        如机制模型 disposition=abstain → rejected,使主链经既有 `if not used` 如实 abstain。"""
+        """Resolve final result status from predictor output; default is success. Subclasses can map mechanistic
+        abstention to rejected so the existing no-used-model path abstains.
+        """
         return "success", None
 
     def handle(self, message: AgentMessage, bus: MessageBus) -> None:
         if not bus.has_message_type("brain_retrieved"):
             raise RetrieveBeforePredictError(
-                f"{self.name} 在 brain 检索前被调用(retrieve-before-predict 门)")
+                f"{self.name} was called before brain retrieval (retrieve-before-predict gate)")
         req = message.payload["request"]
         bc = message.payload["brain_context"]
         score, reject = self.assess_applicability(req, bc)
@@ -83,7 +87,7 @@ class PredictorAgent(BaseAgent):
                 raise TypeError("run_prediction.evidence must be a list")
             status, reject_reason = self._result_status(out)
             version = self._call_version(out)
-        except Exception as e:  # noqa: BLE001 — prepare_input/run_prediction 异常均归 failed(故障隔离)
+        except Exception as e:
             pc = compute_call_provenance(self.name, self.model_version, model_input, None, [])
             self._emit(bus, message, PredictorResultMessage(
                 agent_name=self.name, status="failed", prediction=None, uncertainty=None,

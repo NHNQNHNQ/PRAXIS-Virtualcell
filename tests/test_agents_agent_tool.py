@@ -24,9 +24,9 @@ def test_agent_tool_is_registered_tool_subclass():
 
 def test_sandbox_write_scope_only_allows_candidate_prefix():
     sc = SandboxWriteScope(allowed_prefix=CAND_PREFIX)
-    sc.check_write(f"{CAND_PREFIX}abc")  # 不抛
-    with pytest.raises(PermissionError, match="沙箱"):
-        sc.check_write("brain:Cryo/cases/c1")  # 越权写大脑 → 拒
+    sc.check_write(f"{CAND_PREFIX}abc")
+    with pytest.raises(PermissionError, match="Write scope"):
+        sc.check_write("brain:Cryo/cases/c1")
     with pytest.raises(PermissionError):
         sc.check_write("any/other/key")
 
@@ -35,13 +35,13 @@ def test_subagent_identity_isolation_distinct_agent_id_and_sidechain():
     t = AgentTool()
     parent_id = "agent-parent"
     sub = t.fork_identity(parent_agent_id=parent_id)
-    assert sub.agent_id != parent_id          # 身份隔离
-    assert sub.sidechain_id != parent_id      # 独立 transcript sidechain
-    assert sub.parent_agent_id == parent_id   # 结果经 sidechain 回传父
+    assert sub.agent_id != parent_id
+    assert sub.sidechain_id != parent_id
+    assert sub.parent_agent_id == parent_id
 
 
 def test_discipline_agent_disallows_agent_tool_anti_recursion():
-    # §7.5.4:学科 agent disallowed_tools 含 AgentTool 防递归
+
     t = AgentTool()
     assert t.is_disallowed_for_mode("discipline") is True
     assert t.is_disallowed_for_mode("general") is False
@@ -49,27 +49,38 @@ def test_discipline_agent_disallows_agent_tool_anti_recursion():
 
 async def test_fork_extract_subagent_writes_only_candidate_region():
     store = InMemoryStore()
-    ns = Namespace(user_id="u1", scope="session")  # (user_id, session_id) 候选区
+    ns = Namespace(user_id="u1", scope="session")
     transcript = [
-        {"role": "user", "content": [
-            {"type": "tool_result", "tool_use_id": "t1",
-             "is_error": True, "content": "失败:依赖缺失"}]},
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "tool_result",
+                    "tool_use_id": "t1",
+                    "is_error": True,
+                    "content": "\u5931\u8d25:\u4f9d\u8d56\u7f3a\u5931",
+                }
+            ],
+        },
     ]
     rec: list[dict] = []
     n = await fork_extract_subagent(
-        store, ns, transcript, trigger="tool_failure",
+        store,
+        ns,
+        transcript,
+        trigger="tool_failure",
         transcript_sink=rec.append,
     )
     assert n >= 1
-    # 候选确实写入 _candidate 区
+
     raw = await store.kv_get(ns, f"{CAND_PREFIX}tool_failure-1")
     assert raw is not None
-    # 子 agent 行为写 sidechain(可观测)
+
     assert any(e.get("type") == "subagent_extract" for e in rec)
 
 
 async def test_fork_extract_subagent_cannot_write_brain_directly():
-    # 沙箱:extract 子 agent 不能直接写大脑(只能写候选区,§7.4.2)
+
     sc = SandboxWriteScope(allowed_prefix=CAND_PREFIX)
     with pytest.raises(PermissionError):
         sc.check_write("brain:general/cases/x")

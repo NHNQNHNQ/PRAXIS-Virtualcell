@@ -1,5 +1,3 @@
-// ui 原子组件 barrel(spec §5)。统一导出供 Stage/tab/visualization 复用。
-// 全部无状态、纯展示,样式走 styles/components.css + tokens。
 
 export { default as Button } from "./Button";
 export type { ButtonProps, ButtonVariant, ButtonSize } from "./Button";

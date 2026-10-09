@@ -32,11 +32,11 @@ async def test_abort_after_stream_pairs_tooluse_and_returns_aborted():
     reg = ToolRegistry()
     reg.register(Echo())
     runner = SerialToolRunner(reg, recovery_budget=3, permission=AllowAllPermission())
-    client = FakeLLMClient(turns=[TURN_TOOLUSE])  # 模型发 tool_use
+    client = FakeLLMClient(turns=[TURN_TOOLUSE])
     abort = AbortSignal()
-    abort.set()  # 流结束即视为已中断
+    abort.set()
     st = State()
-    st.messages = [{"role": "user", "content": "查 hi"}]
+    st.messages = [{"role": "user", "content": "\u67e5 hi"}]
     events = [
         e
         async for e in query(
@@ -50,16 +50,14 @@ async def test_abort_after_stream_pairs_tooluse_and_returns_aborted():
         )
     ]
     assert events[-1] == {"type": "end", "reason": TerminalReason.ABORTED.value}
-    # 不变量:每个 tool_use 都有配对 tool_result(无孤儿,下次 API 不会 400)
-    asst = next(
-        m
-        for m in st.messages
-        if m["role"] == "assistant" and isinstance(m["content"], list)
-    )
+
+    asst = next(m for m in st.messages if m["role"] == "assistant" and isinstance(m["content"], list))
     tu_ids = {b["id"] for b in asst["content"] if b["type"] == "tool_use"}
     user_tr = next(
-        m for m in st.messages
-        if m["role"] == "user" and isinstance(m["content"], list)
+        m
+        for m in st.messages
+        if m["role"] == "user"
+        and isinstance(m["content"], list)
         and any(b.get("type") == "tool_result" for b in m["content"])
     )
     tr_ids = {b["tool_use_id"] for b in user_tr["content"] if b["type"] == "tool_result"}

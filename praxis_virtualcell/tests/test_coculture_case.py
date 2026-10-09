@@ -1,9 +1,4 @@
-"""R6(v0.5):Co-culture sender→receiver 两步链 case —— 真跑(填应用 5 例 5C)。
-
-复用 Kang L-R(通讯)+ ISG(receiver 状态)。断言:
-- CXCL10 Mono→CD8T:通讯诱导(fold~51)+ CD8T ISG 激活(d~2.8)→ 两步成立 → accept;
-- receiver=Megakaryocytes:ISG 几乎不激活(d~0.2)→ 链不完整 → downgrade。
-"""
+"""Tests for coculture case."""
 import pytest
 
 from praxis_virtualcell.agents.case_report import validate_case_report
@@ -14,7 +9,7 @@ from praxis_virtualcell.predictors.state.cell_state import _DEFAULT_SUBSET as _I
 from praxis_virtualcell.predictors.state.cell_state import CellStateDB
 
 if not (_LR.is_file() and _ISG.is_file()):
-    pytest.skip("Kang L-R / ISG 子集缺失", allow_module_level=True)
+    pytest.skip("Kang L-R / ISG subsets unavailable", allow_module_level=True)
 
 
 @pytest.fixture(scope="module")
@@ -39,7 +34,7 @@ def test_full_chain_accept(dbs):
 
 def test_weak_receiver_downgrades(dbs):
     comm_db, state_db = dbs
-    # Megakaryocytes ISG 几乎不激活 → 链不完整 → downgrade
+
     report, _ = run_coculture_case({
         "species": "human", "perturbation_object": "ligand", "perturbation_targets": ["CXCL10"],
         "target_output": "communication", "sender_cell_type": "CD14+ Monocytes",

@@ -1,4 +1,4 @@
-"""v0.6 P2:API 与核心 runtime/服务层之间的薄适配。所有科学决策仍由确定性 runtime 完成。"""
+"""Thin API adapter to the deterministic scientific runtime."""
 
 from __future__ import annotations
 
@@ -42,8 +42,7 @@ from praxis_virtualcell.workflows.submit_job import (
 RUNS_DIR = os.environ.get("PRAXIS_VC_RUNS", "runs")
 _VIRTUAL_EXPERIMENT_SUBMISSION_CONTRACT = "vc.virtual-experiment-compilation.v1"
 
-# UI 辅助:cell_type 后端不做枚举校验(自由字符串),这里仅给常见示例供前端下拉,
-# 允许自由填写。物种/扰动类型的合法值直接复用 runtime 白名单(单一真相源)。
+
 _CELL_TYPE_EXAMPLES = [
     "K562",
     "HEK293T",
@@ -61,7 +60,7 @@ _CELL_TYPE_EXAMPLES = [
 
 
 def config_for(mode: str) -> RuntimeConfig:
-    """mode=llm_assisted 时从 env 取 key(无 key 自动 fallback);否则强制 offline。"""
+    """Read environment credentials only for llm_assisted mode; otherwise enforce offline execution."""
     if mode in ("llm_assisted", "llm-assisted"):
         os.environ["PRAXIS_VIRTUALCELL_MODE"] = "llm_assisted"
         return RuntimeConfig.from_env()
@@ -87,8 +86,7 @@ def parse(text: str, mode: str) -> dict:
 
 
 def options() -> dict:
-    """暴露后端权威枚举供前端下拉(只读)。cell_type 后端不限制,仅给示例可自由填。
-    cell_presets 是只读展示层(catalog),不引入新词汇/治理权威。"""
+    """Return authoritative request enums and non-authoritative, editable cell-type presets."""
     from praxis_virtualcell.catalogs import load_cell_presets
 
     return {
@@ -102,7 +100,7 @@ def options() -> dict:
 
 
 def modules() -> dict:
-    """八模块目录(只读展示)。单一真相源 = biological_modules.modules,前端 module_context 步消费。"""
+    """Read the eight-module display catalog from biological_modules.modules."""
     from praxis_virtualcell.biological_modules import modules as M
 
     return {
@@ -198,8 +196,8 @@ def run_job(
             f"confirmed_request_invalid:missing={validation['missing_fields']} errors={validation['errors']}"
         )
     normalized = validation["normalized"]
-    # API 运行与落盘只消费 validator normalized 的顶层请求；metadata 响应安全扩展 key
-    # 可保留，但 requested_outputs/assumptions 等控制字段已清洗，且不把原始请求混回去。
+
+
     validated_request = dict(normalized)
     if pack_id is None:
         out = run_formal_query(
@@ -254,7 +252,7 @@ def get_job(job_id: str) -> dict:
 
 
 def list_jobs() -> list[dict]:
-    """列出 runs/ 下所有 job(带简要信息,供前端 Jobs 列表)。只读,不做任何科学判断。"""
+    """List persisted job summaries without making scientific decisions."""
     store = JobStore(RUNS_DIR)
     out: list[dict] = []
     for jid in store.list_jobs():
@@ -308,8 +306,8 @@ def list_jobs() -> list[dict]:
 
 
 def report_markdown(job_id: str) -> str:
-    """返回该 job 的确定性 report.md(优先读落盘,缺则现场重渲染)。只读。"""
-    job = JobStore(RUNS_DIR).load(job_id)  # 缺失抛 FileNotFoundError
+    """Read stored deterministic Markdown or render it from the saved artifact."""
+    job = JobStore(RUNS_DIR).load(job_id)
     md = job.get("report_md")
     if md:
         return md
@@ -319,9 +317,11 @@ def report_markdown(job_id: str) -> str:
 
 
 def module_plan(job_id: str) -> dict:
-    """从落盘 job 的 structured_report.provenance 提取 module_plan(只读)。
-    缺失(abstain/不可路由 job)→ 空 dict,fail-closed 不重算。job 不存在 → FileNotFoundError。"""
-    job = JobStore(RUNS_DIR).load(job_id)  # 缺 → FileNotFoundError
+    """Extract the stored provenance module plan.
+
+    Missing plans return an empty dict; missing jobs raise FileNotFoundError.
+    """
+    job = JobStore(RUNS_DIR).load(job_id)
     report = job.get("report") or {}
     prov = report.get("provenance") or job.get("provenance") or {}
     return {"module_plan": prov.get("module_plan") or {}}

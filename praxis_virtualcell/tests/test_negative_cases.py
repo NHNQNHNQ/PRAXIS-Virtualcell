@@ -1,5 +1,4 @@
-"""Negative / fuzz:固化 3 层拒绝路径,守 KPI「无静默 accept」。数据在 negative_cases/*.yaml。
-铁律:只读断言现有拒绝行为;若某路径实际不拒绝=真实 gap,停下报告不改测试迁就。"""
+"""Tests for negative cases."""
 from pathlib import Path
 
 import pytest
@@ -26,7 +25,7 @@ _CASES = _load_cases()
 
 
 def test_negative_case_count():
-    assert len(_CASES) >= 12, f"negative 用例过少({len(_CASES)}),疑 glob 落空"
+    assert len(_CASES) >= 12, f"Too few negative cases ({len(_CASES)}); check the fixture glob"
 
 
 @pytest.mark.parametrize("case", _CASES, ids=[c["case_id"] for c in _CASES] or ["_empty"])
@@ -37,37 +36,36 @@ def test_negative(case):
             normalize_request(inp)
     elif layer == "validate":
         v = validate_candidate(inp)
-        assert v["schema_valid"] is False, f"{case['case_id']}: 应 schema_valid=False"
+        assert v["schema_valid"] is False, f"{case['case_id']}: expected schema_valid=False"
         if "error_contains" in exp:
             assert any(exp["error_contains"] in e for e in v["errors"]), \
-                f"{case['case_id']}: errors {v['errors']} 未含 {exp['error_contains']}"
+                f"{case['case_id']}: errors {v['errors']} does not contain {exp['error_contains']}"
         if "missing_contains" in exp:
             assert exp["missing_contains"] in v["missing_fields"], \
-                f"{case['case_id']}: missing {v['missing_fields']} 未含 {exp['missing_contains']}"
+                f"{case['case_id']}: missing {v['missing_fields']} does not contain {exp['missing_contains']}"
     elif layer == "route":
         dec = route(normalize_request(inp))
         assert dec.disposition == exp["disposition"], \
             f"{case['case_id']}: disposition {dec.disposition} != {exp['disposition']}"
     else:
-        pytest.fail(f"{case['case_id']}: 未知 layer={layer}")
+        pytest.fail(f"{case['case_id']}: Unknown layer={layer}")
 
 
 def test_negative_never_silently_accepts():
-    """KPI:没有任何 negative case 得到静默 accept/成功。
-    normalize 层必抛、validate 层 schema_valid=False、route 层 disposition!=accept。"""
+    """Verify negative never silently accepts."""
     offenders = []
     for c in _CASES:
         layer, inp = c["layer"], c["input"]
         if layer == "normalize":
             try:
                 normalize_request(inp)
-                offenders.append(f"{c['case_id']}(normalize 未拒绝)")
+                offenders.append(f"{c['case_id']}(normalize did not reject)")
             except SchemaError:
                 pass
         elif layer == "validate":
             if validate_candidate(inp)["schema_valid"] is not False:
-                offenders.append(f"{c['case_id']}(validate 竟 valid)")
+                offenders.append(f"{c['case_id']}(validate unexpectedly accepted)")
         elif layer == "route":
             if route(normalize_request(inp)).disposition == "accept":
-                offenders.append(f"{c['case_id']}(route 竟 accept)")
-    assert offenders == [], f"静默 accept 违规:{offenders}"
+                offenders.append(f"{c['case_id']}(route unexpectedly accepted)")
+    assert offenders == [], f"Silent acceptance violations: {offenders}"

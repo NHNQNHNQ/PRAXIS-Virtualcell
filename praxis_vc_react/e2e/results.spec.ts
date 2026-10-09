@@ -7,30 +7,30 @@ import {
 } from "./chat-helpers";
 
 const RESULT_TABS: Array<[string, string]> = [
-  ["报告", "概要"],
-  ["预测", "本次未给出预测结论"],
-  ["模块路由", "未产生模块路由"],
-  ["数据与执行身份", "数据与执行身份"],
-  ["证据", "证据与审计"],
-  ["运行轨迹", "运行轨迹"],
-  ["溯源", "运行标识"],
+  ["Report", "Summary"],
+  ["Predictions", "No prediction was produced"],
+  ["Module routing", "No module routing produced"],
+  ["Data and execution identity", "Data and execution identity"],
+  ["Evidence", "Evidence and audit"],
+  ["Execution trace", "Execution trace"],
+  ["Provenance", "Run identity"],
 ];
 
-test("无 Pack 的正式请求在 7 tabs 中明确 abstain 并保留 execution identity", async ({
+test("An unbound request explicitly abstains across seven tabs and preserves execution identity", async ({
   page,
 }) => {
   const failures = collectBrowserFailures(page);
   await selectCell(page, "K562");
-  const run = await runChat(page, "敲低 AHR");
+  const run = await runChat(page, "Knock down AHR");
   const result = page.getByRole("region", {
-    name: `结果 · job ${run.jobId}`,
+    name: `Results · job ${run.jobId}`,
     exact: true,
   });
   await expect(result.getByRole("tab")).toHaveCount(7);
 
   for (const [tab, heading] of RESULT_TABS) {
     await result.getByRole("tab", { name: tab, exact: true }).click();
-    const expected = ["预测", "模块路由"].includes(tab)
+    const expected = ["Predictions", "Module routing"].includes(tab)
       ? result.getByText(heading, { exact: true }).first()
       : result.getByRole("heading", { name: heading, exact: true }).first();
     await expect(expected).toBeVisible();
@@ -55,13 +55,13 @@ test("无 Pack 的正式请求在 7 tabs 中明确 abstain 并保留 execution i
   expect(provenance.execution_identity.fingerprint).toMatch(/^[a-f0-9]{64}$/);
 
   await result
-    .getByRole("tab", { name: "数据与执行身份", exact: true })
+    .getByRole("tab", { name: "Data and execution identity", exact: true })
     .click();
   await expect(
-    result.getByText("未绑定 VirtualCellPack", { exact: true }),
+    result.getByText("No VirtualCellPack bound", { exact: true }),
   ).toBeVisible();
   await expect(
-    result.getByText("未记录 dataset identity", { exact: true }),
+    result.getByText("No dataset identity recorded", { exact: true }),
   ).toBeVisible();
   await expect(
     result
@@ -71,10 +71,10 @@ test("无 Pack 的正式请求在 7 tabs 中明确 abstain 并保留 execution i
   expectNoBrowserFailures(failures);
 });
 
-test("不兼容请求直接报告 abstain 且不伪造预测", async ({ page }) => {
+test("An incompatible request reports abstention without inventing predictions", async ({ page }) => {
   const failures = collectBrowserFailures(page);
   await selectCell(page, "K562");
-  const run = await runChat(page, "敲低 FASN");
+  const run = await runChat(page, "Knock down FASN");
   const payload = (await run.reportResponse.json()) as {
     structured_report: {
       abstain: boolean;
@@ -89,26 +89,26 @@ test("不兼容请求直接报告 abstain 且不伪造预测", async ({ page }) 
   );
 
   const result = page.getByRole("region", {
-    name: `结果 · job ${run.jobId}`,
+    name: `Results · job ${run.jobId}`,
     exact: true,
   });
   await expect(
-    result.getByText("本次未给出预测结论", { exact: true }).first(),
+    result.getByText("No prediction was produced", { exact: true }).first(),
   ).toBeVisible();
   await expect(
     result.getByText("pack_unregistered", { exact: true }),
   ).toBeVisible();
-  await result.getByRole("tab", { name: "预测", exact: true }).click();
+  await result.getByRole("tab", { name: "Predictions", exact: true }).click();
   await expect(
-    result.getByText("可靠性判定与原因见「报告」。", { exact: true }),
+    result.getByText("See Report for the reliability decision and reasons.", { exact: true }),
   ).toBeVisible();
   expectNoBrowserFailures(failures);
 });
 
-test("Recent reports 可重新打开后端保存的历史报告", async ({ page }) => {
+test("Recent reports reopens reports saved by the backend", async ({ page }) => {
   const failures = collectBrowserFailures(page);
   await selectCell(page, "PBMC");
-  const run = await runChat(page, "激活 STAT1");
+  const run = await runChat(page, "Activate STAT1");
 
   const historyEntry = page
     .locator(".chat-history > .chat-history-item.active")
@@ -125,7 +125,7 @@ test("Recent reports 可重新打开后端保存的历史报告", async ({ page 
   ).toBeVisible();
   await expect(
     savedReport.getByRole("region", {
-      name: `结果 · job ${run.jobId}`,
+      name: `Results · job ${run.jobId}`,
       exact: true,
     }),
   ).toBeVisible();

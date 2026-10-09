@@ -1,4 +1,4 @@
-"""组装 offline runtime + 跑一个 request。"""
+"""Build the offline runtime and execute one structured request."""
 
 from __future__ import annotations
 
@@ -82,16 +82,16 @@ def build_runtime(
             CaseRunnerPredictorAgent(),
         ):
             rt.register_agent(a)
-    # Phase 4:module-aware 路由两节点(OFFLINE 也注册 → 产确定性 module_plan,零 LLM)
+
     for a in (SpeciesContextAgent(), ModuleRouterAgent()):
         rt.register_agent(a)
-    # Phase 5:证据等级 + 主动学习两节点(OFFLINE 也注册 → 确定性 advisory 产物挂 provenance,零 LLM)
+
     for a in (EvidenceLevelAgent(), ActiveLearningAgent()):
         rt.register_agent(a)
     from praxis_virtualcell.agents_llm.llm_client import make_llm_client
 
     client = make_llm_client(cfg)
-    # Phase 4:仅 orchestrated 模式 + client enabled 才注册 LLM 编排节点(planner + reasoner)
+
     if client.enabled and cfg.mode in (Mode.LLM_ORCHESTRATED, Mode.LLM_ORCHESTRATED_STRICT):
         from praxis_virtualcell.llm_orchestration.cross_module_reasoner import LLMCrossModuleReasoner
         from praxis_virtualcell.llm_orchestration.module_planner import LLMModulePlanner

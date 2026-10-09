@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Fig 6 — Learned reliability governance (Result 3). Faithful renderer:每个数值硬编码自已核实 finding
-(docs/ANALYSIS-SUMMARY.md §2 / RESULTS-CONSOLIDATED §R3 / finding_g2_percell_w45),绘图时不计算不臆造。
+"""Fig 6 — Learned reliability governance (Result 3). Render preserved values from the scientific source records.
+Sources: docs/ANALYSIS-SUMMARY.md and RESULTS-CONSOLIDATED.md; plotting does not recompute or invent values.
 
-面板:(a) bad-pert AUROC 对比 + per-cell 复算;(b) risk–coverage(真 donor 保留准度随覆盖率);
-(c) 接回 runtime 前后 wrong-accept / risk-coverage。输出 SVG(主)/PDF/PNG(600dpi 预览)。
+Panels: (a) bad-perturbation AUROC and per-cell validation; (b) retained donor accuracy versus coverage;
+(c) runtime wrong-accept and risk-coverage. Export SVG, PDF, and a 600 DPI PNG preview.
 """
 from __future__ import annotations
 
@@ -12,14 +12,14 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-# ── 已核实数值(硬编码,来源见 docstring)──────────────────────────────
+# ── Preserved source values; see the module documentation──────────────────────────────
 AUROC = {"Learned": 0.907, "Disagreement": 0.774, "OOD flag": 0.788, "Random": 0.479}
-AUROC_PERCELL_LEARNED = 0.869                       # per-cell 复算(finding_g2_percell_w45)
-RC_COVERAGE = [1.00, 0.96, 0.88, 0.82, 0.74]        # 覆盖率
-RC_RETAINED = [0.672, 0.683, 0.707, 0.732, 0.754]   # 保留集 delta-Pearson(真 donor)
+AUROC_PERCELL_LEARNED = 0.869                       # per-cell validation source: finding_g2_percell_w45
+RC_COVERAGE = [1.00, 0.96, 0.88, 0.82, 0.74]        # Coverage
+RC_RETAINED = [0.672, 0.683, 0.707, 0.732, 0.754]   # retained-set delta-Pearson from the donor
 RC_AUC, RC_AUC_PERCELL = 0.746, 0.736
-WA_RULE, WA_LEARNED = 0.974, 0.211                  # wrong-accept 接回前后
-RCV_RULE, RCV_LEARNED = 0.026, 0.789                # risk-coverage 接回前后
+WA_RULE, WA_LEARNED = 0.974, 0.211                  # wrong-accept before and after runtime integration
+RCV_RULE, RCV_LEARNED = 0.026, 0.789                # risk-coverage before and after runtime integration
 
 TEAL, AMBER, GRAY, RED = "#2a9d8f", "#e9a13b", "#9aa0a6", "#d1495b"
 plt.rcParams.update({"font.size": 7, "font.family": "sans-serif", "svg.fonttype": "none",
@@ -32,7 +32,7 @@ def _tidy(ax):
 
 fig, (axa, axb, axc) = plt.subplots(1, 3, figsize=(7.2, 2.35))
 
-# (a) AUROC 对比
+# (a) AUROC comparison
 names = list(AUROC)
 vals = [AUROC[n] for n in names]
 colors = [TEAL, GRAY, GRAY, GRAY]
@@ -65,7 +65,7 @@ axb.text(0.02, 0.02, f"risk–cov AUC {RC_AUC} (per-cell {RC_AUC_PERCELL})",
          transform=axb.transAxes, fontsize=5.8, color="#555555")
 _tidy(axb)
 
-# (c) 接回 runtime 前后
+# (c) Before and after runtime integration
 groups = ["Wrong-accept\nrate", "Risk-coverage"]
 rule = [WA_RULE, RCV_RULE]
 learned = [WA_LEARNED, RCV_LEARNED]

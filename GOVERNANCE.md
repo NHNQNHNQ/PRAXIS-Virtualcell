@@ -1,17 +1,12 @@
-# Governance
+# Project governance
 
-PRAXIS-VirtualCell separates engineering, scientific evidence and product policy.
+Maintainers review code, schemas, tests, compatibility, and releases. Scientific claims
+must be supported by recorded validation evidence for the exact model and experiment scope.
+Negative results and abstentions remain part of that record.
 
-- Maintainers govern code, schemas, tests, versioning and release-candidate integrity.
-- Scientific reviewers assess only exact-scope immutable benchmark evidence; negative results are retained.
-- Named product operators decide promotion or revocation from exact evidence. Maintainers and agents cannot
-  infer that decision.
-- Release operators control push, main/tag, publication, staging and production windows independently.
+The runtime separates technical compatibility, scientific validation, and product eligibility.
+Passing one gate does not imply passing the others. Model promotion and revocation must be
+recorded explicitly; an LLM or agent narrative cannot create evidence or override a verdict.
 
-No LLM or agent consensus may create data truth, numerical predictions, compatibility, evidence, promotion or
-final scientific verdict. Conflicts are resolved from exact bytes, Git/artifact identity and executable tests;
-unresolved safety or scope conflicts fail closed. Breaking schema changes require a new version and migration.
-Security, privacy, consent, ethics and biosafety gates override delivery schedules.
-
-The canonical status ledger is
-[docs/PHASE12-30-DETAILED-COMPLETION-CHECKLIST.md](docs/PHASE12-30-DETAILED-COMPLETION-CHECKLIST.md).
+Public schema changes need versioned compatibility or migration documentation. Contributions
+are reviewed through GitHub pull requests; see [CONTRIBUTING.md](CONTRIBUTING.md).

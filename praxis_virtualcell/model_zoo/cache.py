@@ -1,8 +1,5 @@
-"""model zoo 本地缓存 + 版本锁(sha256)。
-
-缓存目录:默认 ~/.cache/praxis_virtualcell/model_zoo/<model_name>/<asset>,root 可 override。
-check():资产存在性 + 可选 sha256 版本锁。缺失或 sha 不匹配 → AssetStatus(available=False),
-fail-closed,绝不 silent accept(篡改/版本错的权重宁可判不可用)。
+"""Local model cache with optional size/sha256 version locks. Namespace assets under model_name; root is
+configurable. Missing or mismatched assets return available=False, rejecting corrupt or wrong-version weights.
 """
 from __future__ import annotations
 
@@ -69,7 +66,7 @@ class ModelCache:
         self.root = Path(root or _DEFAULT_ROOT)
 
     def asset_path(self, model_name: str, asset: str) -> Path:
-        """命名空间化路径:<root>/<model_name>/<asset>(不同模型互不覆盖)。"""
+        """Return a model-namespaced asset path so models cannot overwrite one another."""
         for value in (model_name, asset):
             if not isinstance(value, str):
                 raise ValueError("cache identity must be a canonical relative path")
@@ -206,7 +203,7 @@ class ModelCache:
         sha256: str | None = None,
         size_bytes: int | None = None,
     ) -> AssetStatus:
-        """资产存在性 + 可选 size/sha256 锁。缺失/不匹配 → fail closed。"""
+        """Check asset existence and optional size/sha256 locks; fail closed on missing/mismatched assets."""
         p = self.asset_path(model_name, asset)
         if not p.is_file():
             return AssetStatus(False, None, f"asset_not_found: {asset}")
