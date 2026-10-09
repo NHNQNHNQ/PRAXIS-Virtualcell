@@ -92,8 +92,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      PRAXIS_PIP_CACHE_ROOT: ${{ runner.temp }}/praxis-release-pip-cache
-      PRAXIS_NPM_CACHE_ROOT: ${{ runner.temp }}/praxis-release-npm-cache
+      PRAXIS_PIP_CACHE_ROOT: /tmp/praxis-release-pip-cache
+      PRAXIS_NPM_CACHE_ROOT: /tmp/praxis-release-npm-cache
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
