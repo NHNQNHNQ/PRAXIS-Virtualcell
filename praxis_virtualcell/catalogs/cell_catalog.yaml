@@ -1,0 +1,15 @@
+# 只读 UI 辅助:curated cell/model 预设(展示层)。非权威词汇/治理决策。
+# species 必须 ∈ SUPPORTED_SPECIES(loader 校验);cell_type 自由文本;仅供前端便捷选择。
+presets:
+  - {id: human_k562, species: human, cell_type: K562, label: "K562 — human CML (Norman perturb-seq)", example_perturbation_type: gene, example_targets: [AHR, GATA1], modules: [genetic_hub, cytoplasmic_metabolism, stress_processor]}
+  - {id: human_pbmc, species: human, cell_type: PBMC, label: "PBMC — human immune (Kang IFN-β)", example_perturbation_type: gene, example_targets: [STAT1], modules: [genetic_hub, stress_processor]}
+  - {id: human_a549, species: human, cell_type: A549, label: "A549 — human lung adenocarcinoma", example_perturbation_type: drug, example_targets: [vorinostat], modules: [stress_processor, cytoplasmic_metabolism]}
+  - {id: human_hek293t, species: human, cell_type: HEK293T, label: "HEK293T — human embryonic kidney", example_perturbation_type: gene, example_targets: [TP53], modules: [genetic_hub, stress_processor]}
+  - {id: human_ipsc, species: human, cell_type: iPSC, label: "iPSC — human induced pluripotent", example_perturbation_type: gene, example_targets: [SNAI1], modules: [genetic_hub, cytoskeletal_framework]}
+  - {id: mouse_tcell, species: mouse, cell_type: T cell, label: "T cell — mouse (ortholog 迁移)", example_perturbation_type: gene, example_targets: [Gata1], modules: [genetic_hub, stress_processor]}
+  - {id: mouse_hematopoietic, species: mouse, cell_type: hematopoietic, label: "Hematopoietic — mouse (Paul15 分化)", example_perturbation_type: gene, example_targets: [Gata1], modules: [genetic_hub, cytoplasmic_metabolism]}
+  - {id: mouse_fibroblast, species: mouse, cell_type: fibroblast, label: "Fibroblast — mouse", example_perturbation_type: gene, example_targets: [Myc], modules: [genetic_hub, cytoskeletal_framework]}
+  - {id: yeast_scerevisiae, species: yeast, cell_type: S. cerevisiae, label: "S. cerevisiae — yeast GEM (Yeast8)", example_perturbation_type: gene, example_targets: [YBR166C], modules: [genetic_hub, mitochondrial_energy_metabolism, cytoplasmic_metabolism]}
+  - {id: yeast_carbon, species: yeast, cell_type: S. cerevisiae, label: "S. cerevisiae — 碳源切换 (medium)", example_perturbation_type: medium, example_targets: [], modules: [mitochondrial_energy_metabolism, cytoplasmic_metabolism]}
+  - {id: ecoli_iml1515, species: bacteria, cell_type: E. coli, label: "E. coli — iML1515 GEM (KO 生长)", example_perturbation_type: gene, example_targets: [b0720], modules: [mitochondrial_energy_metabolism, cytoplasmic_metabolism, biosynthetic_network]}
+  - {id: ecoli_antibiotic, species: bacteria, cell_type: E. coli, label: "E. coli — 抗生素 (靶代谢 FBA)", example_perturbation_type: drug, example_targets: [trimethoprim], modules: [mitochondrial_energy_metabolism, cytoplasmic_metabolism]}

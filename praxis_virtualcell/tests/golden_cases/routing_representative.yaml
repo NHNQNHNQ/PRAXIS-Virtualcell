@@ -1,0 +1,58 @@
+# 代表 case:5 应用 × 4 物种覆盖;expect 为 route() 实跑验证值。
+cases:
+  - case_id: human_gene_expression
+    description: 人类基因扰动→表达,原生 scRNA predictor
+    input: {species: human, perturbation_object: gene, target_output: expression, perturbation_targets: [AHR]}
+    expect: {engine: donor_predictor, disposition: accept}
+    workflow: offline
+    request:
+      species: human
+      perturbation_type: gene
+      perturbation_targets: [AHR]
+      task_type: predict_delta_expression
+      input_modality: scRNA
+      output_modality: delta_expression
+  - case_id: mouse_gene_expression
+    description: 小鼠基因→表达,human predictor 迁移需 ortholog(caution)
+    input: {species: mouse, perturbation_object: gene, target_output: expression, perturbation_targets: [Gata1]}
+    expect: {engine: donor_predictor, disposition: caution, caution_flags: [ortholog_required]}
+  - case_id: ecoli_gene_growth
+    description: 大肠杆菌基因敲除→生长,机制 GEM
+    input: {species: bacteria, perturbation_object: gene, target_output: growth, perturbation_targets: [b0720]}
+    expect: {engine: gem_fba, disposition: accept}
+  - case_id: yeast_gene_growth
+    description: 酵母基因敲除→生长,机制 GEM
+    input: {species: yeast, perturbation_object: gene, target_output: growth, perturbation_targets: [YBR166C]}
+    expect: {engine: gem_fba, disposition: accept}
+  - case_id: ecoli_medium_growth
+    description: 大肠杆菌碳源切换→生长,机制 GEM
+    input: {species: bacteria, perturbation_object: medium, target_output: growth, perturbation_targets: [], medium: acetate}
+    expect: {engine: gem_fba, disposition: accept}
+  - case_id: bacteria_drug_growth
+    description: 抗生素(靶代谢)→生长抑制,机制 GEM
+    input: {species: bacteria, perturbation_object: drug, target_output: growth, perturbation_targets: [trimethoprim]}
+    expect: {engine: gem_fba, disposition: accept}
+  - case_id: human_drug_expression
+    description: 人类药物扰动→表达,LINCS 签名(caution)
+    input: {species: human, perturbation_object: drug, target_output: expression, perturbation_targets: [vorinostat]}
+    expect: {engine: embedding, disposition: caution}
+  - case_id: human_gene_state
+    description: 人类基因→细胞状态,marker state scoring
+    input: {species: human, perturbation_object: gene, target_output: state, perturbation_targets: [SNAI1]}
+    expect: {engine: state_scoring, disposition: accept}
+  - case_id: mammalian_flux
+    description: 哺乳类代谢通量→pathway tendency(caution)
+    input: {species: human, perturbation_object: gene, target_output: flux, perturbation_targets: [PKM]}
+    expect: {engine: pathway_scoring, disposition: caution}
+  - case_id: human_communication
+    description: 人类配体→细胞通讯,ligand-receptor 共表达
+    input: {species: human, perturbation_object: ligand, target_output: communication, perturbation_targets: [TNF]}
+    expect: {engine: communication, disposition: accept}
+  - case_id: mouse_gene_state
+    description: 小鼠基因→状态/命运,ortholog(caution)
+    input: {species: mouse, perturbation_object: gene, target_output: state, perturbation_targets: [Gata1]}
+    expect: {engine: state_scoring, disposition: caution, caution_flags: [ortholog_required]}
+  - case_id: human_spatial_niche
+    description: 人类微环境→状态,空间 niche
+    input: {species: human, perturbation_object: medium, target_output: state, perturbation_targets: [], medium: niche}
+    expect: {engine: spatial_niche, disposition: accept}

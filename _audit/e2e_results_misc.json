@@ -1,0 +1,184 @@
+[
+  {
+    "skill": "esm-mutation-scan",
+    "brain": "enzyme",
+    "verdict": "ERROR",
+    "evidence": {
+      "execution_plan": {
+        "brain": "enzyme",
+        "skill": "esm-mutation-scan",
+        "host_env": "PRAXIS-Enzyme",
+        "status": "green",
+        "skill_md_path": "brains/enzyme/skills/workflows/esm-mutation-scan/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "sequence": "MLSDEDFKAVFGMTRSAFANLPLWKQQNLKKEKGLF",
+          "positions": [
+            1,
+            5,
+            10,
+            15,
+            20
+          ],
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "non-zero exit 1",
+        "stderr": "        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zkyd/software/miniconda3/envs/PRAXIS-Enzyme/lib/python3.11/site-packages/torch/serialization.py\", line 671, in __init__\n    super().__init__(torch._C.PyTorchFileReader(name_or_buffer))\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: PytorchStreamReader failed reading zip archive: failed finding central directory\n",
+        "diagnostics": {
+          "brain": "enzyme",
+          "skill": "esm-mutation-scan",
+          "archetype": "mutation_scan",
+          "tool": "ESM-2",
+          "n_positions": 5,
+          "out_dir": "/tmp/esm_mut_es1sj9n6",
+          "subprocess": {
+            "wall_sec": 3.462,
+            "rc": 1
+          }
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "thermompnn_stability",
+    "brain": "protein",
+    "verdict": "RED",
+    "evidence": {
+      "execution_plan": {
+        "brain": "protein",
+        "skill": "thermompnn_stability",
+        "host_env": "thermompnn",
+        "status": "green",
+        "skill_md_path": "brains/protein/skills/workflows/thermompnn_stability/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "input_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "ModuleNotFoundError(\"No module named 'model'\")",
+        "diagnostics": {
+          "brain": "protein",
+          "skill": "thermompnn_stability",
+          "archetype": "mutation_scan",
+          "tool": "ThermoMPNN",
+          "out_dir": "/tmp/thermompnn_0_lbuwmc",
+          "subprocess": {
+            "wall_sec": 0.026,
+            "rc": 0
+          },
+          "__err": "ModuleNotFoundError(\"No module named 'model'\")",
+          "note": "ThermoMPNN inference API 不稳定;需上游确认入口"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "crispr_crispor_design",
+    "brain": "crispr",
+    "verdict": "N-A",
+    "evidence": {
+      "execution_plan": {
+        "brain": "crispr",
+        "skill": "crispr_crispor_design",
+        "host_env": "PRAXIS-CRISPR-crispor",
+        "status": "green",
+        "skill_md_path": "brains/crispr/skills/workflows/crispr_crispor_design/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "target_sequence": "GGGTGGGGGGAGTTTGCTCCTGG",
+          "genome": "hg38",
+          "pam": "NGG",
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "non-zero exit 1",
+        "stderr": "ome/zkyd/data2/mzy/crisporWebsite/crisporEffScores.py\", line 1177, in calcAziScore\n    score = azimuth.model_comparison.predict(numpy.array([seq]), None, None, pam_audit=False)[0]\n  File \"/home/zkyd/data2/mzy/crisporWebsite/bin/Azimuth-2.0/azimuth/model_comparison.py\", line 544, in predict\n    model, learn_options = pickle.load(f)\nModuleNotFoundError: No module named 'sklearn.ensemble._gb_losses'\n",
+        "diagnostics": {
+          "brain": "crispr",
+          "skill": "crispr_crispor_design",
+          "archetype": "crispr",
+          "tool": "crispor.py",
+          "genome": "hg38",
+          "out_dir": "/tmp/crispor_x51p4y_c",
+          "subprocess": {
+            "wall_sec": 6.807,
+            "rc": 1
+          }
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "cazy-crawler",
+    "brain": "enzyme",
+    "verdict": "DONE_real",
+    "evidence": {
+      "execution_plan": {
+        "brain": "enzyme",
+        "skill": "cazy-crawler",
+        "host_env": "praxis-protein",
+        "status": "green",
+        "skill_md_path": "brains/enzyme/skills/workflows/cazy-crawler/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "family_ids": [
+            "GH13",
+            "GT2"
+          ],
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": true,
+        "skill_id": "cazy-crawler",
+        "fetched": [
+          {
+            "family": "GH13",
+            "web_url": "http://www.cazy.org/GH13.html",
+            "ok": true,
+            "note": "no official REST API; manual scrape needed"
+          },
+          {
+            "family": "GT2",
+            "web_url": "http://www.cazy.org/GT2.html",
+            "ok": true,
+            "note": "no official REST API; manual scrape needed"
+          }
+        ],
+        "diagnostics": {
+          "brain": "enzyme",
+          "skill": "cazy-crawler",
+          "archetype": "fetcher",
+          "n_families": 2,
+          "out_dir": "/tmp/cazy_hr4l2hco",
+          "note": "走 dbCAN web service;无本地 CAZy 索引",
+          "fallback": "manual scrape"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  }
+]

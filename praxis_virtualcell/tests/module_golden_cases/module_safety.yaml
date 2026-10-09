@@ -1,0 +1,91 @@
+# module routing golden(safety):mismatch / negative transfer / fail-closed,overall 一律非 accept。
+cases:
+  # ---- bacteria 术语/机制硬约束(决策 E)----
+  - case_id: bacteria_expression_negative_transfer
+    input: {species: bacteria, perturbation_object: gene, target_output: expression, perturbation_targets: [lon]}
+    expect: {primary: genetic_hub, engine: reject, overall_verdict: abstain}
+  - case_id: bacteria_gene_combo_expression_reject
+    input: {species: bacteria, perturbation_object: gene_combination, target_output: expression, perturbation_targets: [b0720, b0721]}
+    expect: {primary: genetic_hub, engine: reject, overall_verdict: abstain}
+  - case_id: bacteria_ligand_communication_reject
+    input: {species: bacteria, perturbation_object: ligand, target_output: communication, perturbation_targets: [FLIC]}
+    expect: {primary: stress_processor, engine: reject, overall_verdict: abstain}
+  - case_id: bacteria_medium_state_reject
+    input: {species: bacteria, perturbation_object: medium, target_output: state, perturbation_targets: [], medium: nutrient_shift}
+    expect: {primary: stress_processor, engine: reject, overall_verdict: abstain}
+  - case_id: bacteria_drug_state_reject
+    input: {species: bacteria, perturbation_object: drug, target_output: state, perturbation_targets: [ampicillin]}
+    expect: {primary: stress_processor, engine: reject, overall_verdict: abstain}
+  # ---- yeast 组织/通讯错配 ----
+  - case_id: yeast_niche_state_reject
+    input: {species: yeast, perturbation_object: medium, target_output: state, perturbation_targets: [], medium: niche}
+    expect: {primary: cytoskeletal_framework, engine: reject, overall_verdict: abstain}
+  - case_id: yeast_ligand_communication_reject
+    input: {species: yeast, perturbation_object: ligand, target_output: communication, perturbation_targets: [MFALPHA1]}
+    expect: {primary: stress_processor, engine: reject, overall_verdict: abstain}
+  - case_id: yeast_drug_expression_reject
+    input: {species: yeast, perturbation_object: drug, target_output: expression, perturbation_targets: [cycloheximide]}
+    expect: {primary: stress_processor, engine: embedding, overall_verdict: caution}
+  - case_id: yeast_gene_combo_expression_reject
+    input: {species: yeast, perturbation_object: gene_combination, target_output: expression, perturbation_targets: [YBR166C, YBR167C]}
+    expect: {primary: genetic_hub, engine: reject, overall_verdict: abstain}
+  - case_id: yeast_gene_state_reject_dup
+    input: {species: yeast, perturbation_object: gene, target_output: state, perturbation_targets: [YAL001C]}
+    expect: {primary: stress_processor, engine: reject, overall_verdict: abstain}
+  # ---- 哺乳类 growth/ligand data-gated downgrade ----
+  - case_id: human_ligand_expression_downgrade
+    input: {species: human, perturbation_object: ligand, target_output: expression, perturbation_targets: [TNF]}
+    expect: {primary: stress_processor, engine: embedding, overall_verdict: downgrade}
+  - case_id: mouse_ligand_expression_downgrade
+    input: {species: mouse, perturbation_object: ligand, target_output: expression, perturbation_targets: [Tnf]}
+    expect: {primary: stress_processor, engine: embedding, overall_verdict: downgrade}
+  - case_id: human_gene_growth_downgrade_dup
+    input: {species: human, perturbation_object: gene_combination, target_output: growth, perturbation_targets: [MYC, KRAS]}
+    expect: {primary: cytoplasmic_metabolism, engine: gem_fba, overall_verdict: downgrade}
+  - case_id: mouse_medium_growth_downgrade
+    input: {species: mouse, perturbation_object: medium, target_output: growth, perturbation_targets: [], medium: glucose}
+    expect: {primary: cytoplasmic_metabolism, engine: gem_fba, overall_verdict: downgrade}
+  # ---- 跨物种 state/communication negative ----
+  - case_id: mouse_communication_reject
+    input: {species: mouse, perturbation_object: gene, target_output: communication, perturbation_targets: [Gata1]}
+    expect: {primary: stress_processor, engine: reject, overall_verdict: abstain}
+  - case_id: bacteria_gene_communication_reject
+    input: {species: bacteria, perturbation_object: gene, target_output: communication, perturbation_targets: [b0720]}
+    expect: {primary: stress_processor, engine: reject, overall_verdict: abstain}
+  - case_id: yeast_gene_communication_reject
+    input: {species: yeast, perturbation_object: gene, target_output: communication, perturbation_targets: [YBR166C]}
+    expect: {primary: stress_processor, engine: reject, overall_verdict: abstain}
+  # ---- weak-support module caution(物种 verdict 叠加)----
+  - case_id: human_membrane_expression_weak
+    input: {species: human, perturbation_object: drug, target_output: state, perturbation_targets: [tunicamycin]}
+    expect: {primary: stress_processor, engine: state_scoring, overall_verdict: accept}
+  - case_id: bacteria_membrane_growth
+    input: {species: bacteria, perturbation_object: drug, target_output: growth, perturbation_targets: [polymyxin]}
+    expect: {primary: cytoplasmic_metabolism, engine: gem_fba, overall_verdict: accept}
+  - case_id: mouse_flux_pathway_dup
+    input: {species: mouse, perturbation_object: gene_combination, target_output: flux, perturbation_targets: [Pkm, Ldha]}
+    expect: {primary: cytoplasmic_metabolism, engine: pathway_scoring, overall_verdict: caution}
+  - case_id: human_flux_pathway_dup
+    input: {species: human, perturbation_object: gene_combination, target_output: flux, perturbation_targets: [PKM, LDHA]}
+    expect: {primary: cytoplasmic_metabolism, engine: pathway_scoring, overall_verdict: caution}
+  - case_id: mouse_drug_state_caution
+    input: {species: mouse, perturbation_object: drug, target_output: state, perturbation_targets: [dexamethasone]}
+    expect: {primary: stress_processor, engine: state_scoring, overall_verdict: caution}
+  - case_id: human_gene_state_native
+    input: {species: human, perturbation_object: gene_combination, target_output: state, perturbation_targets: [SNAI1, ZEB1]}
+    expect: {primary: stress_processor, engine: state_scoring, overall_verdict: accept}
+  - case_id: bacteria_ligand_growth_reject
+    input: {species: bacteria, perturbation_object: ligand, target_output: growth, perturbation_targets: [AI2]}
+    expect: {primary: cytoplasmic_metabolism, engine: reject, overall_verdict: abstain}
+  - case_id: yeast_ligand_growth_reject
+    input: {species: yeast, perturbation_object: ligand, target_output: growth, perturbation_targets: [MFALPHA1]}
+    expect: {primary: cytoplasmic_metabolism, engine: reject, overall_verdict: abstain}
+  - case_id: human_ligand_growth_downgrade
+    input: {species: human, perturbation_object: ligand, target_output: growth, perturbation_targets: [EGF]}
+    expect: {primary: cytoplasmic_metabolism, engine: gem_fba, overall_verdict: downgrade}
+  - case_id: mouse_ligand_growth_downgrade
+    input: {species: mouse, perturbation_object: ligand, target_output: growth, perturbation_targets: [Egf]}
+    expect: {primary: cytoplasmic_metabolism, engine: gem_fba, overall_verdict: downgrade}
+  - case_id: human_ligand_flux_caution
+    input: {species: human, perturbation_object: ligand, target_output: flux, perturbation_targets: [EGF]}
+    expect: {primary: cytoplasmic_metabolism, engine: pathway_scoring, overall_verdict: caution}

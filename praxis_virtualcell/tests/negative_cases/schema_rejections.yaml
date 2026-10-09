@@ -1,0 +1,52 @@
+# normalize 层:抛 SchemaError;validate 层:schema_valid=False。期望值均已 grounding。
+cases:
+  - case_id: normalize_unknown_species
+    layer: normalize
+    description: 未知物种 → SchemaError
+    input: {species: martian, perturbation_object: gene, target_output: expression, perturbation_targets: [X]}
+    expect: {schema_error: true}
+  - case_id: normalize_unknown_object
+    layer: normalize
+    description: 未知扰动对象 → SchemaError
+    input: {species: human, perturbation_object: teleport, target_output: expression, perturbation_targets: [X]}
+    expect: {schema_error: true}
+  - case_id: normalize_unknown_output
+    layer: normalize
+    description: 未知目标输出 → SchemaError
+    input: {species: human, perturbation_object: gene, target_output: vibes, perturbation_targets: [X]}
+    expect: {schema_error: true}
+  - case_id: normalize_empty_gene_targets
+    layer: normalize
+    description: gene 类空 targets → SchemaError(不静默补默认)
+    input: {species: human, perturbation_object: gene, target_output: expression, perturbation_targets: []}
+    expect: {schema_error: true}
+  - case_id: normalize_non_dict_input
+    layer: normalize
+    description: 非 dict 输入 → SchemaError
+    input: "just a string"
+    expect: {schema_error: true}
+  - case_id: validate_unknown_species
+    layer: validate
+    description: parse→confirm:未知物种进 errors
+    input: {species: martian, perturbation_type: gene, perturbation_targets: [X], task_type: predict_delta_expression}
+    expect: {schema_valid: false, error_contains: "unsupported_species"}
+  - case_id: validate_unknown_ptype
+    layer: validate
+    description: 未知扰动类型进 errors
+    input: {species: human, perturbation_type: teleport, perturbation_targets: [X], task_type: predict_delta_expression}
+    expect: {schema_valid: false, error_contains: "unsupported_perturbation_type"}
+  - case_id: validate_missing_species
+    layer: validate
+    description: 缺物种 → missing_fields + clarification
+    input: {perturbation_type: gene, perturbation_targets: [X], task_type: predict_delta_expression}
+    expect: {schema_valid: false, missing_contains: "species"}
+  - case_id: validate_empty_targets
+    layer: validate
+    description: 缺扰动目标 → missing_fields
+    input: {species: human, perturbation_type: gene, perturbation_targets: [], task_type: predict_delta_expression}
+    expect: {schema_valid: false, missing_contains: "perturbation_targets"}
+  - case_id: validate_bad_task
+    layer: validate
+    description: 不支持的任务 → errors
+    input: {species: human, perturbation_type: gene, perturbation_targets: [X], task_type: cure_cancer}
+    expect: {schema_valid: false, error_contains: "unsupported_task"}

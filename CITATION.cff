@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use PRAXIS-VirtualCell, cite the preprint and the exact software release or commit used."
+title: "PRAXIS-VirtualCell"
+type: software
+authors:
+  - family-names: Ma
+    given-names: Zhenyu
+  - family-names: Jiang
+    given-names: Xukai
+version: 1.7.0
+repository-code: "https://github.com/NHNQNHNQ/PRAXIS-Virtualcell"
+url: "https://github.com/NHNQNHNQ/PRAXIS-Virtualcell"
+license: MIT
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Ma
+      given-names: Zhenyu
+    - family-names: Jiang
+      given-names: Xukai
+  title: "PRAXIS-VirtualCell: A Programmable and Trustworthy Framework for Agentic Virtual Cell Experiments"
+  journal: arXiv
+  year: 2026
+  month: 9
+  doi: "10.48550/arXiv.2609.29221"
+  url: "https://arxiv.org/abs/2609.29221v1"
+  identifiers:
+    - type: other
+      value: "arXiv:2609.29221v1"
+      description: "Preprint version 1, submitted 24 September 2026"

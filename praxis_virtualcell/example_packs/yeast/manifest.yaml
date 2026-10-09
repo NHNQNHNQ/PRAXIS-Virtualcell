@@ -1,0 +1,103 @@
+schema_version: vc.pack.v0.2
+pack_id: p10-yeast-tiny
+pack_version: 1.0.0
+taxon:
+  ontology_id: NCBITaxon:4932
+  scientific_name: Saccharomyces cerevisiae
+assembly:
+  name: R64
+  accession: GCF_000146045.2
+identity:
+  observation_key: observation_id
+  feature_key: var_names
+modality:
+  name: scRNA
+  ontology_id: EFO:0008913
+feature_namespace:
+  name: NCBIGene
+  version: GCF_000146045.2
+feature_semantics:
+  id_source: var_names
+  id_format: ncbi_gene_curie
+  symbol_field: feature_symbol
+cell_semantics:
+  identity: cell_identity_id
+  state:
+  - cell_state_id
+  context:
+  - medium_id
+  local_terms:
+  - id: PRAXISCELL:yeast_s288c
+    role: identity
+    label: S. cerevisiae S288C
+    definition: S. cerevisiae S288C identity for this synthetic fixture.
+  - id: VCSTATE:exponential
+    role: state
+    label: exponential
+    definition: Synthetic exponential growth state.
+  - id: VCCONTEXT:toy_ypd
+    role: context
+    label: toy YPD
+    definition: Synthetic medium context; not an experimental recipe.
+conditions:
+  field: condition_id
+  values:
+  - condition:yeast-train-control
+  - condition:yeast-train-perturbed
+  - condition:yeast-test-control
+  - condition:yeast-test-perturbed
+  matched_control_field: matched_control_id
+  dose:
+    value_field: dose_value
+    unit_field: dose_unit
+  time:
+    value_field: time_value
+    unit_field: time_unit
+perturbations:
+  field: perturbation_id
+  values:
+  - id: perturbation:yeast-train-control
+    kind: control
+    targets: []
+  - id: perturbation:GAL4-KO
+    kind: genetic
+    targets:
+    - NCBIGene:855828
+  - id: perturbation:yeast-test-control
+    kind: control
+    targets: []
+  - id: perturbation:GAL80-KO
+    kind: genetic
+    targets:
+    - NCBIGene:854954
+split:
+  name: target-holdout-v1
+  field: split
+  strategy: predefined
+  values:
+  - train
+  - test
+  leakage_guard:
+  - batch_id
+  - condition_id
+  - perturbation_id
+  - target_ids
+provenance:
+  source: synthetic P10 product fixture; no P7 data
+  created_by: PRAXIS-VirtualCell
+  citation: none
+license:
+  id: CC0-1.0
+  name: CC0
+assets:
+- id: expression
+  path: tiny.h5ad
+  media_type: application/vnd.anndata+hdf5
+  sha256: c675ddee3d96aef9000e48ca7480cd0169eb10d3d4eced0fb08891178c7c46fc
+  size_bytes: 43848
+matrix:
+  asset: expression
+  location: X
+  shape:
+  - 4
+  - 2

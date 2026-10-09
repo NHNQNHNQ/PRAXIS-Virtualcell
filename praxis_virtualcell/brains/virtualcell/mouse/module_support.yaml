@@ -1,0 +1,36 @@
+# M1-M8 支持度矩阵(mouse)。跨 human ortholog 迁移,普遍带 caution。
+species: mouse
+modules:
+  membrane_system:
+    support: weak
+    reason: 无膜系统引擎;ortholog 迁移间接
+    tools: [lipid_pathway_rules]
+  genetic_hub:
+    support: medium
+    reason: human predictor 迁移需 ortholog(caution);非原生
+    models: [donor_predictor]
+  mitochondrial_energy_metabolism:
+    support: medium
+    reason: pathway_scoring tendency,ortholog caution
+    models: [pathway_scoring]
+  cytoplasmic_metabolism:
+    support: medium
+    reason: pathway_scoring tendency,ortholog caution
+    models: [pathway_scoring]
+  biosynthetic_network:
+    support: weak
+    reason: 无引擎;ortholog 迁移间接
+    tools: [ribosome_upr_gene_set]
+  cytoskeletal_framework:
+    support: weak
+    reason: 无 morphology model
+    models: [spatial_niche]
+  stress_processor:
+    support: medium
+    reason: state_scoring ortholog 迁移
+    models: [state_scoring]
+  degradation_machinery:
+    support: weak
+    reason: 无降解引擎;基因集规则
+    tools: [proteostasis_gene_set]
+biological_mismatch: []

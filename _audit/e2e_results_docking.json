@@ -1,0 +1,628 @@
+[
+  {
+    "skill": "vina_gnina_dock",
+    "brain": "dock",
+    "verdict": "DONE_real",
+    "evidence": {
+      "execution_plan": {
+        "brain": "dock",
+        "skill": "vina_gnina_dock",
+        "host_env": "praxis-dock",
+        "status": "usable",
+        "skill_md_path": "brains/dock/skills/workflows/vina_gnina_dock/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "receptor_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+          "ligand_smiles": "Cc1ccc(cc1Nc2nccc(n2)c3cccnc3)NC(=O)c4ccc(cc4)CN5CCN(CC5)C",
+          "box_center": [
+            22.5,
+            4.2,
+            17.3
+          ],
+          "box_size": [
+            22,
+            22,
+            22
+          ],
+          "exhaustiveness": 8,
+          "num_modes": 9,
+          "energy_range": 4.0,
+          "redock_self_test": false,
+          "use_gnina": false,
+          "gnina_remote": false,
+          "n_seeds": 1,
+          "seed": 42,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": true,
+        "skill_id": "vina_gnina_dock",
+        "receptor": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+        "ligand": "Cc1ccc(cc1Nc2nccc(n2)c3cccnc3)NC(=O)c4ccc(cc4)CN5CCN(CC5)C",
+        "ligand_sdf_used": "/tmp/vina_gnina_lxijn971/ligand.sdf",
+        "n_poses": 9,
+        "poses": [
+          {
+            "rank": 1,
+            "vina_affinity_kcal_per_mol": 0.0,
+            "gnina_CNN_score": 0.678093493,
+            "gnina_CNN_affinity": 6.2902646065
+          },
+          {
+            "rank": 2,
+            "vina_affinity_kcal_per_mol": 0.0,
+            "gnina_CNN_score": 0.6121498942,
+            "gnina_CNN_affinity": 6.167427063
+          },
+          {
+            "rank": 3,
+            "vina_affinity_kcal_per_mol": 0.0,
+            "gnina_CNN_score": 0.6520889997,
+            "gnina_CNN_affinity": 6.0636954308
+          },
+          {
+            "rank": 4,
+            "vina_affinity_kcal_per_mol": 0.0,
+            "gnina_CNN_score": 0.7226887345,
+            "gnina_CNN_affinity": 6.0625414848
+          },
+          {
+            "rank": 5,
+            "vina_affinity_kcal_per_mol": 0.0,
+            "gnina_CNN_score": 0.6397752762,
+            "gnina_CNN_affinity": 6.049943924
+          },
+          {
+            "rank": 6,
+            "vina_affinity_kcal_per_mol": 0.0,
+            "gnina_CNN_score": 0.6901238561,
+            "gnina_CNN_affinity": 6.0354819298
+          },
+          {
+            "rank": 7,
+            "vina_affinity_kcal_per_mol": 0.0,
+            "gnina_CNN_score": 0.7261279225,
+            "gnina_CNN_affinity": 5.97042799
+          },
+          {
+            "rank": 8,
+            "vina_affinity_kcal_per_mol": 0.0,
+            "gnina_CNN_score": 0.6412811279,
+            "gnina_CNN_affinity": 5.969640255
+          },
+          {
+            "rank": 9,
+            "vina_affinity_kcal_per_mol": 0.0,
+            "gnina_CNN_score": 0.6631536484,
+            "gnina_CNN_affinity": 5.9592456818
+          }
+        ],
+        "best_pose": {
+          "rank": 1,
+          "vina_affinity_kcal_per_mol": 0.0,
+          "gnina_CNN_score": 0.678093493,
+          "gnina_CNN_affinity": 6.2902646065
+        },
+        "vina_best_affinity_kcal_per_mol": 0.0,
+        "redock_self_test": {
+          "performed": false,
+          "note": "本调用未跑;需 redock_self_test=true + crystal_ligand_path"
+        },
+        "wallclock_sec": 20.29,
+        "diagnostics": {
+          "out_dir": "/tmp/vina_gnina_lxijn971",
+          "host": "zkyd",
+          "ligand_sdf_path": "/tmp/vina_gnina_lxijn971/ligand.sdf",
+          "autobox_source": "user_box",
+          "gnina_command": "/home/zkyd/software/miniconda3/envs/praxis-dock/bin/gnina --receptor /home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb --ligand /tmp/vina_gnina_lxijn971/ligand.sdf --center_x 22.5 --center_y 4.2 --center_z 17.3 --size_x 22 --size_y 22 --size_z 22 --num_modes 9 --exhaustiveness 8 --seed 42 -o /tmp/vina_gnina_lxijn971/docked.sdf.gz --cnn_scoring rescore",
+          "gnina_wall_sec": 19.83,
+          "archetype": "docking",
+          "brain": "dock",
+          "skill": "vina_gnina_dock"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "covalent_docking",
+    "brain": "dock",
+    "verdict": "DONE_real",
+    "evidence": {
+      "execution_plan": {
+        "brain": "dock",
+        "skill": "covalent_docking",
+        "host_env": "praxis-dock",
+        "status": "skeleton",
+        "skill_md_path": "brains/dock/skills/workflows/covalent_docking/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "receptor_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+          "ligand_smiles": "C=CC(=O)Nc1ccc(cc1)C(=O)Nc2cccc(c2)C#N",
+          "reactive_residue": "Cys154",
+          "warhead_pattern": "acrylamide",
+          "distance_constraint_A": 2.0,
+          "off_target_cys_panel": false,
+          "docker": "vina_covalent",
+          "simulate": false,
+          "ligand_sdf": "/home/zkyd/data1/praxis2-e2e-inputs/covalent_lig.sdf"
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": true,
+        "skill_id": "covalent_docking",
+        "receptor": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+        "ligand": "/home/zkyd/data1/praxis2-e2e-inputs/covalent_lig.sdf",
+        "best_affinity": 0.0,
+        "poses": [
+          {
+            "rank": 1,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 2,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 3,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 4,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 5,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 6,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 7,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 8,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 9,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 10,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 11,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 12,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 13,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 14,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 15,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 16,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 17,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 18,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 19,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          },
+          {
+            "rank": 20,
+            "affinity_kcal_per_mol": 0.0,
+            "pose_path": "/tmp/cov_dock_htnmkjzw/docked.sdf"
+          }
+        ],
+        "n_covalent_compatible_poses": 0,
+        "runtime_sec": 5.8,
+        "diagnostics": {
+          "brain": "dock",
+          "skill": "covalent_docking",
+          "archetype": "docking",
+          "warhead": "[C:1](=O)",
+          "target_residue": "CYS:145:SG",
+          "distance_cutoff_A": 2.5,
+          "method": "gnina (vina scoring) + warhead-distance post-filter (simplified)",
+          "out_dir": "/tmp/cov_dock_htnmkjzw",
+          "subprocess": {
+            "cmd": "gnina --receptor /home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb --ligand /home/zkyd/data1/praxis2-e2e-inputs/covalent_lig.sdf --autobox_ligand /home/zkyd/data1/praxis2-e2e-inputs/covalent_lig.sdf --exha",
+            "wall_sec": 5.507,
+            "rc": 0
+          },
+          "filter_method": "bio-distance"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "flexpepdock_peptide",
+    "brain": "dock",
+    "verdict": "INCOMPLETE",
+    "evidence": {
+      "execution_plan": {
+        "brain": "dock",
+        "skill": "flexpepdock_peptide",
+        "host_env": "DL-masif",
+        "status": "skeleton",
+        "skill_md_path": "brains/dock/skills/workflows/flexpepdock_peptide/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "receptor_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+          "peptide_sequence": "ACDEFG",
+          "binding_cleft_residues": [
+            250,
+            315,
+            350,
+            380
+          ],
+          "peptide_secondary_structure": "extended",
+          "n_trajectories": 200,
+          "receptor_flex_residues": [
+            250,
+            315,
+            350,
+            380
+          ],
+          "post_dock_md_check": false,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "start_pdb 不存在: None",
+        "diagnostics": {
+          "brain": "dock",
+          "skill": "flexpepdock_peptide",
+          "archetype": "docking",
+          "n_decoys": 50,
+          "peptide_chain": "B",
+          "lowres": false,
+          "out_dir": "/tmp/flexpepdock_ag_zvwv_"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "induced_fit_docking",
+    "brain": "dock",
+    "verdict": "N-A",
+    "evidence": {
+      "execution_plan": {
+        "brain": "dock",
+        "skill": "induced_fit_docking",
+        "host_env": "antibody",
+        "status": "skeleton",
+        "skill_md_path": "brains/dock/skills/workflows/induced_fit_docking/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "receptor_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+          "ligand_smiles": "Cc1ccc(cc1Nc2nccc(n2)c3cccnc3)NC(=O)c4ccc(cc4)CN5CCN(CC5)C",
+          "binding_site_residues_5A": [
+            250,
+            315,
+            350,
+            380,
+            396,
+            402
+          ],
+          "flex_residues": [
+            250,
+            315,
+            350,
+            380
+          ],
+          "n_initial_poses": 20,
+          "max_flex_residues": 6,
+          "tool": "rosetta_ligand",
+          "remote_gpu": false,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "N/A — Schrödinger IFD is commercial/license-blocked (no usable open-source equivalent on host)",
+        "fallback": "pass simulate=true to use synthetic data",
+        "diagnostics": {
+          "brain": "dock",
+          "skill": "induced_fit_docking",
+          "archetype": "docking",
+          "na_reason": "Schrödinger IFD is commercial/license-blocked (no usable open-source equivalent on host)"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "pose_buster_validate",
+    "brain": "dock",
+    "verdict": "DONE_real",
+    "evidence": {
+      "execution_plan": {
+        "brain": "dock",
+        "skill": "pose_buster_validate",
+        "host_env": "praxis-dock",
+        "status": "usable",
+        "skill_md_path": "brains/dock/skills/workflows/pose_buster_validate/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "receptor_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+          "ligand_sdf_or_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/imatinib.sdf",
+          "checks_to_run": [
+            "all"
+          ],
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": true,
+        "skill_id": "pose_buster_validate",
+        "version": "0.6.5",
+        "per_check": {
+          "mol_pred_loaded": true,
+          "mol_cond_loaded": true,
+          "sanitization": true,
+          "inchi_convertible": true,
+          "all_atoms_connected": true,
+          "no_radicals": true,
+          "bond_lengths": true,
+          "bond_angles": true,
+          "internal_steric_clash": true,
+          "aromatic_ring_flatness": true,
+          "non-aromatic_ring_non-flatness": true,
+          "double_bond_flatness": true,
+          "internal_energy": true,
+          "protein-ligand_maximum_distance": false,
+          "minimum_distance_to_protein": true,
+          "minimum_distance_to_organic_cofactors": true,
+          "minimum_distance_to_inorganic_cofactors": true,
+          "minimum_distance_to_waters": true,
+          "volume_overlap_with_protein": true,
+          "volume_overlap_with_organic_cofactors": true,
+          "volume_overlap_with_inorganic_cofactors": true,
+          "volume_overlap_with_waters": true
+        },
+        "n_checks": 22,
+        "n_passed": 21,
+        "failed_checks": [
+          "protein-ligand_maximum_distance"
+        ],
+        "overall_pass": false,
+        "runtime_sec": 2.01,
+        "diagnostics": {
+          "brain": "dock",
+          "skill": "pose_buster_validate",
+          "archetype": "docking",
+          "subprocess": {
+            "cmd": "python3 -c 'import json, sys\nfrom posebusters import PoseBusters\nchecks = ['\"'\"'all'\"'\"']\npb = PoseBusters(config='\"'\"'dock'\"'\"' if checks == ['\"'\"'all'\"'\"'] else checks)\ndf = pb.bust(mol_pred='\"'\"'/home/zkyd/data1/praxis2-e2e-inputs/imatinib.sdf'\"'\"', mol_cond='\"'\"'/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb'\"'\"')\nrow = df.iloc[0].to_dict() if len(df) else {}\nper_check = {k: bool(v) for k, v in row.items() if isinstance(v, (bool,)) or v in (True, False)}\nfailed = [k for k, v in per_check.items() if v is False]\nout = {\n  '\"'\"'per_check'\"'\"': per_check,\n  '\"'\"'n_checks'\"'\"': len(per_check),\n  '\"'\"'n_passed'\"'\"': sum(1 for v in per_check.values() if v),\n  '\"'\"'failed_checks'\"'\"': failed,\n  '\"'\"'overall_pass'\"'\"': len(failed) == 0,\n}\njson.dump(out, sys.stdout)\n'",
+            "wall_sec": 2.008,
+            "rc": 0
+          }
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "protein_na_docking",
+    "brain": "dock",
+    "verdict": "INCOMPLETE",
+    "evidence": {
+      "execution_plan": {
+        "brain": "dock",
+        "skill": "protein_na_docking",
+        "host_env": "praxis-dock",
+        "status": "skeleton",
+        "skill_md_path": "brains/dock/skills/workflows/protein_na_docking/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "protein_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+          "na_3d_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/rna_placeholder.pdb",
+          "na_sequence": "ACGUACGU",
+          "na_strandedness": "ss",
+          "sequence_specificity": "random",
+          "expected_motif_or_PAM": "",
+          "tool": "hdock",
+          "remote_gpu": false,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "需要 input_path(boltz yaml/fasta 含 protein + NA chain)",
+        "hint": "示例 YAML: sequences:[{protein: {id: A, sequence: 'MK...'}}, {dna: {id: B, sequence: 'ATGC...'}}]",
+        "diagnostics": {
+          "brain": "dock",
+          "skill": "protein_na_docking",
+          "archetype": "docking",
+          "predictor": "boltz",
+          "sequence_specificity": "random",
+          "expected_motif_or_PAM": "",
+          "out_dir": "/tmp/boltz_na_y7c7ji0r"
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "redock_benchmark",
+    "brain": "dock",
+    "verdict": "DONE_real",
+    "evidence": {
+      "execution_plan": {
+        "brain": "dock",
+        "skill": "redock_benchmark",
+        "host_env": "praxis-dock",
+        "status": "skeleton",
+        "skill_md_path": "brains/dock/skills/workflows/redock_benchmark/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "receptor_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+          "crystal_complexes": [
+            {
+              "complex_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+              "ligand_chain": "B",
+              "ligand_resname": "STI"
+            }
+          ],
+          "docker": "vina_gnina_dock",
+          "min_top1_le_2A_rate": 0.3,
+          "n_complexes_required": 1,
+          "exhaustiveness": 8,
+          "num_modes": 9,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": true,
+        "skill_id": "redock_benchmark",
+        "passes_threshold": false,
+        "n_complexes_tested": 0,
+        "top1_le_2A_rate": 0.0,
+        "top5_le_2A_rate": 0.0,
+        "top10_le_2A_rate": 0.0,
+        "average_rmsd": 0.0,
+        "per_complex_details": [],
+        "outliers": [
+          {
+            "pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+            "reason": "vina_fail",
+            "stderr": "================\n*** Open Babel Warning  in Init\n  Cannot initialize database 'space-groups.txt' which may cause further errors.\n\n\nUsage error: Unable to read  /tmp/redock_bench_y7chaw3p/1iep_lig.sdf\n"
+          }
+        ],
+        "diagnostics": {
+          "brain": "dock",
+          "skill": "redock_benchmark",
+          "archetype": "docking",
+          "docker": "gnina (vina scoring)",
+          "n_modes": 9,
+          "exhaustiveness": 8,
+          "out_dir": "/tmp/redock_bench_y7chaw3p",
+          "subprocess": {
+            "cmd": "python3 -c 'import json, os, sys, subprocess, tempfile\nfrom pathlib import Path\ntry:\n    from rdkit import Chem\n    from rdkit.Chem import AllChem, rdMolAlign\nexcept Exception as _e:\n    print(json.du",
+            "wall_sec": 2.216,
+            "rc": 0
+          }
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "snugdock_antibody",
+    "brain": "dock",
+    "verdict": "ERROR",
+    "evidence": {
+      "execution_plan": {
+        "brain": "dock",
+        "skill": "snugdock_antibody",
+        "host_env": "DL-masif",
+        "status": "usable",
+        "skill_md_path": "brains/dock/skills/workflows/snugdock_antibody/SKILL.md",
+        "has_run_py": true,
+        "inputs": {
+          "start_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+          "n_decoys": 10,
+          "cdr_h3_length": 12,
+          "simulate": false
+        },
+        "exec_via": "ssh zkyd@10.102.106.53"
+      },
+      "ok": true,
+      "result": {
+        "ok": false,
+        "error": "non-zero exit 1",
+        "stderr": "ck (most recent call last):\n  File \"<string>\", line 4, in <module>\n  File \"/home/zkyd/software/miniconda3/envs/DL-masif/lib/python3.10/site-packages/pyrosetta/__init__.py\", line 197, in init\n    rosetta.protocols.init.init(v)\nRuntimeError: \n\nFile: /home/benchmark/rosetta/source/src/utility/options/OptionCollection.cc:1467\nOption matching -spin_to_z_axis not found in command line top-level context\n",
+        "diagnostics": {
+          "brain": "dock",
+          "skill": "snugdock_antibody",
+          "archetype": "docking",
+          "n_decoys": 10,
+          "cdr_h3_length": 12,
+          "low_conf_flag": false,
+          "out_dir": "/tmp/snugdock_617nsxb5",
+          "subprocess": {
+            "cmd": "python3 -c 'import json, sys, os\nimport pyrosetta\nfrom pyrosetta.rosetta.protocols.antibody.snugdock import SnugDockProtocol\npyrosetta.init('\"'\"'-mute all -ex1 ",
+            "wall_sec": 1.995,
+            "rc": 1
+          }
+        }
+      },
+      "exec_via": "ssh zkyd@10.102.106.53"
+    },
+    "error": null
+  },
+  {
+    "skill": "af3_complex_predict",
+    "brain": "dock",
+    "verdict": "SKIPPED",
+    "evidence": null,
+    "error": null
+  }
+]

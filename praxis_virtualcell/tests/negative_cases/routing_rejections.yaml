@@ -1,0 +1,22 @@
+# route 层:良构但不适用,治理弃权/降级/告警,绝不 accept。期望值均已 grounding。
+cases:
+  - case_id: route_wrong_species_gene_abstain
+    layer: route
+    description: 错物种基因(bacteria + 人类 TP53)→ abstain(治理经路由弃权,不编造)
+    input: {species: bacteria, perturbation_object: gene, target_output: expression, perturbation_targets: [TP53]}
+    expect: {disposition: abstain}
+  - case_id: route_unmappable_drug_caution
+    layer: route
+    description: 无法映射的药名 → embedding/caution(诚实:会试但签名噪声大,非 accept)
+    input: {species: human, perturbation_object: drug, target_output: expression, perturbation_targets: [notarealdrug]}
+    expect: {disposition: caution}
+  - case_id: route_yeast_communication_abstain
+    layer: route
+    description: 酵母细胞通讯无适用引擎 → abstain
+    input: {species: yeast, perturbation_object: ligand, target_output: communication, perturbation_targets: [X]}
+    expect: {disposition: abstain}
+  - case_id: route_yeast_gene_state_abstain
+    layer: route
+    description: 酵母细胞状态无适用引擎 → abstain
+    input: {species: yeast, perturbation_object: gene, target_output: state, perturbation_targets: [YBR166C]}
+    expect: {disposition: abstain}

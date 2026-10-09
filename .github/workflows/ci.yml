@@ -1,27 +1,197 @@
-name: llm-omics-platform
-on: [push, pull_request]
+name: ci
+
+on:
+  push:
+  pull_request:
+
 permissions:
   contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  offline-tools:
+  python-core:
+    name: Python lint and VirtualCell core
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.13.14"
           cache: pip
-      - run: python -m pip install -e '.[dev,api,chemistry,omics]'
-      - run: python -m ruff check praxis2 praxis_virtualcell tests
-      - run: praxis-vc --help
-      - run: >-
-          python -m pytest -q tests/agent_runtime tests/omics tests/llm_prediction tests/test_llm_platform.py
-          tests/mdr_gnb/unit/test_abstain.py
-          tests/mdr_gnb/unit/test_features.py
-          tests/mdr_gnb/unit/test_ensembler.py
-          tests/mdr_gnb/unit/test_critic.py
-          tests/mdr_gnb/unit/test_rule_baseline.py
-          tests/mdr_gnb/unit/test_species_registry.py
-          tests/mdr_gnb/unit/test_report_builder.py
-          tests/mdr_gnb/api/test_schemas.py
+          cache-dependency-path: |
+            pyproject.toml
+            requirements/build-py313.lock
+            requirements/dev-py313.lock
+      - name: Create Python environment
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --only-binary=:all: --require-hashes -r requirements/build-py313.lock
+          .venv/bin/python -m pip install --require-hashes -r requirements/dev-py313.lock
+          .venv/bin/python -m pip install --no-build-isolation --no-deps -e .
+      - name: Ruff
+        run: .venv/bin/ruff check .
+      - name: Check Python dependencies
+        run: .venv/bin/python -m pip check
+      - name: VirtualCell core
+        run: .venv/bin/pytest praxis_virtualcell/tests -m "not llm" -o addopts='' -q -ra
+
+  frontend:
+    name: Frontend build and Playwright
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13.14"
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements/build-py313.lock
+            requirements/dev-py313.lock
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.18.0"
+          cache: npm
+          cache-dependency-path: praxis_vc_react/package-lock.json
+      - name: Install API backend
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --only-binary=:all: --require-hashes -r requirements/build-py313.lock
+          .venv/bin/python -m pip install --require-hashes -r requirements/dev-py313.lock
+          .venv/bin/python -m pip install --no-build-isolation --no-deps -e .
+      - name: Install frontend dependencies
+        working-directory: praxis_vc_react
+        run: npm ci
+      - name: Check Python dependencies
+        run: .venv/bin/python -m pip check
+      - name: Install Chromium
+        working-directory: praxis_vc_react
+        run: npx playwright install --with-deps chromium
+      - name: Typecheck
+        working-directory: praxis_vc_react
+        run: npm run typecheck
+      - name: Lint
+        working-directory: praxis_vc_react
+        run: npm run lint
+      - name: Build
+        working-directory: praxis_vc_react
+        run: npm run build
+      - name: Playwright
+        working-directory: praxis_vc_react
+        run: npm run e2e
+
+  release-wheel:
+    name: Reproducible full release wheel
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PRAXIS_PIP_CACHE_ROOT: /tmp/praxis-release-pip-cache
+      PRAXIS_NPM_CACHE_ROOT: /tmp/praxis-release-npm-cache
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13.14"
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements/build-py313.lock
+            requirements/runtime-py313.lock
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.18.0"
+          cache: npm
+          cache-dependency-path: praxis_vc_react/package-lock.json
+      - name: Prepare hash-locked build wheels and pip cache
+        run: |
+          python -m pip download \
+            --only-binary=:all: \
+            --require-hashes \
+            --requirement requirements/build-py313.lock \
+            --cache-dir "$PRAXIS_PIP_CACHE_ROOT" \
+            --dest "$RUNNER_TEMP/praxis-release-build-wheels"
+      - name: Prepare locked frontend cache
+        working-directory: praxis_vc_react
+        run: npm ci --no-audit --no-fund --cache "$PRAXIS_NPM_CACHE_ROOT"
+      - name: Build full wheel twice
+        env:
+          PYTHON_BIN: python
+          PRAXIS_RELEASE_OFFLINE: "1"
+          PIP_NO_INDEX: "1"
+          PIP_DISABLE_PIP_VERSION_CHECK: "1"
+        run: |
+          scripts/build_release_wheel.sh /tmp/release-one
+          scripts/build_release_wheel.sh /tmp/release-two
+          cmp /tmp/release-one/praxis_virtualcell-*.whl \
+              /tmp/release-two/praxis_virtualcell-*.whl
+      - name: Install locked runtime and wheel
+        run: |
+          python -m venv /tmp/release-venv
+          /tmp/release-venv/bin/python -m pip install --require-hashes -r requirements/runtime-py313.lock
+          /tmp/release-venv/bin/python -m pip install --no-deps \
+            /tmp/release-one/praxis_virtualcell-*.whl
+          /tmp/release-venv/bin/python -m pip check
+      - name: Verify installed CLI, API, web entry and same-origin assets
+        working-directory: /tmp
+        run: /tmp/release-venv/bin/python "$GITHUB_WORKSPACE/scripts/verify_release_install.py"
+
+  release-container:
+    name: Linux release container smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13.14"
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements/build-py313.lock
+            requirements/dev-py313.lock
+      - name: Install locked test environment
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --only-binary=:all: --require-hashes -r requirements/build-py313.lock
+          .venv/bin/python -m pip install --require-hashes -r requirements/dev-py313.lock
+          .venv/bin/python -m pip install --no-build-isolation --no-deps -e .
+          .venv/bin/python -m pip check
+      - name: Build and exercise release image
+        env:
+          PRAXIS_RUN_DOCKER_SMOKE: "1"
+        run: |
+          .venv/bin/python -m pytest \
+            praxis_virtualcell/tests/test_linux_docker_smoke.py \
+            --run-integration -o addopts='' -q -ra
+
+  legacy-unit:
+    name: Legacy unit tests (external suites gated)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13.14"
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements/build-py313.lock
+            requirements/dev-py313.lock
+      - name: Create Python environment
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --only-binary=:all: --require-hashes -r requirements/build-py313.lock
+          .venv/bin/python -m pip install --require-hashes -r requirements/dev-py313.lock
+          .venv/bin/python -m pip install --no-build-isolation --no-deps -e .
+      - name: Check Python dependencies
+        run: .venv/bin/python -m pip check
+      - name: Legacy unit suite
+        run: .venv/bin/pytest tests -m "not (integration or llm or remote)" -o addopts='' -q -ra

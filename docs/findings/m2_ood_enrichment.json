@@ -1,0 +1,24 @@
+{
+  "n": 151,
+  "n_ood": 82,
+  "n_seen": 69,
+  "base_rate_ood": 0.543046357615894,
+  "mean_dp_ood": 0.5136432153025142,
+  "mean_dp_seen": 0.8266377132295987,
+  "n_learned_flagged": 52,
+  "n_rule_flagged": 3,
+  "learned_flagged_ood_frac": 0.9807692307692307,
+  "learned_retained_ood_frac": 0.31313131313131315,
+  "rule_flagged_ood_frac": 0.0,
+  "odds_ratio_learned": 74.66137566137566,
+  "contingency": {
+    "flagged_ood": 51,
+    "flagged_seen": 1,
+    "retained_ood": 31,
+    "retained_seen": 68
+  },
+  "rc_auc_ood_only": 0.5768822159613379,
+  "rc_auc_seen_only": 0.8612230146521479,
+  "reliability_auroc_learned": 0.9068467629250117,
+  "reliability_auroc_ood_only": 0.7877270610153703
+}

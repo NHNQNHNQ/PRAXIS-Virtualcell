@@ -1,0 +1,304 @@
+{
+  "schema_version": "praxis.golden-gears-train-only-validation-protocol.v1",
+  "frozen_on": "2026-08-17",
+  "design_frozen_on": "2026-08-13",
+  "candidate_set_frozen_on": "2026-08-17",
+  "identity": {
+    "payload_hash_algorithm": "sha256(canonical_json(protocol_with_identity.payload_sha256_set_to_null))",
+    "payload_sha256": "8814db3a99702067b7981996c5e61cb97c669d83f2fcbd1269c7de6ed97fdd20",
+    "base_protocol_path": "data/golden/norman_2019/gears_train_only_protocol.json",
+    "base_protocol_payload_sha256": "58285f730f46dc7fe7f5aad752a80cb8d22184171ff9186fd93e4040280388ef",
+    "evaluator_path": "scripts/evaluate_golden_gears_train_only_validation.py",
+    "evaluator_sha256": "e7b5f796b364039782cf462c3e4d14f9aaa323d7080c5e62343f7483ebaada2b"
+  },
+  "implementation_status": "FROZEN_EXECUTABLE",
+  "truth_bundle": {
+    "status": "FROZEN",
+    "preparation_command": "prepare-validation",
+    "preparation_evaluator_sha256": "60cfc2e6a91acb13198ea60bf2757c7cd32f836d742acdc9bc3bfd73d9c24156",
+    "allowed_source_expression_partition": "validation_including_matched_validation_control_only",
+    "test_expression_must_not_be_decoded_or_materialized": true,
+    "files": {
+      "metadata.json": {
+        "size_bytes": 6641,
+        "sha256": "8a66ef1e27783f7fd44e564c14ad8cfe186c190b48071705094982b39c567215"
+      },
+      "truth-delta.npy": {
+        "size_bytes": 1210928,
+        "sha256": "b5a7f4c8b61b0f57b174aaf8441bc16bf12bf4211835a0de4a4c8ad52a422fa4"
+      }
+    }
+  },
+  "candidate_set": {
+    "status": "FROZEN",
+    "profile": "linux_a100_manifest_v1",
+    "required_seed_order": [
+      11,
+      23,
+      37
+    ],
+    "required_epochs": 20,
+    "required_batch_size": 32,
+    "linux_run_manifest": {
+      "path": "data/golden/norman_2019/gears_train_only_linux_a100_run.json",
+      "size_bytes": 5704,
+      "sha256": "acc2a41bd96c197ddb7645f1357804fa21359d8c39a2f56f8e55976dcbb38bea",
+      "payload_sha256": "b73c5fcec272407060aa7548776aeff604f98758855a3e7f2e9524766196fc04",
+      "worker_sha256": "1eb19686f48773ab2a33c04dffef98c662f10ae3194608904fb68bda156c2f8d"
+    },
+    "collection_record": {
+      "size_bytes": 6594,
+      "sha256": "e45020c925e52a674363f928c51667687c29017819634be5a1224d07f703c3f9"
+    },
+    "seeds": [
+      {
+        "seed": 11,
+        "directory": "seed-11",
+        "candidate_record": {
+          "size_bytes": 12010,
+          "sha256": "ef7ef53d6a5e18de6256321e1c0811bd0e1a2d445af04a630426657624d21282"
+        },
+        "model_pt": {
+          "size_bytes": 9260138,
+          "sha256": "1bad083716ee7f1555c728ca1ad67da693ec98aecdc4890641461a91512d09a4"
+        },
+        "tensor_manifest": {
+          "size_bytes": 15052,
+          "sha256": "997de6aea6d7d9b3e8c9a2c35186e307ec13267d750ee66cadd4285f336b9a85"
+        },
+        "safe_config": {
+          "size_bytes": 683,
+          "sha256": "2ee4619366c34fb3b929abf08e73b1072636da396ad94b073c49e0188a7ecf94"
+        },
+        "runtime_graph_manifest": {
+          "size_bytes": 1054,
+          "sha256": "db4415e540550866135798e6d693b88255c98d469055e4f7af4331c9d6610f41"
+        }
+      },
+      {
+        "seed": 23,
+        "directory": "seed-23",
+        "candidate_record": {
+          "size_bytes": 12015,
+          "sha256": "7addf4af08d9b1dfb2a7ec6729ac651a727ba22255c351d67e7ac68eee000d00"
+        },
+        "model_pt": {
+          "size_bytes": 9260138,
+          "sha256": "9cd153efd632cb418001a39cee225f5f3ad741b869b0079090603031f51cfc02"
+        },
+        "tensor_manifest": {
+          "size_bytes": 15052,
+          "sha256": "1816d0d7c0dbbe45ac8d6af0e5775b61f9282eddfa3b93909748cadb24177942"
+        },
+        "safe_config": {
+          "size_bytes": 683,
+          "sha256": "2ee4619366c34fb3b929abf08e73b1072636da396ad94b073c49e0188a7ecf94"
+        },
+        "runtime_graph_manifest": {
+          "size_bytes": 1054,
+          "sha256": "6696b2c4161120196104403292bc96c292f324e30ff1d77e07e11ef3c6b680dd"
+        }
+      },
+      {
+        "seed": 37,
+        "directory": "seed-37",
+        "candidate_record": {
+          "size_bytes": 12010,
+          "sha256": "1f79af134650656e1eef0381d13d3ded012bc8aa204db6e3cd4f757ec8f08db5"
+        },
+        "model_pt": {
+          "size_bytes": 9260138,
+          "sha256": "1182f01b4a80d7d443a3b8e295fb02ac1c9c9157acf7322715028ac9daff5013"
+        },
+        "tensor_manifest": {
+          "size_bytes": 15052,
+          "sha256": "368d7f27a720ae4a7c289b753439c5c9ec5957a2eb0c7a869a8b1184839ae2b5"
+        },
+        "safe_config": {
+          "size_bytes": 683,
+          "sha256": "2ee4619366c34fb3b929abf08e73b1072636da396ad94b073c49e0188a7ecf94"
+        },
+        "runtime_graph_manifest": {
+          "size_bytes": 1054,
+          "sha256": "7780ae93b43570c89ae02dd443bcc5234b1278b8af93d8fabb9c1390c7056adc"
+        }
+      }
+    ]
+  },
+  "inference": {
+    "device": "cpu",
+    "runtime": {
+      "python": "3.11.15",
+      "platform_system": "Linux",
+      "platform_machine": "x86_64",
+      "sysconfig_platform": "linux-x86_64",
+      "packages": {
+        "numpy": "2.4.6",
+        "pandas": "2.3.3",
+        "scipy": "1.17.1",
+        "anndata": "0.12.16",
+        "h5py": "3.16.0",
+        "PyYAML": "6.0.3",
+        "scanpy": "1.11.5",
+        "scikit-learn": "1.9.0",
+        "networkx": "3.6.1",
+        "tqdm": "4.68.2",
+        "torch": "2.6.0",
+        "torch-geometric": "2.8.0",
+        "cell-gears": "0.1.2",
+        "dcor": "0.7"
+      },
+      "gears_source_manifest_sha256": "031e22721292234cae68b841ea65b3d247896f53f585e45baef6222a7b11253a",
+      "torch_runtime_version": "2.6.0+cu124",
+      "torch_cuda_version": "12.4",
+      "cudnn_version": 90100,
+      "nvidia_driver_version": "570.148.08",
+      "logical_device": "cuda:0",
+      "visible_device_count": 1,
+      "gpu_name": "NVIDIA A100-SXM4-40GB",
+      "compute_capability": [8, 0]
+    },
+    "ordered_feature_count": 5045,
+    "rebuild_from_attested_prepare_h5ad_and_frozen_split": true,
+    "config_pickle_must_not_be_deserialized_or_used": true,
+    "model_pt_load": "torch_load_map_location_cpu_weights_only_true_then_strict_state_dict_load",
+    "model_mode": "eval_plus_torch_inference_mode",
+    "query_order": "sorted_unique_canonical_target_symbol_tuples_with_mirrored_raw_labels_reusing_one_prediction",
+    "control_sampling": {
+      "algorithm": "sha256(b'praxis-gears-predict-controls-v1\\0'+str(training_seed).encode('ascii')+b'\\0'+canonical_json(target_symbol_list)); entropy=int.from_bytes(digest[:16],'big',signed=False); numpy.Generator(PCG64(entropy)); integers(0,2059,size=300,endpoint=False,dtype=int64)",
+      "sample_count": 300,
+      "with_replacement": true,
+      "uses_global_rng": false,
+      "uses_gears_prediction_cache": false,
+      "control_source": "2059_native_train_control_observations_in_source_order"
+    },
+    "per_seed_prediction": "GEARS_absolute_expression_float64_mean_over_300_sampled_train_controls_minus_full_native_train_control_mean_float64",
+    "seed_aggregation": "elementwise_arithmetic_mean_in_seed_order_11_23_37_using_float64",
+    "validation_fallback": "forbidden_validation_is_frozen_at_native_scope_coverage_1.0_and_any_unsupported_target_fails_closed",
+    "reduction_dtype": "float64",
+    "hash_array_byte_order": "explicit_big_endian",
+    "reconstructed_graphs": {
+      "G_coexpress": {
+        "shape": [
+          2,
+          6149
+        ],
+        "dtype": ">i8",
+        "sha256": "fe57f176a775a7a4a813ad6c19220bd811e4ee286514a7ae4a2659685e153be1"
+      },
+      "G_coexpress_weight": {
+        "shape": [
+          6149
+        ],
+        "dtype": ">f4",
+        "sha256": "eb30882cf64e129d9551ec6aaf043223179d12a1ebdd72094e08ed12e4b16021"
+      },
+      "G_go": {
+        "shape": [
+          2,
+          202314
+        ],
+        "dtype": ">i8",
+        "sha256": "b5c1a4140bf3d1a4822fafc3b63fb99552220ae0831cc83e87a9a9c194e0c563"
+      },
+      "G_go_weight": {
+        "shape": [
+          202314
+        ],
+        "dtype": ">f4",
+        "sha256": "e669e8ce48f38fbdd7cc82bc9f25f87fd1a7a1f388115010e8df3c7810ff6739"
+      }
+    },
+    "candidate_runtime_graph_manifest": {
+      "schema_version": "praxis.gears-runtime-graph-manifest.v1",
+      "seed": null,
+      "vocabularies": {
+        "gene": {
+          "count": 5045,
+          "canonical_json_sha256": "76ed3a702c1cb54b4c957facdbf9ceb565cdacac1de5dbbd93dd62acd37c013b"
+        },
+        "perturbation": {
+          "count": 9853,
+          "canonical_json_sha256": "aec75533891c4b41b7343b562222615d321c3f8eeda2ec8eeeaa5745f03d63bd"
+        }
+      },
+      "graphs": {
+        "G_go": {
+          "node_vocabulary": "perturbation",
+          "edge_index": {
+            "shape": [2, 202314],
+            "dtype": "torch.int64",
+            "numel": 404628,
+            "sha256": "6a4885fe8a2911b710711d57088dfaf3451848d8136b4e4fc8ee9dd1d30a33a1",
+            "finite": true
+          },
+          "edge_weight": {
+            "shape": [202314],
+            "dtype": "torch.float32",
+            "numel": 202314,
+            "sha256": "9d99cc9e7e2631ee1e968c257d16eb23a97603d507873a13447a3ab7c700271a",
+            "finite": true
+          }
+        },
+        "G_coexpress": {
+          "node_vocabulary": "gene",
+          "edge_index": {
+            "shape": [2, 6149],
+            "dtype": "torch.int64",
+            "numel": 12298,
+            "sha256": "901f62f365b1d47c583458d041901f404d3f062ba50e2c5117c95813494e90fb",
+            "finite": true
+          },
+          "edge_weight": {
+            "shape": [6149],
+            "dtype": "torch.float32",
+            "numel": 6149,
+            "sha256": "d381186ee3fc61d5067bedc95bad536a0a23f4b41fee79ce4ed8bfee1c9e4941",
+            "finite": true
+          }
+        }
+      }
+    },
+    "vocabulary": {
+      "ordered_feature_symbols_sha256": "76ed3a702c1cb54b4c957facdbf9ceb565cdacac1de5dbbd93dd62acd37c013b",
+      "perturbation_vocabulary_sha256": "aec75533891c4b41b7343b562222615d321c3f8eeda2ec8eeeaa5745f03d63bd",
+      "train_control_observation_ids_source_order_sha256": "0752e1781273b317ac9ee7e9face91da0ef78ba181304e4e1ecee8aa4dfd148d",
+      "train_control_mean_sha256": "e46cb1ece11417f0a69d32ea207e346cd96d02eccf46c6aa4f5a9c0e5ed79732",
+      "train_control_count": 2059
+    }
+  },
+  "validation_gate": {
+    "metric": "condition_macro_full_feature_delta_mse",
+    "truth": "validation_condition_mean_X_minus_matched_validation_control_mean_X",
+    "features": 5045,
+    "candidate_mse_must_be_finite": true,
+    "native_scope_coverage": 1.0,
+    "single_condition_macro_mse_strictly_below": 0.0021203121,
+    "combination_condition_macro_mse_strictly_below": 0.0025272989,
+    "thresholds_apply_to": "aggregate_three_seed_prediction",
+    "both_scope_gates_required": true,
+    "test_expression_and_outcome_access_before_gate_passes": false
+  },
+  "execution_boundary": {
+    "evaluator_receives_full_golden_pack": false,
+    "truth_builder_receives_exact_golden_pack_only_before_evaluator_freeze": true,
+    "truth_builder_decodes_test_expression": false,
+    "evaluator_receives_validation_truth_bundle_only": true,
+    "evaluator_receives_attested_train_only_prepare_artifact": true,
+    "network_is_disabled_for_gears_inference_child": true,
+    "filesystem_read_isolation": false,
+    "output_policy": "write_new_atomic_no_replace",
+    "validation_gate_must_pass_before_any_separately_authorized_descriptive_test": true,
+    "test_is_not_implemented_or_executed_by_this_evaluator": true,
+    "registry_or_default_route_changes": false
+  },
+  "claim_ceiling": {
+    "output_schema_version": "praxis.golden-gears-train-only-validation-result.v1",
+    "record_role": "golden_validation_gate_result_not_test_not_scientific_promotion",
+    "benchmark_status": "NOT_RUN",
+    "benchmark_passed": null,
+    "scientifically_validated": false,
+    "promotion_eligible": false,
+    "production_promoted": false
+  }
+}

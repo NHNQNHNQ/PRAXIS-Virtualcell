@@ -1,0 +1,40 @@
+{
+  "admet_multi": {
+    "brain": "drug",
+    "contract_keys": ["n_compounds", "admet_csv", "per_compound_summary"],
+    "inputs": {
+      "smiles_list": [
+        "CC(=O)Oc1ccccc1C(=O)O",
+        "Cc1ccc(cc1Nc2nccc(n2)c3cccnc3)NC(=O)c4ccc(cc4)CN5CCN(CC5)C"
+      ],
+      "simulate": false
+    },
+    "skip": false
+  },
+  "fep_relative_affinity": {
+    "brain": "drug",
+    "contract_keys": ["delta_g_kcal", "uncertainty", "convergence_pass"],
+    "_note": "需要 protein_pdb + ligand_sdf_a + ligand_sdf_b 三个文件路径；openfe RBFE 需 GPU + 数小时跑 MD；预期 INCOMPLETE(文件不在 staging)或 RED(GPU 不可用/openfe 未装)。",
+    "inputs": {
+      "protein_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+      "ligand_sdf_a": "/home/zkyd/data1/praxis2-e2e-inputs/imatinib.sdf",
+      "ligand_sdf_b": "/home/zkyd/data1/praxis2-e2e-inputs/imatinib.sdf",
+      "n_replicates": 1,
+      "timeout_s": 7200,
+      "simulate": false
+    },
+    "skip": false
+  },
+  "protac_ternary": {
+    "brain": "drug",
+    "contract_keys": ["ok", "error", "fallback"],
+    "_note": "real() 硬返回 ok=false + N/A error；host 无 PRosettaC/DEL/商业工具。harness 应判 RED(非零返回含 ok=false)。best-effort 给最小 PROTAC SMILES 输入，但 real() 不使用任何输入字段直接报 N/A。",
+    "inputs": {
+      "protac_smiles": "O=C(CCCN1CC(=O)N2CCCC2C1=O)Nc1ccc(cc1)N1CCN(CC1)c1ccc(NC(=O)c2ccc(CN3CCN(CC3)C)cc2)cc1",
+      "poi_pdb": "/home/zkyd/data1/praxis2-e2e-inputs/1iep.pdb",
+      "e3_ligase": "CRBN",
+      "simulate": false
+    },
+    "skip": false
+  }
+}

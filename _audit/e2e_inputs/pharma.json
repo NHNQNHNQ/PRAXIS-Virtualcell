@@ -1,0 +1,26 @@
+{
+  "allometric_scale": {
+    "brain": "pharma",
+    "contract_keys": ["human_dose_mg_per_kg", "scaling_factor"],
+    "inputs": {"animal_dose_mg_per_kg": 10.0, "animal_weight_kg": 0.25, "human_weight_kg": 70.0, "exponent": 0.67, "seed": 42, "simulate": false},
+    "skip": false
+  },
+  "pbpk_simulate": {
+    "brain": "pharma",
+    "contract_keys": ["cmax_mg_per_l", "tmax_h"],
+    "inputs": {"dose_mg": 100.0, "cl_l_per_h": 5.0, "ka_per_h": 1.0, "q_l_per_h": 15.0, "t_end_h": 24.0, "seed": 42, "simulate": false},
+    "skip": false
+  },
+  "pkpd_emax": {
+    "brain": "pharma",
+    "contract_keys": ["admet_csv", "n_compounds"],
+    "inputs": {"concentrations": [0.1, 0.3, 1.0, 3.0, 10.0, 30.0], "effects": [5.0, 12.0, 28.0, 55.0, 80.0, 95.0], "seed": 42, "simulate": false},
+    "skip": false
+  },
+  "ppb_assess": {
+    "brain": "pharma",
+    "contract_keys": ["admet_csv", "n_compounds"],
+    "inputs": {"smiles": "CC(=O)Oc1ccccc1C(=O)O", "logp": 1.2, "seed": 42, "simulate": false},
+    "skip": false
+  }
+}

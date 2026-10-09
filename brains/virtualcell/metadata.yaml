@@ -1,12 +1,13 @@
-short_prompt: "加载具体菌株组学，由 LLM 直接预测候选药效，并给出可追溯的靶点和机制假说。"
-methods:
-  - "核对菌株、参考基因组、样本条件和组学尺度"
-  - "查询实际基因数值与注释，按来源校验事实引用"
-  - "直接输出 LLM 预测，明确反证、缺口和未校准的不确定性"
+# virtualcell brain — 虚拟细胞多物种多任务预测。
+# helps_with=场景痛点 · delivers=交付物 · examples=试试这样问。
 helps_with:
-  - "菌株组学条件下的候选分子活性与 MIC 估计"
-  - "潜在靶点与机制假说的支持和反对证据整理"
+  - "想预测基因扰动/敲除后单细胞转录组怎么变(Norman / Replogle 类)"
+  - "想比较多个 perturbation predictor 并要可靠性(abstain)判断"
+  - "想把哺乳动物的方法迁到细菌/酵母,但担心跨物种误迁移"
 delivers:
-  - "包含输入身份、结构、预测、来源与执行记录的报告"
+  - "Coordinator 编排的 perturbation 预测 + 不确定性 + abstain 决策"
+  - "跨物种适用性 / 负迁移告警(species-aware,Week 5 起)"
+  - "公开 benchmark 同表对比(Norman / Replogle / Sciplex / E.coli / yeast)"
 examples:
-  - "加载 AB5075-AZI000 并分析候选 SMILES 的抗菌活性。"
+  - "Norman 双基因扰动,Coordinator+abstain 给可靠预测"
+  - "这个 predictor 能用在 E. coli 上吗?"

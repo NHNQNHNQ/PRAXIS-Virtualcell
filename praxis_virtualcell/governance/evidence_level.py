@@ -9,12 +9,7 @@ runtime OOD 真实情况(实读 reliability.py:136):seen_in_train 多为 None �
 """
 from __future__ import annotations
 
-# Retained compatibility mapping for MDR reports; independent of the archived
-# expression ReliabilityAgent. These reason values keep the original mapping.
-_HARD_ABSTAIN = {
-    'no_perturbation_specified', 'core_predictor_failed',
-    'species_not_supported', 'all_predictors_rejected', 'no_successful_predictor',
-}
+from praxis_virtualcell.agents.reliability import _HARD_ABSTAIN
 
 # 硬拒 abstain 原因(→ E0):单一真相源 = reliability._HARD_ABSTAIN
 # (含 core_predictor_failed;复用消除两处常量漂移,新增硬拒原因只须改 reliability 一处)。

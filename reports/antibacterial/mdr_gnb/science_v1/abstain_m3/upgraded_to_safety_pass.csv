@@ -1,8 +1,0 @@
-species,drug,coverage_at_pass,vme_covered,vme_rule,me_covered
-escherichia_coli,aztreonam,0.9,0.0076,0.0376,0.0795
-escherichia_coli,chloramphenicol,0.9,0.0091,0.0226,0.0217
-escherichia_coli,meropenem,0.8,0.0923,0.1739,0.0239
-klebsiella_pneumoniae,tetracycline,0.9,0.1508,0.2103,0.0738
-pseudomonas_aeruginosa,cefepime,0.9,0.5644,0.6263,0.0766
-salmonella_enterica,ceftriaxone,0.8,0.0323,0.0369,0.0492
-salmonella_enterica,tetracycline,0.9,0.0138,0.0157,0.0493

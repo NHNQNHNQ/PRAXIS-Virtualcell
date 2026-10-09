@@ -60,8 +60,6 @@ def validate_pack(pack_root: str | Path) -> PackManifest:
     except (PackAssetMissing, PackPathError) as exc:
         raise PackManifestError(f"Pack manifest must remain inside Pack root: {exc}") from exc
     manifest = load_manifest(manifest_path)
-    if manifest.schema_version == "vc.pack.v0.4":
-        raise PackManifestError("selected-content v0.4 is not supported by standalone omics loaders")
     for asset in manifest.assets:
         path = resolve_asset_path(root, asset.path)
         actual_size = path.stat().st_size
@@ -74,4 +72,9 @@ def validate_pack(pack_root: str | Path) -> PackManifest:
             raise PackAssetHashMismatch(
                 f"asset hash mismatch for {asset.id}: expected {asset.sha256}, got {actual_hash}"
             )
+    if manifest.schema_version == "vc.pack.v0.4":
+        # Keep the public validator and PackRegistry admission gate equivalent.
+        from praxis_virtualcell.data_packs.selected_content import validate_selected_content_pack
+
+        validate_selected_content_pack(root=root, manifest=manifest)
     return manifest

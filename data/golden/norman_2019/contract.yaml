@@ -1,0 +1,128 @@
+schema_version: vc.golden-norman.v1
+benchmark_id: norman-2019-k562-golden
+pack_version: 1.0.0
+source:
+  dataset_doi: https://doi.org/10.7910/DVN/Q2ZV3E
+  datafile_id: 6881912
+  archive:
+    filename: NormanWeissman2019_filtered.h5ad.zip
+    size_bytes: 166988031
+    sha256: 64af382a6af9d129042577a651691d0bdbbdeef2ad973bef77f012b4b209c41f
+  h5ad:
+    filename: Norman2019_simulation_cpa.h5ad
+    size_bytes: 2235954082
+    sha256: de50bb456ea344ae934878def8339e8b7050baf934a69bda2c7196bcb3a0e6cd
+    shape: [91205, 5045]
+    observation_ids_sha256: 16fd22f3aebd3929c644c56bc55977ca63318237381008437787bf1fdb390b1c
+    feature_ids_sha256: ecca6c636629e35ae5f5a0ec6fe84c1a7983e1adb263fbbcaea70a0c5495b2b7
+    feature_symbols_sha256: 76ed3a702c1cb54b4c957facdbf9ceb565cdacac1de5dbbd93dd62acd37c013b
+    feature_records_sha256: 1cc8b612bef0a0d7daac01bb8cc509346a4a32850f93298f29865bb2328d9747
+    condition_by_observation_sha256: e69d8b83e3f69a628c545b3c44f6ad694d8406619451f1db1b6489be33fc9e21
+    split_by_observation_sha256: 80b411f1e444ba0be81f03c3d6ac2eda760a408ca52cd44a779ee2aa098c5464
+    guide_by_observation_sha256: dcd1f628a3e3745c205451f284fa47379ef52367bf2d9afc8778e87e88c819e3
+    matrix:
+      X:
+        format: csr
+        dtype: float32
+        data_sha256: 0ad12508372b3cbec6393aaec9ac580344fa8b3b066cbabfbfb604873f13ff07
+        indices_sha256: fc30c3dda2f94cba9ce5652623c8086f6286406747d35f1964f9f0d0f4e069a4
+        indptr_sha256: 34f268242045b4372f2c87b29bd37cc0b44dba4b4576b92297c201e44dc2e98f
+      counts:
+        location: layers/counts
+        format: dense
+        dtype: float32
+        data_sha256: ba58d2f625ad2ad186ab470f3aa800413628f5df5c2938b5df6c673f74cbd5ad
+  fields:
+    condition: condition
+    split: split1
+    guide: guide_identity
+    source_cell_type: cell_type
+    feature_symbol: gene_name
+    counts_layer: counts
+biology:
+  taxon:
+    ontology_id: NCBITaxon:9606
+    scientific_name: Homo sapiens
+  assembly:
+    name: GRCh38
+    accession: GCA_000001405.15
+  feature_namespace:
+    name: EnsemblGene
+    version: Ensembl 84
+  cell_identity_id: CVCL_0004
+  source_cell_type_value: A549
+  source_cell_type_interpretation: upstream_metadata_error_preserved
+  state_id: VCSTATE:unspecified
+  context_id: VCCONTEXT:in_vitro
+  dose:
+    control: 0.0
+    perturbation: 1.0
+    unit: "1"
+  time:
+    value: 5.0
+    unit: d
+  perturbation_action: CRISPR activation
+split:
+  name: norman-condition-holdout-v1
+  source_mapping:
+    train: train
+    test: validation
+    ood: test
+  source_control_condition: ctrl
+  control_guides:
+    train: NegCtrl0_NegCtrl0__NegCtrl0_NegCtrl0
+    validation: NegCtrl10_NegCtrl0__NegCtrl10_NegCtrl0
+    test: NegCtrl11_NegCtrl0__NegCtrl11_NegCtrl0
+  control_condition_ids:
+    train: norman.control.train
+    validation: norman.control.validation
+    test: norman.control.test
+  condition_delimiter: +
+  ignored_control_target: ctrl
+  leakage_guard: [condition_id]
+expected:
+  golden_split_by_observation_sha256: c501e8a05514b914b216ddb2dbe0a94e709fa7a1e2214d727b831102503f956e
+  condition_id_by_observation_sha256: 6f41dd46159a926ad476152d20c2f82e5def422f16a8213b0918af48594cabb3
+  matched_control_by_observation_sha256: 2fc6ba835e3a9353345651b9369abdd189c6017a854932c038b157faa4b378ae
+  perturbation_id_by_observation_sha256: e69d8b83e3f69a628c545b3c44f6ad694d8406619451f1db1b6489be33fc9e21
+  condition_values_sha256: 7f3e175c495bc9499d852965869bafc23249948e0be5c87eb89e5d01befc44c9
+  perturbation_records_sha256: 0a43f9c57560f7192c0a848cb1ec044a9bf2bfdbc20d6405f98d73b3ca04d1e9
+  target_ids_sha256: 4f58ed5c3ad7355ccba64eed0dd95e02cbcbf75a977d6aec2a1cfd5357abd64c
+  control_assignment_sha256: 8f09650026e297ce0e010120814230bc7de306364ab49316b7c102e836c6e3d5
+  unseen_train_target_ids_sha256: 3bec2a15f4c5965dd32112c3508e4b70ead1724f308d597ab61e9b6210587de3
+  rows_by_split:
+    train: 45989
+    validation: 10944
+    test: 34272
+  controls_by_split:
+    train: 2059
+    validation: 2920
+    test: 2374
+  noncontrol_conditions_by_split:
+    train: 137
+    validation: 30
+    test: 116
+metric:
+  name: condition_macro_full_feature_delta_mse
+  direction: lower_is_better
+  features: all_ordered_pack_features
+  truth: condition_mean_X_minus_matched_split_control_mean_X
+  bootstrap:
+    unit: held_out_perturbation_condition
+    method: paired_percentile
+    rng: numpy.PCG64
+    seed: 0
+    replicates: 2000
+    interval: [0.025, 0.975]
+baselines:
+  no_change:
+    definition: delta equals zero
+    model_name: norman_no_change
+  global_mean:
+    definition: equal mean of train condition deltas
+    model_name: norman_global_mean
+  additive_linear:
+    definition: condition-level additive ridge
+    model_name: norman_additive_linear
+    alpha: 1.0
+    intercept: unpenalized
