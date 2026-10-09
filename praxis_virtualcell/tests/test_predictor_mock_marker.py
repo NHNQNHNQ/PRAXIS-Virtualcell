@@ -1,10 +1,4 @@
-"""Unit 4 契约:mock 标记归属正确性。
-
-- 真预测器(run_prediction 不返回 evidence/provenance)经 handle → evidence==[] 且 provenance 无 "mock" 键
-  (证:mock 标记不再由基类硬编码误标真预测器)。
-- mock 预测器(自声明 evidence/provenance)经 handle → evidence 含 "mock"、provenance["mock"] is True
-  (证:mock 自声明生效,OFFLINE mock 标记保留)。
-"""
+"""Tests for predictor mock marker."""
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.predictors.base import PredictorAgent
@@ -31,8 +25,7 @@ def _payload(model_name):
 
 
 class _RealPredictor(PredictorAgent):
-    """最小真预测器:run_prediction 只返回 prediction/uncertainty(不自声明 mock),
-    与 MLBackedPredictorAgent / ModelWrapper 真跑返回同形。"""
+    """Test fixture: _RealPredictor."""
     name = "RealPredictor"
 
     def run_prediction(self, model_input: dict) -> dict:
@@ -40,7 +33,7 @@ class _RealPredictor(PredictorAgent):
 
 
 def test_real_predictor_not_flagged_mock():
-    """真预测器 success 结果不被误标 mock:evidence 空、provenance 无 mock 键。"""
+    """Verify real predictor not flagged mock."""
     bus = _bus_with_brain()
     _RealPredictor().handle(
         AgentMessage("m1", "X", "RealPredictor", "predict", _payload("RealPredictor"), "t1"), bus)
@@ -51,7 +44,7 @@ def test_real_predictor_not_flagged_mock():
 
 
 def test_mock_predictor_self_declares_mock():
-    """mock 预测器 success 结果保留 mock 标记(自声明):evidence 含 mock、provenance["mock"] is True。"""
+    """Verify mock predictor self declares mock."""
     bus = _bus_with_brain()
     MockGEARSAgent().handle(
         AgentMessage("m1", "X", "MockGEARS", "predict", _payload("MockGEARS"), "t1"), bus)

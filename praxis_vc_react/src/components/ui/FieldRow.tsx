@@ -1,9 +1,6 @@
 import type { ReactNode } from "react";
 import StatusPill, { type FieldStatus } from "./StatusPill";
 
-// Review 表单行(spec §2):左侧标签 + 可选状态点,右侧值或输入控件(children)。
-// status 复用 StatusPill 的字段状态集;省略则不显状态点。
-// 纯展示原子(布局壳),无副作用;实际输入控件由调用方作为 children 传入。
 
 export type FieldRowProps = {
   label: ReactNode;

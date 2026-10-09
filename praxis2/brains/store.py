@@ -1,9 +1,4 @@
-"""brains 经 store 抽象(scope=brain:<slug>,总纲 §7.4.2/§11.6)。
-对齐 M4 memory/review.py approve 已写的 Namespace(user_id, scope=
-f"brain:{brain_slug}") 前置接口——M5 让它成真实大脑落点。
 
-强制 user_id 命名空间(§11.6):brain_ns 直接构造 Namespace,空 user_id
-由 Namespace.__post_init__ 抛 ValueError。"""
 
 import json
 from dataclasses import dataclass
@@ -15,10 +10,10 @@ _INDEX_TABLE = "_brain_index"
 
 @dataclass
 class BrainDoc:
-    slug: str          # _common | general | <13 学科>
+    slug: str
     kind: str          # cases | neg_cases | rules | skills
-    stem: str          # 文件 stem(合并按 stem 覆盖,v1 §2.1)
-    text: str          # 正文(skills 类为目录名/SKILL.md 摘要)
+    stem: str
+    text: str
 
 
 def brain_ns(user_id: str, slug: str) -> Namespace:

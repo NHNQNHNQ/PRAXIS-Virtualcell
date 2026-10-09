@@ -1,13 +1,8 @@
-"""M2.1 投稿前补强 L2:OOD enrichment / OOD-only risk-coverage(纯 Python,Mac 可跑)。
-
-回答"learned abstain 是否偏好弃权 OOD(未见)扰动",并区分 learned 是否只是 OOD 标签的代理。
-- OOD 标签来自 ledger `seen_in_train`(推理期 OOD flag,**特征非 label**;82/151 未见,与 v0.2 表 C split 一致)。
-- 复用 `bootstrap_ci._prepare`(固定 OOF 预测 + frozen learned/rule 软风险 flag)、`abstain_head` risk-coverage。
-- odds ratio 用 Haldane–Anscombe(+0.5)校正,避免除零。
-
-诚实:learned 模型显式含 `seen_in_train` 特征,故 enrichment 部分由该特征驱动;但 learned bad-pert AUROC 0.907
-> ood-only 0.788(reliability_model),且 OOD-only 子集内仍有 risk-coverage 选择性 ⇒ learned **超越** OOD 标签本身。
-pert-level(≠per-cell);runtime `seen_in_train` 多 None(此分析在 ledger 上 flag 齐全)。
+"""Perturbation-level OOD enrichment and OOD-only/seen-only risk-coverage analysis. seen_in_train is an inference
+feature; 82/151 ledger perturbations are unseen. Reuse fixed OOF scores and frozen soft-risk flags; apply
+Haldane–Anscombe +0.5 correction to odds ratios. The learned model includes this OOD feature, so enrichment is
+partly feature-driven; historical AUROC 0.907 vs OOD-only 0.788 is ledger-specific. Runtime missing values
+remain unknown.
 """
 from __future__ import annotations
 
@@ -23,12 +18,12 @@ def _isnan(x):
 
 
 def _get(e, k):
-    """兼容 dict 与 LedgerEntry(dataclass)。"""
+    """Read either a dictionary or LedgerEntry dataclass."""
     return e.get(k) if isinstance(e, dict) else getattr(e, k, None)
 
 
 def ood_labels(entries):
-    """True = OOD(unseen);False = seen;None = unknown。seen_in_train: True/1=seen → 非OOD。"""
+    """Return True for unseen/OOD, False for seen, and None for unknown; seen_in_train=True/1 means in-domain."""
     out = []
     for e in entries:
         s = _get(e, "seen_in_train")
@@ -54,7 +49,7 @@ def _mean_dp(idx, y):
 
 
 def evaluate_ood(entries):
-    """OOD enrichment + OOD-only/seen-only risk-coverage。返回全部诊断标量。"""
+    """Compute OOD enrichment and OOD-only/seen-only risk-coverage diagnostics."""
     oof, y, dis, rule_flag, learned_flag = bc._prepare(entries)
     ood = ood_labels(entries)
     valid = [i for i in range(len(entries)) if ood[i] is not None]
@@ -63,20 +58,20 @@ def evaluate_ood(entries):
     n_seen = n - n_ood
     base = n_ood / n if n else _NAN
 
-    # 2x2 列联表(learned flagged=abstain/downgrade vs retained) × (OOD vs seen)
+
     a = sum(1 for i in valid if learned_flag[i] and ood[i])          # flagged & OOD
     b = sum(1 for i in valid if learned_flag[i] and not ood[i])      # flagged & seen
     c = sum(1 for i in valid if (not learned_flag[i]) and ood[i])    # retained & OOD
     d = sum(1 for i in valid if (not learned_flag[i]) and not ood[i])  # retained & seen
     odds_ratio = ((a + 0.5) * (d + 0.5)) / ((b + 0.5) * (c + 0.5))   # Haldane–Anscombe
 
-    # 子集 risk-coverage(learned 排序 = oof 预测 dp 高=保留)
+
     ood_idx = [i for i in valid if ood[i]]
     seen_idx = [i for i in valid if not ood[i]]
     rc_ood = ah.rc_auc(ah.risk_coverage([oof[i] for i in ood_idx], [y[i] for i in ood_idx]))
     rc_seen = ah.rc_auc(ah.risk_coverage([oof[i] for i in seen_idx], [y[i] for i in seen_idx]))
 
-    rel = rm.evaluate(entries)  # 支撑"learned 不只是 OOD 标签":learned AUROC > ood-only AUROC
+    rel = rm.evaluate(entries)
 
     return {
         "n": n,

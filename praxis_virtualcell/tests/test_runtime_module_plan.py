@@ -1,6 +1,4 @@
-"""Phase 4:接管线 —— module_plan 旁路挂进 report.provenance。
-铁律:OFFLINE 产确定性 module_plan(零 LLM),核心 prediction/reliability 字段与接管线前等价;
-LLM_ORCHESTRATED 无 key → 回退等价 OFFLINE(红线 1)。"""
+"""Tests for runtime module plan."""
 from praxis_virtualcell.core.config import Mode, RuntimeConfig
 from praxis_virtualcell.core.request import VirtualCellRequest
 from praxis_virtualcell.workflows.predict_delta_expression import build_runtime
@@ -23,34 +21,34 @@ def test_offline_report_has_module_plan_in_provenance():
 
 
 def test_offline_module_plan_is_deterministic_zero_llm():
-    """OFFLINE 的 module_plan notes 不含 llm_* 标记(零 LLM)。"""
+    """Verify offline module plan is deterministic zero llm."""
     rep = _run(RuntimeConfig(mode=Mode.OFFLINE))
     notes = rep["provenance"]["module_plan"]["notes"]
     assert not any("llm_" in n for n in notes)
 
 
 def test_offline_core_prediction_unchanged_by_module_plan():
-    """接 module_plan 不改核心 prediction/reliability(旁路挂载,红线:不改现有逻辑)。"""
+    """Verify offline core prediction unchanged by module plan."""
     rep = _run(RuntimeConfig(mode=Mode.OFFLINE))
-    # 核心字段仍在(module_plan 是旁路,不动主报告)
+
     for k in ("abstain", "reliability", "models_used", "models_rejected"):
         assert k in rep
 
 
 def test_orchestrated_without_key_equals_offline_module_plan():
-    """红线 1:LLM_ORCHESTRATED 无 key → LLM 节点不注册 → module_plan 与 OFFLINE 等价。"""
+    """Verify orchestrated without key equals offline module plan."""
     off = _run(RuntimeConfig(mode=Mode.OFFLINE))
     orch = _run(RuntimeConfig(mode=Mode.LLM_ORCHESTRATED, deepseek_api_key=""))
     assert off["provenance"]["module_plan"]["primary"] == \
         orch["provenance"]["module_plan"]["primary"]
     assert off["provenance"]["module_plan"]["secondary"] == \
         orch["provenance"]["module_plan"]["secondary"]
-    # 核心预测也等价
+
     for k in ("abstain", "prediction", "reliability"):
         assert off[k] == orch[k]
 
 
 def test_orchestrated_without_key_no_llm_cross_module_notes():
-    """无 key → 不注册 reasoner → 无 llm_cross_module_notes(不静默假装有)。"""
+    """Verify orchestrated without key no llm cross module notes."""
     orch = _run(RuntimeConfig(mode=Mode.LLM_ORCHESTRATED, deepseek_api_key=""))
     assert "llm_cross_module_notes" not in orch.get("provenance", {})

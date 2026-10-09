@@ -1,4 +1,3 @@
-/* 样式聚合入口。产品固定白色主题，不再加载用户可切换的暗色覆盖。 */
 @import "./fonts.css";
 @import "./tokens.css";
 @import "./base.css";

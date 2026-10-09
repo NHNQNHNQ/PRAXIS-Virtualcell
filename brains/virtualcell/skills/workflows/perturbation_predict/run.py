@@ -1,8 +1,3 @@
-"""perturbation_predict skill runner(stdin JSON → stdout JSON)。
-
-bootstrap 占位:真实预测逻辑随 Week 3/4 接入 Coordinator + PredictorRegistry。
-契约:从 stdin 读 inputs JSON,向 stdout 写单行 result JSON。
-"""
 from __future__ import annotations
 
 import json

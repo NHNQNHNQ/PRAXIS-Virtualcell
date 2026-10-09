@@ -1,6 +1,4 @@
-"""Phase 7 完成闸门:norman_mean_baseline 的 training_card/provenance 跨源一致(防双真相源)+
-red-line 纵深(自训 fail-closed / 零 LLM)。registry.yaml ↔ SelfTrainedWrapper ↔ SelfTrainingSpec
-的锚点数字/module/species 必须对齐;漂移 → FAIL。"""
+"""Tests for provenance consistency."""
 import pytest
 
 from praxis_virtualcell.model_zoo.registry import ModelZooRegistry
@@ -9,7 +7,7 @@ from praxis_virtualcell.model_zoo.wrappers.self_trained_wrapper import SelfTrain
 
 
 def test_registry_wrapper_metric_anchor_aligned():
-    """registry.yaml 的 delta_pearson 与 SelfTrainedWrapper.declare_provenance 的必须一致(单一真相源)。"""
+    """Verify registry wrapper metric anchor aligned."""
     reg_metrics = ModelZooRegistry().get("norman_mean_baseline")["training_card"]["metrics"]
     wrap_metrics = SelfTrainedWrapper().declare_provenance()["metrics"]
     assert reg_metrics["delta_pearson"] == pytest.approx(wrap_metrics["delta_pearson"], abs=1e-6)
@@ -17,7 +15,7 @@ def test_registry_wrapper_metric_anchor_aligned():
 
 
 def test_registry_wrapper_module_species_aligned():
-    """registry module/species 与 wrapper declare_scope 对齐(防 scope 漂移)。"""
+    """Verify registry wrapper module species aligned."""
     e = ModelZooRegistry().get("norman_mean_baseline")
     scope = SelfTrainedWrapper().declare_scope()
     assert e["module"] == scope["module"]
@@ -26,7 +24,7 @@ def test_registry_wrapper_module_species_aligned():
 
 
 def test_spec_to_card_matches_registry():
-    """SelfTrainingSpec.to_training_card() 与 registry.yaml training_card 五键一致(spec 是派生源)。"""
+    """Verify spec to card matches registry."""
     reg_card = ModelZooRegistry().get("norman_mean_baseline")["training_card"]
     spec = SelfTrainingSpec(
         name="norman_mean_baseline",
@@ -41,7 +39,7 @@ def test_spec_to_card_matches_registry():
 
 
 def test_wrapper_provenance_honest_flags():
-    """诚实标注:naive 下界 baseline flag 为 True + distributable False(缺 torch fail-closed)。"""
+    """Verify wrapper provenance honest flags."""
     prov = SelfTrainedWrapper().declare_provenance()
     assert prov["is_naive_lower_bound_baseline"] is True
     assert prov["distributable"] is False

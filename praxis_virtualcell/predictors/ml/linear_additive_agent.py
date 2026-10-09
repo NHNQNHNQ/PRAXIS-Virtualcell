@@ -1,18 +1,19 @@
-"""把 donor LinearAdditivePredictor 包成 praxis predictor-agent(rich↔torch 适配)。
-
-predict_tensor:给 control + pert_emb,经 donor Context/Perturbation 调 donor.predict,返回 mean。
-(bus 级 PredictorAgent 集成在 Coordinator 迁移时接;本期只证预测等价 + 可在 EvalAgent 复用。)
-仅远端 virtualcell 环境 import。
+"""Wrap donor LinearAdditivePredictor for tensor prediction. Build donor Context/Perturbation from control and
+pert_emb, call donor.predict, and return mean. Retained for prediction equivalence and EvalAgent reuse; requires
+donor dependencies.
 """
 from __future__ import annotations
 
+import os
 import sys
 
-import torch
-
-_DONOR = "/home/zkyd/data1/mzy/Virtual cell"
+_DONOR = os.environ.get("PRAXIS_DONOR_SOURCE_ROOT", "").strip()
+if not _DONOR:
+    raise RuntimeError("Set PRAXIS_DONOR_SOURCE_ROOT to the external donor source checkout")
 if _DONOR not in sys.path:
     sys.path.insert(0, _DONOR)
+
+import torch  # noqa: E402
 
 
 class LinearAdditivePredictorAgent:
@@ -30,5 +31,5 @@ class LinearAdditivePredictorAgent:
         return self.model.predict(ctx, pert).mean
 
     def as_donor_predictor(self):
-        """返回底层 donor Predictor,供 EvalAgent.evaluate 复用(Task 5)。"""
+        """Return the underlying donor predictor for EvalAgent evaluation."""
         return self.model

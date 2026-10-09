@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use PRAXIS-VirtualCell, cite the preprint and the exact software release or commit used."
+message: "Please cite the preprint and record the exact software release or commit used."
 title: "PRAXIS-VirtualCell"
 type: software
 authors:

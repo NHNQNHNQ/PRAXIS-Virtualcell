@@ -1,12 +1,6 @@
-"""W5.1(v0.4,Phase II):微生物 培养基/碳源切换 → growth case(环境扰动)。
-
-复用 E. coli GEM(e_coli_core),把默认葡萄糖最小培养基换成其它单一碳源(乙酸/琥珀酸/…),
-FBA 算生长 → 证明 agent 能处理 **gene 以外的环境扰动**(medium 对象),并受治理产出。
-
-治理:请求碳源不在模型 exchange → abstain(不虚构);部分不可得 → caution。
-
-科学默认(写明依据):单一碳源上限 -10 mmol/gDW/h(cobra textbook 惯例),有氧(O2 开放);
-参考态 = glucose 最小培养基(= WT)。
+"""Environmental medium/carbon-source growth case using e_coli_core FBA. Replace glucose with a single carbon
+source such as acetate/succinate. Missing exchanges abstain and partial availability cautions. Default uptake
+bound is -10 mmol/gDW/h with oxygen open; WT reference is glucose minimal medium.
 """
 from __future__ import annotations
 
@@ -14,7 +8,6 @@ from praxis_virtualcell.agents.case_report import CaseReport
 from praxis_virtualcell.agents.route_table import route
 from praxis_virtualcell.agents.species_schema import normalize_request
 
-# 常见碳源名 → e_coli_core exchange 反应 id
 CARBON_EXCHANGES = {
     "glucose": "EX_glc__D_e",
     "fructose": "EX_fru_e",
@@ -28,13 +21,17 @@ CARBON_EXCHANGES = {
 _GLUCOSE_EX = "EX_glc__D_e"
 _UPTAKE_LB = -10.0
 
-_BOUNDARY = ("FBA growth 是约束型最优通量的相对量(steady-state、单碳源上限 -10、有氧),**非**绝对"
-             "生长速率;e_coli_core 是核心代谢子集,只覆盖常见碳源;碳源不在模型 exchange 即弃权,"
-             "不代表该碳源不可利用,仅表'此重建无法评估'。")
+_BOUNDARY = (
+    'FBA growth is a relative constrained optimal flux measure (steady state, '
+    'single-carbon bound -10, aerobic), not an absolute growth rate. e_coli_core covers '
+    'core metabolism and common carbon sources; absent model exchanges cause abstention, '
+    'indicating that this reconstruction cannot assess the source rather than that the '
+    'source is unusable.'
+)
 
 
 def carbon_growth(gem, carbon_name: str, uptake_lb: float = _UPTAKE_LB) -> float | None:
-    """把碳源换成 carbon_name,返回 FBA growth;碳源不在模型 → None。"""
+    """Change the carbon source and return FBA growth; absent source exchange returns None."""
     ex = CARBON_EXCHANGES.get(str(carbon_name).strip().lower())
     if ex is None or not gem.model.reactions.has_id(ex):
         return None
@@ -46,13 +43,13 @@ def carbon_growth(gem, carbon_name: str, uptake_lb: float = _UPTAKE_LB) -> float
 
 
 def run_medium_shift_case(raw_req: dict, gem=None):
-    """微生物碳源切换 growth case → 7 部分 CaseReport(真实数值)。返回 (CaseReport, RouteDecision)。"""
+    """Return a 7-part microbial medium-shift FBA report with RouteDecision."""
     from praxis_virtualcell.predictors.mechanistic.ecoli_gem import EcoliGEM
 
     norm = normalize_request(raw_req)
     dec = route(norm)
     if dec.engine != "gem_fba":
-        raise ValueError(f"medium-shift case 期望 gem_fba,route 给了 {dec.engine}")
+        raise ValueError(f"medium-shift case expected gem_fba; routing selected {dec.engine}")
     gem = gem or EcoliGEM()
 
     glucose_growth = carbon_growth(gem, "glucose") or gem.wt_growth
@@ -81,7 +78,7 @@ def run_medium_shift_case(raw_req: dict, gem=None):
                               "normalized_targets": norm["perturbation_targets"],
                               "target_output": norm["target_output"]},
         models_tools_selected={"engine": dec.engine, "tool": "cobrapy e_coli_core (textbook)",
-                               "method": "FBA 单碳源培养基切换", "reason": dec.reason},
+                               "method": "FBA single-carbon medium shift", "reason": dec.reason},
         raw_output={"reference": "glucose minimal", "glucose_growth": round(glucose_growth, 5),
                     "carbon_sources": rows},
         baseline_comparison={"baseline": "glucose minimal growth", "glucose_growth": round(glucose_growth, 5),

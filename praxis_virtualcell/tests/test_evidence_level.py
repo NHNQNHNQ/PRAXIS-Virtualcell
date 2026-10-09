@@ -1,6 +1,4 @@
-"""Phase 5:evidence_level —— E0–E5 映射(纯函数,零 LLM)。
-决策 B:治理层之上的薄映射,不重写治理、不回写 verdict;E2/E3 accept 级只在现有 disposition
-已 accept 时给出(不领先治理);OOD 未知 fail-closed 记 unknown(红线 6)。"""
+"""Tests for evidence level."""
 from praxis_virtualcell.governance import evidence_level as EL
 
 
@@ -24,7 +22,7 @@ def test_ood_signal_ood():
 
 
 def test_ood_signal_unknown_when_none_and_human_no_caution():
-    # seen_in_train=None + human + 无 caution → 仍 unknown(runtime seen_in_train 多 None,不假装 in_domain)
+
     assert EL.derive_ood_signal(_report(seen_in_train=None)) == "unknown"
 
 
@@ -34,7 +32,7 @@ def test_ood_signal_unknown_when_cross_species():
 
 
 def test_e2_in_domain_accept():
-    """E2:非 abstain、无 downgrade、high、in_domain、disagreement 未触发 → E2(与 disposition accept 对齐)。"""
+    """Verify e2 in domain accept."""
     out = EL.map_evidence_level(_report(seen_in_train=True))
     assert out["level"] == "E2"
     assert out["ood_signal"] == "in_domain"
@@ -42,7 +40,7 @@ def test_e2_in_domain_accept():
 
 
 def test_e3_accept_with_caution_or_unknown_ood():
-    """E3:accept 但 OOD 未知/有 caution/非母种。"""
+    """Verify e3 accept with caution or unknown ood."""
     out = EL.map_evidence_level(_report(seen_in_train=None, reliability="high"))
     assert out["level"] == "E3"
 
@@ -78,23 +76,22 @@ def test_e0_hard_reject():
 
 
 def test_e0_core_predictor_failed():
-    """E0:core 预测器硬失败(core_predictor_failed 不带 downgrade 前缀)的 abstain 须落 E0 硬拒,
-    而非 E1 普通弃权(与 reliability._HARD_ABSTAIN 单一真相源对齐)。"""
+    """Verify e0 core predictor failed."""
     out = EL.map_evidence_level(_report(abstain=True, prediction=None, models_used=[],
                                         abstain_reasons=["core_predictor_failed"]))
     assert out["level"] == "E0"
 
 
 def test_e_level_does_not_lead_disposition():
-    """红线/决策 B:downgrade 请求不得被映射成 E2/E3 accept 级。"""
+    """Verify e level does not lead disposition."""
     out = EL.map_evidence_level(_report(seen_in_train=True, reliability="high",
                                         downgrade_reasons=["downgrade:cell_type_not_supported"]))
-    assert out["level"] in ("E4", "E5")   # 有 downgrade → 不得 E2/E3
+    assert out["level"] in ("E4", "E5")
     assert out["aligned_with_disposition"] is True
 
 
 def test_map_does_not_mutate_report():
-    """不回写:map 只读不改 report。"""
+    """Verify map does not mutate report."""
     r = _report()
     snap = dict(r)
     EL.map_evidence_level(r)

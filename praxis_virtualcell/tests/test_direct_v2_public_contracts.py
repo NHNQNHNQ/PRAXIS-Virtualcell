@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 
 from praxis_virtualcell.core.exceptions import InputValidationError
@@ -17,8 +15,6 @@ from praxis_virtualcell.model_zoo.wrapper_registry import (
     WrapperRegistry,
 )
 from praxis_virtualcell.model_zoo.wrappers.base import ModelWrapper
-
-_U1_DOCUMENT_MARKER = "## U1 本地 direct-v2 发布可验证性补充（未发布）"
 
 
 def _request() -> dict:
@@ -131,62 +127,3 @@ def test_prepared_input_receipt_is_hash_bound_and_never_contains_model_payload()
     assert "model_input" not in rendered
     assert "values" not in rendered
     assert "test_only_private_value" not in str(rendered)
-
-
-def test_u1_docs_describe_the_current_explicit_generic_boundary() -> None:
-    root = Path(__file__).resolve().parents[2]
-    documents = (
-        root / "docs" / "ADR-0009-virtualcell-model-zoo-v2.md",
-        root / "docs" / "ADR-0010-virtualcell-model-adapter-sdk.md",
-        root / "docs" / "runbooks" / "VIRTUALCELL-MODEL-ADAPTER-SDK.md",
-        root / "docs" / "PRAXIS-VIRTUALCELL-CURRENT-PROJECT-AND-INTEGRATION-GUIDE.md",
-        root / "docs" / "TESTING.md",
-        root / "docs" / "VERSIONING.md",
-        root / "README.md",
-    )
-    required_terms = (
-        "DirectV2RuntimeFactory",
-        "vc.direct-v2-execution.v1",
-        "submit_direct_v2_job_from_factory()",
-        "output_reducer_required",
-        "artifact_snapshot_supported",
-        "vc.artifact-snapshot-budget-policy.v1",
-        "vc.environment.v3",
-        "EnvironmentIdentityV2",
-        "未发布",
-    )
-
-    for path in documents:
-        content = path.read_text(encoding="utf-8")
-        if path.name not in {"VERSIONING.md", "README.md", "TESTING.md"}:
-            assert _U1_DOCUMENT_MARKER in content
-        for term in required_terms:
-            if path.name not in {"VERSIONING.md", "README.md", "TESTING.md"}:
-                assert term in content
-        if path.name not in {"VERSIONING.md", "README.md"}:
-            assert "RuntimeBuilder" not in content
-
-    adr = documents[0].read_text(encoding="utf-8")
-    versioning = documents[-2].read_text(encoding="utf-8")
-    readme = documents[-1].read_text(encoding="utf-8")
-    testing = documents[-3].read_text(encoding="utf-8")
-    assert "缺 Pack 可写入 v4 hard-abstain" in adr
-    assert "reserved → failed" in adr
-    assert "per-runtime execution context" in adr
-    assert "ArtifactSnapshot" in adr
-    assert "memory/retention budget" in adr
-    assert "synthetic-only" in adr
-    assert "pack.integrity_drift" in adr
-    assert "vc.execution-plan.v3" in adr
-    assert "vc.job-execution-identity.v5" in adr
-    assert "output_reducer_required" in adr
-    assert "运行边界从当前 registry 再解析同一 binding" in adr
-    assert "path-safe public identifiers" in adr
-    assert "closed allowlist" in adr
-    assert "本地未发布候选" in adr
-    assert "本地、未发布候选" in versioning
-    assert "local/unreleased `vc.execution-plan.v3`" in versioning
-    assert "local/unreleased `.v5`" in versioning
-    assert "P17 compilation" in readme
-    assert "U1 direct-v2 execution" in readme
-    assert "U2 V3" in testing

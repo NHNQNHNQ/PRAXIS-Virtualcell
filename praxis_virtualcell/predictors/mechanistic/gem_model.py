@@ -1,10 +1,6 @@
-"""W2(v0.4):通用基因组尺度代谢模型(GEM/FBA)基座 —— 供 E. coli / yeast 复用。
-
-物种无关的机制模型逻辑:载入 SBML → WT growth(biomass FBA)→ 大小写不敏感单基因 KO →
-7 部分 CaseReport(真实数值 + 治理:基因不在 GEM → abstain/caution 不虚构)。
-
-注:用 `with model:` 上下文手动 knock_out(单进程),避 cobra single_gene_deletion 多进程在
-macOS 上 spawn 卡死。
+"""Species-independent GEM/FBA engine: load SBML, solve WT biomass growth, resolve single-gene knockouts
+case-insensitively, and form a 7-part governed report. Absent genes abstain/caution without fabricated growth.
+Use single-process model contexts to avoid macOS multiprocessing spawn stalls.
 """
 from __future__ import annotations
 
@@ -21,7 +17,7 @@ class KOResult:
 
 
 class GemModel:
-    """通用 GEM:任意 SBML 路径 → WT + 单基因 KO growth。"""
+    """Generic SBML model for WT and single-gene knockout growth."""
 
     def __init__(self, sbml_path: str) -> None:
         from cobra.io import read_sbml_model
@@ -29,7 +25,9 @@ class GemModel:
         self.wt_growth = float(self.model.slim_optimize())
 
     def _resolve(self, gid: str) -> str | None:
-        """大小写不敏感解析(E. coli b-number 小写、酵母系统名大写,schema 归一大写 → 需兼容)。"""
+        """Resolve IDs case-insensitively to reconcile lowercase E. coli b-numbers, uppercase yeast names, and
+        schema normalization.
+        """
         gid = str(gid).strip()
         for cand in (gid, gid.lower(), gid.upper()):
             if self.model.genes.has_id(cand):
@@ -54,9 +52,8 @@ class GemModel:
 
 def run_growth_case(raw_req: dict, gem: GemModel, *, tool: str, model_label: str,
                     boundary: str, default_case_id: str):
-    """通用 KO growth case:route → GEM 真跑 → 7 部分 CaseReport。返回 (CaseReport, RouteDecision)。
-
-    治理:全部 target 不在 GEM → abstain(不虚构);部分不在 → caution(降级);全在 → accept。
+    """Route and execute knockout FBA, returning a 7-part report and RouteDecision. All absent targets abstain,
+    some absent targets caution, and complete coverage accepts.
     """
     from praxis_virtualcell.agents.case_report import CaseReport
     from praxis_virtualcell.agents.route_table import route
@@ -64,8 +61,8 @@ def run_growth_case(raw_req: dict, gem: GemModel, *, tool: str, model_label: str
 
     norm = normalize_request(raw_req)
     dec = route(norm)
-    if dec.engine != "gem_fba":                # 路由铁律:微生物 growth 必走机制模型
-        raise ValueError(f"growth case 期望 gem_fba,route 给了 {dec.engine}")
+    if dec.engine != "gem_fba":
+        raise ValueError(f"growth case expected gem_fba; routing selected {dec.engine}")
 
     kos = gem.knockout_many(norm["perturbation_targets"])
     in_model = [k for k in kos if k.in_model]

@@ -11,7 +11,7 @@ def test_load_env_injects_without_override(tmp_path, monkeypatch):
     monkeypatch.setenv("FOO_K2", "preset")
     load_env(str(env))
     assert os.environ["FOO_K1"] == "v1"
-    assert os.environ["FOO_K2"] == "preset"  # 已存在不覆盖
+    assert os.environ["FOO_K2"] == "preset"
 
 
 def test_config_has_deepseek_fields_defaults():

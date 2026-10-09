@@ -39,7 +39,7 @@ async def test_single_turn_final_text_terminates_stop():
     reg, runner = _deps()
     client = FakeLLMClient(turns=[TURN_FINAL_TEXT])
     st = State()
-    st.messages = [{"role": "user", "content": "问个问题"}]
+    st.messages = [{"role": "user", "content": "\u95ee\u4e2a\u95ee\u9898"}]
     events = [
         e
         async for e in query(
@@ -49,21 +49,21 @@ async def test_single_turn_final_text_terminates_stop():
             settings=_settings(),
             runner=runner,
             compactor=MinimalCompactor(),
-            system="你是助手",
+            system="\u4f60\u662f\u52a9\u624b",
         )
     ]
-    assert {"type": "text", "text": "答案是 42"} in events
+    assert {"type": "text", "text": "The answer is 42"} in events
     assert events[-1] == {"type": "end", "reason": TerminalReason.STOP.value}
     assert st.turn_count == 1
     await client.aclose()
 
 
 async def test_text_and_tooluse_interleave_order_preserved():
-    # §7.1.3:文本先到先 yield,tool_use 随后;顺序与流到达一致
+
     reg, runner = _deps()
     client = FakeLLMClient(turns=[TURN_TOOLUSE])
     st = State()
-    st.messages = [{"role": "user", "content": "查 hi"}]
+    st.messages = [{"role": "user", "content": "\u67e5 hi"}]
     seen = []
     async for e in query(
         st,
@@ -75,9 +75,9 @@ async def test_text_and_tooluse_interleave_order_preserved():
     ):
         seen.append(e)
         if e["type"] == "tool_result":
-            break  # 只验证单轮分发顺序,多轮在 Task 7
+            break
     types = [e["type"] for e in seen]
     assert types[0] == "text" and types[1] == "tool_use"
-    assert seen[0] == {"type": "text", "text": "我来查一下"}
+    assert seen[0] == {"type": "text", "text": "I will check."}
     assert seen[1] == {"type": "tool_use", "id": "tu_1", "name": "echo", "input": {"t": "hi"}}
     await client.aclose()

@@ -32,13 +32,13 @@ test("backend preset examples fill the composer and preserve an explicit drug ov
   const k562Example = page
     .getByLabel("Example questions")
     .getByRole("button", {
-      name: "敲低 AHR 后表达如何变化？",
+      name: "How does expression change after knocking down AHR?",
       exact: true,
     });
   await expect(k562Example).toBeVisible();
   await k562Example.click();
   await expect(page.getByLabel("Message PRAXIS")).toHaveValue(
-    "敲低 AHR 后表达如何变化？",
+    "How does expression change after knocking down AHR?",
   );
 
   await page.getByRole("button", { name: "Change cell", exact: true }).click();
@@ -46,12 +46,12 @@ test("backend preset examples fill the composer and preserve an explicit drug ov
   const drugExample = page
     .getByLabel("Example questions")
     .getByRole("button", {
-      name: "vorinostat 药物处理后表达如何变化？",
+      name: "How does expression change after treatment with vorinostat?",
       exact: true,
     });
   await drugExample.click();
   await expect(page.getByLabel("Message PRAXIS")).toHaveValue(
-    "vorinostat 药物处理后表达如何变化？",
+    "How does expression change after treatment with vorinostat?",
   );
 
   const jobs: Request[] = [];
@@ -69,8 +69,8 @@ test("backend preset examples fill the composer and preserve an explicit drug ov
     text: string;
     mode: string;
   };
-  const [question, overlay] = parseBody.text.split("\n结构化描述:");
-  expect(question).toBe("vorinostat 药物处理后表达如何变化？");
+  const [question, overlay] = parseBody.text.split("\nStructured description:");
+  expect(question).toBe("How does expression change after treatment with vorinostat?");
   expect(parseBody.mode).toBe("llm_assisted");
   expect(JSON.parse(overlay)).toEqual({
     species: "human",

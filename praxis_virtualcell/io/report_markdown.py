@@ -1,8 +1,7 @@
-"""确定性 report.md 渲染器(io 层,纯展示)。
+"""Deterministic Markdown report renderer.
 
-铁律:纯确定性、不 import/调用任何 LLM、可复现(无 wall-clock/随机)、
-不编造(缺字段标 N/A)、不重算科学决策(只读现有 artifact 字段)。
-输入 = JobStore.load() 返回或 save 时组装的等价 job dict。
+Read persisted artifacts without calling an LLM, generating new scientific
+evidence, or recomputing decisions. Missing fields are displayed as N/A.
 """
 from __future__ import annotations
 
@@ -12,7 +11,7 @@ _NA = "N/A"
 
 
 def _verdict(report: dict) -> str:
-    """据现有字段派生单一 verdict(仅展示层聚合,不写回科学决策)。"""
+    """Aggregate existing disposition fields for display without modifying scientific decisions."""
     if report.get("abstain"):
         return "abstain"
     if report.get("downgrade_reasons"):
@@ -46,15 +45,16 @@ def render_report_md(job: dict) -> str:
     w("# PRAXIS-VirtualCell Report")
     w("")
     w(f"> mode: `{mode}` · verdict: **{verdict}** · "
-      "LLM 未参与预测/治理决策;本报告由 structured artifact 确定性生成。")
+      "Predictions and governance are determined by the runtime; this report is rendered from structured artifacts.")
     w("")
 
     # 1. Question
     w("## 1. Question")
     w("")
-    w("原始自然语言:未记录(llm_meta 仅存 hash;offline 无 NL,以结构化任务为权威)。")
+    w("Original natural-language text is not stored. LLM metadata contains hashes; "
+      "the structured request is authoritative.")
     w("")
-    w("结构化任务:")
+    w("Structured request:")
     w("")
     w(f"- species: `{req.get('species') or _NA}`")
     w(f"- cell_type: `{req.get('cell_type') or _NA}`")
@@ -77,7 +77,7 @@ def render_report_md(job: dict) -> str:
 
     # 3. Routing Decision
     rej_reasons = prov.get("rejection_reasons") or {}
-    model_cautions = prov.get("model_cautions") or {}   # B1:机制 predictor disposition caution/abstain
+    model_cautions = prov.get("model_cautions") or {}
     w("## 3. Routing Decision")
     w("")
     w(f"- models_used: `{_fmt_list(used)}`")
@@ -85,7 +85,7 @@ def render_report_md(job: dict) -> str:
         w("- models_rejected:")
         for m in rejected:
             reason = rej_reasons.get(m) or (
-                ", ".join(model_cautions[m]) if model_cautions.get(m) else "未记录原因")
+                ", ".join(model_cautions[m]) if model_cautions.get(m) else "Reason not recorded")
             w(f"  - `{m}` — {reason}")
     else:
         w("- models_rejected: —")
@@ -96,39 +96,39 @@ def render_report_md(job: dict) -> str:
           f"metric=`{dis.get('metric', _NA)}` · triggered=`{dis.get('triggered')}`")
     w("")
 
-    # 模块路由(Phase 8:module_plan 展示层。读现有 provenance.module_plan,缺则 N/A,不重算/不打乱 9 段编号)
+
     mp = prov.get("module_plan") or {}
-    w("### 模块路由(Module Routing)")
+    w("### Module Routing")
     w("")
     if not mp:
-        w(f"- primary module: `{_NA}`(无 module_plan:abstain/不可路由 job 或旧记录)")
+        w(f"- primary module: `{_NA}` (no module_plan: abstained, unroutable, or legacy job)")
     else:
         w(f"- primary module: `{mp.get('primary', _NA)}` · "
           f"secondary: `{_fmt_list(mp.get('secondary'))}` · "
           f"overall_verdict: **{mp.get('overall_verdict', _NA)}**")
         entries = mp.get("entries") or []
         if entries:
-            w("- 模块裁决(module · role · verdict · mismatch):")
+            w("- Module decisions (module · role · verdict · mismatch):")
             for e in entries:
                 w(f"  - `{e.get('module', _NA)}` · {e.get('role', _NA)} · "
                   f"**{e.get('verdict', _NA)}**"
                   + (f" · mismatch=`{e.get('mismatch')}`" if e.get('mismatch') else ""))
     w("")
-    w("_模块路由是治理层之上的逻辑视图(读 module_plan artifact);M1–M8 映射现有 engine,"
-      "verdict 取 route/species/mismatch 最保守,不重写裁决。_")
+    w("_Module routing reads the stored module_plan artifact. M1–M8 map to existing engines; "
+      "the most conservative route/species/mismatch verdict is displayed without overriding governance._")
     w("")
 
     # 4. Result Summary
     w("## 4. Result Summary")
     w("")
     if abstain:
-        w("系统已弃权(abstain),不产出预测数值。见 §5 治理裁决与 §8 边界。")
+        w("The system abstained and produces no prediction values. See §5 Governance Verdict and §8 Limitations.")
     else:
         pred = report.get("prediction")
         if pred is None:
-            w("无 prediction 字段(N/A)。")
+            w("No prediction field is available (N/A).")
         else:
-            w("prediction(确定性 runtime 产出,未经 LLM 修改):")
+            w("Prediction (produced by the deterministic runtime and unmodified by an LLM):")
             w("")
             w("```json")
             w(json.dumps(pred, ensure_ascii=False, indent=2, sort_keys=True))
@@ -170,28 +170,30 @@ def render_report_md(job: dict) -> str:
         w(f"- abstain_artifact_sha256: `{learned.get('abstain_artifact_sha256', _NA)}`")
     w("")
 
-    # 证据记录(Phase 5:evidence_level E0–E5,附 §6 之后。缺键标 N/A,不崩)
+
     ev = prov.get("evidence_level") or {}
-    w("### 证据记录(Evidence Record)")
+    w("### Evidence Record")
     w("")
     w(f"- evidence_level: `{ev.get('level', _NA)}`")
     w(f"- ood_signal: `{ev.get('ood_signal', _NA)}`")
     w(f"- rationale: `{_fmt_list(ev.get('rationale'))}`")
     w(f"- aligned_with_disposition: `{ev.get('aligned_with_disposition', _NA)}`")
     w("")
-    w("_证据等级是治理层之上的薄映射(读现有 reliability/OOD/disagreement 信号),"
-      "不重写裁决;E2=in-domain accept 与现有 disposition 对齐。_")
+    w("_Evidence levels map existing reliability/OOD/disagreement signals "
+      "without overriding governance; E2 denotes in-domain acceptance aligned with the disposition._")
     w("")
 
     # 7. Biological Interpretation
     w("## 7. Biological Interpretation")
     w("")
     if abstain:
-        w("系统弃权,不作生物学解读。")
+        w("The system abstained; no biological interpretation is provided.")
     else:
-        w("结构化结果见 §4;方向/幅度以 prediction 字段为准,不作超出证据的推断。")
+        w("See §4 for structured results. Direction and magnitude follow the prediction field; "
+          "interpretation remains within the evidence.")
     w("")
-    w("_深入生物学解读需 LLM-assisted 模式(见 narrative_report.md);本段不越证据边界。_")
+    w("_Additional narration is available in LLM-assisted mode (narrative_report.md) "
+      "and remains subject to the evidence boundary._")
     w("")
 
     # 8. Limitations
@@ -201,35 +203,36 @@ def render_report_md(job: dict) -> str:
     for r in ar:
         limits.append(f"abstain: {r}")
     for r in dr:
-        limits.append(f"降级: {r}")
+        limits.append(f"downgrade: {r}")
     caution = report.get("caution_flags") or {}
     if caution:
         limits.append(f"caution flags: {json.dumps(caution, ensure_ascii=False, sort_keys=True)}")
-    if model_cautions:   # B1:partial 的 targets_not_in_gem 等机制 caution 如实进 §8
+    if model_cautions:
         limits.append(f"model cautions: {json.dumps(model_cautions, ensure_ascii=False, sort_keys=True)}")
     mk = _mocks(used)
     if mk:
-        limits.append(f"预测数值来自 mock predictor({', '.join(mk)}),非真跑数值;"
-                      "真数值预测在远端 A100(见 benchmarks/)。")
+        limits.append(f"Predictions from mock predictors ({', '.join(mk)}) are test fixtures; "
+                      "they do not constitute experimental validation.")
     sp = req.get("species")
     if sp and sp != "human":
-        limits.append(f"非 human 物种({sp}):可能涉及跨物种投影/ortholog,"
-                      "按降级解读,不当母种原生精度。")
+        limits.append(f"Non-human species ({sp}) may require cross-species projection or ortholog mapping; "
+                      "interpret as downgraded evidence rather than native-species accuracy.")
     if not limits:
-        limits.append("未触发 abstain/降级/caution;仍以 §6 证据强度为准,不过度承诺。")
+        limits.append("No abstention, downgrade, or caution was triggered; "
+                      "conclusions remain limited by the evidence in §6.")
     for x in limits:
         w(f"- {x}")
     w("")
 
-    # 验证计划(Phase 5:learning_queue,附 §8 之后。advisory 建议下一步实验,不改裁决。缺键标 N/A)
+
     lq = prov.get("learning_queue") or {}
     lq_items = lq.get("items") or []
-    w("### 验证计划(Validation Plan · 主动学习建议)")
+    w("### Validation Plan · Active Learning Suggestions")
     w("")
     if not lq_items:
-        w(f"- 优先实验候选:`{_NA}`(无可执行候选或缺 learning_queue)")
+        w(f"- Priority experiment candidates: `{_NA}` (no executable candidates or learning_queue is missing)")
     else:
-        w("- 优先实验候选(按 information gain 降序,advisory 不改裁决):")
+        w("- Priority experiment candidates (descending information gain; advisory only):")
         for it in lq_items[:5]:            # top-5
             w(f"  - `{it.get('candidate', _NA)}` · module=`{it.get('module', _NA)}` · "
               f"information_gain=`{it.get('information_gain', _NA)}` · "
@@ -238,8 +241,8 @@ def render_report_md(job: dict) -> str:
     if lq_notes:
         w(f"- notes: {_fmt_list(lq_notes)}")
     w("")
-    w("_验证计划是主动学习的 advisory 产物:建议下一步该测什么(用 disagreement/OOD/证据等级排序),"
-      "不碰 prediction/verdict 终决/provenance ledger。_")
+    w("_The validation plan recommends experiments ranked by disagreement, OOD, and evidence level. "
+      "It does not modify predictions, final verdicts, or the provenance ledger._")
     w("")
 
     # 9. Reproducibility
@@ -247,8 +250,8 @@ def render_report_md(job: dict) -> str:
     w("")
     w(f"- request_id: `{report.get('request_id') or req.get('request_id') or _NA}`")
     w(f"- mode: `{mode}`")
-    w("- llm_used_for_prediction: `False`(恒定:LLM 不碰预测)")
-    w("- 复现命令:")
+    w("- llm_used_for_prediction: `False` (LLMs do not modify predictions)")
+    w("- Reproduction command:")
     w("")
     w("```bash")
     w("praxis-vc run --request <request.json> --mode offline --out runs/<id>")

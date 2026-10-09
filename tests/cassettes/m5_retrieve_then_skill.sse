@@ -5,7 +5,7 @@ event: content_block_start
 data: {"type":"content_block_start","index":0,"content_block":{"type":"text"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"已检索到领域知识,执行技能"}}
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Domain evidence retrieved; executing the skill"}}
 
 event: content_block_stop
 data: {"type":"content_block_stop","index":0}

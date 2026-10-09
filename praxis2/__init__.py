@@ -1,4 +1,4 @@
-"""PRAXIS-2 内核包。"""
+"""Reusable agent framework for PRAXIS VirtualCell."""
 
 from praxis_virtualcell import __version__
 

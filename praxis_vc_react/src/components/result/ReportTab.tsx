@@ -4,16 +4,6 @@ import Card from "../ui/Card";
 import Badge from "../ui/Badge";
 import StatusPill from "../ui/StatusPill";
 import EmptyState from "../ui/EmptyState";
-
-// Stage 5 · Report tab(spec §2 Report / §3.5)——把 structured_report 拆成证据化分块:
-// Summary / Prediction / Reliability decision / Boundary / Narrative 五块 + LLM 边界提示。
-// 迁自旧 views/ResultView 的 ReportTab(及 ResultsStage 内联),改用新 ui/Card + Badge + StatusPill,
-// 层次靠间距 / 小标题 / 状态点承载,不再依赖旧 App.css 的 .block/.meta 结构类。
-//
-// 铁律:前端只读展示,不做预测/治理裁决;llm_used_for_prediction 如实显示 +
-// 「结果由确定性模型给出,未经语言模型改写」语义(§3.5 已软化文案,沿用不回退)。
-
-// ── 安全取值助手(structured_report 是后端 Record,字段可能缺失)──
 function g(obj: Record<string, unknown>, key: string): unknown {
   return obj?.[key];
 }
@@ -33,7 +23,6 @@ function pretty(v: unknown): string {
   return JSON.stringify(v, null, 2);
 }
 
-// ── 小样式(走 token,不硬编码配色)──
 const codeStyle: CSSProperties = {
   fontFamily: "var(--font-mono)",
   fontSize: 12,
@@ -64,7 +53,6 @@ const stackStyle: CSSProperties = {
   gap: "var(--space-4)",
 };
 
-// 单条 key-value 证据行:左标签、右 mono 值。
 function KV({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div style={rowStyle}>
@@ -101,7 +89,6 @@ export default function ReportTab({
 
   return (
     <div style={stackStyle}>
-      {/* §3.5:预测或弃权由确定性边界给出；LLM 不改写数值或裁决。 */}
       <div
         style={{
           display: "flex",
@@ -112,7 +99,7 @@ export default function ReportTab({
         }}
       >
         <Badge tone="neutral">
-          预测或弃权由确定性边界给出,未经语言模型改写
+          Prediction or abstention is determined by the runtime; language models do not alter it
         </Badge>
         <span>
           llm_used_for_prediction:<Mono>{String(report.llm_used_for_prediction)}</Mono>
@@ -134,17 +121,16 @@ export default function ReportTab({
           }}
         >
           <strong>
-            执行范围：<Mono>{String(executionScope)}</Mono>
+            Execution scope: <Mono>{String(executionScope)}</Mono>
           </strong>
           <span style={{ color: "var(--text-muted)" }}>
             scientifically_validated=
             <Mono>{String(scientificallyValidated ?? "—")}</Mono>
-            ；研究运行不等于科学验证或生产晋级。
+            ; research execution does not imply scientific validation or production promotion.
           </span>
         </div>
       )}
 
-      {/* abstain 突出:置顶醒目条,给出 abstain 原因 */}
       {abstained && (
         <div
           style={{
@@ -159,7 +145,7 @@ export default function ReportTab({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-            <strong style={{ fontSize: 14 }}>本次未给出预测结论</strong>
+            <strong style={{ fontSize: 14 }}>No prediction was produced</strong>
           </div>
           {abstainReasons.length > 0 ? (
             <ul style={{ margin: 0, paddingLeft: "var(--space-5)", fontSize: 13 }}>
@@ -168,43 +154,41 @@ export default function ReportTab({
               ))}
             </ul>
           ) : (
-            <span style={{ fontSize: 13 }}>未记录具体原因。</span>
+            <span style={{ fontSize: 13 }}>No specific reason was recorded.</span>
           )}
         </div>
       )}
 
-      {/* 块 1:Summary */}
-      <Card title="概要">
+      <Card title="Summary">
         <div style={rowsStyle}>
           <KV label="request_id">
             <Mono>{String(g(sr, "request_id") ?? "—")}</Mono>
           </KV>
-          <KV label="使用的模型">
+          <KV label="Models used">
             <Mono>{joinArr(g(sr, "models_used"))}</Mono>
           </KV>
-          <KV label="被拒绝的模型">
+          <KV label="Models rejected">
             <Mono>{joinArr(g(sr, "models_rejected"))}</Mono>
           </KV>
-          <KV label="失败的模型">
+          <KV label="Models failed">
             <Mono>{joinArr(g(sr, "models_failed"))}</Mono>
           </KV>
         </div>
       </Card>
 
-      {/* 块 2:Prediction */}
       <Card
-        title="预测"
+        title="Predictions"
         actions={
           abstained ? (
-            <Badge tone="danger">未给出预测</Badge>
+            <Badge tone="danger">No prediction produced</Badge>
           ) : (
-            <Badge tone="confirmed">已给出预测</Badge>
+            <Badge tone="confirmed">Prediction produced</Badge>
           )
         }
       >
         {abstained ? (
           <p style={{ color: "var(--text-muted)", fontSize: 13, margin: 0 }}>
-            本次未给出预测结论（原因见上方提示）。
+            No prediction was produced (see the reasons above).
           </p>
         ) : predictionValues.length > 0 ? (
           <div style={rowsStyle}>
@@ -214,8 +198,8 @@ export default function ReportTab({
             <KV label="shape">
               <Mono>{joinArr(g(predictionRecord, "shape"), " × ")}</Mono>
             </KV>
-            <KV label="完整向量">
-              {predictionValues.length.toLocaleString("en-US")} 个数值（完整值见下载的 report JSON）
+            <KV label="Full vector">
+              {predictionValues.length.toLocaleString("en-US")} values (download the report JSON for the full vector)
             </KV>
             <KV label="baseline">
               <Mono>{String(g(projectionMetadata, "baseline") ?? "—")}</Mono>
@@ -228,7 +212,7 @@ export default function ReportTab({
           <pre className="json">{pretty(prediction)}</pre>
         )}
         <div style={{ ...rowStyle, marginTop: "var(--space-3)" }}>
-          <span style={labelStyle}>模型间分歧</span>
+          <span style={labelStyle}>Inter-model disagreement</span>
           <span style={{ color: "var(--text)" }}>
             score=<Mono>{String(g(disagreement, "score") ?? "—")}</Mono>
             {" · "}metric=<Mono>{String(g(disagreement, "metric") ?? "—")}</Mono>
@@ -237,8 +221,7 @@ export default function ReportTab({
         </div>
       </Card>
 
-      {/* 块 3:Reliability decision */}
-      <Card title="可靠性判定">
+      <Card title="Reliability decision">
         <div style={rowsStyle}>
           <KV label="reliability">
             <Mono>{String(g(sr, "reliability") ?? "—")}</Mono>
@@ -263,13 +246,12 @@ export default function ReportTab({
         </div>
         {downgradeReasons.length > 0 && (
           <div className="warn" style={{ marginTop: "var(--space-3)" }}>
-            降级原因:{downgradeReasons.join("；")}
+            Downgrade reasons: {downgradeReasons.join("; ")}
           </div>
         )}
       </Card>
 
-      {/* 块 4:Boundary */}
-      <Card title="边界与规则">
+      <Card title="Boundaries and rules">
         <div style={rowsStyle}>
           <KV label="failed_checks">
             <Mono>{joinArr(g(sr, "failed_checks"))}</Mono>
@@ -281,17 +263,16 @@ export default function ReportTab({
             <code style={codeStyle}>{pretty(g(sr, "caution_flags"))}</code>
           </KV>
           <KV label="rules_referenced">
-            <Mono>{joinArr(g(srProv, "rules_referenced"), "；")}</Mono>
+            <Mono>{joinArr(g(srProv, "rules_referenced"), "; ")}</Mono>
           </KV>
           <KV label="rules_hit">
-            <Mono>{joinArr(g(srProv, "rules_hit"), "；")}</Mono>
+            <Mono>{joinArr(g(srProv, "rules_hit"), "; ")}</Mono>
           </KV>
         </div>
       </Card>
 
-      {/* 块 5:Narrative(自然语言解读)——narrative 缺失自然降级 */}
       <Card
-        title="文字解读"
+        title="Narrative"
         actions={
           report.narrative_report ? <StatusPill status="confirmed" /> : undefined
         }
@@ -299,14 +280,14 @@ export default function ReportTab({
         {report.narrative_report ? (
           <>
             <div className="note">
-              由结构化结果生成，语言模型未改动预测/治理结论。
+              Generated from structured results; language models did not alter predictions or governance decisions.
             </div>
             <pre className="narrative">{report.narrative_report}</pre>
           </>
         ) : (
           <EmptyState
-            title="未生成文字解读"
-            hint="当前运行未生成文字解读。"
+            title="No narrative generated"
+            hint="This run did not generate a narrative."
           />
         )}
       </Card>

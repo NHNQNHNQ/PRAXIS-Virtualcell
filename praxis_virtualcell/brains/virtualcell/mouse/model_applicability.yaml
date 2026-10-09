@@ -1,10 +1,4 @@
-# mouse 与 human 同为 mammalian scRNA:human predictor 可迁,但需 ortholog 投影。
-# 故 mouse 进 supported_species → MockCPA/MockGEARS/MockLinear 在 mouse 下 applicable(非 reject),
-# 同时挂 caution=ortholog_required + cross_species_uncertainty,供 trace/Reliability 读取。
-# 路由判定字段(决定 applicable/reject):supported_species/supported_modalities/supported_tasks/reject_if。
-# caution.<species>(LIST)+ cross_species.rule 由 ModelApplicabilityAgent 读取 → 写入
-#     brain_context.routing → provenance.ortholog_cautions → report.caution_flags(§7.3 可审),
-#     但不影响 applicable/reject(mouse 仍 applicable)。supported_perturbations 等为声明式,不参与路由。
+# Explicit predictor applicability. Mammalian mock predictors reject microbial species; mouse transfer requires ortholog cautions.
 MockCPA:
   supported_species: [human, mouse]
   supported_modalities: [scRNA]

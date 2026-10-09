@@ -5,16 +5,20 @@ import os
 import sys
 import time
 
-sys.path.insert(0, "/home/zkyd/data1/mzy/Virtual cell")
-from collections import defaultdict
+_DONOR = os.environ.get("PRAXIS_DONOR_SOURCE_ROOT", "").strip()
+if not _DONOR:
+    raise RuntimeError("Set PRAXIS_DONOR_SOURCE_ROOT to the external donor source checkout")
+if _DONOR not in sys.path:
+    sys.path.insert(0, _DONOR)
+from collections import defaultdict  # noqa: E402
 
-import torch
-from bench.vcbench.loader import _pert_emb_for
+import torch  # noqa: E402
+from bench.vcbench.loader import _pert_emb_for  # noqa: E402
 
-from praxis_virtualcell.predictors.ml.donor_bridge import build_predictor_from_ckpt, load_norman
-from praxis_virtualcell.predictors.ml.ml_predictor_agent import MLPredictorAgent
+from praxis_virtualcell.predictors.ml.donor_bridge import build_predictor_from_ckpt, load_norman  # noqa: E402
+from praxis_virtualcell.predictors.ml.ml_predictor_agent import MLPredictorAgent  # noqa: E402
 
-CKPT="/home/zkyd/data1/mzy/Virtual cell/runs/full_bench_20260521_060815/checkpoints/norman_2019"
+CKPT = os.environ.get("PRAXIS_DONOR_CHECKPOINT_ROOT", "").strip()
 slots={"linear":"linear_additive","latent":"latent_additive","gnn":"gnn_pert"}
 
 def percell_disagreement(D):
@@ -29,7 +33,7 @@ def percell_disagreement(D):
     return torch.stack(pairs).mean(0)
 
 def delta_batch(m, ctrl_batch, pe, kind, targets):
-    """尝试批量 control;失败则逐 cell。返回 (n,G) delta。"""
+    """Try batched controls, then fall back to per-cell prediction; return an (n,G) delta matrix."""
     try:
         mean=m.predict_tensor(ctrl_batch, pe, kind=kind, targets=targets)
         if mean.shape==ctrl_batch.shape:
@@ -43,6 +47,8 @@ def delta_batch(m, ctrl_batch, pe, kind, targets):
     return torch.stack(outs)
 
 def main(max_perts=None, out=None):
+    if not CKPT:
+        raise RuntimeError("Set PRAXIS_DONOR_CHECKPOINT_ROOT to the donor checkpoints")
     t0=time.time()
     models={k:MLPredictorAgent(build_predictor_from_ckpt(os.path.join(CKPT,pn))[0]) for k,pn in slots.items()}
     ds=load_norman("test",seed=1)

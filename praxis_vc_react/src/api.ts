@@ -1,11 +1,4 @@
-// PRAXIS-VirtualCell 前端 API client。
-// 铁律:前端只展示,绝不在此做预测/治理判断;默认 offline;不存/不显示 API key。
-// 所有科学决策均由后端确定性 runtime 完成,本文件仅做 HTTP 调用与类型定义。
 
-// 默认同源(相对路径 ""):FastAPI serve 同源托管 dist 时,前端请求当前 origin 的 /api/*,
-// 无需 CORS、不硬编码 IP —— 部署到任意主机(如 10.102.106.53)开箱即用。
-// dev(Vite 5173)经 vite.config.ts 的 proxy 把 /api 转发到后端;
-// 需指向异地后端时设 VITE_API_BASE 覆盖。
 export const API_BASE: string =
   (import.meta.env.VITE_API_BASE as string | undefined) ?? "";
 
@@ -17,7 +10,6 @@ export interface AskDraft {
   structuredDescription: string;
 }
 
-// ---- 类型(对应后端 pydantic schema) ----
 export interface Health {
   status: string;
   mode: string;
@@ -386,7 +378,6 @@ export interface PackFactoryCatalog {
   write_api_enabled: false;
 }
 
-// ---- 内部 fetch 助手 ----
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json" },
@@ -405,7 +396,6 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
   return (await res.json()) as T;
 }
 
-// ---- 公开方法 ----
 export function health(): Promise<Health> {
   return req<Health>("/api/health");
 }
@@ -472,7 +462,6 @@ export function getProvenance(jobId: string): Promise<ProvenanceResult> {
   return req<ProvenanceResult>(`/api/reports/${encodeURIComponent(jobId)}/provenance`);
 }
 
-// 只读枚举 + cell 预设(供前端下拉)。权威仍在后端,前端只展示。
 export function getOptions(): Promise<Options> {
   return req<Options>("/api/options");
 }
@@ -520,28 +509,20 @@ export async function uploadData(
   return (await res.json()) as UploadReceipt;
 }
 
-// 该 job 的实际模块路由结果(只读)。不可路由 job 返回空 module_plan。
 export function getModulePlan(jobId: string): Promise<{ module_plan: ModulePlan | Record<string, never> }> {
   return req<{ module_plan: ModulePlan | Record<string, never> }>(
     `/api/reports/${encodeURIComponent(jobId)}/module-plan`);
 }
 
-// report.md 为纯文本(text/markdown),不走 JSON 解析,单独 fetch。
 export async function getReportMarkdown(jobId: string): Promise<string> {
   const res = await fetch(`${API_BASE}/api/reports/${encodeURIComponent(jobId)}/markdown`);
-  if (!res.ok) throw new Error(`API ${res.status}: report.md 获取失败`);
+  if (!res.ok) throw new Error(`API ${res.status}: Failed to fetch report.md`);
   return res.text();
 }
 
-// ---- UI 派生类型(spec §6 状态机;仅前端使用,不对应任何新端点/请求) ----
-// Phase 9 P2:7 步扁平流程 → 5 阶段状态机。以下三类型只服务前端状态管理,
-// 不改上面任何请求方法,不新增后端调用。
 
-// 5 阶段:Ask→Review→Route→Run→Results(旧 7 步映射见计划状态机映射表)。
 export type Stage = "ask" | "review" | "route" | "run" | "results";
 
-// 运行状态机:idle=未运行;running=同步执行中(确定性步骤指示,非流式);
-// succeeded/failed/abstained=终态(实际 abstain/failed 由结果页回填)。
 export type RunStatus =
   | "idle"
   | "running"
@@ -549,15 +530,14 @@ export type RunStatus =
   | "failed"
   | "abstained";
 
-// 集中式作业状态:回退只改 stage 不清以下字段,故回退不丢数据。
 export interface JobState {
-  query: string; // Ask 阶段自然语言输入
-  askDraft: AskDraft | null; // Ask 的三个表单字段,回退时按原结构恢复
-  parsedMode: Mode | null; // 最近一次 /api/parse 使用的模式
-  parsedIntent: ParseResult | null; // /api/parse 结果(复用现有 ParseResult)
-  reviewDraft: Record<string, unknown> | null; // Review 尚未确认的编辑,供回退后恢复
-  confirmedRequest: Record<string, unknown> | null; // Review 阶段编辑组装的 request
-  modulePlan: ModulePlan | null; // Route 静态预期(前端派生)/ Results 实际(/module-plan)
+  query: string;
+  askDraft: AskDraft | null;
+  parsedMode: Mode | null;
+  parsedIntent: ParseResult | null;
+  reviewDraft: Record<string, unknown> | null;
+  confirmedRequest: Record<string, unknown> | null;
+  modulePlan: ModulePlan | null;
   runStatus: RunStatus;
-  jobId: string | null; // createJob 产出
+  jobId: string | null;
 }

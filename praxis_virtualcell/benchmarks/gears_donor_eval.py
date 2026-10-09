@@ -1,21 +1,22 @@
-"""L4: GEARS same-split / same-metric — donor norman test split + per-cell ΔPearson via donor EvalAgent.
-
-防泄漏:GEARS 用 **donor train/test 扰动划分**(custom split),GEARS train 排除 donor test 扰动。
-评估:donor EvalAgent(与表 A 0.7039 同一路径)→ per-cell ΔPearson。gene order 与 donor 恒等(同源 2000 genes)。
-adapter:Prediction.mean = ctx.control + (GEARS预测绝对表达 − GEARS_ctrl_mean) → EvalAgent 取 mean−control = GEARS delta。
-
-仅远端 virtualcell env。用法:python gears_donor_eval.py [epochs]   (epochs=1 验证 pipeline,>=20 出真数字)
+"""GEARS same-split/same-metric evaluation using donor Norman train/test perturbations and donor per-cell
+delta-Pearson. Exclude donor test perturbations from GEARS training. Preserve the same 2000-gene order; adapter
+mean=control+(GEARS expression−GEARS control mean). Historical donor reference is 0.7039. Remote execution;
+epochs=1 checks the pipeline and >=20 supports full evaluation.
 """  # noqa: E501
+import os
 import pickle
 import sys
 import time
 
 import numpy as np
-import torch
 
-_DONOR = "/home/zkyd/data1/mzy/Virtual cell"
+_DONOR = os.environ.get("PRAXIS_DONOR_SOURCE_ROOT", "").strip()
+if not _DONOR:
+    raise RuntimeError("Set PRAXIS_DONOR_SOURCE_ROOT to the external donor source checkout")
 if _DONOR not in sys.path:
     sys.path.insert(0, _DONOR)
+
+import torch  # noqa: E402
 
 
 def _to_condition(p: str) -> str:
@@ -26,7 +27,7 @@ def _to_condition(p: str) -> str:
 
 
 def donor_conditions():
-    """donor load_norman train/test 的扰动 → GEARS condition 格式集合(防泄漏 split 基础)。"""
+    """Convert donor train/test perturbations to GEARS condition sets for leakage-safe splits."""
     from praxis_virtualcell.predictors.ml.donor_bridge import load_norman
     out = {}
     for split in ("train", "test"):
@@ -40,29 +41,32 @@ def donor_conditions():
 
 
 def main(epochs: int = 20):
+    gears_data = os.environ.get("GEARS_DATA_ROOT", "").strip()
+    if not gears_data:
+        raise RuntimeError("Set GEARS_DATA_ROOT to the external GEARS data directory")
     import pandas as pd_pkg
     import scanpy as sc
-    pd_pkg.Series.nonzero = lambda self: self.to_numpy().nonzero()  # GEARS+新pandas 兼容
+    pd_pkg.Series.nonzero = lambda self: self.to_numpy().nonzero()
     from gears import GEARS, PertData
 
     t_all = time.time()
-    # 1) donor 扰动划分(防泄漏)
+
     train_c, test_c = donor_conditions()
 
-    # 2) PertData 处理 norman(同 gears_norman.py)
+
     ad = sc.read_h5ad(_DONOR + "/data/raw/tasks_data/unseen_perts/norman2019_comb_stack.h5ad")
     pert = ad.obs["perturbation"].astype(str)
-    ad = ad[(~pert.str.contains("IER5L")).values].copy()  # IER5L 不在 GEARS GO graph
+    ad = ad[(~pert.str.contains("IER5L")).values].copy()
     pert = ad.obs["perturbation"].astype(str)
     ad.obs["condition"] = [_to_condition(p) for p in pert]
     ad.obs["cell_type"] = "K562"
     ad.var["gene_name"] = ad.var_names.astype(str)
-    pd = PertData("/home/zkyd/data1/mzy/gears_data")
+    pd = PertData(gears_data)
     pd.new_data_process("norman_donor_l4", adata=ad)
     all_c = set(map(str, pd.adata.obs["condition"].unique()))
     print(f"[gears] PertData conditions={len(all_c)}", flush=True)
 
-    # 3) custom split:train 排除 test 扰动 → 防泄漏;从 train 切 10% val
+
     test_keep = sorted((test_c & all_c) - {"ctrl"})
     train_pool = sorted(((train_c - test_c) & all_c) - {"ctrl"})
     import random
@@ -70,13 +74,13 @@ def main(epochs: int = 20):
     n_val = max(1, len(train_pool) // 10)
     split_dict = {"train": train_pool[n_val:], "val": train_pool[:n_val], "test": test_keep}
     print(f"[split] train={len(split_dict['train'])} val={len(split_dict['val'])} test={len(split_dict['test'])}", flush=True)  # noqa: E501
-    sp = "/home/zkyd/data1/mzy/gears_data/l4_split.pkl"
+    sp = os.path.join(gears_data, "l4_split.pkl")
     with open(sp, "wb") as f:
         pickle.dump(split_dict, f)
     pd.prepare_split(split="custom", split_dict_path=sp, seed=1)
     pd.get_dataloader(batch_size=32, test_batch_size=64)
 
-    # 4) 训练 GEARS
+
     g = GEARS(pd, device="cuda")
     g.model_initialize(hidden_size=64)
     t0 = time.time()
@@ -115,7 +119,7 @@ def main(epochs: int = 20):
                 res = g.predict([list(pert.targets)])
                 k = next(iter(res))  # GEARS dict key
                 abs_pred = torch.tensor(np.asarray(res[k]).ravel(), dtype=torch.float32)
-                self._cache[key] = abs_pred - ctrl_mean  # GEARS delta(同 donor gene order)
+                self._cache[key] = abs_pred - ctrl_mean
             d = self._cache[key].to(c.device)
             return Prediction(mean=c + d, meta={"predictor": "gears"})
 

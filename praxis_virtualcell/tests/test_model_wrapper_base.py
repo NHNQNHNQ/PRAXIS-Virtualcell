@@ -1,12 +1,11 @@
-"""Phase 2:ModelWrapper 契约。测 declare_scope 结构、estimate_uncertainty 契约(含 None 优雅降级)、
-超出 scope 的输入 → rejected(不硬预测)。用一个最小 DummyWrapper 具化 abstract。"""
+"""Tests for model wrapper base."""
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.model_zoo.wrappers.base import ModelWrapper
 
 
 class _DummyWrapper(ModelWrapper):
-    """最小具化:scope=human/genetic_hub/expression;run_prediction 回定值。"""
+    """Test fixture: _DummyWrapper."""
     name = "DummyWrapper"
 
     def declare_scope(self) -> dict:
@@ -25,7 +24,7 @@ class _NoUncertaintyWrapper(_DummyWrapper):
     name = "NoUncWrapper"
 
     def run_prediction(self, model_input: dict) -> dict:
-        return {"prediction": {"delta": 0.2}}  # 无 uncertainty
+        return {"prediction": {"delta": 0.2}}
 
 
 def _bus_with_brain():
@@ -37,7 +36,7 @@ def _bus_with_brain():
 
 
 def _brain_ctx():
-    # 让 assess_applicability 放行 human/gene/expression
+
     return {
         "species": "human",
         "model_applicability": {
@@ -76,7 +75,7 @@ def test_estimate_uncertainty_from_prediction():
 
 
 def test_estimate_uncertainty_handles_missing_gracefully():
-    """铁律:run_prediction 无 uncertainty → 不崩溃,available=False(诚实:说没有,不假造)。"""
+    """Verify estimate uncertainty handles missing gracefully."""
     w = _NoUncertaintyWrapper()
     out = w.run_prediction({})
     unc = w.estimate_uncertainty({}, out.get("prediction"))
@@ -94,10 +93,10 @@ def test_in_scope_request_succeeds():
 
 
 def test_out_of_scope_request_is_rejected_not_hard_predicted():
-    """超出 scope(mouse)→ rejected,不硬预测(fail-closed)。"""
+    """Verify out of scope request is rejected not hard predicted."""
     w = _DummyWrapper()
     bus = _bus_with_brain()
-    ctx = _brain_ctx()  # applicability 仍只列 human
+    ctx = _brain_ctx()
     w.handle(AgentMessage(
         message_id="m2", sender="X", receiver="DummyWrapper", message_type="predict",
         payload={"request": _request(species="mouse"), "brain_context": ctx}, timestamp="t2"), bus)

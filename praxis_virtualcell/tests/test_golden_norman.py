@@ -302,7 +302,7 @@ def test_checked_in_golden_files_are_small_hash_manifests_not_data_or_weights():
     )
 
     assert artifact["remote_root"] == (
-        "/home/zkyd/data1/mzy/praxis-virtualcell-data/golden/norman-2019"
+        "<PRAXIS_GOLDEN_ROOT>"
     )
     assert artifact["pack"]["fingerprint"] == (
         "42165e430bab3474cdc9e607770ff5e204608c4243f84e492c08e2c6442c55ee"

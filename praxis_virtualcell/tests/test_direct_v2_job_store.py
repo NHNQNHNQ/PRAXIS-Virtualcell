@@ -631,15 +631,6 @@ def test_write_new_failure_is_terminal_and_requires_a_new_job_id(tmp_path, monke
         store.save(job_id, candidate={"source": "retry"})
 
 
-def test_jobstore_terminal_retry_contract_is_documented() -> None:
-    """The write-new retry and POSIX reservation limits are public contracts."""
-
-    root = Path(__file__).resolve().parents[2]
-    adr = (root / "docs" / "ADR-0009-virtualcell-model-zoo-v2.md").read_text(encoding="utf-8")
-
-    assert "POSIX flock" in adr
-    assert "unknown" in adr
-    assert "同一 job_id 不可重试；必须使用新的 job_id" in adr
 
 
 def test_reserved_save_and_failure_marker_use_a_cross_process_terminal_transition(

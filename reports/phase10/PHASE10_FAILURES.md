@@ -1,10 +1,13 @@
-# PHASE 10 — 负例与 ABSTAIN 表
+# Offline abstention cases
 
-> T10.3 16 case 中 11 个诚实 abstain(数据源 trace_bundle.json)。
-> 补充负例 corpus(schema/route/provenance gate/注入)见 tests/negative_cases、
-> test_t10_4/5/6、test_negative_cases.py —— 见 spec §2.5 数据源清单。
+These historical results cover 16 test cases representing 14 distinct requests.
+They mix mock, mechanistic, scoring, and advisory paths; they are not a benchmark
+of eight validated predictive models. The tests remain available under
+`praxis_virtualcell/tests/phase10`. Re-run them for current software validation.
 
-| case | abstain_reason(推断) | models_rejected | module_plan |
+Eleven cases abstained. Reasons below are inferred from stored artifacts; the runtime report is authoritative.
+
+| case | Inferred abstention reason | models_rejected | module_plan |
 |---|---|---|---|
 | S1_M1_membrane_FASN | prediction None | ['MockGEARS'] | genetic_hub overall=downgrade |
 | S3_M3_mito_MYC_growth | prediction None | ['CaseRunner'] | cytoplasmic_metabolism overall=downgrade |

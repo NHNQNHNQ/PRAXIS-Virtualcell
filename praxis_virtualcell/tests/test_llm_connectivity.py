@@ -28,6 +28,6 @@ def test_deepseek_json_mode_returns_parseable():
     from praxis_virtualcell.agents_llm.llm_client import make_llm_client
     client = make_llm_client(_cfg())
     res = client.complete(
-        [{"role": "system", "content": "只输出 JSON"},
-         {"role": "user", "content": '返回 {"ok": true}'}], json_mode=True)
+        [{"role": "system", "content": "Output JSON only"},
+         {"role": "user", "content": 'Return {"ok": true}'}], json_mode=True)
     assert json.loads(res["content"])["ok"] is True

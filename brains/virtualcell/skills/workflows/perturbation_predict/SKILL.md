@@ -1,21 +1,26 @@
 ---
 name: perturbation_predict
-description: 预测基因扰动后的单细胞转录组响应(Coordinator 编排 + abstain 可靠性)
+description: Prepare a structured perturbation request for the VirtualCell runtime
 host_env: praxis-virtualcell
 status: deployed
 ---
 
-# perturbation_predict — 扰动响应预测
+# Perturbation request adapter
 
-虚拟细胞核心 skill:给定 baseline 状态 + perturbation,预测 delta 表达并给可靠性判断。
+Provide baseline context and a perturbation specification. The bundled `run.py`
+is a bootstrap input adapter: it returns an input receipt and a simulation flag.
+It does not run a numerical predictor or provide validated biological results.
+Use the VirtualCell CLI or API for predictions and their reliability report.
 
 ## SOP
-1. 准备 baseline scRNA + perturbation spec(genes / dose / time / 物种)。
-2. Coordinator 路由到 perturbation subagent,PredictorRegistry ensemble 预测 delta 表达。
-3. ReliabilityAgent 判断 accept / abstain(强基线下诚实报告)。
-4. 输出 mean / uncertainty / provenance;simulated 产物自标。
 
-## inputs
-- perturbation: 扰动 spec(基因敲除 / 组合 / 药物 / 剂量)
-- cell_type / species: 上下文
-- simulate: bool(干跑标记)
+1. Identify species, cell type, baseline data, genes or drugs, dose, and time.
+2. Retrieve relevant model applicability and evidence rules.
+3. Submit the request through the supported VirtualCell runtime entrypoint.
+4. Report prediction, uncertainty, abstention, and provenance from the runtime.
+
+## Inputs
+
+- `perturbation`: genes, knockout combinations, drugs, dose, and timing.
+- `cell_type` and `species`: biological context.
+- `simulate`: whether the input receipt represents a dry run.

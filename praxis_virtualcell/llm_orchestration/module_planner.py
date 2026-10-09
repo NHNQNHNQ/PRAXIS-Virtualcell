@@ -1,12 +1,6 @@
-"""LLMModulePlanner(Phase 4,进 message bus):复刻 LLMRouter 的"只能从候选选"。
-
-收 module_plan_request({request(raw), module_support, mismatch_queries})→ 归一 → 建候选全集
-(safety_contract.build_candidate_modules)→ 调 LLM 出 module 集 → sanitize_llm_plan 过滤成
-候选子集(fail-closed)→ emit module_candidates_llm 交 ModuleRouter 用 Phase 3 代码合成 ModulePlan。
-
-铁律:LLM 只挑合法 module 集(不产 ModulePlan、不设 engine/verdict/prediction);越候选剔除;
-LLM 失败回退保底含 primary。assert_llm_boundaries 三 flag 恒 False 由入口守卫,LLM 产物只进
-候选过滤 + 后续 provenance notes,不碰 prediction/hard-rule。
+"""Generate module candidates from an LLM, sanitize to the allowed set, and hand them to deterministic
+ModuleRouter. The LLM cannot create authoritative ModulePlan, set engines/verdicts/predictions, or override hard
+rules. Failure falls back to the deterministic primary; all 3 authority flags remain False.
 """
 from __future__ import annotations
 
@@ -21,10 +15,13 @@ from praxis_virtualcell.core.message import AgentMessage
 from praxis_virtualcell.llm_orchestration import safety_contract as SC
 
 _SYS = (
-    "你给虚拟细胞的生物功能模块编排建议。只输出 JSON:"
-    '{"selected_modules":[],"reasoning_summary":"","risk_flags":[]}。'
-    "selected_modules 里的模块名必须来自给定 candidates,不要发明新模块名、不要选 candidates 外的。"
-    "你只挑选相关模块,不决定引擎、不给数值预测、不改裁决。只输出 JSON。"
+
+        'Suggest biological function modules for a virtual cell experiment. Return only '
+        'JSON:{"selected_modules":[],"reasoning_summary":"","risk_flags":[]}.Module names in '
+        'selected_modules must come from the supplied candidates; do not invent names or '
+        'select outside the candidate list. Select relevant modules only; do not choose '
+        'engines, give numerical predictions, or change verdicts. Return only JSON.'
+
 )
 
 
@@ -48,7 +45,7 @@ class LLMModulePlanner(BaseAgent):
             [{"role": "system", "content": _SYS}, {"role": "user", "content": user}],
             json_mode=True)
         mc = SC.sanitize_llm_plan(res.get("content"), candidates, primary=primary)
-        mc["selected"] = mc.pop("selected_modules")   # 对外键名 selected
+        mc["selected"] = mc.pop("selected_modules")
         bus.send(AgentMessage(
             message_id=message.message_id + ":mcllm",
             sender=self.name, receiver="ModuleRouterAgent",

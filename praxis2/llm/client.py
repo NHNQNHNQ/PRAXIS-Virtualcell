@@ -1,12 +1,5 @@
 # praxis2/llm/client.py
-"""LLM 客户端(M10.5:OpenAI /v1/chat/completions 协议)。
-
-旧 Anthropic /v1/messages 路径已删。litellm proxy 在 .53:4000 提供
-OpenAI-compatible endpoint,真路由到 deepseek-v4-pro / deepseek-v4-flash。
-
-backward alias `AnthropicClient = LLMClient` 保留(server/app.py + 老测试
-仍 import 老名)。
-"""
+"""Stream text and tool calls from an OpenAI-compatible provider."""
 
 from __future__ import annotations
 
@@ -42,13 +35,19 @@ class LLMClient:
         system: str | list[dict] | None = None,
         tools: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
-        """非流式 — query.py 不调,留作工具/调试。"""
+
         payload = self._build_payload(
-            model=model, messages=messages, max_tokens=max_tokens,
-            system=system, tools=tools, stream=False,
+            model=model,
+            messages=messages,
+            max_tokens=max_tokens,
+            system=system,
+            tools=tools,
+            stream=False,
         )
         resp = await self._http.post(
-            "/v1/chat/completions", headers=self._headers, json=payload,
+            "/v1/chat/completions",
+            headers=self._headers,
+            json=payload,
         )
         resp.raise_for_status()
         return resp.json()
@@ -62,26 +61,27 @@ class LLMClient:
         system: str | list[dict] | None = None,
         tools: list[dict[str, Any]] | None = None,
     ):
-        """流式 — query.py 调。yields 4 类规范事件。"""
+
         payload = self._build_payload(
-            model=model, messages=messages, max_tokens=max_tokens,
-            system=system, tools=tools, stream=True,
+            model=model,
+            messages=messages,
+            max_tokens=max_tokens,
+            system=system,
+            tools=tools,
+            stream=True,
         )
         payload["stream_options"] = {"include_usage": True}
         async with self._http.stream(
-            "POST", "/v1/chat/completions",
-            headers=self._headers, json=payload,
+            "POST",
+            "/v1/chat/completions",
+            headers=self._headers,
+            json=payload,
         ) as resp:
-            # M10.5.1 fix:streaming response 上直接 raise_for_status 会
-            # 让 HTTPStatusError 包住未读 body 的 response,上游 repr(exc)
-            # 触发 ResponseNotRead。先 aread body 再判错,exception
-            # message 直接含 body 关键信息。
             if resp.status_code >= 400:
                 await resp.aread()
                 body_preview = resp.text[:500] if resp.text else ""
                 raise httpx.HTTPStatusError(
-                    f"HTTP {resp.status_code} from /v1/chat/completions: "
-                    f"{body_preview}",
+                    f"HTTP {resp.status_code} from /v1/chat/completions: {body_preview}",
                     request=resp.request,
                     response=resp,
                 )
@@ -114,7 +114,6 @@ class LLMClient:
         await self._http.aclose()
 
 
-# Backward alias(server/app.py + 老测试仍 import 老名)
 AnthropicClient = LLMClient
 
 
@@ -122,24 +121,12 @@ def _translate_messages_anthropic_to_openai(
     messages: list[dict[str, Any]],
     system: str | list[dict] | None,
 ) -> list[dict[str, Any]]:
-    """Anthropic content-block messages → OpenAI flat messages。
 
-    - system top-level → messages[0] role=system
-    - {role:'user', content:'str'} → 不变
-    - {role:'user', content:[{type:'tool_result', tool_use_id, content}]}
-        → 每个 tool_result 一条 role='tool' message
-    - {role:'assistant', content:[{type:'text',...}, {type:'tool_use',...}]}
-        → 合并为 1 条 assistant message(content + tool_calls 数组)
-    """
     out: list[dict[str, Any]] = []
 
     if system:
-        # system 可能是 str 或 list[dict](Anthropic 形)
         if isinstance(system, list):
-            sys_text = "".join(
-                b.get("text", "") for b in system
-                if isinstance(b, dict) and b.get("type") == "text"
-            )
+            sys_text = "".join(b.get("text", "") for b in system if isinstance(b, dict) and b.get("type") == "text")
         else:
             sys_text = system
         out.append({"role": "system", "content": sys_text})
@@ -153,7 +140,6 @@ def _translate_messages_anthropic_to_openai(
             out.append({"role": role, "content": content})
             continue
 
-        # content is list of blocks(Anthropic 形)
         if role == "user":
             user_texts: list[str] = []
             for block in content:
@@ -161,15 +147,14 @@ def _translate_messages_anthropic_to_openai(
                 if btype == "tool_result":
                     tool_content = block.get("content", "")
                     if isinstance(tool_content, list):
-                        tool_content = "".join(
-                            b.get("text", "") for b in tool_content
-                            if isinstance(b, dict)
-                        )
-                    out.append({
-                        "role": "tool",
-                        "tool_call_id": block["tool_use_id"],
-                        "content": str(tool_content),
-                    })
+                        tool_content = "".join(b.get("text", "") for b in tool_content if isinstance(b, dict))
+                    out.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": block["tool_use_id"],
+                            "content": str(tool_content),
+                        }
+                    )
                 elif btype == "text":
                     user_texts.append(block.get("text", ""))
             if user_texts:
@@ -183,19 +168,22 @@ def _translate_messages_anthropic_to_openai(
                 if btype == "text":
                     texts.append(block.get("text", ""))
                 elif btype == "tool_use":
-                    tool_calls.append({
-                        "id": block["id"],
-                        "type": "function",
-                        "function": {
-                            "name": block["name"],
-                            "arguments": json.dumps(
-                                block.get("input", {}), ensure_ascii=False,
-                            ),
-                        },
-                    })
+                    tool_calls.append(
+                        {
+                            "id": block["id"],
+                            "type": "function",
+                            "function": {
+                                "name": block["name"],
+                                "arguments": json.dumps(
+                                    block.get("input", {}),
+                                    ensure_ascii=False,
+                                ),
+                            },
+                        }
+                    )
             assistant_msg: dict[str, Any] = {"role": "assistant"}
             text_content = "".join(texts)
-            # OpenAI 允许 content=null 当 tool_calls 存在
+
             assistant_msg["content"] = text_content if text_content else None
             if tool_calls:
                 assistant_msg["tool_calls"] = tool_calls

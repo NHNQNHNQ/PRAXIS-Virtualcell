@@ -1,1 +1,1 @@
-在 K562 细胞里敲除 AHR 基因,预测单细胞转录组的变化。
+Predict the single-cell transcriptomic response to AHR knockout in human K562 cells.

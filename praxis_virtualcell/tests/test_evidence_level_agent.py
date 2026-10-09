@@ -1,5 +1,4 @@
-"""Phase 5:EvidenceLevelAgent(进 bus,薄包装 map_evidence_level)。
-红线:只出 evidence_level_ready,不改 report 任何键。"""
+"""Tests for evidence level agent."""
 from praxis_virtualcell.agents.evidence_level_agent import EvidenceLevelAgent
 from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
@@ -36,7 +35,7 @@ def test_agent_does_not_mutate_report():
     r = _report()
     snap = dict(r)
     _run(r)
-    assert r == snap                      # 只读,不改 report
+    assert r == snap
 
 
 def test_downgrade_report_maps_e4_or_e5():

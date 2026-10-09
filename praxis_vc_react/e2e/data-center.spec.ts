@@ -4,7 +4,7 @@ import {
   expectNoBrowserFailures,
 } from "./chat-helpers";
 
-test("Data Center 按物种和关键词筛选并选择后端 cell preset", async ({
+test("Data Center filters by species and keyword and selects a backend cell preset", async ({
   page,
 }) => {
   const failures = collectBrowserFailures(page);
@@ -53,7 +53,7 @@ test("Data Center 按物种和关键词筛选并选择后端 cell preset", async
   expectNoBrowserFailures(failures);
 });
 
-test("Data Center 无匹配项时显示诚实空态", async ({ page }) => {
+test("Data Center displays an empty state when no presets match", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Data Center", exact: true }).click();
   await page.getByRole("searchbox", { name: "Search cells" }).fill("no-such-cell");
@@ -61,7 +61,7 @@ test("Data Center 无匹配项时显示诚实空态", async ({ page }) => {
   await expect(page.getByRole("article")).toHaveCount(0);
 });
 
-test("options 失败时不生成本地假 cell", async ({ page }) => {
+test("An options failure does not create local cell fixtures", async ({ page }) => {
   await page.route("**/api/options", async (route) => {
     await route.fulfill({
       status: 503,
@@ -71,7 +71,7 @@ test("options 失败时不生成本地假 cell", async ({ page }) => {
   });
 
   await page.goto("/");
-  await expect(page.getByRole("alert")).toContainText("细胞目录不可用");
+  await expect(page.getByRole("alert")).toContainText("Cell catalog unavailable");
   await expect(page.getByRole("article")).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "K562", exact: true }),
@@ -84,7 +84,7 @@ test("options 失败时不生成本地假 cell", async ({ page }) => {
   ).toBeDisabled();
 
   await page.getByRole("button", { name: "Data Center", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("细胞目录不可用");
+  await expect(page.getByRole("alert")).toContainText("Cell catalog unavailable");
   await expect(page.getByRole("article")).toHaveCount(0);
   await expect(page.getByLabel("Message PRAXIS")).toHaveCount(0);
 });

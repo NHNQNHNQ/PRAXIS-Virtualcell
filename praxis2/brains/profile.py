@@ -1,13 +1,4 @@
-"""brain 资料卡 loader — 启动一次 walk 13 学科,module-level cache。
 
-`load_all_profiles()` 返 dict[slug, profile_dict],每个 profile 含:
-- case_count / rule_count / skill_workflows / sample_cases
-  (从 brains/<slug>/ 目录推理)
-- short_prompt / methods / helps_with / delivers
-  (从 brains/<slug>/metadata.yaml,缺 → 空)
-
-改 brain 文件 → 重启 backend 才会重新 load。
-"""
 
 from __future__ import annotations
 
@@ -18,7 +9,7 @@ import yaml
 
 from praxis2.brains.migrate import DISCIPLINE_SLUGS
 
-# 仓内 brains/<slug>/。若需 env override,后续可加 PRAXIS_BRAINS_ROOT。
+
 _DEFAULT_ROOT = Path(__file__).resolve().parents[2] / "brains"
 
 
@@ -26,7 +17,7 @@ _CACHE: dict[str, dict[str, Any]] | None = None
 
 
 def load_all_profiles(*, root: Path | None = None) -> dict[str, dict[str, Any]]:
-    """惰性初始化 module-level cache;后续调用 O(1)。"""
+
     global _CACHE
     if _CACHE is not None:
         return _CACHE
@@ -36,7 +27,7 @@ def load_all_profiles(*, root: Path | None = None) -> dict[str, dict[str, Any]]:
 
 
 def reset_cache_for_tests() -> None:
-    """测试用:清缓存让下次 walk 重读。"""
+
     global _CACHE
     _CACHE = None
 
@@ -58,8 +49,8 @@ def _walk_brain(slug: str, *, root: Path) -> dict[str, Any]:
         "helps_with": yaml_data.get("helps_with", []),
         "delivers": yaml_data.get("delivers", []),
     }
-    # examples:metadata.yaml 有则覆盖 app.py _AGENT_META 的 baseline(手册"试试这样问");
-    # 无则不返回此键(handler 的 {**base, **prof} 保留 baseline,避免空数组覆盖)。
+
+
     examples = yaml_data.get("examples")
     if examples:
         prof["examples"] = examples
@@ -73,12 +64,12 @@ def _count_files(dir_path: Path, pattern: str) -> int:
 
 
 def _count_lines_in_files(dir_path: Path, pattern: str) -> int:
-    """粗略数 rule 数 — 每文件每行算 1 rule(实际可能多行 = 1 rule,粗估)。"""
+
     if not dir_path.is_dir():
         return 0
     total = 0
     for p in dir_path.glob(pattern):
-        # M8 修补:跳过 macOS AppleDouble resource fork(._*)
+
         if p.name.startswith("._"):
             continue
         try:
@@ -120,7 +111,7 @@ def _top_5_cases(dir_path: Path, slug: str) -> list[dict[str, str]]:
 
 
 def _extract_title(path: Path) -> str | None:
-    """从 case .md 头部读 `# 标题` 或 frontmatter `title: ...`。"""
+
     try:
         with open(path, encoding="utf-8") as f:
             for line in f:

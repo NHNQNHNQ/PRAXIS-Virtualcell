@@ -1,1 +1,1 @@
-"""model_zoo wrapper 层:ModelWrapper(扩 PredictorAgent + declare_scope/estimate_uncertainty)。"""
+"""Model wrappers extend PredictorAgent with explicit scope and uncertainty contracts."""

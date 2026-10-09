@@ -1,19 +1,16 @@
-# yeast 特有的扰动/遗传互作语义。本期为声明式 schema(供 species brain 审计 + 未来
-# yeast predictor 接入),不改 ModelApplicabilityAgent 代码逻辑。
-# 表达 yeast 真核微生物真正支持的扰动类型与 mammalian scRNA 任务的差异。
+# Declarative yeast deletion, overexpression, and genetic-interaction semantics; eps = W_ab - W_a * W_b.
 supported_perturbations:
-  - gene_deletion          # 基因敲除 (knockout / Δ)
-  - gene_overexpression    # 过表达 (GAL promoter 等)
-  - genetic_interaction    # 双突变 epistasis / SGA
+  - gene_deletion
+  - gene_overexpression
+  - genetic_interaction
 supported_tasks:
-  - predict_genetic_interaction   # 预测双突变适应度 (epistasis score)
-  - predict_deletion_fitness      # 单/多敲除适应度
+  - predict_genetic_interaction
+  - predict_deletion_fitness
 genetic_interaction:
-  scoring: epistasis              # eps = W_ab - W_a * W_b (乘性模型)
+  scoring: epistasis
   classes: [synthetic_lethal, negative, neutral, positive, suppression]
-  requires_pair: true             # 至少两个 perturbation_targets 才算 genetic_interaction
+  requires_pair: true
 notes:
-  # 为什么 mammalian scRNA predictor 不能直接迁来:
-  - yeast 表型读数主要是 fitness/growth,而非 mammalian scRNA 的 delta_expression
-  - yeast 扰动是 deletion/overexpression,非 mammalian 的 drug/gene perturbation 范式
-  - 基因/通路结构与哺乳动物不同,scRNA 图谱词表不通用
+  - yeast phenotypic readouts primarily measure fitness/growth rather than mammalian scRNA delta_expression
+  - yeast perturbations use deletion/overexpression rather than the mammalian drug/gene perturbation paradigm
+  - gene/pathway structures differ from mammals; scRNA atlas vocabularies are not interchangeable

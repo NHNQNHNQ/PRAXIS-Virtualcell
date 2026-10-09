@@ -1,8 +1,7 @@
-"""The P30A source archive is clean-HEAD only, deterministic, and safe to publish locally."""
+"""The source archive is clean-HEAD only, deterministic, and safe to publish locally."""
 
 from __future__ import annotations
 
-import importlib.util
 import os
 import shutil
 import subprocess
@@ -12,13 +11,7 @@ from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]
 _BUILDER = _ROOT / "scripts" / "build_release_source_archive.sh"
-_RELEASE_CANDIDATE = _ROOT / "scripts" / "release_candidate.py"
 
-_SPEC = importlib.util.spec_from_file_location("praxis_release_candidate_source_archive", _RELEASE_CANDIDATE)
-assert _SPEC and _SPEC.loader
-release_candidate = importlib.util.module_from_spec(_SPEC)
-sys.modules[_SPEC.name] = release_candidate
-_SPEC.loader.exec_module(release_candidate)
 
 
 def _run(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -78,7 +71,7 @@ def _build(repo: Path, output: Path, *, extra_env: dict[str, str] | None = None)
     )
 
 
-def test_source_archive_is_reproducible_and_matches_release_candidate(tmp_path: Path) -> None:
+def test_source_archive_is_reproducible(tmp_path: Path) -> None:
     repo = _repository(tmp_path)
     first = tmp_path / "first" / "praxis-virtualcell-1.7.0.tar.gz"
     second = tmp_path / "second" / "praxis-virtualcell-1.7.0.tar.gz"
@@ -95,13 +88,6 @@ def test_source_archive_is_reproducible_and_matches_release_candidate(tmp_path: 
         assert prefix + "pyproject.toml" in names
         assert prefix + "praxis_virtualcell/__init__.py" in names
         assert all(name.startswith(prefix) and "/._" not in name and not name.startswith("._") for name in names)
-    source_sha = _run("git", "rev-parse", "HEAD", cwd=repo).stdout.strip()
-    assert release_candidate._inspect_release_artifact(  # noqa: SLF001 - test the existing RC boundary directly.
-        first,
-        "1.7.0",
-        repo=repo,
-        source_sha=source_sha,
-    ) == {"kind": "source_archive"}
 
 
 def test_source_archive_rejects_dirty_tree_and_preserves_existing_output(tmp_path: Path) -> None:

@@ -1,15 +1,15 @@
 {
-  "dataset": "Jackson et al. 乳腺癌 Imaging Mass Cytometry",
+  "dataset": "Jackson et al. breast cancer Imaging Mass Cytometry",
   "loader": "squidpy.datasets.imc()",
   "date": "2026-07-01",
   "full_data": {
-    "note": "完整 imc.h5ad 由 squidpy 缓存到 data/anndata/(gitignore),4668 cells×34 markers"
+    "note": "Full imc.h5ad cached by squidpy in ignored data/anndata/; 4668 cells × 34 markers."
   },
   "committed_subset": {
     "file": "imc_niche_subset.json",
     "sha256": "43e77a39140fb7070c3ab9feb4f6984c33aa79c07ae9821b2fc40ecaa77ed861",
     "bytes": 346120,
-    "content": "肿瘤细胞 × 空间 niche(间质邻接/贫瘠,k=15 k-NN 预计算)+ Vimentin/ECadherin",
+    "content": "Tumor cells × spatial niches (stromal-adjacent/sparse, precomputed k=15 nearest neighbors) + Vimentin/ECadherin",
     "n_cells": 3909
   }
 }

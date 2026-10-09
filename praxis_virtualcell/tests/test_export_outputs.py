@@ -15,4 +15,4 @@ def test_export_writes_three_files(tmp_path):
     for fn in ("trace.json", "prediction_report.json", "provenance.json"):
         assert (tmp_path / fn).is_file()
     trace = json.loads((tmp_path / "trace.json").read_text(encoding="utf-8"))
-    assert len(trace) >= 10  # 完整通讯链
+    assert len(trace) >= 10

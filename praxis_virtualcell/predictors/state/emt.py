@@ -1,11 +1,7 @@
-"""R4(v0.5):Cancer EMT state 刻画 case —— 间质 vs 上皮 marker(填应用 3 例 3C)。
-
-数据:mcfarland_2020(MIX-seq 泛癌 scRNA)的 committed 子集(`data/cellstate/mcfarland_emt_subset.json`,
-间质/上皮/hk marker × 肉瘤/上皮癌/其它)。分析:EMT score = 间质 marker 评分 − 上皮 marker 评分 →
-分离肉瘤(间质性)vs 上皮癌(Cohen's d)。复用 `scoring.py`。
-
-诚实:mcfarland 无 TGF-β 等 EMT **诱导扰动** → 本 case 是 EMT **状态刻画**(哪类癌偏间质),
-**非**扰动诱导的 EMT 转变(如实标注)。治理:marker 覆盖不足/分离弱 → downgrade。不训练模型。
+"""EMT state characterization in committed mcfarland_2020 MIX-seq pan-cancer data. Compute
+mesenchymal-minus-epithelial marker scores and compare sarcoma with epithelial carcinoma using Cohen's d. No
+TGF-beta/EMT-inducing perturbation is present, so this characterizes state rather than induced transition. Weak
+coverage/separation downgrades; no model is trained.
 """
 from __future__ import annotations
 
@@ -19,13 +15,17 @@ from praxis_virtualcell.predictors.state.scoring import cohens_d, lognorm, panel
 
 _DEFAULT_SUBSET = Path(__file__).resolve().parents[3] / "data" / "cellstate" / "mcfarland_emt_subset.json"
 _D_ACCEPT, _D_CAUTION, _COV_MIN = 0.8, 0.3, 0.5
-_BOUNDARY = ("EMT score 是 marker-based 相对量(间质−上皮),**非**绝对 EMT 程度;mcfarland 泛癌子集;"
-             "**无 EMT 诱导扰动 → 本 case 为 EMT 状态刻画(哪类癌偏间质),非扰动诱导的 EMT 转变**;"
-             "marker/阈值为设定默认;downgrade 表'证据不足以定 EMT 状态'。")
+_BOUNDARY = (
+    'EMT score is a relative marker measure (mesenchymal−epithelial), not absolute EMT '
+    'degree; mcfarland is a pan-cancer subset; without an EMT-inducing perturbation this '
+    'case characterizes EMT state (mesenchymal cancer types), not perturbation-induced '
+    'EMT transition; markers/thresholds are configured defaults; downgrade indicates '
+    'insufficient evidence to establish EMT state.'
+)
 
 
 class EmtDB:
-    """mcfarland EMT 子集(committed):间质/上皮 marker + 癌类分组。"""
+    """Committed mcfarland EMT marker subset with cancer-type groups."""
 
     def __init__(self, json_path: str | Path | None = None) -> None:
         self._d = json.loads(Path(json_path or _DEFAULT_SUBSET).read_text(encoding="utf-8"))
@@ -48,7 +48,7 @@ class EmtDB:
         es = panel_score(ln, epi, hk)
         if ms is None or es is None:
             return None
-        return ms - es                       # >0 偏间质
+        return ms - es
 
     def emt_separation(self, mes_panel=None, epi_panel=None) -> dict:
         mesc, epic = [], []
@@ -67,11 +67,11 @@ class EmtDB:
 
 
 def run_emt_case(raw_req: dict, db: EmtDB | None = None, mes_panel=None, epi_panel=None):
-    """Cancer EMT state 刻画 case → 7 部分 CaseReport(真实 EMT 分离 + 受治理裁决)。"""
+    """Return a 7-part cancer EMT-state report with observed separation and governance."""
     norm = normalize_request(raw_req)
     dec = route(norm)
     if dec.engine != "state_scoring":
-        raise ValueError(f"EMT case 期望 state_scoring,route 给了 {dec.engine}")
+        raise ValueError(f"EMT case expected state_scoring; routing selected {dec.engine}")
     db = db or EmtDB()
 
     coverage = db.marker_coverage(mes_panel, epi_panel)
@@ -94,13 +94,13 @@ def run_emt_case(raw_req: dict, db: EmtDB | None = None, mes_panel=None, epi_pan
         object_normalization={"species": norm["species"], "perturbation_object": norm["perturbation_object"],
                               "normalized_targets": norm["perturbation_targets"],
                               "target_output": norm["target_output"], "preprocessing": "CP10k + log1p",
-                              "note": "EMT 状态刻画(非扰动诱导 EMT 转变)"},
+                              "note": "EMT state characterization (not perturbation-induced EMT transition)"},
         models_tools_selected={"engine": dec.engine, "tool": "mcfarland_2020 (pertpy) + EMT marker panel",
-                               "method": "marker-based EMT 评分(间质−上皮)", "reason": dec.reason},
+                               "method": "Marker-based EMT score (mesenchymal−epithelial)", "reason": dec.reason},
         raw_output={"marker_coverage": round(coverage, 3), "mesenchymal_mean": sep["mesenchymal_mean"],
                     "epithelial_mean": sep["epithelial_mean"], "cohens_d": sep["cohens_d"],
                     "n_mesenchymal": sep["n_mesenchymal"], "n_epithelial": sep["n_epithelial"]},
-        baseline_comparison={"baseline": "上皮癌 EMT 评分(vs 肉瘤/间质性)",
+        baseline_comparison={"baseline": "Epithelial carcinoma EMT score (vs sarcoma/mesenchymal state)",
                              "mesenchymal_mean": sep["mesenchymal_mean"], "epithelial_mean": sep["epithelial_mean"],
                              "separation_cohens_d": sep["cohens_d"]},
         reliability_decision={"disposition": disposition, "caution_flags": flags, "data_gated": False},

@@ -1,8 +1,4 @@
-"""W2.2(v0.4):Yeast KO growth case —— 真跑 iMM904 GEM(机制模型),非 mock。
-
-无 cobra 或 iMM904 SBML 缺失时整文件 skip。断言真实生物学:ERG1(YGR175C,葡萄糖基础培养必需)
-essential;WT growth ≈ 0.288(iMM904 已知值)。治理:不在 GEM 的基因 → downgrade/abstain。
-"""
+"""Tests for yeast gem case."""
 import pytest
 
 pytest.importorskip("cobra")
@@ -15,7 +11,7 @@ from praxis_virtualcell.predictors.mechanistic.yeast_gem import (
 )
 
 if not _DEFAULT_YEAST_SBML.is_file():
-    pytest.skip(f"iMM904 SBML 缺失({_DEFAULT_YEAST_SBML})", allow_module_level=True)
+    pytest.skip(f"iMM904 SBML unavailable({_DEFAULT_YEAST_SBML})", allow_module_level=True)
 
 
 @pytest.fixture(scope="module")
@@ -24,16 +20,16 @@ def gem():
 
 
 def test_wt_growth_known_value(gem):
-    assert gem.wt_growth == pytest.approx(0.2879, abs=1e-3)   # iMM904 WT(葡萄糖基础培养)
+    assert gem.wt_growth == pytest.approx(0.2879, abs=1e-3)
 
 
 def test_erg1_essential(gem):
-    r = gem.knockout("YGR175C")        # ERG1 角鲨烯环氧酶
+    r = gem.knockout("YGR175C")
     assert r.in_model and r.essential and r.growth == pytest.approx(0.0, abs=1e-6)
 
 
 def test_nonessential_gene_grows(gem):
-    r = gem.knockout("YOR375C")        # GDH1 → 非必需(葡萄糖基础)
+    r = gem.knockout("YOR375C")
     assert r.in_model and not r.essential and r.ratio > 0.9
 
 
@@ -53,7 +49,7 @@ def test_full_case_7parts_real_numbers(gem):
     assert dec.engine == "gem_fba"
     assert "iMM904" in d["models_tools_selected"]["tool"]
     kos = {k["gene"]: k for k in d["raw_output"]["knockouts"]}
-    assert kos["YGR175C"]["essential"] is True     # 真实数值,非 mock
+    assert kos["YGR175C"]["essential"] is True
     assert d["reliability_decision"]["disposition"] == "accept"
 
 

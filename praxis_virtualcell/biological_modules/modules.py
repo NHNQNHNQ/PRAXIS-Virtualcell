@@ -1,11 +1,9 @@
-"""八大细胞功能模块规范定义(单一真相源)。
-
-engines 字段 = 该模块当前映射到的现有 route_table engine(可空 = 该模块暂无直接引擎,
-走规则/工具/abstain)。pillars = 三大数据支柱归属(mechanistic_knowledge /
-subcellular_architecture / dynamic_states)。"""
+"""Canonical definitions for 8 cell-function modules. engines maps each module to existing route_table engines; an
+empty list uses rules/tools/abstention. pillars assigns mechanistic_knowledge, subcellular_architecture, and
+dynamic_states.
+"""
 from __future__ import annotations
 
-# 八模块规范顺序(M1..M8),前端与 registry 均以此为准
 MODULE_ORDER = [
     "membrane_system",                 # M1
     "genetic_hub",                     # M2
@@ -20,12 +18,12 @@ MODULE_ORDER = [
 MODULES: dict[str, dict] = {
     "membrane_system": {
         "code": "M1", "display_name": "Membrane System",
-        "engines": [],  # 暂无直接引擎,走脂质通路规则/transporter 注释
+        "engines": [],
         "pillars": ["subcellular_architecture", "mechanistic_knowledge"],
     },
     "genetic_hub": {
         "code": "M2", "display_name": "Genetic Hub",
-        "engines": ["donor_predictor"],  # + 未来 GEARS/scGPT
+        "engines": ["donor_predictor"],
         "pillars": ["dynamic_states", "mechanistic_knowledge"],
     },
     "mitochondrial_energy_metabolism": {
@@ -40,7 +38,7 @@ MODULES: dict[str, dict] = {
     },
     "biosynthetic_network": {
         "code": "M5", "display_name": "Biosynthetic Network",
-        "engines": [],  # 暂无;未来 AlphaFold/ESMFold/PLM
+        "engines": [],
         "pillars": ["mechanistic_knowledge", "subcellular_architecture"],
     },
     "cytoskeletal_framework": {
@@ -55,12 +53,12 @@ MODULES: dict[str, dict] = {
     },
     "degradation_machinery": {
         "code": "M8", "display_name": "Degradation Machinery",
-        "engines": [],  # 暂无;走 proteostasis/autophagy 基因集规则
+        "engines": [],
         "pillars": ["mechanistic_knowledge", "subcellular_architecture"],
     },
 }
 
-# 物种特异显示别名(铁律:bacteria 不叫线粒体)。key = (species, module_id)。
+
 _SPECIES_DISPLAY_ALIASES = {
     ("bacteria", "mitochondrial_energy_metabolism"): "Energy metabolism / redox module",
 }
@@ -72,7 +70,7 @@ def module_ids() -> list[str]:
 
 def module(module_id: str) -> dict:
     if module_id not in MODULES:
-        raise KeyError(f"未知模块: {module_id}(支持: {MODULE_ORDER})")
+        raise KeyError(f"unknown module: {module_id}(supported: {MODULE_ORDER})")
     return MODULES[module_id]
 
 

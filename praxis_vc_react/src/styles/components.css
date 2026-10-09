@@ -1,12 +1,4 @@
-/* 组件基样式 —— spec §3 卡片/按钮/表单/表格/tab/badge/pill。
-   复用现有类名(.btn/.card/.tabs/.badge/.pill 等)以降低后续组件改造成本,配色改到新 token。
-   前端只读展示,不参与预测/治理决策。
 
-   注:本文件经 styles/index.css 在 App.css 之前载入。过渡期旧 views 仍 import App.css,
-   同名类以 App.css(后载入、同特异度)为准,保证旧页面不掉样式(白屏防护);
-   新组件(P4/P5)引用这里的规则。P3/P5 迁完旧 views、删 App.css 后,这里成为唯一来源。 */
-
-/* ---------- 卡片(spec §3) ---------- */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -42,7 +34,6 @@
   white-space: nowrap;
 }
 
-/* ---------- 按钮 ---------- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -84,7 +75,6 @@
   font-size: 13px;
 }
 
-/* ---------- 表单控件 ---------- */
 textarea,
 input[type="text"],
 input:not([type]),
@@ -111,7 +101,6 @@ select:focus {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
-/* ---------- 键值表 / 通用表 ---------- */
 .kv-table {
   width: 100%;
   border-collapse: collapse;
@@ -171,7 +160,6 @@ select:focus {
   box-shadow: var(--card-shadow);
 }
 
-/* ---------- Badge / Pill(状态语义,spec §2) ---------- */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -220,7 +208,6 @@ select:focus {
   background: var(--surface);
 }
 
-/* ---------- 状态点(status dot) ---------- */
 .status-dot {
   width: 8px;
   height: 8px;
@@ -241,7 +228,6 @@ select:focus {
   background: var(--accent);
 }
 
-/* ---------- 提示条 ---------- */
 .note,
 .warn,
 .err {
@@ -269,7 +255,6 @@ select:focus {
   font-family: var(--font-mono);
 }
 
-/* ---------- json / narrative / pretty 代码块 ---------- */
 .json,
 .narrative,
 .pretty {
@@ -291,19 +276,12 @@ select:focus {
   font-size: 13px;
 }
 
-/* ---------- 表格横向滚动容器(防横溢) ---------- */
 .table-scroll {
   overflow-x: auto;
   margin: var(--space-2) 0;
 }
 
-/* ==========================================================================
-   布局层(Task 9.6):独立 Job Sidebar + TopBar,视觉走新 token。
-   与 App.css 的旧 .sidebar/.topbar 用不同类名(js-* / tb-*),互不覆盖;
-   本 task 起 AppShell 用这套新组件,旧 App.css 过渡期仍在但不再驱动这两块。
-   ========================================================================== */
 
-/* ---------- Job Sidebar(独立历史 job 侧栏,不与步骤轨混,spec §1) ---------- */
 .js-sidebar {
   width: 318px;
   flex-shrink: 0;
@@ -450,7 +428,6 @@ select:focus {
   padding: var(--space-3) var(--space-2) var(--space-1);
 }
 
-/* 历史 job 列表:占据主要垂直空间,自身滚动 */
 .js-joblist {
   flex: 1;
   overflow-y: auto;
@@ -499,7 +476,6 @@ select:focus {
   color: var(--text-muted);
 }
 
-/* 收藏区位:结构占位,数据暂空(spec §1 侧栏含收藏) */
 .js-foot {
   border-top: 1px solid var(--border);
   padding: 10px 8px 4px;
@@ -533,7 +509,6 @@ select:focus {
   color: var(--text-muted);
 }
 
-/* ---------- TopBar(mode pill + LLM 提示 pill + 主题开关,spec §1/§3.5) ---------- */
 .tb-bar {
   display: flex;
   align-items: center;
@@ -559,7 +534,6 @@ select:focus {
 .tb-mode-label {
   color: var(--text);
 }
-/* mode 切换按钮(offline ⇄ llm_assisted);不改预测口径,仅切前端展示模式 */
 .tb-mode-toggle {
   border: none;
   background: transparent;
@@ -576,7 +550,6 @@ select:focus {
   color: var(--text);
 }
 
-/* LLM 提示 pill —— 文案守 spec §3.5(自然科学家说法,非工程黑话) */
 .tb-notice {
   margin-left: auto;
   display: inline-flex;
@@ -599,7 +572,6 @@ select:focus {
   flex-shrink: 0;
 }
 
-/* 主题开关(light/dark)—— 切 document.documentElement.dataset.theme,由 AppShell 管 */
 .tb-theme {
   display: inline-flex;
   align-items: center;
@@ -623,7 +595,6 @@ select:focus {
   line-height: 1;
 }
 
-/* ---------- 窄屏降级:侧栏收窄(spec §1;先保证不横向溢出) ---------- */
 @media (max-width: 1040px) {
   .js-sidebar {
     width: 76px;
@@ -669,7 +640,6 @@ select:focus {
   }
 }
 
-/* ---------- Phase 11A:Agent Workspace 数据上下文边界 ---------- */
 .agent-workspace {
   display: flex;
   flex-direction: column;
@@ -733,7 +703,6 @@ select:focus {
   }
 }
 
-/* ---------- Virtual Cell-first 研究首页 ---------- */
 .research-home,
 .cell-hub,
 .reports-page,
@@ -1065,7 +1034,6 @@ select:focus {
   }
 }
 
-/* ---------- Phase 7:物种数据资源库与受控隔离上传 ---------- */
 .data-library {
   display: flex;
   flex-direction: column;
@@ -1332,13 +1300,7 @@ select:focus {
   }
 }
 
-/* ==========================================================================
-   Workspace + StepperRail(Task 9.7):主工作区 = 内部左侧阶段轨 + 右侧阶段内容。
-   阶段轨在「工作区内部」(spec §1),不是全局侧栏(全局侧栏是 .js-sidebar)。
-   宽屏:竖向 rail 在左;窄屏(≤900px):降级为顶部水平 stepper。
-   ========================================================================== */
 
-/* ---------- Workspace 容器:rail(左)+ stage(右) ---------- */
 .ws {
   display: flex;
   align-items: flex-start;
@@ -1346,10 +1308,9 @@ select:focus {
 }
 .ws-stage {
   flex: 1;
-  min-width: 0; /* 允许内部横向滚动容器收缩,防整体横溢 */
+  min-width: 0;
 }
 
-/* ---------- StepperRail:竖向阶段轨(工作区内左侧) ---------- */
 .sr-rail {
   flex-shrink: 0;
   width: 168px;
@@ -1365,7 +1326,6 @@ select:focus {
 .sr-item {
   position: relative;
 }
-/* 阶段节点:标号 + 文本(阶段名 + 提示) */
 .sr-node {
   display: flex;
   align-items: flex-start;
@@ -1411,10 +1371,9 @@ select:focus {
   color: var(--text-muted);
   line-height: 1.3;
 }
-/* 连接线:节点之间的竖线;已完成段落用主色提示进度 */
 .sr-connector {
   position: absolute;
-  left: calc(var(--space-2) + 12px); /* 对齐 marker 中心 */
+  left: calc(var(--space-2) + 12px);
   top: 34px;
   width: 1.5px;
   height: calc(100% - 34px + var(--space-1));
@@ -1424,7 +1383,6 @@ select:focus {
   background: color-mix(in srgb, var(--primary) 45%, var(--border));
 }
 
-/* —— 当前阶段:主色高亮 —— */
 .sr-current {
   background: color-mix(in srgb, var(--primary) 8%, var(--surface));
   border-color: color-mix(in srgb, var(--primary) 30%, transparent);
@@ -1440,7 +1398,6 @@ select:focus {
   font-weight: 600;
 }
 
-/* —— 已完成:可点回退(强调色勾) —— */
 .sr-done {
   cursor: pointer;
 }
@@ -1454,7 +1411,6 @@ select:focus {
   border-color: color-mix(in srgb, var(--primary) 24%, transparent);
 }
 
-/* —— 紧邻可前进阶段:可点(常态) —— */
 .sr-enabled {
   cursor: pointer;
 }
@@ -1463,7 +1419,6 @@ select:focus {
   border-color: color-mix(in srgb, var(--primary) 20%, transparent);
 }
 
-/* —— 未达标 / 不可跳过:禁用置灰,点不动 —— */
 .sr-disabled {
   cursor: not-allowed;
   opacity: 0.42;
@@ -1473,7 +1428,6 @@ select:focus {
   color: var(--text-muted);
 }
 
-/* ---------- 窄屏降级(≤900px):竖轨 → 顶部水平 stepper ---------- */
 @media (max-width: 900px) {
   .ws {
     flex-direction: column;
@@ -1487,7 +1441,7 @@ select:focus {
     display: flex;
     align-items: stretch;
     gap: var(--space-1);
-    overflow-x: auto; /* 极窄时水平滚动,不横溢页面 */
+    overflow-x: auto;
     padding-bottom: var(--space-1);
   }
   .sr-item {
@@ -1505,11 +1459,9 @@ select:focus {
     align-items: center;
     text-align: center;
   }
-  /* 水平模式隐藏长提示,只留阶段名(节省横向空间;提示仍在 title 属性) */
   .sr-hint {
     display: none;
   }
-  /* 连接线改水平,横穿相邻节点之间 */
   .sr-connector {
     left: auto;
     right: calc(-1 * var(--space-1) / 2);

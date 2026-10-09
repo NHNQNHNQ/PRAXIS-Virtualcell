@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-PRAXIS-VirtualCell v0.1 — 出版级图 (Nature Methods 风格, Python/matplotlib)
-所有数字硬编码自 docs/findings/*,注释标注来源 finding。
-输出: 每图 SVG(主, editable text) + PDF + 600dpi TIFF,放本目录。
-运行: python3 make_figures.py
+PRAXIS VirtualCell publication figures rendered with matplotlib.
+Numerical values are preserved from the scientific records; comments retain their source identities.
+Export editable SVG, PDF, and 600 DPI TIFF into this directory.
+Run: python3 make_figures.py
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, Patch, Rectangle
 
-# ── MANDATORY: editable SVG text (nature-figure 不变量) ───────────────────────
+# ── MANDATORY: editable SVG text (editable vector figure contract) ───────────────────────
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["font.sans-serif"] = ["Arial", "Helvetica", "DejaVu Sans", "Liberation Sans"]
 plt.rcParams["svg.fonttype"] = "none"
@@ -29,7 +29,7 @@ plt.rcParams["legend.frameon"] = False
 
 OUT = os.path.dirname(os.path.abspath(__file__))
 
-# ── palette (一族中性 + 一族信号 + 方向色) ────────────────────────────────────
+# ── palette (neutral, signal, and directional palettes) ────────────────────────────────────
 C = {
     "blue":      "#0F4D92",  # base predictor family
     "blue_soft": "#3775BA",
@@ -54,17 +54,17 @@ def save_pub(fig, name, dpi=600):
     fig.savefig(base + ".svg", bbox_inches="tight")
     fig.savefig(base + ".pdf", bbox_inches="tight")
     fig.savefig(base + ".tiff", dpi=dpi, bbox_inches="tight", pil_kwargs={"compression": "tiff_lzw"})
-    fig.savefig(base + ".png", dpi=200, bbox_inches="tight")  # QA 预览, 非投稿用
+    fig.savefig(base + ".png", dpi=200, bbox_inches="tight")  # QA preview, not the publication raster
     plt.close(fig)
     print(f"  saved {name}.svg/.pdf/.tiff (+png preview)")
 
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
-# ║ Fig 1 — 架构 / 数据流 (schematic-led composite)                            ║
+# ║ Fig 1 — Architecture and data flow (schematic-led composite)                            ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 def box(ax, cx, cy, w, h, text, fc, ec=C["ink"], tc=None, fs=6.6, lw=1.0,
         ls="-", rounded=0.02, fw="normal"):
-    """画一个圆角框,文字居中,返回 (cx, cy, w, h)。"""
+    """Draw a rounded box with centered text and return its center and dimensions."""
     if tc is None:
         tc = "white" if fc in (C["blue"], C["bus"], C["red"], C["teal"], C["llm"], C["n_dark"]) else C["ink"]
     p = FancyBboxPatch((cx - w / 2, cy - h / 2), w, h,
@@ -207,7 +207,7 @@ def fig2():
         ("Latent-additive",               0.6365, "base"),
         ("Pretrained backbone (mock)",     0.6183, "base"),
     ]
-    rows = rows[::-1]  # 自下而上递增显示
+    rows = rows[::-1]  # Display increasing values from bottom to top
     labels = [r[0] for r in rows]
     vals = [r[1] for r in rows]
     kinds = [r[2] for r in rows]
@@ -339,7 +339,7 @@ def fig4():
 def fig5():
     fig, ax = plt.subplots(figsize=(7.2, 3.9))
     ax.set_xlim(0, 100); ax.set_ylim(0, 100); ax.axis("off")
-    STAR = "*"  # declarative marker (ASCII-safe; Arial 无 ★/⇔ 字形)
+    STAR = "*"  # declarative marker (ASCII-safe; use an ASCII marker for font portability)
 
     # Stage 1: disagreement
     s1 = box(ax, 14, 78, 24, 20,

@@ -1,7 +1,4 @@
-"""P1.1(v0.6):LLM 决策边界安全 flag —— 三个 allow_llm_* 必须永远 False,不可配置为 True。
-
-铁律:LLM 绝不碰 prediction / hard-rule / learned reliability 终决。这些 flag 是代码级守卫。
-"""
+"""Tests for llm boundary flags."""
 import pytest
 
 from praxis_virtualcell.core.config import RuntimeConfig, assert_llm_boundaries
@@ -22,7 +19,7 @@ def test_from_env_flags_false():
 
 
 def test_assert_boundaries_passes_when_false():
-    assert_llm_boundaries(RuntimeConfig())          # 不抛
+    assert_llm_boundaries(RuntimeConfig())
 
 
 @pytest.mark.parametrize("flag", [
@@ -32,6 +29,6 @@ def test_assert_boundaries_passes_when_false():
 ])
 def test_assert_boundaries_raises_if_any_true(flag):
     c = RuntimeConfig()
-    object.__setattr__(c, flag, True)               # 强行改也要被守卫拦下
+    object.__setattr__(c, flag, True)
     with pytest.raises(Exception):  # noqa: B017
         assert_llm_boundaries(c)

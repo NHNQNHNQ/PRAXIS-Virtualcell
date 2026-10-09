@@ -1,9 +1,6 @@
-# bacteria 专属 abstain 规则(与 generic/default_abstain_rules.yaml 同 schema)。
-# ReliabilityAgent 当前从 generic/default_abstain_rules.yaml 读 abstain_if;此文件是 species 级
-# 自包含声明,用于审计:对 bacteria,由于所有 mammalian Mock* 被 model_applicability 拒绝,
-# applicable 为空 => all_predictors_rejected 命中 => abstain(GPT §7.2 / §7.4)。
+# Bacterial requests abstain when every mammalian predictor is rejected.
 abstain_if:
-  - all_predictors_rejected      # bacteria 主路径:三个 mammalian predictor 全 reject => 弃权
+  - all_predictors_rejected
   - species_not_supported
   - core_predictor_failed
   - model_disagreement_too_high

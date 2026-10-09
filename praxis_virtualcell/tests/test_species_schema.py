@@ -1,9 +1,4 @@
-"""W1.1(v0.4):species-aware request schema —— 把 request 词汇扩到 gene 以外的
-perturbation_object(drug/medium/ligand)与 delta_expression 以外的 target_output
-(growth/flux/state/communication),并对五类代表输入做对象归一。
-
-铁律:仅 schema/归一层,不含任何预测;非法/缺字段必须报错(不静默补默认)。
-"""
+"""Tests for species schema."""
 import pytest
 
 from praxis_virtualcell.agents.species_schema import (
@@ -44,7 +39,7 @@ def test_mouse_gene_normalized():
 
 
 def test_ecoli_ko_growth_normalized():
-    # bacteria 基因敲除 → growth:代表"虚拟细菌细胞"输入
+
     r = normalize_request({
         "species": "bacteria", "cell_type": "E. coli",
         "perturbation_object": "gene", "perturbation_targets": ["b0720"],
@@ -53,7 +48,7 @@ def test_ecoli_ko_growth_normalized():
     assert r["species"] == "bacteria"
     assert r["target_output"] == "growth"
     assert r["perturbation_targets"] == ["B0720"]
-    assert r["medium"] == "glucose_minimal"              # growth 语境保留 medium
+    assert r["medium"] == "glucose_minimal"
 
 
 def test_yeast_deletion_growth_normalized():
@@ -97,7 +92,7 @@ def test_unknown_target_output_raises():
 
 def test_missing_required_field_raises():
     with pytest.raises(SchemaError):
-        normalize_request({"species": "human", "perturbation_object": "gene"})  # 缺 targets/target_output
+        normalize_request({"species": "human", "perturbation_object": "gene"})
 
 
 def test_empty_targets_raises_for_gene():

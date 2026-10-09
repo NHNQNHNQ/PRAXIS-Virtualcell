@@ -1,7 +1,8 @@
-"""v0.6 P2:PRAXIS-VirtualCell 本地 FastAPI 服务。
+"""Local FastAPI adapter for PRAXIS-VirtualCell.
 
-科学决策全由确定性 runtime 完成;本服务只做 HTTP 适配 + job 持久化。默认 offline。
-启动:praxis-vc serve  或  uvicorn praxis_vc_api.main:app
+The deterministic runtime makes scientific decisions; this service adapts
+HTTP requests and persists jobs. Offline mode is the default.
+Start with praxis-vc serve or uvicorn praxis_vc_api.main:app.
 """
 
 from __future__ import annotations
@@ -226,7 +227,6 @@ def _run_job(
         raise HTTPException(status_code=500, detail="job_execution_failed") from exc
 
 
-# CORS:仅放行本地 Vite dev(5173)。前端只读展示,不影响后端科学决策。
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -261,19 +261,19 @@ def health():
 
 @app.post("/api/parse", response_model=ParseOut)
 def parse(body: ParseIn):
-    """自然语言 → candidate_request + 校验(不执行)。offline 不调 LLM。"""
+    """Parse and validate a candidate without execution. Offline mode makes no LLM calls."""
     return svc.parse(body.text, body.mode)
 
 
 @app.get("/api/options")
 def options():
-    """前端下拉选项(只读):物种/扰动类型/任务的权威枚举 + cell_type 常见示例。"""
+    """Return authoritative request enums and editable cell-type examples."""
     return svc.options()
 
 
 @app.get("/api/modules")
 def modules():
-    """八模块目录(只读):M1–M8 的 id/code/display_name/engines/pillars。单一真相源 modules.py。"""
+    """Return the read-only M1-M8 catalog from biological_modules.modules."""
     return svc.modules()
 
 
@@ -441,7 +441,7 @@ def upload_data_file(
 
 @app.post("/api/jobs", response_model=JobOut)
 def create_job(body: JobIn):
-    """已确认的 request → 离线 runtime 执行 → 落盘 job。"""
+    """Execute a confirmed request through the offline runtime and persist the job."""
     return _run_job(
         body.request,
         body.mode,
@@ -455,7 +455,7 @@ def create_job(body: JobIn):
 
 @app.get("/api/jobs")
 def list_jobs():
-    """列出历史 job(只读)。供前端 Jobs 列表复用 JobStore.list_jobs。"""
+    """List saved job summaries through JobStore.list_jobs."""
     return {"jobs": svc.list_jobs()}
 
 
@@ -507,8 +507,7 @@ def provenance(job_id: str):
 
 @app.get("/api/reports/{job_id}/module-plan")
 def module_plan(job_id: str):
-    """该 job 的实际模块路由结果(只读):primary/secondary/entries/overall_verdict。
-    不可路由 job 返回空 module_plan,不重算。"""
+    """Read the stored routing plan; unroutable jobs return an empty plan without recomputation."""
     try:
         return svc.module_plan(job_id)
     except FileNotFoundError as e:
@@ -517,7 +516,7 @@ def module_plan(job_id: str):
 
 @app.get("/api/reports/{job_id}/markdown", response_class=PlainTextResponse)
 def report_markdown(job_id: str):
-    """确定性 report.md(text/markdown)。历史 job 缺 .md 时现场重渲染。"""
+    """Return deterministic Markdown, rendering it from the saved artifact when missing."""
     try:
         return PlainTextResponse(svc.report_markdown(job_id), media_type="text/markdown")
     except FileNotFoundError as e:
@@ -541,8 +540,6 @@ def _react_dist() -> Path | None:
     return checkout_dist if checkout_dist.is_dir() else None
 
 
-# 必须在所有 /api 路由声明之后 mount，API 路由优先匹配。release wheel 使用包内
-# static；开发 checkout 回退到 Vite dist；容器也可显式设置 PRAXIS_VC_STATIC_ROOT。
 _REACT_DIST = _react_dist()
 if _REACT_DIST is not None:
     app.mount("/", StaticFiles(directory=str(_REACT_DIST), html=True), name="react")

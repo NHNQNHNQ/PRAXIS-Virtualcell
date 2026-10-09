@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0d504b">
+<meta name="description" content="An offline presentation of PRAXIS-VirtualCell, a programmable platform and agent framework for traceable virtual cell experiments.">
+<title>PRAXIS-VirtualCell — Programmable Virtual Experiments</title>
+<style>
+:root{--paper:#f5f4ef;--white:#fffefa;--ink:#173832;--muted:#61716b;--teal:#0d665f;--dark:#0d504b;--mint:#e1eee6;--line:#d9e0d8;--orange:#b95d34;--soft-orange:#f3e4d7;--mono:ui-monospace,SFMono-Regular,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--serif:Georgia,"Times New Roman",serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:95px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6}
+button,a{-webkit-tap-highlight-color:transparent}
+a{color:var(--teal);text-underline-offset:4px}
+button{font:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--orange);outline-offset:5px}
+.skip{position:absolute;left:18px;top:-80px;z-index:20;padding:10px 15px;background:var(--white)}
+.skip:focus{top:12px}
+.header{position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line);background:rgba(245,244,239,.97)}
+.header-inner{max-width:1280px;margin:auto;padding:18px 40px;display:flex;align-items:center;gap:28px}
+.brand{display:flex;align-items:center;gap:11px;color:var(--ink);text-decoration:none;font-weight:700;font-size:15px;letter-spacing:-.3px;white-space:nowrap}
+.brand svg{width:29px;height:29px}
+.header nav{display:flex;gap:23px;align-items:center;margin-left:auto}
+.header nav a{font-size:12px;font-weight:600;text-decoration:none;color:var(--muted)}
+.header nav a:hover{color:var(--teal)}
+.present-toggle{display:flex;align-items:center;gap:8px;background:var(--ink);color:var(--white);border:0;border-radius:7px;padding:8px 13px;font-size:12px;font-weight:600}
+.present-toggle svg{width:15px;height:15px}
+main{max-width:1280px;margin:auto;padding:0 40px}
+.panel{padding:80px 0;border-bottom:1px solid var(--line);scroll-margin-top:85px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);font-weight:600;display:flex;align-items:center;gap:12px;margin:0 0 20px}
+.eyebrow:before{content:"";width:22px;height:1px;background:var(--teal)}
+.hero{display:grid;grid-template-columns:1.12fr 1fr;gap:60px;align-items:center;min-height:660px;padding-top:58px;padding-bottom:55px}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(44px,4.9vw,67px);line-height:1.08;letter-spacing:-2.5px;margin:0 0 25px}
+h1 em{color:var(--teal);font-weight:400}
+.hero-description{font-size:16px;line-height:1.75;color:var(--muted);max-width:475px;margin:0 0 27px}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+.button{display:inline-flex;align-items:center;justify-content:center;gap:15px;border:1px solid var(--line);border-radius:7px;padding:11px 17px;text-decoration:none;font-size:12px;font-weight:600;background:var(--white);color:var(--ink)}
+.button.primary{background:var(--teal);color:white;border-color:var(--teal)}
+.button:hover{border-color:var(--teal)}
+.hero-foot{margin:28px 0 0;display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+.hero-foot span{display:flex;align-items:center;gap:7px}
+.hero-foot span:before{content:"";width:4px;height:4px;background:var(--teal);border-radius:50%}
+.cell-scene{position:relative;border:1px solid var(--line);border-radius:16px;background:linear-gradient(150deg,#edf3eb,#e5eee5 70%,#f1e9dc);padding:24px 15px 16px;box-shadow:0 16px 50px -35px #24473d}
+.scene-label{display:flex;justify-content:space-between;padding:0 9px;font-family:var(--mono);font-size:9px;letter-spacing:1.7px;color:var(--muted)}
+.scene-label span:last-child{color:var(--teal)}
+.cell-scene svg{display:block;width:100%;height:auto}
+.scene-caption{border-top:1px solid #cbdacf;padding:12px 9px 0;display:flex;justify-content:space-between;gap:15px;font-size:10px;color:var(--muted)}
+.section-top{display:flex;align-items:flex-end;justify-content:space-between;gap:40px;margin-bottom:34px}
+.section-top .eyebrow{margin-bottom:14px}
+h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,3.3vw,44px);line-height:1.18;letter-spacing:-1.1px;margin:0}
+.section-intro{font-size:14px;color:var(--muted);max-width:390px;margin:0}
+.diagram-shell{background:var(--white);border:1px solid var(--line);border-radius:13px;padding:18px;overflow:auto}
+.architecture-svg{width:100%;min-width:680px;display:block}
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:22px}
+.role{border-left:2px solid var(--teal);padding:4px 0 4px 16px}
+.role.runtime{border-color:var(--orange)}
+.role h3{font-size:13px;margin:0 0 5px}
+.role p{color:var(--muted);font-size:12px;line-height:1.7;margin:0}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:26px}
+.step{padding:15px 15px 14px;border-radius:8px;border:1px solid var(--line);text-align:left;background:var(--white);color:var(--muted)}
+.step span{display:block;font-family:var(--mono);font-size:9px;letter-spacing:1px;margin-bottom:8px}
+.step strong{font-size:15px;font-weight:600}
+.step[aria-selected="true"]{background:var(--dark);border-color:var(--dark);color:white}
+.step[aria-selected="true"] span{color:#a5c9b7}
+.step:hover{border-color:var(--teal)}
+.workflow-panel{display:grid;grid-template-columns:.95fr 1fr;gap:50px;align-items:center;padding:33px 37px;background:var(--white);border:1px solid var(--line);border-radius:12px;min-height:275px}
+.workflow-kicker{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--orange);margin:0 0 11px;text-transform:uppercase}
+.workflow-panel h3{font-family:var(--serif);font-size:30px;font-weight:400;letter-spacing:-.5px;line-height:1.2;margin:0 0 15px}
+.workflow-panel p{font-size:13px;color:var(--muted);margin:0}
+.workflow-card{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:20px 22px}
+.card-label{font-family:var(--mono);font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--teal);margin-bottom:12px}
+.workflow-card .question{font-size:18px;line-height:1.55;color:var(--ink);font-family:var(--serif)}
+.detail-row{display:grid;grid-template-columns:95px 1fr;gap:12px;border-top:1px solid var(--line);padding:9px 0;font-size:11px}
+.detail-row:first-of-type{border-top:0}
+.detail-row span{color:var(--muted)}
+.detail-row strong{font-weight:500}
+.workflow-note{margin-top:15px;color:var(--muted);font-size:10px;display:flex;gap:8px;align-items:center}
+.workflow-note:before{content:"";width:5px;height:5px;background:var(--orange);border-radius:50%}
+.species-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.species-card{background:var(--white);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.species-visual{height:150px;display:grid;place-items:center;position:relative;background:#e7efe5}
+.species-card:nth-child(2) .species-visual{background:#f0e8da}
+.species-card:nth-child(3) .species-visual{background:#e5eded}
+.species-visual svg{width:150px;height:120px}
+.species-number{position:absolute;left:20px;top:15px;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.species-content{padding:23px 22px 24px}
+.species-content h3{font-family:var(--serif);font-size:23px;font-weight:400;letter-spacing:-.5px;margin:0 0 15px}
+.species-content h3 i{font-weight:400}
+.task-pill{display:inline-block;font-family:var(--mono);font-size:8px;letter-spacing:1px;border:1px solid var(--line);padding:3px 7px;border-radius:4px;color:var(--teal);margin-bottom:14px}
+.species-content p{font-size:12px;color:var(--muted);margin:0 0 16px}
+.species-content .task{font-size:14px;color:var(--ink);font-weight:600;margin-bottom:10px}
+.model-line{font-family:var(--mono);font-size:9px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+.evidence-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.evidence-card{border-top:2px solid var(--teal);background:var(--white);border-radius:0 0 8px 8px;padding:23px 19px}
+.evidence-card:last-child{border-color:var(--orange)}
+.evidence-card .index{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--muted);margin-bottom:23px}
+.evidence-card h3{font-size:14px;line-height:1.4;margin:0 0 12px}
+.evidence-card p{font-size:11px;line-height:1.75;color:var(--muted);margin:0}
+.asset-scope{margin-top:28px;border:1px solid var(--line);border-radius:9px;display:grid;grid-template-columns:repeat(3,1fr);overflow:hidden}
+.asset-scope div{padding:18px 20px;border-right:1px solid var(--line)}
+.asset-scope div:last-child{border:0}
+.asset-scope strong{display:block;font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--teal);text-transform:uppercase;margin-bottom:7px}
+.asset-scope p{font-size:11px;color:var(--muted);margin:0}
+.scope-link{font-size:11px;margin:20px 0 0}
+.citation-panel{display:grid;grid-template-columns:1.25fr .75fr;gap:70px;align-items:start}
+.citation-authors{font-family:var(--mono);font-size:11px;color:var(--teal);letter-spacing:.2px;margin:0 0 18px}
+.citation-title{font-family:var(--serif);font-size:31px;line-height:1.25;letter-spacing:-.7px;margin:0 0 20px}
+.citation-meta{font-size:12px;color:var(--muted);margin-bottom:23px}
+.citation-links{display:flex;flex-wrap:wrap;gap:10px}
+.citation-aside{padding:24px 25px;border:1px solid var(--line);border-radius:10px;background:var(--white)}
+.citation-aside h3{font-size:13px;margin:0 0 12px}
+.citation-aside p{font-size:11px;color:var(--muted);margin:0 0 16px}
+.citation-aside a{font-size:11px}
+details{margin-top:24px}
+summary{font-size:12px;color:var(--teal);cursor:pointer}
+pre{font-family:var(--mono);font-size:10px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;background:#e8ece5;padding:18px;border-radius:8px}
+.copy-button{border:1px solid var(--line);border-radius:5px;background:var(--white);color:var(--teal);padding:6px 11px;font-size:10px}
+.footer{max-width:1280px;margin:0 auto;padding:25px 40px 32px;display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:.3px}
+.footer a{color:var(--muted)}
+.presenter-controls{position:fixed;bottom:0;left:0;right:0;background:var(--paper);border-top:1px solid var(--line);padding:14px 40px;display:none;z-index:15}
+.presenter-controls-inner{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.presenter-controls button{border:1px solid var(--line);border-radius:6px;background:var(--white);color:var(--ink);padding:7px 12px;font-size:12px}
+.presenter-controls button:disabled{opacity:.35;cursor:default}
+.slide-label{font-size:12px;font-weight:600}
+.slide-count{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:13px}
+.keyboard-hint{font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:auto;margin-right:22px}
+body.presenting .panel{display:none;border:0;padding:35px 0 25px;min-height:0}
+body.presenting .panel.is-active{display:block}
+body.presenting .hero.is-active{display:grid;padding-top:35px;min-height:calc(100vh - 154px)}
+body.presenting main{max-width:1280px}
+body.presenting .footer{display:none}
+body.presenting .presenter-controls{display:block}
+body.presenting{padding-bottom:75px}
+body.presenting .section-top{margin-bottom:24px}
+body.presenting .architecture-svg{max-height:350px}
+body.presenting .roles{margin-top:16px}
+body.presenting .panel .eyebrow{margin-bottom:12px}
+body.presenting .cell-scene{max-width:480px}
+@media(min-width:1500px){body.presenting main{max-width:1450px}body.presenting .panel{padding-top:60px}body.presenting h2{font-size:51px}body.presenting .architecture-svg{max-height:420px}body.presenting .hero-description{font-size:19px}body.presenting .workflow-panel{min-height:330px}}
+@media(max-width:1000px){.header-inner{padding:16px 24px;gap:18px}.header nav{gap:15px}.header nav a{font-size:11px}main{padding:0 25px}.hero{gap:30px;min-height:570px}.hero-description{font-size:14px}.section-top{gap:25px}.section-intro{max-width:300px;font-size:12px}.workflow-panel{gap:25px;padding:25px}.evidence-grid{gap:10px}.evidence-card{padding:20px 15px}.citation-panel{gap:35px}.footer{padding-left:25px;padding-right:25px}}
+@media(max-width:760px){.header-inner{padding:14px 18px;gap:15px}.header nav{display:none}.present-toggle{margin-left:auto}.brand{font-size:13px}main{padding:0 20px}.panel{padding:50px 0}.hero{grid-template-columns:1fr;gap:35px;padding-top:40px}h1{font-size:49px;letter-spacing:-2px}.hero-description{max-width:100%;font-size:15px}.cell-scene{max-width:520px;width:100%;margin:auto}.section-top{display:block;margin-bottom:25px}.section-intro{max-width:100%;margin-top:18px;font-size:13px}.roles{grid-template-columns:1fr;gap:15px}.steps{gap:5px}.step{padding:12px 8px}.step span{font-size:8px}.step strong{font-size:12px}.workflow-panel{grid-template-columns:1fr;gap:23px;padding:24px;min-height:0}.workflow-panel h3{font-size:28px}.species-grid{grid-template-columns:1fr}.species-card{display:grid;grid-template-columns:130px 1fr}.species-visual{height:100%;min-height:225px}.species-visual svg{width:120px}.species-number{left:12px;top:12px}.species-content{padding:20px}.species-content h3{font-size:22px}.evidence-grid{grid-template-columns:1fr 1fr;gap:13px}.evidence-card .index{margin-bottom:16px}.asset-scope{grid-template-columns:1fr}.asset-scope div{border-right:0;border-bottom:1px solid var(--line)}.citation-panel{grid-template-columns:1fr;gap:28px}.citation-title{font-size:28px}.footer{padding:20px;display:block;font-size:8px}.footer span{display:block;margin-top:8px}.presenter-controls{padding:12px 15px}.keyboard-hint{display:none}.slide-label{font-size:11px}.slide-count{margin-left:7px}body.presenting .hero.is-active{display:grid;min-height:0}body.presenting .cell-scene{max-width:400px}body.presenting .panel{padding-top:25px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{.header,.actions,.presenter-controls,.copy-button{display:none!important}body,body.presenting{background:white;padding:0}main{padding:0;max-width:none}.panel,body.presenting .panel{display:block!important;break-after:page;border:0;padding:25px 0}.hero,body.presenting .hero.is-active{display:grid!important;min-height:0}.footer{display:none}details pre{display:block}.diagram-shell{overflow:visible}.architecture-svg{min-width:0}a{color:var(--ink)}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="header">
+  <div class="header-inner">
+    <a class="brand" href="#overview" aria-label="PRAXIS-VirtualCell overview">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke="#0d665f" stroke-width="1.2"/><circle cx="16" cy="16" r="8" fill="none" stroke="#0d665f" stroke-width="1.2"/><circle cx="16" cy="16" r="3" fill="#0d665f"/><circle cx="27" cy="10" r="2.2" fill="#b95d34"/></svg>
+      PRAXIS<span style="font-weight:400;color:var(--muted)">/ VirtualCell</span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a href="#architecture">Architecture</a>
+      <a href="#workflow">Workflow</a>
+      <a href="#systems">Systems</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#citation">Preprint</a>
+    </nav>
+    <button class="present-toggle" id="present-toggle" type="button" aria-pressed="false" aria-label="Enter presentation mode">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2.5" y="3" width="15" height="10" rx="1.4"/><path d="M10 13v4m-3 0h6"/></svg>
+      <span>Present</span>
+    </button>
+  </div>
+</header>
+<main id="main">
+<section class="panel hero is-active" id="overview" data-slide="Overview" aria-labelledby="hero-title">
+  <div>
+    <p class="eyebrow">Programmable biology</p>
+    <h1 id="hero-title">From biological<br>questions to<br><em>virtual experiments.</em></h1>
+    <p class="hero-description">A modular platform and agent framework that connects biological data, specialized models, and validation evidence into traceable virtual cell experiments.</p>
+    <div class="actions">
+      <a class="button primary" href="#workflow">Explore the workflow <span aria-hidden="true">→</span></a>
+      <a class="button" href="https://arxiv.org/abs/2609.29221v1" target="_blank" rel="noopener noreferrer">Read the preprint <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="hero-foot"><span>Modular models</span><span>Explicit contracts</span><span>Traceable results</span></div>
+  </div>
+  <div class="cell-scene">
+    <div class="scene-label"><span>PRAXIS-VIRTUALCELL</span><span>EXPERIMENT SYSTEM</span></div>
+    <svg viewBox="0 0 440 365" role="img" aria-labelledby="cell-title cell-desc">
+      <title id="cell-title">A virtual cell assembled from scientific components</title>
+      <desc id="cell-desc">Biological data, predictive models, and evidence connect through a shared runtime to form a traceable virtual experiment.</desc>
+      <defs>
+        <radialGradient id="cell-fill"><stop offset="0" stop-color="#c5dbc9" stop-opacity=".65"/><stop offset="1" stop-color="#cadfd0" stop-opacity=".2"/></radialGradient>
+        <pattern id="scene-grid" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill="#a9bfae" opacity=".45"/></pattern>
+      </defs>
+      <rect x="8" y="16" width="424" height="330" fill="url(#scene-grid)"/>
+      <circle cx="220" cy="188" r="119" fill="url(#cell-fill)" stroke="#6a9c80" stroke-width="1.3"/>
+      <ellipse cx="220" cy="188" rx="94" ry="119" fill="none" stroke="#96b89d" stroke-width="1" stroke-dasharray="3 6" transform="rotate(-27 220 188)"/>
+      <ellipse cx="220" cy="188" rx="119" ry="74" fill="none" stroke="#9cbc9f" stroke-width="1" transform="rotate(21 220 188)"/>
+      <circle cx="220" cy="188" r="76" fill="none" stroke="#6e9b7d" stroke-width="1"/>
+      <circle cx="220" cy="188" r="47" fill="#0d665f"/>
+      <circle cx="220" cy="188" r="54" fill="none" stroke="#0d665f" opacity=".18" stroke-width="5"/>
+      <text x="220" y="184" text-anchor="middle" fill="#fffefa" font-family="Arial,sans-serif" font-size="11" font-weight="600">SHARED</text>
+      <text x="220" y="199" text-anchor="middle" fill="#fffefa" font-family="Arial,sans-serif" font-size="11" font-weight="600">RUNTIME</text>
+      <g fill="#0d665f"><circle cx="123" cy="120" r="4"/><circle cx="307" cy="106" r="4"/><circle cx="333" cy="225" r="4"/><circle cx="149" cy="281" r="4"/><circle cx="223" cy="68" r="3"/><circle cx="112" cy="233" r="3"/><circle cx="280" cy="282" r="3"/></g>
+      <g fill="#b95d34"><circle cx="180" cy="119" r="3.5"/><circle cx="277" cy="228" r="3.5"/><circle cx="184" cy="242" r="3"/></g>
+      <g stroke="#527e68" fill="none" stroke-width="1"><path d="M123 120L87 94H41"/><path d="M307 106L340 74H389"/><path d="M333 225L368 254H405"/><path d="M149 281L122 316H58"/></g>
+      <g font-family="Arial,sans-serif" font-size="10" fill="#325d4d"><text x="40" y="83">Biological data</text><text x="332" y="63">Predictive models</text><text x="354" y="272">Evidence</text><text x="57" y="336">Provenance</text></g>
+      <g transform="translate(277 303)"><rect width="131" height="30" rx="6" fill="#fffefa" stroke="#c6d5c7"/><circle cx="15" cy="15" r="3" fill="#0d665f"/><text x="25" y="19" font-family="Arial,sans-serif" font-size="9" fill="#325d4d">Explicit biological scope</text></g>
+    </svg>
+    <div class="scene-caption"><span>Specialized components. Shared execution.</span><span>Data → Experiment → Record</span></div>
+  </div>
+</section>
+
+<section class="panel" id="architecture" data-slide="Architecture" aria-labelledby="architecture-title">
+  <div class="section-top">
+    <div><p class="eyebrow">01 / Architecture</p><h2 id="architecture-title">Compose the experiment.</h2></div>
+    <p class="section-intro">Independent scientific components share a biological contract and a common execution runtime.</p>
+  </div>
+  <div class="diagram-shell">
+    <svg class="architecture-svg" viewBox="0 0 1020 478" role="img" aria-labelledby="architecture-diagram-title architecture-diagram-desc">
+      <title id="architecture-diagram-title">Agent orchestration above a deterministic Virtual Cell runtime</title>
+      <desc id="architecture-diagram-desc">The agent interprets questions and proposes plans. The runtime connects VirtualCellPack, model, adapter, environment, and validation evidence, checks compatibility, and generates a prediction or structured abstention with a trace and provenance.</desc>
+      <defs><marker id="arrow-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0d665f"/></marker></defs>
+      <rect x="16" y="12" width="988" height="86" rx="11" fill="#f5f4ef" stroke="#d9e0d8"/>
+      <text x="43" y="45" font-family="Arial,sans-serif" font-size="18" font-weight="600" fill="#173832">Agent orchestration</text>
+      <text x="43" y="74" font-family="Arial,sans-serif" font-size="14" fill="#61716b">Interpret the question · Build candidate plans · Explain structured results</text>
+      <text x="973" y="46" text-anchor="end" font-family="Consolas,monospace" font-size="11" fill="#0d665f">RESEARCHER INTERFACE</text>
+      <path d="M510 100V136" stroke="#0d665f" stroke-width="1.8" marker-end="url(#arrow-teal)"/>
+      <text x="531" y="122" font-family="Arial,sans-serif" font-size="12" fill="#61716b">Structured experiment request</text>
+      <rect x="16" y="145" width="988" height="228" rx="11" fill="#e6efe8" stroke="#7caa8c"/>
+      <text x="43" y="180" font-family="Arial,sans-serif" font-size="18" font-weight="600" fill="#173832">Deterministic Virtual Cell runtime</text>
+      <text x="973" y="180" text-anchor="end" font-family="Consolas,monospace" font-size="11" fill="#0d665f">SCIENTIFIC EXECUTION</text>
+      <g font-family="Arial,sans-serif">
+        <rect x="42" y="207" width="171" height="97" rx="8" fill="#fffefa" stroke="#c6d6c9"/>
+        <text x="58" y="236" font-size="14" font-weight="600" fill="#173832">VirtualCellPack</text>
+        <text x="58" y="259" font-size="11" fill="#61716b">Data, state, conditions,</text><text x="58" y="278" font-size="11" fill="#61716b">features, perturbations</text>
+        <rect x="232" y="207" width="171" height="97" rx="8" fill="#fffefa" stroke="#c6d6c9"/>
+        <text x="248" y="236" font-size="14" font-weight="600" fill="#173832">Predictive model</text>
+        <text x="248" y="259" font-size="11" fill="#61716b">Supported inputs,</text><text x="248" y="278" font-size="11" fill="#61716b">interventions, readouts</text>
+        <rect x="422" y="207" width="171" height="97" rx="8" fill="#fffefa" stroke="#c6d6c9"/>
+        <text x="438" y="236" font-size="14" font-weight="600" fill="#173832">Adapter</text>
+        <text x="438" y="259" font-size="11" fill="#61716b">Explicit feature mapping,</text><text x="438" y="278" font-size="11" fill="#61716b">input / output conversion</text>
+        <rect x="612" y="207" width="171" height="97" rx="8" fill="#fffefa" stroke="#c6d6c9"/>
+        <text x="628" y="236" font-size="14" font-weight="600" fill="#173832">Environment</text>
+        <text x="628" y="259" font-size="11" fill="#61716b">Software, parameters,</text><text x="628" y="278" font-size="11" fill="#61716b">execution configuration</text>
+        <rect x="802" y="207" width="171" height="97" rx="8" fill="#fffefa" stroke="#c6d6c9"/>
+        <text x="818" y="236" font-size="14" font-weight="600" fill="#173832">Validation evidence</text>
+        <text x="818" y="259" font-size="11" fill="#61716b">Applicable scope,</text><text x="818" y="278" font-size="11" fill="#61716b">benchmarks, status</text>
+      </g>
+      <g stroke="#719b7e" stroke-width="1.4"><path d="M213 256h19"/><path d="M403 256h19"/><path d="M593 256h19"/><path d="M783 256h19"/></g>
+      <text x="510" y="342" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#325d4d">Compatibility checks → Registered predictor execution → Contextualized result</text>
+      <path d="M510 375v35" stroke="#0d665f" stroke-width="1.8" marker-end="url(#arrow-teal)"/>
+      <rect x="188" y="421" width="644" height="43" rx="8" fill="#0d504b"/>
+      <text x="510" y="448" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#fffefa">Prediction or structured abstention · Trace · Provenance</text>
+    </svg>
+  </div>
+  <div class="roles">
+    <div class="role"><h3>The agent supports reasoning and communication.</h3><p>Question interpretation, candidate routing, and result explanation are tied to structured experiment records.</p></div>
+    <div class="role runtime"><h3>The runtime controls scientific execution.</h3><p>Compatibility, predictor outputs, validation evidence, and the final execution verdict remain under runtime authority.</p></div>
+  </div>
+</section>
+
+<section class="panel" id="workflow" data-slide="Experiment workflow" aria-labelledby="workflow-title">
+  <div class="section-top">
+    <div><p class="eyebrow">02 / Workflow</p><h2 id="workflow-title">Five stages. One auditable experiment.</h2></div>
+    <p class="section-intro">Select a stage to follow an illustrative research question from interpretation to its final record.</p>
+  </div>
+  <div class="steps" role="tablist" aria-label="Virtual experiment stages">
+    <button type="button" class="step" id="tab-ask" role="tab" aria-selected="true" aria-controls="workflow-content" tabindex="0" data-step="0"><span>01 / QUESTION</span><strong>Ask</strong></button>
+    <button type="button" class="step" id="tab-review" role="tab" aria-selected="false" aria-controls="workflow-content" tabindex="-1" data-step="1"><span>02 / CONTEXT</span><strong>Review</strong></button>
+    <button type="button" class="step" id="tab-route" role="tab" aria-selected="false" aria-controls="workflow-content" tabindex="-1" data-step="2"><span>03 / PLAN</span><strong>Route</strong></button>
+    <button type="button" class="step" id="tab-run" role="tab" aria-selected="false" aria-controls="workflow-content" tabindex="-1" data-step="3"><span>04 / EXECUTION</span><strong>Run</strong></button>
+    <button type="button" class="step" id="tab-results" role="tab" aria-selected="false" aria-controls="workflow-content" tabindex="-1" data-step="4"><span>05 / RECORD</span><strong>Results</strong></button>
+  </div>
+  <div class="workflow-panel" id="workflow-content" role="tabpanel" aria-labelledby="tab-ask" tabindex="0">
+    <div>
+      <p class="workflow-kicker" id="workflow-kicker">Begin with biology</p>
+      <h3 id="workflow-heading">Ask a research question.</h3>
+      <p id="workflow-description">Describe the biological system, intervention, and target readout. The agent turns explicit context into a candidate experiment request.</p>
+    </div>
+    <div class="workflow-card">
+      <div class="card-label" id="workflow-card-label">Illustrative question</div>
+      <div id="workflow-card-body"><p class="question">“What happens when AHR is knocked out in human K562 cells?”</p></div>
+    </div>
+  </div>
+  <div class="workflow-note">Illustrative workflow; this page does not run a predictor or display experimental measurements.</div>
+  <noscript><p>Ask defines the question. Review checks the biological context. Route identifies matching data, models, and adapters. Run performs runtime checks and scientific execution. Results records the prediction or abstention with evidence and provenance.</p></noscript>
+</section>
+
+<section class="panel" id="systems" data-slide="Biological systems" aria-labelledby="systems-title">
+  <div class="section-top">
+    <div><p class="eyebrow">03 / Biological systems</p><h2 id="systems-title">Shared runtime. Native biology.</h2></div>
+    <p class="section-intro">Different organisms retain their own features, perturbations, models, and readouts within the same framework.</p>
+  </div>
+  <div class="species-grid">
+    <article class="species-card">
+      <div class="species-visual"><span class="species-number">01 / BACTERIA</span>
+        <svg viewBox="0 0 160 120" aria-hidden="true"><g transform="rotate(-22 80 60)"><rect x="29" y="37" width="102" height="46" rx="23" fill="#bed3ba" stroke="#668963" stroke-width="1.5"/><rect x="35" y="43" width="90" height="34" rx="17" fill="none" stroke="#87a17d" stroke-dasharray="2 3"/><path d="M55 57c7-14 11 14 18 0s11 14 18 0 11 14 18 0" fill="none" stroke="#4e7452" stroke-width="1.7"/><g fill="#75926c"><circle cx="49" cy="63" r="2"/><circle cx="91" cy="69" r="2"/><circle cx="75" cy="48" r="2"/><circle cx="112" cy="64" r="2"/></g><path d="M131 60c14-10 7 20 22 7" fill="none" stroke="#668963" stroke-width="1.2"/></g></svg>
+      </div>
+      <div class="species-content"><h3><i>Escherichia coli</i></h3><span class="task-pill">GROWTH</span><p class="task">Gene knockout → growth</p><p>Mechanistic metabolic models connect genetic interventions and growth conditions to a defined phenotype.</p><div class="model-line">Representative model: iML1515</div></div>
+    </article>
+    <article class="species-card">
+      <div class="species-visual"><span class="species-number">02 / YEAST</span>
+        <svg viewBox="0 0 160 120" aria-hidden="true"><ellipse cx="69" cy="69" rx="35" ry="40" fill="#ddc9a8" stroke="#9d835c" stroke-width="1.5" transform="rotate(15 69 69)"/><ellipse cx="69" cy="69" rx="28" ry="33" fill="none" stroke="#b8a17e"/><ellipse cx="105" cy="34" rx="20" ry="23" fill="#e2cfb0" stroke="#9d835c" stroke-width="1.4" transform="rotate(32 105 34)"/><ellipse cx="105" cy="34" rx="14" ry="17" fill="none" stroke="#b8a17e" transform="rotate(32 105 34)"/><circle cx="66" cy="72" r="10" fill="#b29a71" opacity=".65"/><circle cx="105" cy="34" r="5" fill="#b29a71" opacity=".65"/><g fill="#a78e66"><circle cx="53" cy="53" r="3"/><circle cx="84" cy="84" r="3"/><circle cx="77" cy="47" r="2"/></g></svg>
+      </div>
+      <div class="species-content"><h3><i>S. cerevisiae</i></h3><span class="task-pill">FITNESS</span><p class="task">Gene deletion → fitness</p><p>Task-specific contracts preserve deletion identity, culture conditions, and the semantics of fitness readouts.</p><div class="model-line">Representative model: iMM904</div></div>
+    </article>
+    <article class="species-card">
+      <div class="species-visual"><span class="species-number">03 / HUMAN CELLS</span>
+        <svg viewBox="0 0 160 120" aria-hidden="true"><path d="M126 56c2 29-17 48-45 49-29 2-50-18-50-45s21-44 47-45 46 15 48 41z" fill="#bfd5d2" stroke="#648f88" stroke-width="1.5"/><path d="M120 57c1 24-16 42-39 42-26 2-44-15-44-39s18-38 41-39 40 12 42 36z" fill="none" stroke="#8aada5"/><ellipse cx="79" cy="60" rx="22" ry="24" fill="#84aaa2" stroke="#537d75" stroke-width="1.1" transform="rotate(-18 79 60)"/><circle cx="84" cy="58" r="6" fill="#557e75"/><g fill="#71988e"><ellipse cx="106" cy="79" rx="7" ry="3" transform="rotate(-28 106 79)"/><ellipse cx="53" cy="40" rx="6" ry="3" transform="rotate(28 53 40)"/><circle cx="52" cy="77" r="3"/><circle cx="107" cy="42" r="3"/></g></svg>
+      </div>
+      <div class="species-content"><h3>Human K562 cells</h3><span class="task-pill">TRANSCRIPTION</span><p class="task">Perturbation → expression</p><p>Data-driven models support high-dimensional responses and condition-level comparison under fixed feature contracts.</p><div class="model-line">Examples: additive models · GEARS</div></div>
+    </article>
+  </div>
+</section>
+
+<section class="panel" id="evidence" data-slide="Evidence and reproducibility" aria-labelledby="evidence-title">
+  <div class="section-top">
+    <div><p class="eyebrow">04 / Evidence</p><h2 id="evidence-title">Evidence belongs in the experiment.</h2></div>
+    <p class="section-intro">Execution identity and biological support travel with each result. Evidence categories retain distinct meanings.</p>
+  </div>
+  <div class="evidence-grid">
+    <article class="evidence-card"><div class="index">01 / DEVELOPMENT</div><h3>Development validation</h3><p>Performance on a defined development or Golden benchmark, interpreted within that protocol's scope.</p></article>
+    <article class="evidence-card"><div class="index">02 / EXTERNAL CONTEXT</div><h3>External stress testing</h3><p>Behavior on independent sources, changed conditions, or distribution shifts, with the relevant limitations preserved.</p></article>
+    <article class="evidence-card"><div class="index">03 / COMPUTATION</div><h3>Technical reproducibility</h3><p>Consistent results under fixed inputs, models, adapters, environments, and execution configurations.</p></article>
+    <article class="evidence-card"><div class="index">04 / BIOLOGICAL SUPPORT</div><h3>Scientific validation</h3><p>An independent evidence state. Successful execution or replay alone does not establish biological validity.</p></article>
+  </div>
+  <div class="asset-scope">
+    <div><strong>Included</strong><p>K562 protocols, evaluation scripts, and recorded research results.</p></div>
+    <div><strong>External assets</strong><p>Large datasets, fitted artifacts, and trained model checkpoints.</p></div>
+    <div><strong>Packaging scope</strong><p>Complete real-data microbial benchmark pipelines are not bundled.</p></div>
+  </div>
+  <p class="scope-link"><a href="REPRODUCIBILITY.md">Explore the reproducibility guide →</a></p>
+</section>
+
+<section class="panel" id="citation" data-slide="Preprint and citation" aria-labelledby="citation-title">
+  <div class="section-top"><div><p class="eyebrow">05 / Preprint</p><h2 id="citation-title">The framework, in detail.</h2></div></div>
+  <div class="citation-panel">
+    <div>
+      <p class="citation-authors">Zhenyu Ma · Xukai Jiang</p>
+      <p class="citation-title">PRAXIS-VirtualCell: A Programmable and Trustworthy Framework for Agentic Virtual Cell Experiments</p>
+      <p class="citation-meta">arXiv:2609.29221v1 · 24 September 2026<br>DOI: <a href="https://doi.org/10.48550/arXiv.2609.29221" target="_blank" rel="noopener noreferrer">10.48550/arXiv.2609.29221</a></p>
+      <div class="citation-links">
+        <a class="button primary" href="https://arxiv.org/pdf/2609.29221v1" target="_blank" rel="noopener noreferrer">Read the PDF <span aria-hidden="true">↗</span></a>
+        <a class="button" href="https://arxiv.org/abs/2609.29221v1" target="_blank" rel="noopener noreferrer">arXiv abstract <span aria-hidden="true">↗</span></a>
+        <a class="button" href="../CITATION.bib" download>Download BibTeX <span aria-hidden="true">↓</span></a>
+      </div>
+      <details><summary>View BibTeX citation</summary><pre id="bibtex">@article{ma2026praxisvirtualcell,
+  title = {{PRAXIS-VirtualCell}: A Programmable and Trustworthy
+           Framework for Agentic Virtual Cell Experiments},
+  author = {Ma, Zhenyu and Jiang, Xukai},
+  year = {2026},
+  journal = {arXiv preprint arXiv:2609.29221},
+  eprint = {2609.29221},
+  archivePrefix = {arXiv},
+  primaryClass = {q-bio.QM},
+  doi = {10.48550/arXiv.2609.29221},
+  url = {https://arxiv.org/abs/2609.29221v1},
+  note = {Version 1}
+}</pre><button class="copy-button" id="copy-citation" type="button">Copy citation</button><span id="copy-status" role="status" style="font-size:10px;margin-left:10px"></span></details>
+    </div>
+    <aside class="citation-aside">
+      <h3>Explore the platform</h3>
+      <p>Install locally, inspect the experiment workflow, and connect task-specific data and models through explicit contracts.</p>
+      <p><a href="../README.md">Project overview →</a></p>
+      <p><a href="INSTALL.md">Installation guide →</a></p>
+      <p><a href="REPRODUCIBILITY.md">Reproducibility and evidence →</a></p>
+      <a href="https://github.com/NHNQNHNQ/PRAXIS-Virtualcell" target="_blank" rel="noopener noreferrer">Repository ↗</a>
+    </aside>
+  </div>
+</section>
+</main>
+<footer class="footer"><span>PRAXIS-VirtualCell / Programmable virtual experiments</span><span><a href="../LICENSE">MIT license</a> · <a href="../CITATION.cff">Citation metadata</a> · Offline presentation</span></footer>
+<div class="presenter-controls" aria-label="Presentation controls">
+  <div class="presenter-controls-inner">
+    <div><span class="slide-label" id="slide-label">Overview</span><span class="slide-count" id="slide-count">01 / 06</span></div>
+    <span class="keyboard-hint">← → to navigate · Esc to exit</span>
+    <button id="previous-slide" type="button" disabled aria-label="Previous slide">← Previous</button>
+    <button id="next-slide" type="button" aria-label="Next slide">Next →</button>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var panels = Array.from(document.querySelectorAll(".panel"));
+  var presentToggle = document.getElementById("present-toggle");
+  var previous = document.getElementById("previous-slide");
+  var next = document.getElementById("next-slide");
+  var slideIndex = 0;
+  var presenting = false;
+
+  function showSlide(index) {
+    slideIndex = Math.max(0, Math.min(panels.length - 1, index));
+    panels.forEach(function (panel, current) {
+      panel.classList.toggle("is-active", current === slideIndex);
+    });
+    document.getElementById("slide-label").textContent = panels[slideIndex].dataset.slide;
+    document.getElementById("slide-count").textContent =
+      String(slideIndex + 1).padStart(2, "0") + " / " + String(panels.length).padStart(2, "0");
+    previous.disabled = slideIndex === 0;
+    next.disabled = slideIndex === panels.length - 1;
+    if (presenting) window.scrollTo({ top: 0, behavior: "instant" });
+  }
+
+  function setPresentation(enabled) {
+    presenting = enabled;
+    if (enabled) {
+      var nearest = 0;
+      var distance = Infinity;
+      panels.forEach(function (panel, index) {
+        var current = Math.abs(panel.getBoundingClientRect().top - 90);
+        if (current < distance) { distance = current; nearest = index; }
+      });
+      slideIndex = nearest;
+    }
+    document.body.classList.toggle("presenting", enabled);
+    presentToggle.setAttribute("aria-pressed", String(enabled));
+    presentToggle.setAttribute("aria-label", enabled ? "Exit presentation mode" : "Enter presentation mode");
+    presentToggle.querySelector("span").textContent = enabled ? "Exit presentation" : "Present";
+    showSlide(slideIndex);
+    if (!enabled) panels[slideIndex].scrollIntoView({ behavior: "instant", block: "start" });
+  }
+
+  presentToggle.addEventListener("click", function () { setPresentation(!presenting); });
+  previous.addEventListener("click", function () { showSlide(slideIndex - 1); });
+  next.addEventListener("click", function () { showSlide(slideIndex + 1); });
+  document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+    link.addEventListener("click", function (event) {
+      if (!presenting) return;
+      var target = link.getAttribute("href").slice(1);
+      var index = panels.findIndex(function (panel) { return panel.id === target; });
+      if (index >= 0) { event.preventDefault(); showSlide(index); }
+    });
+  });
+  document.addEventListener("keydown", function (event) {
+    if (!presenting || event.target.closest("input,textarea,select,[role=tablist]")) return;
+    if (event.key === "ArrowRight" || event.key === "PageDown") {
+      event.preventDefault(); showSlide(slideIndex + 1);
+    } else if (event.key === "ArrowLeft" || event.key === "PageUp") {
+      event.preventDefault(); showSlide(slideIndex - 1);
+    } else if (event.key === "Escape") {
+      event.preventDefault(); setPresentation(false); presentToggle.focus();
+    }
+  });
+
+  var stageButtons = Array.from(document.querySelectorAll("[data-step]"));
+  var stages = [
+    {
+      kicker: "Begin with biology", heading: "Ask a research question.",
+      description: "Describe the biological system, intervention, and target readout. The agent turns explicit context into a candidate experiment request.",
+      label: "Illustrative question",
+      question: "“What happens when AHR is knocked out in human K562 cells?”"
+    },
+    {
+      kicker: "Make the context explicit", heading: "Review the biological request.",
+      description: "Inspect the parsed system, perturbation, and requested readout. Resolve missing context before planning scientific execution.",
+      label: "Illustrative request",
+      rows: [["System", "Human K562 cells"], ["Intervention", "AHR knockout"], ["Readout", "Expression response"]]
+    },
+    {
+      kicker: "Connect compatible components", heading: "Route to a candidate experiment.",
+      description: "Identify a matching VirtualCellPack, model, and adapter. The runtime evaluates the declared biological scope and available execution environment.",
+      label: "Candidate plan",
+      rows: [["Data", "Pack identity and feature space"], ["Model", "Declared input and output contract"], ["Adapter", "Explicit mapping and conversion"]]
+    },
+    {
+      kicker: "Keep science under runtime control", heading: "Check, then execute.",
+      description: "The deterministic runtime checks assets, compatibility, perturbation scope, environment, and evidence. Registered predictors generate numerical outputs.",
+      label: "Execution requirements",
+      rows: [["Availability", "Data and model assets"], ["Compatibility", "Features, intervention, and readout"], ["Evidence", "Applicable scope and recorded status"]]
+    },
+    {
+      kicker: "Preserve the complete record", heading: "Return a traceable result.",
+      description: "The report explains the prediction or structured abstention using the run's biological context, evidence scope, trace, and provenance.",
+      label: "Virtual experiment record",
+      rows: [["Outcome", "Prediction or structured abstention"], ["Context", "Data, model, adapter, environment"], ["Audit trail", "Evidence, trace, and provenance"]]
+    }
+  ];
+
+  function selectStage(index, focus) {
+    stageButtons.forEach(function (button, current) {
+      button.setAttribute("aria-selected", String(current === index));
+      button.tabIndex = current === index ? 0 : -1;
+    });
+    var stage = stages[index];
+    document.getElementById("workflow-kicker").textContent = stage.kicker;
+    document.getElementById("workflow-heading").textContent = stage.heading;
+    document.getElementById("workflow-description").textContent = stage.description;
+    document.getElementById("workflow-card-label").textContent = stage.label;
+    document.getElementById("workflow-content").setAttribute("aria-labelledby", stageButtons[index].id);
+    var body = document.getElementById("workflow-card-body");
+    body.replaceChildren();
+    if (stage.question) {
+      var question = document.createElement("p");
+      question.className = "question";
+      question.textContent = stage.question;
+      body.appendChild(question);
+    } else {
+      stage.rows.forEach(function (row) {
+        var line = document.createElement("div");
+        line.className = "detail-row";
+        var label = document.createElement("span");
+        var value = document.createElement("strong");
+        label.textContent = row[0]; value.textContent = row[1];
+        line.append(label, value); body.appendChild(line);
+      });
+    }
+    if (focus) stageButtons[index].focus();
+  }
+
+  stageButtons.forEach(function (button, index) {
+    button.addEventListener("click", function () { selectStage(index, false); });
+    button.addEventListener("keydown", function (event) {
+      var target = index;
+      if (event.key === "ArrowRight") target = (index + 1) % stages.length;
+      else if (event.key === "ArrowLeft") target = (index - 1 + stages.length) % stages.length;
+      else if (event.key === "Home") target = 0;
+      else if (event.key === "End") target = stages.length - 1;
+      else return;
+      event.preventDefault(); event.stopPropagation(); selectStage(target, true);
+    });
+  });
+
+  document.getElementById("copy-citation").addEventListener("click", async function () {
+    var citation = document.getElementById("bibtex").textContent;
+    var status = document.getElementById("copy-status");
+    try {
+      if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(citation);
+      else {
+        var field = document.createElement("textarea");
+        field.value = citation;
+        field.style.position = "fixed"; field.style.opacity = "0";
+        document.body.appendChild(field); field.select();
+        var copied = document.execCommand("copy"); field.remove();
+        if (!copied) throw new Error("Copy unavailable");
+      }
+      status.textContent = "Copied.";
+    } catch (_) {
+      status.textContent = "Select the citation text to copy.";
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,4 +1,2 @@
-# 声明哪些 predictor 为"核心":其 run_prediction 抛异常(status=='failed')时触发 core_predictor_failed abstain(§8.2)。
-# 当前无 predictor 声明为 core(三 mock 的 run_prediction 纯返回常数、不会失败),故 core_predictor_failed
-# 在现 mock 数据流下不触发 —— 待真 predictor(可能抛异常)接入后按需声明。诚实记:此为声明式机制,offline mock 不激活。
+# Generic predictor declarations used by the deterministic routing layer.
 core: []

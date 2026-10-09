@@ -1,5 +1,4 @@
-"""Phase 5:learning_queue 数据结构。items 按 information_gain 降序;空候选 → 空 + note(不虚构);
-to_dict 可序列化。advisory 规划产物,不碰裁决。"""
+"""Tests for learning queue."""
 from praxis_virtualcell.active_learning.learning_queue import LearningQueue, LearningQueueItem
 
 
@@ -29,7 +28,7 @@ def test_to_dict_serializable():
     assert d["items"][0]["drivers"] == ["disagreement_high"]
     assert d["notes"] == ["n1"]
     import json
-    json.dumps(d)                          # 可 JSON 序列化(挂 provenance 需要)
+    json.dumps(d)
 
 
 def test_item_to_dict_keys():
@@ -38,7 +37,7 @@ def test_item_to_dict_keys():
 
 
 def test_stable_order_for_equal_gain():
-    """等 gain 保持稳定序(可复现)。"""
+    """Verify stable order for equal gain."""
     q1 = LearningQueue(items=[_item("a", 0.5, "genetic_hub"), _item("b", 0.5, "stress_processor")])
     q2 = LearningQueue(items=[_item("a", 0.5, "genetic_hub"), _item("b", 0.5, "stress_processor")])
     assert [it.candidate for it in q1.items] == [it.candidate for it in q2.items]

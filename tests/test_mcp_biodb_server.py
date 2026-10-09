@@ -1,25 +1,27 @@
-"""praxis2.mcp.servers.biodb_server 单元测试。
-
-测 6 个 _impl 工具的解析逻辑(mock _http_get_json,不真调 API)。
-真实 API 往返见 e2e。
-"""
 from __future__ import annotations
 
 from unittest.mock import patch
 
 from praxis2.mcp.servers import biodb_server as bd
 
-# ---- search_pubmed(esearch + esummary 两步) ----
 
 def test_search_pubmed_parses_articles():
     esearch = {"esearchresult": {"count": "39330", "idlist": ["42268489", "42268478"]}}
-    esummary = {"result": {
-        "uids": ["42268489", "42268478"],
-        "42268489": {"title": "CRISPR review", "fulljournalname": "Nature",
-                     "articleids": [{"idtype": "doi", "value": "10.1/abc"}]},
-        "42268478": {"title": "Cas9 study", "fulljournalname": "Cell",
-                     "articleids": [{"idtype": "doi", "value": "10.2/def"}]},
-    }}
+    esummary = {
+        "result": {
+            "uids": ["42268489", "42268478"],
+            "42268489": {
+                "title": "CRISPR review",
+                "fulljournalname": "Nature",
+                "articleids": [{"idtype": "doi", "value": "10.1/abc"}],
+            },
+            "42268478": {
+                "title": "Cas9 study",
+                "fulljournalname": "Cell",
+                "articleids": [{"idtype": "doi", "value": "10.2/def"}],
+            },
+        }
+    }
     with patch.object(bd, "_http_get_json", side_effect=[esearch, esummary]):
         r = bd.search_pubmed_impl("CRISPR", retmax=2)
     assert r["ok"] is True
@@ -41,11 +43,14 @@ def test_search_pubmed_empty():
 
 # ---- get_pubmed_abstract(efetch) ----
 
+
 def test_get_pubmed_abstract():
-    xml = ("<PubmedArticleSet><PubmedArticle><MedlineCitation>"
-           "<Article><ArticleTitle>T</ArticleTitle>"
-           "<Abstract><AbstractText>This is the abstract body.</AbstractText></Abstract>"
-           "</Article></MedlineCitation></PubmedArticle></PubmedArticleSet>")
+    xml = (
+        "<PubmedArticleSet><PubmedArticle><MedlineCitation>"
+        "<Article><ArticleTitle>T</ArticleTitle>"
+        "<Abstract><AbstractText>This is the abstract body.</AbstractText></Abstract>"
+        "</Article></MedlineCitation></PubmedArticle></PubmedArticleSet>"
+    )
     with patch.object(bd, "_http_get_text", return_value=xml):
         r = bd.get_pubmed_abstract_impl("42268489")
     assert r["ok"] is True
@@ -53,6 +58,7 @@ def test_get_pubmed_abstract():
 
 
 # ---- get_uniprot ----
+
 
 def test_get_uniprot_parses():
     resp = {
@@ -75,6 +81,7 @@ def test_get_uniprot_parses():
 
 # ---- get_pdb ----
 
+
 def test_get_pdb_parses():
     resp = {
         "struct": {"title": "HEN EGG WHITE LYSOZYME"},
@@ -92,13 +99,18 @@ def test_get_pdb_parses():
 
 # ---- search_chembl ----
 
+
 def test_search_chembl_parses():
-    resp = {"molecules": [{
-        "molecule_chembl_id": "CHEMBL25",
-        "pref_name": "ASPIRIN",
-        "molecule_structures": {"canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O"},
-        "max_phase": 4,
-    }]}
+    resp = {
+        "molecules": [
+            {
+                "molecule_chembl_id": "CHEMBL25",
+                "pref_name": "ASPIRIN",
+                "molecule_structures": {"canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O"},
+                "max_phase": 4,
+            }
+        ]
+    }
     with patch.object(bd, "_http_get_json", return_value=resp):
         r = bd.search_chembl_impl("aspirin", limit=1)
     assert r["ok"] is True
@@ -109,11 +121,21 @@ def test_search_chembl_parses():
 
 # ---- get_pubchem ----
 
+
 def test_get_pubchem_parses():
-    resp = {"PropertyTable": {"Properties": [{
-        "CID": 2244, "MolecularFormula": "C9H8O4", "MolecularWeight": "180.16",
-        "CanonicalSMILES": "CC(=O)OC1=CC=CC=C1C(=O)O", "IUPACName": "2-acetyloxybenzoic acid",
-    }]}}
+    resp = {
+        "PropertyTable": {
+            "Properties": [
+                {
+                    "CID": 2244,
+                    "MolecularFormula": "C9H8O4",
+                    "MolecularWeight": "180.16",
+                    "CanonicalSMILES": "CC(=O)OC1=CC=CC=C1C(=O)O",
+                    "IUPACName": "2-acetyloxybenzoic acid",
+                }
+            ]
+        }
+    }
     with patch.object(bd, "_http_get_json", return_value=resp):
         r = bd.get_pubchem_impl("2244", namespace="cid")
     assert r["ok"] is True
@@ -121,8 +143,6 @@ def test_get_pubchem_parses():
     assert r["formula"] == "C9H8O4"
     assert r["smiles"] == "CC(=O)OC1=CC=CC=C1C(=O)O"
 
-
-# ---- 错误处理 ----
 
 def test_http_error_returns_ok_false():
     with patch.object(bd, "_http_get_json", side_effect=RuntimeError("503 timeout")):

@@ -1,4 +1,4 @@
-"""Task 5(W4b):真 MLBackedPredictorAgent 接 core PredictorAgent —— bus 通讯 + 门 + success/rejected。仅远端。"""
+"""Tests for ml agent bus."""
 import os
 
 import pytest
@@ -55,7 +55,7 @@ def test_ml_agent_retrieve_before_predict(agent_and_target):
     from praxis_virtualcell.core.message import AgentMessage
 
     agent, target = agent_and_target
-    bus = MessageBus()  # 无 brain_retrieved → 门拦截
+    bus = MessageBus()
     with pytest.raises(RetrieveBeforePredictError):
         agent.handle(AgentMessage("m1", "X", "MLLatent", "predict", _payload(target), "t1"), bus)
 

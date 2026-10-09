@@ -14,7 +14,7 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
         except Exception:
             has_torch = False
         if not has_torch:
-            skip_remote = pytest.mark.skip(reason="无 torch，跳过 remote 标记测试")
+            skip_remote = pytest.mark.skip(reason="torch unavailable; skipping remote tests")
             for item in items:
                 if "remote" in item.keywords:
                     item.add_marker(skip_remote)
@@ -23,7 +23,7 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
         return
     load_env()
     if not os.environ.get("DEEPSEEK_API_KEY"):
-        skip_llm = pytest.mark.skip(reason="无 DEEPSEEK_API_KEY，跳过 llm 标记测试")
+        skip_llm = pytest.mark.skip(reason="DEEPSEEK_API_KEY unavailable; skipping live LLM tests")
         for item in items:
             if "llm" in item.keywords:
                 item.add_marker(skip_llm)

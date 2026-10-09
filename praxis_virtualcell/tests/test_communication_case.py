@@ -1,8 +1,4 @@
-"""W5.4(v0.4,Phase II):Cell-cell communication case —— L-R 共表达(真跑,填补 Communication 应用)。
-
-可检验:IFN-β 诱导 CXCL10(单核)→CXCR3(T/NK)通讯轴 → stim score ≫ ctrl → accept。
-治理:ligand/receptor 未表达 → downgrade;ligand 不在 L-R 库 → abstain(不虚构通讯)。
-"""
+"""Tests for communication case."""
 import pytest
 
 from praxis_virtualcell.agents.case_report import validate_case_report
@@ -15,7 +11,7 @@ from praxis_virtualcell.predictors.communication.lr_comm import (
 )
 
 if not _DEFAULT_SUBSET.is_file():
-    pytest.skip(f"L-R 子集缺失({_DEFAULT_SUBSET})", allow_module_level=True)
+    pytest.skip(f"L-R subset unavailable({_DEFAULT_SUBSET})", allow_module_level=True)
 
 
 @pytest.fixture(scope="module")
@@ -32,7 +28,7 @@ def test_route_communication_to_comm_engine():
 def test_cxcl10_induced_in_monocytes(db):
     ctrl = db.expr("CXCL10", "CD14+ Monocytes", "ctrl")
     stim = db.expr("CXCL10", "CD14+ Monocytes", "stim")
-    assert stim > ctrl * 5                    # IFN 强诱导 CXCL10(实测 ~50×)
+    assert stim > ctrl * 5
 
 
 def test_cxcl10_cxcr3_communication_accept(db):
@@ -45,7 +41,7 @@ def test_cxcl10_cxcr3_communication_accept(db):
     d = report.to_dict()
     assert dec.engine == "communication"
     assert d["reliability_decision"]["disposition"] == "accept"
-    assert d["raw_output"]["stim"]["score"] > d["raw_output"]["ctrl"]["score"]   # 通讯 stim>ctrl
+    assert d["raw_output"]["stim"]["score"] > d["raw_output"]["ctrl"]["score"]
 
 
 def test_unknown_ligand_abstains(db):

@@ -1,5 +1,4 @@
-"""Phase 3:module 确定性规则(决策 M1/M3)—— primary/secondary 选取 + mismatch query 推导。
-零 LLM、纯函数。铁律:输出 module 必 ∈ MODULE_ORDER。"""
+"""Tests for module rules."""
 from praxis_virtualcell.agents.module_rules import (
     mismatch_query_for,
     pick_primary,
@@ -63,7 +62,7 @@ def test_secondary_excludes_primary():
 def test_mismatch_query_bacteria_degradation_autophagy():
     r = _req(species="bacteria", perturbation_object="gene",
              target_output="growth", perturbation_targets=["lon"])
-    # degradation_machinery + bacteria → 自噬语境 mismatch query
+
     assert mismatch_query_for(r, "degradation_machinery") == "bacteria_autophagy"
 
 

@@ -99,7 +99,7 @@ function composeCellQuery(
   cell: CellPreset,
   example?: PromptExample,
 ): string {
-  return `${query}\n结构化描述:${JSON.stringify({
+  return `${query}\nStructured description:${JSON.stringify({
     species: cell.species,
     cell_type: cell.cell_type,
     ...(example
@@ -136,22 +136,22 @@ function cellPromptExamples(
 
     if (type === "gene") {
       for (const target of targets) {
-        add(`敲低 ${target} 后表达如何变化？`, type, [target]);
+        add(`How does expression change after knocking down ${target}?`, type, [target]);
       }
       if (targets.length > 1) {
-        add(`同时扰动 ${targets.join(" 和 ")} 后表达如何变化？`, type, targets);
+        add(`How does expression change after perturbing ${targets.join(" and ")} together?`, type, targets);
       } else if (targets[0]) {
-        add(`扰动 ${targets[0]} 后，哪些表达响应最明显？`, type, targets);
+        add(`Which expression responses are strongest after perturbing ${targets[0]}?`, type, targets);
       }
     } else if (type === "drug" && targets[0]) {
-      add(`${targets[0]} 药物处理后表达如何变化？`, type, targets);
-      add(`比较 ${targets[0]} 处理前后的表达响应`, type, targets);
+      add(`How does expression change after treatment with ${targets[0]}?`, type, targets);
+      add(`Compare expression responses before and after treatment with ${targets[0]}`, type, targets);
     } else if (type === "medium") {
-      add(`${cell.cell_type} 在培养基变化后表达如何变化？`, type, []);
-      add(`改变培养条件后，${cell.cell_type} 的表达响应是什么？`, type, []);
+      add(`How does expression change in ${cell.cell_type} after changing the medium?`, type, []);
+      add(`What is the expression response of ${cell.cell_type} after changing culture conditions?`, type, []);
     } else if (targets[0]) {
-      add(`${targets.join(" 和 ")} 扰动后表达如何变化？`, type, targets);
-      add(`比较 ${targets.join(" 和 ")} 扰动前后的表达响应`, type, targets);
+      add(`How does expression change after perturbing ${targets.join(" and ")}?`, type, targets);
+      add(`Compare expression responses before and after perturbing ${targets.join(" and ")}`, type, targets);
     }
   }
 
@@ -170,16 +170,16 @@ function unresolvedParseMessage(parsed: ParseResult): string | null {
 
   const details = [
     parsed.missing_fields.length
-      ? `缺少：${parsed.missing_fields.join("、")}`
+      ? `Missing: ${parsed.missing_fields.join(", ")}`
       : "",
-    parsed.errors.length ? `错误：${parsed.errors.join("、")}` : "",
+    parsed.errors.length ? `Errors: ${parsed.errors.join(", ")}` : "",
   ].filter(Boolean);
-  return `还需要更明确的实验描述。${details.join("；") || "请说明扰动类型和对象。"} 未创建模拟任务。`;
+  return `A more specific experiment description is needed. ${details.join("; ") || "Please specify the perturbation type and targets."} No simulation task was created.`;
 }
 
 function requestValue(value: unknown): string {
   if (Array.isArray(value)) {
-    return value.map(String).join("、") || "—";
+    return value.map(String).join(", ") || "—";
   }
   if (typeof value === "string" && value.trim()) return value;
   return value == null ? "—" : String(value);
@@ -391,7 +391,7 @@ export default function PlatformPage({
         message:
           reason instanceof Error
             ? reason.message
-            : "运行服务暂时不可用，请稍后重试。",
+            : "The runtime service is unavailable. Please try again later.",
       });
     } finally {
       if (isCurrent()) {
@@ -432,8 +432,8 @@ export default function PlatformPage({
       const detail = reason instanceof Error ? reason.message : "";
       setResearchError(
         detail.includes("direct_v2_factory_unconfigured")
-          ? "当前服务尚未配置真实研究运行时；未创建任务，也不会回退到 mock、旧模型或解析路径。"
-          : "研究任务兼容预览失败；未创建任务，也不会回退到旧路径。",
+          ? "A real research runtime is not configured. No task was created; mock, legacy model, and parsing fallbacks are disabled."
+          : "The research compatibility preview failed. No task was created; legacy fallbacks are disabled.",
       );
     } finally {
       if (isCurrent()) {
@@ -487,7 +487,7 @@ export default function PlatformPage({
         status: "error",
         message:
           detail ||
-          "真实研究任务暂时不可用；系统不会回退到 mock、旧模型或解析路径。",
+          "Real research tasks are unavailable; mock, legacy model, and parsing fallbacks are disabled.",
       });
     } finally {
       if (isCurrent()) {
@@ -547,7 +547,7 @@ export default function PlatformPage({
       ) {
         updateTurn(turnId, {
           status: "error",
-          message: "所选细胞上下文未通过请求验证，因此没有创建模拟任务。",
+          message: "The selected cell context failed request validation. No simulation task was created.",
           ...parseMetadata,
         });
         return;
@@ -578,7 +578,7 @@ export default function PlatformPage({
         message:
           reason instanceof Error
             ? reason.message
-            : "运行服务暂时不可用，请稍后重试。",
+            : "The runtime service is unavailable. Please try again later.",
       });
     } finally {
       if (isCurrent()) {
@@ -604,8 +604,8 @@ export default function PlatformPage({
           <span>PRAXIS DATA CENTER</span>
           <h1 id="data-center-title">Choose a cell</h1>
           <p>
-            浏览后端声明的 biological context presets。选择只会固定物种和细胞背景；
-            这些资源不与本次选择绑定，实际执行身份以报告为准。
+            Browse biological context presets provided by the backend. Selection sets the species and cell context;
+            these resources are not bound by the selection. The report records the actual execution identity.
           </p>
         </header>
 
@@ -636,7 +636,7 @@ export default function PlatformPage({
 
         {optionsError && (
           <p className="chat-error" role="alert">
-            细胞目录不可用：{optionsError}
+            Cell catalog unavailable: {optionsError}
           </p>
         )}
         {options == null && !optionsError && (
@@ -644,7 +644,7 @@ export default function PlatformPage({
         )}
         {catalogError && (
           <p className="cell-resource-note">
-            同物种数据与 Pack 计数当前不可用；细胞 preset 仍以后端 options 为准。
+            Same-species dataset and Pack counts are unavailable. Cell presets still come from backend options.
           </p>
         )}
 
@@ -680,8 +680,8 @@ export default function PlatformPage({
           <p className="chat-empty">No matching cell presets.</p>
         )}
         <p className="cell-data-boundary">
-          这些是可审阅的上下文 preset，不是已注册 Virtual Cell。Same-species
-          Dataset 或 Pack 计数不表示绑定、兼容、可执行或科学验证。
+          These are reviewable context presets, not registered Virtual Cells. Same-species
+          Dataset or Pack counts do not imply binding, compatibility, execution capability, or scientific validation.
         </p>
       </section>
     );
@@ -694,7 +694,7 @@ export default function PlatformPage({
           <div>
             <span>SAVED REPORT</span>
             <h1>Run report</h1>
-            <p>结果、abstention 与 execution identity 均来自后端保存记录。</p>
+            <p>Results, abstention, and execution identity come from records saved by the backend.</p>
           </div>
           <button type="button" onClick={onNewChat}>
             New chat
@@ -712,14 +712,14 @@ export default function PlatformPage({
           <span>PRAXIS · VIRTUAL CELL</span>
           <h1 id="cell-first-title">Choose a cell to begin.</h1>
           <p>
-            先固定生物背景，再用自然语言描述实验。后端会根据请求自动路由现有执行路径并
-            直接返回报告；报告会明确显示预测或 abstain。
+            Set the biological context, then describe the experiment in natural language. The backend routes the request through existing execution paths and
+            returns a report showing a prediction or explicit abstention.
           </p>
         </div>
 
         {optionsError && (
           <p className="chat-error" role="alert">
-            细胞目录不可用：{optionsError}
+            Cell catalog unavailable: {optionsError}
           </p>
         )}
         {options == null && !optionsError && (
@@ -768,8 +768,8 @@ export default function PlatformPage({
           <div>
             <strong>What would you like to investigate?</strong>
             <p>
-              描述扰动、处理或条件即可。我会将任务提交给现有运行后端并直接返回报告；
-              实际模型、执行身份与 abstain 以报告为准。
+              Describe the perturbation, treatment, or condition. I will submit the task to the runtime backend and return a report;
+              the report records the actual models, execution identity, and abstention.
             </p>
           </div>
         </div>
@@ -858,14 +858,14 @@ export default function PlatformPage({
                   </button>
                 ) : (
                   <p className="chat-error" role="alert">
-                    当前兼容计划不可执行；未创建任务。
+                    The compatibility plan is not executable. No task was created.
                   </p>
                 )}
               </section>
             )}
             <small>
-              “Preview registered…” 先读取同一运行时的兼容计划；仅在你明确确认后提交该目录任务。
-              其余示例只填入问题。研究运行不等于科学验证或生产晋级。
+              “Preview registered…” retrieves a compatibility plan from the same runtime and submits the catalog task only after explicit confirmation.
+              Other examples only fill the question. Research execution does not imply scientific validation or production promotion.
             </small>
           </div>
         )}
@@ -885,8 +885,8 @@ export default function PlatformPage({
                 <div>
                   <strong>Preparing the report…</strong>
                   <p>
-                    正在解析任务并提交现有运行后端；所选 cell preset 不绑定
-                    Dataset、Pack 或模型。
+                    Parsing the task and submitting it to the runtime backend. The selected cell preset does not bind a
+                    Dataset, Pack, or model.
                   </p>
                 </div>
               </div>
@@ -897,7 +897,7 @@ export default function PlatformPage({
                 <div>
                   <strong>Please confirm this interpretation.</strong>
                   <p>
-                    当前服务未连接语言模型。为避免确定性后备误解实验语义，请确认以下结构化请求。
+                    No language model is connected. Please confirm the structured request to avoid misunderstandings from deterministic fallback parsing.
                   </p>
                   <dl className="interpretation-grid">
                     <div>
@@ -969,8 +969,8 @@ export default function PlatformPage({
                   {parseLabel(turn) ? ` ${parseLabel(turn)}.` : ""}
                 </p>
                 <p className="assistant-report-boundary">
-                  所选 cell preset 只提供请求上下文，并未绑定 Dataset、Pack
-                  或模型。报告不代表该细胞已具备经过科学验证的预测器。
+                  The selected cell preset only supplies request context; it does not bind a Dataset, Pack,
+                  or model. The report does not imply a scientifically validated predictor for this cell.
                 </p>
                 <LazyResultsStage jobId={turn.jobId} onReset={onNewChat} />
               </div>
@@ -1008,9 +1008,9 @@ export default function PlatformPage({
           {busy ? "…" : "↑"}
         </button>
         <small>
-          语言辅助只解析与解释文字；数据、模拟、数值与最终裁决由确定性后端完成。
+          Language assistance only parses and explains text; the deterministic backend handles data, simulation, numerical results, and final decisions.
           {health?.llm_enabled === false
-            ? " 当前服务未连接语言模型，确定性解析需要你确认后才会运行。"
+            ? " No language model is connected. Deterministic parsing requires confirmation before execution."
             : ""}
         </small>
       </form>

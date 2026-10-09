@@ -1,4 +1,4 @@
-"""注册 + 派发 + 驱动 workflow。predictor fan-out 也走 bus(no fake multi-agent)。"""
+"""Register agents, dispatch messages, and drive workflows. Predictor fan-out also communicates through the bus."""
 
 from __future__ import annotations
 
@@ -124,7 +124,7 @@ class AgentRuntime:
     def dispatch_message(self, message: AgentMessage) -> None:
         agent = self._agents.get(message.receiver)
         if agent is None:
-            raise UnknownAgentError(f"未注册 agent: {message.receiver}")
+            raise UnknownAgentError(f"unregistered agent: {message.receiver}")
         self.bus.send(message)
         agent.handle(message, self.bus)
 
@@ -132,7 +132,7 @@ class AgentRuntime:
         self.dispatch_message(message)
         out = self.bus.latest(expected_type)
         if out is None:
-            raise RuntimeError(f"{message.receiver} 未产出 {expected_type}")
+            raise RuntimeError(f"{message.receiver} did not produce {expected_type}")
         return out
 
     def _dispatch_collect_direct_v2(self, message: AgentMessage) -> AgentMessage:
@@ -149,7 +149,7 @@ class AgentRuntime:
                 and out.task_id == message.task_id
             ):
                 return out
-        raise RuntimeError("ModelBrokerAgent 未产出当前 direct-v2 execution_plan_ready")
+        raise RuntimeError("ModelBrokerAgent did not produce the current direct-v2 execution_plan_ready")
 
     def run_workflow_v2(
         self,
@@ -694,9 +694,9 @@ class AgentRuntime:
         pack_id: str | None = None,
         pack_version: str | None = None,
     ) -> dict:
-        """request: VirtualCellRequest。返回最终 report dict。全程经 bus。
-        trace_id/task_id 默认 None → 用 request canonical-hash(现有行为完全不变);
-        free-text 入口传入以全程复用同一 trace(P10.C3 修 P10.A 遗留观察)。"""
+        """Run a VirtualCellRequest entirely through the bus and return the final report. Missing trace_id/task_id
+        use the canonical request hash; free-text entry points can inject one shared trace identity.
+        """
         with self.execution_context():
             return self._run_workflow(
                 request,
@@ -790,11 +790,11 @@ class AgentRuntime:
                 planned.message_id,
             )
             self.bus.send(app)
-        # Phase 4:module-aware 路由旁路挂载(SpeciesContext →[LLMModulePlanner?]→ ModuleRouter),
-        # 产 module_plan 挂进 report.provenance.module_plan;不改下游 predictor fan-out 契约。
-        # 旁路 gating:module_plan 只对"可路由"请求有意义(如同 predictor 只对 applicable 请求跑)。
-        # unsupported 物种(applicable 空)/ 空 perturbation_targets 走 abstain 路径,本无有意义的
-        # module_plan —— 不旁路(不调 normalize_request、不崩),与现有 abstain 语义一致。
+
+
+
+
+
         module_plan = None
         llm_cross_module = None
         if "ModuleRouterAgent" in self._agents and self._is_routable(app):
@@ -851,9 +851,9 @@ class AgentRuntime:
         m = self.mk_message(prov.sender, "Report", "render", prov.payload, prov.message_id)
         rep = self._dispatch_collect(m, "report_done")
         report = rep.payload["report"]
-        # gate 链前捕获 reliability 原判 abstain(所有 gate override 前),供 Gate C 镜像
-        # reliability.py 的 not-abstain 守卫(避免 reliability 因其它原因 abstain 时 Gate C
-        # 独立记一条 reliability 从未确认的 cell_type 越界 provenance)。
+
+
+
         reliability_abstained = report.get("abstain", False)
         if capability_plan is not None:
             report.setdefault("provenance", {})["execution_plan"] = capability_plan
@@ -875,15 +875,15 @@ class AgentRuntime:
             report.setdefault("provenance", {})["llm_route_suggestion"] = llm_route
         if module_plan is not None:
             report.setdefault("provenance", {})["module_plan"] = module_plan
-        # P10.C1:跨模块一致性 governance gate。module_plan 存在时校验内部一致性(check_module_plan
-        # 纯确定性 4 规则)。一致(violations 空)→ 零动作保字节等价;检出违规 → 记录 provenance +
-        # 若 reliability 原未 abstain 则真触发对外 abstain(reliability/critic 裁决零改数值不变:
-        # 只 override report 对外 abstain/prediction/abstain_reasons,reliability 提取字段原样保留,
-        # 原 abstain 记 provenance 供审计)。确定性、无 LLM。
+
+
+
+
+
         if module_plan is not None:
             violations = check_module_plan(module_plan)
             if violations:
-                reliability_abstain = report.get("abstain", False)  # 原判(override 前捕获)
+                reliability_abstain = report.get("abstain", False)
                 gate_abstained = not reliability_abstain
                 if gate_abstained:
                     report["abstain"] = True
@@ -896,8 +896,8 @@ class AgentRuntime:
                     "gate_abstained": gate_abstained,
                     "reliability_original_abstain": reliability_abstain,
                 }
-        # P10.C2 Gate A:per-call hash 完整性 fail-closed。models_used 的 per_call 缺
-        # name/version/input_hash/output_hash 任一 → 对外 abstain(reliability 裁决数值不变)。
+
+
         pch = report.get("provenance", {}).get("per_call_hashes", {})
         hash_missing = {
             n: miss for n in report.get("models_used", []) if (miss := check_call_provenance(pch.get(n, {})))
@@ -906,16 +906,16 @@ class AgentRuntime:
             apply_governance_gate(
                 report, "incomplete_call_provenance", "provenance_hash_gate", {"missing": hash_missing}
             )
-        # P10.C2 Gate B:provenance 完整性硬门(防御性类不变量,罕触发)。必需契约缺键 →
-        # fail-closed 对外 abstain。字段恒由代码构造,正常不触发;防未来重构漏挂。
+
+
         prov_missing = check_report_provenance(report)
         if prov_missing:
             apply_governance_gate(
                 report, "incomplete_provenance", "provenance_completeness_gate", {"missing": prov_missing}
             )
-        # P10.C2 Gate C:cell_type 越界 abstain。全部被采纳 predictor 声明 supported_cell_types
-        # 且 req cell_type 全越界 → 对外 abstain。reliability 的 downgrade:cell_type 数值语义保留,
-        # Gate C 只叠加对外 abstain(不改 reliability)。
+
+
+
         ct_violations = check_cell_type_domain(
             app.payload["request"],
             app.payload["brain_context"],
@@ -928,10 +928,10 @@ class AgentRuntime:
             )
         if llm_cross_module is not None:
             report.setdefault("provenance", {})["llm_cross_module_notes"] = llm_cross_module
-        # Phase 5:证据等级(插点 C)+ 主动学习(插点 D)旁路挂载。确定性零 LLM,advisory 不碰裁决。
-        # 读已组装完成的 report(reliability/abstain/disagreement/downgrade/caution/learned/module_plan
-        # 信号全齐的最早时机)→ 只往 report.provenance 追加 evidence_level/learning_queue 两新键,
-        # 不动任何现有键、不改 prediction/裁决。gated:agent 不在册则分支不进(OFFLINE 字节等价)。
+
+
+
+
         evidence_level = None
         if "EvidenceLevelAgent" in self._agents:
             em = self.mk_message(
@@ -958,11 +958,11 @@ class AgentRuntime:
         if "LLMReport" in self._agents:
             nm = self.mk_message("Report", "LLMReport", "llm_render", {"report": report}, rep.message_id)
             report["narrative"] = self._dispatch_collect(nm, "llm_narrative").payload["narrative"]
-            # P10.C3 narrative 一致性 gate:确定性窄门校验 narrative 对 report 的忠实性
-            # (仅 abstain 场景生效,见 governance/narrative_consistency.py 的范围与 limitation)。
-            # 违规 → fail-closed 丢弃 narrative + 记 provenance(原文留审计)。
-            # **绝不碰 abstain/prediction/reliability**:narrative 不忠实 ≠ 预测不可靠,
-            # LLM 外层问题不得反向改写确定性裁决。
+
+
+
+
+
             nv = check_narrative(report, report["narrative"])
             if nv:
                 report.setdefault("provenance", {})["narrative_consistency_gate"] = {
@@ -974,14 +974,9 @@ class AgentRuntime:
 
     @staticmethod
     def _is_routable(app: AgentMessage) -> bool:
-        """module_plan 旁路的"可路由"判据(显式条件,非捕获异常)。
-
-        与现有管线 abstain 语义同源,排除两类本就无有意义 module_plan 的请求:
-          1) unsupported 物种(martian/bacteria/yeast)→ ModelApplicability 产 applicable==[]
-             (如同现有管线不对它们跑 predictor);
-          2) 空 perturbation_targets → reliability 判 no_perturbation_specified 硬 abstain
-             (与 reliability.py 第 43 行 `[t for t in targets if str(t).strip()]` 判据同源)。
-        两者恰是 module 路由 normalize_request 会抛 SchemaError 的情况;不满足则不旁路。
+        """Determine whether side-path module routing is meaningful using explicit predicates. Exclude unsupported
+        species with no applicable predictors and empty perturbation_targets that trigger hard abstention. These
+        are also schema-normalization failures; do not manufacture a module plan.
         """
         req = app.payload.get("request", {})
         applicable = app.payload.get("applicable") or []
@@ -989,8 +984,9 @@ class AgentRuntime:
         return bool(applicable) and bool(targets)
 
     def _build_module_plan(self, app: AgentMessage) -> dict | None:
-        """Phase 4 旁路:SpeciesContext →[LLMModulePlanner?]→ ModuleRouter,产 module_plan(dict)。
-        OFFLINE(无 LLMModulePlanner)→ ModuleRouter 走确定性 secondary,零 LLM。"""
+        """Build a module plan through SpeciesContext, optional LLMModulePlanner, and ModuleRouter. Offline
+        secondary selection is deterministic and makes no LLM call.
+        """
         module_req = self._request_to_module_input(app.payload["request"])
         sm = self.mk_message(
             "ModelApplicability", "SpeciesContextAgent", "species_context", {"request": module_req}, app.message_id
@@ -1006,15 +1002,15 @@ class AgentRuntime:
                 "SpeciesContextAgent", "LLMModulePlanner", "module_plan_request", base_payload, app.message_id
             )
             mc = self._dispatch_collect(pm, "module_candidates_llm").payload
-            route_payload = mc  # 已含 request/module_support/mismatch/module_candidates
+            route_payload = mc
         else:
-            route_payload = base_payload  # OFFLINE:无候选 → ModuleRouter 走确定性
+            route_payload = base_payload
         rm = self.mk_message("SpeciesContextAgent", "ModuleRouterAgent", "module_route", route_payload, app.message_id)
         return self._dispatch_collect(rm, "module_plan_ready").payload
 
     @staticmethod
     def _request_to_module_input(req: dict) -> dict:
-        """委托 agents.request_adapter.request_to_module_input(消重,行为不变)。"""
+        """Delegate to agents.request_adapter.request_to_module_input without changing behavior."""
         from praxis_virtualcell.agents.request_adapter import request_to_module_input
 
         return request_to_module_input(req)
@@ -1100,7 +1096,7 @@ class AgentRuntime:
         )
 
     def run_workflow_from_text(self, text: str) -> dict:
-        """free-text(仅 llm_assisted+key):LLMInputInterpreter 解析 → run_workflow。"""
+        """Parse free text through LLMInputInterpreter, then run_workflow; requires llm_assisted and credentials."""
         with self.execution_context():
             return self._run_workflow_from_text(text)
 
@@ -1109,11 +1105,11 @@ class AgentRuntime:
         from praxis_virtualcell.core.exceptions import InputValidationError
         from praxis_virtualcell.core.request import VirtualCellRequest
 
-        assert_llm_boundaries(self.config)  # P10.C3:全入口守卫(与 run_query 入口一致)
+        assert_llm_boundaries(self.config)
         if "LLMInputInterpreter" not in self._agents:
-            raise InputValidationError("free-text 需 llm_assisted + DEEPSEEK_API_KEY")
-        # P10.C3:free-text 全程复用同一 trace(修 P10.A 遗留:首条 parse_text 曾因
-        # set_context 尚未调用而走 bus 确定性兜底 trace_msg_*,与后续 trace_<req_hash> 不一致)。
+            raise InputValidationError("free-text requires llm_assisted and DEEPSEEK_API_KEY")
+
+
         _th = hashlib.sha256(text.encode("utf-8")).hexdigest()[:8]
         tid, kid = f"trace_{_th}", f"task_{_th}"
         self.bus.set_context(trace_id=tid, task_id=kid)

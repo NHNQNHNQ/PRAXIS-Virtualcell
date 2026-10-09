@@ -1,6 +1,4 @@
-"""Phase 3:module routing golden(声明式,断言 ModulePlan)。目标 ≥60 case(路线图 §8)。
-铁律:只读断言 ModuleRouter 现有行为;plan 与期望不符=真实 bug,不改 golden 迁就。
-KPI:module unsafe-accept=0(凡期望非 accept 的 case,overall_verdict 不得 accept)。"""
+"""Tests for module golden cases."""
 from pathlib import Path
 
 import pytest
@@ -42,7 +40,7 @@ def _plan_for(request):
 
 
 def test_case_count():
-    assert len(_CASES) >= 60, f"module golden 用例过少({len(_CASES)}),路线图 §8 目标 60"
+    assert len(_CASES) >= 60, f"Too few module golden cases ({len(_CASES)}); at least 60 are required"
 
 
 @pytest.mark.parametrize("case", _CASES, ids=[c["case_id"] for c in _CASES] or ["_empty"])
@@ -62,7 +60,7 @@ def test_module_plan_matches(case):
 
 
 def test_no_unsafe_accept():
-    """KPI:凡期望 overall 非 accept 的 case,实际不得 accept。"""
+    """Verify no unsafe accept."""
     unsafe = [c["case_id"] for c in _CASES
               if c["expect"]["overall_verdict"] != "accept"
               and _plan_for(c["input"])["overall_verdict"] == "accept"]

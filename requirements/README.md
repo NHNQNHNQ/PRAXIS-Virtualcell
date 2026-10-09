@@ -30,11 +30,12 @@ python3.13 -m venv .venv
 .venv/bin/python -m pip install --no-build-isolation --no-deps -e .
 ```
 
-Regenerate only with Python 3.13 and the pinned compiler version:
+Regenerate only with Python 3.13 and the pinned compiler versions. pip 25.3
+preserves the internal API required by pip-tools 7.5.3:
 
 ```bash
 python3.13 -m venv /tmp/praxis-lock-tools
-/tmp/praxis-lock-tools/bin/python -m pip install pip-tools==7.5.3
+/tmp/praxis-lock-tools/bin/python -m pip install pip==25.3 pip-tools==7.5.3
 /tmp/praxis-lock-tools/bin/pip-compile requirements/build-py313.in \
   --allow-unsafe --generate-hashes --strip-extras \
   --output-file requirements/build-py313.lock

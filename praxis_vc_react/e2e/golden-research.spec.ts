@@ -254,7 +254,7 @@ test("K562 registered task submits exact direct-v2 contract and renders the real
     .click();
 
   const result = page.getByRole("region", {
-    name: `结果 · job ${JOB_ID}`,
+    name: `Results · job ${JOB_ID}`,
     exact: true,
   });
   await expect(result).toBeVisible();
@@ -282,16 +282,16 @@ test("K562 registered task submits exact direct-v2 contract and renders the real
     "research_only · science=false · norman_additive_linear",
   );
 
-  await result.getByRole("tab", { name: "预测", exact: true }).click();
-  await expect(result.getByText(/完整输出共 5,045 维/)).toBeVisible();
-  await expect(result.getByLabel("预测变化 Δ（top）")).toBeVisible();
-  await expect(result.getByText("暂无预测变化", { exact: true })).toHaveCount(0);
+  await result.getByRole("tab", { name: "Predictions", exact: true }).click();
+  await expect(result.getByText(/Full output contains 5,045 dimensions/)).toBeVisible();
+  await expect(result.getByLabel("Predicted change Δ (top)")).toBeVisible();
+  await expect(result.getByText("No predicted changes available", { exact: true })).toHaveCount(0);
 
-  await result.getByRole("tab", { name: "溯源", exact: true }).click();
+  await result.getByRole("tab", { name: "Provenance", exact: true }).click();
   await expect(result.getByText("vc.direct-v2-execution.v1", { exact: true })).toBeVisible();
   await expect(result.getByText("research_only", { exact: true }).first()).toBeVisible();
   await expect(
-    page.getByText("human · ENSG00000106546、ENSG00000105610", { exact: true }).first(),
+    page.getByText("human · ENSG00000106546, ENSG00000105610", { exact: true }).first(),
   ).toBeVisible();
   expectNoBrowserFailures(failures);
 });
@@ -346,10 +346,10 @@ test("registered task fails closed when compatibility is unavailable", async ({
   expect(parseRequests).toBe(0);
   expect(jobBodies).toHaveLength(0);
   await expect(page.getByRole("alert")).toContainText(
-    "当前服务尚未配置真实研究运行时",
+    "A real research runtime is not configured",
   );
   await expect(page.getByRole("alert")).toContainText(
-    "不会回退到 mock、旧模型或解析路径",
+    "mock, legacy model, and parsing fallbacks are disabled",
   );
   await expect(
     page.getByRole("button", { name: PREVIEW_LABEL, exact: true }),
@@ -360,7 +360,7 @@ test("registered task fails closed when compatibility is unavailable", async ({
       exact: true,
     }),
   ).toHaveCount(0);
-  await expect(page.getByRole("region", { name: /结果 · job/ })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: /Results · job/ })).toHaveCount(0);
   expect(pageErrors).toEqual([]);
   expect(
     consoleErrors.filter(
@@ -428,7 +428,7 @@ test("registered task rejects a stale confirmed preview without generic fallback
     { compatibility_fingerprint: COMPATIBILITY_FINGERPRINT },
   ]);
   expect(forbiddenRequests).toEqual([]);
-  await expect(page.getByRole("region", { name: /结果 · job/ })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: /Results · job/ })).toHaveCount(0);
 });
 
 test("unconfigured empty research catalog hides the registered entry", async ({

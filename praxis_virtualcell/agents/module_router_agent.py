@@ -1,13 +1,6 @@
-"""ModuleRouterAgent(插点 B):进 message bus,产 ModulePlan。
-
-收 module_route({request(归一后), module_support, mismatch_queries})→ 用 module_rules 定
-primary/secondary → 对每个命中 module 复用 route_table.route() 落 engine/disposition/reason →
-叠加 module_support 的 support/verdict、MODULES 的 display_name/pillars、mismatch → 合成 ModulePlan。
-
-OFFLINE 全程零 LLM(不 import agents_llm)。LLM 版 module plan 留 Phase 4,那时 LLM 产 primary/secondary
-后必须过滤成本模块的合法候选(复用"只能从候选选"约束),再走本 agent 同样的 route/verdict 合成。
-铁律:物种 unsupported / mismatch → verdict 降级不 accept;route engine 与 MODULES[mid].engines
-漂移 → 记 note(供 governance 检查),不崩不迁就。
+"""Build ModulePlan from normalized requests, support metadata, and mismatch queries using deterministic module
+rules and route_table. Unsupported/mismatched biology cannot receive accept. Engine-definition drift becomes an
+audit note. Optional LLM candidates must pass the same allowlist and verdict composition.
 """
 from __future__ import annotations
 
@@ -27,15 +20,15 @@ class ModuleRouterAgent(BaseAgent):
 
     def handle(self, message: AgentMessage, bus: MessageBus) -> None:
         raw = message.payload["request"]
-        req = normalize_request(raw)                 # 复用归一,不自造
+        req = normalize_request(raw)
         module_support = message.payload.get("module_support", {})
         mismatch_queries = message.payload.get("mismatch_queries", {})
         species = req["species"]
 
-        primary = module_rules.pick_primary(req)   # 决策 P1:primary 永由确定性规则定,LLM 不改
+        primary = module_rules.pick_primary(req)
         notes: list[str] = []
-        # Phase 4:若带 LLM 候选(module_candidates.selected),secondary 从 LLM 选中集派生
-        # (决策 P2:LLM 只增删 secondary,且必 ⊆ candidate 全集)。无候选(OFFLINE)→ Phase 3 原路径。
+
+
         mc = message.payload.get("module_candidates")
         if mc and mc.get("selected") is not None:
             candidates = SC.build_candidate_modules(req, module_support)
@@ -61,31 +54,31 @@ class ModuleRouterAgent(BaseAgent):
 
     def _build_entry(self, req, species, mid, role, module_support,
                      mismatch_queries, notes) -> ModulePlanEntry:
-        # 1) 落 engine:复用 route()(单一真相源)。
-        # 注:route() 是请求级路由(非 module 级),secondary 复用同一路由结果;
-        # module 级路由(每个 module 独立落 engine)留 Phase 4,避免将来漂移检查误报。
+
+
+
         dec = route(req)
-        # 2) engine 与 module 定义漂移检查(不崩,记 note 供 governance)
+
         legal_engines = M.MODULES[mid]["engines"]
         if legal_engines and dec.engine not in legal_engines and dec.engine != "reject":
             notes.append(
-                f"engine_module_drift: {mid} 定义 engines={legal_engines} 但 route 落 {dec.engine}")
-        # 3) 物种 support/verdict(来自 SpeciesContext)
+                f"engine_module_drift: {mid} declares engines={legal_engines} but routing selected {dec.engine}")
+
         sup = module_support.get(mid, {"support": "unsupported", "verdict": "reject",
                                        "display_name": mid, "models": [], "tools": []})
-        # 4) mismatch:decision M3 推 query → SpeciesContext 暴露的 verdict
+
         mq = module_rules.mismatch_query_for(req, mid)
         mismatch = mismatch_queries.get(mq) if mq else None
 
-        # P10.B4:gene-set 激活的休眠模块 M1/M5/M8 挂 rule_based/evidence_limited advisory。
-        # 仅当该 module 因 gene-set 命中(且 gene 扰动)而进 plan 时叠加(gene_set_secondary 只返回
-        # gene 门控后命中的 M1/M5/M8);不伪装定量预测(downgrade,无数值 delta)、不改 engine/route()。
+
+
+
         disposition = dec.disposition
         caution = list(dec.caution_flags)
         reason = dec.reason
         if mid in module_rules.gene_set_secondary(req):
-            # 诚实红线:advisory 只能变严格,不能比 route() 更乐观。
-            # route() 已判 abstain/downgrade(如微生物 gene→expression 无适用 scRNA predictor)时不放宽。
+
+
             if disposition in ("accept", "caution"):
                 disposition = "downgrade"
             caution += [f"rule_based:{mid}_gene_set", "evidence_limited"]

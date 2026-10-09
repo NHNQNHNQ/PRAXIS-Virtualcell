@@ -1,6 +1,4 @@
-/* PRAXIS-VirtualCell 前端 — 科研控制台布局与组件。前端只读展示。 */
 
-/* ---------- 外壳:侧栏 + 主区 ---------- */
 .app-shell {
   display: flex;
   height: 100vh;
@@ -8,7 +6,6 @@
   overflow: hidden;
 }
 
-/* ---------- 侧边栏 ---------- */
 .sidebar {
   width: 264px;
   flex-shrink: 0;
@@ -92,7 +89,6 @@
 .dot.off { background: var(--danger); }
 .foot-note { font-size: 11px; color: var(--text-faint); }
 
-/* ---------- 主区 ---------- */
 .main {
   flex: 1;
   display: flex;
@@ -138,7 +134,6 @@
   padding: 44px 34px 80px;
 }
 
-/* ---------- 卡片 / 段 ---------- */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -152,12 +147,10 @@
 
 .muted { color: var(--text-muted); font-size: 13px; }
 
-/* ---------- Ask 空状态(任务 hero) ---------- */
 .hero { text-align: center; padding: 40px 0 8px; }
 .hero h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
 .hero .hero-sub { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
 
-/* ---------- 表单控件 ---------- */
 textarea, input[type="text"], input:not([type]), select {
   font: inherit;
   width: 100%;
@@ -188,7 +181,6 @@ textarea:focus, input:focus, select:focus {
 .row label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
 .row select { width: auto; padding: 8px 12px; }
 
-/* ---------- 按钮 ---------- */
 .btn {
   font-size: 14px;
   font-weight: 500;
@@ -212,7 +204,6 @@ textarea:focus, input:focus, select:focus {
 .btn-ghost:hover { background: var(--surface-hover); }
 .btn-sm { padding: 6px 12px; font-size: 13px; }
 
-/* ---------- 表单网格 / 元信息 ---------- */
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 6px; }
 .grid2 label { display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: var(--text-muted); font-weight: 500; }
 @media (max-width: 560px) { .grid2 { grid-template-columns: 1fr; } }
@@ -224,7 +215,6 @@ code.ok { background: var(--ok-bg); border-color: transparent; color: var(--ok);
 code.bad { background: var(--danger-bg); border-color: transparent; color: var(--danger); }
 code.sha { font-size: 0.68em; }
 
-/* ---------- 提示条 ---------- */
 .note, .warn, .bad-box {
   font-size: 13px;
   padding: 9px 12px;
@@ -263,7 +253,6 @@ code.sha { font-size: 0.68em; }
 .tab:hover { color: var(--text); }
 .tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
 
-/* ---------- Report 块 ---------- */
 .badge-strong {
   display: inline-flex;
   align-items: center;
@@ -297,7 +286,6 @@ code.sha { font-size: 0.68em; }
 }
 .narrative { font-family: var(--font-sans); font-size: 13px; }
 
-/* ---------- Parse Review: candidate_request 只读键值表 ---------- */
 .kv-table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 13px; }
 .kv-table th, .kv-table td {
   text-align: left;
@@ -315,7 +303,6 @@ code.sha { font-size: 0.68em; }
 .kv-table td { color: var(--text); word-break: break-word; }
 .kv-table tr:last-child th, .kv-table tr:last-child td { border-bottom: none; }
 
-/* ---------- Module Routing: 结果里的实际路由表 ---------- */
 .table-scroll { overflow-x: auto; margin: 6px 0; }
 .module-table { min-width: 460px; }
 .module-table thead th {
@@ -331,7 +318,6 @@ code.sha { font-size: 0.68em; }
 }
 .module-table td code { font-size: 12px; }
 
-/* ---------- Module Context: 模块目录卡片网格 ---------- */
 .module-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -366,7 +352,6 @@ code.sha { font-size: 0.68em; }
 .module-engines { font-size: 11px; color: var(--text-faint); margin-top: 4px; font-family: var(--font-mono); word-break: break-word; }
 @media (max-width: 560px) { .module-grid { grid-template-columns: 1fr 1fr; } }
 
-/* ---------- Trace 时间线 ---------- */
 .timeline { list-style: none; margin: 6px 0; padding: 0; }
 .timeline li {
   display: grid;
@@ -382,7 +367,6 @@ code.sha { font-size: 0.68em; }
 .timeline .hop { font-weight: 500; }
 .timeline .mtype { color: var(--focus); font-size: 12px; font-family: var(--font-mono); }
 
-/* ---------- 响应式:窄屏 ---------- */
 @media (max-width: 720px) {
   .sidebar { width: 210px; }
   .main-inner { padding: 28px 16px 60px; }

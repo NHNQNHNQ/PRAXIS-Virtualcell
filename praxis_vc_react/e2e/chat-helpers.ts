@@ -186,7 +186,7 @@ export async function runChat(page: Page, query: string): Promise<RunCapture> {
   ).toBeVisible();
   await expect(
     page.getByRole("region", {
-      name: `结果 · job ${jobId}`,
+      name: `Results · job ${jobId}`,
       exact: true,
     }),
   ).toBeVisible();

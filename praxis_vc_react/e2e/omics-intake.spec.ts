@@ -50,17 +50,17 @@ test("omics intake returns a quarantined upload identity and manual next step", 
   await page.goto("/");
   await page.getByRole("button", { name: "Omics intake", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "物种组学数据资源", exact: true }),
+    page.getByRole("heading", { name: "Species omics resources", exact: true }),
   ).toBeVisible();
 
-  await page.getByLabel("上传物种").selectOption("human");
-  await page.getByLabel("上传令牌").fill("operator-token");
-  await page.getByLabel("组学数据文件").setInputFiles({
+  await page.getByLabel("Upload species").selectOption("human");
+  await page.getByLabel("Upload token").fill("operator-token");
+  await page.getByLabel("Omics data file").setInputFiles({
     name: "cells.h5ad",
     mimeType: "application/octet-stream",
     buffer: Buffer.from("tiny-omics"),
   });
-  await page.getByRole("button", { name: "上传到隔离区", exact: true }).click();
+  await page.getByRole("button", { name: "Upload to quarantine", exact: true }).click();
 
   const receipt = page.getByRole("status");
   await expect(receipt).toContainText(`Upload ID ${uploadId}`);
@@ -68,6 +68,6 @@ test("omics intake returns a quarantined upload identity and manual next step", 
     `praxis-vc pack factory-init --data-root /ABSOLUTE/DATA-ROOT --upload-id ${uploadId} --store /ABSOLUTE/NEW-FACTORY-STORE`,
   );
   await expect(receipt).toContainText(
-    "该命令不解析数据、不生成 candidate，也不注册 Pack",
+    "This command does not parse data, create a candidate, or register a Pack",
   );
 });

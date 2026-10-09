@@ -1,7 +1,5 @@
-"""v0.6:本地 job store —— 把一次 query 的 request/candidate/report/trace/provenance/narrative/llm 落盘。
-
-runs/<job_id>/{request,candidate_request,report,trace,provenance,narrative_report,llm_meta}。
-无数据库依赖(纯文件);API/CLI/web 共用。LLM 只存 hash 元数据,不存 key/原始 prompt 敏感内容。
+"""File-based shared job store for request, candidate, report, trace, provenance, narrative, and LLM metadata. No
+database is required. Store only hashed LLM metadata, never credentials or raw sensitive prompts.
 """
 
 from __future__ import annotations
@@ -1904,7 +1902,7 @@ class JobStore:
         result=None,
         reserved: bool = False,
     ) -> str:
-        """落盘一次 job;result 为 run_query 的返回。返回 job 目录。"""
+        """Persist one job from a run_query result and return its directory."""
         directory_fd = None
         d = None
         if reserved:
@@ -1945,7 +1943,7 @@ class JobStore:
                 )
                 if result.get("narrative"):
                     self._w(directory_fd, "narrative_report.md", result["narrative"])
-                # 确定性 Markdown 报告:每次都写(含 offline),与 LLM narrative 正交
+
                 from praxis_virtualcell.io.report_markdown import render_report_md
 
                 job_like = {
@@ -1958,7 +1956,7 @@ class JobStore:
                     "llm_enabled": result.get("llm_enabled"),
                 }
                 self._w(directory_fd, "report.md", render_report_md(job_like))
-                # LLM 元数据只存 hash(不存 key/原文)
+
                 llm = (result.get("parsed") or {}).get("llm_metadata") or {}
                 self._w(
                     directory_fd,

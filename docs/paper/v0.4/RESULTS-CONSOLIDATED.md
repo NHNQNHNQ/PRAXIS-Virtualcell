@@ -1,134 +1,121 @@
-# PRAXIS-VirtualCell 现有结果深度总结(v0.1→v0.3,投稿前证据盘点)
+# PRAXIS-VirtualCell consolidated evidence (v0.1→v0.3, with later v0.4/v0.5 additions)
 
-> 目的:把**当前已落地、已见证的全部结果**一次性深度汇总,并**明确指出"用来写完整 VirtualCell 主刊论文还缺什么"**——为 v0.4「代表物种 × 代表应用」补强计划提供依据(见 `docs/PLAN-v0.4-species-applications.md`)。
-> 数字一律抄自已记录 finding,无手工臆造。口径红线严格分层。最后更新:2026-07-01(含 L4 + v0.4 + v0.5,strict 15/15,5 应用 × 4 物种全落地),测试 Mac **203 passed + 25 skipped**,本地 HEAD 见 `git log -1`。
-> 详版逐条盘点见 `docs/paper/v0.3/data-inventory.md`;本文件是**面向论文叙事的深度综合 + 缺口判断**。
+> Historical synthesis of recorded and verified results, with explicit limits on what supports a complete virtual-cell paper. All numbers come from recorded findings. Protocols and evidence types are kept separate.
+> Recorded update: 2026-07-01, including L4 and v0.4/v0.5 additions, strict 15/15, and collective coverage of 5 applications × 4 species. Historical Mac verification: **203 passed + 25 skipped**. This snapshot is not current release status.
+> The detailed numerical inventory is `docs/paper/v0.3/data-inventory.md`.
 
----
+## 0. Positioning and supported claims
 
-## 0. 一句话定位与当前证据强度
+PRAXIS treats reliable virtual-cell perturbation prediction as a **control-flow and governance problem**. It integrates existing predictors as agents without retraining foundation models. Its contribution is routing, reliability, abstention, unified output, auditable provenance, and learned governance.
 
-PRAXIS-VirtualCell 把"可信虚拟细胞扰动预测"重述为**控制流 / 治理问题**:不重训 foundation model、强 predictor 一律 agent 接入;自研**路由 / 可靠性 / 弃权 / 统一输出 / 可审计溯源 + 可学习治理**。卖点不是更准,而是**拒绝 / 弃权 / 适用性判断 / 溯源 / 可审计 + 可学习治理**。
+The strongest quantitative claim is that governance is effective on human Norman perturbations: perturbation-held-out reliability learning yields bad-pert AUROC **0.907** and risk-coverage AUC **0.746**, exceeding rule-based rankings. Paired-difference 95% CIs exclude 0, and the advantage is robust to fold assignment.
 
-**当前证据可支撑的论断(强)**:
-> PRAXIS 的治理层在 human Norman 扰动上被**定量验证有效**——可学习可靠性模型在留扰动泛化下 bad-pert AUROC 0.907、risk-coverage AUC 0.746,均显著优于规则基线,且配对优势的 95% CI 不跨 0、对 fold 划分稳健。
+The original v0.3 evidence did not yet establish a general agent framework across representative species and applications: it centered on human Norman single-cell gene perturbation, with only a cross-species routing prototype. Later v0.4/v0.5 demonstrations broaden that evidence, as recorded below, without establishing a universal cross-species predictor.
 
-**当前证据尚**不能**支撑的论断(缺口,motivates v0.4)**:
-> PRAXIS 是一个能跨代表物种、跨代表应用协调不同虚拟细胞任务的**通用智能体框架**。
-> ——因为主结果仍集中在 human Norman single-cell perturbation;跨物种目前只有**路由层原型**(无真跨物种 predictor);应用维度只有 gene perturbation 一类。
+## 1. Evidence hierarchy
 
----
-
-## 1. 证据分层总览(强弱分级,全文务必不混)
-
-| 标签 | 含义 | 强度 |
+| Label | Meaning | Strength |
 |---|---|---|
-| `[远端见证·确定性]` | 远端 A100 当场重跑、逐位/容差复现 | 最硬 |
-| `[远端实跑]` | 远端跑出、单次(确定性配方) | 硬 |
-| `[Mac确定性]` | Mac 本地确定性可复跑 | 硬 |
-| `[OOF泛化]` | 扰动级留出折交叉验证(泛化证据) | 中(小样本) |
-| `[in-sample回放]` | 全量拟合模型在同批数据回放(**非**泛化) | 仅作行为/集成证据 |
-| `[能力矩阵]` | 能力有/无(presence-absence),**非**性能 | 定性 |
-| `[声明式]` | 单测证明机制可激活;mock e2e 不触发 | 弱(机制存在性) |
+| `[remote-witnessed deterministic]` | Remote A100 rerun with bitwise/tolerance reproduction | Strongest |
+| `[remote execution]` | One remote run using the recorded recipe | Strong |
+| `[Mac deterministic]` | Deterministically reproducible on Mac | Strong |
+| `[OOF generalization]` | Perturbation-held-out cross-validation | Moderate; small sample |
+| `[in-sample replay]` | Full-data fit replayed on the same data, not independent generalization | Behavior/integration evidence only |
+| `[capability matrix]` | Capability presence/absence, not predictive performance | Qualitative |
+| `[declarative]` | Unit tests activate a mechanism that mock end-to-end runs do not activate | Limited mechanism-existence evidence |
 
-**三条口径红线**:
-1. **per-cell(n=18874)≠ pert-level(ledger n=60/151)**:v0.2 招牌准确性是 per-cell;v0.3 M1/M2 全部 pert-level。
-2. **OOF 泛化 ≠ in-sample 回放**:0.907/0.746 是 OOF;rule-vs-learned 对照表是 in-sample。
-3. **learned 软治理 ≠ hard-rule 门控**:可学习层只动软判定,硬规则恒权威。
+Keep three distinctions explicit:
 
----
+1. **Per-cell (n=18874) differs from perturbation-level (ledger n=60/151).** v0.2 headline accuracy is per-cell; v0.3 M1/M2 results are perturbation-level.
+2. **OOF generalization differs from in-sample replay.** 0.907/0.746 are OOF results; the rule-versus-learned runtime table is in-sample.
+3. **Learned soft governance differs from hard-rule gating.** Learned decisions do not override hard rules.
 
-## 2. 主结果簇(按论文 Result 章节组织)
+## 2. Results organized for the paper
 
-### R1 — 系统架构 / agent runtime(v0.1)
-runtime / message bus / species brain / predictor-agent / abstain / critic / provenance + 可选 LLM agent。离线确定性可复现。证据:`[能力矩阵]` + `[Mac确定性]`。
+### R1. System architecture / agent runtime (v0.1)
 
-### R2 — Human perturbation benchmark(表 A,v0.2 招牌)
-口径:donor Norman test split · **per-cell ΔPearson** · 同 EvalAgent · n=18874。证据:`[远端见证·确定性]`。来源:`finding_w8_systems_comparison` + `finding_w8_provenance_reverify`。
+The runtime combines the message bus, species brain, predictor agents, abstention, critic, provenance, and optional LLM agents. Offline execution is deterministic. Evidence: `[capability matrix]` + `[Mac deterministic]`.
 
-| 系统 / 方法 | 类型 | ΔPearson | n |
+### R2. Human perturbation benchmark (Table A, v0.2)
+
+Protocol: donor Norman test split, **per-cell ΔPearson**, the same EvalAgent, n=18874. Evidence: `[remote-witnessed deterministic]`. Sources: `finding_w8_systems_comparison` and `finding_w8_provenance_reverify`.
+
+| System/method | Type | ΔPearson | n |
 |---|---|---|---|
-| **PRAXIS Coordinator (all-5)** | ensemble + 治理 | **0.7039** | 18874 |
-| 6 base predictor | 单 base | 0.6716–0.6183 | 18874 |
-| **GEARS (same-split donor-eval, 5ep)** | 外部专用 GNN | **0.4877** | 18874 |
-| **mean-perturbation** | naive 下界 | **0.4615** | 18874 |
-| scGPT (frozen + 轻 head) | foundation | **0.4407** | 7290 |
+| **PRAXIS Coordinator (all-5)** | ensemble + governance | **0.7039** | 18874 |
+| 6 base predictors | single bases | 0.6716–0.6183 | 18874 |
+| **GEARS (same-split donor-eval, 5ep)** | external specialized GNN | **0.4877** | 18874 |
+| **mean-perturbation** | naive lower-bound baseline | **0.4615** | 18874 |
+| scGPT (frozen + lightweight head) | foundation model | **0.4407** | 7290 |
 
-- **诚实卖点**:scGPT frozen 0.4407 **反低于** mean-baseline 0.4615 →"规模非解药";PRAXIS **不声称赢 SOTA**。
-- **同协议外部 baseline 已补(L4,`finding_w9_l4_gears_same_split`)**:GEARS 原生 `pearson_de` 0.8392 是 off-axis(DE-gene 绝对表达 + 自带 split);拉到**同协议 per-cell ΔPearson**(donor test split,n=18874),GEARS = **0.4877**——低于所有 donor base,远低于 Coordinator 0.7039。**核心读法:指标/协议决定结论,off-axis 会高估;GEARS 为 condition 级,per-cell 尺子对其不利(见 finding §4 caveat),非"PRAXIS 赢 SOTA"标题**。防泄漏:GEARS train 扰动与 test 互斥(train62/test150,IER5L 被 GEARS GO 图过滤)。
+Frozen scGPT 0.4407 is below mean-baseline 0.4615; model scale alone does not guarantee accuracy under this protocol. PRAXIS does not claim to defeat SOTA.
 
-### R3 — Learned reliability governance(v0.3 M1/M2.1,**最强新贡献**)
-证据链完整闭环,每步有数、口径分层干净:
+L4 adds the external matched-protocol baseline (`finding_w9_l4_gears_same_split`). GEARS native `pearson_de` 0.8392 is off-axis (absolute expression on DE genes with its own split). Under the same per-cell ΔPearson protocol and donor test split (n=18874), GEARS is **0.4877**, below all donor bases and Coordinator 0.7039. Metrics and protocols determine this comparison. GEARS condition-level predictions are broadcast to cells, which disadvantages it; see the source finding's Section 4 caveat. The leakage-free split is train62/test150; IER5L is filtered by the GEARS GO graph.
 
-**(通电,M1)** 60 真扰动,disagreement 从 mock 伪 0.5 升级为真值连续分布(0.23–0.504),越阈值自发 abstain;**corr(disagreement, per-pert ΔPearson) = −0.716**(高分歧⇒低准度差~27点);best predictor 因扰动而异(gnn75/linear39/latent37,无单一处处最优)。证据:`[远端实跑]`。
+### R3. Learned reliability governance (v0.3 M1/M2.1)
 
-**(泛化,M2.1 OOF)** 151 扰动 · pert-level · 留扰动 5-fold · 无泄漏:
+**Activation (M1).** Across 60 real perturbations, disagreement changes from a mock constant 0.5 to a real continuous distribution (0.23–0.504), with automatic abstention above threshold. **corr(disagreement, per-pert ΔPearson) = −0.716**; higher disagreement corresponds to an approximately 27-point accuracy gap. Best predictors vary across perturbations: gnn75/linear39/latent37. Evidence: `[remote execution]`.
 
-| 指标 | learned | 规则基线 | random |
+**Generalization (M2.1 OOF).** Protocol: 151 perturbations, perturbation-level metrics, perturbation-held-out 5-fold validation, and no leakage.
+
+| Metric | learned | Rule-ranking baseline | random |
 |---|---|---|---|
-| bad-pert AUROC | **0.907** | disagreement 0.774 / ood 0.788 | 0.479 |
-| risk-coverage AUC | **0.746** | disagreement 0.720 / ood 0.730 | 0.660 |
-| 可靠性回归 OOF corr | **0.701** | — | — |
+| Bad-pert AUROC | **0.907** | disagreement 0.774 / ood 0.788 | 0.479 |
+| Risk-coverage AUC | **0.746** | disagreement 0.720 / ood 0.730 | 0.660 |
+| Reliability-regression OOF correlation | **0.701** | — | — |
 
-**(稳健,L1/B3)** 配对差 95% CI 不跨 0(AUROC +0.13 [0.056,0.191]、risk-cov +0.026 [0.014,0.041]);跨 5 seed learned AUROC 0.900±0.008、risk-cov 0.744±0.001。
+**Robustness (L1/B3).** Paired-difference 95% CIs exclude 0: AUROC +0.13 [0.056,0.191] and risk-coverage +0.026 [0.014,0.041]. Across 5 seeds, learned AUROC is 0.900±0.008 and risk-coverage is 0.744±0.001.
 
-**(负结果防过拟合)** 加 magnitude/uncertainty 特征不升反降 → 保持 base 3 特征。
+**Negative feature-enrichment result.** Adding magnitude/uncertainty features does not improve performance, so the 3 base features are retained to limit overfitting.
 
-**(OOD enrichment,L2)** learned-flagged 98% 是 OOD(odds ratio **74.7**),但**超越 OOD 标签**(OOD-only 子集 risk-cov 0.577>0.5、AUROC 0.907>ood-only 0.788)→ learned 不只是 OOD 代理。
+**OOD enrichment (L2).** Learned-flagged cases are 98% OOD, with odds ratio **74.7**. Learned scores add information beyond OOD labels: OOD-only subset risk-coverage is 0.577>0.5, and AUROC 0.907 exceeds ood-only 0.788.
 
-**(接回 runtime,in-sample)** 默认 `learned_with_rule_fallback`;rule vs learned 对照:wrong_accept **0.974→0.211**、risk_coverage **0.026→0.789**、**hard_override=0**、provenance complete;冻结 artifact + content_sha256 自校验 + fail-closed + 逐决策可追溯。7 gates 全过 + 防泄漏审计。
+**Runtime integration (in-sample).** The default mode is `learned_with_rule_fallback`. Rule-versus-learned replay changes wrong_accept **0.974→0.211** and risk_coverage **0.026→0.789**, with **hard_override=0** and complete provenance. Frozen artifacts use content_sha256 integrity checks and fail-closed fallback; decisions are individually traceable. All 7 gates and the leakage audit pass. This is integration evidence, not independent generalization.
 
-### R(治理矩阵,表 B,v0.2)
-7 项治理能力,GEARS/CPA/scGPT/scGen/STATE **全 ✗** vs PRAXIS **全 ✓**(presence-absence,逐项核查论文+repo)。证据:`[能力矩阵]`。
+### Governance matrix (Table B, v0.2)
 
----
+The matrix records 7 governance capabilities: GEARS/CPA/scGPT/scGen/STATE lack them at this system level, while PRAXIS provides them. Entries come from paper/repository checks for each capability. This is `[capability matrix]` evidence, not a performance comparison.
 
-## 3. 诚信验证(防编造,已当场见证)
-应"数据是否编造"之问,远端 A100 **当场重跑见证**全部准确性数字:linear 逐位 0.6638587、Coordinator 0.703874、scGPT 逐位 0.4406901964584723、GEARS 重训 0.8461 同量级。**无任何编造**(`finding_w8_provenance_reverify`)。
+## 3. Numerical verification
 
----
+Remote A100 reruns checked the recorded accuracy numbers: linear bitwise 0.6638587, Coordinator 0.703874, scGPT bitwise 0.4406901964584723, and GEARS retraining 0.8461 on the same scale as its native result. No fabricated or mismatched checked number was found. Source: `finding_w8_provenance_reverify`.
 
-## 4. 诚实边界(务必带进论文)
-- **pert-level ≠ per-cell**:M2 全部数(AUROC/risk-cov)是扰动级,**不是**招牌 per-cell 0.70。
-- **单 control(W4.5)**:disagreement 基于单一基线,非 per-cell 全量。
-- **小样本**:ledger 151;bootstrap CI/多 seed 已补,但单点 AUC 区间仍宽(AUROC 0.907 [0.846,0.952])→ 论文强调**配对优势**而非单点绝对值。
-- **预测性能不赢 SOTA**:复现 donor + 套壳;强外部 baseline 同协议未做(L4 补 GEARS)。
-- **跨物种仅路由层原型**:mouse/bacteria/yeast 无真跨物种 predictor。
-- **应用维度单一**:目前只有 gene perturbation 一类。
+## 4. Evidence limitations at the original snapshot
 
----
+- **Perturbation-level differs from per-cell.** M2 AUROC/risk-coverage numbers are not the headline per-cell 0.70 result.
+- **W4.5 single control.** The original disagreement analysis used a single baseline rather than per-cell controls. Later G2 recalculation is recorded in the detailed inventory and analysis summary.
+- **Small sample.** The ledger contains 151 perturbations. Bootstrap CIs and multiple seeds were later added, but the AUROC interval remains wide: 0.907 [0.846,0.952]. Emphasize paired advantages rather than isolated exact point estimates.
+- **No prediction-SOTA claim.** Predictors are reproduced and integrated; L4 adds the matched-protocol GEARS comparison.
+- **Original cross-species scope.** mouse/bacteria/yeast initially had only routing prototypes, not a trained cross-species predictor.
+- **Original application scope.** The v0.3 core centered on gene perturbation. Later representative demonstrations expand the application categories without removing their proxy/coverage limitations.
 
-## 5. 进行中 / 待补(直接决定论文竞争力)
+## 5. Later additions and remaining comparisons
 
-### ✅ L4 — GEARS 同 split donor-eval 入表 A(远端,**已完成 2026-07-01**)
-- **结果**:GEARS same-split donor-eval,5ep → **ΔPearson 0.4877**(cosine 0.986,n=18874,同表 A 口径)。已入表 A(见 R2)。finding:`finding_w9_l4_gears_same_split`。
-- **防泄漏坐实**:custom split train62/test150(donor train∩test=∅,IER5L 被 GEARS GO 图过滤);eval=`load_norman("test",seed=1)` 18874 cells。
-- **caveat**:condition→cell broadcast(GEARS 粒度限制,per-cell 尺子对其不利);5ep 对齐参考基线;单次(GEARS 无固定 seed)。**R8 解除**。
+### L4: same-split GEARS donor evaluation (completed 2026-07-01)
 
-### 缺口清单(v0.4 进度)
-| 缺口 | 影响面 | 现状 |
+- GEARS same-split donor-eval, 5ep: **ΔPearson 0.4877**, cosine 0.986, n=18874, matched to Table A. Source: `finding_w9_l4_gears_same_split`.
+- Custom split train62/test150, donor train∩test=∅; IER5L is filtered by the GEARS GO graph. Evaluation uses `load_norman("test",seed=1)` with 18874 cells.
+- Caveats: condition→cell broadcast, 5ep aligned with the reference baseline, and a single run without a fixed GEARS seed. This resolves the historical R8 comparison gap.
+
+| Historical gap | Impact | Recorded resolution |
 |---|---|---|
-| 外部专用 baseline 未入表 A | 高 | **✅ L4 已补(GEARS 0.4877 同协议)**;scGen/STATE 未做 |
-| per-cell 解 W4.5 单 control | 中高 | 远端重跑,B2 待启(硬门) |
-| ~~跨物种仅路由原型~~ | 中 | **✅ v0.4 补:mouse ortholog(C3)+ bacteria/yeast GEM 真跑(C4/C5)** |
-| ~~应用维度单一(只 gene pert)~~ | 高 | **✅ v0.4 补:gene + metabolism(GEM)+ drug(LINCS MOA)三应用真跑(C1-C6)** |
+| External specialized baseline missing from Table A | High | L4 adds matched-protocol GEARS 0.4877; scGen/STATE remain absent |
+| W4.5 single-control disagreement | Moderate-high | A remote per-cell rerun was pending as B2 at this snapshot; later G2 resolution is recorded in the detailed inventory |
+| Cross-species evidence only a routing prototype | Moderate | v0.4 adds mouse orthology (C3) and real bacteria/yeast GEM execution (C4/C5) |
+| Only gene perturbation applications | High | v0.4 adds gene, metabolism (GEM), and drug (LINCS MOA) demonstrations across C1-C6 |
 
----
+## 6. Publication-scope interpretation
 
-## 6. 结论:为什么"现在写论文还不够"
+The learned-reliability-governance evidence forms a coherent standalone result for a methods track or systems venue, with explicit small-sample and in-sample limitations.
 
-**够的部分**:作为「learned reliability governance」独立 Result / methods-track / 系统类会议,证据链完整、逻辑闭环——**基本够**。
+The original three breadth/comparison gaps changed as follows:
 
-**原三大短板 → v0.4 进度**:
-1. 准确性侧无同协议强外部对照 → **✅ L4 补 GEARS 0.4877 同协议**(scGen/STATE 仍待);
-2. ~~主结果单物种(human)、单应用(gene perturbation)~~ → **✅ v0.4 补**:human/mouse/bacteria/yeast 四物种 + gene/metabolism/drug 三应用,Phase I 6 core case 全真跑(C1-C6);
-3. ~~"虚拟细胞"广度未体现~~ → **✅ 5 应用全落地**:gene / drug(LINCS MOA)/ **state-fate(IFN 激活)** / metabolism(GEM+表达 tendency)/ **communication(L-R 共表达)** 均有真跑 case + 治理裁决。
+1. No matched-protocol strong external baseline → L4 adds GEARS 0.4877; scGen/STATE remain to be evaluated.
+2. Main results confined to human gene perturbation → v0.4 adds human/mouse/bacteria/yeast and gene/metabolism/drug, with 6 core demonstrations C1-C6 using real data or tools.
+3. Virtual-cell application breadth absent → **5 application categories** now have demonstrations: gene, drug (LINCS MOA), state/fate (IFN activation), metabolism (GEM + expression tendency), and communication (L-R co-expression), each with a governance decision.
 
-**v0.4 已落地**(详见 `docs/PLAN-v0.4-species-applications.md` + `application-cases.md`):论文结构从
-`Norman prediction → governance → learned abstain`
-升级为
-`Core human benchmark(+GEARS 同协议)→ learned reliability governance → representative applications(gene/metabolism/drug)→ cross-species agent routing(human/mouse/bacteria/yeast)`。
-**贯穿主线**:每个非 human/非 gene case 的价值是**受治理裁决**(accept/downgrade/abstain)——如 drug HDAC 弱信号主动 downgrade、微生物基因缺失 abstain——即 R6"reliability-governed reporting prevents overclaiming"。
+The narrative expands from `Norman prediction → governance → learned abstention` to `core human benchmark (+matched-protocol GEARS) → learned reliability governance → representative applications (gene/metabolism/drug) → cross-species agent routing (human/mouse/bacteria/yeast)`.
 
-**最稳口径**(不过度承诺):
+The value of each non-human/non-gene case is its governed decision, not execution alone. Weak HDAC drug signals are downgraded and missing microbial genes trigger abstention. R6 illustrates how reliability-governed reporting prevents overclaiming. Related evidence: `application-cases.md`.
+
 > PRAXIS-VirtualCell is first quantitatively validated on human perturbation prediction, then demonstrated across representative species and applications through **reliability-governed agent workflows**.

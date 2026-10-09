@@ -20,9 +20,9 @@ def test_parses_chinese_experiment_description():
     bus = MessageBus()
     LLMInputInterpreterAgent(_client()).handle(
         AgentMessage("m1", "client", "LLMInputInterpreter", "parse_text",
-                     {"text": "在 K562 细胞里敲除 AHR 基因,预测单细胞转录组变化"}, "t1"), bus)
+                     {"text": "Knock out AHR in K562 cells and predict single-cell transcriptomic changes"}, "t1"), bus)
     out = bus.latest("request_parsed")
-    assert out is not None, "应解析成功 emit request_parsed"
+    assert out is not None, "Successful parsing must emit request_parsed"
     req = out.payload["request"]
     assert req["species"] == "human"
     assert "AHR" in [g.upper() for g in req["perturbation_targets"]]
@@ -34,5 +34,5 @@ def test_garbage_input_falls_back():
     bus = MessageBus()
     LLMInputInterpreterAgent(_client()).handle(
         AgentMessage("m1", "client", "LLMInputInterpreter", "parse_text",
-                     {"text": "今天天气怎么样"}, "t1"), bus)
+                     {"text": "What is the weather like today?"}, "t1"), bus)
     assert bus.latest("request_parsed") is not None or bus.latest("llm_input_failed") is not None

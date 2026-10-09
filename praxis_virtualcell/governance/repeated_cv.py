@@ -1,8 +1,6 @@
-"""M2.1 投稿前补强 B3:多 seed 重复 5-fold CV(纯 Python,Mac 可跑)。
-
-回应「单一确定性 5-fold」局限:打乱扰动顺序后做 leave-perturbation-out CV(`leave_perturbation_out_folds`
-按索引取模分 fold,故打乱顺序 = 不同 fold 划分),跑多个 seed,报 learned / disagreement 的 bad-pert AUROC
-与 abstain risk-coverage AUC 跨 seed 的 mean/sd/min/max。仍无泄漏(只用 INFERENCE_FEATURES)、pert-level。
+"""Repeated seeded 5-fold leave-perturbation-out CV. Shuffle perturbation order before deterministic modulo
+splitting, then summarize bad-perturbation AUROC and selective risk-coverage AUC across seeds as
+mean/sd/min/max. Preserve inference-only features and perturbation-level isolation.
 """
 from __future__ import annotations
 
@@ -21,7 +19,7 @@ def _shuffle(entries, seed):
 
 
 def repeated_cv(entries, *, seeds=(0, 1, 2, 3, 4), k=5):
-    """对每个 seed 打乱顺序 → CV → 收集指标;返回 {seeds, k, per_seed, summary}。"""
+    """Shuffle by each seed, run CV, and return seeds/k/per_seed/summary."""
     rows = []
     for s in seeds:
         sh = _shuffle(entries, s)

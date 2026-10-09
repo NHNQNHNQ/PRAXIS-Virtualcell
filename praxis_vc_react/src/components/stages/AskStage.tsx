@@ -6,17 +6,11 @@ import {
   type ParseResult,
 } from "../../api";
 
-// Stage 1 · Ask(spec §2 Stage1)—— 科研感 hero 输入,不是聊天窗:
-// 无衬线大标题 + 简短说明 + 大输入 textarea + 模式选择 + 示例入口 + Advanced 折叠区。
-// 解析全在后端(POST /api/parse,复用 api.ts 的 parse());前端绝不自己解析自然语言。
-// parse 成功回传 (result, query);失败显错误态、不崩溃。
 
-// 3 个示例:覆盖 spec 要的三类(gene perturbation / drug response / metabolic stress),
-// 点击填入 textarea。文案用科学家的自然说法,不带工程黑话。
 const EXAMPLES: { label: string; text: string }[] = [
-  { label: "基因扰动", text: "在 human 细胞敲 AHR" },
-  { label: "药物响应", text: "vorinostat 处理 A549" },
-  { label: "代谢应激", text: "葡萄糖限制下的 yeast 代谢应激" },
+  { label: "Gene perturbation", text: "Knock down AHR in human cells" },
+  { label: "Drug response", text: "Treat A549 with vorinostat" },
+  { label: "Metabolic stress", text: "Metabolic stress in yeast under glucose limitation" },
 ];
 
 export default function AskStage({
@@ -38,11 +32,10 @@ export default function AskStage({
   ) => void;
 }) {
   const [text, setText] = useState(
-    () => initialDraft?.text || "在 human 细胞敲 AHR",
+    () => initialDraft?.text || "Knock down AHR in human cells",
   );
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  // Advanced 折叠区:可选物种(占位)与直接粘贴结构化描述——仅前端组装,不新增端点。
   const [advSpecies, setAdvSpecies] = useState(
     () => initialDraft?.species ?? "",
   );
@@ -55,7 +48,6 @@ export default function AskStage({
   latestModeRef.current = mode;
 
   useEffect(() => {
-    // React StrictMode 开发态会执行 setup→cleanup→setup；每次 setup 都恢复活动标记。
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
@@ -63,14 +55,11 @@ export default function AskStage({
   }, []);
 
   useEffect(() => {
-    // 模式属于解析请求身份；切换后旧请求的成功、失败和 finally 都不可写回。
     requestEpochRef.current += 1;
     setBusy(false);
     setErr(null);
   }, [mode]);
 
-  // 把可选的高级输入(物种/结构化描述)在前端拼进问题文本一起提交——
-  // 不新增端点,仍走同一个 parse(text, mode);后端负责真正的解读。
   function currentDraft(overrides: Partial<AskDraft> = {}): AskDraft {
     return {
       text,
@@ -82,16 +71,14 @@ export default function AskStage({
 
   function composedQuery(draft: AskDraft): string {
     const extra: string[] = [];
-    if (draft.species.trim()) extra.push(`物种:${draft.species.trim()}`);
+    if (draft.species.trim()) extra.push(`Species: ${draft.species.trim()}`);
     if (draft.structuredDescription.trim()) {
-      extra.push(`结构化描述:${draft.structuredDescription.trim()}`);
+      extra.push(`Structured description:${draft.structuredDescription.trim()}`);
     }
     return extra.length ? `${draft.text}\n${extra.join("\n")}` : draft.text;
   }
 
   function updateDraft(next: AskDraft) {
-    // 同一 Ask 挂载内也允许编辑 pending 请求的草稿。编辑即使旧请求失效，
-    // 并立即恢复提交能力，避免旧 finally 覆盖新草稿状态。
     requestEpochRef.current += 1;
     setBusy(false);
     setErr(null);
@@ -114,9 +101,8 @@ export default function AskStage({
       const result = await parse(query, submittedMode);
       if (isCurrentRequest()) onParsed(result, query, draft, submittedMode);
     } catch {
-      // 面向用户的错误文案(spec §3.5):不暴露内部实现名词,给可操作的提示。
       if (isCurrentRequest()) {
-        setErr("暂时无法连接到运行后端,任务解读未能完成。请确认服务可达后重试。");
+        setErr("Cannot connect to the runtime backend to interpret the task. Check service availability and try again.");
       }
     } finally {
       if (isCurrentRequest()) setBusy(false);
@@ -125,7 +111,6 @@ export default function AskStage({
 
   return (
     <section style={{ maxWidth: "760px" }}>
-      {/* 科研感 hero:轻字重大标题 + 一句平实说明(非「我来帮你」的聊天窗观感)。 */}
       <div style={{ marginBottom: "var(--space-6)" }}>
         <h1
           style={{
@@ -138,7 +123,7 @@ export default function AskStage({
             margin: 0,
           }}
         >
-          描述一次扰动实验
+          Describe a perturbation experiment
         </h1>
         <p
           style={{
@@ -149,12 +134,11 @@ export default function AskStage({
             maxWidth: "60ch",
           }}
         >
-          用自然语言写下要考察的生物体系与扰动,系统会先给出对任务的解读供你核对。
-          只有匹配、可执行且获验证批准的模型才会预测；当前未绑定数据 Pack 的请求会明确弃权。
+          Describe the biological system and perturbation in natural language. Review the interpreted task before proceeding.
+          Only matching, executable models approved by validation produce predictions. Requests without a bound data Pack explicitly abstain.
         </p>
       </div>
 
-      {/* 大输入区:textarea + 模式 + Parse 按钮。 */}
       <div className="card">
         <label
           htmlFor="ask-input"
@@ -166,7 +150,7 @@ export default function AskStage({
             marginBottom: "var(--space-2)",
           }}
         >
-          研究问题
+          Research question
         </label>
         <textarea
           id="ask-input"
@@ -178,10 +162,9 @@ export default function AskStage({
             setText(value);
             updateDraft(next);
           }}
-          placeholder="例:在 human 细胞敲 AHR"
+          placeholder="Example: Knock down AHR in human cells"
         />
 
-        {/* 示例入口:一行 chip,点击填入 textarea。 */}
         <div
           style={{
             display: "flex",
@@ -191,7 +174,7 @@ export default function AskStage({
             marginTop: "var(--space-3)",
           }}
         >
-          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>示例</span>
+          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>Examples</span>
           {EXAMPLES.map((ex) => (
             <button
               key={ex.text}
@@ -220,7 +203,6 @@ export default function AskStage({
           ))}
         </div>
 
-        {/* 模式选择 + 提交。offline 全程不经语言模型;llm_assisted 仅辅助改写文字表述。 */}
         <div
           style={{
             display: "flex",
@@ -241,10 +223,10 @@ export default function AskStage({
               maxWidth: "260px",
             }}
           >
-            运行方式
+            Execution mode
             <select value={mode} onChange={(e) => onMode(e.target.value as Mode)}>
-              <option value="offline">离线(结果不经语言模型)</option>
-              <option value="llm_assisted">辅以语言模型改写文字</option>
+              <option value="offline">Offline (results bypass language models)</option>
+              <option value="llm_assisted">Language-assisted narrative</option>
             </select>
           </label>
           <button
@@ -253,7 +235,7 @@ export default function AskStage({
             disabled={busy || !text.trim()}
             onClick={submit}
           >
-            {busy ? "解读中…" : "解读任务 →"}
+            {busy ? "Interpreting…" : "Interpret task →"}
           </button>
         </div>
 
@@ -264,7 +246,6 @@ export default function AskStage({
         )}
       </div>
 
-      {/* Advanced input:可选,折叠。选物种(占位)/ 直接粘贴结构化描述。仅前端组装,不新增端点。 */}
       <details style={{ marginTop: "var(--space-2)" }}>
         <summary
           style={{
@@ -274,7 +255,7 @@ export default function AskStage({
             userSelect: "none",
           }}
         >
-          高级输入(可选)
+          Advanced input (optional)
         </summary>
         <div className="card" style={{ marginTop: "var(--space-3)" }}>
           <p
@@ -285,7 +266,7 @@ export default function AskStage({
               lineHeight: 1.5,
             }}
           >
-            若已知物种背景,或想直接提供结构化描述,可在此补充。留空则完全由上面的文字决定。
+            Optionally provide known species context or a structured description. Leave blank to use only the question above.
           </p>
 
           <label
@@ -298,7 +279,7 @@ export default function AskStage({
               marginBottom: "var(--space-3)",
             }}
           >
-            物种(可留空)
+            Species (optional)
             <select
               value={advSpecies}
               onChange={(e) => {
@@ -308,7 +289,7 @@ export default function AskStage({
                 updateDraft(next);
               }}
             >
-              <option value="">不指定(由文字推断)</option>
+              <option value="">Unspecified (infer from text)</option>
               <option value="human">human</option>
               <option value="mouse">mouse</option>
               <option value="yeast">yeast</option>
@@ -324,7 +305,7 @@ export default function AskStage({
               marginBottom: "var(--space-1)",
             }}
           >
-            结构化描述(可留空)
+            Structured description (optional)
           </label>
           <textarea
             id="adv-json"
@@ -346,7 +327,7 @@ export default function AskStage({
               marginTop: "var(--space-2)",
             }}
           >
-            这些补充会与上面的问题一起提交,最终解读仍在核对页展示,可再修改。
+            These details are submitted with the question. You can review and edit the final interpretation on the next page.
           </p>
         </div>
       </details>

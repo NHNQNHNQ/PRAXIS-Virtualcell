@@ -11,12 +11,12 @@ def test_trace_has_full_chain_and_retrieve_first():
     types = [m.message_type for m in rt.bus.trace]
     assert "brain_retrieved" in types and "predictor_result" in types
     assert types.index("brain_retrieved") < types.index("predictor_result")
-    # predictor 经 bus 收任务:存在 receiver 为 MockCPA 的 predict 消息
+
     assert any(m.receiver == "MockCPA" and m.message_type == "predict" for m in rt.bus.trace)
 
 
 def test_critic_flags_injected_fake_prediction():
-    # 人造违规:report 阶段声称用了一个并无 success 结果的模型 → critic 命中
+
     from praxis_virtualcell.agents.critic import CriticAgent
     from praxis_virtualcell.core.bus import MessageBus
     from praxis_virtualcell.core.message import AgentMessage

@@ -1,5 +1,6 @@
-"""模块注册表:读 brains/virtualcell/<species>/module_support.yaml,提供支持度/裁决/错配查询。
-纯库(不进 message bus;SpeciesContextAgent 的 bus 接线在 Phase 3)。"""
+"""Read species module_support.yaml and query support, verdicts, and biological mismatches. Library code is
+separate from SpeciesContextAgent bus integration.
+"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,7 +12,7 @@ from praxis_virtualcell.core.config import RuntimeConfig
 
 _SPECIES = ("human", "mouse", "yeast", "bacteria")
 
-# support 等级 → 默认裁决(与 route_table 四态对齐)
+
 _VERDICT = {"strong": "accept", "medium": "accept", "weak": "caution", "unsupported": "reject"}
 
 
@@ -28,23 +29,23 @@ class ModuleRegistry:
         return self._cache[species]
 
     def support(self, species: str, module_id: str) -> dict:
-        """返回 {support, reason?, models?, tools?, ...}。未知物种/模块 → unsupported。"""
+        """Return support metadata; unknown species/modules are unsupported."""
         if module_id not in M.MODULES:
-            raise KeyError(f"未知模块: {module_id}")
+            raise KeyError(f"unknown module: {module_id}")
         rec = (self._load(species).get("modules") or {}).get(module_id)
         if not rec:
-            return {"support": "unsupported", "reason": f"{species} 未声明该模块支持度"}
+            return {"support": "unsupported", "reason": f"{species} has no declared support for this module"}
         return rec
 
     def default_verdict(self, species: str, module_id: str) -> str:
         return _VERDICT[self.support(species, module_id)["support"]]
 
     def matrix(self) -> dict[str, dict[str, dict]]:
-        """4×8 support matrix:{species: {module_id: support_record}}。"""
+        """4×8 support matrix:{species: {module_id: support_record}}."""
         return {sp: {mid: self.support(sp, mid) for mid in M.MODULE_ORDER} for sp in _SPECIES}
 
     def biological_mismatch(self, species: str, query: str) -> str | None:
-        """生物学错配查询 → verdict(reject/caution)或 None(无错配)。"""
+        """Return a biological-mismatch reject/caution verdict or None when no mismatch applies."""
         for m in (self._load(species).get("biological_mismatch") or []):
             if m.get("query") == query:
                 return m.get("verdict")

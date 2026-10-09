@@ -1,5 +1,4 @@
-"""Phase 2:ModelZooRegistry —— 声明式模型注册表 schema + 查询 + 白名单校验。
-铁律:module 必须 ∈ MODULE_ORDER;status 合法枚举;未知 name → KeyError(不静默返 None)。"""
+"""Tests for model zoo registry."""
 import pytest
 
 from praxis_virtualcell.biological_modules import modules as M
@@ -12,12 +11,12 @@ from praxis_virtualcell.model_zoo.registry import (
 
 @pytest.fixture(scope="module")
 def reg():
-    return ModelZooRegistry()  # 默认读 model_zoo/registry.yaml
+    return ModelZooRegistry()
 
 
 def test_seed_entries_present(reg):
     names = set(reg.names())
-    # 至少三条种子:一条 available 真模型、一条 planned 公开模型、一条 self_trained
+
     assert {"ecoli_gem", "gears", "yeast_deletion_fitness"} <= names
 
 
@@ -25,12 +24,12 @@ def test_every_entry_schema_is_legal(reg):
     for name in reg.names():
         e = reg.get(name)
         assert e["name"] == name
-        assert e["type"] in LEGAL_TYPES, f"{name} 非法 type: {e['type']}"
-        assert e["status"] in LEGAL_STATUS, f"{name} 非法 status: {e['status']}"
-        assert e["module"] in M.MODULE_ORDER, f"{name} module 越白名单: {e['module']}"
+        assert e["type"] in LEGAL_TYPES, f"{name} Invalid type:  {e['type']}"
+        assert e["status"] in LEGAL_STATUS, f"{name} Invalid status:  {e['status']}"
+        assert e["module"] in M.MODULE_ORDER, f"{name} module is outside the allowlist: {e['module']}"
         assert isinstance(e.get("requires", []), list)
-        assert e.get("species"), f"{name} 缺 species"
-        assert e.get("wrapper"), f"{name} 缺 wrapper 类路径"
+        assert e.get("species"), f"{name} missing species"
+        assert e.get("wrapper"), f"{name} missing wrapper class path"
 
 
 def test_query_by_module_and_species(reg):
@@ -55,7 +54,7 @@ def test_unknown_name_raises_keyerror(reg):
 
 
 def test_illegal_module_in_yaml_is_rejected(tmp_path):
-    """注册表加载时校验 module ∈ MODULE_ORDER;非法 module → ValueError(fail-closed)。"""
+    """Verify illegal module in yaml is rejected."""
     bad = tmp_path / "bad.yaml"
     bad.write_text(
         "models:\n"

@@ -1,4 +1,6 @@
-"""出路由建议(只建议,不裁决)。只能从候选里选;emit llm_route_suggestion。"""
+"""Suggest routes from declared candidates only and emit llm_route_suggestion; final routing authority remains with
+the runtime.
+"""
 from __future__ import annotations
 
 import json
@@ -9,9 +11,9 @@ from praxis_virtualcell.core.bus import MessageBus
 from praxis_virtualcell.core.message import AgentMessage
 
 _SYS = (
-    "你给虚拟细胞预测的模型路由建议。只输出 JSON:"
-    '{"recommended_agents":[],"excluded_agents":[],"reasoning_summary":"","risk_flags":[]}。'
-    "agent 名必须来自给定 candidates,不要发明新名字。只输出 JSON。"
+    "Suggest model routing for virtual cell prediction. Return only JSON:"
+    '{"recommended_agents":[],"excluded_agents":[],"reasoning_summary":"","risk_flags":[]}.'
+    "Agent names must come from the supplied candidates. Do not invent names. Return only JSON."
 )
 
 
@@ -36,20 +38,20 @@ class LLMRouterAgent(BaseAgent):
                 d = json.loads(res["content"])
                 rec, exc = d.get("recommended_agents"), d.get("excluded_agents")
                 rf = d.get("risk_flags")
-                # C3 全入口结构守卫:只接受 list(非 list 丢弃置 [],绝不把字符串逐字符拆 ——
-                # "AB" 会被拆成 ['A','B'],候选名恰好命中单字符时静默注入垃圾 agent 名);
-                # 捕获 TypeError/AttributeError(JSON 顶层非 object、值为标量)防畸形/注入产物崩溃。
-                # 做法与 llm_orchestration/safety_contract.py 一致 —— 该文件复刻本 agent 的过滤逻辑时
-                # 已修此 fail-closed 漏洞但未回填原件,本 task 回填。
+
+
+
+
+
                 sug["recommended_agents"] = [a for a in (rec if isinstance(rec, list) else [])
                                              if a in candidates]
                 sug["excluded_agents"] = [a for a in (exc if isinstance(exc, list) else [])
                                           if a in candidates]
                 sug["reasoning_summary"] = str(d.get("reasoning_summary", ""))[:500]
-                # C4 元素级白名单(recommended/excluded_agents 无需改 —— `if a in candidates`
-                # 是值白名单,candidates 是 list → `in` 用 == 不需 hash,天然安全)。
+
+
                 sug["risk_flags"] = [f for f in rf if isinstance(f, str)] if isinstance(rf, list) else []
-            # C4 修正 11:回填 RecursionError(同 llm_critic.py:43,机械枚举 7 处之一)。
+
             except (json.JSONDecodeError, TypeError, AttributeError, RecursionError):
                 sug["risk_flags"] = ["llm_parse_failed"]
         else:

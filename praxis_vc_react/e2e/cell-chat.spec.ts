@@ -7,7 +7,7 @@ import {
   selectCell,
 } from "./chat-helpers";
 
-test("选择 cell 后确认确定性解析并完成 parse → job → report", async ({
+test("Select a cell, confirm deterministic parsing, and complete parse → job → report", async ({
   page,
 }) => {
   const failures = collectBrowserFailures(page);
@@ -23,14 +23,14 @@ test("选择 cell 后确认确定性解析并完成 parse → job → report", a
   await selectCell(page, "K562", { openPage: false });
   await expect(page.getByText("human · catalog preset", { exact: true })).toBeVisible();
 
-  const query = "敲低 AHR";
+  const query = "Knock down AHR";
   const run = await runChat(page, query);
   const parseBody = run.parseResponse.request().postDataJSON() as {
     text: string;
     mode: string;
   };
   expect(parseBody).toEqual({
-    text: `${query}\n结构化描述:{"species":"human","cell_type":"K562"}`,
+    text: `${query}\nStructured description:{"species":"human","cell_type":"K562"}`,
     mode: "llm_assisted",
   });
 
@@ -56,7 +56,7 @@ test("选择 cell 后确认确定性解析并完成 parse → job → report", a
   expectNoBrowserFailures(failures);
 });
 
-test("解析需要澄清时 fail-closed 且不创建 job", async ({ page }) => {
+test("Parsing requiring clarification fails closed without creating a job", async ({ page }) => {
   const failures = collectBrowserFailures(page);
   const jobRequests: Request[] = [];
   page.on("request", (request) => {
@@ -76,14 +76,14 @@ test("解析需要澄清时 fail-closed 且不创建 job", async ({ page }) => {
     .filter({ hasText: "I need one more detail." });
   await expect(clarification).toBeVisible();
   await expect(clarification).toContainText("perturbation_targets");
-  await expect(clarification).toContainText("未创建模拟任务");
+  await expect(clarification).toContainText("No simulation task was created");
   await expect(page.getByLabel("Message PRAXIS")).toBeEnabled();
   await page.waitForLoadState("networkidle");
   expect(jobRequests).toEqual([]);
   expectNoBrowserFailures(failures);
 });
 
-test("快速双击发送只产生一次 parse 和一次 job", async ({ page }) => {
+test("A rapid double click sends one parse request and creates one job", async ({ page }) => {
   const failures = collectBrowserFailures(page);
   const parses: Request[] = [];
   const jobs: Request[] = [];
@@ -93,7 +93,7 @@ test("快速双击发送只产生一次 parse 和一次 job", async ({ page }) =
   });
 
   await selectCell(page, "K562");
-  await page.getByLabel("Message PRAXIS").fill("敲低 TP53");
+  await page.getByLabel("Message PRAXIS").fill("Knock down TP53");
   const parseResponsePromise = page.waitForResponse((response) =>
     isRequest(response.request(), "POST", "/api/parse"),
   );
@@ -119,7 +119,7 @@ test("快速双击发送只产生一次 parse 和一次 job", async ({ page }) =
   const { job_id: jobId } = (await jobResponse.json()) as { job_id: string };
   await expect(
     page.getByRole("region", {
-      name: `结果 · job ${jobId}`,
+      name: `Results · job ${jobId}`,
       exact: true,
     }),
   ).toBeVisible();

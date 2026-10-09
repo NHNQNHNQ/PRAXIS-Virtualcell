@@ -1,14 +1,7 @@
-"""M2.1 投稿前补强 L1:perturbation-level bootstrap CI(纯 Python,Mac 可跑)。
-
-给 learned-governance 的核心数字加 95% CI:对 151 ledger 的**固定 OOF 预测 / frozen 决策**做
-**扰动级有放回 bootstrap**(每次重采样 151 个扰动、重算指标),取 percentile CI。
-
-诚实口径:这是对**固定 OOF 预测**(R2/R3,泛化)与**固定 frozen 决策**(R7,in-sample 回放)做扰动级
-bootstrap —— 评估的是**指标在扰动采样下的稳定性**,**不含模型重训(CV 重做)的不确定性**(重采样会让
-同一扰动既进 train 又进 test → 泄漏,故刻意固定预测、只 bootstrap 指标)。pert-level ≠ per-cell。
-
-复用:reliability_model(OOF/AUROC)、abstain_head(risk-coverage)、learned_reliability(frozen 决策)、
-mode_compare 同口径(bad=底 bad_quantile;rule=disagreement>rule_threshold;learned=frozen abstain/downgrade)。
+"""Perturbation-level percentile bootstrap of fixed OOF predictions and frozen decisions from the 151-row ledger.
+Resample 151 perturbations with replacement and recompute metrics for 95% CIs. This measures metric stability
+under perturbation sampling, not model-retraining uncertainty. Preserve the same bad_quantile, rule_threshold,
+and frozen learned decision definitions as mode_compare.
 """
 from __future__ import annotations
 
@@ -27,7 +20,7 @@ def _isnan(x):
 
 
 def _pct(vals, q):
-    """percentile(线性插值)。vals 非空。"""
+    """Linearly interpolated percentile of a nonempty value list."""
     s = sorted(vals)
     if not s:
         return _NAN
@@ -46,17 +39,17 @@ def _quantile(vals, q):
 
 
 def _prepare(entries):
-    """预计算每扰动的固定标量:OOF 预测 dp、真 dp、disagreement、rule/learned 软风险 flag。"""
-    oof, y = rm.cv_reliability(entries)              # 固定 OOF 预测(泛化口径)
+    """Precompute fixed per-perturbation OOF dp, true dp, disagreement, and rule/learned soft-risk flags."""
+    oof, y = rm.cv_reliability(entries)
     X, _ = rm._matrix(entries)
     dis = [r[0] for r in X]                          # disagreement_score(nan-filled)
     rows = lf.extract_features(entries)
     rule_flag, learned_flag = [], []
     for r in rows:
         d = r.get("disagreement_score")
-        rf = d is not None and d > 0.5              # rule:固定 0.5 阈值
+        rf = d is not None and d > 0.5
         rule_flag.append(rf)
-        lr = L.score(r)                              # frozen artifact 决策
+        lr = L.score(r)
         if lr.get("fallback"):
             learned_flag.append(rf)                 # fallback → rule
         else:
@@ -65,26 +58,28 @@ def _prepare(entries):
 
 
 def _metrics(idx, oof, y, dis, rule_flag, learned_flag, *, bad_quantile=0.25, rule_threshold=0.5):
-    """在(可重复的)索引列表 idx 上重算所有指标。n_bad/n_good 为 0 → None(跳过该迭代)。"""
+    """Recompute metrics on a potentially repeated index list; return None when n_bad or n_good is 0 so that
+    iteration can be skipped.
+    """
     ys = [y[i] for i in idx]
     thr = _quantile(ys, bad_quantile)
-    bad = [(not _isnan(y[i]) and y[i] <= thr) for i in idx]      # mode_compare 同口径
+    bad = [(not _isnan(y[i]) and y[i] <= thr) for i in idx]
     n_bad = sum(bad)
     n_good = len(idx) - n_bad
     if n_bad == 0 or n_good == 0:
         return None
 
     bad01 = [1 if b else 0 for b in bad]
-    # --- 泛化(OOF):bad-pert AUROC,score 越大越像 bad ---
+
     learned_auc_score = [(-oof[i] if not _isnan(oof[i]) else 0.0) for i in idx]
     dis_auc_score = [dis[i] for i in idx]
     auroc_learned = rm._auroc(learned_auc_score, bad01)
     auroc_dis = rm._auroc(dis_auc_score, bad01)
-    # --- 泛化(OOF):risk-coverage AUC,score 越大越保留 ---
+
     yi = [y[i] for i in idx]
     rc_learned = ah.rc_auc(ah.risk_coverage([oof[i] for i in idx], yi))
     rc_dis = ah.rc_auc(ah.risk_coverage([(-dis[i] if not _isnan(dis[i]) else _NAN) for i in idx], yi))
-    # --- in-sample 回放:rule vs learned 软风险决策 ---
+
     wa_rule = sum(1 for j in range(len(idx)) if bad[j] and not rule_flag[idx[j]]) / n_bad
     wa_learned = sum(1 for j in range(len(idx)) if bad[j] and not learned_flag[idx[j]]) / n_bad
     rc_rule = sum(1 for j in range(len(idx)) if bad[j] and rule_flag[idx[j]]) / n_bad
@@ -107,7 +102,7 @@ def _metrics(idx, oof, y, dis, rule_flag, learned_flag, *, bad_quantile=0.25, ru
 
 
 def _augment_diffs(m):
-    """加 learned 相对 baseline 的差值(正 = learned 更优方向)。"""
+    """Add learned-minus-baseline differences with signs oriented so positive means learned is better."""
     out = dict(m)
     out["auroc_diff_learned_minus_disagreement"] = m["auroc_learned"] - m["auroc_disagreement"]
     out["rc_auc_diff_learned_minus_disagreement"] = m["rc_auc_learned"] - m["rc_auc_disagreement"]
@@ -117,9 +112,8 @@ def _augment_diffs(m):
 
 
 def run(entries, *, b=2000, seed=0, bad_quantile=0.25, rule_threshold=0.5):
-    """扰动级 bootstrap CI。返回 {n, n_bootstrap, seed, bad_quantile, method, metrics}。
-
-    point = 原始全样本估计(应复现 finding);ci_lo/ci_hi = bootstrap 2.5%/97.5% percentile。
+    """Return perturbation-level bootstrap metadata and metrics. point uses the full sample; ci_lo/ci_hi are
+    bootstrap 2.5%/97.5% percentiles.
     """
     oof, y, dis, rule_flag, learned_flag = _prepare(entries)
     n = len(entries)

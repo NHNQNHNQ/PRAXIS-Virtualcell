@@ -1,9 +1,4 @@
-"""PgStore 真后端实现(v1.1 carry ① 关闭,§11.4)。
-
-通用 KV → praxis_store(JSONB + ttl_at);Blob → praxis_blob(BYTEA);
-Meta → praxis_meta(table_name + user_id + pk → JSONB row)。
-启动期 make_pg_pool 自动建三表(idempotent,M9 不依赖 alembic 单独 migration)。
-"""
+"""Store namespaced values, blobs, and metadata in PostgreSQL; initialize three generic tables."""
 
 from __future__ import annotations
 
@@ -36,7 +31,7 @@ CREATE TABLE IF NOT EXISTS praxis_meta (
 
 
 async def make_pg_pool(url: str, **kwargs) -> asyncpg.Pool:
-    """asyncpg pool 工厂(统一所有 PG 访问入口,auth/store 共享)。"""
+    """Create a PostgreSQL pool and initialize the three generic storage tables."""
     if url.startswith("postgresql+asyncpg://"):
         url = "postgresql://" + url[len("postgresql+asyncpg://") :]
     pool = await asyncpg.create_pool(dsn=url, **kwargs)
@@ -49,9 +44,7 @@ class PgStore(Store):
     def __init__(self, pool: asyncpg.Pool) -> None:
         self._pool = pool
 
-    async def kv_set(
-        self, ns: Namespace, key: str, value: bytes, ttl_s: float | None = None
-    ) -> None:
+    async def kv_set(self, ns: Namespace, key: str, value: bytes, ttl_s: float | None = None) -> None:
         ttl_at = None
         if ttl_s is not None:
             ttl_at = datetime.fromtimestamp(datetime.now(UTC).timestamp() + ttl_s, tz=UTC)
@@ -119,12 +112,7 @@ class PgStore(Store):
         return row["data"] if row else None
 
     async def blob_append(self, ns: Namespace, key: str, chunk: bytes) -> None:
-        """原子追加(单条 SQL):INSERT ON CONFLICT DO UPDATE 拼接 bytea。
-
-        PG 的 || 操作符对 bytea 是字节级拼接;整个 UPSERT 在单语句内
-        持行锁,并发追加同一 (user_id, scope, key) 不会丢条。
-        反 read-modify-write:不读旧值,不重写整盘 → O(1) 单条追加。
-        """
+        """Append bytes to a namespaced blob."""
         async with self._pool.acquire() as conn:
             await conn.execute(
                 """INSERT INTO praxis_blob (user_id, scope, key, data)
@@ -141,7 +129,7 @@ class PgStore(Store):
         user_id = row.get("user_id") or ""
         pk = row.get("id") or row.get("pk") or ""
         if not user_id or not pk:
-            raise ValueError("meta_upsert row 需含 user_id + id/pk")
+            raise ValueError("meta_upsert rows require user_id and id or pk")
         async with self._pool.acquire() as conn:
             await conn.execute(
                 """INSERT INTO praxis_meta (table_name, user_id, pk, row)

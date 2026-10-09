@@ -12,9 +12,7 @@ from praxis2.llm.retry import (
 @respx.mock
 async def test_failover_switches_url_after_retries_exhausted():
     respx.post("https://u1/v1/messages").mock(return_value=httpx.Response(503))
-    ok = respx.post("https://u2/v1/messages").mock(
-        return_value=httpx.Response(200, json={"ok": True})
-    )
+    ok = respx.post("https://u2/v1/messages").mock(return_value=httpx.Response(200, json={"ok": True}))
 
     async def do(client: httpx.AsyncClient):
         r = await client.post("/v1/messages", json={})
@@ -34,9 +32,7 @@ async def test_failover_switches_url_after_retries_exhausted():
 
 @respx.mock
 async def test_succeeds_on_first_url_without_failover():
-    first = respx.post("https://u1/v1/messages").mock(
-        return_value=httpx.Response(200, json={"ok": 1})
-    )
+    first = respx.post("https://u1/v1/messages").mock(return_value=httpx.Response(200, json={"ok": 1}))
 
     async def do(client: httpx.AsyncClient):
         r = await client.post("/v1/messages", json={})
@@ -44,8 +40,11 @@ async def test_succeeds_on_first_url_without_failover():
         return r.json()
 
     result = await call_with_failover(
-        do, base_urls=["https://u1", "https://u2"], max_retries=2,
-        base_delay_s=0.0, max_delay_s=0.0,
+        do,
+        base_urls=["https://u1", "https://u2"],
+        max_retries=2,
+        base_delay_s=0.0,
+        max_delay_s=0.0,
     )
     assert result == {"ok": 1}
     assert first.call_count == 1
@@ -63,17 +62,18 @@ async def test_all_urls_exhausted_raises_last_exception():
 
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await call_with_failover(
-            do, base_urls=["https://u1", "https://u2"], max_retries=1,
-            base_delay_s=0.0, max_delay_s=0.0,
+            do,
+            base_urls=["https://u1", "https://u2"],
+            max_retries=1,
+            base_delay_s=0.0,
+            max_delay_s=0.0,
         )
     assert exc_info.value.response.status_code == 503
 
 
 @respx.mock
 async def test_non_retriable_error_does_not_retry():
-    route = respx.post("https://u1/v1/messages").mock(
-        return_value=httpx.Response(400)
-    )
+    route = respx.post("https://u1/v1/messages").mock(return_value=httpx.Response(400))
 
     async def do(client: httpx.AsyncClient):
         r = await client.post("/v1/messages", json={})
@@ -82,17 +82,17 @@ async def test_non_retriable_error_does_not_retry():
 
     with pytest.raises(httpx.HTTPStatusError):
         await call_with_failover(
-            do, base_urls=["https://u1"], max_retries=3,
-            base_delay_s=0.0, max_delay_s=0.0,
+            do,
+            base_urls=["https://u1"],
+            max_retries=3,
+            base_delay_s=0.0,
+            max_delay_s=0.0,
         )
     assert route.call_count == 1
 
 
-# M10.5:classify_withheld_error 加 OpenAI error code 识别。
-
-
 def test_classify_anthropic_prompt_too_long_still_works():
-    """backward compat:anthropic 兜底字符串仍 match。"""
+
     e = Exception("prompt is too long: max_tokens exceeded")
     assert classify_withheld_error(e) == WithheldKind.PROMPT_TOO_LONG
 
@@ -108,7 +108,7 @@ def test_classify_openai_rate_limit():
 
 
 def test_classify_openai_invalid_model_returns_unknown():
-    """invalid_request_error 不触发 recovery,query.py 出 ERROR。"""
+
     e = Exception("invalid_request_error: Invalid model name passed")
     assert classify_withheld_error(e) == WithheldKind.UNKNOWN
 

@@ -1,5 +1,6 @@
-"""per-call provenance hash:给每个 model call 记 name/version/input-hash/output-hash/evidence,
-并校验完整性(Gate A 用)。确定性 canonical sha256,无 LLM。"""
+"""Deterministic per-call canonical sha256 records for model name/version, input/output hashes, and evidence;
+provide completeness checks for governance gates.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -11,7 +12,7 @@ _SHA256 = re.compile(r"[0-9a-f]{64}")
 
 
 def _canon_sha256(obj) -> str:
-    """canonical json sha256(与 runtime.py trace_id 同模式,确定性)。"""
+    """Compute canonical JSON sha256 using the same deterministic pattern as runtime trace identity."""
     return hashlib.sha256(
         json.dumps(obj, sort_keys=True, ensure_ascii=False, default=str).encode("utf-8")
     ).hexdigest()
@@ -19,11 +20,9 @@ def _canon_sha256(obj) -> str:
 
 def compute_call_provenance(model_name: str, model_version: str | None,
                             model_input, output, evidence) -> dict:
-    """产 per_call 记录。input/output 走 canonical sha256(确定性)。
-
-    input_hash 语义:reject 分支的 input 是原始 request、failed 分支可能是空 dict
-    (prepare_input 未成功),success 分支是 prepare_input 产出——供审计者理解 input_hash 来源。
-    注:numpy 标量经 default=str 会静默转字符串,入 hash 前建议先 .tolist()/float()。
+    """Create per_call provenance with canonical input/output hashes. Rejected calls hash the request; failed
+    preparation can hash an empty dictionary; successful calls hash prepared input. Convert NumPy values to
+    lists/native floats before hashing to avoid string coercion.
     """
     return {
         "model_name": model_name,
@@ -35,7 +34,7 @@ def compute_call_provenance(model_name: str, model_version: str | None,
 
 
 def check_call_provenance(per_call) -> list[str]:
-    """返回缺失、为空或 hash 格式无效的必需键清单(空=完整)。"""
+    """Return required keys that are missing, empty, or have invalid hash format; empty means complete."""
     if not isinstance(per_call, dict):
         return list(_REQUIRED)
     invalid = [key for key in ("model_name", "model_version") if not per_call.get(key)]

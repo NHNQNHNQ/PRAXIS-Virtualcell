@@ -1,7 +1,4 @@
-"""Phase 1:物种特异生物学守卫(数据驱动)。铁律:
-- bacteria 不能强行解释为自噬/线粒体 → mismatch caution
-- yeast/bacteria 单细胞无组织 niche → mismatch reject
-- 弱支持模块默认 caution,不静默 accept"""
+"""Tests for species module guards."""
 import pytest
 
 from praxis_virtualcell.biological_modules import modules as M
@@ -9,7 +6,7 @@ from praxis_virtualcell.biological_modules.registry import ModuleRegistry
 
 reg = ModuleRegistry()
 
-# (species, query, 期望 verdict)
+
 _MISMATCH = [
     ("bacteria", "bacteria_autophagy", "caution"),
     ("bacteria", "mitochondria", "caution"),
@@ -25,18 +22,18 @@ def test_biological_mismatch_verdict(species, query, verdict):
 
 
 def test_weak_modules_never_silently_accept():
-    """所有 weak 模块默认裁决必须是 caution,不能是 accept(诚实:弱支持要带告警)。"""
+    """Verify weak modules never silently accept."""
     offenders = []
     for sp in ("human", "mouse", "yeast", "bacteria"):
         for mid in M.MODULE_ORDER:
             rec = reg.support(sp, mid)
             if rec["support"] == "weak" and reg.default_verdict(sp, mid) == "accept":
                 offenders.append(f"{sp}/{mid}")
-    assert offenders == [], f"弱支持模块被静默 accept: {offenders}"
+    assert offenders == [], f"Weakly supported modules were silently accepted:  {offenders}"
 
 
 def test_unsupported_modules_reject():
-    """unsupported 模块默认 reject。"""
+    """Verify unsupported modules reject."""
     for sp in ("human", "mouse", "yeast", "bacteria"):
         for mid in M.MODULE_ORDER:
             if reg.support(sp, mid)["support"] == "unsupported":
@@ -44,6 +41,6 @@ def test_unsupported_modules_reject():
 
 
 def test_bacteria_m3_not_called_mitochondria_in_display():
-    """bacteria 的 M3 前端显示不得出现 'Mitochondrial'。"""
+    """Verify bacteria m3 not called mitochondria in display."""
     name = reg.display_name("bacteria", "mitochondrial_energy_metabolism")
     assert "Mitochond" not in name

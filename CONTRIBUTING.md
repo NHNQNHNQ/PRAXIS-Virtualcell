@@ -1,20 +1,21 @@
 # Contributing
 
-PRAXIS-VirtualCell accepts changes that preserve its fail-closed product contract: data may be packaged under
-explicit schemas, but prediction requires exact compatible, scientifically validated, product-promoted model
-scope. A passing schema or synthetic fixture is not scientific evidence.
+Contributions to the virtual-cell runtime, model adapters, agent framework, and interface are welcome.
+Start from `main`, keep changes focused, and describe the resulting behavior in your pull request.
 
-## Local workflow
+## Development
 
-1. Create a focused branch from the intended immutable baseline.
-2. Keep data, model, environment, adapter, evidence and policy identities explicit.
-3. Add negative tests before or with implementation; unsupported and stale inputs must abstain.
-4. Run the directed tests, Ruff, frontend checks when affected, packaging/versioning tests and `pip check`.
-5. Update the relevant ADR, runbook, versioning table and status ledger without upgrading science or policy.
+Follow [the installation guide](docs/INSTALL.md) and run the relevant checks in
+[the testing guide](docs/TESTING.md). Include regression tests for changes to runtime behavior.
+Frontend changes should also pass TypeScript, lint, build, and the affected browser tests.
 
-Do not commit secrets, private paths, raw external datasets, checkpoints, model weights or generated release
-artifacts. External data/model runs, operator promotion, push, release and deployment use separate approvals.
+Preserve explicit data, model, adapter, environment, and evidence identities. A schema-valid
+package or synthetic fixture does not establish scientific validity. Unsupported requests,
+incompatible assets, and missing validation evidence must retain their abstention behavior.
+LLMs may interpret requests and explain artifacts; predictions and final governance decisions
+belong to the deterministic runtime.
 
-Pull requests should state exact scope, non-goals, tests, immutable identities, negative results, scientific
-status, product-policy status and rollback implications. Changes to a public schema require a new version or an
-explicit compatibility/migration path.
+Do not commit credentials, private paths, raw external datasets, checkpoints, or generated builds.
+Document the source and license of new assets. Public schema changes need a versioned
+compatibility or migration path. Cite the [preprint](https://arxiv.org/abs/2609.29221v1)
+when discussing the framework in publications.

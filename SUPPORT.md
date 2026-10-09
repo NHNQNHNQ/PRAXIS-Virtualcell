@@ -1,13 +1,11 @@
 # Support
 
-Use GitHub issues for reproducible bugs and scoped feature requests in published, non-sensitive surfaces. Use
-private security reporting for vulnerabilities, secrets or private-data exposure. Scientific collaboration,
-new external assets, experiments, ethics/biosafety decisions and production operations require separate
-coordination and are not ordinary support requests.
+Use [GitHub issues](https://github.com/NHNQNHNQ/PRAXIS-Virtualcell/issues) for reproducible
+bugs, questions, and feature requests. Include the software version or commit, platform,
+command, expected behavior, observed result, and redacted logs.
 
-Include product version, exact Git SHA, platform, command, redacted logs, expected behavior and observed
-abstain/error code. Never attach raw private datasets, credentials, checkpoints or absolute private paths.
+Keep credentials, private datasets, checkpoints, and personal machine paths out of reports.
+For vulnerabilities, follow [the security policy](SECURITY.md).
 
-Contract-only, experimental, unsupported and historical capabilities are best-effort and carry no prediction,
-scientific-validity or production-promotion warranty. See [README.md](README.md) and
-[docs/INDEX.md](docs/INDEX.md) for current status.
+For setup and research scope, start with [the documentation](docs/INDEX.md) and
+[the reproducibility guide](docs/REPRODUCIBILITY.md).

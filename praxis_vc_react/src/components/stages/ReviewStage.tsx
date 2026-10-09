@@ -9,20 +9,6 @@ import Card from "../ui/Card";
 import FieldRow from "../ui/FieldRow";
 import Button from "../ui/Button";
 import type { FieldStatus } from "../ui/StatusPill";
-
-// Stage 2 · Review(spec §2,最重要)—— 核对任务解读 + 可编辑分组表单。
-// 合并旧两步:上部解析摘要(只读元信息 + 假设/缺失)+ 下部可编辑分组表单。
-// 迁自:
-//   · ParseReviewView —— parser/llm_used/fallback_used/schema_valid 元信息、assumptions/missing/errors/clarification 展示;
-//   · ConfirmView —— cell 预设 applyPreset、species/cell_type/perturbation_type/targets 编辑、withCurrent 组装、
-//     以 candidate_request 为基底覆盖可编辑字段(保留 request_id/metadata),confirm 出口只交出组装好的 request。
-// 铁律(红线):前端只组装/展示,绝不做任何治理/预测/科学裁决判断;元信息如实展示。
-//
-// 字段初值来源(修掉 P2 桥接的 remount seed 限制):
-//   initialRequest(= job.confirmedRequest)非空 → 从它回填(保留用户上次编辑值,回退再进不丢);
-//   否则 → 从 parsedIntent.candidate_request seed。
-
-// 不可信解析候选只按声明类型读取；对象/数字不得经 String() 伪装成可确认值。
 function readStr(src: Record<string, unknown>, key: string): string {
   const v = src[key];
   return typeof v === "string" ? v : "";
@@ -48,9 +34,7 @@ export default function ReviewStage({
   onBack: (draft: Record<string, unknown>) => void;
   onEdited: (draft: Record<string, unknown>) => void;
 }) {
-  // 候选请求(解析结果)始终作为基底,承载 request_id/metadata/task_type 等非编辑字段。
   const cand = parsedIntent.candidate_request as Record<string, unknown>;
-  // 可编辑字段的种子:优先用户上次编辑值(initialRequest),否则解析候选。
   const seed = initialRequest ?? cand;
 
   const [species, setSpecies] = useState(() => readStr(seed, "species"));
@@ -65,10 +49,9 @@ export default function ReviewStage({
   const [opts, setOpts] = useState<Options | null>(null);
 
   useEffect(() => {
-    getOptions().then(setOpts).catch(() => setOpts(null)); // 失败静默降级为纯文本输入
+    getOptions().then(setOpts).catch(() => setOpts(null));
   }, []);
 
-  // 选中预设 → 填充 species/cell_type/perturbation_type/targets(便捷,仍可手改)。迁自 ConfirmView.applyPreset。
   function applyPreset(p: CellPreset) {
     const nextPertType = p.example_perturbation_type ?? pertType;
     const nextTargets = p.example_targets
@@ -89,40 +72,27 @@ export default function ReviewStage({
     setTargetsEdited(true);
   }
 
-  // 下拉选项:枚举 + 保留当前值(避免锁死非枚举内的历史值)。迁自 ConfirmView.withCurrent。
   function withCurrent(list: string[] | undefined, cur: string): string[] {
     const xs = list ?? [];
     return cur && !xs.includes(cur) ? [cur, ...xs] : xs;
   }
 
-  // 字段状态映射(spec §2 / 计划 Task 9.9 Step4):状态点须随【当前编辑值】实时反映,
-  // 而非停留在最初的静态解析结果。综合判定 = 当前编辑值 + 原始解析信号(missing_fields / assumptions):
-  //   · 当前值非空 → 若该字段来自推断(assumptions 提及)则 inferred,否则 confirmed(已确认);
-  //   · 当前值为空 → 若命中 missing_fields 则 missing(红橙缺失),否则 editable(可编辑)。
-  // 关键:值非空即不再判 missing,故 species 从空→选 human 后 StatusPill 由「缺失」变「已确认」。
-  // 仍只看解析信号 + 编辑值,不做任何科学裁决。
   const missingSet = useMemo(
     () => new Set(parsedIntent.missing_fields),
     [parsedIntent.missing_fields],
   );
-  // assumptions 是一组自然语言句子;某字段被推断则其字段名通常出现在假设文本里。
   const assumptionsText = useMemo(
     () => parsedIntent.assumptions.join(" ").toLowerCase(),
     [parsedIntent.assumptions],
   );
 
-  // 单个可编辑字段的状态:先看当前编辑值有无,再叠加原始解析信号。
   function statusOf(key: string, value: string): FieldStatus {
     if (value.trim()) {
-      // 有值:来自推断的仍标 inferred(便于审阅),否则视为已确认。
       return assumptionsText.includes(key) ? "inferred" : "confirmed";
     }
-    // 无值:命中 missing_fields → 缺失(红橙提示),否则可编辑。
     return missingSet.has(key) ? "missing" : "editable";
   }
 
-  // 组装 request:以 candidate_request 为基底覆盖可编辑字段,保留 request_id/metadata 等。
-  // 确认和返回共用同一草稿快照；返回只保存编辑，不会触发运行或越过 Review。
   function currentDraft(
     overrides: Partial<{
       species: string;
@@ -145,12 +115,10 @@ export default function ReviewStage({
     };
   }
 
-  // 迁自 ConfirmView.confirm——只交出组装好的 request,不在此发起运行。
   function confirm() {
     onConfirmed(currentDraft());
   }
 
-  // 请求输出(只读):task_type 等来自候选,不在此编辑。
   const taskType = readStr(cand, "task_type");
   function errorIsUnresolved(error: string): boolean {
     if (error.startsWith("unsupported_species:")) {
@@ -168,12 +136,10 @@ export default function ReviewStage({
         ? !opts.perturbation_type.includes(current)
         : !current || current === original;
     }
-    // cell_type 是可选自由文本；严格读取已把非法类型安全归零，当前草稿可直接修正。
     if (error === "invalid_cell_type_type") return false;
     if (error === "invalid_perturbation_targets_type") {
       return !(targetsEdited && (pertType === "medium" || targets.trim()));
     }
-    // 输出、任务、metadata 等不可在本页编辑的错误仍必须返回 Ask 修正。
     return true;
   }
   const unresolvedErrors = parsedIntent.errors.filter(errorIsUnresolved);
@@ -196,7 +162,6 @@ export default function ReviewStage({
 
   return (
     <section style={{ maxWidth: "820px" }}>
-      {/* 标题区:平实说明,非工程旁白(spec §3.5)。 */}
       <div style={{ marginBottom: "var(--space-5)" }}>
         <h1
           style={{
@@ -209,7 +174,7 @@ export default function ReviewStage({
             margin: 0,
           }}
         >
-          核对任务解读
+          Review the task interpretation
         </h1>
         <p
           style={{
@@ -220,13 +185,12 @@ export default function ReviewStage({
             maxWidth: "62ch",
           }}
         >
-          下面是系统对你所描述实验的理解。请核对生物体系与扰动设置,必要时直接修改;
-          确认无误后即可继续。运行前的这一步是为了让任务定义可审阅。
+          Review the interpretation of your experiment. Check the biological system and perturbation settings and edit them if needed;
+          continue once they are correct. This step makes the task definition reviewable before execution.
         </p>
       </div>
 
-      {/* 分组卡 1:生物系统 —— species / cell_type + cell 预设载入。 */}
-      <Card title="生物系统">
+      <Card title="Biological system">
         {opts && opts.cell_presets.length > 0 && (
           <div style={{ marginBottom: "var(--space-3)" }}>
             <label
@@ -239,7 +203,7 @@ export default function ReviewStage({
                 maxWidth: "360px",
               }}
             >
-              载入常用体系(可再手改)
+              Load a common system (editable)
               <select
                 defaultValue=""
                 onChange={(e) => {
@@ -247,7 +211,7 @@ export default function ReviewStage({
                   if (p) applyPreset(p);
                 }}
               >
-                <option value="">— 选择物种 / 细胞类型 —</option>
+                <option value="">— Select species / cell type —</option>
                 {opts.cell_presets.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.label}
@@ -258,7 +222,7 @@ export default function ReviewStage({
           </div>
         )}
 
-        <FieldRow label="物种" status={statusOf("species", species)}>
+        <FieldRow label="Species" status={statusOf("species", species)}>
           {opts ? (
             <select
               value={species}
@@ -287,7 +251,7 @@ export default function ReviewStage({
         </FieldRow>
 
         <FieldRow
-          label="细胞类型（可留空）"
+          label="Cell type (optional)"
           status={cellType.trim() ? "confirmed" : "editable"}
         >
           <input
@@ -301,10 +265,9 @@ export default function ReviewStage({
         </FieldRow>
       </Card>
 
-      {/* 分组卡 2:扰动 —— perturbation_type / perturbation_targets。 */}
-      <Card title="扰动">
+      <Card title="Perturbation">
         <FieldRow
-          label="扰动类型"
+          label="Perturbation type"
           status={statusOf("perturbation_type", pertType)}
         >
           {opts ? (
@@ -335,7 +298,7 @@ export default function ReviewStage({
         </FieldRow>
 
         <FieldRow
-          label="扰动对象（逗号分隔）"
+          label="Perturbation targets (comma-separated)"
           status={statusOf("perturbation_targets", targets)}
         >
           <input
@@ -346,62 +309,59 @@ export default function ReviewStage({
               setTargets(value);
               setTargetsEdited(true);
             }}
-            placeholder="例:AHR, TP53"
+            placeholder="Example: AHR, TP53"
           />
         </FieldRow>
       </Card>
 
-      {/* 分组卡 3:请求输出 —— task_type 等(只读)。 */}
-      <Card title="请求输出">
-        <FieldRow label="任务类型" status="locked">
+      <Card title="Requested output">
+        <FieldRow label="Task type" status="locked">
           <span style={{ fontSize: "14px", color: "var(--text)" }}>
             {taskType || "—"}
           </span>
         </FieldRow>
       </Card>
 
-      {/* 分组卡 4:任务理解与假设 —— 主流程说人话(§3.5),精确/审计术语下沉 Stage 5。 */}
-      <Card title="任务理解与假设">
+      <Card title="Task interpretation and assumptions">
         <ul className="meta" style={{ marginTop: 0 }}>
           <li>
-            解读方式:
+            Interpretation method:
             <code>
               {parsedIntent.parser.toLowerCase().includes("llm")
-                ? "语言模型辅助"
-                : "确定性关键词"}
+                ? "Language assistance"
+                : "Deterministic keywords"}
             </code>
           </li>
           <li>
-            语言模型参与:<code>{parsedIntent.llm_used ? "是" : "否"}</code>
+            Language model used: <code>{parsedIntent.llm_used ? "Yes" : "No"}</code>
           </li>
         </ul>
 
         {parsedIntent.assumptions.length > 0 && (
           <div className="note">
-            推断的假设:{parsedIntent.assumptions.join(";")}
+            Inferred assumptions: {parsedIntent.assumptions.join(";")}
           </div>
         )}
         {unresolvedMissing.length > 0 && (
           <div className="warn">
-            尚缺信息:{unresolvedMissing.join(", ")}
+            Missing information: {unresolvedMissing.join(", ")}
           </div>
         )}
         {unresolvedErrors.length > 0 && (
           <div className="err">
-            解读时的问题:{unresolvedErrors.join(";")}
+            Interpretation issues: {unresolvedErrors.join(";")}
           </div>
         )}
         {resolvedErrors.length > 0 && (
           <div className="note">
-            已在当前草稿修正的原始问题:{resolvedErrors.join(";")}
+            Original issues resolved in this draft: {resolvedErrors.join(";")}
           </div>
         )}
         {confirmationBlocked && (
-          <div className="warn">这项描述还需进一步澄清后再运行。</div>
+          <div className="warn">Clarify this description before execution.</div>
         )}
       </Card>
 
-      {/* 操作行:返回上一步 / 确认继续。不可编辑的解析错误需返回 Ask 修正。 */}
       <div
         style={{
           display: "flex",
@@ -411,10 +371,10 @@ export default function ReviewStage({
         }}
       >
         <Button variant="ghost" onClick={() => onBack(currentDraft())}>
-          ← 返回
+          ← Back
         </Button>
         <Button onClick={confirm} disabled={confirmationBlocked}>
-          确认并继续 →
+          Confirm and continue →
         </Button>
       </div>
     </section>

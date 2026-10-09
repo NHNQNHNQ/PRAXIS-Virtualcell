@@ -1,16 +1,6 @@
-"""v0.6:praxis-vc 命令行入口。
-
-  praxis-vc run  --request examples/ahr_k562.json --mode offline --out runs/ahr
-  praxis-vc ask  --text "在 human 细胞里敲掉 AHR 会怎么样" --mode llm-assisted --out runs/ahr_llm
-  praxis-vc serve --host 127.0.0.1 --port 8000        # FastAPI(需 [api] extra)
-  praxis-vc web  --api http://127.0.0.1:8000          # Streamlit(需 [web] extra)
-
-React 正式网站(praxis_vc_react/,只读展示,不参与预测/治理决策):
-  开发:另起 `cd praxis_vc_react && npm run dev`(5173),serve 作后端。
-  生产:`cd praxis_vc_react && npm run build` 后,serve 会自动把 dist 挂到 "/"
-        (同源),浏览器开 http://127.0.0.1:8000 即前端+后端。
-
-默认 offline;llm-assisted 需 .env 有 DEEPSEEK_API_KEY,否则自动 fallback。
+"""CLI entry point for offline requests, optional LLM-assisted questions, the FastAPI service, and Streamlit. React
+development uses npm run dev; npm run build enables same-origin hosting by serve at 127.0.0.1:8000. Offline is
+the default; LLM assistance requires DEEPSEEK_API_KEY and falls back when unavailable.
 """
 
 from __future__ import annotations
@@ -84,7 +74,7 @@ def _cmd_ask(a) -> int:
         print("== clarification_required ==", parsed["missing_fields"] or parsed["errors"])
         return 2
     if not a.yes:
-        print("(加 --yes 确认执行;或用 web/API 的确认页)")
+        print("(Add --yes to confirm execution, or use the web/API review page.)")
         return 0
     out = run_formal_query(
         parsed["candidate_request"],
@@ -93,7 +83,10 @@ def _cmd_ask(a) -> int:
     )
     if a.out:
         JobStore(os.path.dirname(a.out) or "runs").save(
-            os.path.basename(a.out), candidate=parsed["candidate_request"], result={**out, "parsed": parsed}
+            os.path.basename(a.out),
+            candidate=parsed["candidate_request"],
+            request=parsed["candidate_request"],
+            result={**out, "parsed": parsed},
         )
     print("== reliability_decision ==")
     print(json.dumps(out["reliability_decision"], ensure_ascii=False, indent=2))
@@ -589,69 +582,69 @@ def _pack_identity_arguments(parser) -> None:
 
 
 def main(argv=None, *, direct_v2_factory=None) -> int:
-    p = argparse.ArgumentParser(prog="praxis-vc", description="PRAXIS-VirtualCell 本地科学家界面")
+    p = argparse.ArgumentParser(prog="praxis-vc", description="PRAXIS-VirtualCell local research interface")
     p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
-    r = sub.add_parser("run", help="从 request JSON 跑一次(离线确定性)")
+    r = sub.add_parser("run", help="Run a request JSON with deterministic offline execution")
     r.add_argument("--request", required=True)
     r.add_argument("--mode", default="offline")
     r.add_argument("--out", default=None)
     r.add_argument("--llm-report", action="store_true", dest="llm_report")
     r.set_defaults(fn=_cmd_run)
-    k = sub.add_parser("ask", help="自然语言提问 → 解析 → (--yes)执行")
+    k = sub.add_parser("ask", help="Ask a question, parse it, then execute with --yes")
     k.add_argument("--text", required=True)
     k.add_argument("--mode", default="offline")
     k.add_argument("--out", default=None)
     k.add_argument("--yes", action="store_true")
     k.add_argument("--llm-report", action="store_true", dest="llm_report")
     k.set_defaults(fn=_cmd_ask)
-    s = sub.add_parser("serve", help="启动 FastAPI 本地服务")
+    s = sub.add_parser("serve", help="Start the local FastAPI service")
     s.add_argument("--host", default="127.0.0.1")
     s.add_argument("--port", type=int, default=8000)
     _golden_runtime_arguments(s)
     s.set_defaults(fn=_cmd_serve)
-    w = sub.add_parser("web", help="启动 Streamlit 本地网页")
+    w = sub.add_parser("web", help="Start the local Streamlit interface")
     w.add_argument("--api", default="http://127.0.0.1:8000")
     w.add_argument("--host", default="127.0.0.1")
     w.add_argument("--port", type=int, default=8501)
     w.set_defaults(fn=_cmd_web)
-    pack = sub.add_parser("pack", help="检查、注册和运行 VirtualCellPack")
+    pack = sub.add_parser("pack", help="Inspect, register, and run VirtualCellPacks")
     pack_sub = pack.add_subparsers(dest="pack_cmd", required=True)
     inspect_cmd = pack_sub.add_parser(
         "inspect",
-        help="解析 manifest；不读取资产，不声明 Pack 有效",
+        help="Parse the manifest without reading assets or claiming Pack validity",
     )
     inspect_cmd.add_argument("pack_root")
     inspect_cmd.set_defaults(fn=_cmd_pack_inspect)
     validate_cmd = pack_sub.add_parser(
         "validate",
-        help="重验 manifest、资产和数据语义",
+        help="Revalidate manifest, assets, and data semantics",
     )
     validate_cmd.add_argument("pack_root")
     validate_cmd.set_defaults(fn=_cmd_pack_validate)
     factory_init_cmd = pack_sub.add_parser(
         "factory-init",
-        help="重验一个 quarantine receipt 并初始化 write-new Factory store",
+        help="Revalidate a quarantine receipt and initialize a new Factory store",
     )
     factory_init_cmd.add_argument(
         "--data-root",
         required=True,
-        help="P7 data root 的 canonical 绝对路径",
+        help="Canonical absolute path to the data root",
     )
     factory_init_cmd.add_argument(
         "--upload-id",
         required=True,
-        help="已完成 quarantine receipt 的 canonical UUIDv4",
+        help="Canonical UUIDv4 of the completed quarantine receipt",
     )
     factory_init_cmd.add_argument(
         "--store",
         required=True,
-        help="位于 uploads 子树外的绝对 write-new 路径",
+        help="Absolute path for a new store outside the uploads subtree",
     )
     factory_init_cmd.set_defaults(fn=_cmd_pack_factory_init)
     candidate_prepare_cmd = pack_sub.add_parser(
         "candidate-prepare",
-        help="冻结 operator-authored Pack 为未审核 candidate；不推断 metadata",
+        help="Freeze an operator-authored Pack as an unreviewed candidate without inferring metadata",
     )
     candidate_prepare_cmd.add_argument("--data-root", required=True)
     candidate_prepare_cmd.add_argument("--upload-id", required=True)
@@ -661,7 +654,7 @@ def main(argv=None, *, direct_v2_factory=None) -> int:
     candidate_prepare_cmd.set_defaults(fn=_cmd_pack_candidate_prepare)
     candidate_validate_cmd = pack_sub.add_parser(
         "candidate-validate",
-        help="绑定人工 metadata review 并生成 strict validation report",
+        help="Bind manual metadata review and generate a strict validation report",
     )
     candidate_validate_cmd.add_argument("--data-root", required=True)
     candidate_validate_cmd.add_argument("--upload-id", required=True)
@@ -672,7 +665,7 @@ def main(argv=None, *, direct_v2_factory=None) -> int:
     candidate_validate_cmd.set_defaults(fn=_cmd_pack_candidate_validate)
     register_cmd = pack_sub.add_parser(
         "register",
-        help="以完整 P19 receipt/review/validation/operator chain 写入本地索引",
+        help="Write to the local index using the complete receipt/review/validation/operator chain",
     )
     register_cmd.add_argument("--upload-directory", required=True)
     register_cmd.add_argument("--pack-root", required=True)
@@ -685,19 +678,19 @@ def main(argv=None, *, direct_v2_factory=None) -> int:
     register_cmd.set_defaults(fn=_cmd_pack_register)
     list_cmd = pack_sub.add_parser(
         "list",
-        help="列出内置和已注册 Pack，并逐项重验",
+        help="List built-in and registered Packs and revalidate each entry",
     )
     list_cmd.set_defaults(fn=_cmd_pack_list)
     compatibility_cmd = pack_sub.add_parser(
         "compatibility",
-        help="计算请求、Pack、模型和环境兼容性；不执行模型",
+        help="Evaluate request, Pack, model, and environment compatibility without executing a model",
     )
     compatibility_cmd.add_argument("--request", required=True)
     _pack_identity_arguments(compatibility_cmd)
     compatibility_cmd.set_defaults(fn=_cmd_pack_compatibility)
     pack_run_cmd = pack_sub.add_parser(
         "run",
-        help="按 Pack identity 执行；无可执行模型时诚实弃权",
+        help="Execute against a Pack identity; abstain when no executable model is available",
     )
     pack_run_cmd.add_argument("--request", required=True)
     _pack_identity_arguments(pack_run_cmd)
@@ -711,30 +704,30 @@ def main(argv=None, *, direct_v2_factory=None) -> int:
     pack_run_cmd.set_defaults(fn=_cmd_pack_run)
     direct_v2 = sub.add_parser(
         "direct-v2",
-        help="经显式注入的 generic direct-v2 factory 提交一个 job",
+        help="Submit a job through an explicitly injected generic direct-v2 factory",
     )
     direct_v2_sub = direct_v2.add_subparsers(dest="direct_v2_cmd", required=True)
     direct_v2_run = direct_v2_sub.add_parser(
         "run",
-        help="只接受 vc.request.v2；不自动发现 Pack、模型或领域插件",
+        help="Accept only vc.request.v2; do not discover Packs, models, or domain plugins automatically",
     )
     direct_v2_run.add_argument("--request", required=True)
     _pack_identity_arguments(direct_v2_run)
     direct_v2_run.add_argument(
         "--out",
         required=True,
-        help="JobStore 路径，例如 runs/my-direct-v2-job",
+        help="JobStore path, for example runs/my-direct-v2-job",
     )
     _golden_runtime_arguments(direct_v2_run)
     direct_v2_run.set_defaults(fn=_cmd_direct_v2_run)
     training = sub.add_parser(
         "training",
-        help="运行 contract-only 确定性训练 dry-run",
+        help="Run a deterministic training-contract dry run",
     )
     training_sub = training.add_subparsers(dest="training_cmd", required=True)
     dry_run_cmd = training_sub.add_parser(
         "dry-run",
-        help="从冻结 job 同步生成 candidate artifacts",
+        help="Synchronously generate candidate artifacts from a frozen job",
     )
     dry_run_cmd.add_argument("--job", required=True)
     dry_run_cmd.add_argument("--index", required=True)

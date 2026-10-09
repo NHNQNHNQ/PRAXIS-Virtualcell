@@ -1,15 +1,15 @@
-"""M1(W4b):远端循环加载 donor 多 predictor ckpt,各自 EvalAgent 复现 ΔPearson 对照各 anchor。
-
-仅远端 virtualcell 环境跑。用法:python -m praxis_virtualcell.benchmarks._anchor_donor_multi <ckpt_dir>
-ckpt_dir = .../checkpoints/norman_2019。复用同一 Norman test set(max_cells=200, seed=1)。
-注:pretrained_backbone 用 mock_backbone(非真 scGPT,见 finding)。
+"""Evaluate multiple donor checkpoints against their delta-Pearson anchors in the remote environment. Use the same
+Norman test set (max_cells=200, seed=1). pretrained_backbone uses mock_backbone here, not actual scGPT.
 """
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
-_DONOR = "/home/zkyd/data1/mzy/Virtual cell"
+_DONOR = os.environ.get("PRAXIS_DONOR_SOURCE_ROOT", "").strip()
+if not _DONOR:
+    raise RuntimeError("Set PRAXIS_DONOR_SOURCE_ROOT to the external donor source checkout")
 if _DONOR not in sys.path:
     sys.path.insert(0, _DONOR)
 

@@ -1,5 +1,4 @@
-"""打包配置守卫:wheel 必须含 praxis_virtualcell/praxis_vc_api + 运行时数据。
-防 packages.find 回退到只打 praxis2(否则 praxis-vc CLI ImportError)。"""
+"""Tests for packaging."""
 
 import json
 import re
@@ -78,7 +77,6 @@ def test_python313_hash_locks_cover_ci_and_runtime_dependencies():
     assert {
         "pytest",
         "ruff",
-        "httpx2",
         "streamlit",
         "cobra",
         "greenlet",
@@ -114,38 +112,6 @@ def test_release_container_uses_pinned_bases_and_locked_wheel_install():
     assert "PRAXIS_VC_RUNS=/var/lib/praxis-vc/runs" in dockerfile
 
 
-def test_artifact_oci_assembly_is_network_disabled_and_wheel_first():
-    dockerfile = (_ROOT / "deploy" / "vc" / "Dockerfile.artifact").read_text(encoding="utf-8")
-    script = (_ROOT / "scripts" / "build_release_oci.sh").read_text(encoding="utf-8")
-
-    assert re.search(r"python@sha256:[0-9a-f]{64}", dockerfile)
-    assert "COPY --from=wheelhouse . /wheelhouse" in dockerfile
-    assert dockerfile.count("RUN --network=none") == 2
-    assert "pip download" not in dockerfile
-    assert "npm ci" not in dockerfile
-    assert "--no-index" in dockerfile
-    assert "--require-hashes" in dockerfile
-    assert 'find /opt -xdev -exec touch -h -d "@${SOURCE_DATE_EPOCH}" {} +' in dockerfile
-    assert "COPY --from=installer /opt /opt" in dockerfile
-    assert 'touch -h -d "@${SOURCE_DATE_EPOCH}"' in dockerfile
-    assert "USER 10001:10001" in dockerfile
-    assert 'org.opencontainers.image.revision="${GIT_SHA}"' in dockerfile
-
-    assert "status --porcelain=v1 --untracked-files=normal" in script
-    assert "refusing non-local Docker" in script
-    assert "docker image inspect" in script
-    assert "docker buildx ls" in script
-    assert 'row.get("Driver") != "docker"' in script
-    assert 'node.get("Endpoint") != context' in script
-    assert 'target_profile") != "linux_arm64_cp313"' in script
-    assert '--builder "${PRAXIS_BUILDER}"' in script
-    assert "--network none" in script
-    assert "--no-cache" in script
-    assert "--pull=false" in script
-    assert "--provenance=false" in script
-    assert "--sbom=false" in script
-    assert "type=oci" in script
-    assert "docker push" not in script
 
 
 def test_docker_context_excludes_local_data_and_credentials():

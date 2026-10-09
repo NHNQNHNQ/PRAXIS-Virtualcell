@@ -19,12 +19,12 @@ def _client():
 def test_critic_returns_structured_notes():
     bus = MessageBus()
     report = {"abstain": False, "models_used": ["MockGEARS"],
-              "models_rejected": ["MockGEARS"],  # 矛盾:既 used 又 rejected
+              "models_rejected": ["MockGEARS"],
               "prediction": {"delta": [0.9]}, "reliability": "high", "provenance": {}}
     LLMCriticAgent(_client()).handle(
         AgentMessage("m1", "Report", "LLMCritic", "llm_review", {"report": report}, "t1"), bus)
     out = bus.latest("llm_critic_notes").payload
     assert isinstance(out.get("notes"), list)
     assert isinstance(out.get("flags"), list)
-    # LLM 不改 prediction:输入 report 对象未被修改
+
     assert report["prediction"] == {"delta": [0.9]}

@@ -1,9 +1,6 @@
-"""W1.3(v0.4):case report 7 部分结构 + validator + routing-prototype 构造器。
-
-7 部分是每个 v0.4 case 的质量铁律,缺任一 → CaseReportError(把"必须真实分析"变成可执行门)。
-routing_case 从原始请求构建 routing-prototype case:此类 case 的分析输出 = 治理路由行为本身,
-7 部分由 species_schema 归一 + route_table 路由**真实**填充(非 mock)。需要真跑工具的数值预测
-(GEM 生长、药物 signature)由后续步骤扩展,boundary 里诚实标注 pending / data-gated。
+"""Seven-part case reports, validation, and routing-prototype construction. Missing or empty sections raise
+CaseReportError. Routing cases derive actual normalization and routing evidence; numerical model execution is
+separate and pending/data-gated boundaries remain explicit.
 """
 from __future__ import annotations
 
@@ -17,7 +14,7 @@ _REQUIRED = ("structured_input", "object_normalization", "models_tools_selected"
 
 
 class CaseReportError(ValueError):
-    """case report 缺/空 7 部分中的任一。"""
+    """A case report is missing one of its 7 required sections or has an empty section."""
 
 
 @dataclass
@@ -36,30 +33,36 @@ class CaseReport:
 
 
 def validate_case_report(report) -> None:
-    """7 部分齐全且非空,否则抛 CaseReportError。"""
+    """Require all 7 case-report sections to be nonempty; otherwise raise CaseReportError."""
     d = report.to_dict() if isinstance(report, CaseReport) else dict(report)
     for k in _REQUIRED:
-        if not d.get(k):                       # None / "" / {} / [] 均视为缺
-            raise CaseReportError(f"case report 缺/空字段: {k}")
+        if not d.get(k):
+            raise CaseReportError(f"case report missing or empty field: {k}")
 
 
 def _boundary(dec: RouteDecision) -> str:
-    """据路由决策生成诚实的边界声明(不过度解释)。"""
+    """Describe the evidence boundary implied by the routing decision."""
     if dec.engine == "gem_fba" and not dec.data_gated:
-        return ("routing verified: 路由到机制模型 gem_fba;生长/flux 数值预测 pending"
-                "(由 W2 GEM 真跑补充),本 case 仅验证路由正确,不声称生长数值。")
+        return ("routing verified: routed to mechanistic gem_fba; numerical growth/flux prediction is pending "
+                "(requires GEM execution); this case verifies routing and reports no numerical growth estimate.")
     if dec.data_gated:
-        return "data-gated: 下游数据/模型未就位,当前仅路由级证据,不可作性能结论。"
+        return (
+            'data-gated: downstream data/model assets are unavailable; routing evidence alone '
+            'supports no performance claim.'
+        )
     if dec.caution_flags:
-        return ("cross-species 迁移带 caution(如 ortholog),预测需降级解读,"
-                "不可当母种原生精度。")
+        return (
+            'cross-species transfer requires caution (for example, ortholog mapping); interpret '
+            'predictions conservatively, without assuming native performance in the source '
+            'species.'
+        )
     if dec.disposition == "abstain":
-        return "abstain:无适用引擎,系统正确弃权(治理有效),不产出预测。"
-    return "human 原生路由;数值精度以 core benchmark(表 A)为准。"
+        return "abstain: no applicable engine; the system abstains and produces no prediction."
+    return "native human routing; numerical accuracy is defined by the core benchmark (Table A)."
 
 
 def routing_case(case_id: str, raw_req: dict) -> CaseReport:
-    """从原始请求构建 routing-prototype case(7 部分真实填充)。"""
+    """Build a routing-prototype case with 7 populated sections from the original request."""
     norm = normalize_request(raw_req)
     dec = route(norm)
     return CaseReport(
@@ -74,7 +77,10 @@ def routing_case(case_id: str, raw_req: dict) -> CaseReport:
         models_tools_selected={"engine": dec.engine, "reason": dec.reason},
         raw_output={"route_decision": dec.to_dict()},
         baseline_comparison={
-            "ungoverned": "直接调用哺乳类 predictor 且无适用性检查(可能对不适用物种硬出预测)",
+            "ungoverned": (
+                'Calling a mammalian predictor without applicability checks can force predictions for '
+                'unsupported species.'
+            ),
             "governed": f"engine={dec.engine} · disposition={dec.disposition} · reason={dec.reason}",
         },
         reliability_decision={

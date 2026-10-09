@@ -1,4 +1,4 @@
-"""Task 6(W4b):真 predictor 端到端 communicative workflow —— trace/provenance + success/abstain。仅远端。"""
+"""Tests for ml workflow e2e."""
 import hashlib
 import json
 import os
@@ -119,7 +119,7 @@ def test_ml_workflow_human_success_with_trace(ckpt_and_ds):
     assert report.get("abstain_reasons", []) == [], report
     assert report["prediction"] is not None
     assert report["critic_violations"] == []
-    # 真多智能体证据:retrieve-before-predict + 真 predictor 通讯 + provenance 全在 trace
+
     assert rt.bus.has_message_type("brain_retrieved")
     assert rt.bus.has_message_type("predictor_result")
     assert rt.bus.has_message_type("provenance_done")

@@ -1,6 +1,6 @@
 data: {"id":"x","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
 
-data: {"id":"x","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"已检索到领域知识,执行技能"},"finish_reason":null}]}
+data: {"id":"x","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Domain evidence retrieved; executing the skill"},"finish_reason":null}]}
 
 data: {"id":"x","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"tu_skill","type":"function","function":{"name":"skill_runner","arguments":""}}]},"finish_reason":null}]}
 

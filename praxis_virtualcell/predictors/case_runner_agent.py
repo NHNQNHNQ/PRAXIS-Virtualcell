@@ -1,6 +1,6 @@
-"""真实 case runner → offline 主链的 adapter。PredictorAgent 子类,内部按 route engine
-分发到具体 run_*_case,把 CaseReport 映射成 {prediction:{delta},uncertainty,evidence,provenance}。
-诚实透传 CaseReport 的 disposition/boundary,不伪造。"""
+"""Adapt real case runners to the offline agent pipeline. Dispatch by route engine and expose delta, uncertainty,
+evidence, and provenance while retaining the actual case disposition and scope boundary.
+"""
 from __future__ import annotations
 
 from praxis_virtualcell.agents.request_adapter import request_to_module_input
@@ -13,10 +13,10 @@ from praxis_virtualcell.predictors.case_dispatch import dispatch_runner, map_cas
 
 class CaseRunnerPredictorAgent(PredictorAgent):
     name = "CaseRunner"
-    model_version = "case_runner"          # 早退分支(reject/failed)兜底;成功分支仍用真实 engine
+    model_version = "case_runner"
 
     def prepare_input(self, request: dict, brain_context: dict) -> dict:
-        return {"request": request}          # adapter 需完整 request(route+dispatch 用)
+        return {"request": request}
 
     def assess_applicability(self, request: dict, brain_context: dict) -> tuple[float, str | None]:
         raw = request_to_module_input(request)
@@ -28,8 +28,8 @@ class CaseRunnerPredictorAgent(PredictorAgent):
         return 1.0, None
 
     def _result_status(self, out: dict) -> tuple[str, str | None]:
-        # 机制模型 disposition=abstain(全部 target 不在 GEM,delta 空)→ 不算成功预测,
-        # 让主链经既有 reliability `if not used` 如实 abstain(与接入前 mock 全拒的 abstain 语义一致)。
+
+
         unc = out.get("uncertainty") or {}
         if unc.get("disposition") == "abstain":
             return "rejected", f"gem_abstain:{unc.get('caution_flags')}"
@@ -40,7 +40,7 @@ class CaseRunnerPredictorAgent(PredictorAgent):
         raw = request_to_module_input(request)
         engine = route(normalize_request(raw)).engine
         runner = dispatch_runner(engine, raw)
-        report, _ = runner(raw)              # runner 内部自 normalize+route+真跑
+        report, _ = runner(raw)
         return {
             "prediction": {"delta": map_case_delta(engine, report)},
             "uncertainty": {"disposition": report.reliability_decision["disposition"],

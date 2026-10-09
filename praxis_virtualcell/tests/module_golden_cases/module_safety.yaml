@@ -1,6 +1,4 @@
-# module routing golden(safety):mismatch / negative transfer / fail-closed,overall 一律非 accept。
 cases:
-  # ---- bacteria 术语/机制硬约束(决策 E)----
   - case_id: bacteria_expression_negative_transfer
     input: {species: bacteria, perturbation_object: gene, target_output: expression, perturbation_targets: [lon]}
     expect: {primary: genetic_hub, engine: reject, overall_verdict: abstain}
@@ -16,7 +14,6 @@ cases:
   - case_id: bacteria_drug_state_reject
     input: {species: bacteria, perturbation_object: drug, target_output: state, perturbation_targets: [ampicillin]}
     expect: {primary: stress_processor, engine: reject, overall_verdict: abstain}
-  # ---- yeast 组织/通讯错配 ----
   - case_id: yeast_niche_state_reject
     input: {species: yeast, perturbation_object: medium, target_output: state, perturbation_targets: [], medium: niche}
     expect: {primary: cytoskeletal_framework, engine: reject, overall_verdict: abstain}
@@ -32,7 +29,6 @@ cases:
   - case_id: yeast_gene_state_reject_dup
     input: {species: yeast, perturbation_object: gene, target_output: state, perturbation_targets: [YAL001C]}
     expect: {primary: stress_processor, engine: reject, overall_verdict: abstain}
-  # ---- 哺乳类 growth/ligand data-gated downgrade ----
   - case_id: human_ligand_expression_downgrade
     input: {species: human, perturbation_object: ligand, target_output: expression, perturbation_targets: [TNF]}
     expect: {primary: stress_processor, engine: embedding, overall_verdict: downgrade}
@@ -45,7 +41,6 @@ cases:
   - case_id: mouse_medium_growth_downgrade
     input: {species: mouse, perturbation_object: medium, target_output: growth, perturbation_targets: [], medium: glucose}
     expect: {primary: cytoplasmic_metabolism, engine: gem_fba, overall_verdict: downgrade}
-  # ---- 跨物种 state/communication negative ----
   - case_id: mouse_communication_reject
     input: {species: mouse, perturbation_object: gene, target_output: communication, perturbation_targets: [Gata1]}
     expect: {primary: stress_processor, engine: reject, overall_verdict: abstain}
@@ -55,7 +50,6 @@ cases:
   - case_id: yeast_gene_communication_reject
     input: {species: yeast, perturbation_object: gene, target_output: communication, perturbation_targets: [YBR166C]}
     expect: {primary: stress_processor, engine: reject, overall_verdict: abstain}
-  # ---- weak-support module caution(物种 verdict 叠加)----
   - case_id: human_membrane_expression_weak
     input: {species: human, perturbation_object: drug, target_output: state, perturbation_targets: [tunicamycin]}
     expect: {primary: stress_processor, engine: state_scoring, overall_verdict: accept}

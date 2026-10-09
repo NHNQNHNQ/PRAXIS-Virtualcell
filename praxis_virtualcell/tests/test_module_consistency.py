@@ -1,6 +1,4 @@
-"""Phase 3:cross-module consistency 校验(G4 铺路)。纯函数,验 ModulePlan 内部一致性。
-铁律:verdict 不得比 route disposition 更乐观;mismatch entry 不得 accept;engine 越白名单 → 违规。
-注:evidence level(E0–E5)不在本 Phase(留 Phase 4/5,见计划头部归置决策)。"""
+"""Tests for module consistency."""
 from praxis_virtualcell.agents.module_router_agent import ModuleRouterAgent
 from praxis_virtualcell.agents.species_context_agent import SpeciesContextAgent
 from praxis_virtualcell.core.bus import MessageBus
@@ -29,14 +27,14 @@ def test_clean_plan_has_no_violations():
 
 
 def test_reject_plan_has_no_violations_either():
-    """abstain plan 本身合规(fail-closed 是对的,不算违规)。"""
+    """Verify reject plan has no violations either."""
     p = _plan_for({"species": "bacteria", "perturbation_object": "gene",
                    "target_output": "expression", "perturbation_targets": ["b0720"]})
     assert check_module_plan(p) == []
 
 
 def test_detects_verdict_more_optimistic_than_route():
-    """人为构造:route abstain 但 verdict accept → 必须被抓(不许比 route 更乐观)。"""
+    """Verify detects verdict more optimistic than route."""
     bad = {"species": "human", "request": {}, "primary": "genetic_hub",
            "secondary": [], "overall_verdict": "accept", "notes": [],
            "entries": [{"module": "genetic_hub", "role": "primary", "engine": "reject",
@@ -49,7 +47,7 @@ def test_detects_verdict_more_optimistic_than_route():
 
 
 def test_detects_mismatch_entry_accepted():
-    """mismatch 非 None 但 verdict=accept → 违规(mismatch 必须降级)。"""
+    """Verify detects mismatch entry accepted."""
     bad = {"species": "bacteria", "request": {}, "primary": "degradation_machinery",
            "secondary": [], "overall_verdict": "accept", "notes": [],
            "entries": [{"module": "degradation_machinery", "role": "primary", "engine": "reject",
@@ -62,7 +60,7 @@ def test_detects_mismatch_entry_accepted():
 
 
 def test_detects_engine_out_of_module_whitelist():
-    """engine 不在 MODULES[mid].engines(且非 reject)→ 违规(白名单外)。"""
+    """Verify detects engine out of module whitelist."""
     bad = {"species": "human", "request": {}, "primary": "genetic_hub",
            "secondary": [], "overall_verdict": "accept", "notes": [],
            "entries": [{"module": "genetic_hub", "role": "primary", "engine": "gem_fba",
@@ -75,7 +73,7 @@ def test_detects_engine_out_of_module_whitelist():
 
 
 def test_all_representative_golden_plans_are_consistent():
-    """全 representative golden 的实跑 plan 都应零违规(冒烟:确定性路由自洽)。"""
+    """Verify all representative golden plans are consistent."""
     for req in (
         {
             "species": "human",
@@ -102,4 +100,4 @@ def test_all_representative_golden_plans_are_consistent():
             "perturbation_targets": ["YBR166C"],
         },
     ):
-        assert check_module_plan(_plan_for(req)) == [], f"{req} plan 有一致性违规"
+        assert check_module_plan(_plan_for(req)) == [], f"{req} plan has consistency violations"

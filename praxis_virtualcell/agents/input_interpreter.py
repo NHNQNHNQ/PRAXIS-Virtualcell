@@ -1,4 +1,6 @@
-"""offline:把结构化 dict 校验成 VirtualCellRequest(NL 解析是 W3 的 LLM agent)。"""
+"""Validate a structured dictionary as VirtualCellRequest; natural-language parsing is handled by the optional LLM
+interpreter.
+"""
 from __future__ import annotations
 
 from dataclasses import asdict

@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
-"""大脑审计:统计各学科 cases/rules/skills 真实数 + case frontmatter 校验。
+"""Check local brain cases and rules for valid structured metadata."""
 
-用途:
-1. 给 brains/INDEX.md 提供真实统计(替换过时数字)
-2. 找出无 frontmatter / 缺 case_id 的 case(格式整理)
-
-用法: python scripts/brain_audit.py [--json]
-"""
 from __future__ import annotations
 
 import json
@@ -18,10 +12,7 @@ BRAINS = os.path.join(os.path.dirname(__file__), "..", "brains")
 
 
 def _disciplines() -> list[str]:
-    return sorted(
-        d for d in os.listdir(BRAINS)
-        if os.path.isdir(os.path.join(BRAINS, d)) and not d.startswith(".")
-    )
+    return sorted(d for d in os.listdir(BRAINS) if os.path.isdir(os.path.join(BRAINS, d)) and not d.startswith("."))
 
 
 def _walk_md(base: str) -> list[str]:
@@ -37,7 +28,7 @@ def _classify(disc: str) -> dict:
     base = os.path.join(BRAINS, disc)
     cases, rules, skills = [], [], []
     for p in _walk_md(base):
-        rel = p[len(base) + 1:]
+        rel = p[len(base) + 1 :]
         if "memory/cases/" in rel.replace("\\", "/"):
             cases.append(p)
         elif "memory/rules/" in rel.replace("\\", "/"):
@@ -49,7 +40,7 @@ def _classify(disc: str) -> dict:
 
 
 def _frontmatter_keys(path: str) -> list[str] | None:
-    """返回 frontmatter 字段 key 列表;无 frontmatter 返 None。"""
+
     try:
         with open(path, encoding="utf-8", errors="replace") as f:
             txt = f.read()
@@ -86,23 +77,25 @@ def main() -> int:
         print(json.dumps(r, ensure_ascii=False, indent=2))
         return 0
 
-    print("=== 各学科统计(真实文件数) ===")
-    print(f"{'学科':<14}{'cases':>7}{'rules':>7}{'skills':>7}")
+    print("=== Brain document counts ===")
+    print(f"{'brain':<14}{'cases':>7}{'rules':>7}{'skills':>7}")
     tc = tr = ts = 0
     for disc, d in r["disciplines"].items():
         print(f"{disc:<14}{d['cases']:>7}{d['rules']:>7}{d['skills']:>7}")
-        tc += d["cases"]; tr += d["rules"]; ts += d["skills"]
-    print(f"{'总计':<14}{tc:>7}{tr:>7}{ts:>7}")
+        tc += d["cases"]
+        tr += d["rules"]
+        ts += d["skills"]
+    print(f"{'total':<14}{tc:>7}{tr:>7}{ts:>7}")
 
     nf = r["issues"]["no_frontmatter"]
     nc = r["issues"]["no_case_id"]
-    print("\n=== case 格式问题 ===")
-    print(f"无 frontmatter 的 case: {len(nf)}")
+    print("\n=== Case format issues ===")
+    print(f"Cases without frontmatter: {len(nf)}")
     for p in nf[:15]:
         print(f"  - {p}")
     if len(nf) > 15:
-        print(f"  ... 还有 {len(nf) - 15} 个")
-    print(f"有 frontmatter 但缺 case_id: {len(nc)}")
+        print(f"  ... remaining {len(nf) - 15} items")
+    print(f"Cases missing case_id: {len(nc)}")
     for p in nc[:10]:
         print(f"  - {p}")
     return 0

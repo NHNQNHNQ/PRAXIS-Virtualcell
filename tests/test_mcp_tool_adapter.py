@@ -17,7 +17,6 @@ class _FakeCallResult:
 
 
 class _FakeSession:
-    """模拟 mcp ClientSession.call_tool。"""
     def __init__(self, result=None, raises=None):
         self._result = result
         self._raises = raises
@@ -35,7 +34,7 @@ def _mk_tool(session, remote_name="echo"):
         server_name="echo",
         session=session,
         remote_name=remote_name,
-        description="回显",
+        description="\u56de\u663e",
         input_schema={"type": "object", "properties": {"text": {"type": "string"}}},
         call_timeout_s=30.0,
     )
@@ -47,7 +46,7 @@ def test_name_has_mcp_prefix():
 
 
 def test_rmcp_op_is_none():
-    """MCP 工具是外部能力,不受相位门约束。"""
+
     assert _mk_tool(_FakeSession()).rmcp_op is None
 
 
@@ -57,8 +56,9 @@ def test_input_schema_passthrough():
 
 
 def test_input_schema_fallback_when_empty():
-    t = MCPTool(server_name="x", session=_FakeSession(), remote_name="y",
-                description="", input_schema=None, call_timeout_s=30.0)
+    t = MCPTool(
+        server_name="x", session=_FakeSession(), remote_name="y", description="", input_schema=None, call_timeout_s=30.0
+    )
     assert t.input_schema() == {"type": "object", "properties": {}}
 
 
@@ -80,7 +80,7 @@ def test_run_is_error_returns_ok_false():
 
 
 def test_run_exception_returns_ok_false_not_raise():
-    """server crash / timeout → call_tool 抛 → ok=False,不冒泡致 500。"""
+
     sess = _FakeSession(raises=RuntimeError("connection lost"))
     t = _mk_tool(sess)
     r = asyncio.run(t.run({"text": "x"}))
@@ -89,8 +89,7 @@ def test_run_exception_returns_ok_false_not_raise():
 
 
 def test_run_multi_content_joins_text():
-    sess = _FakeSession(_FakeCallResult(
-        [_FakeContent("part1"), _FakeContent("part2")], is_error=False))
+    sess = _FakeSession(_FakeCallResult([_FakeContent("part1"), _FakeContent("part2")], is_error=False))
     t = _mk_tool(sess)
     r = asyncio.run(t.run({}))
     assert "part1" in r.value and "part2" in r.value

@@ -1,5 +1,4 @@
-"""Phase 3:ModulePlan 数据结构 —— module-aware 路由产物 + Phase 4 输入契约。
-测:白名单校验、verdict 保守合成、overall_verdict 取最保守、to_dict 序列化、mismatch 降级。"""
+"""Tests for module plan."""
 import pytest
 
 from praxis_virtualcell.biological_modules.module_plan import (
@@ -23,17 +22,17 @@ def _entry(**over):
 
 
 def test_synthesize_verdict_takes_more_conservative():
-    # accept + caution → caution;caption + downgrade → downgrade;任意 + reject → reject
+
     assert synthesize_verdict("accept", "caution", None) == "caution"
     assert synthesize_verdict("caution", "downgrade", None) == "downgrade"
     assert synthesize_verdict("accept", "accept", None) == "accept"
-    assert synthesize_verdict("accept", "accept", "reject") == "reject"     # mismatch 降级
+    assert synthesize_verdict("accept", "accept", "reject") == "reject"
     assert synthesize_verdict("caution", "accept", "caution") == "caution"
 
 
 def test_entry_verdict_synthesized_on_init():
     e = _entry(route_disposition="caution", species_verdict="accept")
-    assert e.verdict == "caution"          # 取更保守
+    assert e.verdict == "caution"
 
 
 def test_entry_rejects_illegal_module():
@@ -57,7 +56,7 @@ def test_plan_overall_verdict_is_most_conservative():
     plan = ModulePlan(species="human", request={"species": "human"},
                       primary="genetic_hub", secondary=["stress_processor"],
                       entries=[prim, sec], notes=[])
-    assert plan.overall_verdict == "downgrade"     # 最保守
+    assert plan.overall_verdict == "downgrade"
 
 
 def test_plan_to_dict_roundtrip_keys():

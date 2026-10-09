@@ -1,5 +1,3 @@
-"""run_tool 的契约:超时/非 0/异常都不抛,结构化返回。"""
-
 from brains._common.lib.run_tool import run_tool
 
 
@@ -32,8 +30,7 @@ def test_timeout_returns_structured_err():
 
 
 def test_stdin_passthrough():
-    r = run_tool(["python3", "-c", "import sys; print(sys.stdin.read().upper())"],
-                 stdin=b"hello")
+    r = run_tool(["python3", "-c", "import sys; print(sys.stdin.read().upper())"], stdin=b"hello")
     assert r["ok"] is True
     assert r["stdout"].strip() == "HELLO"
 

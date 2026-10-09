@@ -16,7 +16,7 @@ _PAYLOAD = {"request": {"species": "human", "input_modality": "scRNA",
 
 
 def test_predict_without_brain_retrieved_raises():
-    bus = MessageBus()  # 无 brain_retrieved
+    bus = MessageBus()
     a = MockCPAAgent()
     m = AgentMessage("m1", "ModelApplicability", "MockCPA", "predict", _PAYLOAD, "t1")
     with pytest.raises(RetrieveBeforePredictError):

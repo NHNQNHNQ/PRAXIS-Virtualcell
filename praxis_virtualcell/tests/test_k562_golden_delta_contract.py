@@ -51,7 +51,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 _GOLDEN = _ROOT / "data" / "golden" / "norman_2019"
 _CONTRACT_SHA256 = "6bfc46e23e55e05a2c87dcdac9bd48da6c1f6bd2240742dc18f73ec963cf0d76"
 _PACK_MANIFEST_SHA256 = "704b81da74fd96907b7e6012757b2c12104fcf3a2a3ae56af52c76d7f2c163a6"
-_ARTIFACT_MANIFEST_SHA256 = "724b701beda574ad344b764de09dafb86648e49c9a327df717212aaf25cc71ac"
+_ARTIFACT_MANIFEST_SHA256 = "110276ce9cc74caaf396448319579ec0e1414dc7470ea31f9170a5d62ca4784c"
 _PACK_FINGERPRINT = "42165e430bab3474cdc9e607770ff5e204608c4243f84e492c08e2c6442c55ee"
 _CANONICAL_CONTRACT_SHA256 = "f34afa761239abc97033c78bb9d0c29a1c36a4c7d1a106a9cbbaa805a5196ff5"
 _DEFAULT_ADAPTER_SHA256 = "17afc27e56dba13567001ff1982cbf1660e2948fadf2147301a1d0dcf61aeb3d"
@@ -156,7 +156,7 @@ def _bindings(evaluation_scope: str = "single_gene"):
         pack_manifest_sha256=_PACK_MANIFEST_SHA256,
         pack_manifest_size_bytes=30074,
         artifact_manifest_sha256=_ARTIFACT_MANIFEST_SHA256,
-        artifact_manifest_size_bytes=3864,
+        artifact_manifest_size_bytes=4140,
         h5ad_path="norman_k562_golden.h5ad",
         h5ad_media_type="application/vnd.anndata+hdf5",
         h5ad_sha256=_H5AD_SHA256,
@@ -586,7 +586,7 @@ def test_exact_native_bindings_freeze_k562_golden_identity_without_evidence_or_p
         pack.contract_yaml_size_bytes,
         pack.pack_manifest_size_bytes,
         pack.artifact_manifest_size_bytes,
-    ) == (4749, 30074, 3864)
+    ) == (4749, 30074, 4140)
     assert (pack.h5ad_path, pack.h5ad_media_type) == (
         "norman_k562_golden.h5ad",
         "application/vnd.anndata+hdf5",
@@ -1446,7 +1446,7 @@ def test_projection_is_prepared_only_exact_and_abstention_cannot_project():
 def test_checked_in_small_manifests_freeze_exact_p8_identities_and_scope_records():
     assert (_GOLDEN / "contract.yaml").stat().st_size == 4749
     assert (_GOLDEN / "pack.manifest.yaml").stat().st_size == 30074
-    assert (_GOLDEN / "artifact-manifest.json").stat().st_size == 3864
+    assert (_GOLDEN / "artifact-manifest.json").stat().st_size == 4140
     assert _sha256(_GOLDEN / "contract.yaml") == _CONTRACT_SHA256
     assert _sha256(_GOLDEN / "pack.manifest.yaml") == _PACK_MANIFEST_SHA256
     assert _sha256(_GOLDEN / "artifact-manifest.json") == _ARTIFACT_MANIFEST_SHA256

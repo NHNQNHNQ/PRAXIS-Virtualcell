@@ -1,4 +1,3 @@
-"""chat_registry 单测(build_chat_registry 参数/行为)。"""
 from praxis2.server.chat_registry import build_chat_registry
 
 
@@ -16,15 +15,17 @@ def test_bash_no_isolation_default(tmp_path):
 
 
 def test_no_bash_when_sandbox_root_none():
-    """fail-closed 终点:bash_sandbox_root=None(userns 不可用时 app.py 传 None)→ 不注册 Bash。"""
+
     reg = build_chat_registry(bash_sandbox_root=None)
     assert reg.get("Bash") is None
 
 
 def test_bash_cgroup_passed_to_tool(tmp_path):
     reg = build_chat_registry(
-        bash_sandbox_root=str(tmp_path), bash_cgroup=True,
-        bash_cgroup_mem_mb=512, bash_cgroup_cpu_pct=200,
+        bash_sandbox_root=str(tmp_path),
+        bash_cgroup=True,
+        bash_cgroup_mem_mb=512,
+        bash_cgroup_cpu_pct=200,
     )
     tool = reg.get("Bash")
     assert tool._cgroup is True

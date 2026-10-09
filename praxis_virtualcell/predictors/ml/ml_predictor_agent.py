@@ -1,18 +1,19 @@
-"""通用 ML predictor-agent 包装(rich↔torch 适配)。
-
-`predict_tensor`:给 control + pert_emb,经 donor Context/Perturbation 调 `donor.predict`,返回 mean。
-对所有 donor base predictor(linear/latent/cpa/gnn/decoder/pretrained_backbone)接口相同。
-(Week 4a 的 LinearAdditivePredictorAgent 是其前身,保留以兼容旧测试。)仅远端 virtualcell 环境。
+"""Generic tensor adapter for donor linear/latent/cpa/gnn/decoder/pretrained_backbone models. Build
+Context/Perturbation, invoke predict, and return mean. Preserve the earlier linear adapter for compatibility;
+requires donor dependencies.
 """
 from __future__ import annotations
 
+import os
 import sys
 
-import torch
-
-_DONOR = "/home/zkyd/data1/mzy/Virtual cell"
+_DONOR = os.environ.get("PRAXIS_DONOR_SOURCE_ROOT", "").strip()
+if not _DONOR:
+    raise RuntimeError("Set PRAXIS_DONOR_SOURCE_ROOT to the external donor source checkout")
 if _DONOR not in sys.path:
     sys.path.insert(0, _DONOR)
+
+import torch  # noqa: E402
 
 
 class MLPredictorAgent:
@@ -29,5 +30,5 @@ class MLPredictorAgent:
         return self.model.predict(ctx, pert).mean
 
     def as_donor_predictor(self):
-        """返回底层 donor Predictor,供 EvalAgent.evaluate / Coordinator 复用。"""
+        """Return the underlying donor predictor for EvalAgent or Coordinator reuse."""
         return self.model

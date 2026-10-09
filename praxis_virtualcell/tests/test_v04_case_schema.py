@@ -1,13 +1,4 @@
-"""W1.3(v0.4):case report 7 部分 validator + 3 个 routing-prototype case。
-
-每个 v0.4 case 必须输出 7 部分(缺任一 → validate 失败):
-  1 structured_input 2 object_normalization 3 models_tools_selected
-  4 raw_output 5 baseline_comparison 6 reliability_decision 7 provenance_boundary
-
-routing-prototype case(C3/C4/C5)的"分析输出"= 治理路由行为本身(真实、非 mock):
-schema 归一 + route_table 路由,7 部分由真实 schema/routing 填充。C4/C5 的生长**数值**
-预测留 W2 GEM 真跑,本步只验证"路由到正确引擎",boundary 里诚实标注。
-"""
+"""Tests for v04 case schema."""
 import pytest
 
 from praxis_virtualcell.agents.case_report import (
@@ -25,7 +16,7 @@ _FULL = dict(
 
 
 def test_validator_accepts_full_report():
-    validate_case_report(CaseReport(**_FULL))          # 不抛
+    validate_case_report(CaseReport(**_FULL))
 
 
 @pytest.mark.parametrize("missing", [
@@ -34,16 +25,16 @@ def test_validator_accepts_full_report():
 ])
 def test_validator_rejects_missing_or_empty(missing):
     bad = dict(_FULL)
-    bad[missing] = {}                                  # 空 → 视为缺
+    bad[missing] = {}
     with pytest.raises(CaseReportError):
         validate_case_report(CaseReport(**bad))
 
 
 def test_validator_accepts_dict_form():
-    validate_case_report(dict(_FULL, case_id="Y"))     # dict 形式也可校验
+    validate_case_report(dict(_FULL, case_id="Y"))
 
 
-# --- 3 个 routing-prototype case（方向正确 + 7 部分齐全）---
+
 
 def test_case_C3_mouse_ortholog_routing():
     c = routing_case("C3_mouse_ortholog", {
@@ -63,7 +54,7 @@ def test_case_C4_ecoli_ko_routes_gem():
     validate_case_report(c)
     d = c.to_dict()
     assert d["models_tools_selected"]["engine"] == "gem_fba"
-    # 生长数值未跑 → boundary 必须诚实标注 pending
+
     assert "pending" in str(d["provenance_boundary"]).lower() or \
            "gem" in str(d["provenance_boundary"]).lower()
 

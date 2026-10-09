@@ -1,8 +1,4 @@
-"""Phase 6:ScgptWrapper —— 把 .53 上真跑的 scGPT(frozen backbone + head)收编为 ModelWrapper。
-本地(无 torch)可测:scope/provenance 契约、诚实点估计 uncertainty、缺 torch → run_prediction
-fail-closed(不静默返回假 delta)。真推理(load 196MB ckpt + MLPredictorAgent)是 .53 → Task 6.5 gated。
-scGPT 接口已同构 donor(finding_w4c_scgpt:predict_tensor==donor predict),故真推理复用
-build_predictor_from_ckpt + MLPredictorAgent,不重写 ML 内核。"""
+"""Tests for scgpt wrapper."""
 import importlib.util
 
 import pytest
@@ -27,18 +23,18 @@ def test_declare_scope_human_genetic_hub():
 def test_declare_provenance_has_scgpt_anchor_and_honest_flags():
     prov = ScgptWrapper().declare_provenance()
     assert prov["model"] == "scgpt"
-    # 锚点:scGPT ΔPearson 0.4407(donor norman test split,同表 A 口径可比)
+
     assert prov["metrics"]["delta_pearson"] == pytest.approx(0.4407, abs=1e-4)
     assert prov["metrics"]["cosine"] == pytest.approx(0.9808, abs=1e-4)
     assert prov["metrics"]["n"] == 7290
-    # 诚实:frozen backbone 偏低,SOTA 需 fine-tune(backlog)
+
     assert prov["frozen_backbone_underperforms"] is True
-    # ckpt 坐标进 provenance(挪出硬编码)
+
     assert "pretrained_backbone" in prov["remote_env"]["ckpt"]
 
 
 def test_declare_provenance_comparable_to_donor_base():
-    """scGPT ΔPearson 与 donor base 同口径可比(与 GEARS 不同)。"""
+    """Verify declare provenance comparable to donor base."""
     prov = ScgptWrapper().declare_provenance()
     assert prov.get("not_comparable_to_donor_base", False) is False
 
@@ -49,16 +45,16 @@ def test_estimate_uncertainty_is_honest_point_estimate():
     assert unc["method"] == "point_estimate"
 
 
-@pytest.mark.skipif(_HAS_TORCH, reason="本地无 torch 才测 fail-closed;有 torch 时真推理走 Task 6.5 gated")
+@pytest.mark.skipif(_HAS_TORCH, reason="Requires a torch-free environment; real inference is dependency gated.")
 def test_run_prediction_fail_closed_without_torch():
-    """红线 6:缺 torch → run_prediction 抛(不静默返回假 delta 冒充可用)。"""
+    """Verify run prediction fail closed without torch."""
     with pytest.raises(Exception) as ei:
         ScgptWrapper().run_prediction({"targets": ["AHR"]})
     msg = str(ei.value).lower()
     assert "torch" in msg or "scgpt" in msg or "no module" in msg or "ckpt" in msg
 
 
-@pytest.mark.skipif(_HAS_TORCH, reason="本地无 torch 才测 handle fail-closed 归 failed")
+@pytest.mark.skipif(_HAS_TORCH, reason="This test checks that missing torch produces a failed result")
 def test_handle_degrades_to_failed_without_torch():
     from praxis_virtualcell.core.bus import MessageBus
     from praxis_virtualcell.core.message import AgentMessage
