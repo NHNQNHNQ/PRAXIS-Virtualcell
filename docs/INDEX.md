@@ -1,7 +1,7 @@
 # PRAXIS-VirtualCell documentation
 
-PRAXIS-VirtualCell organizes biological data, specialized models, agent
-orchestration, and validation evidence into traceable virtual experiments.
+PRAXIS-VirtualCell 1.0.0 provides a standalone scientific runtime, experiment
+agents, and local applications for traceable virtual experiments.
 
 | Start here | What you will find |
 |---|---|
@@ -12,6 +12,7 @@ orchestration, and validation evidence into traceable virtual experiments.
 | [User guide](USER-GUIDE.md) | How to run and interpret an experiment |
 | [Examples](EXAMPLES.md) | Offline CLI examples and research protocols |
 | [Testing](TESTING.md) | Local verification and explicitly enabled external checks |
+| [Versioning](VERSIONING.md) | Standalone product version and scientific artifact identities |
 | [Contributing](../CONTRIBUTING.md) | How to contribute code, models, data integrations, and documentation |
 | [Support](../SUPPORT.md) | Bug reports and questions |
 | [Provenance](../PROVENANCE.md) | Software derivation and attribution |

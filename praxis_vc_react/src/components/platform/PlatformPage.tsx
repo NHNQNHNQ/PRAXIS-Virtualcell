@@ -601,7 +601,7 @@ export default function PlatformPage({
     return (
       <section className="cell-data-center" aria-labelledby="data-center-title">
         <header>
-          <span>PRAXIS DATA CENTER</span>
+          <span>PRAXIS-VirtualCell Data Center</span>
           <h1 id="data-center-title">Choose a cell</h1>
           <p>
             Browse biological context presets provided by the backend. Selection sets the species and cell context;
@@ -709,7 +709,7 @@ export default function PlatformPage({
     return (
       <section className="cell-first-home" aria-labelledby="cell-first-title">
         <div className="cell-first-hero">
-          <span>PRAXIS · VIRTUAL CELL</span>
+          <span>PRAXIS-VirtualCell</span>
           <h1 id="cell-first-title">Choose a cell to begin.</h1>
           <p>
             Set the biological context, then describe the experiment in natural language. The backend routes the request through existing execution paths and
@@ -980,7 +980,7 @@ export default function PlatformPage({
       </div>
 
       <form className="chat-composer" onSubmit={submit}>
-        <label htmlFor="chat-query">Message PRAXIS</label>
+        <label htmlFor="chat-query">Message PRAXIS-VirtualCell</label>
         <textarea
           ref={composerRef}
           id="chat-query"

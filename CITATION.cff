@@ -7,7 +7,7 @@ authors:
     given-names: Zhenyu
   - family-names: Jiang
     given-names: Xukai
-version: 1.7.0
+version: 1.0.0
 repository-code: "https://github.com/NHNQNHNQ/PRAXIS-Virtualcell"
 url: "https://github.com/NHNQNHNQ/PRAXIS-Virtualcell"
 license: MIT

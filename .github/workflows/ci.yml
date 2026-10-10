@@ -171,8 +171,8 @@ jobs:
             praxis_virtualcell/tests/test_linux_docker_smoke.py \
             --run-integration -o addopts='' -q -ra
 
-  legacy-unit:
-    name: Legacy unit tests (external suites gated)
+  scientific-scripts:
+    name: Scientific script regression tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -193,5 +193,5 @@ jobs:
           .venv/bin/python -m pip install --no-build-isolation --no-deps -e .
       - name: Check Python dependencies
         run: .venv/bin/python -m pip check
-      - name: Legacy unit suite
+      - name: Scientific script suite
         run: .venv/bin/pytest tests -m "not (integration or llm or remote)" -o addopts='' -q -ra

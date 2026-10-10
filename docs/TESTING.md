@@ -1,6 +1,7 @@
 # Testing
 
-Run checks from the repository root. Use an isolated environment and install
+These checks cover the standalone 1.0.0 scientific runtime and its applications.
+Run them from the repository root. Use an isolated environment and install
 the development dependencies:
 
 ```bash
@@ -12,7 +13,7 @@ ruff check .
 Python 3.13 dependency locks are documented in
 [requirements/README.md](../requirements/README.md).
 
-## VirtualCell tests
+## Standalone VirtualCell tests
 
 ```bash
 pytest praxis_virtualcell/tests \
@@ -21,15 +22,6 @@ pytest praxis_virtualcell/tests \
 
 For a focused change, run the affected tests first. Scientific fixtures and
 mock predictors verify software contracts; their success is software evidence.
-
-## Shared agent framework tests
-
-```bash
-pytest tests -m "not (integration or llm or remote)" -o addopts='' -q -ra
-```
-
-The shared suite covers tools, messaging, configuration, memory, and runtime
-behavior used by the platform.
 
 ## Frontend checks
 

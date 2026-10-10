@@ -37,7 +37,7 @@ test("backend preset examples fill the composer and preserve an explicit drug ov
     });
   await expect(k562Example).toBeVisible();
   await k562Example.click();
-  await expect(page.getByLabel("Message PRAXIS")).toHaveValue(
+  await expect(page.getByLabel("Message PRAXIS-VirtualCell")).toHaveValue(
     "How does expression change after knocking down AHR?",
   );
 
@@ -50,7 +50,7 @@ test("backend preset examples fill the composer and preserve an explicit drug ov
       exact: true,
     });
   await drugExample.click();
-  await expect(page.getByLabel("Message PRAXIS")).toHaveValue(
+  await expect(page.getByLabel("Message PRAXIS-VirtualCell")).toHaveValue(
     "How does expression change after treatment with vorinostat?",
   );
 

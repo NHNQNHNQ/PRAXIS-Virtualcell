@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions to the virtual-cell runtime, model adapters, agent framework, and interface are welcome.
+Contributions to the VirtualCell scientific runtime, experiment agents, model adapters, and local interface are welcome.
 Start from `main`, keep changes focused, and describe the resulting behavior in your pull request.
 
 ## Development

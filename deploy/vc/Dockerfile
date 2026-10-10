@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-# Multi-platform index digests are pinned so amd64 CI/.53 and arm64 developer
+# Multi-platform index digests are pinned so amd64 CI and arm64 developer
 # machines resolve the same reviewed release of each official base image.
 ARG NODE_IMAGE=node:24-alpine@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd
 ARG PYTHON_IMAGE=python:3.13.14-slim-trixie@sha256:9662417aace5ae7b8e2609cce472b72a8958e134ba372808abe9cc1a0c0125e6
@@ -23,7 +23,6 @@ WORKDIR /src
 COPY pyproject.toml setup.py MANIFEST.in README.md ./
 COPY requirements/build-py313.lock ./requirements/build-py313.lock
 COPY requirements/runtime-py313.lock ./requirements/runtime-py313.lock
-COPY praxis2 ./praxis2
 COPY praxis_virtualcell ./praxis_virtualcell
 COPY praxis_vc_api ./praxis_vc_api
 COPY praxis_vc_web ./praxis_vc_web

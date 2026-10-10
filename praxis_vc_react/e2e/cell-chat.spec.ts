@@ -18,7 +18,7 @@ test("Select a cell, confirm deterministic parsing, and complete parse → job �
       exact: true,
     }),
   ).toBeVisible();
-  await expect(page.getByLabel("Message PRAXIS")).toHaveCount(0);
+  await expect(page.getByLabel("Message PRAXIS-VirtualCell")).toHaveCount(0);
 
   await selectCell(page, "K562", { openPage: false });
   await expect(page.getByText("human · catalog preset", { exact: true })).toBeVisible();
@@ -67,7 +67,7 @@ test("Parsing requiring clarification fails closed without creating a job", asyn
   const parseResponsePromise = page.waitForResponse((response) =>
     isRequest(response.request(), "POST", "/api/parse"),
   );
-  await page.getByLabel("Message PRAXIS").fill("🧬🧪");
+  await page.getByLabel("Message PRAXIS-VirtualCell").fill("🧬🧪");
   await page.getByRole("button", { name: "Send message", exact: true }).click();
   expect((await parseResponsePromise).status()).toBe(200);
 
@@ -77,7 +77,7 @@ test("Parsing requiring clarification fails closed without creating a job", asyn
   await expect(clarification).toBeVisible();
   await expect(clarification).toContainText("perturbation_targets");
   await expect(clarification).toContainText("No simulation task was created");
-  await expect(page.getByLabel("Message PRAXIS")).toBeEnabled();
+  await expect(page.getByLabel("Message PRAXIS-VirtualCell")).toBeEnabled();
   await page.waitForLoadState("networkidle");
   expect(jobRequests).toEqual([]);
   expectNoBrowserFailures(failures);
@@ -93,7 +93,7 @@ test("A rapid double click sends one parse request and creates one job", async (
   });
 
   await selectCell(page, "K562");
-  await page.getByLabel("Message PRAXIS").fill("Knock down TP53");
+  await page.getByLabel("Message PRAXIS-VirtualCell").fill("Knock down TP53");
   const parseResponsePromise = page.waitForResponse((response) =>
     isRequest(response.request(), "POST", "/api/parse"),
   );

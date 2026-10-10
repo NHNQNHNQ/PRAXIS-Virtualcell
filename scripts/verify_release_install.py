@@ -8,6 +8,7 @@ import os
 import re
 import tempfile
 from importlib.metadata import version
+from importlib.util import find_spec
 from importlib.resources import files
 from pathlib import Path
 
@@ -123,6 +124,7 @@ async def _verify_api() -> dict[str, object]:
 
 def main() -> None:
     product_version = version("praxis-virtualcell")
+    assert find_spec("praxis2") is None, "release includes an unrelated framework"
     assert files("praxis_vc_web").joinpath("app.py").is_file()
     assert not files("praxis_virtualcell").joinpath("tests").is_dir()
     registrations = files("praxis_virtualcell.model_zoo").joinpath("registrations")

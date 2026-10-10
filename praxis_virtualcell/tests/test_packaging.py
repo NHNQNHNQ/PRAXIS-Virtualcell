@@ -14,9 +14,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 def test_packages_find_includes_virtualcell():
     cfg = tomllib.loads((_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     include = cfg["tool"]["setuptools"]["packages"]["find"]["include"]
-    assert any(p.startswith("praxis_virtualcell") for p in include), include
-    assert any(p.startswith("praxis_vc_api") for p in include), include
-    assert any(p.startswith("praxis_vc_web") for p in include), include
+    assert include == ["praxis_virtualcell*", "praxis_vc_api*", "praxis_vc_web*"], include
     assert cfg["tool"]["setuptools"]["packages"]["find"]["exclude"] == ["praxis_virtualcell.tests*"]
 
 
@@ -73,7 +71,8 @@ def test_python313_hash_locks_cover_ci_and_runtime_dependencies():
     dev_requirements = cfg["project"]["optional-dependencies"]["dev"]
 
     assert build == {"packaging", "setuptools", "wheel"}
-    assert {"fastapi", "httpx", "mcp", "pydantic", "uvicorn"} <= runtime
+    assert {"fastapi", "httpx", "pydantic", "uvicorn"} <= runtime
+    assert {"mcp", "pydantic-settings", "asyncpg", "redis", "fakeredis", "respx"}.isdisjoint(runtime | dev)
     assert {
         "pytest",
         "ruff",

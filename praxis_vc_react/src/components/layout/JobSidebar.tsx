@@ -85,10 +85,10 @@ export default function JobSidebar({
         type="button"
         className="chat-brand"
         onClick={onNewChat}
-        aria-label="New PRAXIS conversation"
+        aria-label="New PRAXIS-VirtualCell conversation"
       >
         <span>P</span>
-        <strong>PRAXIS VirtualCell</strong>
+        <strong>PRAXIS-VirtualCell</strong>
       </button>
 
       <button type="button" className="chat-new-button" onClick={onNewChat}>

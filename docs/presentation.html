@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0d504b">
-<meta name="description" content="An offline presentation of PRAXIS-VirtualCell, a programmable platform and agent framework for traceable virtual cell experiments.">
+<meta name="description" content="An offline presentation of PRAXIS-VirtualCell, the standalone 1.0.0 scientific runtime and applications for traceable virtual cell experiments.">
 <title>PRAXIS-VirtualCell — Programmable Virtual Experiments</title>
 <style>
 :root{--paper:#f5f4ef;--white:#fffefa;--ink:#173832;--muted:#61716b;--teal:#0d665f;--dark:#0d504b;--mint:#e1eee6;--line:#d9e0d8;--orange:#b95d34;--soft-orange:#f3e4d7;--mono:ui-monospace,SFMono-Regular,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--serif:Georgia,"Times New Roman",serif}
@@ -168,9 +168,9 @@ body.presenting .cell-scene{max-width:480px}
 <main id="main">
 <section class="panel hero is-active" id="overview" data-slide="Overview" aria-labelledby="hero-title">
   <div>
-    <p class="eyebrow">Programmable biology</p>
+    <p class="eyebrow">Standalone VirtualCell · 1.0.0</p>
     <h1 id="hero-title">From biological<br>questions to<br><em>virtual experiments.</em></h1>
-    <p class="hero-description">A modular platform and agent framework that connects biological data, specialized models, and validation evidence into traceable virtual cell experiments.</p>
+    <p class="hero-description">A standalone scientific runtime and experiment agents that connect biological data, specialized models, and validation evidence into traceable virtual cell experiments.</p>
     <div class="actions">
       <a class="button primary" href="#workflow">Explore the workflow <span aria-hidden="true">→</span></a>
       <a class="button" href="https://arxiv.org/abs/2609.29221v1" target="_blank" rel="noopener noreferrer">Read the preprint <span aria-hidden="true">↗</span></a>
@@ -178,10 +178,10 @@ body.presenting .cell-scene{max-width:480px}
     <div class="hero-foot"><span>Modular models</span><span>Explicit contracts</span><span>Traceable results</span></div>
   </div>
   <div class="cell-scene">
-    <div class="scene-label"><span>PRAXIS-VIRTUALCELL</span><span>EXPERIMENT SYSTEM</span></div>
+    <div class="scene-label"><span>PRAXIS-VIRTUALCELL</span><span>VERSION 1.0.0</span></div>
     <svg viewBox="0 0 440 365" role="img" aria-labelledby="cell-title cell-desc">
       <title id="cell-title">A virtual cell assembled from scientific components</title>
-      <desc id="cell-desc">Biological data, predictive models, and evidence connect through a shared runtime to form a traceable virtual experiment.</desc>
+      <desc id="cell-desc">Biological data, predictive models, and evidence connect through the standalone VirtualCell scientific runtime to form a traceable virtual experiment.</desc>
       <defs>
         <radialGradient id="cell-fill"><stop offset="0" stop-color="#c5dbc9" stop-opacity=".65"/><stop offset="1" stop-color="#cadfd0" stop-opacity=".2"/></radialGradient>
         <pattern id="scene-grid" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill="#a9bfae" opacity=".45"/></pattern>
@@ -193,7 +193,7 @@ body.presenting .cell-scene{max-width:480px}
       <circle cx="220" cy="188" r="76" fill="none" stroke="#6e9b7d" stroke-width="1"/>
       <circle cx="220" cy="188" r="47" fill="#0d665f"/>
       <circle cx="220" cy="188" r="54" fill="none" stroke="#0d665f" opacity=".18" stroke-width="5"/>
-      <text x="220" y="184" text-anchor="middle" fill="#fffefa" font-family="Arial,sans-serif" font-size="11" font-weight="600">SHARED</text>
+      <text x="220" y="184" text-anchor="middle" fill="#fffefa" font-family="Arial,sans-serif" font-size="11" font-weight="600">VIRTUAL CELL</text>
       <text x="220" y="199" text-anchor="middle" fill="#fffefa" font-family="Arial,sans-serif" font-size="11" font-weight="600">RUNTIME</text>
       <g fill="#0d665f"><circle cx="123" cy="120" r="4"/><circle cx="307" cy="106" r="4"/><circle cx="333" cy="225" r="4"/><circle cx="149" cy="281" r="4"/><circle cx="223" cy="68" r="3"/><circle cx="112" cy="233" r="3"/><circle cx="280" cy="282" r="3"/></g>
       <g fill="#b95d34"><circle cx="180" cy="119" r="3.5"/><circle cx="277" cy="228" r="3.5"/><circle cx="184" cy="242" r="3"/></g>
@@ -201,22 +201,22 @@ body.presenting .cell-scene{max-width:480px}
       <g font-family="Arial,sans-serif" font-size="10" fill="#325d4d"><text x="40" y="83">Biological data</text><text x="332" y="63">Predictive models</text><text x="354" y="272">Evidence</text><text x="57" y="336">Provenance</text></g>
       <g transform="translate(277 303)"><rect width="131" height="30" rx="6" fill="#fffefa" stroke="#c6d5c7"/><circle cx="15" cy="15" r="3" fill="#0d665f"/><text x="25" y="19" font-family="Arial,sans-serif" font-size="9" fill="#325d4d">Explicit biological scope</text></g>
     </svg>
-    <div class="scene-caption"><span>Specialized components. Shared execution.</span><span>Data → Experiment → Record</span></div>
+    <div class="scene-caption"><span>Scientific components. Traced execution.</span><span>Data → Experiment → Record</span></div>
   </div>
 </section>
 
 <section class="panel" id="architecture" data-slide="Architecture" aria-labelledby="architecture-title">
   <div class="section-top">
     <div><p class="eyebrow">01 / Architecture</p><h2 id="architecture-title">Compose the experiment.</h2></div>
-    <p class="section-intro">Independent scientific components share a biological contract and a common execution runtime.</p>
+    <p class="section-intro">Scientific components connect through explicit biological contracts in the standalone VirtualCell runtime.</p>
   </div>
   <div class="diagram-shell">
     <svg class="architecture-svg" viewBox="0 0 1020 478" role="img" aria-labelledby="architecture-diagram-title architecture-diagram-desc">
-      <title id="architecture-diagram-title">Agent orchestration above a deterministic Virtual Cell runtime</title>
+      <title id="architecture-diagram-title">VirtualCell experiment agents above the deterministic scientific runtime</title>
       <desc id="architecture-diagram-desc">The agent interprets questions and proposes plans. The runtime connects VirtualCellPack, model, adapter, environment, and validation evidence, checks compatibility, and generates a prediction or structured abstention with a trace and provenance.</desc>
       <defs><marker id="arrow-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0d665f"/></marker></defs>
       <rect x="16" y="12" width="988" height="86" rx="11" fill="#f5f4ef" stroke="#d9e0d8"/>
-      <text x="43" y="45" font-family="Arial,sans-serif" font-size="18" font-weight="600" fill="#173832">Agent orchestration</text>
+      <text x="43" y="45" font-family="Arial,sans-serif" font-size="18" font-weight="600" fill="#173832">VirtualCell agent orchestration</text>
       <text x="43" y="74" font-family="Arial,sans-serif" font-size="14" fill="#61716b">Interpret the question · Build candidate plans · Explain structured results</text>
       <text x="973" y="46" text-anchor="end" font-family="Consolas,monospace" font-size="11" fill="#0d665f">RESEARCHER INTERFACE</text>
       <path d="M510 100V136" stroke="#0d665f" stroke-width="1.8" marker-end="url(#arrow-teal)"/>
@@ -249,7 +249,7 @@ body.presenting .cell-scene{max-width:480px}
     </svg>
   </div>
   <div class="roles">
-    <div class="role"><h3>The agent supports reasoning and communication.</h3><p>Question interpretation, candidate routing, and result explanation are tied to structured experiment records.</p></div>
+    <div class="role"><h3>VirtualCell agents support reasoning and communication.</h3><p>Question interpretation, candidate routing, and result explanation are tied to structured experiment records.</p></div>
     <div class="role runtime"><h3>The runtime controls scientific execution.</h3><p>Compatibility, predictor outputs, validation evidence, and the final execution verdict remain under runtime authority.</p></div>
   </div>
 </section>
@@ -283,8 +283,8 @@ body.presenting .cell-scene{max-width:480px}
 
 <section class="panel" id="systems" data-slide="Biological systems" aria-labelledby="systems-title">
   <div class="section-top">
-    <div><p class="eyebrow">03 / Biological systems</p><h2 id="systems-title">Shared runtime. Native biology.</h2></div>
-    <p class="section-intro">Different organisms retain their own features, perturbations, models, and readouts within the same framework.</p>
+    <div><p class="eyebrow">03 / Biological systems</p><h2 id="systems-title">One runtime. Native biology.</h2></div>
+    <p class="section-intro">Different organisms retain their own features, perturbations, models, and readouts within the VirtualCell scientific runtime.</p>
   </div>
   <div class="species-grid">
     <article class="species-card">
@@ -354,7 +354,7 @@ body.presenting .cell-scene{max-width:480px}
 }</pre><button class="copy-button" id="copy-citation" type="button">Copy citation</button><span id="copy-status" role="status" style="font-size:10px;margin-left:10px"></span></details>
     </div>
     <aside class="citation-aside">
-      <h3>Explore the platform</h3>
+      <h3>Explore VirtualCell 1.0.0</h3>
       <p>Install locally, inspect the experiment workflow, and connect task-specific data and models through explicit contracts.</p>
       <p><a href="../README.md">Project overview →</a></p>
       <p><a href="INSTALL.md">Installation guide →</a></p>
@@ -364,7 +364,7 @@ body.presenting .cell-scene{max-width:480px}
   </div>
 </section>
 </main>
-<footer class="footer"><span>PRAXIS-VirtualCell / Programmable virtual experiments</span><span><a href="../LICENSE">MIT license</a> · <a href="../CITATION.cff">Citation metadata</a> · Offline presentation</span></footer>
+<footer class="footer"><span>PRAXIS-VirtualCell 1.0.0 / Programmable virtual experiments</span><span><a href="../LICENSE">MIT license</a> · <a href="../CITATION.cff">Citation metadata</a> · Offline presentation</span></footer>
 <div class="presenter-controls" aria-label="Presentation controls">
   <div class="presenter-controls-inner">
     <div><span class="slide-label" id="slide-label">Overview</span><span class="slide-count" id="slide-count">01 / 06</span></div>
