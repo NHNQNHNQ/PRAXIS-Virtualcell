@@ -18,7 +18,6 @@ def test_product_version_has_one_authoritative_value() -> None:
     package = json.loads((_ROOT / "praxis_vc_react/package.json").read_text(encoding="utf-8"))
     package_lock = json.loads((_ROOT / "praxis_vc_react/package-lock.json").read_text(encoding="utf-8"))
 
-    import praxis2
     import praxis_virtualcell
 
     product_version = pyproject["project"]["version"]
@@ -26,7 +25,6 @@ def test_product_version_has_one_authoritative_value() -> None:
     assert str(Version(product_version)) == product_version
     assert distribution_version("praxis-virtualcell") == product_version
     assert praxis_virtualcell.__version__ == product_version
-    assert praxis2.__version__ == product_version
     assert package["version"] == product_version
     assert package_lock["version"] == product_version
     assert package_lock["packages"][""]["version"] == product_version

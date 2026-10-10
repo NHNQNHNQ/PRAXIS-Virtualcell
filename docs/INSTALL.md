@@ -1,6 +1,7 @@
 # Installation
 
-Use a source checkout to run the CLI and local interface. Package metadata
+PRAXIS-VirtualCell 1.0.0 runs its standalone scientific runtime through a CLI,
+local API, and browser interface. Use a source checkout to install it. Package metadata
 supports Python 3.11 or newer. Python 3.13 has
 [checked-in dependency locks](../requirements/README.md).
 

@@ -1,6 +1,6 @@
 # PRAXIS-VirtualCell frontend
 
-The React interface provides cell context selection, conversational task submission, data and Pack catalogs, and saved reports. Predictions, abstention, execution identity, and provenance come from the API. Language assistance only parses and explains text.
+The React interface provides cell context selection, conversational task submission, data and Pack catalogs, and saved reports. It connects only to the standalone PRAXIS-VirtualCell API. Predictions, abstention, execution identity, and provenance come from the API. Language assistance only parses and explains text.
 
 ## Development
 

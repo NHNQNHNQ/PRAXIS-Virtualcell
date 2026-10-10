@@ -5,7 +5,7 @@ ordered features, data and model identities, adapter, environment, execution
 configuration, output, evidence state, and provenance.
 
 Record the exact Git commit, software version, dependency versions, and platform
-with every experiment. The package version is `1.7.0`; application dependency
+with every experiment. The standalone package version is `1.0.0`; application dependency
 locks are documented in [requirements/README.md](../requirements/README.md).
 
 ## Local demonstration

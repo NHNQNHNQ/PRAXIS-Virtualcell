@@ -86,5 +86,5 @@ test("An options failure does not create local cell fixtures", async ({ page }) 
   await page.getByRole("button", { name: "Data Center", exact: true }).click();
   await expect(page.getByRole("alert")).toContainText("Cell catalog unavailable");
   await expect(page.getByRole("article")).toHaveCount(0);
-  await expect(page.getByLabel("Message PRAXIS")).toHaveCount(0);
+  await expect(page.getByLabel("Message PRAXIS-VirtualCell")).toHaveCount(0);
 });

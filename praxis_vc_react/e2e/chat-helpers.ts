@@ -89,7 +89,7 @@ export async function selectCell(
       exact: true,
     }),
   ).toBeVisible();
-  await expect(page.getByLabel("Message PRAXIS")).toBeVisible();
+  await expect(page.getByLabel("Message PRAXIS-VirtualCell")).toBeVisible();
 }
 
 export async function runChat(page: Page, query: string): Promise<RunCapture> {
@@ -124,7 +124,7 @@ export async function runChat(page: Page, query: string): Promise<RunCapture> {
     ),
   );
 
-  await page.getByLabel("Message PRAXIS").fill(query);
+  await page.getByLabel("Message PRAXIS-VirtualCell").fill(query);
   await page.getByRole("button", { name: "Send message", exact: true }).click();
 
   const parseResponse = await parseResponsePromise;

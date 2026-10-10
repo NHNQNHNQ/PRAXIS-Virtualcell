@@ -1,20 +1,26 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 — Standalone VirtualCell
 
-- Restore the virtual-cell platform and generic agent framework described in the preprint.
-- Present the project through an English README and an interactive, self-contained overview.
-- Translate repository documentation, interface text, prompts, and code annotations into English.
-- Remove unrelated service components and internal operational records from the current source tree.
-- Provide formal arXiv citation metadata in CFF and BibTeX formats.
+- Start an independent product release series for the VirtualCell scientific runtime and applications.
+- Include experiment agents, explicit biological contracts, compatibility checks, evidence-governed execution, and structured abstention.
+- Provide the CLI, local API, browser workflow, and optional LLM assistance for virtual cell experiments.
+- Limit the public implementation to VirtualCell scientific execution and its supporting applications.
+- Present an English README, offline interactive overview, reproducibility guide, and formal preprint citations.
+- Preserve scientific artifact identities, recorded results, and validation boundaries independently of the product version.
 
-## 1.7.0
+## Pre-standalone history
+
+The following versions describe earlier development before the independent
+VirtualCell release series.
+
+### 1.7.0
 
 - Versioned data, model, adapter, environment, validation, and policy contracts.
 - Pack construction, training and benchmark interfaces, registry support, and experiment planning.
 - Deterministic compatibility checks and evidence-governed execution with abstention.
 
-## 1.6.0
+### 1.6.0
 
 - Local API and browser workflow: Ask, Review, Route, Run, and Results.
 - Accessible themes, editable requests, job history, report exports, and responsive layout.

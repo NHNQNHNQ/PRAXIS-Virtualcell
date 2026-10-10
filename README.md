@@ -3,13 +3,17 @@
 [![Preprint](https://img.shields.io/badge/arXiv-2609.29221-B31B1B)](https://arxiv.org/abs/2609.29221v1)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)](docs/INSTALL.md)
 [![License](https://img.shields.io/badge/License-MIT-167D7F)](LICENSE)
+[![Standalone release](https://img.shields.io/badge/VirtualCell-1.0.0-0D665F)](docs/VERSIONING.md)
 
-**A programmable platform and agent framework for virtual cell experiments.**
+**A standalone scientific platform for agentic virtual cell experiments.**
 
 PRAXIS-VirtualCell connects biological data, specialized predictive models,
 perturbations, adapters, execution environments, and validation evidence.
 Researchers can turn a biological question into an experiment with explicit
 compatibility checks, traceable execution, and contextualized results.
+
+The standalone **1.0.0** release includes the VirtualCell scientific runtime,
+experiment agents, CLI, local API, and browser interface.
 
 **[Explore the presentation](docs/presentation.html)** ·
 [Read the preprint](https://arxiv.org/abs/2609.29221v1) ·
@@ -22,8 +26,8 @@ compatibility checks, traceable execution, and contextualized results.
 
 ```mermaid
 flowchart LR
-    Q["Biological question"] --> A["Agent: interpret and plan"]
-    A --> R["Runtime: check and execute"]
+    Q["Biological question"] --> A["VirtualCell agents: interpret and plan"]
+    A --> R["Scientific runtime: check and execute"]
     P["Data · State · Perturbation"] --> R
     M["Model · Adapter · Environment"] --> R
     E["Validation evidence"] --> R
@@ -32,12 +36,12 @@ flowchart LR
 ```
 
 The workflow has five stages: **Ask → Review → Route → Run → Results**.
-The agent helps interpret questions, propose routes, and explain results.
+VirtualCell agents interpret questions, propose routes, and explain results.
 The deterministic runtime controls compatibility, scientific model execution,
 evidence states, and the final verdict. Numerical outputs come from registered
 predictors; unavailable or unsupported requests receive structured abstention.
 
-## One framework, distinct biological tasks
+## One scientific runtime, distinct biological tasks
 
 | Biological system | Perturbation | Readout |
 |---|---|---|

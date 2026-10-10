@@ -1,4 +1,4 @@
-"""VirtualCell execution exceptions independent of praxis2."""
+"""Standalone VirtualCell execution exceptions."""
 from __future__ import annotations
 
 
